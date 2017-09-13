@@ -571,6 +571,7 @@ public class ProjectManagement implements IProjectManagement {
     //logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
+      userWhere.setStartupInfo(null);
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");
@@ -588,6 +589,12 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  /**
+   * @see #setStartupInfo
+   * @param userWhere
+   * @param projid
+   * @param project
+   */
   private void setStartupInfoOnUser(User userWhere, int projid, Project project) {
     configureProject(project, true, false);
 

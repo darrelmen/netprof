@@ -789,6 +789,7 @@ public class LangTest implements
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
     logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
+    initialUI.showCogMenu();
   }
 
   /**
@@ -821,7 +822,6 @@ public class LangTest implements
       }
     });
   }
-
 
   /**
    * Init Flash recorder once we login.

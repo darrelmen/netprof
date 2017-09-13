@@ -49,12 +49,13 @@ import java.util.*;
  * @since
  */
 public class MailSupport {
+  private static final Logger logger = LogManager.getLogger(MailSupport.class);
+
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
-  private static final Logger logger = LogManager.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String LOCALHOST = "localhost";
-  private static final int MAIL_PORT = 2525;
+  private static final int MAIL_PORT = 25;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";

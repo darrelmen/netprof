@@ -64,7 +64,7 @@ public class ProjectChoices {
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
   protected static final String LOGIN = "Login";
-  private static final int NO_USER_INITIAL = -2;
+  //private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
@@ -72,7 +72,7 @@ public class ProjectChoices {
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
-  protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  //protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
@@ -110,7 +110,8 @@ public class ProjectChoices {
 
   private void showInitialChoices(int level) {
     long then = System.currentTimeMillis();
-    service.getStartupInfo(new AsyncCallback<StartupInfo>() {
+
+    controller.getService().getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
         lifecycleSupport.onFailure(caught, then);
       }

@@ -83,4 +83,6 @@ public interface UILifecycle {
   void chooseProjectAgain();
 
   INavigation getNavigation();
+
+  void showCogMenu();
 }

@@ -42,6 +42,8 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.services.LangTestDatabase;
+import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 
 
@@ -82,6 +84,7 @@ public class AMASInitialUI extends InitialUI {
      */
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
+    LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
     learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller, exerciseServiceAsync);
     learnHelper.showContent(contentRow, "");
   }

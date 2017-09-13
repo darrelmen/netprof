@@ -39,6 +39,7 @@ public class UserMenu {
 
   private static final String ABOUT_NET_PRO_F = "About Netprof";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
+  private static final String LOG_OUT = "Sign Out";
 
   private final UserManager userManager;
 
@@ -47,12 +48,11 @@ public class UserMenu {
   private final UserState userState;
   private final PropertyHandler props;
 
-  private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private LangTestDatabaseAsync service = null;
 
   /**
    * @see #getLogOut
    */
-  private static final String LOG_OUT = "Sign Out";
   private final UILifecycle uiLifecycle;
 
   /**
@@ -69,27 +69,41 @@ public class UserMenu {
     this.userManager = userManager;
     this.controller = langTest;
     this.uiLifecycle = uiLifecycle;
-
-    getUserMenuChoices();
   }
 
-  List<LinkAndTitle> getCogMenuChoices2() {
+  /**
+   * @return
+   * @see NewBanner#getRightSideChoices
+   */
+  List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
-    choices.add(new LinkAndTitle("Manage Users", props.getDominoURL(), true));
+    choices.add(new LinkAndTitle("Manage Users", props.getDominoURL()));
     choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
-    String nameForAnswer = props.getNameForAnswer() + "s";
-    choices.add(new LinkAndTitle(
-        nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
-    //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
-    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
-    choices.add(new LinkAndTitle("Show Report", "scoreServlet?report", true));
-    choices.add(new LinkAndTitle("Send Report", "scoreServlet?sendReport", true));
-
     return choices;
   }
 
-  List<LinkAndTitle> getUserMenuChoices() {
+  List<LinkAndTitle> getProjectSpecificChoices() {
+    List<LinkAndTitle> choices = new ArrayList<>();
+    String nameForAnswer = props.getNameForAnswer() + "s";
+    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler(), true));
+    //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
+    choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
+    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
+    choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
+    choices.add(new LinkAndTitle("Send Report", "scoreServlet?sendReport"));
+    return choices;
+  }
+
+  @NotNull
+  private String getCapitalized(String nameForAnswer) {
+    return nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1);
+  }
+
+  /**
+   * @return
+   * @see NewBanner#addUserMenu
+   */
+  List<LinkAndTitle> getStandardUserMenuChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
 
     choices.add(getChangePassword());
@@ -130,6 +144,9 @@ public class UserMenu {
         }
 
         public void onSuccess() {
+          if (service == null) {
+            service = GWT.create(LangTestDatabase.class);
+          }
           new EventTable().show(service);
         }
       });

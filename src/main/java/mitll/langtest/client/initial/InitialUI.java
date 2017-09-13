@@ -100,7 +100,6 @@ public class InitialUI implements UILifecycle {
   protected final UserFeedback userFeedback;
   protected final PropertyHandler props;
 
-  protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final IBanner banner;
 
   protected Widget headerRow;
@@ -412,7 +411,7 @@ public class InitialUI implements UILifecycle {
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      logger.info("chooseProjectAgain user --- " + userManager.getUser() + " " + userManager.getUserID());
+      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
 
       controller.getUserService().forgetProject(new AsyncCallback<Void>() {
         @Override
@@ -434,6 +433,7 @@ public class InitialUI implements UILifecycle {
 
       clearContent();
       addProjectChoices(0, null);
+      showCogMenu();
     } else {
       logger.info("chooseProjectAgain no user --- ");
     }
@@ -486,14 +486,22 @@ public class InitialUI implements UILifecycle {
     }
     //   logger.info("user is valid...");
 
-    banner.setCogVisible(true);
+    showCogMenu();
     return false;
+  }
+
+  public void showCogMenu() {
+    banner.setCogVisible(true);
   }
 
   private void showLogin(EventRegistration eventRegistration) {
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
+    hideCogMenu();
+  }
+
+  private void hideCogMenu() {
     banner.setCogVisible(false);
   }
 
@@ -512,7 +520,7 @@ public class InitialUI implements UILifecycle {
     firstRow.add(new ResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
-    banner.setCogVisible(false);
+    hideCogMenu();
   }
 
   private void handleSendResetPass(final Container verticalContainer,
@@ -523,7 +531,7 @@ public class InitialUI implements UILifecycle {
     firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
-    banner.setCogVisible(false);
+    hideCogMenu();
   }
 
   private void clearPadding(Container verticalContainer) {
@@ -566,8 +574,7 @@ public class InitialUI implements UILifecycle {
     }
 
     if (userID > -1) {
-      banner.setCogVisible(true);
-      //banner.setVisibleAdmin(user.isAdmin() || user.getUserKind() == User.Kind.PROJECT_ADMIN || user.isCD());
+      showCogMenu();
     }
   }
 

@@ -51,7 +51,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private Dropdown cog;
 
   private INavigation navigation;
-   private final Map<String, NavLink> nameToLink = new HashMap<>();
+  private final Map<String, NavLink> nameToLink = new HashMap<>();
   private Dropdown userDrop;
   /**
    * @see #addChoicesForUser(ComplexWidget)
@@ -70,7 +70,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @param lifecycle
    * @see InitialUI#InitialUI(LangTest, UserManager)
    */
-  public NewBanner(UserManager userManager, UILifecycle lifecycle, UserMenu userMenu, Breadcrumbs breadcrumbs,
+  public NewBanner(UserManager userManager,
+                   UILifecycle lifecycle,
+                   UserMenu userMenu,
+                   Breadcrumbs breadcrumbs,
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
     setInverse(true);
@@ -99,22 +102,28 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     add(navCollapse);
 
-    navCollapse.add(this.lnav = getLNav());
-    addChoicesForUser(lnav);
-    Nav recnav = getRecNav();
-    this.recnav = recnav;
-    navCollapse.add(recnav);
+    {
+      navCollapse.add(this.lnav = getLNav());
+      addChoicesForUser(lnav);
+    }
+    {
+      Nav recnav = getRecNav();
+      this.recnav = recnav;
+      navCollapse.add(recnav);
+    }
     recordMenuVisible();
 
-    Nav defectnav = getDefectNav();
-    this.defectnav = defectnav;
-    navCollapse.add(defectnav);
+    {
+      Nav defectnav = getDefectNav();
+      this.defectnav = defectnav;
+      navCollapse.add(defectnav);
+    }
     defectMenuVisible();
 
     navCollapse.add(getRightSideChoices(userManager, userMenu));
 
     setCogVisible(userManager.hasUser());
-   // addHistoryListener();
+    // addHistoryListener();
   }
 
   @NotNull
@@ -139,8 +148,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     nav.getElement().setId("defectnav");
     styleNav(nav);
 
-    viewToLink.put(VIEWS.DEFECTS,  getChoice(nav, VIEWS.DEFECTS));
-    viewToLink.put(VIEWS.FIX,  getChoice(nav, VIEWS.FIX));
+    viewToLink.put(VIEWS.DEFECTS, getChoice(nav, VIEWS.DEFECTS));
+    viewToLink.put(VIEWS.FIX, getChoice(nav, VIEWS.FIX));
 
     return nav;
   }
@@ -166,11 +175,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav lnav = new Nav();
     lnav.getElement().setId("lnav");
     styleNav(lnav);
-
     return lnav;
   }
 
-
+  /**
+   * @param userManager
+   * @param userMenu
+   * @return
+   * @see #addWidgets
+   */
   @NotNull
   private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
     Nav rnav = new Nav();
@@ -179,14 +192,27 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     addUserMenu(userManager, userMenu, rnav);
 
-    cog = new Dropdown("");
-    cog.setIcon(IconType.COG);
-    userMenu.getCogMenuChoices2().forEach(lt -> cog.add(lt.getLink()));
-    rnav.add(cog);
+    {
+      cog = new Dropdown("");
+      cog.setIcon(IconType.COG);
+      userMenu.getCogMenuChoicesForAdmin().forEach(lt -> {
+        NavLink link = lt.makeNewLink();
+        cog.add(link);
+      });
+
+      hasProjectChoices = userMenu.getProjectSpecificChoices();
+      hasProjectChoices.forEach(lt -> {
+        NavLink link = lt.makeNewLink();
+        cog.add(link);
+      });
+      rnav.add(cog);
+    }
 
     getInfoMenu(userMenu, rnav);
     return rnav;
   }
+
+  private List<LinkAndTitle> hasProjectChoices;
 
   private void addSubtitle(Nav rnav) {
     rnav.add(subtitle = new Label());
@@ -198,17 +224,24 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
+  /**
+   * @param userManager
+   * @param userMenu
+   * @param rnav
+   * @see #getRightSideChoices
+   */
   private void addUserMenu(UserManager userManager, UserMenu userMenu, Nav rnav) {
     userDrop = new Dropdown(userManager.getUserID());
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
-    userMenu.getUserMenuChoices().forEach(lt -> userDrop.add(lt.getLink()));
+    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
 
   private Label subtitle;
 
   /**
    * Tell them we can't record.
+   *
    * @see InitialUI#setSplash
    */
   @Override
@@ -261,7 +294,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 //    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
-    //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
+      //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       gotClickOnChoice(instanceName, learn);
       // setHistoryItem(historyToken);
     });
@@ -274,6 +307,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void showLearn() {
     gotClickOnChoice(VIEWS.LEARN.toString(), viewToLink.get(VIEWS.LEARN));
   }
+
   public void showDrill() {
     gotClickOnChoice(VIEWS.DRILL.toString(), viewToLink.get(VIEWS.DRILL));
   }
@@ -292,9 +326,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
+   * @param learn
    * @see #checkProjectSelected
    * @see #gotClickOnChoice
-   * @param learn
    */
   private void showActive(NavLink learn) {
     for (NavLink link : nameToLink.values()) link.setActive(false);
@@ -334,7 +368,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
     for (Widget choice : choices) choice.setVisible(val);
-    cog.setVisible(isAdmin());
+    boolean admin = isAdmin();
+    cog.setVisible(admin);
+
+    boolean hasProject = controller.getProjectStartupInfo() != null;
+
+    logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
+
+    hasProjectChoices.forEach(linkAndTitle -> linkAndTitle.getMyLink().setVisible(hasProject));
   }
 
   @Override
@@ -378,9 +419,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private boolean isQC() {
     //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     boolean admin = isAdmin();
- //   logger.info("is admin " + admin);
+    //   logger.info("is admin " + admin);
     boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
-   // logger.info("is canDoQC " + canDoQC);
+    // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
   }
 
@@ -388,7 +429,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
     VIEWS currentView = navigation.getCurrentView();
-  //  logger.info("Current view is " + currentView);
+    //  logger.info("Current view is " + currentView);
     NavLink learn = viewToLink.get(currentView);
 
     //logger.info("Current view link is " + learn);

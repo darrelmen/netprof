@@ -127,16 +127,6 @@ public class ProjectStartupInfo implements IsSerializable {
     return hasModel;
   }
 
-  public String toString() {
-    Collection<SectionNode> sectionNodes = getSectionNodes();
-
-    String sectionInfo = sectionNodes == null ? "missing section nodes???" : " num nodes " + sectionNodes.size();
-    return "Project  " + projectid +
-        " Order " + getTypeOrder() +
-        sectionInfo +
-        " has model " + hasModel;
-  }
-
   public Map<String, Set<MatchInfo>> getTypeToDistinct() {
     return typeToDistinct;
   }
@@ -155,5 +145,15 @@ public class ProjectStartupInfo implements IsSerializable {
 
   public Language getLanguageInfo() {
     return languageInfo;
+  }
+
+  public String toString() {
+    Collection<SectionNode> sectionNodes = getSectionNodes();
+
+    String sectionInfo = sectionNodes == null ? "missing section nodes???" : " num nodes " + sectionNodes.size();
+    return "Project  " + projectid +
+        " Order " + getTypeOrder() +
+        sectionInfo +
+        " has model " + hasModel;
   }
 }

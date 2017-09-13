@@ -11,32 +11,44 @@ import org.jetbrains.annotations.NotNull;
 public class LinkAndTitle {
   private final ClickHandler clickHandler;
   private final String title;
-  private final boolean isAdminChoice;
+  //  private final boolean isAdminChoice;
   private String linkURL = null;
+  private NavLink myLink;
 
-  public LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
+  /**
+   * @param title
+   * @param click
+   * @param isAdminChoice
+   * @see UserMenu#getChangePassword
+   */
+  LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
     this.title = title;
     this.clickHandler = click;
-    this.isAdminChoice = isAdminChoice;
+    //  this.isAdminChoice = isAdminChoice;
     this.linkURL = null;
   }
 
-  public LinkAndTitle(String title, String linkURL, boolean isAdminChoice) {
+  /**
+   * @param title
+   * @param linkURL
+   * @param isAdminChoice
+   * @see UserMenu#getCogMenuChoicesForAdmin
+   */
+  LinkAndTitle(String title, String linkURL) {
     this.title = title;
     this.linkURL = linkURL;
-    this.isAdminChoice = isAdminChoice;
+    //  this.isAdminChoice = true;
     this.clickHandler = null;
   }
 
   public NavLink add(Dropdown dropdown) {
-    NavLink monitoringC = getLink();
-
+    NavLink monitoringC = makeNewLink();
     dropdown.add(monitoringC);
     return monitoringC;
   }
 
   @NotNull
-  public NavLink getLink() {
+  NavLink makeNewLink() {
     NavLink monitoringC = new NavLink(title);
     if (linkURL != null) {
       monitoringC.setHref(linkURL);
@@ -44,7 +56,12 @@ public class LinkAndTitle {
     } else {
       monitoringC.addClickHandler(clickHandler);
     }
-    return monitoringC;
+
+    return myLink = monitoringC;
+  }
+
+  NavLink getMyLink() {
+    return myLink;
   }
 
 /*  public String getLinkURL() {
@@ -57,7 +74,13 @@ public class LinkAndTitle {
   }
 */
 
+  /**
+   *
+   * @return
+   */
+/*
   public boolean isAdminChoice() {
     return isAdminChoice;
   }
+*/
 }
