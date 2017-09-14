@@ -14,7 +14,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -25,7 +30,7 @@ public class UserCopy {
   private static final boolean DEBUG = false;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
-  public static final String D_ADMIN = "d.admin";
+  private static final String D_ADMIN = "d.admin";
 
   /**
    * What can happen:
@@ -81,6 +86,10 @@ public class UserCopy {
       int importID = toImport.getID();
       String importUserID = toImport.getUserID();
 
+      if (hasSpaces(importUserID)) {
+        logger.info("replacing spaces in " +importUserID);
+      }
+
       if (DEBUG) logger.info("copying " + importID + " : " + importUserID);
 
       if (importUserID.isEmpty()) importUserID = "unknown";
@@ -126,6 +135,12 @@ public class UserCopy {
         " lurker " + lurker
     );
     return oldToNew;
+  }
+
+  private boolean hasSpaces(String s) {
+    Pattern pattern = Pattern.compile("\\s");
+    Matcher matcher = pattern.matcher(s);
+    return matcher.find();
   }
 
   /**

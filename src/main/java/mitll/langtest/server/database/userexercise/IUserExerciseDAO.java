@@ -70,6 +70,7 @@ public interface IUserExerciseDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   CommonExercise getByExID(int exid);
+  CommonExercise getByExOldID(String oldid);
 
   CommonExercise getTemplateExercise(int projID);
 

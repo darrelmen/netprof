@@ -153,6 +153,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     setAudioDAO(audioDAO, projid);
   }
 
+  /**
+   * @see #getRawExercises
+   * @return
+   */
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
     lastModified = file.lastModified();
@@ -160,6 +164,15 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
 
     List<CommonExercise> exercises = readExercises(file);
+
+    for (CommonExercise exercise:exercises) {
+      if (exercise.getOldID().equalsIgnoreCase("3473")) {
+        logger.info("readExercises got " + exercise);
+      }
+      else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
+        logger.info("readExercises got blackboard " + exercise);
+      }
+    }
 
     getSectionHelper().report();
 

@@ -64,6 +64,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final int MAX_WARNS = Integer.MAX_VALUE;
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
+  private final Map<String, CommonExercise> oldidToExercise = new HashMap<>();
 
   private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
 
@@ -92,7 +93,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   BaseExerciseDAO(ServerProperties serverProps,
                   IUserListManager userListManager,
                   boolean addDefects,
-                  String language ) {
+                  String language) {
     this.serverProps = serverProps;
     this.userListManager = userListManager;
     this.language = language;
@@ -135,6 +136,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   public void reload() {
     exercises = null;
     idToExercise.clear();
+    oldidToExercise.clear();
     sectionHelper.clear();
     getRawExercises();
   }
@@ -157,13 +159,34 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     // remove exercises to remove
     // mask over old items that have been overridden
     if (userExerciseDAO != null) {
-      addOverlays(removeExercises());
+      Collection<Integer> removes = removeExercises();
+      logger.info("remove these (" + removes.size() + ") " + removes);
+      addOverlays(removes);
     }
 
     // add new items
     addNewExercises();
+
     // attachAudio();
   }
+
+/*  private void checkBlackboard(String prefix) {
+    checkBlackboard(prefix, exercises);
+  }
+
+  private void checkBlackboard(String prefix, Collection<CommonExercise> exercises) {
+    for (CommonExercise exercise : exercises) {
+      if (matchBlackboard(exercise)) {
+        logger.info(prefix + " checkBlackboard got " + exercise);
+      } else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
+        logger.info(prefix + " checkBlackboard got blackboard " + exercise);
+      }
+    }
+  }
+
+  private boolean matchBlackboard(CommonExercise exercise) {
+    return exercise.getOldID().equalsIgnoreCase("3473") || (exercise.getEnglish().equalsIgnoreCase("blackboard"));
+  }*/
 
 
   /**
@@ -205,6 +228,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
       idToExercise.put(e.getDominoID(), e);
+      oldidToExercise.put(e.getOldID(), e);
     }
 
     int listSize = exercises.size();
@@ -236,6 +260,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     int override = 0;
     int skippedOverride = 0;
+    int nomatch = 0;
     int removedSoSkipped = 0;
     SortedSet<Integer> staleOverrides = new TreeSet<>();
     for (CommonExercise userExercise : overrides) {
@@ -244,30 +269,45 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         removedSoSkipped++;
       } else {
         if (isKnownExercise(overrideID)) {
-          //  logger.info("for " + overrideID + " got " + userExercise.getUnitToValue());
+          String oldID = userExercise.getOldID();
+          logger.info("addOverlays for " +
+              "\n\tid #   " + overrideID +
+              "\n\told id " + oldID +
+              "\n\tgot    " + userExercise.getUnitToValue() + " " + oldID + " " + userExercise.getEnglish() + " " + userExercise.getForeignLanguage());
           // don't use the unit->value map stored in the user originalExercise table...
-          CommonExercise originalExercise = getExercise(overrideID);
+          // CommonExercise originalExercise = getExercise(overrideID);
+          CommonExercise originalExercise = getExerciseOld(oldID);
 
-          long predefUpdateTime = originalExercise.getUpdateTime();
-          long userExUpdateTime = userExercise.getUpdateTime();
+          if (originalExercise == null) {
+            logger.warn("can't find original exercise for " + oldID);
+            logger.warn("can't find original exercise for " + userExercise);
 
-          if (userExUpdateTime > predefUpdateTime) {
-            Map<String, String> unitToValue = originalExercise.getUnitToValue();
-            ((Exercise) userExercise).setUnitToValue(unitToValue);
+            nomatch++;
+          } else {
+            long predefUpdateTime = originalExercise.getUpdateTime();
+            long userExUpdateTime = userExercise.getUpdateTime();
 
-            logger.debug("addOverlays refresh originalExercise for " + userExercise.getID() + " '" + userExercise.getForeignLanguage() +
-                "' vs '" + originalExercise.getForeignLanguage() +
-                "'");
-            sectionHelper.refreshExercise(userExercise);
-            addOverlay(userExercise);
+            if (userExUpdateTime > predefUpdateTime) {
+              Map<String, String> unitToValue = originalExercise.getUnitToValue();
+              ((Exercise) userExercise).setUnitToValue(unitToValue);
+
+              logger.debug("addOverlays refresh originalExercise for" +
+                  "\n\tID     " + userExercise.getID() +
+                  "\n\tOLD id " + oldID +
+                  "\n\t fl    '" + userExercise.getForeignLanguage() +
+                  "' vs '" + originalExercise.getForeignLanguage() +
+                  "'");
+              sectionHelper.refreshExercise(userExercise);
+              addOverlay(userExercise);
 
 //          Collection<CommonExercise> exercisesForSimpleSelectionState = sectionHelper.getExercisesForSimpleSelectionState(unitToValue);
 //          for (CommonExercise originalExercise:exercisesForSimpleSelectionState) if (originalExercise.getOldID().equals(overrideID)) logger.warn("found " + originalExercise);
-            override++;
-          } else {
-            skippedOverride++;
-            if (skippedOverride < 5)
-              logger.info("for " + overrideID + " skipping override, since predef originalExercise is newer " + new Date(predefUpdateTime) + " > " + new Date(userExUpdateTime));
+              override++;
+            } else {
+              skippedOverride++;
+              if (skippedOverride < 5)
+                logger.info("for " + overrideID + " skipping override, since predef originalExercise is newer " + new Date(predefUpdateTime) + " > " + new Date(userExUpdateTime));
+            }
           }
         } else {
           staleOverrides.add(overrideID);
@@ -277,6 +317,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }
     if (override > 0) {
       logger.debug("addOverlays overlay childCount was " + override);
+    }
+    if (nomatch > 0) {
+      logger.warn("addOverlays nomatch was " + nomatch);
     }
     if (skippedOverride > 0) {
       logger.debug("addOverlays skippedOverride childCount was " + skippedOverride);
@@ -299,20 +342,24 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   public CommonExercise addOverlay(CommonExercise userExercise) {
     int idOfNewExercise = userExercise.getID();
-    CommonExercise currentExercise = getExercise(idOfNewExercise);
+    CommonExercise currentExercise = getExerciseOld(userExercise.getOldID());
 
     if (currentExercise == null) {
       logger.info("addOverlay : huh? can't find " + userExercise);
     } else {
-      //logger.debug("addOverlay at " +userExercise.getOldID() + " found " +currentExercise);
+      logger.debug("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
       synchronized (this) {
         int i = exercises.indexOf(currentExercise);
+        logger.debug("addOverlay at " + i + " when looking for " + currentExercise);
         if (i == -1) {
           logger.error("addOverlay : huh? couldn't find " + currentExercise);
         } else {
+          logger.debug("addOverlay step on " + i + " : " + exercises.get(i));
+
           exercises.set(i, userExercise);
         }
         idToExercise.put(idOfNewExercise, userExercise);
+        oldidToExercise.put(userExercise.getOldID(), userExercise);
         //  logger.debug("addOverlay : after " + getExercise(userExercise.getOldID()));
       }
     }
@@ -321,13 +368,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * @param ue
-   * @see DatabaseImpl#duplicateExercise
+   * @seex DatabaseImpl#duplicateExercise
    * @see #addNewExercises()
    */
   public void add(CommonExercise ue) {
     synchronized (this) {
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
+      oldidToExercise.put(ue.getOldID(), ue);
 
       if (exercises.size() != idToExercise.size()) {
         logger.warn("add " + exercises.size() + " exercises but id->ex " + idToExercise.size());
@@ -338,14 +386,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * @param id
    * @return true if exercise with this id was removed
-   * @see DatabaseImpl#deleteItem(int, int)
+   * @seex DatabaseImpl#deleteItem
    */
-  public boolean remove(int id) {
+/*  public boolean remove(int id) {
     synchronized (this) {
       CommonExercise remove = idToExercise.remove(id);
       return remove != null && exercises.remove(remove);
     }
-  }
+  }*/
 
   /**
    * This DAO needs to talk to other DAOs.
@@ -388,6 +436,19 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       if (commonExercise == null) {
         if (warns++ < MAX_WARNS)
           logger.warn(this + " couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
+      }
+      return commonExercise;
+    }
+  }
+
+  public CommonExercise getExerciseOld(String id) {
+    synchronized (this) {
+      CommonExercise commonExercise = oldidToExercise.get(id);
+      if (commonExercise == null) {
+        if (warns++ < MAX_WARNS) {
+          logger.warn(this + " couldn't find exercise " + id + " in " + oldidToExercise.size() + " exercises (" + warns + " warned)");
+          logger.warn(" : " + oldidToExercise.keySet());
+        }
       }
       return commonExercise;
     }
@@ -449,12 +510,13 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private void addNewExercises() {
     if (addRemoveDAO != null) {
       for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
-        CommonExercise where = userExerciseDAO.getByExID(id.getId());
+        String oldid = id.getOldid();
+        CommonExercise where = userExerciseDAO.getByExOldID(oldid);
         if (where == null) {
           logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
         } else {
           int id1 = where.getID();
-          if (isKnownExercise(id.getId())) {
+          if (isKnownExercise(oldid)) {
             logger.debug("addNewExercises SKIPPING new user exercise " + id1 + " since already added from spreadsheet : " + where);
           } else {
             logger.debug("addNewExercises adding new user exercise " + id1 + " : " + where);
@@ -470,6 +532,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     return idToExercise.containsKey(id);
   }
 
+  private boolean isKnownExercise(String id) {
+    return oldidToExercise.containsKey(id);
+  }
+
   /**
    * Some exercises are marked as deleted - remove them from the list of current exercises.
    *
@@ -480,16 +546,24 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       Collection<AddRemoveDAO.IdAndTime> removes = addRemoveDAO.getRemoves();
 
       if (!removes.isEmpty())
-        logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
+        logger.warn("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
 
       Set<Integer> idsToRemove = new HashSet<>();
       for (AddRemoveDAO.IdAndTime id : removes) {
-        CommonExercise remove = idToExercise.remove(id.getId());
+        // CommonExercise remove = idToExercise.remove(id.getId());
+        CommonExercise remove = oldidToExercise.remove(id.getOldid());
+
         if (remove != null && remove.getUpdateTime() < id.getTimestamp()) {
+          logger.warn("removeExercises remove " + remove.getID() + " " + remove.getOldID() + " " + remove.getEnglish() + " " + remove.getForeignLanguage());
+
           boolean remove1 = exercises.remove(remove);
           if (!remove1) logger.error("huh? remove inconsistency??");
           getSectionHelper().removeExercise(remove);
-          idsToRemove.add(id.getId());
+          idsToRemove.add(remove.getID());
+        } else if (remove != null) {
+          logger.warn("removeExercises 2 remove " + remove.getID() + " " + remove.getOldID() + " " + remove.getEnglish() + " " + remove.getForeignLanguage());
+        } else {
+          logger.error("can't find remove exercise by " + id.getOldid());
         }
       }
       return idsToRemove;

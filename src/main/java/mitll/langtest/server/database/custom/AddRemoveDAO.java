@@ -173,9 +173,9 @@ public class AddRemoveDAO extends DAO {
 
       while (rs.next()) {
         int id = rs.getInt(1);
-    //    String id = rs.getString(1);
+        String oldid = rs.getString(2);
         long mod = rs.getTimestamp(3).getTime();
-        lists.add(new IdAndTime(id, mod));
+        lists.add(new IdAndTime(oldid, mod));
       }
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
@@ -188,17 +188,21 @@ public class AddRemoveDAO extends DAO {
   }
 
   public static class IdAndTime implements Comparable<IdAndTime> {
-    private final int id;
+    // private final int id;
+    private final String oldid;
     private final long timestamp;
 
-    IdAndTime(int id, long timestamp) {
-      this.id = id;
+    IdAndTime(String oldid, long timestamp) {
+      // this.id = id;
+      this.oldid = oldid;
       this.timestamp = timestamp;
     }
 
+/*
     public int getId() {
       return id;
     }
+*/
 
     public long getTimestamp() {
       return timestamp;
@@ -206,13 +210,17 @@ public class AddRemoveDAO extends DAO {
 
     @Override
     public int compareTo(IdAndTime o) {
-      int i = Integer.valueOf(id).compareTo(o.id);
-      return i == 0 ? Long.valueOf(timestamp).compareTo(o.getTimestamp()) : i;
+      int i = oldid.compareTo(o.oldid);
+      return i == 0 ? Long.compare(timestamp, o.getTimestamp()) : i;
     }
 
     @Override
     public boolean equals(Object other) {
       return compareTo((IdAndTime) other) == 0;
+    }
+
+    public String getOldid() {
+      return oldid;
     }
   }
 

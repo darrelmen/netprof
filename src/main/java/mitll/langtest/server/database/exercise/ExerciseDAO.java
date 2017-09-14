@@ -68,16 +68,16 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
 
   /**
    * @param userExercise
-   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
+   * @seex mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    */
-  void add(CommonExercise userExercise);
+ // void add(CommonExercise userExercise);
 
   /**
    * @param id
    * @return
-   * @see DatabaseImpl#deleteItem
+   * @seex DatabaseImpl#deleteItem
    */
-  boolean remove(int id);
+//  boolean remove(int id);
 
   /**
    * @param userExerciseDAO

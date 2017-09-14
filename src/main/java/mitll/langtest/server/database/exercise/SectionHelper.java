@@ -670,7 +670,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem
+   * @seex mitll.langtest.server.database.DatabaseImpl#deleteItem
    * @see BaseExerciseDAO#removeExercises()
    */
   @Override
@@ -684,6 +684,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
           logger.warn("removeExercise didn't remove " + exercise.getID() + " for " + pair);
           didRemove = false;
+        }
+        else {
+          logger.info("removeExercise remove " + exercise.getID() + " " + exercise);
         }
       }
     }

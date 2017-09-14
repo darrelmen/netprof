@@ -61,7 +61,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String LESSON = "lesson";
 
   private static final String USEREXERCISE = "userexercise";
-  private static final String GET_ALL_SQL = "SELECT * from " + USEREXERCISE;
+  private static final String GET_ALL_SQL = "SELECT * FROM " + USEREXERCISE;
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
@@ -245,7 +245,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   private void createUserTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         USEREXERCISE +
         " (" +
         "uniqueid IDENTITY, " +
@@ -407,6 +407,13 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public CommonExercise getByExID(int exid) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
+    Collection<CommonExercise> commonExercises = getCommonExercises(sql);
+    return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
+  }
+
+  @Override
+  public CommonExercise getByExOldID(String oldid) {
+    String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + oldid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }

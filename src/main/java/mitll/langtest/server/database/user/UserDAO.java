@@ -640,7 +640,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
-        logger.info("getUsers user kind for " + id + " " + userID + " is null?");
+        logger.debug("getUsers user kind for " + id + " " + userID + " is null?");
       }
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 

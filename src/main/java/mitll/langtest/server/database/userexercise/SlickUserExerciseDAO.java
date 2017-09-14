@@ -758,6 +758,12 @@ public class SlickUserExerciseDAO
   }
 
   @Override
+  public CommonExercise getByExOldID(String oldid) {
+    throw new IllegalArgumentException("dont call me");
+    //return null;
+  }
+
+  @Override
   public CommonExercise getTemplateExercise(int projID) {
     if (templateExercise == null) {
       Collection<SlickExercise> byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
