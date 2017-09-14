@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.mail;
 
+import com.sun.mail.util.MailConnectException;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
@@ -58,6 +59,7 @@ public class MailSupport {
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String LOCALHOST = "localhost";
   private static final int MAIL_PORT = 25;
+  private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
@@ -210,7 +212,7 @@ public class MailSupport {
               ccEmails,
               subject,
               message));
-    } catch (ConnectException e) {
+    } catch (MailConnectException e) {
       if (!useTestPort) {
         normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true);
       } else {
@@ -227,7 +229,7 @@ public class MailSupport {
   }
 
   private Session getMailSession(String email_server, boolean testEmail) {
-    return Session.getDefaultInstance(getMailProps(email_server, testEmail), null);
+    return Session.getInstance(getMailProps(email_server, testEmail), null);
   }
 
   @NotNull
@@ -237,8 +239,8 @@ public class MailSupport {
     props.put(MAIL_DEBUG, "" + debugEmail);
 
     if (useTestEmail) {
-      props.put(MAIL_SMTP_PORT, "" + MAIL_PORT);
-//        logger.debug("Testing : using port " + MAIL_PORT);
+      props.put(MAIL_SMTP_PORT, "" + TEST_MAIL_PORT);
+      logger.debug("getMailProps : using port " + TEST_MAIL_PORT);
     }
     return props;
   }
@@ -320,13 +322,15 @@ public class MailSupport {
    * @see #normalEmail(String, String, List, String, String, String, boolean)
    */
   private Message makeMessage(Session session,
-                              String recipientName, String recipientEmail,
+                              String recipientName,
+                              String recipientEmail,
                               Collection<String> ccEmails,
-                              String subject, String message) throws Exception {
+                              String subject,
+                              String message) throws Exception {
     Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
     InternetAddress address = new InternetAddress(recipientEmail, recipientName);
-    logger.debug("Sending to " + address + " at port " + MAIL_PORT);
+    logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
     msg.addRecipient(Message.RecipientType.TO, address);
     addCC(ccEmails, msg);
     msg.setSubject(subject);

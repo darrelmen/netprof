@@ -514,8 +514,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     ExerciseListRequest request =
         getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
-    logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request +
-        "\n\tlast " + lastSuccessfulRequest);
+    if (DEBUG) {
+      logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request +
+          "\n\tlast " + lastSuccessfulRequest);
+    }
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {

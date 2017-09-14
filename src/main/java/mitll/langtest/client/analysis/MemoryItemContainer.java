@@ -116,23 +116,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.shortPageSize = shortPageSize;
   }
 
-  /**
-   * @paramx controller
-   * @paramx header
-   * @paramx idWidth
-   * @see mitll.langtest.client.analysis.BasicUserContainer#BasicUserContainer
-   */
-/*  private MemoryItemContainer(ExerciseController controller, String header, int idWidth) {
-    super(controller);
-    this.selectedUserKey = getSelectedUserKey(controller, header);
-    this.selectedUser = getSelectedUser(selectedUserKey);
-    this.header = header;
-    todaysDate = format.format(new Date());
-    todayYear = todaysDate.substring(todaysDate.length() - 2);
-
-    this.idWidth = idWidth;
-  }*/
-
   DivWidget getTable(Collection<T> users, String title, String subtitle) {
     Heading students = getStudentsHeader(title, subtitle);
 
@@ -172,8 +155,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return null;
   }
 
-  protected String truncate(String columnText) {
-    int maxLengthId = getMaxLengthId();
+  protected String truncate(String columnText) {  return truncate(columnText, getMaxLengthId());  }
+
+  @NotNull
+  protected String truncate(String columnText, int maxLengthId) {
     if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
   }
@@ -203,12 +188,17 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     List<T> list = getList();
-    addItemID(list);
+    addItemID(list, getMaxLengthId());
     addDateCol(list);
   }
 
-  protected void addItemID(List<T> list) {
-    Column<T, SafeHtml> userCol = getItemColumn();
+  /**
+   *
+   * @param list
+   * @param maxLength
+   */
+  protected void addItemID(List<T> list, int maxLength) {
+    Column<T, SafeHtml> userCol = getItemColumn(maxLength);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader(header));
@@ -393,7 +383,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
-    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+    //logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
@@ -407,7 +397,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn() {
+  private Column<T, SafeHtml> getItemColumn(int maxLength) {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -417,13 +407,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
       @Override
       public SafeHtml getValue(T shell) {
-        return getSafeHtml(getTruncatedItemLabel(shell));
+        return getSafeHtml(getTruncatedItemLabel(shell, maxLength));
       }
     };
   }
 
-  private String getTruncatedItemLabel(T shell) {
-    return truncate(getItemLabel(shell));
+  private String getTruncatedItemLabel(T shell, int maxLength) {
+    return truncate(getItemLabel(shell),maxLength);
   }
 
   protected abstract String getItemLabel(T shell);

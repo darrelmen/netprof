@@ -267,7 +267,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.creator = exercise.getCreator();
   }
 
-  @Override public CommonShell getShell(boolean includeContext) {
+  @Override
+  public CommonShell getShell(boolean includeContext) {
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, getContext(), getContextTranslation());
   }
 
@@ -384,8 +385,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst
    * @return
+   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst
    */
   @Override
   public List<String> getFirstPron() {
@@ -476,7 +477,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     boolean checkOld = !getOldID().isEmpty();
     return other instanceof Exercise &&
         (checkOld && getOldID().equals(((Exercise) other).getOldID()) ||
-            (getID() == ((ExerciseShell) other).getID())
+            (getID() != -1 && ((ExerciseShell) other).getID() != -1 &&
+                (getID() == ((ExerciseShell) other).getID()))
         );
   }
 

@@ -56,9 +56,7 @@ public class BaseExercise implements IsSerializable, Shell {
   }
 
   @Override
-  public int getID() {
-    return id;
-  }
+  public int getID() {  return id;  }
 
   /**
    * @see PagingContainer#getEnglishColumn
@@ -73,6 +71,10 @@ public class BaseExercise implements IsSerializable, Shell {
   @Override
   public void setState(STATE state) { this.state = state;  }
 
+  /**
+   * @see PagingContainer#getEnglishColumn
+   * @return
+   */
   @Override
   public STATE getSecondState() {
     return secondState;

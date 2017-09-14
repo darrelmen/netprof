@@ -30,7 +30,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";
   public static final String PUBLIC = "Public?";
-  public static final String NUM_ITEMS = "#";
+  private static final String NUM_ITEMS = "#";
   private boolean slim = false;
 
   private List<Button> buttons = new ArrayList<>();
@@ -92,7 +92,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserList<CommonShell>> list = getList();
-    addItemID(list);
+    addItemID(list, getMaxLengthId());
     addNum();
     addDateCol(list);
 

@@ -86,7 +86,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     private static final String DIFF_COL_HEADER = "+/-";
     */
   private static final int MIN_RECORDINGS = 5;
-  public static final String STUDENT = "Student";
+
+  /**
+   *
+   */
+  private static final String STUDENT = "Student";
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -389,7 +393,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserInfo> list = getList();
-    addItemID(list);
+    addItemID(list, 20);
     addFirstName(list);
     addLastName(list);
     addDateCol(list);
