@@ -34,19 +34,16 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.hlt.domino.shared.model.user.DBUser;
+import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.HasID;
 
-public class MiniUser implements HasID, Comparable<HasID> {
-  protected String first = "";
-  protected String last = "";
-  private int id;
+public class MiniUser extends FirstLastUser {
   private int age;
 
   private boolean isMale;
   private Gender realGender = Gender.Unspecified;
 
-  private String userID;
   private boolean isAdmin;
   protected long timestamp;
 
@@ -59,13 +56,13 @@ public class MiniUser implements HasID, Comparable<HasID> {
   public MiniUser() {
   } // for serialization
 
-  public MiniUser(int id, int age, boolean isMale,  String userID, boolean isAdmin) {
-    this.id = id;
+  public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
+    super(id);
     this.age = age;
     this.isMale = isMale;
-    this.realGender = isMale?Gender.Male:Gender.Female;
+    this.realGender = isMale ? Gender.Male : Gender.Female;
 
-    this.userID = userID;
+    this.userID  = userID;
     this.isAdmin = isAdmin;
   }
 
@@ -77,7 +74,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
    * @param isAdmin
    */
   public MiniUser(int id, int age, boolean isMale, Gender realGender, String userID, boolean isAdmin) {
-    this.id = id;
+    super(id);
     this.age = age;
     this.isMale = isMale;
     this.realGender = realGender;
@@ -87,11 +84,11 @@ public class MiniUser implements HasID, Comparable<HasID> {
   }
 
   public boolean isDefault() {
-    return id < 0;
+    return getID() < 0;
   }
 
   public boolean isUnknownDefault() {
-    return id == -1;
+    return getID() == -1;
   }
 
   /**
@@ -107,7 +104,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
 
   @Override
   public int compareTo(HasID o) {
-    return Integer.compare(id, o.getID());
+    return Integer.compare(getID(), o.getID());
   }
 
   @Override
@@ -117,21 +114,11 @@ public class MiniUser implements HasID, Comparable<HasID> {
 
   @Override
   public int hashCode() {
-    return new Long(id).hashCode();
-  }
-
-
-  @Override
-  public int getID() {
-    return id;
+    return new Integer(getID()).hashCode();
   }
 
   public int getAge() {
     return age;
-  }
-
-  public String getUserID() {
-    return userID;
   }
 
   /**
@@ -142,13 +129,17 @@ public class MiniUser implements HasID, Comparable<HasID> {
     this.userID = userID;
   }
 
+  /**
+   * @see Report#getUsers
+   * @return
+   */
   public long getTimestampMillis() {
     return timestamp;
   }
 
   /**
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#getMini
    * @param startTime
+   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#getMini
    */
   public void setTimestampMillis(long startTime) {
     this.timestamp = startTime;
@@ -156,30 +147,6 @@ public class MiniUser implements HasID, Comparable<HasID> {
 
   public boolean isAdmin() {
     return isAdmin;
-  }
-
-  /**
-   * First name
-   * @return
-   */
-  public String getFirst() {
-    return first;
-  }
-
-  /**
-   * Last name
-   * @return
-   */
-  public String getLast() {
-    return last;
-  }
-
-  public void setFirst(String first) {
-    this.first = first;
-  }
-
-  public void setLast(String last) {
-    this.last = last;
   }
 
   public String getOldID() {
@@ -226,7 +193,7 @@ public class MiniUser implements HasID, Comparable<HasID> {
   }
 
   public String toString() {
-    return "mini-user " + id + " : " + age + " yr old " +
+    return "mini-user " + getID() + " : " + age + " yr old " +
         (isMale() ? "male" : "female") +
         (isAdmin() ? "ADMIN" : "");
   }

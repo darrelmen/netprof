@@ -95,44 +95,9 @@ public class UserInfo implements HasID {
     return (int) Math.ceil(100 * total / size);
   }
 
-/*  public String getUserID() {
-    return getUser() == null ? "UNK" : getUser().getUserID();
-  }*/
-
   public long getTimestampMillis() {
     return startTime;
   }
-
-  /**
-   * @return
-   */
-/*
-  public MiniUser getUser() {
-    return this;
-  }
-*/
-
-  /**
-   * @param user
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
-   */
-/*  public void setUser(MiniUser user) {
-    setFields(user.getID(), user.getAge(), user.isMale(), user.getUserID(), user.isAdmin());
-    setTimestampMillis(user.getTimestampMillis());
-
-*//*
-    user.setFirst(user.getFirst());
-    user.setLast(user.getLast());
-    *//*
-  }*/
-
-  /**
-   * @return
-   * @see UserContainer#getStart
-   */
-//  public int getStart() {
-//    return start;
-//  }
 
   public int getCurrent() {
     return current;
