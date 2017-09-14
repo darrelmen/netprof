@@ -48,7 +48,7 @@ import static mitll.langtest.shared.user.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser implements ReportUser {
-  public static final String NOT_SET = "NOT_SET";
+  private static final String NOT_SET = "NOT_SET";
   @Deprecated
   private int experience;
   private String ipaddr;
@@ -76,6 +76,7 @@ public class User extends MiniUser implements ReportUser {
   @Deprecated
   private String resetKey;
   private String affiliation;
+  private boolean hasAppPermission;
 
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
@@ -124,6 +125,10 @@ public class User extends MiniUser implements ReportUser {
       default:
         return Collections.emptyList();
     }
+  }
+
+  public boolean isHasAppPermission() {
+    return hasAppPermission;
   }
 
   /**
@@ -230,7 +235,7 @@ public class User extends MiniUser implements ReportUser {
         STUDENT,
         "",
         "", "", //"",
-        System.currentTimeMillis(), "OTHER");
+        System.currentTimeMillis(), "OTHER", true);
   }
 
   public User(User copy) {
@@ -252,7 +257,8 @@ public class User extends MiniUser implements ReportUser {
         copy.getDevice(),
         copy.getResetKey(),
         copy.getTimestampMillis(),
-        copy.getAffiliation());
+        copy.getAffiliation(),
+        copy.isHasAppPermission());
   }
 
   /**
@@ -272,8 +278,7 @@ public class User extends MiniUser implements ReportUser {
    * @param resetPassKey
    * @param timestamp
    * @param affiliation
-   * @paramx cdEnableKey
-   * @seex mitll.langtest.server.database.user.SlickUserDAOImpl#toUser
+   * @param hasAppPermission
    * @see mitll.langtest.server.database.user.DominoUserDAOImpl#toUser
    * @see UserDAO#getUsers
    */
@@ -292,9 +297,9 @@ public class User extends MiniUser implements ReportUser {
 
               String device,
               String resetPassKey,
-              //String cdEnableKey,
-              long timestamp,//, boolean isActive
-              String affiliation) {
+              long timestamp,
+              String affiliation,
+              boolean hasAppPermission) {
     super(id, age, gender == 0, realGender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -310,9 +315,9 @@ public class User extends MiniUser implements ReportUser {
     this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
-    //  this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
     this.affiliation = affiliation;
+    this.hasAppPermission =hasAppPermission;
   }
 
   public boolean isStudent() {

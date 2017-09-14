@@ -66,7 +66,6 @@ import java.util.*;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
 //  private final Logger logger = Logger.getLogger("UserPassLogin");
-
   public static final String USER_NAME_BOX = "UserNameBox";
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";

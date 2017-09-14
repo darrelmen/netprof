@@ -91,7 +91,7 @@ class TimeSeriesPlot extends DivWidget {
 
   /**
    * How can phoneSession be null? Transient?
-   * 
+   *
    * Show childCount in session if small - since error bars won't be displayed.
    * @param toolTipData
    * @param seriesName1
@@ -110,8 +110,7 @@ class TimeSeriesPlot extends DivWidget {
 
   private String getTooltipPrefix(String seriesName1, String dateToShow) {
     return "<b>" + seriesName1 + "</b>" +
-        "<br/>" + dateToShow +
-        "<br/>";
+        "<br/>" + dateToShow + "<br/>";
   }
 
   /**

@@ -91,7 +91,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
 
-  private static final String NETPROF = "netprof";
+  /**
+   * Should be consistent with DOMINO.
+   */
+  private static final String NETPROF = "NetProf";
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
 
   private IUserServiceDelegate delegate;
@@ -801,7 +804,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         device,//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         creationTime,
-        dominoUser.getAffiliation());
+        dominoUser.getAffiliation(),
+        dominoUser.getApplicationAbbreviations().contains(NETPROF));
 
 //    try {
 //      MiniUser.Gender realGender = getRealGender(gender);

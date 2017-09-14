@@ -49,6 +49,7 @@ import java.util.*;
  */
 public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(UserDAO.class);
+  public static final String OTHER = "OTHER";
 
   /**
    * @param database
@@ -672,7 +673,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           device,
           resetKey,
           //  "",
-          rs.getTimestamp(TIMESTAMP).getTime(), "OTHER");
+          rs.getTimestamp(TIMESTAMP).getTime(),
+          OTHER,
+          true);
 
       users.add(newUser);
 

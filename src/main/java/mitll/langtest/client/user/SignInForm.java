@@ -58,6 +58,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #gotLogin
    */
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
+  private static final String APPLICATION_PERMISSION = "I'm sorry, you do not have permission to access this application.";
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   /**
    *
@@ -286,6 +287,9 @@ public class SignInForm extends UserDialog implements SignIn {
       User loggedInUser = result.getLoggedInUser();
       if (!loggedInUser.isEnabled()) {
         markErrorBlur(userField, DEACTIVATED);
+        signIn.setEnabled(true);
+      } else if (!loggedInUser.isHasAppPermission()) {
+        markErrorBlur(userField, APPLICATION_PERMISSION);
         signIn.setEnabled(true);
       } else {
         //    logger.info("user is enabled...");
