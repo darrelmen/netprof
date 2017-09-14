@@ -38,12 +38,6 @@ import mitll.langtest.shared.analysis.*;
 import java.util.List;
 
 public interface IAnalysis {
- // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
   AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
-
- // List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid);
-
- // PhoneReport getPhonesForUser(int id, int minRecordings, int listid);
-
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
 }

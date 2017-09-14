@@ -152,7 +152,6 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(AnalysisReport result) {
         useReport(result, then, userChosenID, listid, isTeacherView, showTab, bottom, userid, minRecordings);
-
       }
     });
   }

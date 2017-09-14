@@ -43,6 +43,7 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -125,10 +126,12 @@ public abstract class Analysis extends DAO {
     List<UserInfo> userInfos = new ArrayList<>();
     logger.info("getUserInfos for " + best.size());
     long then = System.currentTimeMillis();
+    Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastUsers();
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
       Integer userid = pair.getKey();
 
-      MiniUser miniUser = userDAO.getMiniUser(userid);
+//      MiniUser miniUser = userDAO.getMiniUser(userid);
+      FirstLastUser miniUser = firstLastUsers.get(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {

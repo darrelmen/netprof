@@ -113,7 +113,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @return
    * @seex IAnalysis#getPhonesForUser(int, int, int)
    * @seex IAnalysis#getWordScoresForUser(int, int, int)
-   * @see Analysis#getPerformanceForUser(int, int, int)
+   * @see Analysis#getPerformanceForUser
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();
@@ -284,7 +284,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     perfs.forEach(perf -> exercises.add(database.getCustomOrPredefExercise(projid, perf.exid())));
 
-    // Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
     logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size());
 
     audioDAO.attachAudioToExercises(exercises, language);

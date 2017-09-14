@@ -45,9 +45,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.shared.user.Kind;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.ReportUser;
+import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -92,8 +90,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
-  public static final String NETPROF = "netprof";
-  public static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
+
+  private static final String NETPROF = "netprof";
+  private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -374,7 +373,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String last,
                      String url,
                      String affiliation) {
-    // Timestamp now = new Timestamp(System.currentTimeMillis());
     mitll.hlt.domino.shared.model.user.User.Gender gender1 = mitll.hlt.domino.shared.model.user.User.Gender.valueOf(gender.name());
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
@@ -382,19 +380,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         last,
         email,
         affiliation,
-        gender1,//.equalsIgnoreCase(MALE) ? DMALE : DFEMALE,
+        gender1,
         Collections.singleton(kind.getRole()),
         getGroup(),
 
         APPLICATION_ABBREVIATIONS
-        );
+    );
 
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
     acctDetail.setCrTime(new Date());
-    SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser,
-        url,
-        true);
+    SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser, url, true);
 
     if (clientUserDetailSResult == null) {
       return -1; // password error?
@@ -564,6 +560,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return loggedInUser == null ? null : toUser(loggedInUser);
   }
 
+  private void getUserFields() {
+    delegate.getUserFields();
+  }
+
   /**
    * @param user
    * @param id
@@ -573,7 +573,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
   public User getUserIfMatchPass(User user, String id, String encodedPassword) {
-    logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
+//  logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
     String dominoPassword = getUserCredentials(id);
 
     long then = System.currentTimeMillis();
@@ -665,7 +665,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public ReportUsers getReportUsers() {
     List<ReportUser> copy = new ArrayList<>();
-    getAll().forEach(u-> copy.add(toUser(u)));
+    getAll().forEach(u -> copy.add(toUser(u)));
     return new ReportUsers(copy, getUsersDevices(copy));
   }
 
@@ -779,6 +779,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
     boolean isMale = gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male);
+
+
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
@@ -826,6 +828,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private boolean isAdmin(mitll.hlt.domino.shared.model.user.User dominoUser) {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
+    return isAdmin(roleAbbreviations);
+  }
+
+  private boolean isAdmin(Set<String> roleAbbreviations) {
     return roleAbbreviations.contains(ADMIN.getRole()) || roleAbbreviations.contains(PROJECT_ADMIN.getRole());
   }
 
@@ -917,8 +923,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //  public List<ReportUser> getUsersDevices() {
 //    return getUsersDevices(getUsers());
 //  }
-
- private List<ReportUser> getUsersDevices(List<ReportUser> users) {
+  private List<ReportUser> getUsersDevices(List<ReportUser> users) {
     return users
         .stream()
         .filter(user -> user.getDevice() != null && user.getDevice().startsWith("i"))
@@ -1036,8 +1041,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * gets ROLE from DBUser
    *
-   * @param s
    * @return
+   * @paramx s
    */
 /*
   private User.Kind getRole(DBUser s) {
@@ -1049,6 +1054,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     DBUser byID = lookupUser(userid);
 //    logger.info("getMiniUser " + userid);
     return byID == null ? null : getMini(byID);
+  }
+
+  public Map<Integer, FirstLastUser> getFirstLastUsers() {
+    Collection<List<Object>> userFields = delegate.getUserFields("_id", "userId", "firstName", "lastName");
+
+    Map<Integer, FirstLastUser> idToFirstLast = new HashMap<>();
+    for (List<Object> userField : userFields) {
+      int i = 0;
+      Object o = userField.get(i++);
+      Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
+      String o2 = (String) userField.get(i++);
+      String o3 = (String) userField.get(i++);
+      String o4 = (String) userField.get(i++);
+      idToFirstLast.put(o1, new FirstLastUser(o1, o2, o3, o4));
+    }
+    return idToFirstLast;
   }
 
   public String getUserChosenID(int userid) {
@@ -1065,24 +1086,26 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private MiniUser getMini(DBUser dominoUser) {
     boolean admin = isAdmin(dominoUser);
 
+    mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
     MiniUser miniUser = new MiniUser(
         dominoUser.getDocumentDBID(),
         0,  // age
-        isMale(dominoUser),
-        MiniUser.Gender.valueOf(dominoUser.getGender().name()),
+        isGenderMale(gender),
+        MiniUser.Gender.valueOf(gender.name()),
         dominoUser.getUserId(),
         admin);
 
     //   logger.info("getMini for " + dominoUser);
+    {
+      AccountDetail acctDetail = dominoUser.getAcctDetail();
+      long now = System.currentTimeMillis();
 
-    AccountDetail acctDetail = dominoUser.getAcctDetail();
-    long now = System.currentTimeMillis();
+      long time = acctDetail == null ?
+          now :
+          acctDetail.getCrTime() == null ? now : acctDetail.getCrTime().getTime();
 
-    long time = acctDetail == null ?
-        now :
-        acctDetail.getCrTime() == null ? now : acctDetail.getCrTime().getTime();
-
-    miniUser.setTimestampMillis(time);
+      miniUser.setTimestampMillis(time);
+    }
     miniUser.setFirst(dominoUser.getFirstName());
     miniUser.setLast(dominoUser.getLastName());
 
@@ -1090,7 +1113,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   private boolean isMale(DBUser dominoUser) {
-    return dominoUser.getGender() == DMALE;
+    return isGenderMale(dominoUser.getGender());
+  }
+
+  private boolean isGenderMale(mitll.hlt.domino.shared.model.user.User.Gender dominoUser) {
+    return dominoUser == DMALE;
   }
 
   /**

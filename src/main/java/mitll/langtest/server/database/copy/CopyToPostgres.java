@@ -330,7 +330,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
     } else {
-      logger.info("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
+      logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
   }
 
@@ -583,6 +583,7 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param oldToNewUserList
+   * @see #copyUserExListJoin
    */
   private void copyUserExerciseListJoin(DatabaseImpl db,
                                         Map<Integer, Integer> oldToNewUserList,

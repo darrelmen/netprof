@@ -1346,7 +1346,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see SlickPhoneDAO#getPhoneReport
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project, Map<Integer, MiniUser> idToMini) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
+                               int userid,
+                               int exid,
+                               Project project,
+                               Map<Integer, MiniUser> idToMini) {
     CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null) {

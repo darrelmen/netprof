@@ -37,10 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.ReportUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -142,6 +139,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   MiniUser getMiniUser(int userid);
 
+  Map<Integer,FirstLastUser> getFirstLastUsers();
   String getUserChosenID(int userid);
 
   boolean isMale(int userid);

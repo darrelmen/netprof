@@ -144,7 +144,8 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see Database#getNativeAudio(Map, int, int, Project, Map)
    */
-  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini);
+  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
+                        String language, Map<Integer, MiniUser> idToMini);
 
   Map<String,Integer> getPairs(int projid);
 

@@ -36,14 +36,16 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.net.ConnectException;
 import java.util.*;
 
 /**
- *  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ * * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
@@ -75,16 +77,15 @@ public class MailSupport {
   }
 
   /**
-   *
-   * @see Report#sendEmails
    * @param serverName
    * @param to
    * @param replyTo
    * @param subject
    * @param message
+   * @see Report#sendEmails
    */
   public boolean sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-   return sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
+    return sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
   }
 
   /**
@@ -99,7 +100,7 @@ public class MailSupport {
    * @see EmailHelper#sendEmail
    */
   boolean sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
-                        String linkText, Collection<String> ccEmails) {
+                    String linkText, Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
@@ -181,38 +182,41 @@ public class MailSupport {
    * @param subject
    * @param message
    * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST);
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST, testEmail);
   }
 
   /**
-   * @see #email(String, String, String)
    * @param recipientName
    * @param recipientEmail
    * @param ccEmails
    * @param subject
    * @param message
    * @param email_server
+   * @param useTestPort
+   * @see #email(String, String, String)
    */
   private void normalEmail(String recipientName, String recipientEmail, List<String> ccEmails,
-                           String subject, String message, String email_server) {
+                           String subject, String message, String email_server, boolean useTestPort) {
     try {
-      Properties props = new Properties();
-      props.put(MAIL_SMTP_HOST, email_server);
-      props.put(MAIL_DEBUG, "" + debugEmail);
-
-      if (testEmail) {
-        props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
-//        logger.debug("Testing : using port " + MAIL_PORT);
+      Transport.send(
+          makeMessage(
+              getMailSession(email_server, useTestPort),
+              recipientName,
+              recipientEmail,
+              ccEmails,
+              subject,
+              message));
+    } catch (ConnectException e) {
+      if (!useTestPort) {
+        normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true);
+      } else {
+        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
-
-      Session session = Session.getDefaultInstance(props, null);
-      // logger.debug("sending email to " + recipientEmail);
-      Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
-      Transport.send(msg);
+      // OK try with test email
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
         logger.info("couldn't send email - no mail daemon? ");
@@ -220,6 +224,23 @@ public class MailSupport {
         logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
     }
+  }
+
+  private Session getMailSession(String email_server, boolean testEmail) {
+    return Session.getDefaultInstance(getMailProps(email_server, testEmail), null);
+  }
+
+  @NotNull
+  private Properties getMailProps(String email_server, boolean useTestEmail) {
+    Properties props = new Properties();
+    props.put(MAIL_SMTP_HOST, email_server);
+    props.put(MAIL_DEBUG, "" + debugEmail);
+
+    if (useTestEmail) {
+      props.put(MAIL_SMTP_PORT, "" + MAIL_PORT);
+//        logger.debug("Testing : using port " + MAIL_PORT);
+    }
+    return props;
   }
 
   /**
@@ -232,27 +253,27 @@ public class MailSupport {
    * @see #sendEmail(String, String, String, String, String, String, String, Collection)
    */
   private boolean normalFullEmail(String senderName,
-                               String senderEmail,
-                               String replyToEmail,
-                               Collection<String> ccEmails,
-                               Collection<String> recipientEmails,
+                                  String senderEmail,
+                                  String replyToEmail,
+                                  Collection<String> ccEmails,
+                                  Collection<String> recipientEmails,
 
-                               String subject, String message) {
+                                  String subject, String message) {
     try {
       Properties props = new Properties();
       props.put(MAIL_SMTP_HOST, LOCALHOST);
       props.put(MAIL_DEBUG, "" + (debugEmail || testEmail));
 
       if (testEmail) {
-        props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
+        props.put(MAIL_SMTP_PORT, "" + MAIL_PORT);
         logger.debug("Testing : using port " + MAIL_PORT);
       }
       Session session = Session.getDefaultInstance(props, null);
-  //    logger.debug("session props " + session.getProperties());
+      //    logger.debug("session props " + session.getProperties());
       String property = session.getProperty(MAIL_SMTP_PORT);
 
       if (testEmail && property == null) {
-        session.getProperties().setProperty(MAIL_SMTP_PORT, ""+MAIL_PORT);
+        session.getProperties().setProperty(MAIL_SMTP_PORT, "" + MAIL_PORT);
       }
 
       Message msg = makeHTMLMessage(session,
@@ -288,7 +309,6 @@ public class MailSupport {
 */
 
   /**
-   * @see #normalEmail(String, String, java.util.List, String, String, String)
    * @param session
    * @param recipientName
    * @param recipientEmail
@@ -297,6 +317,7 @@ public class MailSupport {
    * @param message
    * @return
    * @throws Exception
+   * @see #normalEmail(String, String, List, String, String, String, boolean)
    */
   private Message makeMessage(Session session,
                               String recipientName, String recipientEmail,
@@ -321,7 +342,6 @@ public class MailSupport {
   }
 
   /**
-   * @see #normalFullEmail(String, String, String, Collection, Collection, String, String)
    * @param session
    * @param senderName
    * @param senderEmail
@@ -332,6 +352,7 @@ public class MailSupport {
    * @param message
    * @return
    * @throws Exception
+   * @see #normalFullEmail(String, String, String, Collection, Collection, String, String)
    */
   private Message makeHTMLMessage(Session session,
                                   String senderName,

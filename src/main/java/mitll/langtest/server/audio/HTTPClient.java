@@ -140,9 +140,7 @@ public class HTTPClient {
    */
   public boolean isAvailable(String webserviceIP, int webservicePort, String service) {
     try {
-      //String s =
       readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
-      //logger.info("response " + s);
       return true;
     } catch (FileNotFoundException fnf) {
       logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);

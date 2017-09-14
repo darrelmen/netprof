@@ -128,8 +128,7 @@ public class SlickUserExerciseDAO
    */
   public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
-    //List<String> typeOrder = getTypeOrder();
-    Iterator<String> iterator = typeOrder.iterator();
+     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
@@ -1052,9 +1051,14 @@ public class SlickUserExerciseDAO
 
     addToMap(oldToNew, allPredefByProject);
 
-    addToMap(oldToNew, dao.getAllContextPredefByProject(projectid));
+    List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);
+    addToMap(oldToNew, allContextPredefByProject);
 
-    logger.info("getOldToNew found for project #" + projectid + " " + allPredefByProject.size() + " exercises, " + oldToNew.size() + " old->new");
+    logger.info("getOldToNew found for" +
+        "\n\tproject #" + projectid +
+        "\n\t" + allPredefByProject.size() + " predef exercises," +
+        "\n\t" + allContextPredefByProject.size() + " context predef exercises," +
+        "\n\t" + oldToNew.size() + " old->new mappings");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
     return oldToNew;
   }

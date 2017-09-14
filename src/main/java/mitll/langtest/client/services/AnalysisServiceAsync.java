@@ -46,34 +46,12 @@ import java.util.List;
 public interface AnalysisServiceAsync {
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 
-  //void getPerformanceForUser(int id, int minRecordings, int listid, AsyncCallback<UserPerformance> async);
-
-  //void getWordScores(int id, int minRecordings, int listid, AsyncCallback<List<WordScore>> async);
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @param async
-   */
-//  void getPhoneScores(int id, int minRecordings, int listid, AsyncCallback<PhoneReport> async);
-
   /**
    * TODO : not sure why this is ever needed
    * @param ids
    * @param async
    */
   void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
-
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see AnalysisPlot#AnalysisPlot
-   */
-  // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
 
   void getPerformanceReportForUser(int id, int minRecordings, int listid, AsyncCallback<AnalysisReport> async);
 }

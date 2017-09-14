@@ -39,7 +39,6 @@ public class ExerciseCopy {
                                                   Collection<String> typeOrder,
                                                   Map<String, Integer> parentToChild) {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
-    Map<String, Integer> exToInt;
 
     logger.info("copyUserAndPredefExercises for " + projectid + " typeOrder is " + typeOrder);
     if (typeOrder.isEmpty()) {
@@ -48,11 +47,22 @@ public class ExerciseCopy {
     Map<String, List<Exercise>> idToCandidateOverride = new HashMap<>();
     List<Exercise> exercises = addUserExercises(db, oldToNewUser, projectid, typeOrder, idToCandidateOverride);
 
+    List<CommonExercise> exercises1 = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID);
+
+    for (CommonExercise exercise:exercises1) {
+      if (exercise.getOldID().equalsIgnoreCase("3473")) {
+        logger.info("copyUserAndPredefExercises got " + exercise);
+      }
+      else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
+        logger.info("copyUserAndPredefExercises got blackboard " + exercise);
+      }
+    }
+
     parentToChild.putAll(addExercises(
         db.getUserDAO().getImportUser(), projectid, idToFL, slickUEDAO,
-        db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID), typeOrder, idToCandidateOverride));
+        exercises1, typeOrder, idToCandidateOverride));
 
-    exToInt = slickUEDAO.getOldToNew(projectid);
+    Map<String, Integer> exToInt = slickUEDAO.getOldToNew(projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, exercises);
 
     logger.info("copyUserAndPredefExercises : finished copying exercises - found " + exToInt.size());
@@ -103,17 +113,29 @@ public class ExerciseCopy {
                                            Collection<CommonExercise> exercises,
                                            Collection<String> typeOrder,
                                            Map<String, List<Exercise>> idToCandidateOverride) {
-    Map<String, Integer> exToInt;
-    logger.info("copyUserAndPredefExercises found " + exercises.size() + " old exercises and  " + idToCandidateOverride.size() + " overrides");
+
+    logger.info("copyUserAndPredefExercises" +
+        "\n\tfound " + exercises.size() + " old exercises" +
+        "\n\tand   " + idToCandidateOverride.size() + " overrides");
 
     // TODO : why not add it to interface?
-    exToInt = addExercisesAndAttributes(importUser, projectid, slickUEDAO, exercises, typeOrder, idToCandidateOverride);
+    Map<String, Integer> exToInt = addExercisesAndAttributes(importUser, projectid, slickUEDAO, exercises, typeOrder, idToCandidateOverride);
     idToFL.putAll(slickUEDAO.getIDToFL(projectid));
 
     logger.info("copyUserAndPredefExercises old->new for project #" + projectid + " : " + exercises.size() + " exercises, " + exToInt.size());
     return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
   }
 
+  /**
+   *
+   * @param importUser
+   * @param projectid
+   * @param slickUEDAO
+   * @param exercises
+   * @param typeOrder
+   * @param idToCandidateOverride
+   * @return
+   */
   private Map<String, Integer> addExercisesAndAttributes(int importUser,
                                                          int projectid,
                                                          SlickUserExerciseDAO slickUEDAO,
@@ -233,8 +255,13 @@ public class ExerciseCopy {
 
     int replacements = 0;
     int converted = 0;
+    logger.info("addPredefExercises adding " + exercises.size());
+
     for (CommonExercise ex : exercises) {
       String oldID = ex.getOldID();
+
+      logger.info("addPredefExercises adding ex old #" + oldID + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
+
       List<Exercise> exercises1 = idToCandidateOverride.get(oldID);
 
       CommonExercise exToUse = ex;
@@ -244,7 +271,8 @@ public class ExerciseCopy {
               !candidate.getEnglish().equals(ex.getEnglish()) &&
               !candidate.getForeignLanguage().equals(ex.getForeignLanguage())
               ) {
-            logger.info("addPredefExercises for " + oldID +
+            logger.info("addPredefExercises" +
+                "\n\tfor old id " + oldID +
                 " replacing" +
                 "\n\toriginal " + ex +
                 "\n\twith     " + candidate);

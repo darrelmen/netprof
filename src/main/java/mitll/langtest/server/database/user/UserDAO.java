@@ -34,10 +34,7 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.shared.user.Kind;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.ReportUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -519,6 +516,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public Map<Integer, FirstLastUser> getFirstLastUsers() {
+    return null;
+  }
+
+  @Override
   public String getUserChosenID(int userid) {
     return null;
   }
@@ -638,7 +640,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
-        logger.warn("getUsers user kind for " + id + " " + userID + " is null?");
+        logger.info("getUsers user kind for " + id + " " + userID + " is null?");
       }
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
