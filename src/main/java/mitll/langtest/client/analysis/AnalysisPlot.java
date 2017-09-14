@@ -174,35 +174,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(FIVEMIN, "Minute");
   }
 
-  /**
-   * @paramx service
-   * @paramx userid
-   * @param userChosenID
-   * @paramx minRecordings
-   * @param listid
-   * @param isTeacherView
-   * @see #AnalysisPlot
-   */
-/*  private void getPerformanceForUser(AnalysisServiceAsync service,
-                                     int userid,
-                                     final String userChosenID,
-                                     int minRecordings,
-                                     int listid,
-                                     boolean isTeacherView) {
-//    logger.info("getPerformanceForUser " + userid + " : " + userChosenID);
-    service.getPerformanceForUser(userid, minRecordings, listid, new AsyncCallback<UserPerformance>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
-      }
-
-      @Override
-      public void onSuccess(UserPerformance userPerformance) {
-        showUserPerformance(userPerformance, userChosenID, listid, isTeacherView);
-      }
-    });
-  }*/
-
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
     if (!rawBestScores.isEmpty()) {
@@ -598,7 +569,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
             CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
             return getTooltip(toolTipData, exerciseID, commonShell);
           } catch (Exception e) {
-            logger.warning(e.getMessage());
+            logger.warning("getToolTip " + e.getMessage());
+            exceptionSupport.logException(e);
             return "";
           }
         });

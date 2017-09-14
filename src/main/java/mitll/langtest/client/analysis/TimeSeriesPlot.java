@@ -90,6 +90,8 @@ class TimeSeriesPlot extends DivWidget {
   }
 
   /**
+   * How can phoneSession be null? Transient?
+   * 
    * Show childCount in session if small - since error bars won't be displayed.
    * @param toolTipData
    * @param seriesName1
@@ -99,7 +101,7 @@ class TimeSeriesPlot extends DivWidget {
     String dateToShow = getDateToShow(toolTipData);
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
   //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
-    String countInfo =  "<br/>n = " + session.getCount();
+    String countInfo = session == null? "": "<br/>n = " + session.getCount();
 
     return getTooltipPrefix(seriesName1, dateToShow) +
         "Mean = " + toolTipData.getYAsLong() + "%" +
@@ -117,7 +119,7 @@ class TimeSeriesPlot extends DivWidget {
    * @param seriesName1
    * @return
    * @paramx dateToShow
-   * @see AnalysisPlot#getTooltip(ToolTipData, String, CommonShell)
+   * @see AnalysisPlot#getTooltip
    */
   String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
