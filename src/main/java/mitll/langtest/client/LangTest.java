@@ -466,7 +466,7 @@ public class LangTest implements
   /**
    * Log browser exception on server, include user and exercise ids.  Consider including chapter selection.
    *
-   * @see #onModuleLoad()
+   * @see #onModuleLoad
    */
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(this::logException);
@@ -475,6 +475,8 @@ public class LangTest implements
   private boolean lastWasStackOverflow = false;
 
   public String logException(Throwable throwable) {
+    logger.info("got exception " + throwable.getMessage());
+
     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
     boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
     if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions

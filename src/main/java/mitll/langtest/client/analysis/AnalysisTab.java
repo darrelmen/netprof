@@ -46,7 +46,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -124,8 +123,8 @@ public class AnalysisTab extends DivWidget {
     Icon playFeedback = getPlayFeedback();
 
     boolean isTeacherView = overallBottom != null;
-    analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid, userChosenID, minRecordings,
-        controller.getSoundManager(), playFeedback, listid, isTeacherView);
+    analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
+        controller.getSoundManager(), playFeedback, controller);
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);

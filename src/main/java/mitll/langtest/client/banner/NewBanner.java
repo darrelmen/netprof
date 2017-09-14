@@ -372,9 +372,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     cog.setVisible(admin);
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
-
-    logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
-
+ //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
     hasProjectChoices.forEach(linkAndTitle -> linkAndTitle.getMyLink().setVisible(hasProject));
   }
 

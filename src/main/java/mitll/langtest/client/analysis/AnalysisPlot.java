@@ -40,6 +40,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -54,7 +55,6 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
-import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -134,24 +134,20 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private int index = 0;
 
   private TimeWidgets timeWidgets;
+  private  final ExceptionSupport exceptionSupport;
 
   /**
    * @param service
    * @param userid
-   * @param userChosenID
-   * @param minRecordings
-   * @param listid
-   * @param isTeacherView
    * @see AnalysisTab#AnalysisTab
    */
   public AnalysisPlot(ExerciseServiceAsync service,
                       int userid,
-                      final String userChosenID,
-                      final int minRecordings,
                       SoundManagerAPI soundManagerAPI,
                       Icon playFeedback,
-                      int listid, boolean isTeacherView) {
+                      ExceptionSupport exceptionSupport) {
     getElement().setId("AnalysisPlot");
+    this.exceptionSupport=exceptionSupport;
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
 
     getElement().getStyle().setProperty("minHeight", minHeight, Style.Unit.PX);
@@ -207,7 +203,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     });
   }*/
 
-  public void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
+  void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
@@ -396,21 +392,29 @@ public class AnalysisPlot extends TimeSeriesPlot {
         seriesName,
         shortPeriod);
 
-    if (!shortPeriod) {
+   // if (!shortPeriod) {
       addErrorBars(userPerformance, chart);
-    }
+   // }
 
     configureChart(chart, subtitle);
     return chart;
   }
 
   private boolean isShortPeriod(List<TimeAndScore> rawBestScores) {
-    if (rawBestScores.size() < 2) return true;
+    if (rawBestScores.size() < 2) {
+      logger.info("only " + rawBestScores.size() + " scores");
+      return true;
+    }
     TimeAndScore first = rawBestScores.get(0);
     TimeAndScore last = rawBestScores.get(rawBestScores.size() - 1);
 
     long diff = last.getTimestamp() - first.getTimestamp();
-    return diff < QUARTER;
+    boolean b = diff < QUARTER;
+
+    if (b) {
+      logger.info("time span is < 6 hours " + diff);
+    }
+    return b;
   }
 
   /**
@@ -422,16 +426,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToError.clear();
     granularityToSessions = userPerformance.getGranularityToSessions();
 
-    List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
-    Collections.sort(grans);
-    for (Long gran : grans) {
-      String label = granToLabel.get(gran);
-      //   logger.info("addErrorBars Adding for " + label);
-      List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
-      granToError.put(gran, addErrorBarSeries(phoneSessions, chart, label, true));
+    {
+      List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
-      Series avgSeries = addMeans(phoneSessions, chart, label, true);
-      granToAverage.put(gran, avgSeries);
+      Collections.sort(grans);
+      for (Long gran : grans) {
+        String label = granToLabel.get(gran);
+        //   logger.info("addErrorBars Adding for " + label);
+        List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
+        granToError.put(gran, addErrorBarSeries(phoneSessions, chart, label, true));
+        granToAverage.put(gran, addMeans(phoneSessions, chart, label, true));
+      }
     }
 
     long now = System.currentTimeMillis();
@@ -528,6 +533,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
   }
 
+  /**
+   * @see #getChart(String, String, String, UserPerformance)
+   * @param title
+   * @return
+   */
   private Chart getChart(String title) {
     return new Chart()
         .setZoomType(BaseChart.ZoomType.X)
@@ -750,22 +760,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
     chart.getXAxis()
         .setStartOnTick(true)
         .setEndOnTick(true)
-        .setType(Axis.Type.DATE_TIME).setAxisSetExtremesEventHandler(new AxisSetExtremesEventHandler() {
-      @Override
-      public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
-        if (axisSetExtremesEvent != null) {
-          // logger.info("configureChart window " + firstTime + " " + lastTime);
-          gotExtremes(axisSetExtremesEvent);
-        }
-        //else {
-        //  logger.warning("got null event");
-        // }
-        return true;
-      }
-    });
+        .setType(Axis.Type.DATE_TIME).setAxisSetExtremesEventHandler(axisSetExtremesEvent -> {
+          if (axisSetExtremesEvent != null) {
+            // logger.info("configureChart window " + firstTime + " " + lastTime);
+            gotExtremes(axisSetExtremesEvent);
+          }
+          return true;
+        });
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
+    chart.setWidth("100%");
   }
 
   private boolean isShort() {
@@ -779,9 +784,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #configureChart
    */
   private void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
-    for (Series series : detailSeries) {
-      series.setVisible(false, false);
-    }
+    detailSeries.forEach(series -> series.setVisible(false, false));
 
     try {
       Number min = axisSetExtremesEvent.getMin();
@@ -792,18 +795,20 @@ public class AnalysisPlot extends TimeSeriesPlot {
         long start = min.longValue();
         long end = max.longValue();
         //    logger.info("gotExtremes now min " + min + " max " + max);
-        setVisibility(start, end);
+        //if (granularityToSessions != null)
+          setVisibility(start, end);
         timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
-        setVisibility(end - YEARS, end);
+        //if (granularityToSessions != null)
+          setVisibility(end - YEARS, end);
         setTimeWindowControlsToAll();
       }
       showSeriesByVisible();
 
     } catch (Exception e) {
-      //e.printStackTrace();
-      logger.warning("Got " + e);
+      logger.warning("gotExtremes : got " + e);
+      exceptionSupport.logException(e);
     }
   }
 

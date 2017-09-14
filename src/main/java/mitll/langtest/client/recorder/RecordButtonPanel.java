@@ -177,12 +177,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
-      controller.stopRecording(new WavCallback() {
-        @Override
-        public void getBase64EncodedWavFile(String bytes) {
-          postAudioFile(getPanel(), 1, bytes);
-        }
-      });
+      controller.stopRecording(bytes -> postAudioFile(getPanel(), 1, bytes));
       return true;
     } else {
       initRecordButton();

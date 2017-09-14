@@ -42,13 +42,6 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     super(controller, selectedUserKey, header, 10, 8);
   }
 
-
-/*
-  public BasicUserContainer(ExerciseController controller, String header) {
-    super(controller, header, ID_WIDTH);
-  }
-*/
-
   /**
    * @param o1
    * @param o2

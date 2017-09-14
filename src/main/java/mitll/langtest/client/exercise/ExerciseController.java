@@ -60,7 +60,7 @@ import java.util.Collection;
  * Time: 11:56 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface ExerciseController extends Services {
+public interface ExerciseController extends Services, ExceptionSupport {
   UserManager getUserManager();
 
   UserFeedback getFeedback();
@@ -97,9 +97,6 @@ public interface ExerciseController extends Services {
 
   PropertyHandler getProps();
 
-  String logException(Throwable throwable);
-
-  void logMessageOnServer(String message, String prefix, boolean sendEmail);
 
   ProjectStartupInfo getProjectStartupInfo();
 

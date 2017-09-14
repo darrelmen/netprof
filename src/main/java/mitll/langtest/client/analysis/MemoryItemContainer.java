@@ -257,7 +257,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        logger.info("Selected user found  "+ selectedUser + " at " +index);
+        //logger.info("Selected user found  "+ selectedUser + " at " +index);
       }
       i++;
     }

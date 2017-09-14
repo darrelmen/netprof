@@ -78,7 +78,7 @@ public class UserMenu {
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle("Manage Users", props.getDominoURL()));
-    choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
+    //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     return choices;
   }
 
