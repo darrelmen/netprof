@@ -100,6 +100,12 @@ public abstract class UserDialog extends BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
+  /**
+   * Grabs focus on dialectGroup
+   *
+   * @param dialectGroup
+   * @param message
+   */
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
   }
@@ -108,8 +114,29 @@ public abstract class UserDialog extends BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
   }
 
+  /**
+   * Grabs focus on dialectGroup
+   *
+   * @param dialectGroup
+   * @param message
+   */
   void markErrorBlur(FormField dialectGroup, String message) {
-    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
+    markErrorBlur(dialectGroup, message, Placement.TOP);
+  }
+
+  void markErrorBlurNoGrab(FormField dialectGroup, String message) {
+    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
+  }
+
+  /**
+   * Grabs focus on dialectGroup
+   *
+   * @param dialectGroup
+   * @param message
+   * @param top
+   */
+  void markErrorBlur(FormField dialectGroup, String message, Placement top) {
+    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, top, true);
   }
 
   /**
@@ -211,5 +238,14 @@ public abstract class UserDialog extends BasicDialog {
     userBox.addStyleName("topMargin");
     userBox.addStyleName("rightFiveMargin");
     userBox.setWidth(SIGN_UP_WIDTH);
+  }
+
+  @NotNull
+  protected boolean hasSpaces(String userID) {
+    return userID.split("\\s").length > 1;
+  }
+
+  protected String normalizeSpaces(String trim) {
+    return trim.replaceAll("\\s+", "_");
   }
 }

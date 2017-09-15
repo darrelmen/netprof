@@ -46,8 +46,6 @@ public interface UserServiceAsync {
    * @param userId
    * @param attemptedFreeTextPassword
    * @param async
-   * @seex UserManager#getPermissionsAndSetUser
-   * @seex mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
   void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
@@ -67,8 +65,6 @@ public interface UserServiceAsync {
 
   void getUsers(AsyncCallback<List<User>> async);
 
-  // void getUser(int id, AsyncCallback<User> async);
-
   /**
    * No real need to pass this in
    *
@@ -87,8 +83,6 @@ public interface UserServiceAsync {
   void setProject(int projectid, AsyncCallback<User> async);
 
   void forgetProject(AsyncCallback<Void> async);
-
-  //void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
   void getUserByID(String id, AsyncCallback<User> async);
 

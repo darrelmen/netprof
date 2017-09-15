@@ -54,6 +54,7 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.LoginResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -191,6 +192,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signInForm.setFocusPassword();
   }
 
+  /**
+   * @see SignUpForm#handleAddUserResponse
+   */
   public void tryLogin() {
     signInForm.tryLogin();
   }

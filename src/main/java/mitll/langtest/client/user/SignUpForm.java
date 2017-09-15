@@ -53,9 +53,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.user.SignInForm.NO_SPACES;
+
 public class SignUpForm extends UserDialog implements SignUp {
-  public static final String ADD_INFO = "Add info";
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  private static final String ADD_INFO = "Add info";
+  private static final String COMPLETE_YOUR_PROFILE = "Complete Your Profile";
 
   private static final String I_M_SORRY = "I'm sorry";
   /**
@@ -80,7 +84,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
-   private static final String SIGN_UP_WIDTH = "266px";
+  private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
@@ -89,7 +93,6 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private TextBoxBase userBox;
   private TextBoxBase emailBox;
-  //private Heading demoHeader;
 
   private FormField firstName;
   private FormField lastName;
@@ -234,13 +237,16 @@ public class SignUpForm extends UserDialog implements SignUp {
     return getTwoPartForm(newUserPrompt, fields);
   }
 
+  /**
+   * @param isNewUser
+   * @see #onUserIDBlur
+   */
   private void setNewUserPrompt(boolean isNewUser) {
     if (isNewUser) {
       newUserPrompt.setText(NEW_USER);
       newUserPrompt.setSubtext(SIGN_UP_SUBTEXT);
     } else {
-      //      setFocusOn(firstFocus.getWidget());
-      newUserPrompt.setText("Complete Your Profile");
+      newUserPrompt.setText(COMPLETE_YOUR_PROFILE);
       newUserPrompt.setSubtext("");
     }
   }
@@ -296,22 +302,15 @@ public class SignUpForm extends UserDialog implements SignUp {
         permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
-  protected Collection<Kind> getRoles() {
-    return User.getSelfChoiceRoles();
-  }
-
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
     signUpUser = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "username");
 
-    signUpUser.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        //logger.info("makeSignInUserName : got blur ");
-        onUserIDBlur();
-      }
+    signUpUser.box.addBlurHandler(event -> {
+//      logger.info("makeSignUpUsername : got blur ");
+      onUserIDBlur();
     });
 
     return userBox;
@@ -321,25 +320,50 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #makeSignUpUsername
    */
   private void onUserIDBlur() {
-    final String text = signUpUser.getSafeText();
+    final String text = signUpUser.getSafeText().trim();
 
     if (!text.isEmpty()) {
       //  eventRegistration.logEvent(signUpUser.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-      //logger.info("\tchecking makeSignInUserName " + text);
-      service.getUserByID(text, new AsyncCallback<User>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          logger.warning("\tgot FAILURE on userExists " + text);
-        }
+  //    logger.info("\tonUserIDBlur checking " + text);
 
-        @Override
-        public void onSuccess(User result) {
-          boolean isNewUser = result == null;
-          setSignUpButtonTitle(isNewUser);
-          setNewUserPrompt(isNewUser);
-        }
-      });
+
+      if (hasSpaces(text)) {
+        service.getUserByID(normalizeSpaces(text), new AsyncCallback<User>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("\tgot FAILURE on userExists " + text);
+          }
+
+          @Override
+          public void onSuccess(User result) {
+            if (result == null) {
+    //          logger.warning("got no user for " + text);
+              markErrorBlurNoGrab(signUpUser, NO_SPACES);
+            } else {
+              reallyOnUserIDBlur(text);
+            }
+          }
+        });
+      } else {
+        reallyOnUserIDBlur(text);
+      }
     }
+  }
+
+  private void reallyOnUserIDBlur(String text) {
+    service.getUserByID(text, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        logger.warning("\tgot FAILURE on userExists " + text);
+      }
+
+      @Override
+      public void onSuccess(User result) {
+        boolean isNewUser = result == null;
+        setSignUpButtonTitle(isNewUser);
+        setNewUserPrompt(isNewUser);
+      }
+    });
   }
 
 
@@ -461,12 +485,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private ClickHandler getSignUpClickHandler(final TextBoxBase userBox) {
-    return new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        signUpNewOrAddInfoToOld(userBox.getValue());
-      }
-    };
+    return event -> signUpNewOrAddInfoToOld(userBox.getValue());
   }
 
   /**
@@ -475,7 +494,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param userID
    * @see #getSignUpClickHandler
    */
-  private void signUpNewOrAddInfoToOld(String userID) {
+  private void signUpNewOrAddInfoToOld(final String userID) {
     service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -489,10 +508,11 @@ public class SignUpForm extends UserDialog implements SignUp {
           checkForm(userID);
         } else {
           // existing legacy users can have shorter userids than
-          if (isFormValid(userID, true)) {
-            gotSignUp(userID, emailBox.getValue());
+          String fUserID = userID.trim();
+          if (hasSpaces(fUserID)) {
+            checkLegacyUserWithSpacesLong(fUserID);
           } else {
-            logger.info("getSignUpClickHandler form is not valid!!");
+            isFormValidLongUserID(fUserID);
           }
         }
       }
@@ -500,16 +520,76 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   /**
-   * @see #signUpNewOrAddInfoToOld
    * @param userID
+   * @see #signUpNewOrAddInfoToOld
    */
   private void checkForm(String userID) {
+    userID = userID.trim();
+    if (hasSpaces(userID)) {
+      checkLegacyUserWithSpaces(userID);
+    } else {
+      isFormValid(userID);
+    }
+  }
+
+  private void isFormValid(String userID) {
     if (isFormValid(userID, false)) {
       gotSignUp(userID, emailBox.getValue());
     } else {
       logger.info("getSignUpClickHandler form is not valid!!");
     }
   }
+
+  private void isFormValidLongUserID(String userID) {
+    if (isFormValid(userID, true)) {
+      gotSignUp(userID, emailBox.getValue());
+    } else {
+      logger.info("getSignUpClickHandler form is not valid!!");
+    }
+  }
+
+  private void checkLegacyUserWithSpaces(String userID) {
+    String testUserID = normalizeSpaces(userID);
+    service.getUserByID(testUserID, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        logger.warning("\tgot FAILURE on userExists " + testUserID);
+      }
+
+      @Override
+      public void onSuccess(User result) {
+        if (result != null) {
+          logger.info("try again with " + testUserID);
+          isFormValid(testUserID);
+        } else {
+          logger.info("nobody with " + testUserID);
+          isFormValid(userID);
+        }
+      }
+    });
+  }
+
+  private void checkLegacyUserWithSpacesLong(String userID) {
+    String testUserID = normalizeSpaces(userID);
+    service.getUserByID(testUserID, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        logger.warning("\tgot FAILURE on userExists " + testUserID);
+      }
+
+      @Override
+      public void onSuccess(User result) {
+        if (result != null) {
+          logger.info("try again with " + testUserID);
+          isFormValidLongUserID(testUserID);
+        } else {
+          logger.info("nobody with " + testUserID);
+          isFormValidLongUserID(userID);
+        }
+      }
+    });
+  }
+
 
   /**
    * @param userID
@@ -519,14 +599,11 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #checkForm
    */
   private boolean isFormValid(String userID, boolean allowShort) {
-    String emailText = signUpEmail.box.getValue();
-
     userID = userID.trim();
-
-    String[] split = userID.split("\\s");
-    if (split.length > 1) {//s.length() != userID.length()) {
+    if (hasSpaces(userID)) {
       eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
-      markErrorBlur(signUpUser, "Please no spaces in user id.");
+   //   logger.warning("isFormValid has spaces for " + userID);
+      markErrorBlurNoGrab(signUpUser, NO_SPACES);
       return false;
     } else {
       int minLengthUserId = allowShort ? 4 : MIN_LENGTH_USER_ID;
@@ -542,11 +619,11 @@ public class SignUpForm extends UserDialog implements SignUp {
         eventRegistration.logEvent(lastName.getWidget(), "TextBox", "N/A", "short user last name '" + lastName.getSafeText() + "'");
         markErrorBlur(lastName, "Please enter a last name.");
         return false;
-      } else if (emailText.isEmpty()) {
+      } else if (signUpEmail.box.getValue().isEmpty()) {
         eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "empty email");
         markErrorBlur(signUpEmail, "Please enter your email.");
         return false;
-      } else if (!isValidEmail(emailText)) {
+      } else if (!isValidEmail(signUpEmail.box.getValue())) {
         markInvalidEmail();
         return false;
       } else if (affBox.getSelectedIndex() == 0) {
