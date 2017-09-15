@@ -73,6 +73,7 @@ import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -607,7 +608,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @param userWhere
-   * @see mitll.langtest.server.database.security.UserSecurityManager#setSessionUser
+   * @see NPUserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {

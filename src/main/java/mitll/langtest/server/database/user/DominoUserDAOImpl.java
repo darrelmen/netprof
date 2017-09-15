@@ -44,6 +44,7 @@ import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
@@ -94,7 +95,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * Should be consistent with DOMINO.
    */
-  private static final String NETPROF = "NetProf";
+  public static final String NETPROF = "NetProf";
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
 
   private IUserServiceDelegate delegate;
@@ -560,24 +561,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (loggedInUser == null) {
       myDelegate.isMatch(encodedCurrPass, attemptedTxtPass);
     }
-    return loggedInUser == null ? null : toUser(loggedInUser);
+    return getUser(loggedInUser);
   }
 
+/*
   private void getUserFields() {
     delegate.getUserFields();
   }
+*/
 
   /**
-   * @param user
-   * @param id
+   * @param userID
    * @param encodedPassword
    * @return
    * @seex #getUserIfMatch
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
-  public User getUserIfMatchPass(User user, String id, String encodedPassword) {
-//  logger.info("getUserIfMatchPass '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
-    String dominoPassword = getUserCredentials(id);
+  public boolean isMatchingPassword(String userID, String encodedPassword) {
+//  logger.info("isMatchingPassword '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
+    String dominoPassword = getUserCredentials(userID);
 
     long then = System.currentTimeMillis();
     boolean match = myDelegate.isMatch(dominoPassword, encodedPassword);
@@ -585,38 +587,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     long diff = now - then;
 //    if (diff > 50) {
-//      logger.warn("getUserIfMatchPass : took " + diff + " to check for password match.");
+//      logger.warn("isMatchingPassword : took " + diff + " to check for password match.");
 //    }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
-
       if (diff > 100) {
         logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() +
             " match " + match + " took " + diff + " millis");
       }
 
-      boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
-      user.setAdmin(isadmin);
-      return user;
+      return true;
     } else {
       logger.warn("getUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword.length() + " took " + diff);
-      return null;
+      return false;
     }
   }
 
   /**
    * @param userId
    * @return
-   * @see #getUserIfMatchPass(User, String, String)
+   * @see #isMatchingPassword
    */
   private String getUserCredentials(String userId) {
-    return getUserCredentials(eq(UID_F, userId));
-  }
-
-  private MongoCollection<Document> users() {
-    return pool.getMongoCollection(USERS_C);
-  }
-
-  private String getUserCredentials(Bson query) {
+    Bson query = eq(UID_F, userId);
     Document user = users().find(query).projection(include(PASS_F)).first();
 
     if (user != null) {
@@ -627,28 +619,44 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return null;
   }
 
+  private MongoCollection<Document> users() {
+    return pool.getMongoCollection(USERS_C);
+  }
+
   /**
-   * @param id
+   * @param userID
    * @return
    * @seex mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
    */
   @Override
-  public User getUserByID(String id) {
-    mitll.hlt.domino.shared.model.user.DBUser dominoUser = delegate.getDBUser(id);
+  public User getUserByID(String userID) {
+    mitll.hlt.domino.shared.model.user.DBUser dominoUser = getDBUser(userID);
     if (dominoUser == null) {
-      logger.warn("getUserByID no user by '" + id + "'");
+      logger.warn("getUserByID no user by '" + userID + "'");
     }
+    else {
+      logger.info("found " + userID);
+    }
+
+    return getUser(dominoUser);
+  }
+
+  @Override
+  public DBUser getDBUser(String userID) {
+    return delegate.getDBUser(userID);
+  }
+
+  private User getUser(DBUser dominoUser) {
     return dominoUser == null ? null : toUser(dominoUser);
   }
 
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.database.security.UserSecurityManager#getUserForID
+   * @see NPUserSecurityManager#getUserForID
    */
   public User getByID(int id) {
-    DBUser dbUser = lookupUser(id);
-    return dbUser == null ? null : toUser(dbUser);
+    return getUser(lookupUser(id));
   }
 
   @Override
@@ -758,7 +766,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private User toUser(mitll.hlt.domino.shared.model.user.DBUser dominoUser) {
     // logger.info("toUser " + dominoUser);
-    boolean admin = isAdmin(dominoUser);
     long creationTime = System.currentTimeMillis();
     String device = "";
 
@@ -768,51 +775,31 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       if (acctDetail.getCrTime() != null) {
         creationTime = acctDetail.getCrTime().getTime();
       } else {
-        logger.info("toUser no cr time on " + acctDetail);
+        logger.warn("toUser no creation time on " + acctDetail);
       }
     } else {
-      logger.info("toUser no acct detail for " + dominoUser.getDocumentDBID());
+      logger.warn("toUser no acct detail for " + dominoUser.getDocumentDBID());
     }
-
-    String email = dominoUser.getEmail();
-
     //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
     Set<User.Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
-    mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
-    boolean isMale = gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male);
+    boolean isMale = isMaleHardChoice(dominoUser);
 
-
+    boolean hasAppPermission = isHasAppPermission(dominoUser);
     User user = new User(
         dominoUser.getDocumentDBID(),
-        99,//dominoUser.age(),
+        dominoUser.getUserId(),
         isMale ? 0 : 1,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-        0,
-        "",
-        "",
-        "",
-        "",//dominoUser.dialect(),
-        dominoUser.getUserId(),
         dominoUser.isActive(),
-        admin,
-        Collections.emptyList(),
+        isAdmin(dominoUser),
         getUserKind(dominoUser, permissionSet),
-        email,
-        //dominoUser.emailhash(),
-        device,//        dominoUser.device(),
-        "",//dominoUser.resetpasswordkey(),
+        dominoUser.getEmail(),
+        device,
         creationTime,
         dominoUser.getAffiliation(),
-        dominoUser.getApplicationAbbreviations().contains(NETPROF));
-
-//    try {
-//      MiniUser.Gender realGender = getRealGender(gender);
-//      user.setRealGender(realGender);
-//    } catch (IllegalArgumentException e) {
-//      logger.error("couldn't parse gender " + gender.name());
-//    }
+        hasAppPermission);
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
@@ -820,6 +807,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
 //    logger.info("\ttoUser return " + user);
     return user;
+  }
+
+  private boolean isHasAppPermission(DBUser dominoUser) {
+    Set<String> applicationAbbreviations = dominoUser.getApplicationAbbreviations();
+    boolean hasAppPermission = false;
+    for (String app : applicationAbbreviations) {
+      if (app.equalsIgnoreCase(NETPROF)) hasAppPermission = true;
+    }
+    if (!hasAppPermission) {
+      logger.info("isHasAppPermission user #" + dominoUser.getDocumentDBID() + " not a netprof user only has : " + applicationAbbreviations);
+    }
+    return hasAppPermission;
+  }
+
+  /**
+   * Unspecified assumed to be male... Good idea?
+   *
+   * @param dominoUser
+   * @return
+   */
+  private boolean isMaleHardChoice(DBUser dominoUser) {
+    mitll.hlt.domino.shared.model.user.User.Gender gender = dominoUser.getGender();
+    return gender.equals(mitll.hlt.domino.shared.model.user.User.Gender.Male);
   }
 
   /**
@@ -1196,10 +1206,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       dbUser.setAffiliation(toUpdate.getAffiliation());
       MiniUser.Gender realGender = toUpdate.getRealGender();
 
-      mitll.hlt.domino.shared.model.user.User.Gender gender = mitll.hlt.domino.shared.model.user.User.Gender.valueOf(realGender.name());
+      mitll.hlt.domino.shared.model.user.User.Gender gender =
+          mitll.hlt.domino.shared.model.user.User.Gender.valueOf(realGender.name());
       dbUser.setGender(gender);
-      delegate.updateUser(adminUser, getClientUserDetail(dbUser));
+      updateUser(dbUser);
     }
+  }
+
+  @Override
+  public SResult<ClientUserDetail> updateUser(DBUser updateUser) {
+    if (updateUser.getFirstName() == null) updateUser.setFirstName("");
+    if (updateUser.getLastName() == null) updateUser.setLastName("");
+    if (updateUser.getEmail().isEmpty()) updateUser.setEmail("UNSET");
+
+
+    if (updateUser.getUserId() == null) logger.error("no user id for " + updateUser);
+    if (updateUser.getUserId().isEmpty()) logger.error("empty user id for " + updateUser);
+    if (updateUser.getFirstName() == null) logger.error("no first  for " + updateUser);
+    if (updateUser.getLastName() == null) logger.error("no last for " + updateUser);
+    if (updateUser.getEmail() == null) logger.error("no email for " + updateUser);
+    if (updateUser.getEmail().isEmpty()) logger.error("empty email for " + updateUser);
+    if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
+
+   return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
 
   private boolean isValidAsEmail(String text) {
@@ -1214,7 +1243,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public boolean forgotPassword(String user, String url) {
-    DBUser next = delegate.getDBUser(user);
+    DBUser next = getDBUser(user);
 
     if (next == null) {
       logger.warn("forgotPassword - can't find user " + user);

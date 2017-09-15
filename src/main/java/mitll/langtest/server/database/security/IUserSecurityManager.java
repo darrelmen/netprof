@@ -13,9 +13,9 @@ import javax.servlet.http.HttpSession;
 public interface IUserSecurityManager {
   /**
    * The key to get/set the id of the user stored in the session
-   * @see UserSecurityManager#getUserIDFromRequest
-   * @see UserSecurityManager#getUserIDFromSession
-   * @see UserSecurityManager#logoutUser
+   * @see NPUserSecurityManager#getUserIDFromRequest
+   * @see NPUserSecurityManager#getUserIDFromSession
+   * @see NPUserSecurityManager#logoutUser
    */
   String USER_SESSION_ATT = "user-db-id";
 

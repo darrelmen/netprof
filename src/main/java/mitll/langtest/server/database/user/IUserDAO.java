@@ -32,10 +32,12 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.hlt.domino.shared.common.SResult;
+import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.Report;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 
@@ -100,6 +102,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
    */
   User getUserByID(String id);
+
+  DBUser getDBUser(String userID);
 
   /**
    * TODO : replace with user where or rename
@@ -180,6 +184,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
+
+  SResult<ClientUserDetail> updateUser(DBUser dbUser);
 
   boolean forgotPassword(String user, String url);
 

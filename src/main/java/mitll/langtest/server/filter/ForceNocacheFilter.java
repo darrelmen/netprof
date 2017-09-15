@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.filter;
 
-import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.*;
@@ -61,7 +61,7 @@ public class ForceNocacheFilter implements Filter {
    * @param chain
    * @throws IOException
    * @throws ServletException
-   * @see UserSecurityManager#setSessionUser
+   * @see NPUserSecurityManager#setSessionUser
    */
   @Override
   public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
@@ -73,7 +73,7 @@ public class ForceNocacheFilter implements Filter {
     String loginId = "no-user";
     if (session != null) {
       sessionId = session.getId();
-      Object loginO = session.getAttribute(UserSecurityManager.USER_SESSION_ATT);
+      Object loginO = session.getAttribute(NPUserSecurityManager.USER_SESSION_ATT);
       if (loginO != null) {
         loginId = loginO.toString();
       }

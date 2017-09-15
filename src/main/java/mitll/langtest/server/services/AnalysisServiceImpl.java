@@ -77,7 +77,13 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-    return db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+    long then = System.currentTimeMillis();
+    List<UserInfo> userInfo = db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+    long now = System.currentTimeMillis();
+    if (now-then>100) {
+      logger.info("took " +(now-then) + " millis to get " + userInfo.size() + " user infos.");
+    }
+    return userInfo;
   }
 
   /**

@@ -44,6 +44,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -350,7 +351,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @param session
    * @param loggedInUser
    * @seex #addUser
-   * @see mitll.langtest.server.database.security.UserSecurityManager#lookupUser
+   * @see NPUserSecurityManager#lookupUser
    */
 /*  public long setSessionUser(HttpSession session, User loggedInUser) {
     securityManager.setSessionUser(session,loggedInUser);

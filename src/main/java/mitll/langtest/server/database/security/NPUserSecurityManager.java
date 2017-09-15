@@ -51,13 +51,13 @@ import java.util.Date;
 import java.util.Enumeration;
 
 /**
- * UserSecurityManager: Provide top level security management.
+ * NPUserSecurityManager: Provide top level security management.
  *
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since Oct 31, 2013 6:30:34 PM
  */
-public class UserSecurityManager implements IUserSecurityManager {
-  private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
+public class NPUserSecurityManager implements IUserSecurityManager {
+  private static final Logger log = LogManager.getLogger(NPUserSecurityManager.class);
 
   /**
    * The key to get/set the request attribute that holds the
@@ -75,8 +75,8 @@ public class UserSecurityManager implements IUserSecurityManager {
    * @param userSessionDAO
    * @see
    */
-  public UserSecurityManager(IUserDAO userDAO,
-                             IUserSessionDAO userSessionDAO) {
+  public NPUserSecurityManager(IUserDAO userDAO,
+                               IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
     //startShiro();

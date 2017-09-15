@@ -2,7 +2,7 @@ package mitll.langtest.server.database.user;
 
 import mitll.hlt.domino.server.user.UserServiceDelegateBase;
 import mitll.hlt.domino.server.util.LegacyMd5Hash;
-import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +16,7 @@ import java.security.spec.KeySpec;
  * Created by go22670 on 2/1/17.
  */
 class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
-  private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
+  private static final Logger log = LogManager.getLogger(MyMongoUserServiceDelegate.class);
 
   boolean DEBUG =false;
 //  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
@@ -70,7 +70,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
     } catch (Exception ex) {
       log.warn("Can not authenticate user!", ex);
     }
-    log.info("Authentication Failed for " + encodedCurrPass);
+    if (DEBUG) log.info("Authentication Failed for " + encodedCurrPass);
     return false;
   }
 

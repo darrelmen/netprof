@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.hlt.domino.shared.common.SResult;
+import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.user.*;
@@ -50,6 +53,7 @@ import java.util.*;
 public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(UserDAO.class);
   public static final String OTHER = "OTHER";
+  public static final boolean DEBUG = false;
 
   /**
    * @param database
@@ -310,6 +314,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         USERS +
         " where " +
         "(UPPER(" +
+
+
+
         USER_ID +
         ")='" + id.toUpperCase() + "' OR " +
         EMAIL + "='" + id.toUpperCase() +
@@ -341,6 +348,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public User getUserByID(String id) {
     return getUserWhere(-1, "SELECT * from users where UPPER(" + USER_ID + ")='" + id.toUpperCase() + "'");
+  }
+
+  @Override
+  public DBUser getDBUser(String userID) {
+    return null;
   }
 
   @Override
@@ -641,7 +653,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
-        logger.debug("getUsers user kind for " + id + " " + userID + " is null?");
+        if (DEBUG) logger.debug("getUsers user kind for " + id + " " + userID + " is null?");
       }
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
@@ -653,7 +665,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       MiniUser.Gender realGender = anInt == 0 ? MiniUser.Gender.Male : MiniUser.Gender.Female;
 
       User newUser = new User(id, //id
-          rs.getInt(AGE), // age
+          userID, rs.getInt(AGE), // age
           anInt, //gender
           realGender,
           rs.getInt(EXPERIENCE), // exp
@@ -663,7 +675,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           // last
           rs.getString(NATIVE_LANG), // native
           rs.getString(DIALECT), // dialect
-          userID,
 
           rs.getBoolean(ENABLED),// || (userKind1 != User.Kind.CONTENT_DEVELOPER),
           isAdmin,
@@ -824,6 +835,12 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
     return false;
+  }
+
+  @Override
+  public SResult<ClientUserDetail> updateUser(DBUser dbUser) {
+
+    return null;
   }
 
   /**

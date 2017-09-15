@@ -1,6 +1,8 @@
 package mitll.langtest.server.database.copy;
 
+import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
@@ -14,12 +16,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static mitll.langtest.server.database.user.DominoUserDAOImpl.NETPROF;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -88,6 +89,9 @@ public class UserCopy {
 
       if (hasSpaces(importUserID)) {
         logger.info("replacing spaces in " +importUserID);
+        importUserID = importUserID.trim().replaceAll("\\s++","_");
+        logger.info("now no spaces in " +importUserID);
+        toImport.setUserID(importUserID);
       }
 
       if (DEBUG) logger.info("copying " + importID + " : " + importUserID);
@@ -101,25 +105,29 @@ public class UserCopy {
         } else {
           if (DEBUG) logger.info("copyUsers #" + c + "/" + importUsers.size() + " : import " + toImport);
 
-          User dominoUser = dominoUserDAO.getUserByID(importUserID);
+       //   User dominoUser = dominoUserDAO.getUserByID(importUserID);
+        //  User dominoUser = dominoUserDAO.getUserByID(importUserID);
 
+          mitll.hlt.domino.shared.model.user.DBUser dominoDBUser = dominoUserDAO.getDBUser(importUserID);
 
-          if (dominoUser == null) { // new user
+          if (dominoDBUser == null) { // new user
             //logger.info("copyUsers no existing user id '" + importUserID + "'");
-            ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName);
-            userToCreation.put(e.getDocumentDBID(), e.getAcctDetail().getCrTime().getTime());
-            added.add(e);
-            ;
+            ClientUserDetail newUser = addUser(dominoUserDAO, oldToNew, toImport, optName);
+            userToCreation.put(newUser.getDocumentDBID(), newUser.getAcctDetail().getCrTime().getTime());
+            added.add(newUser);
           } else { // user exists
-            if (dominoUser.getUserID().equals(D_ADMIN)) {
-              logger.warn("found d.admin " + dominoUser);
+            if (dominoDBUser.getUserId().equals(D_ADMIN)) {
+              logger.warn("found d.admin " + dominoDBUser);
             } else {
-              userToCreation.put(dominoUser.getID(), dominoUser.getTimestampMillis());
+              long creationTime = dominoDBUser.getAcctDetail().getCrTime().getTime();
+              userToCreation.put(dominoDBUser.getDocumentDBID(), creationTime);
             }
 
             if (foundExistingUser(projid, optName,
                 dominoUserDAO, oldToNew,
-                added, toImport, dominoUser)) {
+                added,
+                toImport,
+                dominoDBUser)) {
               collisions++;
             }
           }
@@ -165,18 +173,20 @@ public class UserCopy {
                                     Map<Integer, Integer> oldToNew,
                                     List<ClientUserDetail> added,
                                     User toImport,
-                                    User dominoUser) throws Exception {
+                                    mitll.hlt.domino.shared.model.user.DBUser dominoUser
+                                    ) throws Exception {
     String passwordHash = toImport.getPasswordHash();
     if (passwordHash == null) passwordHash = "";
-
+    int dominoDBID = dominoUser.getDocumentDBID();
 
     int importID = toImport.getID();
     String importUserID = toImport.getUserID();
 
-    User strictUserWithPass = dominoUserDAO.getUserIfMatchPass(dominoUser, importUserID, passwordHash);
-    if (strictUserWithPass != null) { // existing user with same password
+    boolean didPasswordMatch = dominoUserDAO.isMatchingPassword(importUserID, passwordHash);
+//    int dominoDBID = dominoUser.getID();
+    if (didPasswordMatch) { // existing user with same password
       // do nothing, but remember id mapping
-      oldToNew.put(importID, strictUserWithPass.getID());
+      oldToNew.put(importID, dominoDBID);
       return false;
     } else {
       if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + dominoUser);
@@ -188,15 +198,36 @@ public class UserCopy {
       } else {
         // second person is out of luck - they need to make a new account
         if (WARN_ON_COLLISION) {
-          logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID + " : " + dominoUser + "\n");
+          logger.info("COLLISION : copyUsers found existing user with password difference " + importUserID +
+              " : " + dominoUser + "\n");
         }
 
-        oldToNew.put(importID, dominoUser.getID());
+        checkUserApplications(dominoUserDAO, dominoUser, dominoDBID);
+        oldToNew.put(importID, dominoDBID);
       }
 
-      logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + dominoUser.getID() +
+      logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + dominoDBID +
           " : " + dominoUser);
       return true;
+    }
+  }
+
+  private void checkUserApplications(DominoUserDAOImpl dominoUserDAO, DBUser dominoUser, int dominoDBID) {
+    Set<String> applicationAbbreviations = dominoUser.getApplicationAbbreviations();
+    if (applicationAbbreviations.contains(NETPROF)) {
+     // logger.info("foundExistingUser : found existing application entry for user #" + dominoDBID);
+    }
+    else {
+      applicationAbbreviations.add(NETPROF);
+      logger.info("before " + dominoUser.getApplicationAbbreviationsString());
+
+      logger.info("before " + dominoUser.getApplicationAbbreviations());
+
+      SResult<ClientUserDetail> clientUserDetailSResult = dominoUserDAO.updateUser(dominoUser);
+      logger.info("Got back " + clientUserDetailSResult);
+      logger.info("Got back " + clientUserDetailSResult.get().getApplicationAbbreviations());
+      logger.info("Got back " + clientUserDetailSResult.get().getApplicationAbbreviationsString());
+      logger.info("foundExistingUser : updating application entry for user #" + dominoDBID);
     }
   }
 

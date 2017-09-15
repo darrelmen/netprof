@@ -259,8 +259,7 @@ public class ExerciseCopy {
 
     for (CommonExercise ex : exercises) {
       String oldID = ex.getOldID();
-
-      logger.info("addPredefExercises adding ex old #" + oldID + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
+//      logger.info("addPredefExercises adding ex old #" + oldID + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
 
       List<Exercise> exercises1 = idToCandidateOverride.get(oldID);
 

@@ -37,7 +37,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.ContextPractice;
@@ -353,7 +353,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       db = makeDatabaseImpl(serverProps);
       // logger.info("readProperties made database " + db);
-      securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
+      securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
       //  logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
