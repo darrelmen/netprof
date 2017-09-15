@@ -88,7 +88,7 @@ public class User extends MiniUser implements ReportUser {
    * @see SignUpForm#getRoles
    */
   public static Collection<Kind> getSelfChoiceRoles() {
-    return Arrays.asList(STUDENT);
+    return Collections.singletonList(STUDENT);
   }
 
   /**
@@ -103,10 +103,7 @@ public class User extends MiniUser implements ReportUser {
       case STUDENT:
         return Collections.emptyList();
       case TEACHER:
-        return Arrays.asList(
-            TEACHER_PERM//,
-//            INVITE // other stuedents
-        );
+        return Collections.singletonList(TEACHER_PERM);
       case AUDIO_RECORDER:
         return Collections.singleton(
             RECORD_AUDIO);
@@ -130,69 +127,6 @@ public class User extends MiniUser implements ReportUser {
   public boolean isHasAppPermission() {
     return hasAppPermission;
   }
-
-  /**
-   * When you sign up yourself (not invited, you request these permissions).
-   * The only roles are student and teacher for self-sign up.
-   *
-   * @param role
-   * @return
-   */
-/*
-  public static Collection<Permission> getRequestedPermsForRole(Kind role) {
-    switch (role) {
-      case STUDENT:
-        return Collections.emptyList();
-
-      case TEACHER:
-        return Arrays.asList(TEACHER_PERM);
-
-      default:
-        return Collections.emptyList();
-    }
-  }
-*/
-
-  /**
-   * These are the set of possible permissions you can have when you are one of these users.
-   *
-   * @paramx role
-   * @return
-   */
-/*
-  public static Collection<Permission> getPossiblePermsForRole(Kind role) {
-    switch (role) {
-      case STUDENT:
-        return Collections.emptyList();
-      case TEACHER:
-        return Arrays.asList(
-            TEACHER_PERM, // allows them to via the full analysis tab, edit students
-            RECORD_AUDIO,
-            DEVELOP_CONTENT//, // make new projects, edit via domino
-            //INVITE,
-            //         EDIT_STUDENT//,
-            //EDIT_USER
-        );  // students
-      case AUDIO_RECORDER:
-        return Collections.singleton(RECORD_AUDIO);
-      case CONTENT_DEVELOPER:
-        return Arrays.asList(
-            RECORD_AUDIO,
-            QUALITY_CONTROL);
-      case PROJECT_ADMIN:
-        return Arrays.asList(
-            TEACHER_PERM,
-            RECORD_AUDIO,
-            DEVELOP_CONTENT
-            //    INVITE,
-//            EDIT_STUDENT//,
-            //  EDIT_USER
-        );
-      default:
-        return Collections.emptyList();
-    }
-  }
-*/
 
   public enum Permission implements IsSerializable {
     TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
@@ -231,7 +165,7 @@ public class User extends MiniUser implements ReportUser {
    */
   public User(int id, int age, int gender, Gender realGender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
-    this(id, age, gender, realGender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
+    this(id, NOT_SET, age, gender, realGender, experience, ipaddr, password, NOT_SET, NOT_SET, enabled, false, permissions,
         STUDENT,
         "",
         "", "", //"",
@@ -240,7 +174,7 @@ public class User extends MiniUser implements ReportUser {
 
   public User(User copy) {
     this(copy.getID(),
-        copy.getAge(),
+        copy.getUserID(), copy.getAge(),
         copy.getGender(),
         copy.getRealGender(),
         copy.getExperience(),
@@ -248,7 +182,6 @@ public class User extends MiniUser implements ReportUser {
         copy.getPasswordHash(),
         copy.getNativeLang(),
         copy.getDialect(),
-        copy.getUserID(),
         copy.isEnabled(),
         copy.isAdmin(),
         copy.getPermissions(),
@@ -261,14 +194,44 @@ public class User extends MiniUser implements ReportUser {
         copy.isHasAppPermission());
   }
 
+  public User(int id,
+              String userID,
+              int gender,
+              Gender realGender,
+              boolean enabled, boolean isAdmin,
+              Kind userKind,
+              String email,
+              String device,
+              long timestamp,
+              String affiliation,
+              boolean hasAppPermission) {
+    this(id,
+        userID, 99,
+        gender,
+        realGender,
+        0,
+        "",
+        "",
+        "",
+        "",
+        enabled,
+        isAdmin,
+        Collections.emptyList(),
+        userKind,
+        email,
+        device, "",
+        timestamp, affiliation, hasAppPermission
+    );
+  }
+
   /**
    * @param id
+   * @param userID
    * @param age
    * @param gender
    * @param experience
    * @param ipaddr
    * @param passwordH
-   * @param userID
    * @param enabled
    * @param isAdmin
    * @param permissions
@@ -283,6 +246,7 @@ public class User extends MiniUser implements ReportUser {
    * @see UserDAO#getUsers
    */
   public User(int id,
+              String userID,
               int age,
               int gender,
               Gender realGender,
@@ -290,7 +254,7 @@ public class User extends MiniUser implements ReportUser {
               String ipaddr,
               String passwordH,
               String nativeLang, String dialect,
-              String userID, boolean enabled, boolean isAdmin,
+              boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
 
               String email,
@@ -317,7 +281,7 @@ public class User extends MiniUser implements ReportUser {
     this.resetKey = resetPassKey;
     this.timestamp = timestamp;
     this.affiliation = affiliation;
-    this.hasAppPermission =hasAppPermission;
+    this.hasAppPermission = hasAppPermission;
   }
 
   public boolean isStudent() {
@@ -559,8 +523,8 @@ public class User extends MiniUser implements ReportUser {
   public String toString() {
     String email = getEmail();
     return "user " +
-            "\n\tid      " + getID() +
-            "\n\tuserid  " + getUserID() +
+        "\n\tid      " + getID() +
+        "\n\tuserid  " + getUserID() +
         (first.isEmpty() ? "" :
             "\n\tfirst   " + first) +
         (last.isEmpty() ? "" :
@@ -586,7 +550,8 @@ public class User extends MiniUser implements ReportUser {
         (resetKey == null || resetKey.isEmpty() ? "" :
             "\n\treset   '" + resetKey + "'") +
         (startupInfo == null ? "" :
-            "\n\tstartup  " + startupInfo)
+            "\n\tstartup  " + startupInfo) +
+        "\n\thasPermission  " + isHasAppPermission()
         ;
   }
 }
