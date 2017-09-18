@@ -67,19 +67,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   CommonExercise addOverlay(CommonExercise userExercise);
 
   /**
-   * @param userExercise
-   * @seex mitll.langtest.server.database.DatabaseImpl#duplicateExercise
-   */
- // void add(CommonExercise userExercise);
-
-  /**
-   * @param id
-   * @return
-   * @seex DatabaseImpl#deleteItem
-   */
-//  boolean remove(int id);
-
-  /**
    * @param userExerciseDAO
    * @param projid
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies

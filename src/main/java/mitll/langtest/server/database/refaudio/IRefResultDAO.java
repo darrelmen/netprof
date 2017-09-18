@@ -75,8 +75,6 @@ public interface IRefResultDAO extends IDAO {
 
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
-   * @paramx exid
-   * @paramx answer
    * @return
    */
   Collection<ISlimResult> getAllSlimForProject(int projid);
@@ -84,7 +82,7 @@ public interface IRefResultDAO extends IDAO {
   ISlimResult getResult(int audioid);
 
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef
+   * @see mitll.langtest.server.decoder.RefResultDecoder#ensure
    * @return
    */
   int getNumResults();

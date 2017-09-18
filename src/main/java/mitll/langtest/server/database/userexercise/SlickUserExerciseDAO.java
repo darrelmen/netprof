@@ -80,7 +80,7 @@ public class SlickUserExerciseDAO
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
   private static final String DEFAULT_FOR_EMPTY = ANY;
-//  private static final int DESIRED_RANGES = 10;
+  //  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
 
   private final long lastModified = System.currentTimeMillis();
@@ -128,7 +128,7 @@ public class SlickUserExerciseDAO
    */
   public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
-     Iterator<String> iterator = typeOrder.iterator();
+    Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
@@ -197,7 +197,7 @@ public class SlickUserExerciseDAO
       return null;
     }
     Iterator<String> iterator = typeOrder.iterator();
-    String first  = iterator.hasNext() ? iterator.next() : "";
+    String first = iterator.hasNext() ? iterator.next() : "";
     String second = iterator.hasNext() ? iterator.next() : "";
 
     int creator = shared.getCreator();
@@ -206,10 +206,10 @@ public class SlickUserExerciseDAO
     long updateTime = shared.getUpdateTime();
     if (updateTime == 0) updateTime = lastModified;
 
-    String firstType  = unitToValue.getOrDefault(first, "");
-    if (firstType.isEmpty()) firstType  = unitToValue.getOrDefault(first.toLowerCase(), "");
+    String firstType = unitToValue.getOrDefault(first, "");
+    if (firstType.isEmpty()) firstType = unitToValue.getOrDefault(first.toLowerCase(), "");
     String secondType = unitToValue.getOrDefault(second, "");
-    if (secondType.isEmpty()) secondType  = unitToValue.getOrDefault(second.toLowerCase(), "");
+    if (secondType.isEmpty()) secondType = unitToValue.getOrDefault(second.toLowerCase(), "");
 
 //    logger.info("toSlick for " + shared.getID() +
 //        " : " +first +
@@ -298,7 +298,7 @@ public class SlickUserExerciseDAO
    * @param slick
    * @param lookup
    * @return
-   * @see IUserExerciseDAO#useExToPhones
+   * @seex IUserExerciseDAO#useExToPhones
    * @see #getExercises
    */
   private List<Pair> addExerciseToSectionHelper(SlickExercise slick,
@@ -313,13 +313,18 @@ public class SlickUserExerciseDAO
     int numToUse = exercisePhoneInfo.getNumPhones();
     if (numToUse == 0) {
       numToUse = exercisePhoneInfo.getNumPhones2();
-//      logger.warn("using back off phone childCount " + numToUse);
+      if (numToUse < 1) {
+        logger.warn("using back off phone childCount " + slick.id() + " = " + numToUse);
+      }
+      else {
+        logger.info("using back off phone childCount " + slick.id() + " = " + numToUse);
+      }
     }
 
     exercise.setNumPhones(numToUse);
+//    logger.info("addExerciseToSectionHelper for " + exercise.getID() + " num phones = " + numToUse);
 
-    List<Pair> pairs = addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
-    return pairs;
+    return addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
   }
 
   @NotNull
@@ -350,16 +355,27 @@ public class SlickUserExerciseDAO
     return exercise;
   }
 
+  /**
+   *
+   * @param slick
+   * @param exToPhones
+   * @param lookup
+   * @return
+   */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
                                                  Map<Integer, ExercisePhoneInfo> exToPhones,
                                                  PronunciationLookup lookup) {
-    int id = slick.id();
-    ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(id);
+    ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
-    if (exercisePhoneInfo == null) {
+    if (exercisePhoneInfo == null || exercisePhoneInfo.getNumPhones() < 1) {
       exercisePhoneInfo = getExercisePhoneInfo(slick, lookup);
     }
+/*
+    else if (exercisePhoneInfo.getNumPhones() <1) {
+      logger.warn("for " + slick.id() + " found no phones?");
+    }
+*/
     return exercisePhoneInfo;
   }
 
@@ -380,7 +396,8 @@ public class SlickUserExerciseDAO
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick, PronunciationLookup lookup) {
     ExercisePhoneInfo exercisePhoneInfo;
 
-    if (slick.numphones() == -1) {
+    int numphones = slick.numphones();
+    if (numphones < 1) {
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
@@ -391,20 +408,21 @@ public class SlickUserExerciseDAO
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
       exercisePhoneInfo.setNumPhones2(n2);
 
-      if (n2 == -1) {
+      int id = slick.id();
+      if (n2 < 1) {
         cantcalc++;
-        if (cantcalc % 1000 == 0) {
+        if (cantcalc < 25 || cantcalc % 1000 == 0) {
           logger.debug("getExercisePhoneInfo can't calc num phones for " + cantcalc +
-              " exercises, e.g. " + slick.id() + " " + foreignlanguage + "/" + slick.english());
+              " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
         }
       } else {
-        exerciseDAO.updatePhones(slick.id(), n2);
+        exerciseDAO.updatePhones(id, n2);
         updated++;
-        if (updated % 100 == 0) logger.debug("getExercisePhoneInfo updated " + updated + " exercises with phone info");
+        if (updated < 25 || updated % 100 == 0) logger.debug("getExercisePhoneInfo updated " + updated + " exercises with phone info");
       }
     } else {
       exercisePhoneInfo = new ExercisePhoneInfo();
-      exercisePhoneInfo.setNumPhones(slick.numphones());
+      exercisePhoneInfo.setNumPhones(numphones);
     }
     /*
     if (slick.english().equals("address")) {
@@ -590,6 +608,7 @@ public class SlickUserExerciseDAO
 
   /**
    * TODO : All overkill...?  why not just look them back up from exercise dao?
+   *
    * @param all
    * @return
    * @see
@@ -646,7 +665,7 @@ public class SlickUserExerciseDAO
     }
 
     if (addTypesToSection) {
-    //  logger.info("getExercises type order " + typeOrder);
+      //  logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");
@@ -729,20 +748,21 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see #getOnList
-   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    * @param listID
    * @return
+   * @see #getOnList
+   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    */
   public List<CommonExercise> getCommonExercises(int listID) {
-
 
 
     List<SlickExercise> onList = dao.getOnList(listID);
     return getUserExercises(onList);
   }
 
-  public int getNumOnList(int listID) {  return dao.getNumOnList(listID);  }
+  public int getNumOnList(int listID) {
+    return dao.getNumOnList(listID);
+  }
 
   @Override
   public CommonExercise getByExID(int exid) {
@@ -814,11 +834,10 @@ public class SlickUserExerciseDAO
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
-    // TODO : consider getting exercise->phone from the ref result table again
+    // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
-    int projectid = theProject.getID();
 //    Collection<String> attributeTypes = getAttributeTypes(projectid);
-    return getExercises(dao.getAllPredefByProject(projectid),
+    return getExercises(dao.getAllPredefByProject(theProject.getID()),
         typeOrder,
         sectionHelper,
         exerciseToPhoneForProject, theProject, allByProject, exToAttrs, /*attributeTypes, */true);
@@ -1125,7 +1144,6 @@ public class SlickUserExerciseDAO
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
   }*/
-
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
   }

@@ -38,9 +38,9 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   /**
-   * @see FacetExerciseList#addSortBox
    * @param language
    * @return
+   * @see FacetExerciseList#addSortBox
    */
   ListBox getSortBox(String language) {
     ListBox w1 = new ListBox();
@@ -67,10 +67,7 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
       sortBy((o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
-      sortBy((o1, o2) -> {
-        int i = -1 * compPhones(o1, o2);
-        return compareShells(o1, o2, i);
-      });
+      sortBy((o1, o2) -> compareShells(o1, o2, -1 * compPhones(o1, o2)));
     } else if (selectedValue.equals(ENGLISH_ASC)) {
       sortBy(this::compEnglish);
     } else if (selectedValue.equals(ENGLISH_DSC)) {
@@ -111,7 +108,7 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {
-    return Integer.valueOf(o1.getNumPhones()).compareTo(o2.getNumPhones());
+    return Integer.compare(o1.getNumPhones(), o2.getNumPhones());
   }
 
   private int compareShells(CommonShell o1, CommonShell o2, int i) {
@@ -146,8 +143,8 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
 
   private int compEnglish(CommonShell o1, CommonShell o2) {
     return o1.getEnglish().toLowerCase().compareTo(o2.getEnglish().toLowerCase());
-  } 
-  
+  }
+
   private int compMeaning(CommonShell o1, CommonShell o2) {
     return o1.getMeaning().toLowerCase().compareTo(o2.getMeaning().toLowerCase());
   }

@@ -53,14 +53,6 @@ public class ExercisePhoneInfo {
   private Collection<String> phones = new TreeSet<>();
   private Map<String, ExerciseToPhone.Info> wordToInfo;
 
-  /**
-   * @see SlickUserExerciseDAO#useExToPhones
-   * @return
-   */
-  int getNumPhones() {
-    return numPhones;
-  }
-
   public ExercisePhoneInfo() {
   }
 
@@ -70,7 +62,6 @@ public class ExercisePhoneInfo {
    */
   public ExercisePhoneInfo(String phoneString) {
     String[] split = phoneString.split("[,;]");
-//    List<String> phones = new ArrayList<>();
     for (String forWord : split) {
       String[] split1 = forWord.split(" ");
       for (String phone : split1) {
@@ -84,22 +75,32 @@ public class ExercisePhoneInfo {
         }
       }
     }
+    if (numPhones == 0) logger.warn("no phones for " + phoneString);
  //   logger.info("from " + phoneString + " " + phones);
 
+  }
+
+  /**
+   * @see SlickUserExerciseDAO#addExerciseToSectionHelper
+   * @return
+   */
+  public int getNumPhones() {
+    return numPhones;
   }
 
   /**
    * @deprecated nobody uses this currently...
    * @return
    */
-  public Collection<String> getPhones() {
+/*  public Collection<String> getPhones() {
     return phones;
-  }
+  }*/
 
   /**
    * @param phone
    * @see ExerciseToPhone#addPhones
    */
+
   void addPhones(Collection<String> phone) {
     this.phones.addAll(phone);
   }
@@ -115,7 +116,7 @@ public class ExercisePhoneInfo {
    * @param wordToInfo
    * @see ExerciseToPhone#getExerciseToPhoneForProject
    */
-  public void setWordToInfo(Map<String, ExerciseToPhone.Info> wordToInfo) {
+  void setWordToInfo(Map<String, ExerciseToPhone.Info> wordToInfo) {
     this.wordToInfo = wordToInfo;
   }
 
@@ -127,11 +128,11 @@ public class ExercisePhoneInfo {
    * @see SlickUserExerciseDAO#addPhoneInfo
    * @return
    */
-  public int getNumPhones2() {
+  int getNumPhones2() {
     return numPhones2;
   }
 
-  public void setNumPhones2(int numPhones2) {
+  void setNumPhones2(int numPhones2) {
     this.numPhones2 = numPhones2;
   }
 }

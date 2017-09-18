@@ -144,6 +144,10 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     this.english = english;
   }
 
+  /**
+   * @see mitll.langtest.client.list.ListSorting#compPhones
+   * @return
+   */
   @Override
   public int getNumPhones() {
     return numPhones;
