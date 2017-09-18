@@ -42,6 +42,7 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
@@ -77,9 +78,9 @@ public class ParseResultJson {
   /**
    * @param typeToEvent
    * @return
-   * @see ASRScoring#getTypeToEndTimes(EventAndFileInfo)
+   * @see ASRScoring#getTypeToEndTimes
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
+  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
@@ -97,7 +98,25 @@ public class ParseResultJson {
     return typeToEndTimes;
   }
 
-  int warn = 0;
+  private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
+      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<SlimSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) {
+        typeToEndTimes.put(key, endTimes = new ArrayList<>());
+      }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new SlimSegment(value.event, value.score));
+      }
+    }
+
+    return typeToEndTimes;
+  }
+
+ private  int warn = 0;
 
   /**
    * @param json
@@ -147,8 +166,8 @@ public class ParseResultJson {
    * @param json
    * @return
    * @see PhoneDAO#getPhoneReport
-   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExerciseToPhone
-   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
+   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExerciseToPhoneForProject
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
   public Map<NetPronImageType, List<TranscriptSegment>> readFromJSON(String json) {
     if (json.isEmpty()) {
@@ -161,6 +180,19 @@ public class ParseResultJson {
       return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
     }
   }
+
+  public Map<NetPronImageType, List<SlimSegment>> slimReadFromJSON(String json) {
+    if (json.isEmpty()) {
+      //logger.warn("json is empty?");
+      return Collections.emptyMap();
+    } else if (json.equals("{}") || json.equals("null")) {
+      // logger.warn("json is " + json);
+      return Collections.emptyMap();
+    } else {
+      return slimGetNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+    }
+  }
+
 
   /**
    * @param json

@@ -154,7 +154,7 @@ public class ClickableTranscript {
 
     /**
      * @param type
-     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
+     * @see #addClickHandlers
      */
     TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
       super(type);

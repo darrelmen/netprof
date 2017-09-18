@@ -382,9 +382,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
     long diff = last.getTimestamp() - first.getTimestamp();
     boolean b = diff < QUARTER;
 
-    if (b) {
+/*    if (b) {
       logger.info("time span is < 6 hours " + diff);
-    }
+    }*/
     return b;
   }
 

@@ -62,7 +62,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     return -1;
   }
 
-  protected int getFirstCompare(T o1, T o2) {
+   int getFirstCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }

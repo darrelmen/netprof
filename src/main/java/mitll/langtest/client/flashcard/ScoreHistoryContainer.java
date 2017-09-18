@@ -70,7 +70,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private final boolean english;
 
   private static final int MAX_LENGTH_ID = 15;
-  static final int TABLE_HISTORY_WIDTH = 420;
+  //static final int TABLE_HISTORY_WIDTH = 420;
   private static final int COL_WIDTH = 130;
   private static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 

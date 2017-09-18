@@ -52,6 +52,7 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -301,7 +302,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     if (scores.isEmpty()) {
       logger.warning("makeColoredTable no segments for " + scoreAndPath);
     }
-    row.getElement().setInnerHTML(new WordTable().makeColoredTable(scores));
+    row.getElement().setInnerHTML(new WordTable().makeColoredTableFull(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");
     return row;

@@ -1,8 +1,14 @@
 package mitll.langtest.shared.analysis;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import mitll.langtest.client.analysis.ShowTab;
+
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @see mitll.langtest.client.analysis.AnalysisTab#useReport
+ */
 public class AnalysisReport implements Serializable {
   private  List<WordScore> wordScores;
   private UserPerformance userPerformance;

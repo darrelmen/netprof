@@ -44,6 +44,7 @@ import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SimpleHighlightSegment;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -98,17 +99,7 @@ public class WordTable {
       builder.append("<table>");
       builder.append("<thead>");
 
-      for (TranscriptSegment phone : pair.getValue()) {
-        String event = phone.getEvent();
-        if (!event.equals("sil")) {
-          String color = " background-color:" + SimpleColumnChart.getColor(phone.getScore());
-          boolean match = event.equals(filter);
-          if (!match) color = "";
-          builder.append("<th style='text-align:center;" + color + "'>");
-          builder.append(event);
-          builder.append("</th>");
-        }
-      }
+      addPhones(filter, builder, pair);
 
       builder.append("</thead>");
       builder.append("</table>");
@@ -121,12 +112,37 @@ public class WordTable {
     return builder.toString();
   }
 
+  private void addPhones(String filter, StringBuilder builder, Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
+    for (TranscriptSegment phone : pair.getValue()) {
+      String event = phone.getEvent();
+      if (!event.equals("sil")) {
+        String color = " background-color:" + SimpleColumnChart.getColor(phone.getScore());
+        boolean match = event.equals(filter);
+        if (!match) color = "";
+        builder.append("<th style='text-align:center;" + color + "'>");
+        builder.append(event);
+        builder.append("</th>");
+      }
+    }
+  }
+
   /**
    * @param netPronImageTypeToEndTime
    * @return
    * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    */
-  public String makeColoredTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+  public String makeColoredTable(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
+    StringBuilder builder = new StringBuilder();
+    List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+
+//    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
+//      builder.append(getColoredSpanForSegment(pair));
+//    }
+
+    return getHTMLForWords(builder, words);
+  }
+
+  public String makeColoredTableFull(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
 
@@ -134,6 +150,11 @@ public class WordTable {
 //      builder.append(getColoredSpanForSegment(pair));
 //    }
 
+    return getHTMLForWords(builder, words);
+  }
+
+  @NotNull
+  private <T extends SlimSegment> String getHTMLForWords(StringBuilder builder, List<T> words) {
     if (words == null) {
       logger.warning("no transcript?");
     } else {
@@ -145,16 +166,8 @@ public class WordTable {
     return builder.toString();
   }
 
-  /**
-   * Somehow unknown model is getting out.
-   *
-   * @return
-   * @paramx pair
-   */
-//  private String getColoredSpanForSegment(Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
-//    return getColoredSpanForWord(pair.getKey());
-//  }
-  private String getColoredSpanForWord(TranscriptSegment word) {
+
+  private String getColoredSpanForWord(SlimSegment word) {
     String event = word.getEvent();
     if (event.equals("UNKNOWNMODEL")) event = "Low score";
     String coloredSpan = getColoredSpan(event, word.getScore());

@@ -82,7 +82,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     this.examples = examples;
   }
 
-
   protected int toInt(double value) {
     return (int)(value* SCALE);
   }

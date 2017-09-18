@@ -34,6 +34,9 @@ package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,8 @@ public class WordAndScore extends WordScore {
   private transient int seq;
   private String word;
   private transient String scoreJson;
+
+  private Map<NetPronImageType, List<TranscriptSegment>> fullTranscript;
 
   /**
    * @param word
@@ -129,5 +134,13 @@ public class WordAndScore extends WordScore {
   public String toString() {
     return getExid() + " #" + getWseq() + " : " + getWord() + "\ts " + getPronScore() + "\tres " + getResultID() +
         "\tanswer " + getAnswerAudio() + " ref " + getRefAudio();
+  }
+
+  public Map<NetPronImageType, List<TranscriptSegment>> getFullTranscript() {
+    return fullTranscript;
+  }
+
+  public void setFullTranscript(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
+    this.fullTranscript = fullTranscript;
   }
 }

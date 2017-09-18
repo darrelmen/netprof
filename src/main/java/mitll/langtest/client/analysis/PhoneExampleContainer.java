@@ -108,7 +108,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    */
   public Panel getTableWithPager(ListOptions listOptions) {
     Panel tableWithPager = super.getTableWithPager(listOptions);
-    tableWithPager.getElement().setId("TableScoreHistory");
+    tableWithPager.getElement().setId("PhoneExampleTableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     return tableWithPager;
   }
@@ -184,7 +184,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable(int)
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -198,7 +198,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        String columnText = new WordTable().toHTML(shell.getTranscript(), phone);
+        String columnText = new WordTable().toHTML(shell.getFullTranscript(), phone);
         if (columnText.isEmpty()) {
           String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();

@@ -160,7 +160,7 @@ public class AnalysisTab extends DivWidget {
     long now = System.currentTimeMillis();
 
     if (now - then > 200) {
-      logger.info("took " + (now - then) + " to get report");
+      logger.info("useReport took " + (now - then) + " to get report for " +userid + " " + userChosenID);
     }
 
     long then2 = now;
@@ -168,7 +168,7 @@ public class AnalysisTab extends DivWidget {
 
     now = System.currentTimeMillis();
     if (now - then2 > 200) {
-      logger.info("took " + (now - then2) + " to show plot");
+      logger.info("useReport took " + (now - then2) + " to show plot");
     }
     long then3 = now;
 
@@ -181,7 +181,7 @@ public class AnalysisTab extends DivWidget {
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
-      logger.info("took " + (now - then3) + " to show word scores");
+      logger.info("useReport took " + (now - then3) + " to show word scores");
     }
     Scheduler.get().scheduleDeferred(() -> analysisPlot.populateExerciseMap(controller.getExerciseService(), userid));
   }

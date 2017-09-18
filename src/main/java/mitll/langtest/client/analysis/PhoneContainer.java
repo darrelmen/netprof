@@ -267,7 +267,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     // table.setTableLayoutFixed(false);
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
-    tableWithPager.getElement().setId("TableScoreHistory");
+    tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");
 

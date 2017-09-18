@@ -119,6 +119,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   protected int getMaxLengthId() {
     return 11;
   }
+  protected int getMaxTableWidth() {
+    return 600;
+  }
 
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {

@@ -324,7 +324,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.getElement().getStyle().setProperty("maxWidth", tableWidth + "px");
   }
 
-  private int getMaxTableWidth() {
+  protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
 

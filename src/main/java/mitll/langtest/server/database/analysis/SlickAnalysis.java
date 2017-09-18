@@ -102,7 +102,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         getPhoneReport(userid, bestForUser, language, project));
 
     long now = System.currentTimeMillis();
-    logger.info("Return (took " + (now - then) +        ") analysis report");// + analysisReport);
+    logger.info("Return (took " + (now - then) +        ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
   }
 

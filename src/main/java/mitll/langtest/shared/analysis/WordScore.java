@@ -34,6 +34,7 @@ package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.analysis.WordContainer;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -59,7 +60,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   private static final int SCALE = 1000;
 
-  private Map<NetPronImageType, List<TranscriptSegment>> transcript;
+  private Map<NetPronImageType, List<SlimSegment>> transcript;
 
   public WordScore() {
   }
@@ -73,7 +74,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @param transcript
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
-  public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+  public WordScore(BestScore bs, Map<NetPronImageType, List<SlimSegment>> transcript) {
     this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(),
         bs.getNativeAudio(), transcript);
   }
@@ -94,7 +95,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
                       int resultID,
                       String answerAudio,
                       String refAudio,
-                      Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+                      Map<NetPronImageType, List<SlimSegment>> transcript) {
     this.exid = exid;
     this.pronScore = (pronScore < 0) ? 0 : (int)(pronScore* SCALE);
     this.timestamp = timestamp;
@@ -139,16 +140,15 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @see WordContainer#getItemColumn
    * @return
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
+  public Map<NetPronImageType, List<SlimSegment>> getTranscript() {
     return transcript;
   }
-
 
   /**
    * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript(WordAndScore, Map)
    * @param transcript
    */
-  public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+  public void setTranscript(Map<NetPronImageType, List<SlimSegment>> transcript) {
     this.transcript = transcript;
   }
 

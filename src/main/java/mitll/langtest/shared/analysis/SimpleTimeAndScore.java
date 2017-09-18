@@ -43,7 +43,7 @@ import java.io.Serializable;
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
  */
 public class SimpleTimeAndScore implements Serializable {
-  private static final int SCALE = 1000;
+  public static final int SCALE = 1000;
   private long timestamp;
   private int score;
   private transient WordAndScore wordAndScore;
@@ -82,7 +82,7 @@ public class SimpleTimeAndScore implements Serializable {
   }
 
   /**
-   * TODO : make this an int
+   * TODOx : make this an int
    *
    * @return
    */

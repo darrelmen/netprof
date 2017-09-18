@@ -30,11 +30,11 @@
  *
  */
 
-package mitll.langtest.shared.analysis;
+package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.shared.analysis.WordAndScore;
 
-import java.util.List;
+import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -44,7 +44,7 @@ import java.util.List;
  */
 public class PhoneAndScore implements Comparable<PhoneAndScore> {
   private long timestamp;
-  private float pronScore;
+  private int pronScore;
   private WordAndScore wordAndScore;
 
   /**
@@ -53,26 +53,32 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
    * @param timestamp
    */
   public PhoneAndScore(float pronScore, long timestamp) {
-    this.pronScore = pronScore;
+    this.pronScore = toInt(pronScore);
     this.timestamp = timestamp;
+  }
+
+  private int toInt(float value) {
+    return (int) (value * SCALE);
+  }
+
+  private float fromInt(int value) {
+    return ((float) value) / SCALE;
   }
 
   @Override
   public int compareTo(PhoneAndScore o) {
-    return Long.valueOf(timestamp).compareTo(o.timestamp);
+    return Long.compare(timestamp, o.timestamp);
   }
 
   /**
-   * @see PhoneDAO#getPhoneTimeSeries(List)
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries
    * @return
    */
   public long getTimestamp() {
     return timestamp;
   }
 
-  public float getPronScore() {
-    return pronScore;
-  }
+  public float getPronScore() { return fromInt(pronScore);  }
 
   public void setWordAndScore(WordAndScore wordAndScore) {
     this.wordAndScore = wordAndScore;
@@ -83,6 +89,6 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   }
   
   public String toString() {
-    return ""+pronScore;
+    return ""+getPronScore();
   }
 }

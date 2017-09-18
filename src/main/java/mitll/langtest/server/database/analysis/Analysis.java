@@ -41,6 +41,7 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.FirstLastUser;
@@ -159,67 +160,11 @@ public abstract class Analysis extends DAO {
     userInfos.sort((o1, o2) -> -1 * Long.compare(o1.getTimestampMillis(), o2.getTimestampMillis()));
   }
 
-/*  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
-    List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
-
-    Collections.sort(grans);
-    // boolean oneSet = false;
-    List<PhoneSession> phoneSessions1 = Collections.emptyList();
-    for (Long gran : grans) {
-      //if (!oneSet) {
-      List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
-
-      int size = 0;
-      int total = 0;
-      boolean anyBigger = false;
-      for (PhoneSession session : phoneSessions) {
-        //  logger.info("\t " + gran + " session " + session);
-        size++;
-        total += session.getCount();
-        if (session.getCount() > 50) anyBigger = true;
-      }
-      //       String label = granToLabel.get(gran);
-//        String seriesInfo = gran + "/" + label;
-      // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
-
-      if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
-        //  oneSet = true;
-        phoneSessions1 = granularityToSessions.get(gran);
-        //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
-        break;
-      }
-      //else {
-      //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
-      //}
-      //}
-    }
-
-*//*    if (!oneSet) {
-      if (grans.isEmpty()) {
-        logger.error("huh? empty map for " + granularityToSessions);
-      } else {
-        Long first = grans.iterator().next();
-        phoneSessions1 = granularityToSessions.get(first);
-      }
-    }*//*
-    return phoneSessions1;
-  }*/
-
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
-   */
- // abstract public UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
-
   /**
    * @param id
    * @param best
    * @return
-   * @see Analysis#getPerformanceForUser(int, int, int)
+   * @see Analysis#getPerformanceForUser
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -243,7 +188,7 @@ public abstract class Analysis extends DAO {
   /**
    * @param best
    * @return
-   * @see IAnalysis#getWordScoresForUser(int, int, int)
+   * @see IAnalysis#getWordScoresForUser
    */
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -455,10 +400,10 @@ public abstract class Analysis extends DAO {
         // skip low scores
       } else if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(json);
+        Map<NetPronImageType, List<SlimSegment>> netPronImageTypeListMap = parseResultJson.slimReadFromJSON(json);
         netPronImageTypeListMap.remove(NetPronImageType.PHONE_TRANSCRIPT);
-        WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
-        results.add(wordScore);
+        //WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
+        results.add(new WordScore(bs, netPronImageTypeListMap));
       } else {
 //        logger.warn("getWordScore score " + bs.getScore()  + " is below threshold.");
         skipped++;
@@ -466,15 +411,15 @@ public abstract class Analysis extends DAO {
     }
 
     long now = System.currentTimeMillis();
-    if (now - then > 50) {
-      logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
+    if (now - then > 20) {
+      logger.debug("getWordScore took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
     }
 
     then = System.currentTimeMillis();
     Collections.sort(results);
     now = System.currentTimeMillis();
-    if (now - then > 50) {
-      logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
+    if (now - then > 20) {
+      logger.debug( "getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
     }
     //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 

@@ -54,6 +54,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -340,7 +341,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        Map<NetPronImageType, List<TranscriptSegment>> transcript = shell.getTranscript();
+        Map<NetPronImageType, List<SlimSegment>> transcript = shell.getTranscript();
 
         if (transcript == null) logger.warning("getItemColumn no transcript for " + shell);
         else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {

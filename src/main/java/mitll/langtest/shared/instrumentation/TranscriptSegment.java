@@ -35,17 +35,19 @@ package mitll.langtest.shared.instrumentation;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
+import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/25/2014.
  */
-public class TranscriptSegment implements IsSerializable, Comparable<TranscriptSegment> {
-  private float start;                  /// Start time in seconds
-  private float end;                    /// End time in seconds
-  private String event;                 /// Text to be displayed per event
-  private float score;                  /// posterior score
+public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
+  private int start;                  /// Start time in seconds
+  private int end;                    /// End time in seconds
 
   public TranscriptSegment() {
   }
@@ -57,50 +59,34 @@ public class TranscriptSegment implements IsSerializable, Comparable<TranscriptS
    * @param e     end time in seconds
    * @param name  event name (i.e. phone, word, etc.)
    * @param score
+   * @see mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes(Map)
    */
   public TranscriptSegment(float s, float e, String name, float score) {
-    start = s;
-    end = e;
-    event = name;
-    this.score = score;
+    super(name,score);
+    start = toInt(s);
+    end = toInt(e);
   }
 
-
   public float getStart() {
-    return start;
+    return fromInt(start);
   }
 
   public float getEnd() {
-    return end;
+    return fromInt(end);
   }
 
+/*
   public boolean contains(float pos) {
     return pos >= start && pos < end;
   }
+*/
 
   public boolean contains(double pos) {
-    return pos >= start && pos < end;
+    return pos >= getStart() && pos < getEnd();
   }
 
   public int getDuration() {
-    return Math.round(end * 1000 - start * 1000);
-  }
-
-  /**
-   * Event could be a word or a phone, generally.
-   *
-   * @return
-   */
-  public String getEvent() {
-    return event;
-  }
-
-  public float getScore() {
-    return score;
-  }
-
-  private float roundToHundredth(float totalHours) {
-    return ((float) ((Math.round(totalHours * 100d)))) / 100f;
+    return Math.round(end - start);
   }
 
   public float getFloatDuration() {
@@ -109,10 +95,15 @@ public class TranscriptSegment implements IsSerializable, Comparable<TranscriptS
 
   @Override
   public int compareTo(@NotNull TranscriptSegment o) {
-    return Float.valueOf(getStart()).compareTo(o.getStart());
+    return Integer.compare(start, o.start);
   }
 
   public String toString() {
-    return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
+    return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
+        getEvent() + " (" + roundToHundredth(getScore()) + ")";
+  }
+
+  private float roundToHundredth(float totalHours) {
+    return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
 }

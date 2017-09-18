@@ -37,7 +37,6 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -51,14 +50,14 @@ import java.util.List;
 import java.util.Map;
 
 public class BasePhoneDAO extends DAO {
-  private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+  //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
   static final String PHONE = "phone";
   static final String SEQ = "seq";
-  protected static final String SCORE = "score";
+  static final String SCORE = "score";
   //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
-  final ParseResultJson parseResultJson;
+  private final ParseResultJson parseResultJson;
 
   BasePhoneDAO(Database database) {
     super(database);
@@ -71,7 +70,8 @@ public class BasePhoneDAO extends DAO {
    * @param scoreJson
    * @param wordAndScore
    */
-   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson,
+   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap,
+                      String scoreJson,
                       WordAndScore wordAndScore) {
      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
          stringToMap.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
@@ -153,8 +153,9 @@ public class BasePhoneDAO extends DAO {
    * @param wordAndScore
    * @param netPronImageTypeListMap
    */
-  private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    wordAndScore.setTranscript(netPronImageTypeListMap);
+  private void setTranscript(WordAndScore wordAndScore,
+                             Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+    wordAndScore.setFullTranscript(netPronImageTypeListMap);
     wordAndScore.clearJSON();
   }
 
