@@ -62,6 +62,11 @@ public abstract class UserDialog extends BasicDialog {
   static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" +
+          "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
+          "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
+
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   protected static final String SIGN_UP_WIDTH = 266 + "px";
@@ -146,16 +151,15 @@ public abstract class UserDialog extends BasicDialog {
    * @return
    */
   String trimURL(String url) {
-    if (url.contains("127.0.0.1")) {
+//    if (url.contains("127.0.0.1")) {
+//      return url.split("\\?")[0].split("#")[0];
+//    } else {
       return url.split("\\?")[0].split("#")[0];
-    } else {
-      return url.split("\\?")[0].split("#")[0];
-    }
+//    }
   }
 
-  protected boolean isValidEmail(String text) {
-    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-  }
+  //    String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+  protected boolean isValidEmail(String text) { return text.trim().toLowerCase().matches(EMAIL_REGEX);  }
 
   /**
    * TODO: store selector and validator?

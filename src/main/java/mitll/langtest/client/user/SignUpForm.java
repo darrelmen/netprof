@@ -56,7 +56,15 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
+  public static final int MIN_EMAIL_LENGTH = 7;
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  private static final int SHORT_USER_ID = 4;
+  private static final String USER_ID_REGEX = "^[a-zA-Z0-9_\\-.]{5,50}$";
+  private static final String USER_ID_BAD = "User IDs must contain only alphanumeric characters";
+  private static final String LAST_NAME = "Last Name";
+  private static final String EMAIL = "Email";
+  private static final String ADD_INFO1 = "Add Info";
 
   private static final String ADD_INFO = "Add info";
   private static final String COMPLETE_YOUR_PROFILE = "Complete Your Profile";
@@ -67,13 +75,16 @@ public class SignUpForm extends UserDialog implements SignUp {
    */
   private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
-  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
+//  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
 
-  public static final int BOGUS_AGE = 99;
+  //public static final int BOGUS_AGE = 99;
   /**
    * @see #getSignUpForm
    */
   private static final String NEW_USER = "New User?";
+  /**
+   * Consistent with DOMINO.
+   */
   private static final int MIN_LENGTH_USER_ID = 5;
 
   /**
@@ -83,7 +94,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
-  private static final String VALID_EMAIL = "Please enter a valid email address.";
+  private static final String INVALID_EMAIL = "Please enter a valid email address.";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
@@ -308,10 +319,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "username");
 
-    signUpUser.box.addBlurHandler(event -> {
-//      logger.info("makeSignUpUsername : got blur ");
-      onUserIDBlur();
-    });
+    signUpUser.box.addBlurHandler(event -> onUserIDBlur());
 
     return userBox;
   }
@@ -324,8 +332,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     if (!text.isEmpty()) {
       //  eventRegistration.logEvent(signUpUser.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-  //    logger.info("\tonUserIDBlur checking " + text);
-
+      //    logger.info("\tonUserIDBlur checking " + text);
 
       if (hasSpaces(text)) {
         service.getUserByID(normalizeSpaces(text), new AsyncCallback<User>() {
@@ -337,7 +344,7 @@ public class SignUpForm extends UserDialog implements SignUp {
           @Override
           public void onSuccess(User result) {
             if (result == null) {
-    //          logger.warning("got no user for " + text);
+              //          logger.warning("got no user for " + text);
               markErrorBlurNoGrab(signUpUser, NO_SPACES);
             } else {
               reallyOnUserIDBlur(text);
@@ -350,11 +357,35 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
   }
 
-  private void reallyOnUserIDBlur(String text) {
-    service.getUserByID(text, new AsyncCallback<User>() {
+  private void reallyOnUserIDBlur(String uidVal) {
+    logger.info("reallyOnUserIDBlur user id blur " + uidVal);
+/*    if (uidVal.length() < MIN_LENGTH_USER_ID) {
+      logger.info("markErrorBlurNoGrab user id blur " + uidVal);
+
+      markErrorBlurNoGrab(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
+    } else if (isValidUserID(uidVal)) {
+      service.getUserByID(uidVal, new AsyncCallback<User>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          logger.warning("\tgot FAILURE on userExists " + uidVal);
+        }
+
+        @Override
+        public void onSuccess(User result) {
+          boolean isNewUser = result == null;
+          setSignUpButtonTitle(isNewUser);
+          setNewUserPrompt(isNewUser);
+        }
+      });
+    } else {
+      markErrorBlurNoGrab(signUpUser, USER_ID_BAD);
+    }*/
+
+
+    service.getUserByID(uidVal, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
-        logger.warning("\tgot FAILURE on userExists " + text);
+        logger.warning("\tgot FAILURE on userExists " + uidVal);
       }
 
       @Override
@@ -366,18 +397,21 @@ public class SignUpForm extends UserDialog implements SignUp {
     });
   }
 
+  private boolean isValidUserID(String uidVal) {
+    return uidVal.matches(USER_ID_REGEX);
+  }
 
   private void styleBoxNotLast(TextBoxBase userBox) {
     styleBox(userBox);
     userBox.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
   }
 
-  private TextBoxBase makeSignUpFirstName(Fieldset fieldset) {
+  private void makeSignUpFirstName(Fieldset fieldset) {
     firstName = getFormField(fieldset, false, 3, USERNAME_WIDTH, "First Name");
     final TextBoxBase userBox = firstName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "firstName");
-    return userBox;
+    //return userBox;
   }
 
   private FormField getFormField(Fieldset fieldset, boolean isPassword, int minLength, int usernameWidth, String hint) {
@@ -386,36 +420,45 @@ public class SignUpForm extends UserDialog implements SignUp {
         addControlFormFieldWithPlaceholder(fieldset, isPassword, minLength, usernameWidth, hint);
   }
 
-  private TextBoxBase makeSignUpLastName(Fieldset fieldset) {
-    lastName = getFormField(fieldset, false, 3, USERNAME_WIDTH, "Last Name");
+  private void makeSignUpLastName(Fieldset fieldset) {
+    lastName = getFormField(fieldset, false, 3, USERNAME_WIDTH, LAST_NAME);
     final TextBoxBase userBox = lastName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "lastName");
-    return userBox;
+    //return userBox;
   }
 
   /**
+   * x@y.com
+   *
    * @param fieldset
    * @return
    * @see #getFields
    */
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
-    signUpEmail = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
+    signUpEmail = getFormField(fieldset, false, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
     final TextBoxBase emailBox = signUpEmail.box;
     styleBox(emailBox);
+   // emailBox.addBlurHandler(event -> onEmailBlur(emailBox));
     addFocusHandler(emailBox, "email");
     return emailBox;
   }
 
+/*  private void onEmailBlur(TextBoxBase emailBox) {
+    String value = emailBox.getValue();
+    if (value.length() < MIN_EMAIL_LENGTH) {
+      markErrorBlurNoGrab(signUpEmail, "Please enter a valid email address");
+    } else if (!isValidEmail(value)) {
+      markErrorBlurNoGrab(signUpEmail, INVALID_EMAIL);
+    }
+  }*/
+
   private void addFocusHandler(final TextBoxBase userBox, final String username) {
-    userBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.clearSignInHasFocus();
-        pleaseCheck.setVisible(false);
-        signUp.setEnabled(true);
-        eventRegistration.logEvent(userBox, "SignUp_" + username + "Box", "N/A", "focus in " + username + " field in sign up form");
-      }
+    userBox.addFocusHandler(event -> {
+      userPassLogin.clearSignInHasFocus();
+      pleaseCheck.setVisible(false);
+      signUp.setEnabled(true);
+      eventRegistration.logEvent(userBox, "SignUp_" + username + "Box", "N/A", "focus in " + username + " field in sign up form");
     });
   }
 
@@ -426,45 +469,19 @@ public class SignUpForm extends UserDialog implements SignUp {
     registrationInfo = new RegistrationInfo(fieldset, false);
 
     final TextBoxBase ageBox = registrationInfo.getAgeEntryGroup().box;
-    ageBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.clearSignInHasFocus();
-      }
-    });
-    ageBox.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        if (!isValidAge(registrationInfo.getAgeEntryGroup())) {
-          //  registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-          markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG, Placement.TOP);
-        }
+    ageBox.addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
+    ageBox.addBlurHandler(event -> {
+      if (!isValidAge(registrationInfo.getAgeEntryGroup())) {
+        markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG, Placement.TOP);
       }
     });
 
-//    registrationInfo.hideAge();
     FormField dialectGroup = registrationInfo.getDialectGroup();
     if (dialectGroup != null) {
-      dialectGroup.box.addFocusHandler(new FocusHandler() {
-        @Override
-        public void onFocus(FocusEvent event) {
-          userPassLogin.clearSignInHasFocus();
-        }
-      });
+      dialectGroup.box.addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
     }
-    registrationInfo.getMale().addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.clearSignInHasFocus();
-      }
-    });
-    registrationInfo.getFemale().addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        userPassLogin.clearSignInHasFocus();
-      }
-    });
-    //  registrationInfo.setVisible(false);
+    registrationInfo.getMale().addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
+    registrationInfo.getFemale().addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
   }
 
   /**
@@ -476,12 +493,11 @@ public class SignUpForm extends UserDialog implements SignUp {
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     Button signUp = getFormButton("SignUp", SIGN_UP, eventRegistration);
     signUp.addClickHandler(getSignUpClickHandler(userBox));
-
     return signUp;
   }
 
   private void setSignUpButtonTitle(boolean isSignUp) {
-    signUp.setText(isSignUp ? SIGN_UP : "Add Info");
+    signUp.setText(isSignUp ? SIGN_UP : ADD_INFO1);
   }
 
   private ClickHandler getSignUpClickHandler(final TextBoxBase userBox) {
@@ -602,15 +618,20 @@ public class SignUpForm extends UserDialog implements SignUp {
     userID = userID.trim();
     if (hasSpaces(userID)) {
       eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
-   //   logger.warning("isFormValid has spaces for " + userID);
+      //   logger.warning("isFormValid has spaces for " + userID);
       markErrorBlurNoGrab(signUpUser, NO_SPACES);
       return false;
     } else {
-      int minLengthUserId = allowShort ? 4 : MIN_LENGTH_USER_ID;
+      int minLengthUserId = allowShort ? SHORT_USER_ID : MIN_LENGTH_USER_ID;
       if (userID.length() < minLengthUserId) {
         eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
         markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
         return false;
+      } else if (!isValidUserID(userID)) {
+        eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "bad user id '" + userID + "'");
+        markErrorBlur(signUpUser, USER_ID_BAD);
+        return false;
+
       } else if (firstName.getSafeText().isEmpty()) {
         eventRegistration.logEvent(firstName.getWidget(), "TextBox", "N/A", "short user first name '" + firstName.getSafeText() + "'");
         markErrorBlur(firstName, "Please enter a first name.");
@@ -640,7 +661,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void markInvalidEmail() {
     eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "invalid email");
-    markErrorBlur(signUpEmail, VALID_EMAIL);
+    markErrorBlur(signUpEmail, INVALID_EMAIL);
   }
 
   /**
@@ -745,10 +766,6 @@ public class SignUpForm extends UserDialog implements SignUp {
       }
     }
   }
-
-/*  private String getDialect() {
-    return registrationInfo.isVisible() ? registrationInfo.getDialectGroup().getSafeText() : "unk";
-  }*/
 
   private boolean isMale() {
     return !registrationInfo.isVisible() || registrationInfo.isMale();

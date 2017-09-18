@@ -242,7 +242,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     container.add(leftAndRight);
     getLeftIntro(leftAndRight);
     getRightLogin(leftAndRight);
-    //  leftAndRight.add(getLinksToSites());
     return container;
   }
 

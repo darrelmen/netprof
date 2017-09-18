@@ -46,6 +46,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.HasBlurHandlers;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
@@ -98,13 +99,13 @@ public class BasicDialog {
 
   @NotNull
   protected FormField getFormField(Panel dialogBox,
-                                 String label,
-                                 String subtext,
-                                 int minLength,
-                                 Widget rightSide,
-                                 int labelWidth,
-                                 int optWidth,
-                                 TextBoxBase textBox) {
+                                   String label,
+                                   String subtext,
+                                   int minLength,
+                                   Widget rightSide,
+                                   int labelWidth,
+                                   int optWidth,
+                                   TextBoxBase textBox) {
     if (optWidth > 0) textBox.setWidth(optWidth + "px");
 
     textBox.getElement().setId("textBox");
@@ -130,7 +131,7 @@ public class BasicDialog {
    * @param dialogBox
    * @param widget
    * @return
-   * @see #getSimpleFormField(Panel, TextBox, int)
+   * @see #getSimpleFormField
    */
   private ControlGroup addControlGroupEntryNoLabel(HasWidgets dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
@@ -424,19 +425,26 @@ public class BasicDialog {
     return popover;
   }
 
-  private Popover setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup, boolean requestFocus) {
+  private void setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup, boolean requestFocus) {
     configurePopup(popover, w, heading, message, placement, true, requestFocus);
+    new FireOnce().addBlurHandler(w,popover,this,dialectGroup);
+  }
 
-    w.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        if (DEBUG) logger.info("got blur, dismissing popover...");
+  private static class FireOnce {
+    private HandlerRegistration handlerRegistration;
+
+     void addBlurHandler(FocusWidget w, final MyPopover popover, BasicDialog outer, final ControlGroup dialectGroup) {
+      handlerRegistration = w.addBlurHandler(event -> {
+        clear();
+      //  outer.logger.info("got blur, dismissing popover...");
         popover.dontFireAgain();
-        clearError(dialectGroup);
-      }
-    });
+        outer.clearError(dialectGroup);
+      });
+    }
 
-    return popover;
+    private void clear() {
+      handlerRegistration.removeHandler();
+    }
   }
 
   protected void clearError(ControlGroup dialectGroup) {
@@ -446,13 +454,9 @@ public class BasicDialog {
   private Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover, boolean requestFocus) {
     configurePopup(popover, widget, heading, message, placement, true, requestFocus);
 
-    hasBlurHandlers.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        if (DEBUG) logger.info("got blur, dismissing popover, with no control.");
-
-        popover.dontFireAgain();
-      }
+    hasBlurHandlers.addBlurHandler(event -> {
+      if (DEBUG) logger.info("got blur, dismissing popover, with no control.");
+      popover.dontFireAgain();
     });
 
     return popover;
@@ -489,11 +493,7 @@ public class BasicDialog {
   }
 
   private void requestFocus(final Focusable w) {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        w.setFocus(true);
-      }
-    });
+    Scheduler.get().scheduleDeferred((Command) () -> w.setFocus(true));
   }
 
   /**
@@ -552,7 +552,7 @@ public class BasicDialog {
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
     FormField simpleFormField = getSimpleFormField(dialogBox, user, minLength);
-    simpleFormField.getGroup().getElement().setId("controlGroup_"+hint);
+    simpleFormField.getGroup().getElement().setId("controlGroup_" + hint);
     return simpleFormField;
   }
 
@@ -574,15 +574,13 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-   FormField getSimpleFormField(HasWidgets dialogBox, TextBox user, int minLength) {
+  FormField getSimpleFormField(HasWidgets dialogBox, TextBox user, int minLength) {
     return new FormField(user, addControlGroupEntryNoLabel(dialogBox, user), minLength);
   }
 
   static class MyPopover extends Popover {
-     MyPopover() {
-    }
-
-     void dontFireAgain() {
+    //MyPopover() {}
+    void dontFireAgain() {
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();
