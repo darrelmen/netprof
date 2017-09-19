@@ -114,18 +114,26 @@ public class RecordWordAndPhone {
 
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
-        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
+        if (keepEvent(event)) {
           long wid = wordDAO.addWord(new Word(answerID, event, windex++, segment.getScore()));
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
-              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                phoneDAO.addPhone(new Phone(answerID, wid, pevent, pindex++, pseg.getScore(), pseg.getDuration()));
+              if (keepEvent(pevent)) {
+                int duration = pseg.getDuration();
+                if (duration == 0) {
+                  logger.warn("zero duration for " +answerID + " wid " + wid  + " event " + pevent);
+                }
+                phoneDAO.addPhone(new Phone(answerID, wid, pevent, pindex++, pseg.getScore(), duration));
               }
             }
           }
         }
       }
     }
+  }
+
+  private boolean keepEvent(String event) {
+    return !event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL);
   }
 }

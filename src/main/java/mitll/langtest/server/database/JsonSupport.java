@@ -249,7 +249,7 @@ public class JsonSupport {
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
     List<Integer> ids = new ArrayList<>();
-    Map<Integer, String> exidToRefAudio = new HashMap<>();
+   // Map<Integer, String> exidToRefAudio = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
@@ -257,11 +257,11 @@ public class JsonSupport {
       }
       int id = exercise.getID();
       ids.add(id);
-      exidToRefAudio.put(id, exercise.getRefAudio());
+     // exidToRefAudio.put(id, exercise.getRefAudio());
     }
 
     now = System.currentTimeMillis();
-    if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
+    if (now - then > 100) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
     return phoneDAO.getWorstPhonesJson(userid, ids, language, project);
   }

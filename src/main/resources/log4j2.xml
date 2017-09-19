@@ -47,7 +47,7 @@
           -->
         <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
               from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
-              bufferSize="1" ignoreExceptions="false" smtpPort="2525"/>
+              bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
 
         <RollingFile name="LogFile"
                      fileName="${sys:catalina.base}/logs/netprof-app.log"
@@ -164,6 +164,12 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="org.eclipse.jetty.io" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+
+
 <!--        <logger name="mitll" level="debug" additivity="false">
             <appender-ref ref="LogFile"/>
         </logger>-->
@@ -175,7 +181,7 @@
         -->
 
         <root level="debug">
-            <appender-ref ref="LogFile" level="debug"/>
+            <appender-ref ref="LogFile" level="info"/>
             <appender-ref ref="Mail" level="error"/>
         </root>
 

@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -68,6 +69,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return this.dao.dao().name();
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone(DatabaseImpl, Map, Map)
+   * @param shared
+   * @return
+   */
   public SlickPhone toSlick(Phone shared) {
     return new SlickPhone(-1,
         (int) shared.getRid(),
@@ -84,7 +90,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         slick.wid(),
         slick.phone(),
         slick.seq(),
-        slick.score(), slick.duration());
+        slick.score(),
+        slick.duration());
   }
 
   public void insert(SlickPhone word) {
@@ -95,6 +102,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     dao.addBulk(bulk);
   }
 
+  /**
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo(long, Map)
+   * @param word
+   * @return
+   */
   @Override
   public boolean addPhone(Phone word) {
     return dao.insert(toSlick(word)) > 0;
@@ -174,12 +186,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                      int userid,
                                      Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
-
- //   int currentExercise = -1;
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     float totalScore = 0;
-   // float totalItems = 0;
 
     Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
     int c = 0;
@@ -189,10 +198,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Set<Integer> exids = new HashSet<>();
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
+    int num = 0;
     for (SlickPhoneReport report : phoneReportByResult) {
-      int i = 1;
+     // int i = 1;
       c++;
-
       // logger.info("#"+ c + " : " + report);
       // info from result table
       int exid = report.exid();
@@ -210,23 +219,33 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         totalItems++;
       }*/
 
-      String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
-
-      WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise, phoneToScores, phoneToWordAndScore,
-          exid, report.answer(), scoreJson, report.modified(),
-          report.wseq(), report.word(),
-          report.rid(), report.phone(), report.pseq(), report.pscore(), language);
-
       if (addTranscript) {
+        String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+        WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise, phoneToScores, phoneToWordAndScore,
+            exid,
+            report.answer(),
+            scoreJson,
+            report.modified(),
+            report.wseq(),
+            report.word(),
+            report.rid(),
+            report.phone(),
+            report.pseq(),
+            report.pscore(),
+            language);
+
         addTranscript(stringToMap, scoreJson, wordAndScore);
+        num++;
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
+    logger.info("added " + num + " transcripts");
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
+    return new MakePhoneReport()
+        .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
   }
 
   public void removeForResult(int resultid) {

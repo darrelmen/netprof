@@ -65,11 +65,11 @@ public class SlickUserExerciseDAO
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#getTypeOrder
-   * @see #addPhoneInfo
+   * @seex mitll.langtest.server.database.project.ProjectManagement#getTypeOrder
+   * @seex #addPhoneInfo
    */
-  public static final String SOUND = "Sound";
-  public static final String DIFFICULTY = "Difficulty";
+  //public static final String SOUND = "Sound";
+ // public static final String DIFFICULTY = "Difficulty";
 
   /**
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
@@ -314,7 +314,7 @@ public class SlickUserExerciseDAO
     if (numToUse == 0) {
       numToUse = exercisePhoneInfo.getNumPhones2();
       if (numToUse < 1) {
-        logger.warn("using back off phone childCount " + slick.id() + " = " + numToUse);
+        logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " +slick.english() + " " + slick.foreignlanguage());
       }
       else {
         logger.info("using back off phone childCount " + slick.id() + " = " + numToUse);
@@ -418,7 +418,8 @@ public class SlickUserExerciseDAO
       } else {
         exerciseDAO.updatePhones(id, n2);
         updated++;
-        if (updated < 25 || updated % 100 == 0) logger.debug("getExercisePhoneInfo updated " + updated + " exercises with phone info");
+        if (updated < 25 || updated % 1000 == 0) logger.debug("getExercisePhoneInfo (project #" + slick.projid()+
+            ") updated " + updated + " exercises with phone info");
       }
     } else {
       exercisePhoneInfo = new ExercisePhoneInfo();

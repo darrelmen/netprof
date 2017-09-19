@@ -22,11 +22,13 @@ public class MakePhoneReport {
    * @param totalItems
    * @param sortByLatestExample
    * @return
-   * @see #getPhoneReport(String, Map, boolean, boolean)
+   * @see SlickPhoneDAO#getPhoneReport
    */
   public PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
-                                     Map<String, List<WordAndScore>> phoneToWordAndScore,
-                                     float totalScore, float totalItems, boolean sortByLatestExample) {
+                                    Map<String, List<WordAndScore>> phoneToWordAndScore,
+                                    float totalScore,
+                                    float totalItems,
+                                    boolean sortByLatestExample) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
     if (DEBUG) {
@@ -46,8 +48,7 @@ public class MakePhoneReport {
     if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     if (sortByLatestExample) {
-      Map<String, List<WordAndScore>> stringCollectionMap = sortPhonesByLatest(phoneToAvg, sorted);
-      phoneToWordAndScore = stringCollectionMap;
+      phoneToWordAndScore = sortPhonesByLatest(phoneToAvg, sorted);
     } else {
       sortPhonesByCurrentScore(phoneToAvg, sorted);
     }
@@ -102,6 +103,7 @@ public class MakePhoneReport {
    * For the iPad, we don't want to return every single example, just the latest one, and the summary score
    * for the phone is just for the latest ones, or else they can seem inconsistent, since the iPad only shows
    * distinct words.
+   *
    * @param phoneToAvg
    * @param sorted
    * @return
@@ -129,7 +131,7 @@ public class MakePhoneReport {
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        Float current  = phoneToScore.get(o1);
+        Float current = phoneToScore.get(o1);
         Float current1 = phoneToScore.get(o2);
         int i = current.compareTo(current1);
         return i == 0 ? o1.compareTo(o2) : i;
@@ -144,17 +146,20 @@ public class MakePhoneReport {
     return phoneToMinimal;
   }
 
+  /**
+   * @param phoneToScores
+   * @return
+   * @see #getPhoneReport(Map, Map, float, float, boolean)
+   */
   private Map<String, PhoneStats> getPhoneToPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
     final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
 
-    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToScores.entrySet()) {
-      String phone = pair.getKey();
-      List<PhoneAndScore> value = pair.getValue();
-      value.sort(Comparator.comparingLong(PhoneAndScore::getTimestamp));
-
-      List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
+    phoneToScores.forEach((phone, scores) -> {
+      scores.sort(Comparator.comparingLong(PhoneAndScore::getTimestamp));
+      List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(scores);
       phoneToAvg.put(phone, new PhoneStats(phoneTimeSeries.size(), phoneTimeSeries));
-    }
+    });
+
     return phoneToAvg;
   }
 
@@ -163,7 +168,7 @@ public class MakePhoneReport {
    * @see #getPhoneReport(Map, Map, float, float, boolean)
    */
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    new PhoneAnalysis().setSessions(phoneToAvgSorted);
+    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted);
   }
 
   /**

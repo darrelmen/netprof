@@ -519,13 +519,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     String prefix = installPath + File.separator + s;
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
-    String relPrefix = prefix.substring(netProfDurLength) + File.separator;
-    return relPrefix;
+    return prefix.substring(netProfDurLength) + File.separator;
   }
 
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
-    return dao.perf(projid, minScore);
-  }
+  public Collection<SlickPerfResult> getPerf(int projid, float minScore) { return dao.perf(projid, minScore); }
 
   /**
    * @param userid

@@ -97,6 +97,10 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
   private static final String OPT_NETPROF = "/opt/netprof/import";
 
+  private void copySeveral(List<String> configs) {
+
+  }
+
   /**
    * @param config
    * @param optionalProperties
@@ -105,6 +109,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main
    */
   private void copyOneConfigCommand(String config, String optionalProperties, String optionalName, int displayOrder) throws Exception {
+    CopyToPostgres copyToPostgres = new CopyToPostgres();
+
     DatabaseImpl databaseLight = null;
     try {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
@@ -117,7 +123,7 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tmodel" + databaseLight.getServerProps().getCurrentModel());
 
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      new CopyToPostgres().copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
+      copyToPostgres.copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
     } finally {
@@ -927,6 +933,16 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.error("couldn't copy config " + config, e);
         }
         break;
+/*      case COPYALL:
+        logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
+        try {
+          List<String> configs = new ArrayList<>();
+          for (int i =1;i<arg.length; i++) configs.add(arg[i]);
+          copyToPostgres.copySeveral(configs);
+        } catch (Exception e) {
+          logger.error("couldn't copy config " + config, e);
+        }
+        break;*/
       case DROPALL:
         logger.warn("really be sure that this is only during development and not during production!");
         if (arg.length == 2) {

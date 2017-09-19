@@ -219,15 +219,16 @@ public class UserCopy {
     }
     else {
       applicationAbbreviations.add(NETPROF);
-      logger.info("before " + dominoUser.getApplicationAbbreviationsString());
-
-      logger.info("before " + dominoUser.getApplicationAbbreviations());
+//      logger.info("before " + dominoUser.getApplicationAbbreviationsString());
+//      logger.info("before " + dominoUser.getApplicationAbbreviations());
 
       SResult<ClientUserDetail> clientUserDetailSResult = dominoUserDAO.updateUser(dominoUser);
+/*
       logger.info("Got back " + clientUserDetailSResult);
       logger.info("Got back " + clientUserDetailSResult.get().getApplicationAbbreviations());
       logger.info("Got back " + clientUserDetailSResult.get().getApplicationAbbreviationsString());
       logger.info("foundExistingUser : updating application entry for user #" + dominoDBID);
+      */
     }
   }
 

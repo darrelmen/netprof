@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.analysis;
 
-import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.analysis.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +49,7 @@ public class PhoneAnalysis {
 
   private static final int DESIRED_NUM_SESSIONS = 15;
   private static final int MIN_SESSION_SIZE = 9;
-  private static final int REAL_MIN_SESSION_SIZE = MIN_SESSION_SIZE;
+  //private static final int REAL_MIN_SESSION_SIZE = MIN_SESSION_SIZE;
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
@@ -73,14 +72,11 @@ public class PhoneAnalysis {
 
   /**
    * @param phoneToAvgSorted
-   * @see PhoneDAO#setSessions(Map)
+   * @see Analysis#setSessions
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#setSessions
    */
-  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-      String phone = pair.getKey();
-      PhoneStats stats = pair.getValue();
-      stats.setSessions(partitionDontPrune(phone, stats.getTimeSeries()));
-    }
+  public void setSessionsWithPrune(Map<String, PhoneStats> phoneToAvgSorted) {
+    phoneToAvgSorted.forEach((phone, stats) -> stats.setSessions(partitionWithPrune(phone, stats.getTimeSeries())));
   }
 
   /**
@@ -93,24 +89,21 @@ public class PhoneAnalysis {
    * @param key
    * @param answersForUser
    * @return
-   * @see Analysis#getPhonesForUser(long, int)
+   * @see PhoneAnalysis#setSessionsWithPrune(Map)
    */
-  private List<PhoneSession> partitionDontPrune(String key, List<TimeAndScore> answersForUser) {
-    return getPhoneSessionsDontPrune(key, answersForUser, GRANULARITIES);
+  private List<PhoneSession> partitionWithPrune(String key, List<TimeAndScore> answersForUser) {
+    return getPhoneSessionsWithPrune(key, answersForUser, GRANULARITIES, false);
   }
 
   /**
    * @param answersForUser
    * @return
-   * @see Analysis#getPerformanceForUser(int, int, int)
+   * @see Analysis#getUserPerformance
    */
-  public <T extends SimpleTimeAndScore> Map<Long, List<PhoneSession>> getGranularityToSessions(List<T> answersForUser) {
-    //String overall1 = OVERALL;
-    Map<Long, List<PhoneSessionInternal>> overall = getGranularityToSessions(answersForUser, GRANULARITIES);
+  <T extends SimpleTimeAndScore> Map<Long, List<PhoneSession>> getGranularityToSessions(List<T> answersForUser) {
     Map<Long, List<PhoneSession>> serial = new HashMap<>();
-    for (Map.Entry<Long, List<PhoneSessionInternal>> pair : overall.entrySet()) {
-      serial.put(pair.getKey(), getPhoneSessions(OVERALL, pair.getValue(), false));
-    }
+    getGranularityToSessions(answersForUser, GRANULARITIES)
+        .forEach((k, v) -> serial.put(k, getPhoneSessions(OVERALL, v, false)));
     return serial;
   }
 
@@ -118,13 +111,16 @@ public class PhoneAnalysis {
    * @param key
    * @param answersForUser
    * @param times
+   * @param shouldPrune
    * @return
-   * @see #partitionDontPrune(String, List)
+   * @see #partitionWithPrune(String, List)
    */
-  private List<PhoneSession> getPhoneSessionsDontPrune(String key, List<TimeAndScore> answersForUser, List<Long> times) {
+  private List<PhoneSession> getPhoneSessionsWithPrune(String key,
+                                                       List<TimeAndScore> answersForUser,
+                                                       List<Long> times, boolean shouldPrune) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, times);
     List<PhoneSessionInternal> toUse = chooseSession(times, granularityToSessions);
-    return getPhoneSessions(key, toUse, true);
+    return getPhoneSessions(key, toUse, shouldPrune);
   }
 
   private <T extends SimpleTimeAndScore> Map<Long, List<PhoneSessionInternal>> getGranularityToSessions(
@@ -132,10 +128,7 @@ public class PhoneAnalysis {
       List<Long> times) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
     Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
-    for (Long time : times) {
-      List<PhoneSessionInternal> value = new ArrayList<>();
-      granularityToSessions.put(time, value);
-    }
+    times.forEach(time -> granularityToSessions.put(time, new ArrayList<>()));
 
     partition(answersForUser, times, granularityToSessions, granToCurrent);
     return granularityToSessions;
@@ -151,28 +144,37 @@ public class PhoneAnalysis {
    */
   private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
+
     if (toUse == null) {
       logger.error("getPhoneSessions huh? no sessions?");
     } else {
+      logger.info("getPhoneSessions " + key + " prune " + prune + " sessions " + toUse.size());
       int size = toUse.size();
       for (PhoneSessionInternal internal : toUse) {
         internal.remember();
-        double mean = internal.getMean();
-        double stdev1 = internal.getStdev();
-        long meanTime = internal.getMeanTime();
-        if (!prune || (internal.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
+
+        if (!prune || (internal.getCount() > MIN_SESSION_SIZE || size == 1)) {
           if (internal.getEnd() == 0) {
             logger.error("getPhoneSessions got 0 end time " + internal);
           }
           List<WordAndScore> examples = new ArrayList<>();
           examples.addAll(internal.getQueue());
+
+          double mean = internal.getMean();
+          double stdev1 = internal.getStdev();
+          long meanTime = internal.getMeanTime();
+
           sessions2.add(new PhoneSession(key,
               internal.getBin(),
               internal.getCount(),
               mean,
               stdev1,
               meanTime,
-              internal.getStart(), internal.getEnd(), examples));
+              internal.getStart(),
+              internal.getEnd(),
+              examples));
+        } else {
+          logger.warn("\tskipping session " + internal);
         }
       }
     }
@@ -180,10 +182,15 @@ public class PhoneAnalysis {
   }
 
   /**
-   * @param answersForUser
-   * @param times
-   * @param granularityToSessions
-   * @param granToCurrent
+   * For all time granularities - Hour, Day, Week, Month
+   * bin by time, add answers to bin
+   * bin = PhoneSession
+   * make a
+   *
+   * @param answersForUser        all the answers by that user
+   * @param times                 granularities - HOUR, DAY, WEEK, MONTH
+   * @param granularityToSessions all sessions for this granularity
+   * @param granToCurrent         bin to session
    * @see #getGranularityToSessions(List, List)
    */
   private <T extends SimpleTimeAndScore> void partition(List<T> answersForUser,
@@ -192,23 +199,25 @@ public class PhoneAnalysis {
                                                         Map<Long, PhoneSessionInternal> granToCurrent) {
     long last = 0;
 
-    for (T r : answersForUser) {
+    for (T r : answersForUser) { // sorted by time
       long timestamp = r.getTimestamp();
 
       for (Long time : times) {
-        List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
         PhoneSessionInternal phoneSessionInternal = granToCurrent.get(time);
         long gran = (timestamp / time) * time;
         long diff = timestamp - last;
-        if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
+        if ((phoneSessionInternal == null) ||
+            (diff > time /*&& phoneSessionInternal.getN() > MIN_SESSION_SIZE*/)
+            ) {
           phoneSessionInternal = new PhoneSessionInternal(gran);
-          phoneSessionInternals.add(phoneSessionInternal);
+          granularityToSessions.get(time).add(phoneSessionInternal);
           granToCurrent.put(time, phoneSessionInternal);
         } else {
           //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
         }
         phoneSessionInternal.addValue(r.getScore(), r.getTimestamp(), r.getWordAndScore());
       }
+
       last = timestamp;
     }
   }

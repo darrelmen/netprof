@@ -67,7 +67,7 @@ public class ExercisePhoneInfo {
       for (String phone : split1) {
         phone = phone.trim();
         if (phone.equalsIgnoreCase("sp")) {
-          logger.info("skip " +phone);
+         // logger.info("skip " +phone);
         }
         else {
           phones.add(phone);

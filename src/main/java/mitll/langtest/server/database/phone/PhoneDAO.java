@@ -26,6 +26,8 @@ import java.util.*;
  * Date: 12/9/13
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
+ *
+ * @deprecated
  */
 public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(PhoneDAO.class);
@@ -151,9 +153,9 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   @Override
   public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, String language, Project project) {
     try {
-      return getPhoneReport(getResultIDJoinSQL(userid, ids), null, true, false);
+      return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
     } catch (Exception e) {
-      logAndNotify.logAndNotifyServerException(e,"sql exception for user " +userid + " and result ids "  + ids);
+      logAndNotify.logAndNotifyServerException(e, "sql exception for user " + userid + " and result ids " + ids);
       return new PhoneReport();
     }
   }
@@ -169,8 +171,8 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param language
    * @param project
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    * @seex JsonSupport#getJsonPhoneReport(long, int, Map)
+   * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    */
   public JSONObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project) {
     PhoneReport phoneReport = getPhoneReport(userid, exids, null);
@@ -187,7 +189,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   protected PhoneReport getPhoneReport(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     PhoneReport worstPhonesAndScore = null;
     try {
-      worstPhonesAndScore = getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
+      worstPhonesAndScore = getPhoneReport(getJoinSQL(userid, exids), false, true);
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
@@ -198,19 +200,17 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * TODO : huh? doesn't seem to add last item to total score or total items?
    *
    * @param sql
-   * @param idToRef
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
    * @return
    * @throws SQLException
    * @see IPhoneDAO#getWorstPhonesForResults(int, Collection, String, Project)
-   * @see #getPhoneReport(String, Map, boolean, boolean)
+   * @see #getPhoneReport(String, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,
-                                       Map<Integer, String> idToRef,
                                        boolean addTranscript,
                                        boolean sortByLatestExample) throws SQLException {
- //   logger.debug("getPhoneReport query is\n" + sql);
+    //   logger.debug("getPhoneReport query is\n" + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -235,7 +235,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       String scoreJson = rs.getString(i++);
       float pronScore = rs.getFloat(i++);
 
-   //   logger.info("#"+ c + " : " + exid + " audio " + audioAnswer);
+      //   logger.info("#"+ c + " : " + exid + " audio " + audioAnswer);
 
       long resultTime = -1;
       Timestamp timestamp = rs.getTimestamp(i++);
@@ -255,7 +255,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       if (!exid.equals(currentExercise)) {
         currentExercise = exid;
-        if (false)  logger.debug("#" +c+ " adding " + exid + " score " + pronScore);
+        if (false) logger.debug("#" + c + " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
       }
@@ -270,30 +270,29 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           addTranscript(stringToMap, scoreJson, wordAndScore);
         }
       } catch (NumberFormatException e) {
-        logger.warn("got " +e + " for " + exid);
+        logger.warn("got " + e + " for " + exid);
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    finish(connection, statement, rs,sql);
+    finish(connection, statement, rs, sql);
 
     return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
 
   /**
    * @param userid
-   * @paramx exids
-   * @paramx sortByLatestExample
    * @return
    * @throws SQLException
+   * @paramx exids
+   * @paramx sortByLatestExample
    * @see #getPhoneReport
    */
 /*  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     return getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
   }*/
-
   private String getResultIDJoinSQL(long userid, Collection<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
     return getJoinSQL(userid, filterClause);
@@ -331,6 +330,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   /**
    * For old h2 world we don't have phone duration.
+   *
    * @return
    */
   public Collection<Phone> getAll() {
@@ -338,7 +338,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     List<Phone> all = new ArrayList<>();
     try {
-      String sql = "select * from " + PHONE;
+      String sql = "SELECT * FROM " + PHONE;
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
@@ -348,9 +348,16 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         String phone = rs.getString(PHONE);
         int seq = rs.getInt(SEQ);
         float phoneScore = rs.getFloat(SCORE);
-        all.add(new Phone(rid, wid, phone, seq, phoneScore, 0));
+        float durationSeconds;
+        try {
+          durationSeconds = rs.getFloat(DURATION);
+        } catch (Exception e) {
+          durationSeconds = 0;
+        }
+        int durationMillis = Float.valueOf(durationSeconds * 1000f).intValue();
+        all.add(new Phone(rid, wid, phone, seq, phoneScore, durationMillis));
       }
-      finish(connection, statement, rs,sql);
+      finish(connection, statement, rs, sql);
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }

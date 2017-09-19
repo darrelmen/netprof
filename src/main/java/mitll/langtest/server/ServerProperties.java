@@ -177,7 +177,7 @@ public class ServerProperties {
   private static final String MIN_ANALYSIS_SCORE = "minAnalysisScore";
   private static final String HYDRA_HOST = "hydraHost";
 
-  private static final int MIN_SCORE_TO_SHOW = 20;// 0.20f;
+  private static final int MIN_SCORE_TO_SHOW = 0;//20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
   private static final int USER_FINAL_SCORES = 30;
 
@@ -725,8 +725,7 @@ public class ServerProperties {
    * @return 0-1 float
    */
   public float getMinAnalysisScore() {
-    int intPropertyDef = getIntPropertyDef(MIN_ANALYSIS_SCORE, MIN_SCORE_TO_SHOW);
-    return (float) intPropertyDef / 100f;
+    return (float) getIntPropertyDef(MIN_ANALYSIS_SCORE, MIN_SCORE_TO_SHOW) / 100f;
   }
 
   /**

@@ -10,14 +10,20 @@ import java.util.List;
  * @see mitll.langtest.client.analysis.AnalysisTab#useReport
  */
 public class AnalysisReport implements Serializable {
-  private  List<WordScore> wordScores;
+  private List<WordScore> wordScores;
   private UserPerformance userPerformance;
-  private  PhoneReport phoneReport;
+  private PhoneReport phoneReport;
 
-  public AnalysisReport(){}
+  public AnalysisReport() {
+  }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPerformanceReportForUser(int, int, int)
+   * @param userPerformance
+   * @param wordScores
+   * @param phoneReport
+   */
   public AnalysisReport(UserPerformance userPerformance, List<WordScore> wordScores, PhoneReport phoneReport) {
-
     this.userPerformance = userPerformance;
     this.wordScores = wordScores;
     this.phoneReport = phoneReport;
@@ -36,11 +42,11 @@ public class AnalysisReport implements Serializable {
   }
 
   public String toString() {
-    return "UserPerf:"+userPerformance+
-        "\n\tword scores"  + wordScores +
-        "\n\tphone scores "+phoneReport;
+    return "UserPerf:" + userPerformance +
+        "\n\tword scores" + wordScores +
+        "\n\tphone scores " + phoneReport;
     //+
-     //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();
+    //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();
 
   }
 }

@@ -58,7 +58,7 @@ public class PhoneReport implements Serializable {
   /**
    * @param overallPercent
    * @param phoneToWordAndScoreSorted
-   * @see PhoneDAO#getPhoneReport(Map, Map, float, float)
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneReport(int overallPercent,
                      Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
@@ -70,6 +70,10 @@ public class PhoneReport implements Serializable {
     valid = true;
   }
 
+  /**
+   * Map of each phone to words it appears in.
+   * @return
+   */
   public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
     return phoneToWordAndScoreSorted;
   }
@@ -80,7 +84,7 @@ public class PhoneReport implements Serializable {
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager(PhoneReport)
+   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager
    */
   public Map<String, PhoneStats> getPhoneToAvgSorted() {
     return phoneToAvgSorted;

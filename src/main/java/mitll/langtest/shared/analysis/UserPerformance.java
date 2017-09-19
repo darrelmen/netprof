@@ -174,7 +174,7 @@ public class UserPerformance implements Serializable {
 
   /**
    * @param granularityToSessions
-   * @see Analysis#getUserPerformance(long, Map)
+   * @see Analysis#getUserPerformance
    */
   public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
     this.granularityToSessions = granularityToSessions;

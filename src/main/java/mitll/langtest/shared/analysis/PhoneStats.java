@@ -57,7 +57,7 @@ public class PhoneStats implements Serializable {
 
   /**
    * @param count
-   * @see PhoneDAO#getPhoneReport
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneStats(int count, List<TimeAndScore> timeSeries) {
     this.count = count;
@@ -73,8 +73,7 @@ public class PhoneStats implements Serializable {
     if (sessions == null || sessions.isEmpty()) return 0;
 
     PhoneSession next = sessions.iterator().next();
-    double mean = next.getMean();
-    return toHundred(mean);
+    return toHundred(next.getMean());
   }
 
   private int toHundred(double mean) {
@@ -118,7 +117,7 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
+    return "PhoneStats : childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
         (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
   }
 }
