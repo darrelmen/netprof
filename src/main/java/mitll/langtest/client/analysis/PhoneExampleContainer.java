@@ -65,8 +65,8 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
-  public static final String EXAMPLES_OF_SOUND = "Examples of sound";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
+  private static final String EXAMPLES_OF_SOUND = "Examples of sound";
 
   private static final String WORDS_USING = "Vocabulary with ";
 
@@ -144,21 +144,19 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
                                                                      List<WordAndScore> dataList) {
     ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<WordAndScore>() {
-          public int compare(WordAndScore o1, WordAndScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return o1.getWord().compareTo(o2.getWord());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return o1.getWord().compareTo(o2.getWord());
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }

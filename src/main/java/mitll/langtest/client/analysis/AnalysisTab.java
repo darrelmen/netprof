@@ -80,7 +80,7 @@ public class AnalysisTab extends DivWidget {
    */
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
-  private static final String SUBTITLE = "scores > 20";
+  private static final String SUBTITLE = "";//scores > 20";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
@@ -160,7 +160,12 @@ public class AnalysisTab extends DivWidget {
     long now = System.currentTimeMillis();
 
     if (now - then > 200) {
-      logger.info("useReport took " + (now - then) + " to get report for " +userid + " " + userChosenID);
+      logger.info("useReport took " + (now - then) + " to get report" +
+          "\n\tfor    " +userid + " " + userChosenID +
+          "\n\twords  " + result.getWordScores().size() +
+          "\n\tphones " + result.getPhoneReport().getPhoneToAvgSorted().size() +
+          "\n\tphones word and score " + result.getPhoneReport().getPhoneToWordAndScoreSorted().values().size()
+      );
     }
 
     long then2 = now;
@@ -173,7 +178,7 @@ public class AnalysisTab extends DivWidget {
     long then3 = now;
 
     Scheduler.get().scheduleDeferred(() ->
-        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
+        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom,
             result.getPhoneReport()));
 
 //    showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
@@ -261,12 +266,7 @@ public class AnalysisTab extends DivWidget {
     final Button left = new Button();
     controller.register(left, "prevTimeWindow");
     left.setIcon(IconType.CARET_LEFT);
-    left.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        analysisPlot.gotPrevClick();
-      }
-    });
+    left.addClickHandler(event -> analysisPlot.gotPrevClick());
     left.setEnabled(false);
     return left;
   }
@@ -320,14 +320,14 @@ public class AnalysisTab extends DivWidget {
     return getButton(controller, getClickHandler(TIME_HORIZON.MONTH), "Month");
   }
 
-  private ClickHandler getClickHandler(final TIME_HORIZON month) {
-    return event -> analysisPlot.setTimeHorizon(month);
-  }
-
   private Button getAllChoice() {
     Button all = getButton(controller, getClickHandler(TIME_HORIZON.ALL), "All");
     all.setActive(true);
     return all;
+  }
+
+  private ClickHandler getClickHandler(final TIME_HORIZON month) {
+    return event -> analysisPlot.setTimeHorizon(month);
   }
 
   private void showWordScores(List<WordScore> wordScores,
@@ -335,21 +335,20 @@ public class AnalysisTab extends DivWidget {
                               AnalysisPlot analysisPlot,
                               ShowTab showTab,
                               Panel lowerHalf,
-                              int userid,
-                              int minRecordings,
-                              int listid,
                               PhoneReport phoneReport) {
     {
       // logger.info("showWordScores " + wordScores.size());
-      Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab,
-          new Heading(3, WORDS, SUBTITLE));
+      Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
+      Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, wordsTitle);
 
       tableWithPager.setWidth(WORD_WIDTH + "px");
 
-      DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer",
-          new Heading(3, WORDS, SUBTITLE));
-      wordsContainer.addStyleName("cardBorderShadow");
-      lowerHalf.add(wordsContainer);
+      {
+        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer",
+            wordsTitle);
+        wordsContainer.addStyleName("cardBorderShadow");
+        lowerHalf.add(wordsContainer);
+      }
     }
 
     DivWidget soundsDiv = getSoundsDiv();
@@ -360,12 +359,22 @@ public class AnalysisTab extends DivWidget {
         soundsDiv, analysisPlot, showTab);
   }
 
+  /**
+   *
+   * @param wordScores
+   * @param controller
+   * @param analysisPlot
+   * @param showTab
+   * @param wordsTitle
+   * @return
+   */
   private Panel getWordContainer(List<WordScore> wordScores,
                                  ExerciseController controller,
                                  AnalysisPlot analysisPlot,
                                  ShowTab showTab,
                                  Heading wordsTitle) {
-    return new WordContainer(controller, analysisPlot, showTab, wordsTitle).getTableWithPager(wordScores);
+    return new WordContainer(controller, analysisPlot, showTab, wordsTitle)
+        .getTableWithPager(wordScores);
   }
 
   private DivWidget getSoundsDiv() {
@@ -380,11 +389,11 @@ public class AnalysisTab extends DivWidget {
     return soundsDiv;
   }
 
-  private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
+  private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
     wordsContainer.addStyleName("floatLeftAndClear");
-    wordsContainer.add(w);
+    wordsContainer.add(heading);
     wordsContainer.add(tableWithPager);
     return wordsContainer;
   }

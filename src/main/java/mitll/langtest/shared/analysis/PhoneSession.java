@@ -86,7 +86,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return (int)(value* SCALE);
   }
 
-  protected double fromInt(int value) {
+  private double fromInt(int value) {
     return ((double)value)/ SCALE;
   }
 
@@ -146,14 +146,16 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return count;
   }
 
-  public long getStart() {
-    return start;
-  }
+  public long getStart() { return start;  }
 
   public long getEnd() {
     return end;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.TimeSeriesPlot#getSessionTime(PhoneSession, PhoneSession)
+   * @return
+   */
   public long getMiddle() {
     return (start + end) / 2;
   }

@@ -55,6 +55,7 @@ public class BasePhoneDAO extends DAO {
   static final String PHONE = "phone";
   static final String SEQ = "seq";
   static final String SCORE = "score";
+  static final String DURATION = "duration";
   //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
   private final ParseResultJson parseResultJson;

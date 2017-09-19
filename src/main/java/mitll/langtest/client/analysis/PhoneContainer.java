@@ -83,14 +83,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";
   private static final int SOUND_WIDTH = 75;
+
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
 
-  // private final boolean isNarrow;
   private long from;
   private long to;
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy");
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -98,8 +100,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param phonePlot
    * @see AnalysisTab#getPhoneReport
    */
-  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
-                        PhonePlot phonePlot) {
+  PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
+                 PhonePlot phonePlot) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
@@ -137,11 +139,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @param from
    * @param to
-   * @see AnalysisPlot#changed
+   * @see AnalysisPlot#timeChanged
    */
   @Override
   public void timeChanged(long from, long to) {
-//    logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    if (DEBUG) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
 
     this.from = from;
     this.to = to;
@@ -151,16 +153,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private List<PhoneAndStats> getPhoneAndStatsList(long from, long to) {
-    if (phoneReport == null) {
-      return Collections.emptyList();
-    } else {
-      Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-      return getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
-    }
+    return (phoneReport == null) ? Collections.emptyList() :
+        getPhoneAndStatsListForPeriod(phoneReport.getPhoneToAvgSorted(), from, to);
   }
 
   private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted, long first, long last) {
-//    logger.info("timeChanged From " + first+"/"+debugFormat(first) + " : " + last +"/"+debugFormat(last));
+    if (DEBUG)
+      logger.info("getPhoneAndStatsListForPeriod From " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
 
     List<PhoneAndStats> phoneAndStatsList = new ArrayList<>();
     if (phoneToAvgSorted == null) {
@@ -179,21 +178,26 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param phoneToAvgSorted
    * @param first
    * @param last
-   * @see #timeChanged(long, long)
+   * @see #timeChanged
    */
   private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
                                 long first, long last) {
-//    logger.info("getPhoneStatuses From " + first+"/"+debugFormat(first) + " : " + last+"/"+debugFormat(last));
+    if (DEBUG) {
+      logger.info("getPhoneStatuses From " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
+      logger.info("getPhoneStatuses examine " + phoneToAvgSorted.entrySet().size());
+    }
 
     for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
       PhoneStats value = ps.getValue();
       List<PhoneSession> filtered = getFiltered(first, last, value);
       //    logger.info("key " + ps.getKey() + " value " + filtered.size());
       //  logger.info("Filtered " + filtered.size());
-      int initial = value.getInitial(filtered);
-      int current = value.getCurrent(filtered);
-      int count = value.getCount(filtered);
+
       if (!filtered.isEmpty()) {
+        int initial = value.getInitial(filtered);
+        int current = value.getCurrent(filtered);
+        int count = value.getCount(filtered);
+
         phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
             initial,
             current,
@@ -203,7 +207,17 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     }
 
     Collections.sort(phoneAndStatses);
-//    logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
+    if (DEBUG) {
+      logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
+      if (phoneAndStatses.isEmpty()) {
+        phoneToAvgSorted.forEach((k, v) -> {
+          logger.info(k + " = " + v.getSessions().size() + " sessions");
+          v.getSessions()
+              .forEach(phoneSession -> logger.info("\t" + k + " = " +
+                  debugFormat(phoneSession.getStart()) + "-" + debugFormat(phoneSession.getEnd())));
+        });
+      }
+    }
   }
 
   /**
@@ -217,12 +231,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
-/*
 
   private String debugFormat(long first) {
     return debugShortFormat.format(new Date(first));
   }
-*/
+
 
   /**
    * TODO : this doesn't work properly - should do any sessions that overlap with the window
@@ -235,7 +248,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getFiltered(long, long, PhoneStats)
    */
   private List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
-    // logger.info("getFiltered : From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
+    if (DEBUG && false) {
+      logger.info("getFiltered : over " + orig.size() +
+          " From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
+    }
 
     List<PhoneSession> filtered = new ArrayList<>();
     for (PhoneSession session : orig) {
@@ -248,6 +264,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         //logger.info("Exclude " +window);
       }
     }
+/*    if (DEBUG) {
+      logger.info("getFiltered : found " + filtered.size());
+    }*/
     return filtered;
   }
 
@@ -318,21 +337,19 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
                                                                       List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<PhoneAndStats>() {
-          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return compPhones(o1, o2);
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return compPhones(o1, o2);
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
@@ -350,26 +367,24 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
                                                                     List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndStats>() {
-          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
-            if (o1 == o2) {
-              return 0;
-            }
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
 
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                int a1 = o1.getCount();
-                int a2 = o2.getCount();
-                return compIntThenPhone(o1, o2, a1, a2);
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
+          if (o1 != null) {
+            if (o2 == null) {
+              logger.warning("------- o2 is null?");
               return -1;
+            } else {
+              int a1 = o1.getCount();
+              int a2 = o2.getCount();
+              return compIntThenPhone(o1, o2, a1, a2);
             }
+          } else {
+            logger.warning("------- o1 is null?");
+
+            return -1;
           }
         });
     return columnSortHandler;
@@ -380,27 +395,25 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
                                                                    List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndStats>() {
-          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
-            if (o1 == o2) {
-              return 0;
-            }
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
 
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                int a1 = o1.getCurrent();
-                int a2 = o2.getCurrent();
-                return compIntThenPhone(o1, o2, a1, a2);
-
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
+          if (o1 != null) {
+            if (o2 == null) {
+              logger.warning("------- o2 is null?");
               return -1;
+            } else {
+              int a1 = o1.getCurrent();
+              int a2 = o2.getCurrent();
+              return compIntThenPhone(o1, o2, a1, a2);
+
             }
+          } else {
+            logger.warning("------- o1 is null?");
+
+            return -1;
           }
         });
     return columnSortHandler;
@@ -520,8 +533,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        String s = "" + shell.getCount();
-        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+        return new SafeHtmlBuilder().appendHtmlConstant("" + shell.getCount()).toSafeHtml();
       }
     };
   }

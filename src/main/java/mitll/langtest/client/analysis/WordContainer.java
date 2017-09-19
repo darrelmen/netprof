@@ -55,7 +55,6 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.SlimSegment;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 import org.jetbrains.annotations.NotNull;
@@ -97,6 +96,8 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   private final String todaysDate;
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
+  private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
+  private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
 
   /**
    * What sort order do we want?
@@ -117,7 +118,6 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     todayYear = todaysDate.substring(todaysDate.length() - 2);
   }
 
-  private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
@@ -167,7 +167,6 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     sortedHistory.forEach(this::addItem);
     flush();
   }
-
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
                                                                   List<WordScore> dataList) {
@@ -399,16 +398,17 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
       heading.setSubtext("");
       addItems(sortedHistory);
     } else {
-      // logger.info("Starting from " +from + " : " +to);
-  //    logger.info("timeChanged : from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+//       logger.info("Starting from " +from + " : " +to);
+//      logger.info("timeChanged : from " + yearShortFormat2.format(new Date(from)) + " to " + yearShortFormat2.format(new Date(to)));
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
 
-      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from+1), new WordScore(to+1));
+      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from + 1), new WordScore(to + 1));
+      //    logger.info("wordScores found " +wordScores.size());
 
 //      logger.info("timeChanged : wordScores " + wordScores.size());
       List<WordScore> filtered = new ArrayList<>(wordScores);
-      filtered.sort((o1, o2) -> -1*Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
-      //Collections.sort(filtered); // put sort back to by score first
+      filtered.sort((o1, o2) -> -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp()));
+      //Collections.sort(filtered); // put sort back to by score first?
       addItems(filtered);
     }
   }

@@ -790,7 +790,7 @@ public class LangTest implements
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
-    logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
+ //   logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
     initialUI.showCogMenu();
   }
 

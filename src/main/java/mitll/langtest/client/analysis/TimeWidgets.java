@@ -53,7 +53,16 @@ class TimeWidgets {
   private final Button month;
   final HTML display;
 
-  public TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {
+  /**
+   * @see AnalysisTab#getTimeWindowStepper
+   * @param prevButton
+   * @param nextButton
+   * @param display
+   * @param all
+   * @param week
+   * @param month
+   */
+  TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {
     this.prevButton = prevButton;
     this.nextButton = nextButton;
     this.display = display;
