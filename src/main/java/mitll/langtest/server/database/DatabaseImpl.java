@@ -199,7 +199,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.serverProps = serverProps;
     this.logAndNotify = null;
     this.absConfigDir = "";
-    setDBConnection();
+    setPostgresDBConnection();
   }
 
   /**
@@ -256,7 +256,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     if (!maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) {
       then = System.currentTimeMillis();
-      initializeDAOs(pathHelper);
+
+      // first connect to postgres
+
+      setPostgresDBConnection();
+      logger.debug("initializeDAOs --- " + dbConnection);
+
+      // then connect to mongo
+      DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
+
+      initializeDAOs(pathHelper, dominoUserDAO);
       now = System.currentTimeMillis();
 
       if (now - then > 300) {
@@ -327,12 +336,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
-  private void initializeDAOs(PathHelper pathHelper) {
-    setDBConnection();
-    logger.debug("initializeDAOs --- " + dbConnection);
-
+  private void initializeDAOs(PathHelper pathHelper,DominoUserDAOImpl dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
-    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
+
     this.userDAO = dominoUserDAO;
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
@@ -385,7 +391,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.debug("initializeDAOs : tables = " + getTables());
   }
 
-  private void setDBConnection() {
+  private void setPostgresDBConnection() {
     dbConnection = getDbConnection();
   }
 
@@ -1300,13 +1306,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void close() {
     try {
       if (userDAO != null) userDAO.close();
+    } catch (Exception e) {
+      logger.error("close got " + e, e);
+    }
+
+    try {
       if (connection != null) {
         connection.contextDestroyed();
       }
+    } catch (Exception e) {
+      logger.error("close got " + e, e);
+    }
+
+    try {
       logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("close got " + e, e);
     }
   }
 

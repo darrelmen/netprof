@@ -129,7 +129,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     try {
       connectToMongo(database, database.getServerProps().getProps());
     } catch (Exception e) {
-      logger.error("Couldn't connect to mongo - is it running and accessible? " + e);
+      logger.error("Couldn't connect to mongo - is it running and accessible? " + e,e);
+      throw e;
     }
   }
 

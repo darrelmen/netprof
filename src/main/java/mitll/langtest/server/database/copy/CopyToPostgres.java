@@ -108,7 +108,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param displayOrder
    * @see #main
    */
-  private void copyOneConfigCommand(String config, String optionalProperties, String optionalName, int displayOrder) throws Exception {
+  private boolean copyOneConfigCommand(String config, String optionalProperties, String optionalName, int displayOrder) throws Exception {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     DatabaseImpl databaseLight = null;
@@ -124,8 +124,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
       copyToPostgres.copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
+      return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
+      return false;
     } finally {
       if (databaseLight != null) {
         databaseLight.close();
@@ -933,7 +935,10 @@ public class CopyToPostgres<T extends CommonShell> {
       case COPY:
         logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
         try {
-          copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
+          if (!b) {
+            System.exit(1);
+          }
         } catch (Exception e) {
           logger.error("couldn't copy config " + config, e);
         }

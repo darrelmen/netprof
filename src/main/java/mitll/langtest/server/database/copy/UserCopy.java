@@ -88,7 +88,7 @@ public class UserCopy {
       String importUserID = toImport.getUserID();
 
       if (hasSpaces(importUserID)) {
-        logger.info("replacing spaces in " +importUserID);
+//      logger.info("replacing spaces in " +importUserID);
         importUserID = importUserID.trim().replaceAll("\\s++","_");
         logger.info("now no spaces in " +importUserID);
         toImport.setUserID(importUserID);
