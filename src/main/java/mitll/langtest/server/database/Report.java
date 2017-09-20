@@ -196,20 +196,21 @@ public class Report implements IReport {
    */
   @Override
   public List<ReportStats> doReport(int projid,
-                          String language,
-                          String site,
+                                    String language,
+                                    String site,
 
-                          ServerProperties serverProps,
-                          MailSupport mailSupport,
-                          PathHelper pathHelper,
-                          boolean forceSend) {
+                                    ServerProperties serverProps,
+                                    MailSupport mailSupport,
+                                    PathHelper pathHelper,
+                                    boolean forceSend,
+                                    boolean getAllYears) {
     List<String> reportEmails = serverProps.getReportEmails();
 
     // check if it's a monday
     if (!getShouldSkip() &&
         // isTodayAGoodDay() &&
         !reportEmails.isEmpty()) {
-      int thisYear = getThisYear();
+      int thisYear = getAllYears ? -1 : getThisYear();
       return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, thisYear, forceSend);
     } else {
       return Collections.emptyList();
@@ -243,16 +244,16 @@ public class Report implements IReport {
    * @param pathHelper
    * @param reportEmails who to send to
    * @param year         which year you want data for
-   * @see #doReport
+   * @see IReport#doReport
    */
   private List<ReportStats> writeAndSendReport(int projid,
-                                     String language,
-                                     String site,
-                                     MailSupport mailSupport,
-                                     PathHelper pathHelper,
-                                     List<String> reportEmails,
-                                     int year,
-                                     boolean forceSend) {
+                                               String language,
+                                               String site,
+                                               MailSupport mailSupport,
+                                               PathHelper pathHelper,
+                                               List<String> reportEmails,
+                                               int year,
+                                               boolean forceSend) {
     String today = new SimpleDateFormat("MM_dd_yy").format(new Date());
     File file = getReportFile(pathHelper, today, language, site, ".html");
     if (file.exists() && !forceSend) {
@@ -263,7 +264,7 @@ public class Report implements IReport {
       try {
         ReportStats stats = new ReportStats(projid, language, site, year);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
-   //     sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
+        //     sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
         return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
@@ -319,6 +320,13 @@ public class Report implements IReport {
     //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
   }
 
+  /**
+   * @param mailSupport
+   * @param reportEmails
+   * @param reportStats
+   * @param pathHelper
+   * @see DatabaseImpl#sendReports(IReport, boolean)
+   */
   @Override
   public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper) {
     File summaryReport = getSummaryReport(reportStats, pathHelper);

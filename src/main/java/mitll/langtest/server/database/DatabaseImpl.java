@@ -140,7 +140,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final String UNKNOWN = "unknown";
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
-  public static final int DAY = 24 * 60 * 60 * 1000;
+  private static final int DAY = 24 * 60 * 60 * 1000;
 
   /**
    * @see #getContextPractice
@@ -1656,7 +1656,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
               serverProps,
               mailSupport,
               pathHelper,
-              forceSend));
+              forceSend, true));
     });
 
     report.sendExcelViaEmail(mailSupport, serverProps.getReportEmails(), stats, pathHelper);

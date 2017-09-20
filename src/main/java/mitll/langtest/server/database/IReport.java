@@ -13,12 +13,14 @@ import java.util.List;
 
 public interface IReport {
   List<ReportStats> doReport(int projid,
-                   String language,
-                   String site,
-                   ServerProperties serverProps,
-                   MailSupport mailSupport,
-                   PathHelper pathHelper,
-                   boolean forceSend);
+                             String language,
+                             String site,
+                             ServerProperties serverProps,
+                             MailSupport mailSupport,
+                             PathHelper pathHelper,
+                             boolean forceSend,
+                             boolean getAllYears);
+
   JSONObject writeReportToFile(ReportStats stats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException;
 
   /**
