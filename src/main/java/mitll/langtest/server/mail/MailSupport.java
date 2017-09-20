@@ -46,7 +46,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.net.ConnectException;
 import java.util.*;
 
 /**
@@ -67,6 +66,7 @@ public class MailSupport {
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
+  public static final String TEXT_HTML = "text/html";
   private final boolean debugEmail;
   private final boolean testEmail;
 
@@ -200,13 +200,25 @@ public class MailSupport {
 
 
     try {
-      configure(RECIPIENT_NAME, receiver, Collections.emptyList(), subject, messageBody, message);
+      //   configure(RECIPIENT_NAME, receiver, Collections.emptyList(), subject, messageBody, message);
+
+
+      message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
+      InternetAddress address = new InternetAddress(receiver, "someone");
+      logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
+      message.addRecipient(Message.RecipientType.TO, address);
+      // addCC(ccEmails, msg);
+      message.setSubject(subject);
+      //  message.setText(messageBody);
+      message.setSentDate(new Date());
 
       Multipart multipart = new MimeMultipart();
 
+
       {// creates body part for the message
         MimeBodyPart messageBodyPart = new MimeBodyPart();
-        messageBodyPart.setContent(message, "text/html");
+        //    messageBodyPart.setContent(message, "multipart/mixed");
+        messageBodyPart.setText(messageBody);
 
 // adds parts to the multipart
         multipart.addBodyPart(messageBodyPart);
@@ -215,7 +227,9 @@ public class MailSupport {
       // creates body part for the attachment
       {
         MimeBodyPart attachPart = new MimeBodyPart();
+        attachPart.setContent(message, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         attachPart.attachFile(toAttach);
+
         multipart.addBodyPart(attachPart);
       }
 
@@ -422,7 +436,7 @@ public class MailSupport {
     addCC(ccEmails, msg);
     msg.setSubject(subject);
     msg.setText(message);
-    msg.addHeader("Content-Type", "text/html");
+    msg.addHeader("Content-Type", TEXT_HTML);
     //logger.info("Session is " + session + " message " + msg);
     addReplyTo(replyToEmail, msg);
     return msg;

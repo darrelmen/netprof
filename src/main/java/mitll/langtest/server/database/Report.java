@@ -195,7 +195,7 @@ public class Report implements IReport {
    * @see ReportingServices#doReport
    */
   @Override
-  public boolean doReport(int projid,
+  public List<ReportStats> doReport(int projid,
                           String language,
                           String site,
 
@@ -209,10 +209,9 @@ public class Report implements IReport {
     if (!getShouldSkip() &&
         // isTodayAGoodDay() &&
         !reportEmails.isEmpty()) {
-      writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, getThisYear(), forceSend);
-      return true;
+      return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, getThisYear(), forceSend);
     } else {
-      return false;
+      return Collections.emptyList();
     }
   }
 
@@ -245,7 +244,7 @@ public class Report implements IReport {
    * @param year         which year you want data for
    * @see #doReport
    */
-  private boolean writeAndSendReport(int projid,
+  private List<ReportStats> writeAndSendReport(int projid,
                                      String language,
                                      String site,
                                      MailSupport mailSupport,
@@ -257,7 +256,7 @@ public class Report implements IReport {
     File file = getReportFile(pathHelper, today, language, site, ".html");
     if (file.exists() && !forceSend) {
       logger.debug("writeAndSendReport already did report for " + today + " : " + file.getAbsolutePath());
-      return false;
+      return Collections.emptyList();
     } else {
       logger.debug("writeAndSendReport Site real path " + site);
       try {
@@ -265,10 +264,11 @@ public class Report implements IReport {
         ReportStats stats = new ReportStats(projid, language, site, year, jsonObject);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
         sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
+        return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
+        return Collections.emptyList();
       }
-      return true;
     }
   }
 
@@ -319,7 +319,14 @@ public class Report implements IReport {
     });
 
 
+    //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
+  }
+
+  @Override
+  public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper) {
     File summaryReport = getSummaryReport(reportStats, pathHelper);
+
+    //List<String> reportEmails = serverProps.getReportEmails();
 
     reportEmails.forEach(dest -> {
       if (!mailSupport.emailAttachment(dest, MY_EMAIL, getFileName(), summaryReport)) {

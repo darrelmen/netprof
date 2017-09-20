@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IReport {
-  boolean doReport(int projid,
+  List<ReportStats> doReport(int projid,
                    String language,
                    String site,
                    ServerProperties serverProps,
@@ -29,6 +29,8 @@ public interface IReport {
    * @return
    */
   String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports);
+
+  void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper);
 
   File getReportPathDLI(PathHelper pathHelper, String suffix);
 }

@@ -1611,13 +1611,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private void sendReports(IReport report, boolean forceSend) {
     MailSupport mailSupport = getMailSupport();
+    List<ReportStats> stats = new ArrayList<>();
     getProjects().forEach(project -> {
-      report
+      stats.addAll(report
           .doReport(project.getID(),
               project.getLanguage(),
               project.getProject().name(),
-              serverProps, mailSupport, pathHelper, forceSend);
+              serverProps, mailSupport, pathHelper, forceSend));
     });
+
+    report.sendExcelViaEmail(mailSupport, serverProps.getReportEmails(), stats, pathHelper);
   }
 
   private MailSupport getMailSupport() {

@@ -117,7 +117,9 @@
 
         <logger name="mitll.hlt.domino.server.util" level="WARN"/>
         <logger name="mitll.hlt.domino.server.user" level="WARN"/>
-
+        <logger name="org.eclipse.jetty.io" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
         <root level="debug">
             <appender-ref ref="STDOUT" level="debug"/>
         </root>
