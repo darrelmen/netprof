@@ -163,9 +163,14 @@ public class CopyToPostgres<T extends CommonShell> {
 
     ServerProperties serverProps = getProps();
 
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
+    DatabaseImpl database
+        = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
         new PathHelper("war", serverProps), false, null, false);
     return database;
+  }
+
+  private static DatabaseImpl getSimpleDatabase() {
+    return new DatabaseImpl(getProps());
   }
 
   private static ServerProperties getProps() {
@@ -887,7 +892,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Expects something like:
-   *
+   * <p>
    * copy english
    * copy pashto pashto1
    * drop pashto
@@ -947,23 +952,40 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.warn("really be sure that this is only during development and not during production!");
         if (arg.length == 2) {
           String s = arg[1];
-          if (s.equals("destroy")){
-            try {
-              logger.warn("OK hope this is what you want.");
-              DatabaseImpl database = getDatabase();
-              database.dropAll();
-              database.close();
-            } catch (Exception e) {
-              logger.error("couldn't drop all tables", e);
-            }
-          }
-          else {
+          if (s.equals("destroy")) {
+            doDropAll();
+          } else {
             logger.info("please check with Gordon or Ray or somebody like that before doing this.");
           }
         }
         break;
       default:
         usage();
+    }
+  }
+
+  /**
+   * Drop all doesn't require mongo connection, etc.
+   *
+   */
+  private static void doDropAll() {
+    DatabaseImpl database = null;
+    try {
+      logger.warn("OK hope this is what you want.");
+      database = getSimpleDatabase();
+      database.dropAll();
+    } catch (Exception e) {
+      logger.error("couldn't drop all tables, got " + e, e);
+      String concat = database.getTables().concat(",\n");
+      logger.info("doDropAll now there are " + concat);
+    } finally {
+      try {
+        if (database != null) {
+          database.close();
+        }
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+      }
     }
   }
 
@@ -1010,7 +1032,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static void usage() {
-    logger.error("Usage : expecting either " + getValues()+  " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
+    logger.error("Usage : expecting either " + getValues() + " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
     logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
   }
 }

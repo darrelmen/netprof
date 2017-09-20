@@ -195,6 +195,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
 
+  public DatabaseImpl(ServerProperties serverProps) {
+    this.serverProps = serverProps;
+    this.logAndNotify = null;
+    this.absConfigDir = "";
+    setDBConnection();
+  }
+
   /**
    * JUST FOR TESTING
    *
@@ -321,7 +328,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void initializeDAOs(PathHelper pathHelper) {
-    dbConnection = getDbConnection();
+    setDBConnection();
     logger.debug("initializeDAOs --- " + dbConnection);
 
     eventDAO = new SlickEventImpl(dbConnection);
@@ -375,7 +382,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
 
-    logger.debug("initializeDAOs : tables = " + dbConnection.getTables());
+    logger.debug("initializeDAOs : tables = " + getTables());
+  }
+
+  private void setDBConnection() {
+    dbConnection = getDbConnection();
   }
 
   /**
@@ -1132,8 +1143,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     userListManager.createTables(dbConnection, created);
 
     if (!created.isEmpty()) {
-      logger.info("createTables created slick tables : " + created);
-      logger.info("createTables after create slick tables - has " + dbConnection.getTables());
+      logger.info("createTables created slick tables          : " + created);
+      logger.info("createTables after create slick tables - has " + getTables());
     }
 
     dbConnection.addColumn();
@@ -1288,7 +1299,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   public void close() {
     try {
-      userDAO.close();
+      if (userDAO != null) userDAO.close();
       if (connection != null) {
         connection.contextDestroyed();
       }
@@ -1305,7 +1316,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Use with extreme caution.
    */
   public void dropAll() {
-    dbConnection.dropAll();
+    if (dbConnection.hasAnyTables()) {
+      dbConnection.dropAll();
+    }
+    if (dbConnection.hasAnyTables()) {
+     logger.error("dropAll couldn't delete all the tables, now there are  " + getTables());
+    }
+  }
+
+  public String getTables() {
+    return dbConnection.getTables();
   }
 
   private int warns = 0;
@@ -1617,7 +1637,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
           .doReport(project.getID(),
               project.getLanguage(),
               project.getProject().name(),
-              serverProps, mailSupport, pathHelper, forceSend));
+              serverProps,
+              mailSupport,
+              pathHelper,
+              forceSend));
     });
 
     report.sendExcelViaEmail(mailSupport, serverProps.getReportEmails(), stats, pathHelper);

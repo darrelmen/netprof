@@ -66,7 +66,7 @@ public class MailSupport {
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
-  public static final String TEXT_HTML = "text/html";
+  private static final String TEXT_HTML = "text/html";
   private final boolean debugEmail;
   private final boolean testEmail;
 

@@ -209,7 +209,8 @@ public class Report implements IReport {
     if (!getShouldSkip() &&
         // isTodayAGoodDay() &&
         !reportEmails.isEmpty()) {
-      return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, getThisYear(), forceSend);
+      int thisYear = getThisYear();
+      return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, thisYear, forceSend);
     } else {
       return Collections.emptyList();
     }
@@ -260,10 +261,9 @@ public class Report implements IReport {
     } else {
       logger.debug("writeAndSendReport Site real path " + site);
       try {
-        JSONObject jsonObject = new JSONObject();
-        ReportStats stats = new ReportStats(projid, language, site, year, jsonObject);
+        ReportStats stats = new ReportStats(projid, language, site, year);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
-        sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
+   //     sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
         return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
@@ -314,11 +314,8 @@ public class Report implements IReport {
 
     reportEmails.forEach(dest -> {
       if (!mailSupport.sendEmail(hostname, dest, MY_EMAIL, subject, stats.getHtml())) {
-
       }
     });
-
-
     //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
   }
 
