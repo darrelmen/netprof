@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface IResultDAO extends IDAO {
+  long getFirstTime(int projid);
+
   List<Result> getResults();
 
   Collection<MonitorResult> getResultsDevices(int projid);

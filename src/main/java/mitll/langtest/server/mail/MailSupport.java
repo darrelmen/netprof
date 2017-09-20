@@ -41,7 +41,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.util.*;
 
@@ -74,7 +78,7 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
-    this.testEmail = testEmail;
+    this.testEmail = true;
     if (testEmail) logger.warn("\n\n\n--->using test email");
   }
 
@@ -191,6 +195,42 @@ public class MailSupport {
     normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST, testEmail);
   }
 
+  public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach) {
+    Message message = new MimeMessage(getMailSession(LOCALHOST, testEmail));
+
+
+    try {
+      configure(RECIPIENT_NAME, receiver, Collections.emptyList(), subject, messageBody, message);
+
+      Multipart multipart = new MimeMultipart();
+
+      {// creates body part for the message
+        MimeBodyPart messageBodyPart = new MimeBodyPart();
+        messageBodyPart.setContent(message, "text/html");
+
+// adds parts to the multipart
+        multipart.addBodyPart(messageBodyPart);
+      }
+
+      // creates body part for the attachment
+      {
+        MimeBodyPart attachPart = new MimeBodyPart();
+        attachPart.attachFile(toAttach);
+        multipart.addBodyPart(attachPart);
+      }
+
+// sets the multipart as message's content
+      message.setContent(multipart);
+
+      Transport.send(message);
+      return true;
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+
+      return false;
+    }
+  }
+
   /**
    * @param recipientName
    * @param recipientEmail
@@ -257,12 +297,14 @@ public class MailSupport {
   private boolean normalFullEmail(String senderName,
                                   String senderEmail,
                                   String replyToEmail,
+
                                   Collection<String> ccEmails,
                                   Collection<String> recipientEmails,
 
-                                  String subject, String message) {
+                                  String subject,
+                                  String message) {
     try {
-      Properties props = new Properties();
+/*      Properties props = new Properties();
       props.put(MAIL_SMTP_HOST, LOCALHOST);
       props.put(MAIL_DEBUG, "" + (debugEmail || testEmail));
 
@@ -276,9 +318,8 @@ public class MailSupport {
 
       if (testEmail && property == null) {
         session.getProperties().setProperty(MAIL_SMTP_PORT, "" + MAIL_PORT);
-      }
-
-      Message msg = makeHTMLMessage(session,
+      }*/
+      Message msg = makeHTMLMessage(getMailSession(LOCALHOST, testEmail),
           senderName, senderEmail, replyToEmail, recipientEmails,
           ccEmails, subject, message);
       Transport.send(msg);
@@ -328,6 +369,12 @@ public class MailSupport {
                               String subject,
                               String message) throws Exception {
     Message msg = new MimeMessage(session);
+    configure(recipientName, recipientEmail, ccEmails, subject, message, msg);
+
+    return msg;
+  }
+
+  private void configure(String recipientName, String recipientEmail, Collection<String> ccEmails, String subject, String message, Message msg) throws MessagingException, UnsupportedEncodingException {
     msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
     InternetAddress address = new InternetAddress(recipientEmail, recipientName);
     logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
@@ -335,8 +382,7 @@ public class MailSupport {
     addCC(ccEmails, msg);
     msg.setSubject(subject);
     msg.setText(message);
-
-    return msg;
+    msg.setSentDate(new Date());
   }
 
   private void addCC(Collection<String> ccEmails, Message msg) throws MessagingException {

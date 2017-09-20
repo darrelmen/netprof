@@ -148,7 +148,7 @@ public class PhoneAnalysis {
     if (toUse == null) {
       logger.error("getPhoneSessions huh? no sessions?");
     } else {
-      logger.info("getPhoneSessions " + key + " prune " + prune + " sessions " + toUse.size());
+//      logger.info("getPhoneSessions " + key + " prune " + prune + " sessions " + toUse.size());
       int size = toUse.size();
       for (PhoneSessionInternal internal : toUse) {
         internal.remember();

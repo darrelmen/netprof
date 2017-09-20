@@ -6,8 +6,10 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 public interface IReport {
   boolean doReport(int projid,
@@ -15,9 +17,18 @@ public interface IReport {
                    String site,
                    ServerProperties serverProps,
                    MailSupport mailSupport,
-                   PathHelper pathHelper, boolean forceSend);
+                   PathHelper pathHelper,
+                   boolean forceSend);
+  JSONObject writeReportToFile(ReportStats stats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException;
 
-//  boolean isTodayAGoodDay();
-  JSONObject writeReportToFile(int projid, PathHelper pathHelper, String language, int year, String name) throws IOException;
-  String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year);
+  /**
+   * @param projects
+   * @param jsonObject
+   * @param year
+   * @param allReports
+   * @return
+   */
+  String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports);
+
+  File getReportPathDLI(PathHelper pathHelper, String suffix);
 }

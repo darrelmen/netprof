@@ -225,6 +225,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return trimPathForWebPage2(slick.answer());
   }
 
+  @Override
+  public long getFirstTime(int projid) {
+    return dao.getFirst(projid).modified().getTime();
+  }
+
   public void addBulk(List<SlickResult> bulk) {
     dao.addBulk(bulk);
   }
@@ -522,7 +527,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return prefix.substring(netProfDurLength) + File.separator;
   }
 
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) { return dao.perf(projid, minScore); }
+  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
+    return dao.perf(projid, minScore);
+  }
 
   /**
    * @param userid

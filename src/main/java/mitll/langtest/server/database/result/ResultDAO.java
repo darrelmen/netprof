@@ -100,18 +100,10 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   //  logger.warn("\n\n\n\nmade h2 result dao " + this);
   }
 
-  /**
-   * @param id
-   * @param phoneDAO
-   * @param minRecordings
-   * @param exToRef
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
-   */
-/*  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings, Map<String, String> exToRef) {
-    return new Analysis(database, phoneDAO, exToRef).getPerformanceForUser(id, minRecordings);
-  }*/
+  @Override
+  public long getFirstTime(int projid) {
+    return 0;
+  }
 
   /**
    * Pulls the list of results out of the database.

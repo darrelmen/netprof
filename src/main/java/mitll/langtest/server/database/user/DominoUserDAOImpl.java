@@ -94,8 +94,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * Should be consistent with DOMINO.
+   * Actually it's all lower case.
    */
-  public static final String NETPROF = "NetProf";
+  public static final String NETPROF = DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
 
   private IUserServiceDelegate delegate;
@@ -809,11 +810,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user;
   }
 
+  /**
+   * NOT case insensitive.
+   *
+   * @param dominoUser
+   * @return
+   */
   private boolean isHasAppPermission(DBUser dominoUser) {
     Set<String> applicationAbbreviations = dominoUser.getApplicationAbbreviations();
     boolean hasAppPermission = false;
     for (String app : applicationAbbreviations) {
-      if (app.equalsIgnoreCase(NETPROF)) hasAppPermission = true;
+      if (app.equals(NETPROF)) hasAppPermission = true;
     }
     if (!hasAppPermission) {
       logger.info("isHasAppPermission user #" + dominoUser.getDocumentDBID() + " not a netprof user only has : " + applicationAbbreviations);
@@ -966,9 +973,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (miniUserCache == null || (now - lastCache) > 60 * 60 * 1000 || lastCount != userCount) {
       Map<Integer, MiniUser> idToUser = new HashMap<>();
 
-      for (DBUser s : getAll()) {
-        idToUser.put(s.getDocumentDBID(), getMini(s));
-      }
+      getAll().forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), getMini(dbUser)));
 
       miniUserCache = idToUser;
 
@@ -1008,7 +1013,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
     logger.warn("getAll calling get all users");
-    List<DBUser> users = delegate.getUsers(-1, null);
+    FindOptions<UserColumn> opts = new FindOptions<>();
+    FilterDetail<UserColumn> netProf = new FilterDetail<>(UserColumn.DLIApplications, "NetProf", FilterDetail.Operator.RegEx);
+    opts.addFilter(netProf);
+    List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;

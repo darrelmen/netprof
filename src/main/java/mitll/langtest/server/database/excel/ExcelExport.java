@@ -76,7 +76,8 @@ public class ExcelExport {
   public void writeExcelToStream(Collection<CommonExercise> exercises,
                                  OutputStream out,
                                  Collection<String> typeOrder,
-                                 String language, boolean isDefectList) {
+                                 String language,
+                                 boolean isDefectList) {
     SXSSFWorkbook wb = writeExcel(exercises, language, typeOrder, isDefectList);
     long then = System.currentTimeMillis();
     try {

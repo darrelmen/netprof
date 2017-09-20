@@ -56,6 +56,7 @@ import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
+import mitll.langtest.server.database.excel.ReportToExcel;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
@@ -108,9 +109,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.CollationKey;
@@ -1605,10 +1604,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }
 
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
-  }
-
   @Override
   public void sendReport() {
     sendReports(getReport(), true);
@@ -1618,8 +1613,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     MailSupport mailSupport = getMailSupport();
     getProjects().forEach(project -> {
       report
-          .doReport(project.getID(), project.getLanguage(), project.getProject().name(), serverProps, mailSupport, pathHelper, forceSend);
+          .doReport(project.getID(),
+              project.getLanguage(),
+              project.getProject().name(),
+              serverProps, mailSupport, pathHelper, forceSend);
     });
+  }
+
+  private MailSupport getMailSupport() {
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
 
   /**
@@ -1630,19 +1632,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public String getReport(int year, JSONObject jsonObject) {
-    return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year);
+    List<ReportStats> reportStats = new ArrayList<>();
+    return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, reportStats);
   }
-  //private Report reportCache;
 
-  private IReport getReport() {
-    //if (reportCache == null) {
+  public IReport getReport() {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
-    ;
-    Report report = new Report(resultDAO, eventDAO, audioDAO, "",
-        reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(), serverProps.getNPServer());
-    //this.reportCache = report;
-    //}
-    //return reportCache;
+    Report report = new Report(resultDAO, eventDAO, audioDAO,
+        reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(),
+        serverProps.getNPServer(), this.getLogAndNotify());
     return report;
   }
 
@@ -1665,16 +1663,33 @@ public class DatabaseImpl implements Database, DatabaseServices {
     List<JSONObject> jsons = new ArrayList<>();
     IReport report = getReport();
 
+    List<ReportStats> allReports = new ArrayList<>();
     getProjects().forEach(project -> {
           try {
-            jsons.add(report.writeReportToFile(project.getID(), pathHelper, project.getLanguage(), year, project.getProject().name()));
+            jsons.add(report.writeReportToFile(new ReportStats(project.getProject(), year), pathHelper, allReports));
           } catch (IOException e) {
             logger.error("got " + e);
           }
         }
     );
 
+    getSummaryReport(report, allReports);
+
     return jsons;
+
+  }
+
+  private File getSummaryReport(IReport report, List<ReportStats> allReports) {
+    try {
+      File file2 = report.getReportPathDLI(pathHelper, ".xlsx");
+      new ReportToExcel(logAndNotify).toXLSX(allReports, new FileOutputStream(file2));
+      logger.debug("writeReportToFile wrote to " + file2.getAbsolutePath());
+      return file2;
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      logAndNotify(e);
+      return null;
+    }
 
   }
 
