@@ -120,14 +120,6 @@ public interface IAudioDAO extends IDAO {
   Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
-  /**
-   * TURNED THIS OFF FOR NOW - we don't allow creating new items
-   * @seex mitll.langtest.server.services.AudioServiceImpl#reallyCreateNewItem
-   * @paramx uniqueID
-   * @paramx exerciseID
-   */
- // void updateExerciseID(int uniqueID, int exerciseID, String actualPath);
-
   void updateDNR(int uniqueID, float dnr);
 
   boolean didFindAnyAudioFiles(int projectid);

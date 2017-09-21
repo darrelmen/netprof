@@ -145,14 +145,14 @@ public class AudioFileHelper implements AlignDecode {
    * @param transcript
    * @param transliteration
    * @return
-   * @see Project#getPronunciations
+   * @see Project#getPronunciationsFromDictOrLTS
    */
-  public String getPronunciations(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciations(transcript, transliteration, true);
+  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
+    return webserviceScoring.getPronunciationsFromDictOrLTS(transcript, transliteration, true);
   }
 
-  public int getNumPhones(String transcript, String transliteration) {
-    return webserviceScoring.getNumPhones(transcript, transliteration);
+  public int getNumPhonesFromDictionary(String transcript, String transliteration) {
+    return webserviceScoring.getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
   }
 
   /**
@@ -1449,6 +1449,14 @@ public class AudioFileHelper implements AlignDecode {
    */
   private void makeDecodeCorrectnessChecker() {
     decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore());
+  }
+
+  /**
+   * If a language is in development and has no model, there will be no dictionary...?
+   * @return
+   */
+  public boolean hasDict() {
+    return !asrScoring.isDictEmpty();
   }
 
   /**

@@ -34,7 +34,6 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
@@ -139,7 +138,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public boolean update(ProjectInfo info) {
-    boolean update = getProjectDAO().update(getUserIDFromSession(), info);
+    boolean update = getProjectDAO().update(getUserIDFromSessionOrDB(), info);
     if (update) {
       db.configureProject(db.getProject(info.getID()), true);
     }
@@ -191,7 +190,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
 
     if (toImport != null) {
-      int importUser = getUserIDFromSession();
+      int importUser = getUserIDFromSessionOrDB();
       logger.info("addPending import user = " + importUser);
       if (importUser == -1) {
         logger.info("\t addPending import user now = " + importUser);

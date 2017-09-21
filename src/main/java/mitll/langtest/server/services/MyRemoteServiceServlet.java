@@ -109,7 +109,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @return
    */
   protected int getProjectID() {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionOrDB();
     return getProjectID(userIDFromSession);
   }
 
@@ -128,7 +128,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   }
 
   protected Project getProject() {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionOrDB();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       return null;
@@ -160,16 +160,22 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    *
    * @return
    */
-  int getUserIDFromSession() {
-    int userIDFromSession = getUserIDFromSessionNoCheck();
+  int getUserIDFromSessionOrDB() {
+    return securityManager.getUserIDFromSession(getThreadLocalRequest());
+  }
+
+/*
+  private int getUserIDFromSessionOrDB(HttpServletRequest threadLocalRequest, HttpServletResponse threadLocalResponse) {
+    int userIDFromSession = getUserIDFromSessionNoCheck(threadLocalRequest);
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
       try {
-        User sessionUser = getSessionUser();
+        User sessionUser = securityManager.getLoggedInUser(getThreadLocalRequest(), threadLocalResponse);
+
         int i = (sessionUser == null) ? -1 : sessionUser.getID();
 
         if (i == -1) { // OK, try the cookie???
-          logger.error("getUserIDFromSession huh? couldn't get user from session or database?");
+          logger.error("getUserIDFromSessionOrDB huh? couldn't get user from session or database?");
         }
         return i;
       } catch (DominoSessionException e) {
@@ -180,15 +186,20 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       return userIDFromSession;
     }
   }
+*/
 
   /**
    * @return
-   * @see #getUserIDFromSession
+   * @see #getUserIDFromSessionOrDB
    */
-  private int getUserIDFromSessionNoCheck() {
-    return securityManager.getUserIDFromRequest(getThreadLocalRequest());
-  }
+/*  private int getUserIDFromSessionNoCheck(HttpServletRequest threadLocalRequest) {
+    return securityManager.getUserIDFromRequest(threadLocalRequest);
+  }*/
 
+  /**
+   * Add startup info to user.
+   * @return
+   */
   public User getUserFromSession() {
     try {
       User loggedInUser = getSessionUser();
@@ -229,7 +240,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @throws DominoSessionException
    */
   User getSessionUser() throws DominoSessionException {
-    return securityManager.getLoggedInUser(getThreadLocalRequest(), getThreadLocalResponse());
+    return securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 
   /**

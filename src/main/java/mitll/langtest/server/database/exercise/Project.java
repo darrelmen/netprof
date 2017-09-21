@@ -434,20 +434,19 @@ public class Project implements PronunciationLookup {
 */
 
   @Override
-  public String getPronunciations(String transcript, String transliteration) {
-    return hasModel() ? audioFileHelper.getPronunciations(transcript, transliteration) : "";
+  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
+    return hasModel() ? audioFileHelper.getPronunciationsFromDictOrLTS(transcript, transliteration) : "";
   }
 
   @Override
-  public int getNumPhones(String transcript, String transliteration) {
-    return hasModel() ? audioFileHelper.getNumPhones(transcript, transliteration) : 0;
+  public int getNumPhonesFromDictionary(String transcript, String transliteration) {
+    return hasModel() ? audioFileHelper.getNumPhonesFromDictionary(transcript, transliteration) : 0;
   }
 
-  /*
-  public Map<Integer, ExercisePhoneInfo> getExToPhone() {
-    return exToPhone;
+  @Override
+  public boolean hasDict() {
+    return hasModel() ? audioFileHelper.hasDict() : false;
   }
-*/
 
   /**
    * @return
@@ -486,10 +485,6 @@ public class Project implements PronunciationLookup {
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
   }
-
-//  public void setAudioToAlignment(Map<Integer, AlignmentOutput> audioToAlignment) {
-//    this.audioToAlignment = audioToAlignment;
-//  }
 
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;

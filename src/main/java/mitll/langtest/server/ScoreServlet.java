@@ -48,7 +48,6 @@ import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.Int;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -227,9 +226,8 @@ public class ScoreServlet extends DatabaseServlet {
           request,
           response,
           queryString,
-          toReturn,
-          projid,
-          passwordFromBody)) {
+          toReturn
+      )) {
         logger.info("doGet " + language + " handled user command");
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
@@ -246,7 +244,7 @@ public class ScoreServlet extends DatabaseServlet {
         reportingServices.getReport(getYear(queryString), toReturn);
       } else if (matchesRequest(queryString, SEND_REPORT)) {
         queryString = removePrefix(queryString, SEND_REPORT);
-        reportingServices.sendReport();
+        reportingServices.sendReport(securityManager.getUserIDFromSession(request));
       } else if (matchesRequest(queryString, EXPORT)) {
         toReturn = getJSONForExercises(projid);
       } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
@@ -628,6 +626,12 @@ public class ScoreServlet extends DatabaseServlet {
     return deviceType;
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
+   * @param request
+   * @param jsonObject
+   */
   private void checkUserAndLogin(HttpServletRequest request, JSONObject jsonObject) {
     userManagement.tryToLogin(
         jsonObject,

@@ -32,33 +32,11 @@
 
 package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.analysis.IAnalysis;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.DominoExerciseDAO;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.ProjectType;
-import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.ExerciseToPhone;
-import mitll.langtest.server.scoring.PrecalcScores;
-import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
-
-import java.util.*;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);

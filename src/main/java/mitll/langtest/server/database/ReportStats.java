@@ -5,6 +5,7 @@ import net.sf.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ReportStats {
   private int projid;
@@ -26,12 +27,13 @@ public class ReportStats {
     this.year = year;
   }
 
-  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS}
+  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
 
   ;
 
   Map<INFO, String> keyToValue = new HashMap<>();
   Map<INFO, Integer> intKeyToValue = new HashMap<>();
+  Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
 
 
   public ReportStats(ReportStats reportStats) {
@@ -99,8 +101,17 @@ public class ReportStats {
     keyToValue.put(key, value);
   }
 
-  public void putInt(INFO key, Integer value) {
+  void putInt(INFO key, Integer value) {
     intKeyToValue.put(key, value);
+  }
+
+  void putIntMulti(INFO key, String key2, Integer value) {
+    Map<String, Integer> weekToValue = intMultiKeyToValue.computeIfAbsent(key, k -> new TreeMap<>());
+    weekToValue.put(key2, value);
+  }
+
+  public Map<String, Integer> getKeyToValue(INFO key) {
+    return intMultiKeyToValue.get(key);
   }
 
   public Map<INFO, Integer> getIntKeyToValue() {

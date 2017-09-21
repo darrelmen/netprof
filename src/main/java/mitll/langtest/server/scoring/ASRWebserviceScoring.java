@@ -497,7 +497,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     String dict
         = "[";
-    String pronunciations = getPronunciations(transcript, transliteration, false);
+    String pronunciations = getPronunciationsFromDictOrLTS(transcript, transliteration, false);
 
 /*    logger.info("createHydraDict" +
         "\n\ttranscript     " + transcript +
@@ -513,13 +513,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private Set<String> seen = new HashSet<>();
 
   /**
+   * TODO : Why this method here too? Duplicate?
    * TODO : add failure case back in
    *
    * @param transcript
    * @param transliteration
    * @return
+   * @see AudioFileHelper#getNumPhonesFromDictionary
    */
-  public int getNumPhones(String transcript, String transliteration) {
+  public int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration) {
     //  String[] translitTokens = transliteration.toLowerCase().split(" ");
     String[] transcriptTokens = transcript.split(" ");
     //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
@@ -569,9 +571,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param transliteration
    * @param justPhones
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciations
+   * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
-  public String getPronunciations(String transcript, String transliteration, boolean justPhones) {
+  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones) {
     String dict = "";
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
@@ -584,7 +586,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     for (String word : transcriptTokens) {
       String trim = word.trim();
       if (!trim.equals(word)) {
-        logger.warn("getPronunciations trim is different '" + trim + "' != '" + word + "'");
+        logger.warn("getPronunciationsFromDictOrLTS trim is different '" + trim + "' != '" + word + "'");
         word = trim;
       }
       if (!word.equals(" ") && !word.isEmpty()) {
@@ -598,7 +600,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           }
         } else {  // not in the dictionary, let's ask LTS
           if (getLTS() == null) {
-            logger.warn("getPronunciations " + this + " " + languageProperty + " : LTS is null???");
+            logger.warn("getPronunciationsFromDictOrLTS " + this + " " + languageProperty + " : LTS is null???");
           } else {
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
@@ -607,7 +609,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               if (canUseTransliteration) {
                 //              logger.info("trying transliteration LTS");
                 if (!seen.contains(key)) {
-                  logger.warn("getPronunciations (transliteration) couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                  logger.warn("getPronunciationsFromDictOrLTS (transliteration) couldn't get letter to sound map from " +
+                      getLTS() + " for " + word1 + " in " + transcript);
                 }
 
                 String[][] translitprocess = (numTokens == 1) ?
@@ -615,14 +618,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                     getLTS().process(translitTokens[index]);
 
                 if (ltsOutputOk(translitprocess)) {
-                  logger.info("getPronunciations got pronunciation from transliteration");
+                  logger.info("getPronunciationsFromDictOrLTS got pronunciation from transliteration");
                   for (String[] pron : translitprocess) {
                     dict += getPronStringForWord(word, pron, false);
                   }
                 } else {
-                  logger.info("getPronunciations transliteration LTS failed");
-                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
-                  logger.info("getPronunciations attempting to fall back to default pronunciation");
+                  logger.info("getPronunciationsFromDictOrLTS transliteration LTS failed");
+                  logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
+                  logger.info("getPronunciationsFromDictOrLTS attempting to fall back to default pronunciation");
                   if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
                     dict += getDefaultPronStringForWord(word, translitprocess, justPhones);
                   }
@@ -630,7 +633,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               } else {
 //                logger.info("can't use transliteration");
                 if (!seen.contains(key)) {
-                  logger.warn("getPronunciations couldn't get letter to sound map from " + getLTS() + " for '" + word1 + "' in " + transcript);
+                  logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + getLTS() + " for '" + word1 + "' in " + transcript);
                 }
 
                 seen.add(key);
@@ -684,7 +687,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param apply
    * @param justPhones
    * @return
-   * @see #getPronunciations
+   * @see #getPronunciationsFromDictOrLTS
    */
   private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
     for (String[] pc : apply) {

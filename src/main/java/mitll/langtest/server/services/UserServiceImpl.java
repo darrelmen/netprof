@@ -307,7 +307,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see ChangePasswordView#changePassword
    */
   public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionOrDB();
     User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
     return
         userWhereResetKey != null &&

@@ -80,6 +80,11 @@ public class ExerciseToPhone {
     return exToPhones;
   }*/
 
+  /**
+   * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#getExerciseToPhoneForProject
+   * @param jsonResults
+   * @return
+   */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(Collection<SlickRefResultJson> jsonResults) {
     long then = System.currentTimeMillis();
 //    long now = System.currentTimeMillis();
@@ -98,9 +103,9 @@ public class ExerciseToPhone {
         exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
       }
       List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-      if (transcriptSegments != null) {
+/*      if (transcriptSegments != null) {
         addPhones(phonesForEx, transcriptSegments);
-      }
+      }*/
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
 
@@ -170,7 +175,7 @@ public class ExerciseToPhone {
               pForWord.add(pronKey);
 
               Info info = new Info(exid, word, pronsForWord, numWords);
-              //for (List<String> pron : info.getPronunciations()) {
+              //for (List<String> pron : info.getPronunciationsFromDictOrLTS()) {
               Set<Info> infos = lengthToInfos.get(pron.size());
               if (infos == null) {
                 lengthToInfos.put(pron.size(), infos = new HashSet<Info>());
@@ -181,7 +186,7 @@ public class ExerciseToPhone {
           }
 /*
           Info info = new Info(exid, word, pronsForWord, numWords);
-          for (List<String> pron : info.getPronunciations()) {
+          for (List<String> pron : info.getPronunciationsFromDictOrLTS()) {
             Set<Info> infos = lengthToInfos.get(pron.size());
             if (infos == null) {
               lengthToInfos.put(pron.size(), infos = new HashSet<Info>());
@@ -194,7 +199,9 @@ public class ExerciseToPhone {
         ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
         if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
 
+/*
         addPhones(phonesForEx, netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT));
+*/
 
         phonesForEx.setNumPhones(exjson.numalignphones());
       }
@@ -247,12 +254,16 @@ public class ExerciseToPhone {
       }
     }
 
+    // Not for now - maybe in the future.
+    /*
+
     for (Map.Entry<Integer, ExercisePhoneInfo> entry : exToPhones.entrySet()) {
       Map<String, Info> wordToInfo = exToWordToInfo.get(entry.getKey());
       if (wordToInfo != null) {
         entry.getValue().setWordToInfo(wordToInfo);
       }
     }
+*/
 
     long diff = System.currentTimeMillis() - then;
     if (diff > 20)  logger.info("took " + diff + " millis to populate ex->phone map");
@@ -266,7 +277,7 @@ public class ExerciseToPhone {
     if (wordToInfo == null) {
       exToWordToInfo.put(info.exid, wordToInfo = new HashMap<>());
     }
-    Info previous = wordToInfo.put(info.word, info);
+    /*Info previous =*/ wordToInfo.put(info.word, info);
   }
 
   private String getPronKey(List<String> pron) {
@@ -375,7 +386,7 @@ public class ExerciseToPhone {
    * @param phonesForEx
    * @param transcriptSegments
    */
-  private void addPhones(ExercisePhoneInfo phonesForEx, List<TranscriptSegment> transcriptSegments) {
+/*  private void addPhones(ExercisePhoneInfo phonesForEx, List<TranscriptSegment> transcriptSegments) {
     Set<String> phones = new HashSet<>();
     for (TranscriptSegment segment : transcriptSegments) {
       if (segment != null) {
@@ -383,5 +394,5 @@ public class ExerciseToPhone {
       }
     }
     phonesForEx.addPhones(phones);
-  }
+  }*/
 }

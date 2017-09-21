@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by go22670 on 3/8/17.
  */
 public interface ReportingServices {
-  void sendReport();
+  void sendReport(int userID);
 
   String getReport(int year, JSONObject jsonObject);
 

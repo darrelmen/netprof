@@ -454,6 +454,10 @@ public abstract class Scoring {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
   }
 
+  /**
+   * Must be public.
+   * @return
+   */
   public boolean isDictEmpty() { return checkLTSHelper.isDictEmpty(); }
 
   /**

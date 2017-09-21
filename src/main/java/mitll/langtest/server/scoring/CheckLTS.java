@@ -238,8 +238,12 @@ class CheckLTS {
     return oov;
   }
 
-  public boolean isDictEmpty() {
-    return htkDictionary.isEmpty();
+  /**
+   * @see Scoring#isDictEmpty
+   * @return
+   */
+  boolean isDictEmpty() {
+    return htkDictionary == null || htkDictionary.isEmpty();
   }
 
   private boolean isTranslitOk(LTS lts, String transliteration, Collection<String> tokens, Collection<String> translitTokens) {

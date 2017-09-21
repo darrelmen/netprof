@@ -78,7 +78,7 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
-    this.testEmail = false;
+    this.testEmail = true;
     if (testEmail) logger.warn("\n\n\n--->using test email");
   }
 
@@ -318,25 +318,9 @@ public class MailSupport {
                                   String subject,
                                   String message) {
     try {
-/*      Properties props = new Properties();
-      props.put(MAIL_SMTP_HOST, LOCALHOST);
-      props.put(MAIL_DEBUG, "" + (debugEmail || testEmail));
-
-      if (testEmail) {
-        props.put(MAIL_SMTP_PORT, "" + MAIL_PORT);
-        logger.debug("Testing : using port " + MAIL_PORT);
-      }
-      Session session = Session.getDefaultInstance(props, null);
-      //    logger.debug("session props " + session.getProperties());
-      String property = session.getProperty(MAIL_SMTP_PORT);
-
-      if (testEmail && property == null) {
-        session.getProperties().setProperty(MAIL_SMTP_PORT, "" + MAIL_PORT);
-      }*/
-      Message msg = makeHTMLMessage(getMailSession(LOCALHOST, testEmail),
+      Transport.send(makeHTMLMessage(getMailSession(LOCALHOST, testEmail),
           senderName, senderEmail, replyToEmail, recipientEmails,
-          ccEmails, subject, message);
-      Transport.send(msg);
+          ccEmails, subject, message));
       return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {

@@ -84,9 +84,6 @@ public class RestUserManagement {
   private static final String EXISTING_USER_NAME = "ExistingUserName";
   private static final String USER = "user";
 
-  //  private static final String PASSWORD_H = "passwordH";
-//  private static final String FREE_TEXT_PASSWORD = "freeTextPassword";
-
   /**
    * @seex mitll.langtest.server.database.user.UserManagement#userExists
    * @see #addUser
@@ -144,17 +141,13 @@ public class RestUserManagement {
    * @param response
    * @param queryString
    * @param toReturn
-   * @param projid
-   * @param passwordFromBody
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
   public boolean doGet(HttpServletRequest request,
                        HttpServletResponse response,
                        String queryString,
-                       JSONObject toReturn,
-                       int projid,
-                       String passwordFromBody) {
+                       JSONObject toReturn) {
 /*    if (queryString.startsWith(HAS_USER)) {
       String[] split1 = getParams(queryString);
       if (split1.length < 2) {
@@ -304,8 +297,6 @@ public class RestUserManagement {
       toReturn.put(TOKEN, "");
       toReturn.put(PASSWORD_CORRECT, FALSE);
     } else {
-      //User strictUserWithPass = userDAO.getStrictUserWithPass(user, passwordH);
-
       int userid = userFound.getID();
       toReturn.put(USERID, userid);
       // TODO : do we need to do something else here?
@@ -620,7 +611,7 @@ public class RestUserManagement {
     String last = request.getHeader("last");
     String affiliation = request.getHeader("affiliation");
 
-    boolean isMale = gender == null ? false : gender.equalsIgnoreCase("male");
+    boolean isMale = gender != null && gender.equalsIgnoreCase("male");
     SignUpUser user2 = new SignUpUser(user,
         emailH, email,
         Kind.STUDENT,

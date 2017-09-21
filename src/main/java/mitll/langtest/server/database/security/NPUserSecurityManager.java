@@ -44,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -71,6 +70,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private final IUserSessionDAO userSessionDAO;
 
   /**
+   * Only made once but shared with servlets.
    * @param userDAO
    * @param userSessionDAO
    * @see
@@ -250,22 +250,20 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   /**
    * @param request
-   * @param response
    * @return
    * @throws RestrictedOperationException
    * @throws DominoSessionException
-   * @see MyRemoteServiceServlet#getUserFromSession()
+   * @see MyRemoteServiceServlet#getUserFromSession
    */
   @Override
-  public User getLoggedInUser(HttpServletRequest request, HttpServletResponse response)
-      throws RestrictedOperationException, DominoSessionException {
+  public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
     return getLoggedInUser(request, "", false);
   }
 
   /**
    * Get the currently logged in user.
    *
-   * @see IUserSecurityManager#getLoggedInUser(HttpServletRequest, HttpServletResponse)
+   * @see IUserSecurityManager#getLoggedInUser(HttpServletRequest)
    */
   private User getLoggedInUser(HttpServletRequest request,
                                String opName,
@@ -277,21 +275,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     if (subject != null) {
       log.info("subject is " + subject.isRemembered());
     }*/
-    User user = lookupUser(request, throwOnFail);
+    User user = lookupUserFromSessionOrDB(request, throwOnFail);
     if (user == null && throwOnFail) {
       throwException(opName, user, null);
     }
     return user;
   }
-
-  /**
-   * Check to see if the user's session is active.
-   */
-/*
-  private boolean isSessionActive(User user) {
-    return true;
-  }
-*/
 
   /**
    * Get the current user out of the request. This is stored once the
@@ -319,10 +308,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @throws DominoSessionException when session is empty or has no user token.
    * @see #getLoggedInUser(HttpServletRequest, String, boolean)
    */
-  private User lookupUser(HttpServletRequest request, boolean throwOnFail)
+  private User lookupUserFromSessionOrDB(HttpServletRequest request, boolean throwOnFail)
       throws DominoSessionException {
     if (request == null) {
-      log.warn("lookupUser huh? no request???");
+      log.warn("lookupUserFromSessionOrDB huh? no request???");
       return null;
     }
     User sessUser = lookupUserFromHttpSession(request);
@@ -330,26 +319,26 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       sessUser = lookupUserFromDBSession(request);
       HttpSession session = request.getSession(false);
       if (session == null) {
-//        log.debug("lookupUser note - no current session - ");
+//        log.debug("lookupUserFromSessionOrDB note - no current session - ");
         try {
           session = request.getSession();
-          //        log.debug("lookupUser note - made session - ");
+          //        log.debug("lookupUserFromSessionOrDB note - made session - ");
         } catch (Exception e) {
           log.error("got " + e, e);
         }
       } else {
-        //  log.debug("lookupUser found current session - ");
+        //  log.debug("lookupUserFromSessionOrDB found current session - ");
       }
       /*long cookie =*/
       if (sessUser != null) {
         /*userService.*/
         setSessionUser(session, sessUser);
       } else {
-        log.debug("lookupUser no user for session - " + session + " logged out?");
+        log.debug("lookupUserFromSessionOrDB no user for session - " + session + " logged out?");
       }
       // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
-//      log.debug("lookupUser User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
+//      log.debug("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
 //		if (sessUser != null && (!sessUser.isActive())) {
 //			sessUser = null;
@@ -393,7 +382,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param request
    * @return
    * @throws DominoSessionException
-   * @see #lookupUser(HttpServletRequest, boolean)
+   * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
   private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
@@ -431,11 +420,52 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
+   * Initially, we have no userid in the session, then we log in, and we add the userid
+   * to the session (which is transient) and store a cookie on the client
+   * <p>
+   * So - several cases-
+   * 1) active session, with id (we've logged in recently) - get id from session
+   * 2) session has timed out on server, but client doesn't know it - server has no idea about the session
+   * - we lookup session id in database, and we're ok
+   * - every time we make a new session, we store a new cookie on the client
+   * 3) we're accessing a service on a tomcat instance that doesn't have the session
+   * - lookup session in database
+   * 4) close browser, bring it back up - client has no session, but server did
+   * - use cookie to find userid, and put back on a new session
+   * - ideally only the startup method should know about this case...
+   * 5) if log out, just one session info should be cleared - or all???
+   * ? what if have two browsers open - logged in in one, logged out in other?
+   *
+   * @return
+   */
+  @Override
+  public int getUserIDFromSession(HttpServletRequest threadLocalRequest) {
+    int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
+    if (userIDFromSession == -1) {
+      // it's not in the current session - can we recover it from the remember me cookie?
+      try {
+        User sessionUser = getLoggedInUser(threadLocalRequest);
+        int i = (sessionUser == null) ? -1 : sessionUser.getID();
+
+        if (i == -1) { // OK, try the cookie???
+          log.error("getUserIDFromSession huh? couldn't get user from session or database?");
+        }
+        return i;
+      } catch (DominoSessionException e) {
+        log.error("got " + e, e);
+      }
+      return -1;
+    } else {
+      return userIDFromSession;
+    }
+  }
+
+  /**
    * Get the userid from the session.
    *
    * @param request
    * @return
-   * @see MyRemoteServiceServlet#getUserIDFromSessionNoCheck
+   * @see mitll.langtest.server.DatabaseServlet#getProject
    */
   public int getUserIDFromRequest(HttpServletRequest request) {
     if (request == null) {
@@ -474,7 +504,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param request
    * @return null if there is no user for the session
    * @throws DominoSessionException
-   * @see #lookupUser(HttpServletRequest, boolean)
+   * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
   private User lookupUserFromDBSession(HttpServletRequest request)
       throws DominoSessionException {

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
@@ -52,7 +51,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   @Override
   public Collection<UserList<CommonShell>> getLists() {
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionOrDB();
     return getUserListManager().getUserListDAO().getAllPublicNotMine(userIDFromSession, getProjectID(userIDFromSession));
   }
 
@@ -66,7 +65,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public UserList addUserList(String name, String description, String dliClass, boolean isPublic) {
-    return getUserListManager().addUserList(getUserIDFromSession(), name, description, dliClass, isPublic, getProjectID());
+    return getUserListManager().addUserList(getUserIDFromSessionOrDB(), name, description, dliClass, isPublic, getProjectID());
   }
 
   @Override
@@ -139,7 +138,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     try {
-      return getUserListManager().getListsForUser(getUserIDFromSession(), getProjectID(), onlyCreated, visited);
+      return getUserListManager().getListsForUser(getUserIDFromSessionOrDB(), getProjectID(), onlyCreated, visited);
     } catch (Exception e) {
       logger.error("Got " + e, e);
       return Collections.emptyList();
@@ -153,7 +152,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
 //  @Override
 //  public Collection<UserList<CommonShell>> getUserListsForText(String search) {
-//    return getUserListManager().getUserListsForText(search, getUserIDFromSession(), getProjectID());
+//    return getUserListManager().getUserListsForText(search, getUserIDFromSessionOrDB(), getProjectID());
 //  }
 
   /**
@@ -280,7 +279,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     logger.info("convertTextToExercises currently know about " + currentKnownFL.size());
 
-    int userIDFromSession = getUserIDFromSession();
+    int userIDFromSession = getUserIDFromSessionOrDB();
 
     for (String line : lines) {
       String[] parts = line.split("\\t");

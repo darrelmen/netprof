@@ -336,7 +336,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
-  private void initializeDAOs(PathHelper pathHelper,DominoUserDAOImpl dominoUserDAO) {
+  private void initializeDAOs(PathHelper pathHelper, DominoUserDAOImpl dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
@@ -1336,7 +1336,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       dbConnection.dropAll();
     }
     if (dbConnection.hasAnyTables()) {
-     logger.error("dropAll couldn't delete all the tables, now there are  " + getTables());
+      logger.error("dropAll couldn't delete all the tables, now there are  " + getTables());
     }
   }
 
@@ -1618,7 +1618,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public void doReport() {
     if (isTodayAGoodDay()) {
-      sendReports(getReport(), false);
+      sendReports(getReport(), false, -1);
     } else {
       logger.debug("not sending email report since this is not monday...");
     }
@@ -1641,13 +1641,21 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public void sendReport() {
-    sendReports(getReport(), true);
+  public void sendReport(int userID) {
+    sendReports(getReport(), true, userID);
   }
 
-  private void sendReports(IReport report, boolean forceSend) {
+  /**
+   * @param report
+   * @param forceSend
+   * @param userID
+   * @see #doReport
+   */
+  private void sendReports(IReport report, boolean forceSend, int userID) {
     MailSupport mailSupport = getMailSupport();
     List<ReportStats> stats = new ArrayList<>();
+
+
     getProjects().forEach(project -> {
       stats.addAll(report
           .doReport(project.getID(),
@@ -1659,7 +1667,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
               forceSend, true));
     });
 
-    report.sendExcelViaEmail(mailSupport, serverProps.getReportEmails(), stats, pathHelper);
+    {
+      List<String> reportEmails = serverProps.getReportEmails();
+      if (userID != -1) {
+        User byID = userDAO.getByID(userID);
+        if (byID == null) {
+          logger.error("huh? can't find user " + userID + " in db?");
+        } else {
+//          logger.info("using user email " + byID.getEmail());
+          reportEmails = Collections.singletonList(byID.getEmail());
+        }
+      }
+      report.sendExcelViaEmail(mailSupport, reportEmails, stats, pathHelper);
+    }
   }
 
   private MailSupport getMailSupport() {

@@ -45,16 +45,16 @@ public class DLIClassServiceImpl extends MyRemoteServiceServlet implements DLICl
 
   @Override
   public Set<Integer> getStudents() {
-    return new HashSet<>(db.getDliClassJoinDAO().getStudents(getUserIDFromSession()));
+    return new HashSet<>(db.getDliClassJoinDAO().getStudents(getUserIDFromSessionOrDB()));
   }
 
   @Override
   public void add(int student) {
-    db.getDliClassJoinDAO().insert(getUserIDFromSession(), student);
+    db.getDliClassJoinDAO().insert(getUserIDFromSessionOrDB(), student);
   }
 
   @Override
   public void remove(int student) {
-    db.getDliClassJoinDAO().remove(getUserIDFromSession(), student);
+    db.getDliClassJoinDAO().remove(getUserIDFromSessionOrDB(), student);
   }
 }

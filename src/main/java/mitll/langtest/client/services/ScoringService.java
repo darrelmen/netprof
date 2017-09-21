@@ -60,8 +60,6 @@ public interface ScoringService extends RemoteService {
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
 
-//  void getAllAlignments();
-
   /**
    * @see mitll.langtest.client.project.ProjectChoices#recalcProject
    * @param projid
@@ -80,18 +78,13 @@ public interface ScoringService extends RemoteService {
    * @return
    * @see ASRScoringAudioPanel#scoreAudio
    */
-  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
+  PretestScore getASRScoreForAudio(int reqid,
+                                   long resultID,
+                                   String testAudioFile,
+                                   String sentence,
                                    String transliteration,
 
                                    ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap);
-
-  /**
-   * @param resultid
-   * @param roundTrip
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
-   */
-  void addRoundTrip(int resultid, int roundTrip);
 
   /**
    * @param base64EncodedString
@@ -109,12 +102,20 @@ public interface ScoringService extends RemoteService {
                            int reqid,
                            String device);
 
+  /**
+   * @param resultid
+   * @param roundTrip
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
+   */
+  void addRoundTrip(int resultid, int roundTrip);
+
   boolean isHydraRunning(int projid);
 
   /**
    * @param foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   boolean isValidForeignPhrase(String foreign, String transliteration);
 }

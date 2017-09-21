@@ -4,7 +4,6 @@ import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -14,22 +13,23 @@ public interface IUserSecurityManager {
   /**
    * The key to get/set the id of the user stored in the session
    * @see NPUserSecurityManager#getUserIDFromRequest
-   * @see NPUserSecurityManager#getUserIDFromSession
+   * @see IUserSecurityManager#getUserIDFromSession
    * @see NPUserSecurityManager#logoutUser
    */
   String USER_SESSION_ATT = "user-db-id";
+
+  int getUserIDFromSession(HttpServletRequest threadLocalRequest);
 
   int getUserIDFromRequest(HttpServletRequest request);
 
   /**
    *
    * @param request
-   * @param response
    * @return
    * @throws RestrictedOperationException
    * @throws DominoSessionException
    */
-  User getLoggedInUser(HttpServletRequest request, HttpServletResponse response) throws RestrictedOperationException, DominoSessionException;
+  User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
 
   void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions);
 

@@ -307,6 +307,7 @@ public class Report implements IReport {
    * @param reportStats
    * @see #writeAndSendReport
    */
+/*
   private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails,
                           List<ReportStats> reportStats, PathHelper pathHelper) {
     String suffix = " (" + stats.getName() + ") on " + getHostInfo();
@@ -318,23 +319,24 @@ public class Report implements IReport {
       }
     });
     //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
-  }
+  }*/
 
   /**
    * @param mailSupport
    * @param reportEmails
    * @param reportStats
    * @param pathHelper
-   * @see DatabaseImpl#sendReports(IReport, boolean)
+   * @see DatabaseImpl#sendReports
    */
   @Override
   public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper) {
     File summaryReport = getSummaryReport(reportStats, pathHelper);
 
-    //List<String> reportEmails = serverProps.getReportEmails();
+    String subject = getFileName();
+    String messageBody = getFileName();
 
     reportEmails.forEach(dest -> {
-      if (!mailSupport.emailAttachment(dest, MY_EMAIL, getFileName(), summaryReport)) {
+      if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport)) {
 
       }
     });
@@ -382,8 +384,7 @@ public class Report implements IReport {
 
   @Override
   public File getReportPathDLI(PathHelper pathHelper, String suffix) {
-    File reports = getReportsDir(pathHelper);
-    return new File(reports, getFileName() + suffix);
+    return new File(getReportsDir(pathHelper), getFileName() + suffix);
   }
 
   @NotNull

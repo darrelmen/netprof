@@ -169,7 +169,7 @@ public class ProjectTest extends BaseTest {
     for (CommonExercise exercise : rawExercises) {
       ExercisePhoneInfo exercisePhoneInfo = null;//project.getExToPhone().get(exercise.getID());
       if (exercisePhoneInfo != null) {
-        Map<String, ExerciseToPhone.Info> wordToInfo = exercisePhoneInfo.getWordToInfo();
+        Map<String, ExerciseToPhone.Info> wordToInfo = Collections.emptyMap();//exercisePhoneInfo.getWordToInfo();
         logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() + " " + wordToInfo);
 
         if (wordToInfo != null) {

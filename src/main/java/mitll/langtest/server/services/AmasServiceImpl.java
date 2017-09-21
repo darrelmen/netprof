@@ -82,7 +82,7 @@ public class AmasServiceImpl extends MyRemoteServiceServlet implements AmasServi
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
                                               Collection<Integer> exids) {
-    return new QuizCorrect(db).getScoresForUser(typeToSection, getUserIDFromSession(), exids, getProjectID());
+    return new QuizCorrect(db).getScoresForUser(typeToSection, getUserIDFromSessionOrDB(), exids, getProjectID());
   }
 
   /**

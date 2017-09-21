@@ -121,7 +121,7 @@ public class DownloadServlet extends DatabaseServlet {
         int projid = getProject(request);
 
         if (projid == -1) {
-          projid = getProjectIDFromUser(request, response);
+          projid = getProjectIDFromUser(request);
         }
         if (projid == -1) {
           logger.warn("doGet no current project for request ");
@@ -159,8 +159,7 @@ public class DownloadServlet extends DatabaseServlet {
                 String[] splitArgs = split[1].split("&");
                 writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
               }
-            }
-            else {
+            } else {
               String[] split = queryString.split("list=");
 
               if (split.length == 2) {
@@ -191,21 +190,18 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   *
    * @param request
-   * @param response not used actually - consider removing...
    * @return
    * @throws DominoSessionException
    */
-  private int getProjectIDFromUser(HttpServletRequest request, HttpServletResponse response) throws DominoSessionException {
+  private int getProjectIDFromUser(HttpServletRequest request) throws DominoSessionException {
     logger.info("doGet no project id on session, let's try the security manager");
-    User loggedInUser = securityManager.getLoggedInUser(request, response);
-   int projid = -1;
-   if (loggedInUser != null) {
+    User loggedInUser = securityManager.getLoggedInUser(request);
+    int projid = -1;
+    if (loggedInUser != null) {
       logger.debug("doGet found session user " + loggedInUser.getUserID());
       projid = getMostRecentProjectByUser(loggedInUser.getID());
-    }
-    else {
+    } else {
       logger.warn("doGet couldn't find user via request...");
     }
     return projid;
@@ -220,9 +216,9 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param splitArgs
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private AudioExportOptions getAudioExportOptions(String[] splitArgs) {
     AudioExportOptions options = new AudioExportOptions();
@@ -234,7 +230,7 @@ public class DownloadServlet extends DatabaseServlet {
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
       else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
-        logger.error("huh? got unexpected arg '" + arg +"'");
+        logger.error("huh? got unexpected arg '" + arg + "'");
       }
     }
     return options;

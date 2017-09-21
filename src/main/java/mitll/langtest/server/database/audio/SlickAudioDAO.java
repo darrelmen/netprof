@@ -64,14 +64,21 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final long now = System.currentTimeMillis();
   private final long before = now - (24 * 60 * 60 * 1000);
   private final boolean doCheckOnStartup;
-  private int defaultResult;
   private final ServerProperties serverProps;
+  private final boolean hasMediaDir;
+
+  private int defaultResult;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
     serverProps = database.getServerProps();
     doCheckOnStartup = serverProps.doAudioCheckOnStartup();
+    String mediaDir = serverProps.getMediaDir();
+    hasMediaDir = new File(mediaDir).exists();
+    if (!hasMediaDir) {
+      logger.info("no media dir at " + mediaDir + " - this is OK on netprof host.");
+    }
   }
 
   public Map<String, Integer> getPairs(int projid) {
@@ -639,18 +646,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.services.AudioServiceImpl#checkAudio
    */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
-    boolean foundFiles = didFindAnyAudioFiles(projectID);
-    String mediaDir = serverProps.getMediaDir();
-    File file = new File(mediaDir);
-    //logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
-    if (file.exists()) {
+    if (hasMediaDir) {
+      logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
       //logger.debug("makeSureAudioIsThere media dir " + file + " exists ");
+      String mediaDir = serverProps.getMediaDir();
+      File file = new File(mediaDir);
       if (file.isDirectory()) {
         String[] list = file.list();
         if (list == null) {
           logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
         } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
           //logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
+          boolean foundFiles = didFindAnyAudioFiles(projectID);
           if (validateAll ||
               (serverProps.doAudioChecksInProduction() &&
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
@@ -659,11 +666,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           }
         }
       } else {
-        logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
+        logger.error("configuration error - (" + projectID + " " + language +
+            ") expecting media directory " + mediaDir + " to be directory.");
       }
-    } else {
-      logger.warn("makeSureAudioIsThere : configuration error? - expecting a media directory " + mediaDir);
-    }
+    } /*else {
+      logger.warn("makeSureAudioIsThere : (" + projectID + " " + language +
+          ") configuration error? - expecting a media directory " + mediaDir);
+    }*/
   }
 
   /**

@@ -41,6 +41,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeSet;
 
+/**
+ * In the future we could imagine finding words that were close in phone space (dog-bog-fog) or something.
+ */
 public class ExercisePhoneInfo {
   private static final Logger logger = LogManager.getLogger(ExercisePhoneInfo.class);
 
@@ -50,8 +53,8 @@ public class ExercisePhoneInfo {
   /**
    * Unique set...?
    */
-  private Collection<String> phones = new TreeSet<>();
-  private Map<String, ExerciseToPhone.Info> wordToInfo;
+  //private Collection<String> phones = new TreeSet<>();
+  //private Map<String, ExerciseToPhone.Info> wordToInfo;
 
   public ExercisePhoneInfo() {
   }
@@ -70,14 +73,13 @@ public class ExercisePhoneInfo {
          // logger.info("skip " +phone);
         }
         else {
-          phones.add(phone);
+    //      phones.add(phone);
           numPhones++;
         }
       }
     }
     if (numPhones == 0) logger.warn("no phones for " + phoneString);
  //   logger.info("from " + phoneString + " " + phones);
-
   }
 
   /**
@@ -88,22 +90,16 @@ public class ExercisePhoneInfo {
     return numPhones;
   }
 
-  /**
-   * @deprecated nobody uses this currently...
-   * @return
-   */
-/*  public Collection<String> getPhones() {
-    return phones;
-  }*/
-
-  /**
+ /**
    * @param phone
    * @see ExerciseToPhone#addPhones
    */
 
+/*
   void addPhones(Collection<String> phone) {
     this.phones.addAll(phone);
   }
+*/
 
   /**
    * @param num
@@ -116,13 +112,17 @@ public class ExercisePhoneInfo {
    * @param wordToInfo
    * @see ExerciseToPhone#getExerciseToPhoneForProject
    */
+/*
   void setWordToInfo(Map<String, ExerciseToPhone.Info> wordToInfo) {
     this.wordToInfo = wordToInfo;
   }
+*/
 
+/*
   public Map<String, ExerciseToPhone.Info> getWordToInfo() {
     return wordToInfo;
   }
+*/
 
   /**
    * @see SlickUserExerciseDAO#addPhoneInfo

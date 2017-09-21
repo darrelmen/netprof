@@ -55,7 +55,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    */
   @Override
   public void addAnnotation(int exerciseID, String field, String status, String comment) {
-    getUserListManager().addAnnotation(exerciseID, field, status, comment, getUserIDFromSession());
+    getUserListManager().addAnnotation(exerciseID, field, status, comment, getUserIDFromSessionOrDB());
   }
 
   /**
@@ -64,7 +64,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   public void markReviewed(int id, boolean isCorrect) {
-    getUserListManager().markCorrectness(id, isCorrect, getUserIDFromSession());
+    getUserListManager().markCorrectness(id, isCorrect, getUserIDFromSessionOrDB());
   }
 
   /**
@@ -73,7 +73,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
    */
   public void markState(int exid, STATE state) {
-    getUserListManager().markState(exid, state, getUserIDFromSession());
+    getUserListManager().markState(exid, state, getUserIDFromSessionOrDB());
   }
 
   /**

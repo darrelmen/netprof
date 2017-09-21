@@ -55,6 +55,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,13 +64,6 @@ public class SlickUserExerciseDAO
     extends BaseUserExerciseDAO
     implements IUserExerciseDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
-
-  /**
-   * @seex mitll.langtest.server.database.project.ProjectManagement#getTypeOrder
-   * @seex #addPhoneInfo
-   */
-  //public static final String SOUND = "Sound";
- // public static final String DIFFICULTY = "Difficulty";
 
   /**
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
@@ -93,6 +87,7 @@ public class SlickUserExerciseDAO
   private final IRefResultDAO refResultDAO;
   public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
+  private final boolean hasMediaDir;
 
   /**
    * @param database
@@ -108,6 +103,12 @@ public class SlickUserExerciseDAO
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
+
+    String mediaDir = database.getServerProps().getMediaDir();
+    hasMediaDir = new File(mediaDir).exists();
+    if (!hasMediaDir) {
+      logger.info("no media dir at " + mediaDir + " - this is OK on netprof host.");
+    }
   }
 
   public void createTable() {
@@ -296,9 +297,13 @@ public class SlickUserExerciseDAO
    * Use exercise -> phone map to determine phones per exercise...
    *
    * @param slick
+   * @param baseTypeOrder
+   * @param sectionHelper
+   * @param exToPhones
    * @param lookup
+   * @param exercise
+   * @param attrTypes
    * @return
-   * @seex IUserExerciseDAO#useExToPhones
    * @see #getExercises
    */
   private List<Pair> addExerciseToSectionHelper(SlickExercise slick,
@@ -314,10 +319,9 @@ public class SlickUserExerciseDAO
     if (numToUse == 0) {
       numToUse = exercisePhoneInfo.getNumPhones2();
       if (numToUse < 1) {
-        logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " +slick.english() + " " + slick.foreignlanguage());
-      }
-      else {
-        logger.info("using back off phone childCount " + slick.id() + " = " + numToUse);
+        logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage());
+      } else {
+        logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
       }
     }
 
@@ -356,7 +360,7 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   *
+   * If the number of phones on an exercise has not been calculated yet, look it up.
    * @param slick
    * @param exToPhones
    * @param lookup
@@ -372,7 +376,7 @@ public class SlickUserExerciseDAO
       exercisePhoneInfo = getExercisePhoneInfo(slick, lookup);
     }
 /*
-    else if (exercisePhoneInfo.getNumPhones() <1) {
+    else if (exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS() <1) {
       logger.warn("for " + slick.id() + " found no phones?");
     }
 */
@@ -383,6 +387,7 @@ public class SlickUserExerciseDAO
   private int cantcalc = 0;
 
   /**
+   *
    * Writes to table on cache miss.
    * <p>
    * Trying to prevent recalc on startup, which slows
@@ -401,25 +406,28 @@ public class SlickUserExerciseDAO
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
-      String pronunciations = lookup.getPronunciations(foreignlanguage, transliteration);
-
-      int n2 = lookup.getNumPhones(foreignlanguage, transliteration);
-
+      String pronunciations = lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
-      exercisePhoneInfo.setNumPhones2(n2);
 
-      int id = slick.id();
-      if (n2 < 1) {
-        cantcalc++;
-        if (cantcalc < 25 || cantcalc % 1000 == 0) {
-          logger.debug("getExercisePhoneInfo can't calc num phones for " + cantcalc +
-              " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
+      {
+        int n2 = lookup.getNumPhonesFromDictionary(foreignlanguage, transliteration);
+        if (n2 > 0) {
+          exercisePhoneInfo.setNumPhones2(n2);
         }
-      } else {
-        exerciseDAO.updatePhones(id, n2);
-        updated++;
-        if (updated < 25 || updated % 1000 == 0) logger.debug("getExercisePhoneInfo (project #" + slick.projid()+
-            ") updated " + updated + " exercises with phone info");
+
+        int id = slick.id();
+        if (n2 < 1) {
+          cantcalc++;
+          if (cantcalc < 25 || cantcalc % 1000 == 0) {
+            logger.debug("getExercisePhoneInfo can't calc num phones for " + cantcalc +
+                " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
+          }
+        } else if (hasMediaDir) {
+          exerciseDAO.updatePhones(id, n2);
+          updated++;
+          if (updated < 25 || updated % 1000 == 0) logger.debug("getExercisePhoneInfo (project #" + slick.projid() +
+              ") updated " + updated + " exercises with phone info");
+        }
       }
     } else {
       exercisePhoneInfo = new ExercisePhoneInfo();
@@ -435,7 +443,6 @@ public class SlickUserExerciseDAO
 
     return exercisePhoneInfo;
   }
-
   //private int spew = 0;
 
   /**
@@ -524,7 +531,7 @@ public class SlickUserExerciseDAO
 
   *//*        if (slick.unit().equals("1") && slick.lesson().equals("1")) {
             logger.info("for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage() + " (" +
-                exercisePhoneInfo.getNumPhones() +
+                exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS() +
                 ") " + copy);
           }*//*
             allPairs.add(copy);
@@ -841,7 +848,11 @@ public class SlickUserExerciseDAO
     return getExercises(dao.getAllPredefByProject(theProject.getID()),
         typeOrder,
         sectionHelper,
-        exerciseToPhoneForProject, theProject, allByProject, exToAttrs, /*attributeTypes, */true);
+        exerciseToPhoneForProject,
+        theProject,
+        allByProject,
+        exToAttrs,
+        true);
   }
 
   @NotNull
@@ -1120,7 +1131,7 @@ public class SlickUserExerciseDAO
 
     Map<Integer, Integer> binToCount = new TreeMap<>();
     for (ExercisePhoneInfo exercisePhoneInfo : exToPhones.values()) {
-      int numPhones = exercisePhoneInfo.getNumPhones();
+      int numPhones = exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS();
       binToCount.put(numPhones, binToCount.getOrDefault(numPhones, 0) + 1);
       total++;
     }

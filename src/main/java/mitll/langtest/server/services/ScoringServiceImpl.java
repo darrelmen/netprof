@@ -144,7 +144,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @Override
   public void recalcAlignments(int projid) {
-    recalcAlignments(getUserIDFromSession(), db.getProject(projid));
+    recalcAlignments(getUserIDFromSessionOrDB(), db.getProject(projid));
   }
 
   private void recalcAlignments(int userIDFromSession, Project project) {
@@ -215,7 +215,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 //    logger.info("getAlignmentsFromDB asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
-    return recalcAlignments(projid, audioIDs, getUserIDFromSession(), audioIDMap, db.getProject(projid).hasModel());
+    return recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
   }
 
@@ -381,7 +381,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     String english = customOrPredefExercise == null ? "" : customOrPredefExercise.getEnglish();
     PrecalcScores precalcScores =
-        getAudioFileHelper().checkForWebservice(exerciseID, english, sentence, getProjectID(), getUserIDFromSession(), absoluteAudioFile);
+        getAudioFileHelper().checkForWebservice(exerciseID, english, sentence, getProjectID(), getUserIDFromSessionOrDB(), absoluteAudioFile);
 
     return getPretestScore(reqid,
         (int) resultID,

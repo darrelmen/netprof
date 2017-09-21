@@ -165,7 +165,7 @@ public class SmallVocabDecoder {
   /**
    * @param sentence
    * @return
-   * @see ASRWebserviceScoring#getPronunciations(String, String, boolean)
+   * @see ASRWebserviceScoring#getPronunciationsFromDictOrLTS(String, String, boolean)
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {

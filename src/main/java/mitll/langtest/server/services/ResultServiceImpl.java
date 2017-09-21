@@ -72,7 +72,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
                                    Map<String, String> unitToValue,
                                    String flText,
                                    int req) {
-    //  int userIDFromSession = getUserIDFromSession();
+    //  int userIDFromSession = getUserIDFromSessionOrDB();
     List<MonitorResult> results = getResults(unitToValue, -1, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
@@ -217,7 +217,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
                                                   String flText,
                                                   String which) {
     Collection<MonitorResult> results = getMonitorResults();
-    int userid = getUserIDFromSession();
+    int userid = getUserIDFromSessionOrDB();
 
     logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
 

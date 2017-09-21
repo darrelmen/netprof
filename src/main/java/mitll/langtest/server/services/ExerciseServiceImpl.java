@@ -1251,7 +1251,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
       return (T) db.getAMASExercise(exid);
     }
-    return getAnnotatedExercise(getUserIDFromSession(), getProjectID(), exid, isFlashcardReq);
+    return getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectID(), exid, isFlashcardReq);
   }
 
   /**
@@ -1344,7 +1344,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) {
     List<CommonExercise> exercises = new ArrayList<>();
 
-    int userID = getUserIDFromSession();
+    int userID = getUserIDFromSessionOrDB();
     int projectID = getProjectID(userID);
 
     long then = System.currentTimeMillis();
