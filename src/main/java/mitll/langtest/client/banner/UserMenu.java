@@ -90,16 +90,21 @@ public class UserMenu {
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle("Events", new EventsClickHandler()));
     choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler()));
-    choices.add(new LinkAndTitle("Send Report", event -> lazyGetService().sendReport(new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+    choices.add(new LinkAndTitle("Send Report", event -> {
+      new ModalInfoDialog("Status report being generated.", "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
 
-      @Override
-      public void onSuccess(Void result) {
-        new ModalInfoDialog("Status report sent", "Please check your email.");
-      }
-    })));
+      lazyGetService().sendReport(new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          new ModalInfoDialog("Status report sent", "Please check your email.");
+        }
+      });
+
+    }));
     choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
     return choices;
   }
