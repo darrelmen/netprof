@@ -325,18 +325,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int processDur = 0;
     if (scores == null) {
       long then = System.currentTimeMillis();
-      //double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
-
       int end = (int) (cachedDuration * 100.0);
       Path tempDir = null;
+      String rawAudioPath = getRawAudioPath(filePath);
       try {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
 
         File tempFile = tempDir.toFile();
 
         // dcodr can't handle an equals in the file name... duh...
-        String rawAudioPath = filePath.replaceAll("\\=", "") + ".raw";
-        //rawAudioPath = rawAudioPath.replaceAll("\\=","");
         // logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
         AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
 
@@ -365,6 +362,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if (tempDir != null) {
           tempDir.toFile().deleteOnExit(); // clean up temp file
         }
+        cleanUpRawFile(rawAudioPath);
       }
     }
     if (scores == null) {
@@ -377,6 +375,26 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         decode, prefix, noSuffix,
         scores, phoneLab, wordLab,
         cachedDuration, processDur, usePhoneToDisplay, jsonObject);
+  }
+
+  /**
+   * We don't need it after sending it to dcodr
+   * @param rawAudioPath
+   */
+  private void cleanUpRawFile(String rawAudioPath) {
+    File file = new File(rawAudioPath);
+    if (file.exists()) {
+      if (!file.delete()) {
+        String mes = "huh? couldn't delete raw audio file " + file.getAbsolutePath();
+        logger.error(mes);
+        langTestDatabase.logAndNotifyServerException(null,mes);
+      }
+    }
+  }
+
+  @NotNull
+  private String getRawAudioPath(String filePath) {
+    return filePath.replaceAll("\\=", "") + ".raw";
   }
 
   private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {
