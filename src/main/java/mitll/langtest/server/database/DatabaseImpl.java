@@ -1655,7 +1655,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     MailSupport mailSupport = getMailSupport();
     List<ReportStats> stats = new ArrayList<>();
 
-
     getProjects().forEach(project -> {
       stats.addAll(report
           .doReport(project.getID(),

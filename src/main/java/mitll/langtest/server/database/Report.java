@@ -261,7 +261,7 @@ public class Report implements IReport {
       try {
         ReportStats stats = new ReportStats(projid, language, site, year);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
-        //     sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
+        sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
         return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
@@ -304,7 +304,6 @@ public class Report implements IReport {
    * @param reportStats
    * @see #writeAndSendReport
    */
-/*
   private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails,
                           List<ReportStats> reportStats, PathHelper pathHelper) {
     String suffix = " (" + stats.getName() + ") on " + getHostInfo();
@@ -316,7 +315,7 @@ public class Report implements IReport {
       }
     });
     //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
-  }*/
+  }
 
   /**
    * @param mailSupport
@@ -368,6 +367,7 @@ public class Report implements IReport {
   }
 
   private void writeHTMLFile(File file, ReportStats reportStats) throws IOException {
+    logger.info("writeHTMLFile to " + file.getAbsolutePath());
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     writer.write(reportStats.getHtml());
     writer.close();
@@ -1283,15 +1283,14 @@ public class Report implements IReport {
                                               int year) {
     Calendar calendar = getCalendarForYear(year);
     Integer max = getMax(weekToCount);
-    long initial = calendar.getTimeInMillis();
+    //long initial = calendar.getTimeInMillis();
 
     SimpleDateFormat df = new SimpleDateFormat("MM-dd");
 
-    Map<String, Integer> weekToCountFormatted = new HashMap<>();
+    Map<String, Integer> weekToCountFormatted = new TreeMap<>();
 
     for (int week = 1; week <= max; week++) {
-      Date time = getThisWeek(year, calendar, week);
-      String format1 = df.format(time);
+      String format1 = df.format(getThisWeek(year, calendar, week));
       weekToCountFormatted.put(format1, getCountAtWeek(weekToCount, week));
     }
 
@@ -1316,7 +1315,7 @@ public class Report implements IReport {
     else if (value instanceof Collection<?>) {
       return ((Collection<?>) value).size();
     }
-    return (Integer) value;
+    return value instanceof Integer ? (Integer) value : ((Long) value).intValue();
   }
 
   @NotNull
@@ -1448,9 +1447,12 @@ public class Report implements IReport {
         getSectionReport(ytd, monthToCount, weekToCount, recordings, jsonObject, year)
     );
 
-    reportStats.putInt(recordings.equalsIgnoreCase(ALL_RECORDINGS) ? INFO.ALL_RECORDINGS : INFO.DEVICE_RECORDINGS, ytd);
+    boolean allRecordings = recordings.equalsIgnoreCase(ALL_RECORDINGS);
+    reportStats.putInt(allRecordings ? INFO.ALL_RECORDINGS : INFO.DEVICE_RECORDINGS, ytd);
 
-    reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, getThisYear()));
+    if (allRecordings) {
+      reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, getThisYear()));
+    }
   }
 
   /**

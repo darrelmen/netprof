@@ -3,9 +3,7 @@ package mitll.langtest.server.database;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ReportStats {
   private int projid;
@@ -124,6 +122,11 @@ public class ReportStats {
     weekToValue.put(key2, value);
   }
 
+  /**
+   * @see Report#getResultsForSet
+   * @param key
+   * @param weekToCount
+   */
   void putIntMulti(INFO key, Map<String, Integer> weekToCount) {
     intMultiKeyToValue.put(key, weekToCount);
   }

@@ -315,6 +315,8 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
+   * Rip the header off to make a raw file.
+   *
    * @param wavFile
    * @param rawFile
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
@@ -324,9 +326,11 @@ public class AudioConversion extends AudioBase {
     FileOutputStream fout = null;
     AudioInputStream f = null;
     try {
-      fout = new FileOutputStream(rawFile);
-      byte[] b = new byte[1024];
       f = AudioSystem.getAudioInputStream(new File(wavFile));
+      fout = new FileOutputStream(rawFile);
+
+      byte[] b = new byte[1024];
+
       int nread = 0;
       do {
         if (nread > 0)
@@ -334,6 +338,7 @@ public class AudioConversion extends AudioBase {
         nread = f.read(b);
       }
       while (nread > 0);
+
       f.close();
       fout.close();
     } catch (UnsupportedAudioFileException | IOException e) {
