@@ -90,7 +90,7 @@ public class UserMenu {
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle("Events", new EventsClickHandler()));
     choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler()));
-    choices.add(new LinkAndTitle("Send Report", event -> service.sendReport(new AsyncCallback<Void>() {
+    choices.add(new LinkAndTitle("Send Report", event -> lazyGetService().sendReport(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -154,13 +154,17 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          if (service == null) {
-            service = GWT.create(LangTestDatabase.class);
-          }
-          new EventTable().show(service);
+          new EventTable().show(lazyGetService());
         }
       });
     }
+  }
+
+  private LangTestDatabaseAsync lazyGetService() {
+    if (service == null) {
+      service = GWT.create(LangTestDatabase.class);
+    }
+    return service;
   }
 
   private class ChangePasswordClickHandler implements ClickHandler {

@@ -1347,7 +1347,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private int warns = 0;
 
   /**
-   * TODO : Fix this to get the right project first!
+   * TODOx : Fix this to get the right project first!
    * <p>
    * allow custom items to mask out non-custom items
    * Special code to mask out unit/chapter from database in userexercise table.
@@ -1363,9 +1363,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
       // if (warns++ < 50)
-      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+      logger.warn("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
+    }
+    if (toRet == null) {
+      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+          " after looking in exercise table.");
     }
 
     return toRet;

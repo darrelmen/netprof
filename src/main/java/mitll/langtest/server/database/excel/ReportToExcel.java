@@ -26,6 +26,7 @@ public class ReportToExcel {
   private static final Logger logger = LogManager.getLogger(ReportToExcel.class);
   public static final String NET_PRO_F_HISTORICAL = "NetProF Historical";
   public static final String NET_PRO_F_YTD = "NetProF-Vrt";
+  public static final String INCREASE = "INCREASE";
 
   protected final LogAndNotify logAndNotify;
 
@@ -204,9 +205,11 @@ public class ReportToExcel {
     Map<String, Integer> langToCurrent = new HashMap<>();
     Map<String, Integer> langToPrev = new HashMap<>();
     int marginalDiff = 0;
-    CellStyle style = getCellStyle(workbook);
+    XSSFCellStyle cellStyle = getCellStyle(workbook);
+    setBorder(cellStyle);
     XSSFCellStyle greenStyle = getDarkGreenStyle(workbook);
-
+    XSSFCellStyle greenStyleWeeklyTotal = getDarkGreenStyle(workbook);
+    setNumberFormat(workbook, greenStyleWeeklyTotal);
     for (String week : weeks) {
       Row row = sheet.createRow(rownum++);
 
@@ -216,7 +219,6 @@ public class ReportToExcel {
       cell1.setCellStyle(greenStyle);
       int marginalTotal = 0;
 
-      //int prev = 0;
       int prevMarginal = 0;
 
       // for every lang per week
@@ -230,40 +232,39 @@ public class ReportToExcel {
         int cumulative = langToCurrent.getOrDefault(lang, 0) + count;
         marginalTotal += cumulative;
         langToCurrent.put(lang, cumulative);
-        Cell cell = row.createCell(col++);
-        cell.setCellStyle(style);
-        cell.setCellValue(cumulative);
-        langToLastWeek.put(lang, cumulative - langToPrev.getOrDefault(lang, 0));
+
+        {
+          Cell cell = row.createCell(col++);
+          cell.setCellStyle(cellStyle);
+          cell.setCellValue(cumulative);
+        }
+        int diffLastWeek = cumulative - langToPrev.getOrDefault(lang, 0);
+        logger.info("lang " + lang + " = " + diffLastWeek);
+        langToLastWeek.put(lang, diffLastWeek);
         langToPrev.put(lang, cumulative);
       }
 
-      Cell cell = row.createCell(col++);
-      cell.setCellValue(marginalTotal);
-      cell.setCellStyle(greenStyle);
+      {
+        Cell cell = row.createCell(col++);
+        cell.setCellValue(marginalTotal);
+        cell.setCellStyle(greenStyleWeeklyTotal);
+      }
       marginalDiff = marginalTotal - prevMarginal;
       prevMarginal = marginalTotal;
     }
 
     Row row = sheet.createRow(rownum++);
 
-    int col = 0;
+    doIncreaseRow(workbook, sortedLang, langToLastWeek, marginalDiff, row);
 
-    Cell cell = row.createCell(col++);
-    cell.setCellValue("INCREASE");
-    XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
-    XSSFCellStyle yellowStyle = getYellowStyle(workbook);
-    cell.setCellStyle(brightGreenStyle);
-    for (String lang : sortedLang) {
-      Integer value = langToLastWeek.get(lang);
-      Cell cell1 = row.createCell(col++);
-      cell1.setCellValue(value);
-      if (value == 0) {
-        cell.setCellStyle(yellowStyle);
-      } else {
-        cell.setCellStyle(brightGreenStyle);
-      }
-    }
-    row.createCell(col++).setCellValue(marginalDiff);
+    rownum = addFooterRow(workbook, sheet, rownum, sortedLang, greenStyle);
+
+    return rownum;
+  }
+
+  private int addFooterRow(XSSFWorkbook workbook, Sheet sheet, int rownum, Set<String> sortedLang, XSSFCellStyle greenStyle) {
+    Row row;
+    int col;
 
     row = sheet.createRow(rownum++);
     col = 0;
@@ -285,28 +286,94 @@ public class ReportToExcel {
     return rownum;
   }
 
-  @NotNull
-  private CellStyle getCellStyle(XSSFWorkbook workbook) {
-    CellStyle style = workbook.createCellStyle();
-    DataFormat format = workbook.createDataFormat();
+  private void doIncreaseRow(XSSFWorkbook workbook, Set<String> sortedLang, Map<String, Integer> langToLastWeek, int marginalDiff, Row row) {
+    int col = 0;
 
-    style.setDataFormat(format.getFormat("#,###"));
+    XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
+    XSSFCellStyle yellowStyle = getYellowStyle(workbook);
+
+    {
+      Cell cell = row.createCell(col++);
+      cell.setCellValue(INCREASE);
+      cell.setCellStyle(brightGreenStyle);
+    }
+
+    for (String lang : sortedLang) {
+      Integer value = langToLastWeek.get(lang);
+      if (value == null) {
+        logger.error("no value for " + lang);
+        value = 0;
+      } else logger.info("Got " + lang + " = " + value);
+
+      {
+        Cell cell1 = row.createCell(col++);
+        cell1.setCellValue(value);
+
+        if (value == 0) {
+          cell1.setCellStyle(yellowStyle);
+        } else {
+          cell1.setCellStyle(brightGreenStyle);
+        }
+      }
+    }
+    Cell cell = row.createCell(col++);
+    cell.setCellValue(marginalDiff);
+    cell.setCellStyle(getBlueStyle(workbook));
+  }
+
+  @NotNull
+  private XSSFCellStyle getCellStyle(XSSFWorkbook workbook) {
+    XSSFCellStyle style = workbook.createCellStyle();
+    setNumberFormat(workbook, style);
     style.setAlignment(HorizontalAlignment.CENTER);
     return style;
   }
 
+
   @NotNull
   private XSSFCellStyle getDarkGreenStyle(XSSFWorkbook workbook) {
-/*
-    XSSFCellStyle greenStyle = workbook.createCellStyle();
-//    greenStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-    java.awt.Color darkGreen = new java.awt.Color(170, 207, 145);
-    setColorStyle(workbook, greenStyle, darkGreen);
-    return greenStyle;
-*/
-
     java.awt.Color darkGreen = new java.awt.Color(170, 207, 145);
     return getColorStyle(workbook, darkGreen);
+  }
+
+  @NotNull
+  private XSSFCellStyle getLightGreenStyle(XSSFWorkbook workbook) {
+    java.awt.Color darkGreen = new java.awt.Color(226, 239, 219);
+    return getColorStyle(workbook, darkGreen);
+  }
+
+  @NotNull
+  private XSSFCellStyle getBlueStyle(XSSFWorkbook workbook) {
+    java.awt.Color darkGreen = new java.awt.Color(30, 177, 237);
+    return getColorStyle(workbook, darkGreen);
+  }
+
+  @NotNull
+  private XSSFCellStyle getBrightGreenStyle(XSSFWorkbook workbook) {
+    java.awt.Color darkGreen = new java.awt.Color(109, 253, 110);
+
+    XSSFCellStyle colorStyle = getColorStyle(workbook, darkGreen);
+    setNumberFormat(workbook, colorStyle);
+    return colorStyle;
+  }
+
+  private void setNumberFormat(XSSFWorkbook workbook, CellStyle style) {
+    DataFormat format = workbook.createDataFormat();
+    style.setDataFormat(format.getFormat("#,###"));
+  }
+
+  @NotNull
+  private XSSFCellStyle getYellowStyle(XSSFWorkbook workbook) {
+    java.awt.Color darkGreen = new java.awt.Color(255, 253, 56);
+    XSSFCellStyle colorStyle = getColorStyle(workbook, darkGreen);
+    setNumberFormat(workbook, colorStyle);
+    return colorStyle;
+  }
+
+  private XSSFCellStyle getColorStyle(XSSFWorkbook workbook, java.awt.Color darkGreen) {
+    XSSFCellStyle greenStyle = workbook.createCellStyle();
+    setColorStyle(workbook, greenStyle, darkGreen);
+    return greenStyle;
   }
 
   private void setColorStyle(XSSFWorkbook workbook, XSSFCellStyle greenStyle, java.awt.Color darkGreen) {
@@ -319,31 +386,15 @@ public class ReportToExcel {
   private void setBold(XSSFWorkbook workbook, XSSFCellStyle greenStyle) {
     XSSFFont font = workbook.createFont();
     font.setBold(true);
+    setBorder(greenStyle);
     greenStyle.setFont(font);
   }
 
-  @NotNull
-  private XSSFCellStyle getLightGreenStyle(XSSFWorkbook workbook) {
-    java.awt.Color darkGreen = new java.awt.Color(226, 239, 219);
-    return getColorStyle(workbook, darkGreen);
-  }
-
-  @NotNull
-  private XSSFCellStyle getBrightGreenStyle(XSSFWorkbook workbook) {
-    java.awt.Color darkGreen = new java.awt.Color(109, 253, 110);
-    return getColorStyle(workbook, darkGreen);
-  }
-
-  @NotNull
-  private XSSFCellStyle getYellowStyle(XSSFWorkbook workbook) {
-    java.awt.Color darkGreen = new java.awt.Color(255, 253, 56);
-    return getColorStyle(workbook, darkGreen);
-  }
-
-  private XSSFCellStyle getColorStyle(XSSFWorkbook workbook, java.awt.Color darkGreen) {
-    XSSFCellStyle greenStyle = workbook.createCellStyle();
-    setColorStyle(workbook, greenStyle, darkGreen);
-    return greenStyle;
+  private void setBorder(XSSFCellStyle style) {
+    style.setBorderBottom(BorderStyle.THIN);
+    style.setBorderTop(BorderStyle.THIN);
+    style.setBorderRight(BorderStyle.THIN);
+    style.setBorderLeft(BorderStyle.THIN);
   }
 
   private String getWeek(String week) {
