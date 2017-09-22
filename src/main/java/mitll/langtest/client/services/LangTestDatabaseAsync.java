@@ -66,7 +66,8 @@ public interface LangTestDatabaseAsync {
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 
-  void getContextPractice(AsyncCallback<ContextPractice> async);
+  void sendReport(AsyncCallback<Void> async);
 
-  void reloadExercises(AsyncCallback<Void> async);
+  // void getContextPractice(AsyncCallback<ContextPractice> async);
+
 }

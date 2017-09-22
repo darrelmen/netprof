@@ -160,25 +160,30 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getExercises(getProjectID());
   }
 
-  public ContextPractice getContextPractice() {
+/*  public ContextPractice getContextPractice() {
     return db.getContextPractice();
+  }*/
+
+  public void sendReport() {
+    db.sendReport(securityManager.getUserIDFromSession(getThreadLocalRequest()));
   }
 
   /**
    * Not really hooked up yet...
    */
-  @Override
+ /* @Override
   public void reloadExercises() {
     logger.info("reloadExercises --- !");
     db.reloadExercises(getProjectID());
-  }
+  }*/
 
   /**
    * The very first thing that gets called from the client.
    * <p>
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
-   *
+   * <p>
    * Shows a better message if configuration is bad.
+   *
    * @return
    * @paramx userID
    * @see mitll.langtest.client.LangTest#onModuleLoad
@@ -217,9 +222,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     try {
       if (db == null) {
-        logger.error("no db set? " + id + " " + widgetType + " exid "  +exid + " context " +context + " by user " + userid);
-      }
-      else {
+        logger.error("no db set? " + id + " " + widgetType + " exid " + exid + " context " + context + " by user " + userid);
+      } else {
         db.logEvent(id, widgetType, exid, context, userid, device);
       }
     } catch (Exception e) {

@@ -104,7 +104,7 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
-  private static final String SEND_REPORT = "sendReport";
+//  private static final String SEND_REPORT = "sendReport";
   private static final String VERSION_NOW = "1.0";
   private static final String EXPORT = "export";
   private static final String REMOVE_REF_RESULT = "removeRefResult";
@@ -242,9 +242,9 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (matchesRequest(queryString, JSON_REPORT)) {
         queryString = removePrefix(queryString, JSON_REPORT);
         reportingServices.getReport(getYear(queryString), toReturn);
-      } else if (matchesRequest(queryString, SEND_REPORT)) {
+/*      } else if (matchesRequest(queryString, SEND_REPORT)) {
         queryString = removePrefix(queryString, SEND_REPORT);
-        reportingServices.sendReport(securityManager.getUserIDFromSession(request));
+        reportingServices.sendReport(securityManager.getUserIDFromSession(request));*/
       } else if (matchesRequest(queryString, EXPORT)) {
         toReturn = getJSONForExercises(projid);
       } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {

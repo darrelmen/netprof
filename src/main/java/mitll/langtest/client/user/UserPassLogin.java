@@ -201,11 +201,10 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   /**
    * Don't redirect them to download site just yet.
+   * @see #UserPassLogin(PropertyHandler, UserManager, EventRegistration, StartupInfo)
    */
   private void showSuggestApp() {
-    List<String> messages = Arrays.asList(IPAD_LINE_1,
-        // IPAD_LINE_2,
-        IPAD_LINE_3);
+    List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
         "Install App?",
         messages,
@@ -283,6 +282,10 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     forgotUser.addStyleName("leftTenMargin");
   }
 
+  /**
+   * @see #getForgotRow
+   * @return
+   */
   private Button getHelpButton() {
     Button help = new Button(HELP);
     help.addStyleName("leftTenMargin");

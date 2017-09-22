@@ -47,24 +47,13 @@ public class EasyReportTest extends BaseTest {
   public void testReport() {
     DatabaseImpl andPopulate = getAndPopulate();
     andPopulate.getReport();
-
-    andPopulate.sendReport();
     andPopulate.close();
   }
 
   @Test
   public void testSendReport() {
     DatabaseImpl andPopulate = getAndPopulate();
-
-    andPopulate.sendReport();
-    andPopulate.close();
-  }
-
-  @Test
-  public void testEmail() {
-    DatabaseImpl andPopulate = getAndPopulate();
-
-    andPopulate.sendReport();
+    andPopulate.sendReport(-1);
     andPopulate.close();
   }
 

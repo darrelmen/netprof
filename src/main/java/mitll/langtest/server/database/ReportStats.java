@@ -17,10 +17,24 @@ public class ReportStats {
   private String html;
 
   public void merge(ReportStats reportStats) {
-    reportStats.getIntKeyToValue().forEach((k, v) -> {
-      Map<INFO, Integer> intKeyToValue = getIntKeyToValue();
-      intKeyToValue.merge(k, v, (a, b) -> a + b);
+    Map<INFO, Integer> intKeyToValue = getIntKeyToValue();
+    Map<INFO, Integer> otherMap = reportStats.getIntKeyToValue();
+    mergeKeyToValue(intKeyToValue, otherMap);
+
+    reportStats.intMultiKeyToValue.forEach((k, v) -> {
+      intMultiKeyToValue.merge(k, v, (a, b) -> {
+        mergeKeyToValue2(a, b);
+        return a;
+      });
     });
+  }
+
+  private void mergeKeyToValue(Map<INFO, Integer> intKeyToValue, Map<INFO, Integer> otherMap) {
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
+  }
+
+  private void mergeKeyToValue2(Map<String, Integer> intKeyToValue, Map<String, Integer> otherMap) {
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
   }
 
   public void setYear(int year) {
@@ -108,6 +122,10 @@ public class ReportStats {
   void putIntMulti(INFO key, String key2, Integer value) {
     Map<String, Integer> weekToValue = intMultiKeyToValue.computeIfAbsent(key, k -> new TreeMap<>());
     weekToValue.put(key2, value);
+  }
+
+  void putIntMulti(INFO key, Map<String, Integer> weekToCount) {
+    intMultiKeyToValue.put(key, weekToCount);
   }
 
   public Map<String, Integer> getKeyToValue(INFO key) {

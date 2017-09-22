@@ -83,7 +83,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * @param message
-   * @see LangTest#logMessageOnServer(String)
+   * @see LangTest#logMessageOnServer
    */
   void logMessage(String message, boolean sendEmail);
 
@@ -105,14 +105,12 @@ public interface LangTestDatabase extends RemoteService {
    */
   Collection<Event> getEvents();
 
+  void sendReport();
   /**
    * Dialog support...
    *
    * @return
-   * @see mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
+   * @seex mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
    */
-  ContextPractice getContextPractice();
-
-  @Deprecated
-  void reloadExercises();
+  //ContextPractice getContextPractice();
 }

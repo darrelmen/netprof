@@ -7,6 +7,7 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -85,12 +86,21 @@ public class UserMenu {
   List<LinkAndTitle> getProjectSpecificChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
     String nameForAnswer = props.getNameForAnswer() + "s";
-    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler(), true));
+    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new LinkAndTitle("Events", new EventsClickHandler(), true));
-    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
+    choices.add(new LinkAndTitle("Events", new EventsClickHandler()));
+    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler()));
+    choices.add(new LinkAndTitle("Send Report", event -> service.sendReport(new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        new ModalInfoDialog("Status report sent", "Please check your email.");
+      }
+    })));
     choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
-    choices.add(new LinkAndTitle("Send Report", "scoreServlet?sendReport"));
     return choices;
   }
 
@@ -114,12 +124,12 @@ public class UserMenu {
 
   @NotNull
   private LinkAndTitle getChangePassword() {
-    return new LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false);
+    return new LinkAndTitle("Change Password", new ChangePasswordClickHandler());
   }
 
   @NotNull
   private LinkAndTitle getLogOut() {
-    return new LinkAndTitle(LOG_OUT, new LogoutClickHandler(), false);
+    return new LinkAndTitle(LOG_OUT, new LogoutClickHandler());
   }
 
   private class UsersClickHandler implements ClickHandler {

@@ -58,7 +58,6 @@ import java.util.List;
  */
 public class ModalInfoDialog {
  // private final Logger logger = Logger.getLogger("ModalInfoDialog");
-
   private static final List<String> MESSAGES = Collections.emptyList();
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 

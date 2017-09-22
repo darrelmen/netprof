@@ -79,7 +79,6 @@ public class Report implements IReport {
 
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
-  // private static final boolean CLEAR_DAY_HOUR_MINUTE = true;
   private static final boolean WRITE_RESULTS_TO_FILE = false;
   private static final String ACTIVE_USERS = "Active Users";
   private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
@@ -95,7 +94,6 @@ public class Report implements IReport {
 
   private static final String NEW_I_PAD_I_PHONE_USERS = "New iPad/iPhone Users";
   private static final String TIME_ON_TASK = "Time on Task";
-  //  private static final String MM_DD = "MM-dd";
   private static final String ALL_NEW_USERS = "All New Users";
   private static final String ALL_USERS = "allUsers";
   private static final String I_PAD_USERS = "iPadUsers";
@@ -137,7 +135,6 @@ public class Report implements IReport {
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
-  //  private final String prefix;
   private BufferedWriter csv;
   private final Map<Integer, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = true;
@@ -827,7 +824,8 @@ public class Report implements IReport {
    * @return
    * @see #getReport
    */
-  private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year, Collection<Integer> usersForProject) {
+  private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year,
+                                Collection<Integer> usersForProject) {
     return getUsers(builder, fixUserStarts(usersForProject), ALL_NEW_USERS, jsonObject, year, true);
   }
 
@@ -1240,42 +1238,30 @@ public class Report implements IReport {
    * @see #getSectionReport(int, Map, Map, String, JSONObject, int)
    * @see #getEvents
    */
-  private String getWC(Map<Integer, ?> weekToCount, String unit, String count, JSONArray jsonArray, int year) {
+  private String getWC(Map<Integer, ?> weekToCount,
+                       String unit,
+                       String count,
+                       JSONArray jsonArray,
+                       int year) {
     String s = "";
     Calendar calendar = getCalendarForYear(year);
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
     Integer max = getMax(weekToCount);
     long initial = calendar.getTimeInMillis();
+
+    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
     SimpleDateFormat fullFormat = new SimpleDateFormat("MM-dd-yy");
 
 //    logger.info(unit +" before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
-
     for (int week = 1; week <= max; week++) {
-      // for (Map.Entry<Integer, ?> pair : weekToCount.entrySet()) {
-      Object value = weekToCount.get(week);
-      if (value == null) value = 0;
-      if (value instanceof Collection<?>) {
-        value = ((Collection<?>) value).size();
-      }
-
+      Object value = getCountAtWeek(weekToCount, week);
       //   logger.info("getWC before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
-      calendar.set(Calendar.WEEK_OF_YEAR, week);
-      calendar.set(Calendar.DAY_OF_WEEK, 1);
-      calendar.set(Calendar.YEAR, year);
-
-      Date time = calendar.getTime();
+      Date time = getThisWeek(year, calendar, week);
       boolean before = time.getTime() < initial;
       String format1 = before ? fullFormat.format(time) : df.format(time);
 
       //logger.info("getWC after  week " + week + " = " + time + " " + time.getTime() +" or " + format1 + " = " + value);
-
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put("weekOfYear", week);
-      jsonObject.put(COUNT, value);
-      jsonObject.put("date", fullFormat.format(time));
-
-      jsonArray.add(jsonObject);
+      addJSONForWeek(jsonArray, week, value, fullFormat.format(time));
 
       s += "<tr><td>" +
           "<span>" + format1 +
@@ -1293,6 +1279,54 @@ public class Report implements IReport {
         "</table><br/>\n";
   }
 
+  private Map<String, Integer> getWeekToCount(Map<Integer, ?> weekToCount,
+                                              int year) {
+    Calendar calendar = getCalendarForYear(year);
+    Integer max = getMax(weekToCount);
+    long initial = calendar.getTimeInMillis();
+
+    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
+
+    Map<String, Integer> weekToCountFormatted = new HashMap<>();
+
+    for (int week = 1; week <= max; week++) {
+      Date time = getThisWeek(year, calendar, week);
+      String format1 = df.format(time);
+      weekToCountFormatted.put(format1, getCountAtWeek(weekToCount, week));
+    }
+
+    return weekToCountFormatted;
+  }
+
+  private void addJSONForWeek(JSONArray jsonArray,
+                              int week,
+                              Object value,
+                              String format) {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("weekOfYear", week);
+    jsonObject.put(COUNT, value);
+    jsonObject.put("date", format);
+    jsonArray.add(jsonObject);
+  }
+
+  @NotNull
+  private Integer getCountAtWeek(Map<Integer, ?> weekToCount, int week) {
+    Object value = weekToCount.get(week);
+    if (value == null) return 0;
+    else if (value instanceof Collection<?>) {
+      return ((Collection<?>) value).size();
+    }
+    return (Integer) value;
+  }
+
+  @NotNull
+  private Date getThisWeek(int year, Calendar calendar, int week) {
+    calendar.set(Calendar.WEEK_OF_YEAR, week);
+    calendar.set(Calendar.DAY_OF_WEEK, 1);
+    calendar.set(Calendar.YEAR, year);
+
+    return calendar.getTime();
+  }
 
   /**
    * @param builder
@@ -1415,6 +1449,8 @@ public class Report implements IReport {
     );
 
     reportStats.putInt(recordings.equalsIgnoreCase(ALL_RECORDINGS) ? INFO.ALL_RECORDINGS : INFO.DEVICE_RECORDINGS, ytd);
+
+    reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, getThisYear()));
   }
 
   /**

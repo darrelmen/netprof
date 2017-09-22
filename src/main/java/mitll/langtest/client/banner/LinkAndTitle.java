@@ -18,10 +18,9 @@ public class LinkAndTitle {
   /**
    * @param title
    * @param click
-   * @param isAdminChoice
    * @see UserMenu#getChangePassword
    */
-  LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
+  LinkAndTitle(String title, ClickHandler click) {
     this.title = title;
     this.clickHandler = click;
     //  this.isAdminChoice = isAdminChoice;
@@ -31,7 +30,7 @@ public class LinkAndTitle {
   /**
    * @param title
    * @param linkURL
-   * @param isAdminChoice
+   * @paramx isAdminChoice
    * @see UserMenu#getCogMenuChoicesForAdmin
    */
   LinkAndTitle(String title, String linkURL) {
