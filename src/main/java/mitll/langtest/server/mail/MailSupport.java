@@ -33,6 +33,7 @@
 package mitll.langtest.server.mail;
 
 import com.sun.mail.util.MailConnectException;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
@@ -195,16 +196,21 @@ public class MailSupport {
     normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST, testEmail);
   }
 
-  public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach) {
+  /**
+   * @param receiver
+   * @param subject
+   * @param messageBody
+   * @param toAttach
+   * @param receiverName
+   * @return
+   * @see Report#sendExcelViaEmail(MailSupport, List, List, PathHelper, List)
+   */
+  public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach, String receiverName) {
     Message message = new MimeMessage(getMailSession(LOCALHOST, testEmail));
 
-
     try {
-      //   configure(RECIPIENT_NAME, receiver, Collections.emptyList(), subject, messageBody, message);
-
-
       message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
-      InternetAddress address = new InternetAddress(receiver, "someone");
+      InternetAddress address = new InternetAddress(receiver, receiverName);
       logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
       message.addRecipient(Message.RecipientType.TO, address);
       // addCC(ccEmails, msg);
@@ -214,13 +220,13 @@ public class MailSupport {
 
       Multipart multipart = new MimeMultipart();
 
-
       {// creates body part for the message
         MimeBodyPart messageBodyPart = new MimeBodyPart();
-        //    messageBodyPart.setContent(message, "multipart/mixed");
-        messageBodyPart.setText(messageBody);
+        String htmlEmail = getHTMLEmail(null, messageBody, null);
+        messageBodyPart.setContent(htmlEmail, "text/html");
+        // messageBodyPart.setText(htmlEmail, "utf-8", "text/html");
 
-// adds parts to the multipart
+        // adds parts to the multipart
         multipart.addBodyPart(messageBodyPart);
       }
 
@@ -233,7 +239,7 @@ public class MailSupport {
         multipart.addBodyPart(attachPart);
       }
 
-// sets the multipart as message's content
+      // sets the multipart as message's content
       message.setContent(multipart);
 
       Transport.send(message);

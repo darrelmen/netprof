@@ -322,20 +322,23 @@ public class Report implements IReport {
    * @param reportEmails
    * @param reportStats
    * @param pathHelper
+   * @param receiverNames
    * @see DatabaseImpl#sendReports
    */
   @Override
-  public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper) {
+  public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper, List<String> receiverNames) {
     File summaryReport = getSummaryReport(reportStats, pathHelper);
 
-    String subject = getFileName();
-    String messageBody = getFileName();
+    String subject =  getFileName();
+    String messageBody = "Hi,<br>Here is the current usage report for NetProF.<br>Thanks, Administrator";
 
-    reportEmails.forEach(dest -> {
-      if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport)) {
+    for (int i = 0; i < reportEmails.size(); i++) {
+      String dest = reportEmails.get(i);
+      String name = receiverNames.get(i);
+      if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport, name)) {
 
       }
-    });
+    }
   }
 
 

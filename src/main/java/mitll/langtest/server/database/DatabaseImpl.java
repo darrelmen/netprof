@@ -1671,7 +1671,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     });
 
     {
-      List<String> reportEmails = serverProps.getReportEmails();
+      List<String> reportEmails  = serverProps.getReportEmails();
+      List<String> receiverNames = reportEmails;//serverProps.getReceiverNames();
       if (userID != -1) {
         User byID = userDAO.getByID(userID);
         if (byID == null) {
@@ -1679,9 +1680,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
         } else {
 //          logger.info("using user email " + byID.getEmail());
           reportEmails = Collections.singletonList(byID.getEmail());
+          receiverNames = Collections.singletonList(byID.getFullName());
         }
       }
-      report.sendExcelViaEmail(mailSupport, reportEmails, stats, pathHelper);
+      report.sendExcelViaEmail(mailSupport, reportEmails, stats, pathHelper, receiverNames);
     }
   }
 

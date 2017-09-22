@@ -709,6 +709,12 @@ public class ServerProperties {
     return emailList.getReportEmails();
   }
 
+/*
+  public List<String> getReportNames() {
+    return emailList.getReportNames();
+  }
+*/
+
   public int getUserInitialScores() {
     return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
   }

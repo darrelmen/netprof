@@ -92,6 +92,7 @@ public class EmailList {
    * Set this property for non-DLI deployments.
    */
   private static final String REPORT_EMAILS = "reportEmails";
+  private static final String REPORT_EMAIL_NAMES = "reportNames";
 
   /**
    * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500

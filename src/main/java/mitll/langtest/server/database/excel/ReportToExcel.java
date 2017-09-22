@@ -239,7 +239,7 @@ public class ReportToExcel {
           cell.setCellValue(cumulative);
         }
         int diffLastWeek = cumulative - langToPrev.getOrDefault(lang, 0);
-        logger.info("lang " + lang + " = " + diffLastWeek);
+//        logger.info("lang " + lang + " = " + diffLastWeek);
         langToLastWeek.put(lang, diffLastWeek);
         langToPrev.put(lang, cumulative);
       }

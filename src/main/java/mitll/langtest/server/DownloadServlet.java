@@ -230,7 +230,7 @@ public class DownloadServlet extends DatabaseServlet {
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
       else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
-        logger.error("huh? got unexpected arg '" + arg + "'");
+        logger.warn("huh? got unexpected arg '" + arg + "'");
       }
     }
     return options;
