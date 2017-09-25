@@ -143,14 +143,25 @@ public class Report implements IReport {
 
   private final Map<Integer, String> idToUser = new HashMap<>();
 
-  private final Set<String> lincoln = new HashSet<>(Arrays.asList(SKIP_USER, "rbudd", "jmelot", "esalesky", "gatewood",
-      "testing", "grading", "fullperm", "0001abcd", "egodoy",
+  private final Set<String> lincoln = new HashSet<>(Arrays.asList(SKIP_USER,
+      "rbudd",
+      "jmelot",
+      "esalesky",
+      "gatewood",
+      "testing",
+      "grading",
+      "fullperm",
+      "0001abcd",
+      "egodoy",
       "rb2rb2",
       "dajone3",
       "WagnerSandy",
+      "SWagner",
       "rbtrbt",
       "tamas01",
-      "teacher", "newteacher"));
+      "tmarius",
+      "teacher",
+      "newteacher"));
 
   private final List<ReportUser> users;
   private final List<ReportUser> deviceUsers;
@@ -566,7 +577,7 @@ public class Report implements IReport {
                        ReportStats reportStats) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>").append(i).append("</h1>");
-    builder.append(getReport(forYear, i, allSlim, allDevicesSlim,
+    builder.append(getReportForYear(forYear, i, allSlim, allDevicesSlim,
         audioAttributes, results, resultsDevices, language, usersForProject, reportStats));
     dataArray.add(forYear);
   }
@@ -580,7 +591,7 @@ public class Report implements IReport {
    * @see #addYear
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  private String getReport(JSONObject jsonObject,
+  private String getReportForYear(JSONObject jsonObject,
                            int year,
                            List<SlickSlimEvent> allSlim,
                            List<SlickSlimEvent> allDevicesSlim,
@@ -643,6 +654,15 @@ public class Report implements IReport {
     jsonObject.put(HOST_INFO, browserReport);
   }*/
 
+  /**
+   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @param jsonObject
+   * @param year
+   * @param results
+   * @param builder
+   * @param users
+   * @param reportStats
+   */
   private void addRecordings(JSONObject jsonObject, int year, Collection<MonitorResult> results, StringBuilder builder,
                              Set<Integer> users, ReportStats reportStats) {
     JSONObject allRecordings = new JSONObject();
@@ -677,6 +697,14 @@ public class Report implements IReport {
     return filteredDevices;
   }
 
+  /**
+   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @param jsonObject
+   * @param year
+   * @param usersForProject
+   * @param builder
+   * @return
+   */
   private Set<Integer> getUserIDs(JSONObject jsonObject, int year, Collection<Integer> usersForProject, StringBuilder builder) {
     // all users
     JSONObject allUsers = new JSONObject();
@@ -1333,7 +1361,7 @@ public class Report implements IReport {
   /**
    * @param builder
    * @param year
-   * @see IReport#doReport
+   * @see #addRecordings
    */
   private void getResults(StringBuilder builder,
                           Set<Integer> students,
@@ -1366,7 +1394,7 @@ public class Report implements IReport {
     Map<Integer, Integer> monthToCount = counts.getMonthToCount();
     Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
-    Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
+    Map<Integer, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     int teacherAudio = 0;
     int invalid = 0;
@@ -1376,6 +1404,12 @@ public class Report implements IReport {
     int beforeJanuary = 0;
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
+
+    logger.info("Year  " +year+ " Students num = " + students.size());
+
+    Map<Integer, Integer> idToCount = new HashMap<>();
+    Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
+
     try {
       BufferedWriter writer = null;
       teacherAudio = 0;
@@ -1387,6 +1421,9 @@ public class Report implements IReport {
       for (MonitorResult result : results) {
         long timestamp = result.getTimestamp();
 
+        calendar.setTimeInMillis(timestamp);
+        int w = calendar.get(Calendar.WEEK_OF_YEAR);
+        boolean firstWeeks = false;// w==5;
         if (yearTimeRange.inYear(timestamp)) {
           if (result.isValid()) {
             if (!isRefAudioResult(result)) {
@@ -1400,20 +1437,31 @@ public class Report implements IReport {
                     }*/
                     ytd++;
 
+                   // if (w==5) logger.info("include " + result);
                     tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
                     seen.add(result.getAnswer());
                   } else {
+                    if (firstWeeks) logger.warn(w + " by me " + result);
                     me++;
                   }
                 } else {
+                  if (firstWeeks) logger.warn(w + " min duration too short " + result);
                   invalidScore++;
                 }
               } else {
+                if (firstWeeks) logger.warn(w + " teacher score " + result);
                 skipped.add(userid);
+
+                idToCount.put(userid, idToCount.getOrDefault(userid, 0) + 1);
+                Set<MonitorResult> orDefault = userToRecordings.getOrDefault(userid, new HashSet<>());
+                orDefault.add(result);
+                userToRecordings.put(userid, orDefault);
+
                 teacherAudio++;
               }
             }
           } else {
+            if (firstWeeks) logger.warn(w+ " invalid score " + result);
             invalid++;
           }
         } else {
@@ -1427,19 +1475,25 @@ public class Report implements IReport {
       logger.error("got " + e, e);
     }
 
-    if (DEBUG) {
-      logger.debug("getResultsForSet out of " + size +
-          "  Skipped " +
-          invalid + " invalid recordings, " +
-          invalidScore + " -1 score items, " +
-          me + " by gvidaver, " +
-          beforeJanuary + " beforeJan1st");
+    if (DEBUG || true) {
+      logger.debug("getResultsForSet" +
+          "\n\tout of   " + size +
+          "\n\tSkipped  " + invalid + " invalid recordings, " +
+          "\n\tinvalid  " + invalidScore + " -1 score items, " +
+          "\n\tgvidaver " + me + " by gvidaver, " +
+          "\n\tbefore   " + beforeJanuary + " beforeJan1st");
     }
     if (teacherAudio > 0) {
       StringBuilder builder1 = new StringBuilder();
       builder1.append("\n");
       for (Integer skip : skipped) {
-        builder1.append(skip).append("/").append(idToUser.get(skip)).append(",\n");
+        builder1
+            .append(skip)
+            .append("/")
+            .append(idToUser.get(skip))
+            .append("\t")
+            .append(idToCount.get(skip))
+            .append("\n");
       }
       if (DEBUG) logger.debug("getResultsForSet skipped " + teacherAudio + " teacher recordings by " + builder1);
     }
@@ -1490,7 +1544,7 @@ public class Report implements IReport {
     Map<Integer, Integer> monthToCount = counts.getMonthToCount();
     Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
-    Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
+    Map<Integer, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
@@ -1582,27 +1636,25 @@ public class Report implements IReport {
                                    Map<Integer, Integer> monthToCount,
                                    Map<Integer, Integer> weekToCount,
                                    UserTimeBase result,
-                                   Map<Long, Map<String, Integer>> userToDayToCount) {
-    long timestamp = result.getTimestamp();
-    int userid = result.getUserid();
-
-    tallyByMonthAndWeek(calendar, monthToCount, weekToCount, userToDayToCount, timestamp, userid);
+                                   Map<Integer, Map<String, Integer>> userToDayToCount) {
+    tallyByMonthAndWeek(calendar, monthToCount, weekToCount, userToDayToCount, result.getTimestamp(), result.getUserid());
   }
 
   private void tallyByMonthAndWeek(Calendar calendar, Map<Integer, Integer> monthToCount,
                                    Map<Integer, Integer> weekToCount,
-                                   Map<Long, Map<String, Integer>> userToDayToCount, long timestamp, long userid) {
+                                   Map<Integer, Map<String, Integer>> userToDayToCount, long timestamp, int userid) {
     calendar.setTimeInMillis(timestamp);
 
     int month = calendar.get(Calendar.MONTH);
     monthToCount.put(month, monthToCount.getOrDefault(month, 0) + 1);
 
-    Map<String, Integer> dayToCount = userToDayToCount.get(userid);
-    if (dayToCount == null) userToDayToCount.put(userid, dayToCount = new TreeMap<>());
-    String key = calendar.get(Calendar.YEAR) + "," +
+    Map<String, Integer> dayToCount = userToDayToCount.computeIfAbsent(userid, k -> new TreeMap<>());
+
+    String yearMonthDayKey = calendar.get(Calendar.YEAR) + "," +
         month + "," +
         calendar.get(Calendar.DAY_OF_MONTH);
-    dayToCount.put(key, dayToCount.getOrDefault(key, 0) + 1);
+
+    dayToCount.put(yearMonthDayKey, dayToCount.getOrDefault(yearMonthDayKey, 0) + 1);
 
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
     Integer orDefault = weekToCount.getOrDefault(w, 0);
@@ -1813,7 +1865,7 @@ public class Report implements IReport {
   }*/
 
   private boolean isValidUser(long creatorID) {
-    return creatorID != 1; // 1 = gvidaver
+    return true;// creatorID != 1; // 1 = gvidaver
   }
 
   /**

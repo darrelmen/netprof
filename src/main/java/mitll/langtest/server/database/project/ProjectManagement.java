@@ -58,10 +58,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -253,8 +257,38 @@ public class ProjectManagement implements IProjectManagement {
               id
           )
       );
-      project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 
+      boolean myProject = true;
+      try {
+        InetAddress ip = InetAddress.getLocalHost();
+        String hostName = ip.getHostName().toLowerCase();
+        String webserviceHost = project.getWebserviceHost();
+
+        if (hostName.startsWith("hydra2")) {
+          if (webserviceHost.equalsIgnoreCase("h2")) {
+            myProject = true;
+          } else {
+            myProject = false;
+          }
+        } else if (hostName.startsWith("hydra")) {
+          if (webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT)) {
+            myProject = true;
+          } else {
+            myProject = false;
+          }
+        }
+        if (myProject) {
+          logger.info("project " + project + " on " + hostName + " will check lts and count phones.");
+        } else {
+          logger.info("project " + project + " on " + hostName + " will NOT check lts and count phones.");
+        }
+      } catch (UnknownHostException e) {
+        logger.error("got " + e, e);
+      }
+
+      if (myProject) {
+        project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
+      }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
       //  logMemory();
 
@@ -439,7 +473,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see DatabaseImpl#getExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) { return getProjectOrFirst(projectid).getExerciseByID(id);
+  public CommonExercise getExercise(int projectid, int id) {
+    return getProjectOrFirst(projectid).getExerciseByID(id);
   }
 
 /*
@@ -538,7 +573,9 @@ public class ProjectManagement implements IProjectManagement {
   }*/
 
   @Override
-  public Collection<Project> getProjects() {  return idToProject.values();  }
+  public Collection<Project> getProjects() {
+    return idToProject.values();
+  }
 
   @Override
   public Collection<Project> getProductionProjects() {
@@ -590,10 +627,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @see #setStartupInfo
    * @param userWhere
    * @param projid
    * @param project
+   * @see #setStartupInfo
    */
   private void setStartupInfoOnUser(User userWhere, int projid, Project project) {
     configureProject(project, true, false);
@@ -664,7 +701,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   *
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
    */
@@ -733,7 +769,7 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     String prop = project.getProp(Project.WEBSERVICE_HOST);
-    if (prop == null) prop = Project.WEBSERVICE_HOST_DEFAULT;
+    if (prop == null) prop = WEBSERVICE_HOST_DEFAULT;
 
     boolean onIOS = isOnIOS(project);
 

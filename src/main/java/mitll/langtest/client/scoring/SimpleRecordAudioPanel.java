@@ -89,7 +89,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    *
    * @return
    * @seex #AudioPanel
-   * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel(BusyPanel, ExerciseController, CommonExercise, List, ListInterface)
+   * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
   private void addWidgets() {
     DivWidget col = new DivWidget();
@@ -98,6 +98,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       DivWidget historyHoriz = new DivWidget();
       historyHoriz.addStyleName("inlineFlex");
       DivWidget spacer = new DivWidget();
+      spacer.getElement().setId("simpleSpacer");
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
       historyHoriz.add(spacer);

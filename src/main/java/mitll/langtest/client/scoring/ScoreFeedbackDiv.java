@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.Style;
@@ -18,17 +17,15 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv {
+  public static final double NATIVE_THRSHOLD = .75;
   private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
-
   private static final String OVERALL_SCORE = "Overall Score";
 
   private final ProgressBar progressBar;
@@ -57,8 +54,8 @@ public class ScoreFeedbackDiv {
     this.downloadContainer = downloadContainer;
   }
 
-  private Tooltip addTooltip(Widget w, String tip) {
-    return new TooltipHelper().addTooltip(w, tip);
+  private void addTooltip(Widget w, String tip) {
+     new TooltipHelper().addTooltip(w, tip);
   }
 
   void showScore(double score) {
@@ -93,6 +90,13 @@ public class ScoreFeedbackDiv {
     progressBar.setVisible(false);
   }
 
+  /**
+   * Horizontal - play audio, score feedback, download widget
+   * Shows a little praise message too!
+   * @param pretestScore
+   * @param isRTL
+   * @return
+   */
   @NotNull
   public DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {
     DivWidget wordTableContainer = new DivWidget();
@@ -102,19 +106,29 @@ public class ScoreFeedbackDiv {
 
     wordTableContainer.add(getPlayButtonDiv());
 
-    if (pretestScore.getHydecScore() > 0) {
+    float hydecScore = pretestScore.getHydecScore();
+    logger.info("score " + hydecScore);
+    if (hydecScore > 0) {
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
 
       Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
       scoreFeedbackDiv.add(new WordTable()
           .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
-      SegmentHighlightAudioControl listener = new SegmentHighlightAudioControl(typeToSegmentToWidget);
-      playAudioPanel.setListener(listener);
+
+      playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
       // so it will play on drill tab...
       playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
+      if (hydecScore> NATIVE_THRSHOLD) {
+        Heading w = new Heading(4, getPraiseMessage());
+        w.addStyleName("leftFiveMargin");
+        w.addStyleName("correctCard");
+        DivWidget praise= new DivWidget();
+        praise.add(w);
+        wordTableContainer.add(praise);
+      }
       //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
@@ -127,6 +141,13 @@ public class ScoreFeedbackDiv {
     wordTableContainer.add(container);
 
     return wordTableContainer;
+  }
+
+  private List<String> praise = Arrays.asList("Fantastic!","Outstanding!","Great!","Well done!","Good Job!","Two thumbs up!","Awesome!","Fabulous!","Splendid!","Amazing!","Terrific!","Superb!","Nice!","Bravo!","Magnificent!");
+  private Random rand=new Random();
+  @NotNull
+  private String getPraiseMessage() {
+    return praise.get(rand.nextInt(praise.size()));
   }
 
   public void setDownloadHref(String audioPathToUse, int id, int user, String host) {

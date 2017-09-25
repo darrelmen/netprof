@@ -208,12 +208,17 @@ public class AudioFileHelper implements AlignDecode {
             }
           }
 
+          long then = System.currentTimeMillis();
+          logger.warn("checkLTSAndCountPhones took " + (then-now) + " millis to examine " + exercises.size() + " exercises.");
+
           if (!safe.isEmpty() || !unsafe.isEmpty()) {
             logger.info("checkLTSAndCountPhones marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
           }
 
           project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
+          long now2 = System.currentTimeMillis();
 
+          logger.warn("checkLTSAndCountPhones took " + (now2-then) + " millis to mark exercises safe/unsafe to decode.");
           if (count > 0) {
             logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
           }

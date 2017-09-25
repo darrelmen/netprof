@@ -754,12 +754,12 @@ public class CopyToPostgres<T extends CommonShell> {
     Set<Integer> userids = new HashSet<>();
 
     for (Result result : results) {
-      int userid = result.getUserid();
-      Integer userID = oldToNewUser.get(userid);
+      int oldUserID = result.getUserid();
+      Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
-        boolean add = userids.add(userid);
+        boolean add = userids.add(oldUserID);
         if (add) {
-          logger.error("copyResult no user " + userid);
+          logger.error("copyResult no user " + oldUserID);
         }
       } else {
         result.setUserID(userID);
@@ -775,7 +775,7 @@ public class CopyToPostgres<T extends CommonShell> {
           String transcript = idToFL.get(realExID);
           SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
           if (e == null) {
-            if (missing < 10) logger.warn("missing exid ref " + result.getOldExID());
+            if (missing < 10 || true) logger.warn("missing exid ref " + result.getOldExID()  + " so skipping " + result);
             missing++;
           } else {
             bulk.add(e);

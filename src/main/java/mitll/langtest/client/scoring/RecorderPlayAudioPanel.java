@@ -132,6 +132,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
     recordImage1.setVisible(false);
     recordImage1.setWidth("32px");
+
     recordImage2 = new Image(UriUtils.fromSafeConstant(SECOND_RED));
     recordImage2.setVisible(false);
     recordImage2.setWidth("32px");

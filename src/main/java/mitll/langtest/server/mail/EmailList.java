@@ -33,6 +33,8 @@
 package mitll.langtest.server.mail;
 
 import mitll.langtest.server.database.user.UserDAO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -43,6 +45,8 @@ import java.util.*;
  * @since 10/26/15.
  */
 public class EmailList {
+  private static final Logger logger = LogManager.getLogger(EmailList.class);
+
   // MIT LL
   private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
@@ -52,7 +56,7 @@ public class EmailList {
   private static final String GRIMMER = "michael.grimmer1@dliflc.edu";
   private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
   private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
-  private static final String SANDY = "sandra.wagner@dliflc.edu";
+  //private static final String SANDY = "sandra.wagner@dliflc.edu";
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";
@@ -92,7 +96,7 @@ public class EmailList {
    * Set this property for non-DLI deployments.
    */
   private static final String REPORT_EMAILS = "reportEmails";
-  private static final String REPORT_EMAIL_NAMES = "reportNames";
+//  private static final String REPORT_EMAIL_NAMES = "reportNames";
 
   /**
    * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500
@@ -106,7 +110,13 @@ public class EmailList {
     this.props = props;
 
     String property = props.getProperty(ADMINS);
-    if (property != null) admins = new HashSet<>(Arrays.asList(property.split(",")));
+    if (property != null) {
+      admins = new HashSet<>(Arrays.asList(property.split(",")));
+      logger.info("admins now " + admins);
+    }
+    else {
+      logger.debug("default admins " + admins);
+    }
 
     property = props.getProperty(REPORT_EMAILS);
     if (property != null) {
