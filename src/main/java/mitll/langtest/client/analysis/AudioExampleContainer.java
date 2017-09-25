@@ -23,8 +23,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/20/17.
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
-  private final Logger logger = Logger.getLogger("AudioExampleContainer");
-
+ // private final Logger logger = Logger.getLogger("AudioExampleContainer");
   private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -40,15 +39,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   AudioExampleContainer(ExerciseController controller, AnalysisPlot plot) {
     super(controller);
     this.plot = plot;
-  }
-
-  /**
-   * @param id
-   * @return
-   * @see #getPlayAudio
-   */
-  protected CommonShell getShell(int id) {
-    return plot.getIdToEx().get(id);
   }
 
   void addAudioColumns() {
@@ -79,6 +69,15 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
       }
     };
+  }
+
+  /**
+   * @param id
+   * @return
+   * @see #getPlayAudio
+   */
+  protected CommonShell getShell(int id) {
+    return plot.getShell(id);
   }
 
   @NotNull

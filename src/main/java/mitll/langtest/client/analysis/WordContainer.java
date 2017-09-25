@@ -81,7 +81,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
   private static final int SIGNED_UP = 95;
-  private static final String SIGNED_UP1 = "Date";
+  private static final String DATE = "Date";
 
   private final ExerciseComparator sorter;
   private final ShowTab learnTab;
@@ -97,7 +97,9 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
-  private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
+  // private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
+
+  private Map<Integer, Map<Long, String>> exToTimeToAnswer = new HashMap<>();
 
   /**
    * What sort order do we want?
@@ -137,13 +139,21 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     sortedHistory.sort(getWordScoreTimeComparatorDesc());
     byTime = new TreeSet<>(getWordScoreTimeComparator());
     byTime.addAll(sortedHistory);
-
 //    logger.info("getTableWithPager got " + sortedHistory.size() + " items");
     addItems(sortedHistory);
 
     addPlayer();
 
     return tableWithPager;
+  }
+
+  Map<Integer, Map<Long, WordScore>> getExToTimeToAnswer(List<WordScore> sortedHistory) {
+    Map<Integer, Map<Long, WordScore>> exToTimeToAnswer = new HashMap<>();
+    for (WordScore wordScore : sortedHistory) {
+      Map<Long, WordScore> timeToAnswer = exToTimeToAnswer.computeIfAbsent(wordScore.getExid(), k -> new HashMap<>());
+      timeToAnswer.computeIfAbsent(wordScore.getTimestamp(), k -> wordScore);
+    }
+    return exToTimeToAnswer;
   }
 
   @NotNull
@@ -207,10 +217,10 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
             } else {
               float a1 = o1.getPronScore();
               float a2 = o2.getPronScore();
-              int i = Float.valueOf(a1).compareTo(a2);
+              int i = Float.compare(a1, a2);
               // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
               if (i == 0) {
-                return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+                return Long.compare(o1.getTimestamp(), o2.getTimestamp());
               } else {
                 return i;
               }
@@ -231,7 +241,7 @@ public class WordContainer extends AudioExampleContainer<WordScore> implements A
     {
       Column<WordScore, SafeHtml> dateCol = getDateColumn();
       dateCol.setSortable(true);
-      addColumn(dateCol, new TextHeader(SIGNED_UP1));
+      addColumn(dateCol, new TextHeader(DATE));
       table.setColumnWidth(dateCol, SIGNED_UP + "px");
       table.addColumnSortHandler(getDateSorter(dateCol, getList()));
       table.getColumnSortList().push(dateCol);

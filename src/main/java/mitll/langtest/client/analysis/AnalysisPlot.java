@@ -48,10 +48,7 @@ import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.PhoneSession;
-import mitll.langtest.shared.analysis.TimeAndScore;
-import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -72,7 +69,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/19/15.
  */
-public class AnalysisPlot extends TimeSeriesPlot {
+public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   public static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
@@ -138,6 +135,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private TimeWidgets timeWidgets;
   private final ExceptionSupport exceptionSupport;
+  private Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer;
 
   /**
    * @param service
@@ -163,7 +161,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     this.userid = userid;
     populateGranToLabel();
 
-    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
+    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback, this);
   }
 
   private void populateGranToLabel() {
@@ -561,9 +559,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private SeriesClickEventHandler getSeriesClickEventHandler() {
     return clickEvent -> {
       long nearestXAsLong = clickEvent.getNearestXAsLong();
-      Integer s = timeToId.get(clickEvent.getNearestXAsLong());
-      if (s != null) {
-        playAudio.playLast(s, userid);
+      Integer exid = timeToId.get(nearestXAsLong);
+      if (exid != null) {
+        playAudio.playLast(exid, userid, nearestXAsLong);
       } else {
         logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
       }
@@ -856,11 +854,16 @@ public class AnalysisPlot extends TimeSeriesPlot {
     //}
   }
 
+  @Override
+  public CommonShell getShell(int id) {
+    return getIdToEx().get(id);
+  }
+
   /**
    * @return
    * @see WordContainer#getShell
    */
-  Map<Integer, CommonShell> getIdToEx() {
+  private Map<Integer, CommonShell> getIdToEx() {
     return idToEx;
   }
 
@@ -881,8 +884,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
    */
   private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
-    this.timeHorizon = timeHorizon;
-
+    //this.timeHorizon = timeHorizon;
     // logger.info("goToLast set time from " + new Date(firstTime) + " to " + new Date(lastTime));
     XAxis xAxis;
     try {
@@ -952,28 +954,39 @@ public class AnalysisPlot extends TimeSeriesPlot {
     timeChanged(firstTime, lastTime);
   }
 
+  /**
+   * @see AnalysisTab#getPrevButton
+   */
   void gotPrevClick() {
-    long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
-    List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
-
     index--;
 
     timeWidgets.prevButton.setEnabled(index > 0);
     timeWidgets.nextButton.setEnabled(true);
 
-    showTimePeriod(offset, periods);
+    showTimePeriod(getOffset(), getPeriods());
   }
 
+  /**
+   * @see AnalysisTab#getNextButton
+   */
   void gotNextClick() {
-    long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
-    List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
+    List<Long> periods = getPeriods();
 
     index++;
 
     timeWidgets.prevButton.setEnabled(true);
     timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
 
-    showTimePeriod(offset, periods);
+    showTimePeriod(getOffset(), periods);
+  }
+
+  private long getOffset() {
+    return timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
+  }
+
+  @NotNull
+  private List<Long> getPeriods() {
+    return timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
   }
 
   /**
@@ -986,22 +999,21 @@ public class AnalysisPlot extends TimeSeriesPlot {
     Long aLong = periods.get(index);
     timeWidgets.display.setText(getShortDate(aLong));
     long end = aLong + offset;
-
-    logger.info("showTimePeriod From  " + getShortDate(aLong));
-    logger.info("showTimePeriod to    " + getShortDate(end));
-    logger.info("showTimePeriod offset    " + offset);
+    //  logger.info("showTimePeriod From  " + getShortDate(aLong));
+    //  logger.info("showTimePeriod to    " + getShortDate(end));
+    // logger.info("showTimePeriod offset    " + offset);
     chart.getXAxis().setExtremes(aLong, end);
 
     timeChanged(aLong, end);
   }
 
-  public void setTimeWidgets(TimeWidgets timeWidgets) {
+  void setTimeWidgets(TimeWidgets timeWidgets) {
     this.timeWidgets = timeWidgets;
   }
 
   private final Set<TimeChangeListener> listeners = new HashSet<>();
 
-  public void addListener(TimeChangeListener listener) {
+  void addListener(TimeChangeListener listener) {
     listeners.add(listener);
   }
 
@@ -1012,6 +1024,15 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   private void timeChanged(long from, long to) {
     for (TimeChangeListener listener : listeners) listener.timeChanged(from, to);
+  }
+
+  void setExerciseToTimeToAnswer(Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer) {
+    this.exerciseToTimeToAnswer = exerciseToTimeToAnswer;
+  }
+
+  @Override
+  public WordScore getAnswerPath(int exid, long timestamp) {
+    return exerciseToTimeToAnswer.get(exid).get(timestamp);
   }
 
   public interface TimeChangeListener {

@@ -39,7 +39,6 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -150,13 +149,13 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(AnalysisReport result) {
-        useReport(result, then, userChosenID, listid, isTeacherView, showTab, bottom, userid, minRecordings);
+        useReport(result, then, userChosenID, listid, isTeacherView, showTab, bottom, userid);
       }
     });
   }
 
   private void useReport(AnalysisReport result, long then, String userChosenID, int listid, boolean isTeacherView,
-                         ShowTab showTab, DivWidget bottom, int userid, int minRecordings) {
+                         ShowTab showTab, DivWidget bottom, int userid) {
     long now = System.currentTimeMillis();
 
     if (now - then > 200) {
@@ -180,9 +179,6 @@ public class AnalysisTab extends DivWidget {
     Scheduler.get().scheduleDeferred(() ->
         showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom,
             result.getPhoneReport()));
-
-//    showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom, userid, minRecordings, listid,
-//        result.getPhoneReport());
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -330,6 +326,16 @@ public class AnalysisTab extends DivWidget {
     return event -> analysisPlot.setTimeHorizon(month);
   }
 
+  /**
+   *
+   * @param wordScores
+   * @param controller
+   * @param analysisPlot
+   * @param showTab
+   * @param lowerHalf
+   * @param phoneReport
+   * @see #useReport
+   */
   private void showWordScores(List<WordScore> wordScores,
                               ExerciseController controller,
                               AnalysisPlot analysisPlot,
@@ -337,7 +343,6 @@ public class AnalysisTab extends DivWidget {
                               Panel lowerHalf,
                               PhoneReport phoneReport) {
     {
-      // logger.info("showWordScores " + wordScores.size());
       Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
       Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, wordsTitle);
 
@@ -373,7 +378,10 @@ public class AnalysisTab extends DivWidget {
                                  AnalysisPlot analysisPlot,
                                  ShowTab showTab,
                                  Heading wordsTitle) {
-    return new WordContainer(controller, analysisPlot, showTab, wordsTitle)
+    WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
+    analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
+
+    return wordContainer
         .getTableWithPager(wordScores);
   }
 
