@@ -1,12 +1,12 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.database.ReportStats.INFO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
-
-import static org.apache.poi.ss.usermodel.PatternFormatting.SOLID_FOREGROUND;
 
 /**
  * Created by go22670 on 3/25/16.
@@ -38,11 +36,10 @@ public class ReportToExcel {
 
   /**
    * @param out
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see Report#getSummaryReport
    */
   public void toXLSX(List<ReportStats> stats, OutputStream out) {
     long then = System.currentTimeMillis();
-    long now = System.currentTimeMillis();
 
     XSSFWorkbook wb = new XSSFWorkbook();//1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
 
@@ -50,54 +47,91 @@ public class ReportToExcel {
 
     int rownum = writeWeeklySheet(wb, wb.createSheet(NET_PRO_F_YTD), langToYearToStats);
 
-    now = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
     if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
         " rows to sheet, or " + (now - then) / rownum + " millis/row");
     then = now;
 
-    rownum = writeHistoricalSheet(stats, wb.createSheet(NET_PRO_F_HISTORICAL), langToYearToStats);
+    rownum = writeHistoricalSheet(wb, stats, wb.createSheet(NET_PRO_F_HISTORICAL), langToYearToStats);
 
     writeTheFile(out, then, wb);
   }
 
-  private int writeHistoricalSheet(List<ReportStats> stats, Sheet sheet,
+  /**
+   *
+   * @param workbook
+   * @param stats
+   * @param sheet
+   * @param langToYearToStats
+   * @return
+   * @see #toXLSX(List, OutputStream)
+   */
+  private int writeHistoricalSheet(XSSFWorkbook workbook,
+                                   List<ReportStats> stats, Sheet sheet,
                                    Map<String, Map<Integer, ReportStats>> langToYearToStats) {
     int rownum = 0;
 
     short yellow = IndexedColors.YELLOW.getIndex();
     Set<Integer> yearsFromStats = getYearsFromStats(stats);
 
-    rownum = writeHeaderRow(sheet, rownum, yellow, yearsFromStats);
+    rownum = writeHeaderRow(workbook, sheet, rownum, yellow, yearsFromStats);
 
-    // Map<String, Map<Integer, ReportStats>> langToYearToStats = getLangToYearToStats(stats,false);
     Map<Integer, Integer> yearToTotal = new HashMap<>();
     Set<String> sortedLang = new TreeSet<>(langToYearToStats.keySet());
+    XSSFCellStyle lightGreenStyle = getLightGreenStyle(workbook);
+    XSSFCellStyle cellStyle = getCellStyle(workbook);
     for (String lang : sortedLang) {
       Row row = sheet.createRow(rownum++);
 
       int col = 0;
 
-      row.createCell(col++).setCellValue(lang);
+      {
+        Cell langCell = row.createCell(col++);
+        langCell.setCellStyle(lightGreenStyle);
+        langCell.setCellValue(lang);
+      }
+
       for (Integer year : yearsFromStats) {
         Map<Integer, ReportStats> yearToStats = langToYearToStats.get(lang);
         ReportStats reportStats = yearToStats.get(year);
 //        logger.info("For " + lang + " " + year + " got " + reportStats);
         Integer orDefault = reportStats == null ? 0 : reportStats.getIntKeyToValue().getOrDefault(INFO.ALL_RECORDINGS, 0);
-        row.createCell(col++).setCellValue(orDefault);
+        {
+          Cell cell = row.createCell(col++);
+          cell.setCellStyle(cellStyle);
+          cell.setCellValue(orDefault);
+        }
         yearToTotal.put(year, yearToTotal.getOrDefault(year, 0) + orDefault);
       }
-      row.createCell(col++).setCellValue(lang);
+      {
+        Cell cell = row.createCell(col++);
+        cell.setCellStyle(lightGreenStyle);
+        cell.setCellValue(lang);
+      }
     }
 
-    Row row = sheet.createRow(rownum++);
-    int col = 0;
-    row.createCell(col++).setCellValue("TOTALS");
+    {
+      XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
+      Row row = sheet.createRow(rownum++);
+      int col = 0;
+      {
+        Cell cell1 = row.createCell(col++);
+        cell1.setCellValue("TOTALS");
+        cell1.setCellStyle(brightGreenStyle);
+      }
 
-    for (Integer year : yearsFromStats) {
-      row.createCell(col++).setCellValue(yearToTotal.getOrDefault(year, 0));
+      for (Integer year : yearsFromStats) {
+        Cell cell = row.createCell(col++);
+        cell.setCellStyle(brightGreenStyle);
+        cell.setCellValue(yearToTotal.getOrDefault(year, 0));
+      }
+
+      {
+        Cell cell = row.createCell(col++);
+        cell.setCellStyle(brightGreenStyle);
+        cell.setCellValue("TOTAL");
+      }
     }
-
-    row.createCell(col++).setCellValue("TOTAL");
     return rownum;
   }
 
@@ -136,22 +170,22 @@ public class ReportToExcel {
     return langToStats;
   }
 
-  private int writeHeaderRow(Sheet sheet, int rownum, short yellow, Set<Integer> years) {
+  private int writeHeaderRow(XSSFWorkbook workbook, Sheet sheet, int rownum, short yellow, Set<Integer> years) {
     Row headerRow = sheet.createRow(rownum++);
     // headerRow.getRowStyle().setFillBackgroundColor(IndexedColors.YELLOW.getIndex());
     int col = 0;
     Cell headerCell = headerRow.createCell(col++);
-    makeYellow(yellow, headerCell);
+    makeYellow(workbook, headerCell);
     headerCell.setCellValue("Language");
 
     for (Integer year : years) {
       Cell cell = headerRow.createCell(col++);
       cell.setCellValue(year);
-      makeYellow(yellow, cell);
+      makeYellow(workbook, cell);
     }
     Cell cell = headerRow.createCell(col++);
     cell.setCellValue("Languages");
-    makeYellow(yellow, cell);
+    makeYellow(workbook, cell);
     return rownum;
   }
 
@@ -370,6 +404,14 @@ public class ReportToExcel {
     return colorStyle;
   }
 
+  @NotNull
+  private XSSFCellStyle getYellowStyle2(XSSFWorkbook workbook) {
+    java.awt.Color darkGreen = new java.awt.Color(255, 253, 56);
+    XSSFCellStyle colorStyle = getColorStyle(workbook, darkGreen);
+    setBold(workbook, colorStyle);
+    return colorStyle;
+  }
+
   private XSSFCellStyle getColorStyle(XSSFWorkbook workbook, java.awt.Color darkGreen) {
     XSSFCellStyle greenStyle = workbook.createCellStyle();
     setColorStyle(workbook, greenStyle, darkGreen);
@@ -402,8 +444,8 @@ public class ReportToExcel {
     return week.replace("-", "/");
   }
 
-  private void makeYellow(short yellow, Cell headerCell) {
-    headerCell.getCellStyle().setFillBackgroundColor(yellow);
+  private void makeYellow(XSSFWorkbook workbook, Cell headerCell) {
+    headerCell.setCellStyle(getYellowStyle2(workbook));
   }
 
   private int getYearSafe(ReportStats reportStats) {

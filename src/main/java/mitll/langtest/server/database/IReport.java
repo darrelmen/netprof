@@ -34,5 +34,7 @@ public interface IReport {
 
   void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper, List<String> receiverNames);
 
+  File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper);
+
   File getReportPathDLI(PathHelper pathHelper, String suffix);
 }

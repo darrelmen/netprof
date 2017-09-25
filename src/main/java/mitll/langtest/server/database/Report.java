@@ -118,15 +118,17 @@ public class Report implements IReport {
   private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
   private static final int EVIL_LAST_WEEK = 54;
   private static final String SKIP_USER = "gvidaver";
-  public static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
+  static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
   private static final int MIN_DURATION = 250;
-  private static final String MITLL = "mitll";
-  public static final String WEEK1 = "week";
-  public static final String YEAR = "year";
-  public static final String REFERENCE_RECORDINGS = "referenceRecordings";
-  public static final String HOST_INFO = "hostInfo";
-  public static final String HOST = "host";
-  public static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
+  // private static final String MITLL = "mitll";
+  private static final String WEEK1 = "week";
+  private static final String YEAR = "year";
+  private static final String REFERENCE_RECORDINGS = "referenceRecordings";
+  // public static final String HOST_INFO = "hostInfo";
+  private static final String HOST = "host";
+  private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
+  private static final int ALL_YEARS = -1;
+  private static final String FOOTER = "</body></head></html>";
 
   /**
    * @see #getReportForProject
@@ -135,7 +137,7 @@ public class Report implements IReport {
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
-  private BufferedWriter csv;
+  //  private BufferedWriter csv;
   private final Map<Integer, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = true;
 
@@ -152,9 +154,9 @@ public class Report implements IReport {
 
   private final List<ReportUser> users;
   private final List<ReportUser> deviceUsers;
-  private String hostname;
+  private final String hostname;
   private final Map<Integer, Integer> userToProject;
-  LogAndNotify logAndNotify;
+  private final LogAndNotify logAndNotify;
 
   /**
    * @param resultDAO
@@ -207,7 +209,7 @@ public class Report implements IReport {
     if (!getShouldSkip() &&
         // isTodayAGoodDay() &&
         !reportEmails.isEmpty()) {
-      int thisYear = getAllYears ? -1 : getThisYear();
+      int thisYear = getAllYears ? ALL_YEARS : getThisYear();
       return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, thisYear, forceSend);
     } else {
       return Collections.emptyList();
@@ -261,7 +263,7 @@ public class Report implements IReport {
       try {
         ReportStats stats = new ReportStats(projid, language, site, year);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
-        sendEmails(stats, mailSupport, reportEmails, reportStats, pathHelper);
+        sendEmails(stats, mailSupport, reportEmails);
         return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
@@ -301,11 +303,9 @@ public class Report implements IReport {
    * @param stats
    * @param mailSupport
    * @param reportEmails
-   * @param reportStats
    * @see #writeAndSendReport
    */
-  private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails,
-                          List<ReportStats> reportStats, PathHelper pathHelper) {
+  private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails) {
     String suffix = " (" + stats.getName() + ") on " + getHostInfo();
     String subject = "Weekly Usage Report for " + stats.getLanguage() + suffix;
     //  File file = getReportPath(pathHelper, language, name);
@@ -329,7 +329,7 @@ public class Report implements IReport {
   public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper, List<String> receiverNames) {
     File summaryReport = getSummaryReport(reportStats, pathHelper);
 
-    String subject =  getFileName();
+    String subject = getFileName();
     String messageBody = "Hi,<br>Here is the current usage report for NetProF.<br>Thanks, Administrator";
 
     for (int i = 0; i < reportEmails.size(); i++) {
@@ -342,7 +342,14 @@ public class Report implements IReport {
   }
 
 
-  private File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper) {
+  /**
+   * @param allReports
+   * @param pathHelper
+   * @return
+   * @see DatabaseImpl#doReportForYear(int)
+   */
+  @Override
+  public File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper) {
     try {
       File file2 = getReportPathDLI(pathHelper, ".xlsx");
       new ReportToExcel(logAndNotify).toXLSX(allReports, new FileOutputStream(file2));
@@ -435,15 +442,11 @@ public class Report implements IReport {
   public String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports) {
     StringBuilder builder = new StringBuilder();
     builder.append(getHeader("All Languages", "All Projects"));
+    projects.forEach(project ->
+        allReports.addAll(getReportForProject(new ReportStats(project, year, jsonObject), builder, true))
+    );
 
-    //List<ReportStats> reportStats = new ArrayList<>();
-    projects.forEach(project -> {
-      ReportStats stats = new ReportStats(project, year, jsonObject);
-      //reportStats.add(stats);
-      allReports.addAll(getReportForProject(stats, builder, true));
-    });
-
-    builder.append(getFooter());
+    builder.append(FOOTER);
     return builder.toString();
   }
 
@@ -460,7 +463,7 @@ public class Report implements IReport {
 
     List<ReportStats> reportsForProject = getReportForProject(reportStats, builder, false);
 
-    builder.append(getFooter());
+    builder.append(FOOTER);
     String s = builder.toString();
     reportStats.setHtml(s);
     return reportsForProject;
@@ -497,8 +500,9 @@ public class Report implements IReport {
       jsonObject.put(HOST, getHostInfo());
 
       JSONArray dataArray = new JSONArray();
-      if (stats.getYear() == -1) {
+      if (stats.getYear() == ALL_YEARS) {
         int firstYear = getFirstYear(getEarliest(projid));
+        if (firstYear < 2015) firstYear = 2015;
         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
         logger.info(language + " doReportForYear for " + firstYear + "->" + thisYear);
 
@@ -694,10 +698,6 @@ public class Report implements IReport {
         (hostInfo.isEmpty() ? "" : ("<h2>Host     : " + hostInfo + "</h2>\n")) +
             "<h2>Language : " + language + "</h2>\n" +
             "<h2>Project  : " + projectName + "</h2>\n";
-  }
-
-  private String getFooter() {
-    return "</body></head></html>";
   }
 
   private final Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();

@@ -1027,7 +1027,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @return
-   * @see LangTestDatabaseImpl#getContextPractice()
+   * @see LangTestDatabaseImpl#getContextPractice
    */
   @Override
   public ContextPractice getContextPractice() {
@@ -1679,7 +1679,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           logger.error("huh? can't find user " + userID + " in db?");
         } else {
 //          logger.info("using user email " + byID.getEmail());
-          reportEmails = Collections.singletonList(byID.getEmail());
+          reportEmails  = Collections.singletonList(byID.getEmail());
           receiverNames = Collections.singletonList(byID.getFullName());
         }
       }
@@ -1740,17 +1740,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
         }
     );
 
-    getSummaryReport(report, allReports);
-
+    report.getSummaryReport(allReports,pathHelper);
     return jsons;
-
   }
 
-  private File getSummaryReport(IReport report, List<ReportStats> allReports) {
+/*  private File getSummaryReport(IReport report, List<ReportStats> allReports) {
     try {
       File file2 = report.getReportPathDLI(pathHelper, ".xlsx");
       new ReportToExcel(logAndNotify).toXLSX(allReports, new FileOutputStream(file2));
-      logger.debug("writeReportToFile wrote to " + file2.getAbsolutePath());
+      logger.info("writeReportToFile wrote to " + file2.getAbsolutePath());
       return file2;
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -1758,7 +1756,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return null;
     }
 
-  }
+  }*/
 
   /**
    * @param resultID
