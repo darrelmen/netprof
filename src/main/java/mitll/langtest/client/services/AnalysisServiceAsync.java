@@ -33,10 +33,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.analysis.AnalysisPlot;
-import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -54,4 +50,6 @@ public interface AnalysisServiceAsync {
   void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
 
   void getPerformanceReportForUser(int id, int minRecordings, int listid, AsyncCallback<AnalysisReport> async);
+
+  void getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to, AsyncCallback<List<WordAndScore>> async);
 }

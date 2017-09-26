@@ -231,12 +231,12 @@ public class PerformanceTest extends BaseTest {
         total += value.getCurrent();
         wtotal += value.getCount() * value.getCurrent();
         c += value.getCount();
-
+/*
         int totalExamples = 0;
         for (PhoneSession session : value.getSessions()) {
           totalExamples += session.getExamples().size();
         }
-        logger.info("for " + ps.getKey() + " got " + totalExamples);
+        logger.info("for " + ps.getKey() + " got " + totalExamples);*/
       }
       logger.info("i total avg " + (itotal / phoneToAvgSorted.size()));
       logger.info("c total avg " + (total / phoneToAvgSorted.size()));

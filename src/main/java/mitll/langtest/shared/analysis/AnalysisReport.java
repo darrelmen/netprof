@@ -42,8 +42,9 @@ public class AnalysisReport implements Serializable {
   }
 
   public String toString() {
-    return "UserPerf:" + userPerformance +
-        "\n\tword scores" + wordScores +
+    return "UserPerf:" +
+        "\n\tperf :       " + userPerformance +
+        "\n\tword scores  " + wordScores.size() + " scores " +
         "\n\tphone scores " + phoneReport;
     //+
     //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();

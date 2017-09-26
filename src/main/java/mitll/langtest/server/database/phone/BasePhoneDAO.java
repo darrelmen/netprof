@@ -67,15 +67,15 @@ public class BasePhoneDAO extends DAO {
 
   /**
    * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
-   * @param stringToMap
+   * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
    */
-   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap,
+   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                       String scoreJson,
                       WordAndScore wordAndScore) {
      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
-         stringToMap.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
+         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
   }
 
@@ -83,7 +83,6 @@ public class BasePhoneDAO extends DAO {
    * TODO : don't do this with the idToRef map...
    *  look it up in a better way
    *
-   * @paramx idToRef
    * @param phoneToScores
    * @param phoneToWordAndScore
    * @param exid
@@ -113,29 +112,46 @@ public class BasePhoneDAO extends DAO {
                                           long rid,
                                           String phone,
                                           int seq,
-                                          float phoneScore, String language) {
+                                          float phoneScore,
+                                          String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime);
 
-    List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
-    if (wordAndScores == null) {
-      phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<>());
-    }
+    List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
 
-    boolean isLegacy = audioAnswer.startsWith("answers");
-    String filePath = isLegacy ?
-        getRelPrefix(language) + audioAnswer:
-        trimPathForWebPage(audioAnswer);
+    String filePath = getFilePath(audioAnswer, language);
 
-    WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, (int)rid, wseq, seq,
+    WordAndScore wordAndScore = new WordAndScore(exid,
+        word,
+        phoneScore,
+        (int)rid,
+        wseq,
+        seq,
         filePath,
         refAudioForExercise,
-        scoreJson, resultTime);
+        scoreJson,
+        resultTime);
 
     wordAndScores.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
     return wordAndScore;
   }
 
+  private String getFilePath(String audioAnswer, String language) {
+    boolean isLegacy = audioAnswer.startsWith("answers");
+    return isLegacy ?
+        getRelPrefix(language) + audioAnswer:
+        trimPathForWebPage(audioAnswer);
+  }
+
+  /**
+   *
+   * @param phoneToScores
+   * @param phone
+   * @param phoneScore
+   * @param resultTime
+   * @return
+   * @see #getAndRememberWordAndScore(String, Map, Map, int, String, String, long, int, String, long, String, int, float, String)
+   */
   private PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
                                                     String phone,
                                                     float phoneScore,

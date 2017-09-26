@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.AnalysisPlot;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -50,11 +52,11 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private int stdev;
   private long meanTime;
   private long count = 0;
-  private long bin;
+  //private long bin;
   private long start;
   private long end;
   private String phone;
-  private List<WordAndScore> examples;
+//  private List<WordAndScore> examples;
 
   private static final int SCALE = 1000;
 
@@ -67,27 +69,32 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
    * @param meanTime
    * @param start
    * @param end
-   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
+   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions
    */
-  public PhoneSession(String phone, long bin, long count, double mean, double stdev, long meanTime, long start, long end,
-                      List<WordAndScore> examples) {
+  public PhoneSession(String phone,
+                      long bin,
+                      long count,
+                      double mean,
+                      double stdev,
+                      long meanTime,
+                      long start, long end) {
     this.phone = phone;
-    this.bin = bin;
+    //this.bin = bin;
     this.count = count;
     this.mean = toInt(mean);
     this.stdev = toInt(stdev);
     this.meanTime = meanTime;
     this.start = start;
     this.end = end;
-    this.examples = examples;
+  //  this.examples = examples;
   }
 
   protected int toInt(double value) {
-    return (int)(value* SCALE);
+    return (int) (value * SCALE);
   }
 
   private double fromInt(int value) {
-    return ((double)value)/ SCALE;
+    return ((double) value) / SCALE;
   }
 
   /**
@@ -96,6 +103,12 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public PhoneSession() {
   }
 
+  /**
+   * @see AnalysisPlot#getPeriods
+   * @param start
+   * @param last
+   * @return
+   */
   public boolean doesOverlap(long start, long last) {
     return (getEnd() > start && getEnd() <= last)
         || (getStart() > start && getStart() <= last)
@@ -134,6 +147,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   /**
    * sort by time -
+   *
    * @param o
    * @return
    */
@@ -146,29 +160,38 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return count;
   }
 
-  public long getStart() { return start;  }
+  public long getStart() {
+    return start;
+  }
 
   public long getEnd() {
     return end;
   }
 
   /**
-   * @see mitll.langtest.client.analysis.TimeSeriesPlot#getSessionTime(PhoneSession, PhoneSession)
    * @return
+   * @see mitll.langtest.client.analysis.TimeSeriesPlot#getSessionTime(PhoneSession, PhoneSession)
    */
   public long getMiddle() {
     return (start + end) / 2;
   }
 
-  public List<WordAndScore> getExamples() {
+/*  public List<WordAndScore> getExamples() {
     return examples;
-  }
+  }*/
 
   public String toString() {
-    return phone + " : " + new Date(bin) +
-        " start " + new Date(start) +
-        " end " + new Date(end) +
-        " n " + count +
-        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
+    return
+        "\n\tphone " + phone + " : " +
+//            "\n\tat    " + new Date(bin) +
+  //          "\n\tstart " + new Date(start) +
+    //        "\n\tend   " + new Date(end) +
+            "\n\tn     " + count +
+      //      "\n\tmean  " + mean +
+        //    "\n\tstdev " + stdev +
+            "\n\ttime  " + new Date(meanTime)
+            //+
+            //"\n\texamples  " + examples.size()
+        ;
   }
 }

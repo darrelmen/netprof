@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,8 +81,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     long then = System.currentTimeMillis();
     List<UserInfo> userInfo = db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
     long now = System.currentTimeMillis();
-    if (now-then>100) {
-      logger.info("took " +(now-then) + " millis to get " + userInfo.size() + " user infos.");
+    if (now - then > 100) {
+      logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
     }
     return userInfo;
   }
@@ -100,18 +101,31 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      SlickAnalysis slickAnalysis =
-          new SlickAnalysis(
-              db.getDatabase(),
-              db.getPhoneDAO(),
-              db.getAudioDAO(),
-              (SlickResultDAO) db.getResultDAO(),
-              db.getProject(projectID).getLanguage(),
-              projectID
-          );
-
-      return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid);
+      return getSlickAnalysis(projectID).getPerformanceReportForUser(id, minRecordings, listid);
     }
+  }
+
+  @Override
+  public List<WordAndScore> getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to) {
+    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
+    int projectID = getProjectID();
+    if (projectID == -1) {
+      return new ArrayList<>();
+    } else {
+      return getSlickAnalysis(projectID).getPhoneReportFor(id, listid, phone, from, to);
+    }
+  }
+
+  @NotNull
+  private SlickAnalysis getSlickAnalysis(int projectID) {
+    return new SlickAnalysis(
+        db.getDatabase(),
+        db.getPhoneDAO(),
+        db.getAudioDAO(),
+        (SlickResultDAO) db.getResultDAO(),
+        db.getProject(projectID).getLanguage(),
+        projectID
+    );
   }
 
   /**

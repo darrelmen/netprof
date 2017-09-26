@@ -34,6 +34,8 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.shared.analysis.WordAndScore;
 
+import java.util.Map;
+
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 /**
@@ -48,11 +50,11 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   private WordAndScore wordAndScore;
 
   /**
-   * @see PhoneDAO#getPhoneReport
+   * @see BasePhoneDAO#getAndRememberPhoneAndScore(Map, String, float, long)
    * @param pronScore
    * @param timestamp
    */
-  public PhoneAndScore(float pronScore, long timestamp) {
+   PhoneAndScore(float pronScore, long timestamp) {
     this.pronScore = toInt(pronScore);
     this.timestamp = timestamp;
   }

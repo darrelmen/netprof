@@ -55,6 +55,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
+  public static final int MAX_TO_SEND = 25;
   private final SlickResultDAO resultDAO;
   private final String language;
   private final int projid;
@@ -95,15 +96,56 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
 
+    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+
     long then = System.currentTimeMillis();
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
         getWordScores(bestForUser),
-        getPhoneReport(userid, bestForUser, language, project));
+        getPhoneReport(userid, next, project));
 
     long now = System.currentTimeMillis();
-    logger.info("Return (took " + (now - then) +        ") analysis report for " + userid + " and list " + listid);// + analysisReport);
+    logger.info("Return (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
+  }
+
+  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+
+    long then = System.currentTimeMillis();
+
+
+    logger.info("getPhoneReportFor for " + next +
+        " userid " + userid +
+        " phone " + phone +
+        " from " + from + " " + new Date(from) +
+        " to " + to + " " + new Date(to)
+    );
+    PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
+
+    List<WordAndScore> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
+
+    if (wordAndScores == null) {
+      logger.error("huh? no scores for " + phone);
+      return new ArrayList<>();
+    } else {
+
+      logger.info("getPhoneReportFor for " + phone +
+          " got word " + wordAndScores.size());
+
+      SortedSet<WordAndScore> examples = new TreeSet<>();
+      examples.addAll(wordAndScores);
+      List<WordAndScore> filteredWords = new ArrayList<>(examples);
+
+      filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
+
+      long now = System.currentTimeMillis();
+      logger.info("Return (took " + (now - then) + ") " +
+          "to get " + wordAndScores.size() + " " + filteredWords.size() +
+          "  report for " + userid + " and list " + listid);// + analysisReport);
+      return filteredWords;
+    }
   }
 
   /**
@@ -111,8 +153,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param listid
    * @return
-   * @seex IAnalysis#getPhonesForUser(int, int, int)
-   * @seex IAnalysis#getWordScoresForUser(int, int, int)
    * @see Analysis#getPerformanceForUser
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
@@ -200,7 +240,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     if (addNativeAudio) {
       getNativeAudio(perfs);
-      logger.info("getUserToResults took "+(System.currentTimeMillis()-then) + " millis to get native audio for " +perfs.size());
+      logger.info("getUserToResults took " + (System.currentTimeMillis() - then) + " millis to get native audio for " + perfs.size());
     }
 
     then = System.currentTimeMillis();

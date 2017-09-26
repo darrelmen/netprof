@@ -32,12 +32,7 @@
 
 package mitll.langtest.server.database.analysis;
 
-import com.google.common.collect.MinMaxPriorityQueue;
-import mitll.langtest.shared.analysis.WordAndScore;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -56,7 +51,7 @@ public class PhoneSessionInternal {
   private final long bin;
   private long start;
   private long end = 0;
-  private MinMaxPriorityQueue<WordAndScore> queue;
+  //private MinMaxPriorityQueue<WordAndScore> queue;
 
   /**
    * @param bin
@@ -64,12 +59,17 @@ public class PhoneSessionInternal {
    */
   PhoneSessionInternal(long bin) {
     this.bin = bin;
-    this.queue = MinMaxPriorityQueue
-        .maximumSize(10)
-        .create();
+/*    this.queue = MinMaxPriorityQueue
+        .maximumSize(100000)
+        .create();*/
   }
 
-  void addValue(float value, long timestamp, WordAndScore wordAndScore) {
+  /**
+   *
+   * @param value
+   * @param timestamp
+   */
+  void addValue(float value, long timestamp) {
     if (summaryStatistics.getN() == 0) {
       start = timestamp;
     }
@@ -79,9 +79,9 @@ public class PhoneSessionInternal {
 
     if (timestamp > end) end = timestamp;
 
-    if (wordAndScore != null) {
+/*    if (wordAndScore != null) {
       getQueue().add(wordAndScore);
-    }
+    }*/
   }
 
   public void remember() {
@@ -123,9 +123,16 @@ public class PhoneSessionInternal {
     return end;
   }
 
+  /**
+   * @see PhoneAnalysis#getPhoneSessions
+   * @see #addValue
+   * @return
+   */
+/*
   MinMaxPriorityQueue<WordAndScore> getQueue() {
     return queue;
   }
+*/
 
   @Override
   public String toString() {

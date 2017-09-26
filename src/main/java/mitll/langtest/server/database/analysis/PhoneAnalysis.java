@@ -150,6 +150,8 @@ public class PhoneAnalysis {
     } else {
 //      logger.info("getPhoneSessions " + key + " prune " + prune + " sessions " + toUse.size());
       int size = toUse.size();
+
+
       for (PhoneSessionInternal internal : toUse) {
         internal.remember();
 
@@ -157,8 +159,8 @@ public class PhoneAnalysis {
           if (internal.getEnd() == 0) {
             logger.error("getPhoneSessions got 0 end time " + internal);
           }
-          List<WordAndScore> examples = new ArrayList<>();
-          examples.addAll(internal.getQueue());
+//          List<WordAndScore> examples = new ArrayList<>();
+//          examples.addAll(internal.getQueue());
 
           double mean = internal.getMean();
           double stdev1 = internal.getStdev();
@@ -171,10 +173,12 @@ public class PhoneAnalysis {
               stdev1,
               meanTime,
               internal.getStart(),
-              internal.getEnd(),
-              examples));
+              internal.getEnd()
+          ));
+
         } else {
-          logger.warn("\tskipping session " + internal);
+          logger.warn("\tgetPhoneSessions: for " + key+
+              "skipping session " + internal);
         }
       }
     }
@@ -215,7 +219,7 @@ public class PhoneAnalysis {
         } else {
           //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
         }
-        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp(), r.getWordAndScore());
+        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
       }
 
       last = timestamp;

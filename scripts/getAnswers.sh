@@ -34,20 +34,28 @@ then
  file="turkish"
 fi
 
-cd /opt/netprof/answers/$file
+path=/opt/netprof/answers/$file
+cd $path
 
 echo `pwd`
 
+echo "start curl..."
 date
 suffix="Answers"
+realName=$orig$suffix
+echo $realName
 
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$orig$suffix.tar.gz"
+echo curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
+curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
 
+echo "finished curl..."
 date
-tar xfz $orig.tar.gz
-rm $orig.tar.gz
-#sudo chown -R tomcat8 .
+tar xfz $realName.tar.gz
+echo "done untar..."
+rm $realName.tar.gz
 date
+
+
 
 cd ..
 }

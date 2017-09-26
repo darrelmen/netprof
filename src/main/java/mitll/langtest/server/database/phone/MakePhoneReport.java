@@ -32,20 +32,25 @@ public class MakePhoneReport {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
     if (DEBUG) {
-      logger.debug("score " + overallScore + " items " + totalItems + " percent " + percentOverall +
-          " phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
+      logger.warn(
+          "\n\tscore " + overallScore +
+              "\n\titems " + totalItems +
+              "\n\tpercent " + percentOverall +
+              "\n\tphoneToScores " + phoneToScores.size() +
+              "\n\t: " + phoneToScores.keySet());
     }
 
     final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
-    //if (DEBUG || true) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.warn("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
+    // set sessions on each phone stats
+    setSessions(phoneToAvg);
+
+    if (DEBUG) logger.warn("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
 
-    if (DEBUG) logger.debug("before sorted " + sorted);
-
-    setSessions(phoneToAvg);
-
-    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.warn("before sorted " + sorted);
 
     if (sortByLatestExample) {
       phoneToWordAndScore = sortPhonesByLatest(phoneToAvg, sorted);
@@ -53,44 +58,55 @@ public class MakePhoneReport {
       sortPhonesByCurrentScore(phoneToAvg, sorted);
     }
 
-    if (DEBUG) logger.debug("sorted " + sorted.size() + " " + sorted);
+    if (DEBUG) logger.warn("sorted " + sorted.size() + " " + sorted);
 
-    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<String, PhoneStats>();
-    for (String phone : sorted) {
-      phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
+    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
+    sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
+
+    if (DEBUG) {
+      logger.warn("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
-
-    if (DEBUG) logger.debug("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
     for (String phone : sorted) {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       Collections.sort(value);
+      if (DEBUG) {
+        logger.warn("phone->words for " + phone + " : " + value.size());
+        for (WordAndScore wordAndScore : value) {
+          logger.warn("for " + phone+ " got " + wordAndScore);
+        }
+      }
       phoneToWordAndScoreSorted.put(phone, value);
     }
 
-    if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
+    if (DEBUG) {
+      logger.warn("phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
+    }
 
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
   }
 
+  /**
+   * Compare by score for phone, then by phone name.
+   * @param phoneToAvg
+   * @param sorted
+   * @see #getPhoneReport
+   */
   private void sortPhonesByCurrentScore(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
-    Collections.sort(sorted, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        PhoneStats first = phoneToAvg.get(o1);
-        PhoneStats second = phoneToAvg.get(o2);
-        int current = first.getCurrent();
-        int current1 = second.getCurrent();
-        //if (current == current1) {
-        //  logger.info("got same " + current + " for " + o1 + " and " + o2);
-        //} else {
-        // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
-        //}
-        int i = Integer.compare(current, current1);
-        return i == 0 ? o1.compareTo(o2) : i;
-      }
+    sorted.sort((o1, o2) -> {
+      PhoneStats first = phoneToAvg.get(o1);
+      PhoneStats second = phoneToAvg.get(o2);
+      int current = first.getCurrent();
+      int current1 = second.getCurrent();
+      //if (current == current1) {
+      //  logger.info("got same " + current + " for " + o1 + " and " + o2);
+      //} else {
+      // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
+      //}
+      int i = Integer.compare(current, current1);
+      return i == 0 ? o1.compareTo(o2) : i;
     });
 /*
     for (String phone : sorted) {
@@ -186,8 +202,7 @@ public class MakePhoneReport {
       count++;
       float moving = total / count;
 
-      WordAndScore wordAndScore = bs.getWordAndScore();
-      TimeAndScore timeAndScore = new TimeAndScore(-1, bs.getTimestamp(), pronScore, moving, wordAndScore);
+      TimeAndScore timeAndScore = new TimeAndScore(-1, bs.getTimestamp(), pronScore, moving, bs.getWordAndScore());
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;

@@ -144,20 +144,24 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param ids
-   * @param language
    * @param project
    * @return
    * @throws SQLException
    * @seex Analysis#getPhonesForUser
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, String language, Project project) {
+  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project) {
     try {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
     } catch (Exception e) {
       logAndNotify.logAndNotifyServerException(e, "sql exception for user " + userid + " and result ids " + ids);
       return new PhoneReport();
     }
+  }
+
+  @Override
+  public PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to) {
+    return null;
   }
 
   @Override
@@ -204,7 +208,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param sortByLatestExample
    * @return
    * @throws SQLException
-   * @see IPhoneDAO#getWorstPhonesForResults(int, Collection, String, Project)
+   * @see IPhoneDAO#getWorstPhonesForResults(int, Collection, Project)
    * @see #getPhoneReport(String, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,

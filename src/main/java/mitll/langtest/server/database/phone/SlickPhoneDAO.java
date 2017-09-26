@@ -49,6 +49,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
@@ -70,9 +71,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone(DatabaseImpl, Map, Map)
    * @param shared
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone(DatabaseImpl, Map, Map)
    */
   public SlickPhone toSlick(Phone shared) {
     return new SlickPhone(-1,
@@ -103,9 +104,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * @see RecordWordAndPhone#recordWordAndPhoneInfo(long, Map)
    * @param word
    * @return
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo(long, Map)
    */
   @Override
   public boolean addPhone(Phone word) {
@@ -127,7 +128,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        Project project) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, false, true,
-        language, userid, project);
+        userid, project);
     // logger.info("getWorstPhonesJson phone report " + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
@@ -137,7 +138,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    *
    * @param userid
    * @param ids
-   * @param language
    * @param project
    * @return
    * @throws SQLException
@@ -146,12 +146,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   @Override
   public PhoneReport getWorstPhonesForResults(int userid,
                                               Collection<Integer> ids,
-                                              String language,
                                               Project project) {
     long then = System.currentTimeMillis();
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
     long now = System.currentTimeMillis();
-    if (now - then > 1) logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
+    if (now - then > 1)
+      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
 
 //    then = System.currentTimeMillis();
 //    Collection<SlickPhoneReport> phoneReportByResult2 = dao.getPhoneReportByResultForUser(userid, ids);
@@ -160,37 +160,59 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //      logger.info("getWorstPhonesForResults getPhoneReportByResultForUser took " + (now - then) + " to get " + phoneReportByResult2.size());
 //    }
 
-    return getPhoneReport(phoneReportByResult, true, false, language, userid, project);
+    return getPhoneReport(phoneReportByResult, true, false, userid, project);
+  }
+
+  @Override
+  public PhoneReport getWorstPhonesForResultsForPhone(int userid,
+                                                      Collection<Integer> ids,
+                                                      Project project,
+                                                      String phone, long from, long to) {
+    long then = System.currentTimeMillis();
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResultForPhone(userid, ids, phone, new Timestamp(from), new Timestamp(to));
+    long now = System.currentTimeMillis();
+    if (now - then > 1)
+      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
+
+//    then = System.currentTimeMillis();
+//    Collection<SlickPhoneReport> phoneReportByResult2 = dao.getPhoneReportByResultForUser(userid, ids);
+//    now = System.currentTimeMillis();
+//    if (now - then > 1) {
+//      logger.info("getWorstPhonesForResults getPhoneReportByResultForUser took " + (now - then) + " to get " + phoneReportByResult2.size());
+//    }
+
+    return getPhoneReport(phoneReportByResult, true, false, userid, project);
   }
 
   /**
    * TODO : huh? doesn't seem to add last item to total score or total items?
    * TODO : don't use idToRef map
-   *
+   * <p>
    * Why get native audio here?
    *
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
-   * @param language
    * @param userid
    * @param project
    * @return
    * @throws SQLException
-   * @paramx idToRef
    * @see #getWorstPhonesForResults
    */
   private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
                                      boolean addTranscript,
                                      boolean sortByLatestExample,
-                                     String language,
                                      int userid,
                                      Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
+    String language = project.getLanguage();
+    logger.info("user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
+    logger.info("phoneReportByResult " + phoneReportByResult.size());
+
     float totalScore = 0;
 
-    Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
+    Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript = new HashMap<>();
     int c = 0;
 
     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
@@ -199,17 +221,16 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     int num = 0;
-    for (SlickPhoneReport report : phoneReportByResult) {
-     // int i = 1;
+    for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
+      // int i = 1;
       c++;
       // logger.info("#"+ c + " : " + report);
       // info from result table
       int exid = report.exid();
-      String scoreJson = report.scorejson();
       float pronScore = report.pronScore();
 
       boolean add = exids.add(exid);
-      if (add) {
+      if (add) { // only first score counts ???
         totalScore += pronScore;
       }
  /*     if (exid != currentExercise) {
@@ -221,7 +242,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       if (addTranscript) {
         String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
-        WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise, phoneToScores, phoneToWordAndScore,
+        String scoreJson = report.scorejson();
+        WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise,
+            phoneToScores,
+            phoneToWordAndScore,
             exid,
             report.answer(),
             scoreJson,
@@ -234,7 +258,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             report.pscore(),
             language);
 
-        addTranscript(stringToMap, scoreJson, wordAndScore);
+        addTranscript(jsonToTranscript, scoreJson, wordAndScore);
         num++;
       }
       //    } else {

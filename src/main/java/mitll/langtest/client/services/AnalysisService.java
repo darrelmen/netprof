@@ -52,31 +52,7 @@ public interface AnalysisService extends RemoteService {
    */
   List<CommonShell> getShells(List<Integer> ids);
 
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
-   */
- // UserPerformance getPerformanceForUser(int id, int minRecordings, int listid);
-
   AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
-   */
- // List<WordScore> getWordScores(int id, int minRecordings, int listid);
 
-  /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport
-   */
-//  PhoneReport getPhoneScores(int id, int minRecordings, int listid);
+  List<WordAndScore> getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to);
 }

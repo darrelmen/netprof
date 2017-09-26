@@ -46,6 +46,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -54,10 +55,9 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.PhoneSession;
-import mitll.langtest.shared.analysis.PhoneStats;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.server.database.word.Word;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -86,6 +86,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
+  private final int listid;
+  private final int userid;
 
   private long from;
   private long to;
@@ -93,18 +95,25 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy");
 
   private static final boolean DEBUG = false;
+  private final AnalysisServiceAsync analysisServiceAsync;
 
   /**
    * @param controller
    * @param exampleContainer
    * @param phonePlot
-   * @see AnalysisTab#getPhoneReport
+   * @param listid
+   * @param userid           @see AnalysisTab#getPhoneReport
    */
-  PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
-                 PhonePlot phonePlot) {
+  PhoneContainer(ExerciseController controller,
+                 PhoneExampleContainer exampleContainer,
+                 PhonePlot phonePlot,
+                 AnalysisServiceAsync analysisServiceAsync, int listid, int userid) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
+    this.analysisServiceAsync = analysisServiceAsync;
+    this.listid = listid;
+    this.userid = userid;
   }
 
   @Override
@@ -317,12 +326,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @see AnalysisTab#getPhoneReport
    */
-   void showExamplesForSelectedSound() {
+  void showExamplesForSelectedSound() {
     List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
       logger.warning("showExamplesForSelectedSound : list empty?");
     } else {
-      clickOnPhone(list.get(0).getPhone());
+      String phone = list.get(0).getPhone();
+      //clickOnPhone(phone);
+      clickOnPhone2(phone);
     }
   }
 
@@ -467,7 +478,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
-      clickOnPhone(object.getPhone());
+   //   clickOnPhone(object.getPhone());
+      clickOnPhone2(object.getPhone());
     } else {
       logger.info("got other event " + event.getType());
     }
@@ -478,21 +490,82 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    *
    * @param phone
    */
-  private void clickOnPhone(String phone) {
-    PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
+/*  private void clickOnPhone(String phone) {
+    PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
     //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
-    List<PhoneSession> filtered = getFiltered(stats.getSessions(), from, to);
+    List<PhoneSession> filtered = getFiltered(statsForPhone.getSessions(), from, to);
 
+    SortedSet<WordAndScore> examples = new TreeSet<>();
+    int total=0;
+    for (PhoneSession session : filtered) {
+     // logger.info("for " + session + " got " + session.getExamples().size());
+      examples.addAll(session.getExamples());
+      total+=session.getExamples().size();
+    }
+
+    logger.info("total    " + total);
+    logger.info("examples " + examples.size());
+
+    List<WordAndScore> filteredWords = new ArrayList<>(examples);
+
+    logger.info("Got " + filteredWords.size() + " for " + from + " - " + to);
+*//*    int i =0;
+    for (WordAndScore wordAndScore:filteredWords) {
+      logger.info(i++ + " : " + wordAndScore);
+    }*//*
+
+    // TODO: better ways of doing this.
+    exampleContainer.addItems(phone,
+        filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
+        MAX_EXAMPLES);
+
+    phonePlot.showErrorBarData(filtered, phone);
+  }*/
+
+  private void clickOnPhone2(String phone) {
+    PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
+    //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
+    List<PhoneSession> filtered = getFiltered(statsForPhone.getSessions(), from, to);
+
+    long min = Long.MAX_VALUE;
+    long max = Long.MIN_VALUE;
+    for (PhoneSession phoneSession : filtered) {
+      if (phoneSession.getStart() < min) min = phoneSession.getStart();
+      if (phoneSession.getEnd() > max) max = phoneSession.getEnd();
+    }
+/*
     SortedSet<WordAndScore> examples = new TreeSet<>();
     for (PhoneSession session : filtered) examples.addAll(session.getExamples());
     List<WordAndScore> filteredWords = new ArrayList<>(examples);
+*/
+    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, min, max, new AsyncCallback<List<WordAndScore>>() {
+      @Override
+      public void onFailure(Throwable caught) {
 
-    // TODO: better ways of doing this.
-    filteredWords = filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES));
-    exampleContainer.addItems(phone, filteredWords, MAX_EXAMPLES);
+      }
 
-    phonePlot.showErrorBarData(filtered, phone);
+      @Override
+      public void onSuccess(List<WordAndScore> filteredWords) {
+
+        logger.info("Compare : Got " + filteredWords.size() + " for " + from + " - " + to);
+
+   /*     int i =0;
+        for (WordAndScore wordAndScore:filteredWords) {
+          logger.info("Compare "+i++ + " : " + wordAndScore);
+        }*/
+
+        // TODO: better ways of doing this.
+        exampleContainer.addItems(phone,
+            filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
+            MAX_EXAMPLES);
+
+        phonePlot.showErrorBarData(filtered, phone);
+      }
+    });
+
+
   }
+
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();

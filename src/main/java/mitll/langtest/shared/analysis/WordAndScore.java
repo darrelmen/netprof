@@ -80,8 +80,13 @@ public class WordAndScore extends WordScore {
   public WordAndScore() {
   }
 
+  public boolean equals(Object other) {
+    WordScore other1 = (WordScore) other;
+    return compareTo(other1) == 0;
+  }
+
   /**
-   * Sort first by score
+   * Sort first by score, then by word, then by seq
    *
    * @param o
    * @return
@@ -108,8 +113,10 @@ public class WordAndScore extends WordScore {
   }
 
   /**
-   * @see mitll.langtest.server.database.phone.PhoneJSON#getJsonForWord
+   * So this is for iOS...
+   *
    * @return
+   * @see mitll.langtest.server.database.phone.PhoneJSON#getJsonForWord
    */
   public int getSeq() {
     return seq;
@@ -120,8 +127,8 @@ public class WordAndScore extends WordScore {
   }
 
   /**
-   * @see mitll.langtest.server.database.phone.PhoneJSON#getWordsJsonArray(Map, Map, Map, List)
    * @return
+   * @see mitll.langtest.server.database.phone.PhoneJSON#getWordsJsonArray(Map, Map, Map, List)
    */
   public String getScoreJson() {
     return scoreJson;
@@ -131,24 +138,31 @@ public class WordAndScore extends WordScore {
     scoreJson = "";
   }
 
-  public String toString() {
-    return getExid() + " #" + getWseq() + " : " + getWord() + "\ts " + getPronScore() + "\tres " + getResultID() +
-        "\tanswer " + getAnswerAudio() + " ref " + getRefAudio();
-  }
-
   /**
-   * @see PhoneExampleContainer#getItemColumn
    * @return
+   * @see PhoneExampleContainer#getItemColumn
    */
   public Map<NetPronImageType, List<TranscriptSegment>> getFullTranscript() {
     return fullTranscript;
   }
 
   /**
-   * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript
    * @param fullTranscript
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript
    */
   public void setFullTranscript(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
     this.fullTranscript = fullTranscript;
+  }
+
+  public String toString() {
+    return
+        "\n\tExercise #" + getExid() +
+            "\n\t #" + getWseq() +
+            "\n\tseq   " + getSeq() +
+            "\n\t:     " + getWord() +
+            "\n\tscore " + getPronScore() +
+            "\n\tres    " + getResultID() +
+            "\n\tanswer " + getAnswerAudio() +
+            "\n\tref    " + getRefAudio();
   }
 }

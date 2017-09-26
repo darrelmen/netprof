@@ -39,18 +39,14 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EasyAnalysisTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyAnalysisTest.class);
   public static final int MAX = 200;
-
-  //private final DateFormat debugShortFormat = DateFormat.getInstance().get("MMM d yyyy");
 
   @Test
   public void testAnalysis() {
@@ -58,6 +54,8 @@ public class EasyAnalysisTest extends BaseTest {
     AnalysisReport performanceReportForUser = getPerformanceReportForUser(andPopulate, 2, 295, 1, -1);
 
     logger.info("Got " + performanceReportForUser);
+    logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
+
     PhoneReport phoneReport = performanceReportForUser.getPhoneReport();
     logger.info("phone Report " + phoneReport);
 
@@ -65,27 +63,30 @@ public class EasyAnalysisTest extends BaseTest {
 
     phoneToAvgSorted.forEach((k, v) -> {
       logger.info(k + " = " + v.getSessions().size() + " sessions");
+
+/*
       v.getSessions()
           .forEach(phoneSession -> logger.info("\t" + k + " = " +
               debugFormat(phoneSession.getStart()) + "-" + debugFormat(phoneSession.getEnd())));
+*/
     });
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = phoneReport.getPhoneToWordAndScoreSorted();
 
-    phoneToWordAndScoreSorted.forEach((k, v) -> {
-      v.sort(new Comparator<WordAndScore>() {
-        @Override
-        public int compare(WordAndScore o1, WordAndScore o2) {
-          return Long.compare(o1.getTimestamp(), o2.getTimestamp());
-        }
-      });
+    phoneToWordAndScoreSorted.forEach((phone, v) -> {
+      v.sort(Comparator.comparingLong(WordScore::getTimestamp));
 
-      logger.info(k + " = " + v.size() + " words");
-      v
-          .forEach(phoneSession -> logger.info("\t" + k + " = " +
+      logger.info(phone + " = " + v.size() + " words");
+/*      v
+          .forEach(phoneSession -> logger.info("\t" + phone + " = " +
               phoneSession.getWord() + " = " +
-              debugFormat(phoneSession.getTimestamp())));
+              debugFormat(phoneSession.getTimestamp())));*/
     });
+
+    String x = "nj";
+    List<WordAndScore> performanceReportForUser2 = getPerformanceReportForUser2(andPopulate, 2, 295, x);
+    logger.info("for " +x+
+        " " + performanceReportForUser2.size());
 
   /*  List<WordScore> wordScores = performanceReportForUser.getWordScores();
     wordScores.sort(new Comparator<WordScore>() {
@@ -112,17 +113,49 @@ public class EasyAnalysisTest extends BaseTest {
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      SlickAnalysis slickAnalysis =
-          new SlickAnalysis(
-              db.getDatabase(),
-              db.getPhoneDAO(),
-              db.getAudioDAO(),
-              (SlickResultDAO) db.getResultDAO(),
-              db.getProject(projectID).getLanguage(),
-              projectID
-          );
+      SlickAnalysis slickAnalysis = getSlickAnalysis(db, projectID);
 
       return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid);
     }
+  }
+
+  public List<WordAndScore> getPerformanceReportForUser2(DatabaseImpl db, int projectID, int id, String phone) {
+    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
+    if (projectID == -1) {
+      return new ArrayList<>();
+    } else {
+      SlickAnalysis slickAnalysis = getSlickAnalysis(db, projectID);
+
+      long from = new Date().getTime();
+      long ten = 10l * 365l * 24l * 60l * 60l * 1000l;
+      from -= ten;
+      long to = new Date().getTime();
+      to += ten;
+
+      logger.info("from " + new Date(from));
+      logger.info("to   " + new Date(to));
+
+       to = 1506463703650l;
+      // logger.info("from " + new Date(from));
+
+      from =1457051837030l;
+      from--;
+      to =1485273391652l;
+      to++;
+    //  return slickAnalysis.getPhoneReportFor(id, -1, phone, from, to);
+      return slickAnalysis.getPhoneReportFor(id, -1, phone, 0, to);
+    }
+  }
+
+  @NotNull
+  private SlickAnalysis getSlickAnalysis(DatabaseImpl db, int projectID) {
+    return new SlickAnalysis(
+        db.getDatabase(),
+        db.getPhoneDAO(),
+        db.getAudioDAO(),
+        (SlickResultDAO) db.getResultDAO(),
+        db.getProject(projectID).getLanguage(),
+        projectID
+    );
   }
 }

@@ -86,6 +86,11 @@ class H2Analysis extends Analysis implements IAnalysis {
     return null;
   }
 
+  @Override
+  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+    return null;
+  }
+
   /**
    * @param userDAO
    * @param minRecordings
@@ -183,7 +188,8 @@ class H2Analysis extends Analysis implements IAnalysis {
     try {
       String sql = getPerfSQL(id);
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      return getPhoneReport(id, best, database.getLanguage(), null);
+      UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
+      return getPhoneReport(id, next, null);
     } catch (Exception ee) {
       logException(ee);
     }

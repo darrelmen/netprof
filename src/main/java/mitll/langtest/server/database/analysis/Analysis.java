@@ -210,32 +210,26 @@ public abstract class Analysis extends DAO {
 
   /**
    * @param userid
-   * @param best
-   * @param language
+   * @param next
    * @param project
    * @return
-   * @see SlickAnalysis#getPerformanceReportForUser(int, int, int)
+   * @see SlickAnalysis#getPerformanceReportForUser
    */
-  PhoneReport getPhoneReport(int userid, Map<Integer, UserInfo> best, String language, Project project) {
+  PhoneReport getPhoneReport(int userid, UserInfo next, Project project) {
+    //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
     if (DEBUG)
-      logger.debug(" getPhonesForUser " + userid + " got " + best.size());
+      logger.debug(" getPhonesForUser " + userid + " got " + next);
 
-    if (best.isEmpty()) {
+    if (next == null) {
       return new PhoneReport();
     } else {
       long then = System.currentTimeMillis();
       long start = then;
       long now;
-      UserInfo next = best.values().iterator().next();
-      List<BestScore> resultsForQuery = next.getBestScores();
+      List<Integer> resultIDs = getResultIDsForUser(next);
 
-      List<Integer> ids = new ArrayList<>();
-      resultsForQuery.forEach(bs -> ids.add(bs.getResultID()));
-
-      if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
       then = System.currentTimeMillis();
-      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, language, project);
-
+      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, resultIDs, project);
       now = System.currentTimeMillis();
 
       long diff = now - then;
@@ -254,6 +248,53 @@ public abstract class Analysis extends DAO {
 
       return phoneReport;
     }
+  }
+
+  PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
+    //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
+    if (DEBUG)
+      logger.debug(" getPhonesForUser " + userid + " got " + next);
+
+    if (next == null) {
+      return new PhoneReport();
+    } else {
+      long then = System.currentTimeMillis();
+      long start = then;
+      long now;
+      List<Integer> resultIDs = getResultIDsForUser(next);
+
+      then = System.currentTimeMillis();
+      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResultsForPhone(userid, resultIDs, project, phone, from, to);
+      now = System.currentTimeMillis();
+
+      long diff = now - then;
+      if (DEBUG || diff > 100) {
+        logger.debug(" getPhonesForUser " + userid + " took " + diff + " millis to phone report");
+      }
+      if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
+
+      long diff2 = System.currentTimeMillis() - start;
+      if (DEBUG || diff2 > 100) {
+        logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
+          /*phonesForUser.size() +*/ " phones");
+      }
+
+     // setSessions(phoneReport.getPhoneToAvgSorted());
+
+      return phoneReport;
+    }
+  }
+
+  @NotNull
+  private List<Integer> getResultIDsForUser(UserInfo next) {
+    List<BestScore> resultsForQuery = next.getBestScores();
+
+    List<Integer> resultIDs = new ArrayList<>();
+    resultsForQuery.forEach(bs -> resultIDs.add(bs.getResultID()));
+
+    if (DEBUG)
+      logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + resultIDs.size() + " resultIDs ");
+    return resultIDs;
   }
 
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {

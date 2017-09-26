@@ -81,6 +81,7 @@ public class AnalysisTab extends DivWidget {
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "";//scores > 20";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
+  private final int userid;
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
@@ -88,6 +89,7 @@ public class AnalysisTab extends DivWidget {
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
+  private final int listid;
 
   /**
    * @param controller
@@ -113,6 +115,8 @@ public class AnalysisTab extends DivWidget {
                      int userid,
                      String userChosenID,
                      int listid) {
+    this.userid = userid;
+    this.listid = listid;
     getElement().setId("AnalysisTab");
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
@@ -160,7 +164,7 @@ public class AnalysisTab extends DivWidget {
 
     if (now - then > 200) {
       logger.info("useReport took " + (now - then) + " to get report" +
-          "\n\tfor    " +userid + " " + userChosenID +
+          "\n\tfor    " + userid + " " + userChosenID +
           "\n\twords  " + result.getWordScores().size() +
           "\n\tphones " + result.getPhoneReport().getPhoneToAvgSorted().size() +
           "\n\tphones word and score " + result.getPhoneReport().getPhoneToWordAndScoreSorted().values().size()
@@ -327,7 +331,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   *
    * @param wordScores
    * @param controller
    * @param analysisPlot
@@ -365,7 +368,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   *
    * @param wordScores
    * @param controller
    * @param analysisPlot
@@ -423,7 +425,7 @@ public class AnalysisTab extends DivWidget {
         new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
 
     final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot);
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, analysisServiceAsync, listid, userid);
     analysisPlot.addListener(phoneContainer);
     showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer, phonePlot);
   }
