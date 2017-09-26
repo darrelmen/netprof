@@ -162,14 +162,17 @@ public class AnalysisTab extends DivWidget {
                          ShowTab showTab, DivWidget bottom, int userid) {
     long now = System.currentTimeMillis();
 
+    PhoneReport phoneReport = result.getPhoneReport();
+    if (phoneReport == null) phoneReport = new PhoneReport();
     if (now - then > 200) {
       logger.info("useReport took " + (now - then) + " to get report" +
           "\n\tfor    " + userid + " " + userChosenID +
           "\n\twords  " + result.getWordScores().size() +
-          "\n\tphones " + result.getPhoneReport().getPhoneToAvgSorted().size() +
-          "\n\tphones word and score " + result.getPhoneReport().getPhoneToWordAndScoreSorted().values().size()
+          "\n\tphones " + phoneReport.getPhoneToAvgSorted().size() +
+          "\n\tphones word and score " + phoneReport.getPhoneToWordAndScoreSorted().values().size()
       );
     }
+    PhoneReport fphoneReport = phoneReport;
 
     long then2 = now;
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
@@ -182,7 +185,7 @@ public class AnalysisTab extends DivWidget {
 
     Scheduler.get().scheduleDeferred(() ->
         showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom,
-            result.getPhoneReport()));
+            fphoneReport));
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {

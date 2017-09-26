@@ -533,11 +533,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       if (phoneSession.getStart() < min) min = phoneSession.getStart();
       if (phoneSession.getEnd() > max) max = phoneSession.getEnd();
     }
-/*
-    SortedSet<WordAndScore> examples = new TreeSet<>();
-    for (PhoneSession session : filtered) examples.addAll(session.getExamples());
-    List<WordAndScore> filteredWords = new ArrayList<>(examples);
-*/
     analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, min, max, new AsyncCallback<List<WordAndScore>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -546,15 +541,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public void onSuccess(List<WordAndScore> filteredWords) {
-
-        logger.info("Compare : Got " + filteredWords.size() + " for " + from + " - " + to);
-
-   /*     int i =0;
-        for (WordAndScore wordAndScore:filteredWords) {
-          logger.info("Compare "+i++ + " : " + wordAndScore);
-        }*/
-
-        // TODO: better ways of doing this.
         exampleContainer.addItems(phone,
             filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
             MAX_EXAMPLES);

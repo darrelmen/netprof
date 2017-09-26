@@ -35,6 +35,7 @@ package mitll.langtest.shared.analysis;
 import mitll.langtest.server.database.phone.PhoneDAO;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +47,8 @@ import java.util.Map;
  */
 public class PhoneReport implements Serializable {
   private int overallPercent;
-  private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
-  private Map<String, PhoneStats> phoneToAvgSorted;
+  private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new HashMap<>();
+  private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
 
   private boolean valid = false;
 
