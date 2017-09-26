@@ -1,0 +1,4 @@
+2017-09-13 17:42:27 [ERROR] [CopyToPostgres                :858 ] - Usage : expecting either copy or drop followed by config, e.g. copy spanish
+2017-09-13 17:42:27 [ERROR] [CopyToPostgres                :858 ] - Usage : expecting either copy or drop followed by config, e.g. copy spanish
+2017-09-13 17:42:27 [ERROR] [CopyToPostgres                :859 ] - Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary
+2017-09-13 17:42:27 [ERROR] [CopyToPostgres                :859 ] - Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary
