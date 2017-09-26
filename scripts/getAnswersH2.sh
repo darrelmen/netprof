@@ -39,12 +39,13 @@ cd /opt/netprof/answers/$file
 echo `pwd`
 
 date
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$origAnswers.tar.gz"
+suffix="Answers"
+curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$orig$suffix.tar.gz"
 
 date
-sudo tar xfz $orig.tar.gz
+tar xfz $orig.tar.gz
 rm $orig.tar.gz
-sudo chown -R tomcat8 .
+#sudo chown -R tomcat8 .
 date
 
 cd ..

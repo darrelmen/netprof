@@ -95,7 +95,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private final ShowTab learnTab;
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
-  private Set<Integer> mine;
+  /**
+   *
+   */
+  private Set<Integer> myStudents;
+
+  private Button add;
+  private Button remove;
+  private Button mineOnly;
 
   /**
    * @param controller
@@ -113,21 +120,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     this.learnTab = learnTab;
     // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
-    mine = new HashSet<>();
+    myStudents = new HashSet<>();
   }
 
   protected int getMaxLengthId() {
     return 11;
   }
+
   protected int getMaxTableWidth() {
     return 600;
   }
 
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
-    boolean mineOnly1 = showOnlyMine();
-
-    if (mineOnly1) {
+    if (showOnlyMine()) {
       controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -136,16 +142,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
         @Override
         public void onSuccess(Set<Integer> result) {
-          mine = result;
+          myStudents = result;
 
           remembered = new ArrayList<>(users);
           List<UserInfo> filtered = new ArrayList<>();
           remembered.forEach(userInfo -> {
-            if (mine.contains(userInfo.getID())) filtered.add(userInfo);
+            if (myStudents.contains(userInfo.getID())) filtered.add(userInfo);
           });
-          Panel tableWithPager = getTableWithPager(filtered);
-          leftSide.add(tableWithPager);
-          ((Panel) tableWithPager.getParent()).add(getButtons());
+          getTableWithButtons(filtered, leftSide);
         }
       });
     } else {
@@ -157,8 +161,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
         @Override
         public void onSuccess(Set<Integer> result) {
-          mine = result;
-
+          myStudents = result;
+          mineOnly.setEnabled(!myStudents.isEmpty());
           Panel tableWithPager = getTableWithPager(users);
           leftSide.add(tableWithPager);
           ((Panel) tableWithPager.getParent()).add(getButtons());
@@ -166,6 +170,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         }
       });
     }
+  }
+
+  private void getTableWithButtons(List<UserInfo> filtered, DivWidget leftSide) {
+    Panel tableWithPager = getTableWithPager(filtered);
+    leftSide.add(tableWithPager);
+    ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
   @Override
@@ -198,8 +208,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return buttons;
   }
 
-  private Button add;
-  private Button remove;
 
   @NotNull
   private Button getAddButton() {
@@ -219,10 +227,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
         @Override
         public void onSuccess(Void result) {
-          mine.add(id);
+          myStudents.add(id);
           remove.setEnabled(true);
           table.redraw();
-
+          mineOnly.setEnabled(true);
           // update the list if filter selected
         }
       });
@@ -234,7 +242,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private void enableButtons() {
     UserInfo currentSelection = getCurrentSelection();
 
-    boolean onMyList = mine.contains(currentSelection.getID());
+    boolean onMyList = myStudents.contains(currentSelection.getID());
     add.setEnabled(!onMyList);
     remove.setEnabled(onMyList);
   }
@@ -256,10 +264,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         @Override
         public void onSuccess(Void result) {
           // update the list if filter selected
-          mine.remove(id);
+          myStudents.remove(id);
           add.setEnabled(true);
           if (showOnlyMine()) filterUsers();
           else table.redraw();
+
+          mineOnly.setEnabled(!myStudents.isEmpty());
+
+          if (myStudents.isEmpty()) {
+         //   logger.info("student list is empty!");
+            mineOnly.setActive(false);
+            showAllUsers();
+          }
         }
       });
     });
@@ -293,7 +309,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
     filterContainer.add(getListBox());
     filterContainer.addStyleName("leftFiveMargin");
-    filterContainer.add(getMine());
+    filterContainer.add(mineOnly = getMyStudents());
 
     return filterContainer;
   }
@@ -301,21 +317,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private List<UserInfo> remembered;
 
   @NotNull
-  private Button getMine() {
+  private Button getMyStudents() {
     Button mineOnly = new Button("Mine Only");
     mineOnly.setToggle(true);
     mineOnly.setSize(ButtonSize.MINI);
     mineOnly.addStyleName("leftFiveMargin");
     mineOnly.addStyleName("topFiveMargin");
 
-    boolean mineOnly1 = showOnlyMine();
-    mineOnly.setActive(mineOnly1);
-    // if (mineOnly1) rememberAndFilter();
+    mineOnly.setActive(showOnlyMine());
 
     mineOnly.addClickHandler(event -> {
       if (mineOnly.isToggled()) {
-        setStorageMineOnly(false);
-        populateTable(remembered);
+        showAllUsers();
       } else {
         setStorageMineOnly(true);
         rememberAndFilter();
@@ -323,6 +336,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     });
 
     return mineOnly;
+  }
+
+  private void showAllUsers() {
+    setStorageMineOnly(false);
+    populateTable(remembered);
   }
 
   private void setStorageMineOnly(boolean val) {
@@ -338,7 +356,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     List<UserInfo> filtered = new ArrayList<>();
 
     remembered.forEach(userInfo -> {
-      if (mine.contains(userInfo.getID())) filtered.add(userInfo);
+      if (myStudents.contains(userInfo.getID())) filtered.add(userInfo);
     });
 
     populateTable(filtered);
@@ -595,7 +613,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Boolean.compare(mine.contains(o1.getID()), mine.contains(o2.getID()));
+              return Boolean.compare(myStudents.contains(o1.getID()), myStudents.contains(o2.getID()));
               //        return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
             }
           }
@@ -652,7 +670,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml((mine.contains(shell.getID()) ? "Y" : "N"));
+        return getSafeHtml((myStudents.contains(shell.getID()) ? "Y" : "N"));
       }
     };
   }
