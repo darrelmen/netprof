@@ -317,7 +317,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @see AnalysisTab#getPhoneReport
    */
-  public void showExamplesForSelectedSound() {
+   void showExamplesForSelectedSound() {
     List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
       logger.warning("showExamplesForSelectedSound : list empty?");
@@ -355,7 +355,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
-    int i = Integer.valueOf(a1).compareTo(a2);
+    int i = Integer.compare(a1, a2);
     return (i == 0) ? compPhones(o1, o2) : i;
   }
 
@@ -377,9 +377,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
               logger.warning("------- o2 is null?");
               return -1;
             } else {
-              int a1 = o1.getCount();
-              int a2 = o2.getCount();
-              return compIntThenPhone(o1, o2, a1, a2);
+              return compIntThenPhone(o1, o2, o1.getCount(), o2.getCount());
             }
           } else {
             logger.warning("------- o1 is null?");
@@ -405,14 +403,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
               logger.warning("------- o2 is null?");
               return -1;
             } else {
-              int a1 = o1.getCurrent();
-              int a2 = o2.getCurrent();
-              return compIntThenPhone(o1, o2, a1, a2);
-
+              return compIntThenPhone(o1, o2, o1.getCurrent(), o2.getCurrent());
             }
           } else {
             logger.warning("------- o1 is null?");
-
             return -1;
           }
         });

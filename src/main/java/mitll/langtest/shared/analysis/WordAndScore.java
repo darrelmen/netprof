@@ -136,10 +136,18 @@ public class WordAndScore extends WordScore {
         "\tanswer " + getAnswerAudio() + " ref " + getRefAudio();
   }
 
+  /**
+   * @see PhoneExampleContainer#getItemColumn
+   * @return
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> getFullTranscript() {
     return fullTranscript;
   }
 
+  /**
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript
+   * @param fullTranscript
+   */
   public void setFullTranscript(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
     this.fullTranscript = fullTranscript;
   }

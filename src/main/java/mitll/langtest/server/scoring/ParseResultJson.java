@@ -79,16 +79,15 @@ public class ParseResultJson {
    * @param typeToEvent
    * @return
    * @see ASRScoring#getTypeToEndTimes
+   * @see #readFromJSON(String)
+   * @see #parseJsonAndGetProns
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>());
-      }
+      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
         endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));

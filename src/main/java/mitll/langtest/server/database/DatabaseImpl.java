@@ -1671,7 +1671,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     });
 
     {
-      List<String> reportEmails  = serverProps.getReportEmails();
+      List<String> reportEmails = serverProps.getReportEmails();
       List<String> receiverNames = reportEmails;//serverProps.getReceiverNames();
       if (userID != -1) {
         User byID = userDAO.getByID(userID);
@@ -1679,7 +1679,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           logger.error("huh? can't find user " + userID + " in db?");
         } else {
 //          logger.info("using user email " + byID.getEmail());
-          reportEmails  = Collections.singletonList(byID.getEmail());
+          reportEmails = Collections.singletonList(byID.getEmail());
           receiverNames = Collections.singletonList(byID.getFullName());
         }
       }
@@ -1740,7 +1740,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         }
     );
 
-    report.getSummaryReport(allReports,pathHelper);
+    report.getSummaryReport(allReports, pathHelper);
     return jsons;
   }
 
@@ -1791,45 +1791,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
-    // IUserDAO userDAO = getUserDAO();
-//    logger.info("getMaleFemaleProgress getting exercises -- " + projectid);
-    Collection<CommonExercise> exercises = getExercises(projectid);
-
-//    List<DBUser> all = userDAO.getAll();
-//    Map<Integer, User> userMapMales = userDAO.getUserMapFromUsers(true, all);
-//    logger.info("getMaleFemaleProgress getting userMapMales -- " + userMapMales.size());
-//
-//    Map<Integer, User> userMapFemales = userDAO.getUserMapFromUsers(false, all);
-//    logger.info("getMaleFemaleProgress getting userMapFemales -- " + userMapFemales.size());
-
-    float total = exercises.size();
-    Set<Integer> uniqueIDs = new HashSet<>();
-
-    int context = 0;
-    Map<Integer, String> exToTranscript = new HashMap<>();
-    Map<Integer, String> exToContextTranscript = new HashMap<>();
-
-    for (CommonExercise shell : exercises) {
-      if (shell.hasContext()) context++;
-      boolean add = uniqueIDs.add(shell.getID());
-      if (!add) {
-        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
-      }
-      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
-      exToContextTranscript.put(shell.getID(), shell.getContext());
-    }
-
-//    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +        uniqueIDs.size());// +
-    // " unique" +
-    // " males " + userMapMales.size() + " females " + userMapFemales.size());
-
-    long then = System.currentTimeMillis();
-    Map<String, Float> recordedReport = getAudioDAO().getRecordedReport(projectid, total, context, uniqueIDs,
-        exToTranscript, exToContextTranscript);
-    long now = System.currentTimeMillis();
-    if (now - then > 100) logger.info("getRecordedReport took " + (now - then));
-
-    return recordedReport;
+    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid));
   }
 
   @Override

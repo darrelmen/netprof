@@ -271,20 +271,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                          Map<Integer, String> exToTranscript,
                          Set<Integer> idsOfRecordedExercisesForMales,
                          Set<Integer> idsOfRecordedExercisesForFemales) {
-
-
     Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
-
     for (Integer key : countForGender4.keySet()) {
       boolean male = userDAO.isMale(key);
-      Collection<Tuple2<Integer, Integer>> tuple2s = countForGender4.get(key);
-
-      Iterator<Tuple2<Integer, Integer>> iterator1 = tuple2s.iterator();
-      //   scala.collection.Iterator<Tuple2<Object, Object>> iterator = tuple2s.iterator();
-
-      Set<Integer> exIDs = getExIDs(iterator1);
+      Set<Integer> exIDs = getExIDs(countForGender4.get(key).iterator());
 
       if (male) {
         idsOfRecordedExercisesForMales.addAll(exIDs);

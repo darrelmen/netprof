@@ -146,4 +146,6 @@ public interface IAudioDAO extends IDAO {
   void addBulk(List<SlickAudio> copies);
 
   Collection<UserTimeBase> getAudioForReport(int projid);
+
+  Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises);
 }

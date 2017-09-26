@@ -19,7 +19,7 @@ public class SlimSegment implements IsSerializable {
     return (int) (value * SCALE);
   }
 
-  protected float fromInt(int value) {
+  float fromInt(int value) {
     return ((float) value) / SCALE;
   }
 

@@ -220,7 +220,7 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  abstract Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids,Map<Integer, MiniUser> idToMini);
+  abstract Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer, MiniUser> idToMini);
 
   /**
    * @param firstExercise
@@ -228,10 +228,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
-  public int attachAudioToExercise(CommonExercise firstExercise, String language,Map<Integer, MiniUser> idToMini) {
+  public int attachAudioToExercise(CommonExercise firstExercise, String language, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
     int id = firstExercise.getID();
-    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id,idToMini);
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);
     long now = System.currentTimeMillis();
 
     if (now - then > WARN_DURATION)
@@ -464,7 +464,7 @@ public abstract class BaseAudioDAO extends DAO {
     return new String(s2);
   }
 
-  abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid,Map<Integer, MiniUser> idToMini);
+  abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid, Map<Integer, MiniUser> idToMini);
 
   /**
    * Get back the ids of exercises recorded by people who are the same gender as the userid.
@@ -484,6 +484,40 @@ public abstract class BaseAudioDAO extends DAO {
         AudioType.SLOW.toString(),
         projid
     );
+  }
+
+  public Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises) {
+    float total = exercises.size();
+    Set<Integer> uniqueIDs = new HashSet<>();
+
+    int context = 0;
+    Map<Integer, String> exToTranscript = new HashMap<>();
+    Map<Integer, String> exToContextTranscript = new HashMap<>();
+
+    for (CommonExercise shell : exercises) {
+      if (shell.hasContext()) context++;
+      boolean add = uniqueIDs.add(shell.getID());
+      if (!add) {
+        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+      }
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      exToContextTranscript.put(shell.getID(), shell.getContext());
+    }
+
+//    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +        uniqueIDs.size());// +
+    // " unique" +
+    // " males " + userMapMales.size() + " females " + userMapFemales.size());
+
+    long then = System.currentTimeMillis();
+    Map<String, Float> recordedReport = getRecordedReport(projectid, total, context, uniqueIDs,
+        exToTranscript, exToContextTranscript);
+    long now = System.currentTimeMillis();
+    if (now - then > 100) logger.info("getRecordedReport for" +
+        "\n\t project " + projectid+
+        "\n\twith     " + exercises.size() + " exercises "+
+        "\n\ttook     " + (now - then));
+
+    return recordedReport;
   }
 
   /**
@@ -613,9 +647,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see IAudioDAO#addOrUpdate
    */
-  protected AudioAttribute getAudioAttribute(int userid, int exerciseID, AudioType audioType,Map<Integer, MiniUser> idToMini) {
+  protected AudioAttribute getAudioAttribute(int userid, int exerciseID, AudioType audioType, Map<Integer, MiniUser> idToMini) {
     AudioAttribute audioAttr = null;
-    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(exerciseID,idToMini);
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(exerciseID, idToMini);
     //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
     for (AudioAttribute audioAttribute : audioAttributes) {
@@ -742,7 +776,7 @@ public abstract class BaseAudioDAO extends DAO {
   private Set<Integer> getWithContext(boolean male, int projid) {
     Set<Integer> audioExercisesForGender = getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
 
-  //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
+    //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
 
     Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
         male,

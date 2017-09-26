@@ -66,6 +66,8 @@ import java.util.logging.Logger;
  */
 public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
+
+  private static final String CLICK_ON = "Click on an item to review.";
   private static final String EXAMPLES_OF_SOUND = "Examples of sound";
 
   private static final String WORDS_USING = "Vocabulary with ";
@@ -128,14 +130,13 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       if (onlyFirstFew) heading.setSubtext(subtext);
     }
     clear();
+
     if (sortedHistory != null) {
-      // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
-      for (WordAndScore WordAndScore : sortedHistory) {
-        addItem(WordAndScore);
-      }
+      sortedHistory.forEach(this::addItem);
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
     }
+
     flush();
     addPlayer();
   }
@@ -146,17 +147,11 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {
-            return 0;
+            return 0; // how?
           }
 
           // Compare the name columns.
-          if (o1 != null) {
-            if (o2 == null) return 1;
-            else {
-              return o1.getWord().compareTo(o2.getWord());
-            }
-          }
-          return -1;
+          return (o1 == null) ? -1 : (o2 == null) ? 1 : o1.getWord().compareTo(o2.getWord());
         });
     return columnSortHandler;
   }
@@ -167,8 +162,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
     addColumn(itemCol, header);
-    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
+    table.addColumnSortHandler(getEnglishSorter(itemCol, getList()));
 
     try {
       addAudioColumns();
@@ -177,7 +171,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       logger.warning("Got " + e);
     }
 
-    new TooltipHelper().addTooltip(table, "Click on an item to review.");
+    new TooltipHelper().addTooltip(table, CLICK_ON);
   }
 
   /**

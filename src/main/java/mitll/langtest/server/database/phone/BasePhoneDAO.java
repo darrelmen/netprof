@@ -137,9 +137,10 @@ public class BasePhoneDAO extends DAO {
   }
 
   private PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
-                                                    String phone, float phoneScore, long resultTime) {
-    List<PhoneAndScore> scores = phoneToScores.get(phone);
-    if (scores == null) phoneToScores.put(phone, scores = new ArrayList<>());
+                                                    String phone,
+                                                    float phoneScore,
+                                                    long resultTime) {
+    List<PhoneAndScore> scores = phoneToScores.computeIfAbsent(phone, k -> new ArrayList<>());
     PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime);
     scores.add(phoneAndScore);
     return phoneAndScore;

@@ -504,8 +504,7 @@ public class WordTable {
         if (!shouldSkipPhone(event)) {
           for (TranscriptSegment phone : phones) {
             if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
-              List<TranscriptSegment> orDefault = wordToPhones.get(word);
-              if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<>());
+              List<TranscriptSegment> orDefault = wordToPhones.computeIfAbsent(word, k -> new ArrayList<>());
               orDefault.add(phone);
             }
           }
