@@ -85,7 +85,7 @@ public abstract class Scoring {
 
   private final String deployPath;
   final ServerProperties props;
-  final LogAndNotify langTestDatabase;
+  final LogAndNotify logAndNotify;
 
 //  private static final double KEEP_THRESHOLD = 0.3;
 
@@ -125,7 +125,7 @@ public abstract class Scoring {
           Project project) {
     this.deployPath = deployPath;
     this.props = props;
-    this.langTestDatabase = langTestDatabase;
+    this.logAndNotify = langTestDatabase;
     this.htkDictionary = htkDictionary;
   //  lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     String language = project.getLanguage();

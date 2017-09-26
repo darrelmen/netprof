@@ -334,8 +334,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         File tempFile = tempDir.toFile();
 
         // dcodr can't handle an equals in the file name... duh...
-        // logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra");
-        AudioConversion.wav2raw(filePath + ".wav", rawAudioPath);
+        String wavFile1 = filePath + ".wav";
+        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra (derived from " + wavFile1 + ")");
+        boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
+
+        if (!wroteIt) {
+          logAndNotify.logAndNotifyServerException(null,"couldn't write the raw file to " + rawAudioPath);
+          return new PretestScore(0);
+        }
 
         Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
             tempFile.getAbsolutePath(), decode, end);
@@ -387,7 +393,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (!file.delete()) {
         String mes = "huh? couldn't delete raw audio file " + file.getAbsolutePath();
         logger.error(mes);
-        langTestDatabase.logAndNotifyServerException(null,mes);
+        logAndNotify.logAndNotifyServerException(null,mes);
       }
     }
   }
@@ -794,7 +800,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
       message = "hydra said " + resultsStr + " : " + message;
       logger.error(message);
-      langTestDatabase.logAndNotifyServerException(null, message);
+      logAndNotify.logAndNotifyServerException(null, message);
       return null;
     } else {
       String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
@@ -803,8 +809,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (results[0].isEmpty()) {
         String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
         logger.error(message);
-        if (langTestDatabase != null) {  // skip during testing
-          langTestDatabase.logAndNotifyServerException(null, message);
+        if (logAndNotify != null) {  // skip during testing
+          logAndNotify.logAndNotifyServerException(null, message);
         }
         return null;
       }
@@ -863,7 +869,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         resultsStr = httpClient.sendAndReceive(hydraInput);
       } catch (IOException e) {
         logger.error("Error closing http connection " + e, e);
-        langTestDatabase.logAndNotifyServerException(e, "running hydra on" +
+        logAndNotify.logAndNotifyServerException(e, "running hydra on" +
             "\n\thost  " + getHostName() +
             "\n\tinput " + hydraInput);
         resultsStr = "";

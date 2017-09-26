@@ -322,12 +322,15 @@ public class AudioConversion extends AudioBase {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   // assumes 16Khz
-  public static void wav2raw(String wavFile, String rawFile) {
+  public static boolean wav2raw(String wavFile, String rawFile) {
     FileOutputStream fout = null;
     AudioInputStream f = null;
     try {
       f = AudioSystem.getAudioInputStream(new File(wavFile));
-      fout = new FileOutputStream(rawFile);
+      File file = new File(rawFile);
+      String absolutePath = file.getAbsolutePath();
+      logger.debug("wav2raw Writing to " + absolutePath);
+      fout = new FileOutputStream(file);
 
       byte[] b = new byte[1024];
 
@@ -341,8 +344,11 @@ public class AudioConversion extends AudioBase {
 
       f.close();
       fout.close();
+      logger.info("wav2raw wrote to " + absolutePath + " exists = " + file.exists());
+      return (!file.exists());
     } catch (UnsupportedAudioFileException | IOException e) {
       logger.error("Got " + e, e);
+      return false;
     } finally {
       try {
         if (fout != null)
