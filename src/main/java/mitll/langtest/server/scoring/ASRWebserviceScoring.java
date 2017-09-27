@@ -339,7 +339,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
 
         if (!wroteIt) {
-          logAndNotify.logAndNotifyServerException(null,"couldn't write the raw file to " + rawAudioPath);
+          logAndNotify.logAndNotifyServerException(null, "couldn't write the raw file to " + rawAudioPath);
           return new PretestScore(0);
         }
 
@@ -385,16 +385,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   /**
    * We don't need it after sending it to dcodr
+   *
    * @param rawAudioPath
    */
   private void cleanUpRawFile(String rawAudioPath) {
-    File file = new File(rawAudioPath);
-    if (file.exists()) {
-      if (!file.delete()) {
-        String mes = "huh? couldn't delete raw audio file " + file.getAbsolutePath();
+    File rawFile = new File(rawAudioPath);
+    String absolutePath = rawFile.getAbsolutePath();
+    if (rawFile.exists()) {
+      if (!rawFile.delete()) {
+        logger.info("cleanUpRawFile : deleted " + absolutePath);
+      } else {
+        String mes = "huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);
-        logAndNotify.logAndNotifyServerException(null,mes);
+        logAndNotify.logAndNotifyServerException(null, mes);
       }
+    } else {
+      logger.info("cleanUpRawFile : source file doesn't exist = " + absolutePath);
     }
   }
 

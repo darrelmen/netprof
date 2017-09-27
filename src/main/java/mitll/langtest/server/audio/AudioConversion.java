@@ -316,45 +316,53 @@ public class AudioConversion extends AudioBase {
 
   /**
    * Rip the header off to make a raw file.
+   * assumes 16Khz?
    *
    * @param wavFile
    * @param rawFile
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
-  // assumes 16Khz
   public static boolean wav2raw(String wavFile, String rawFile) {
     FileOutputStream fout = null;
-    AudioInputStream f = null;
+    AudioInputStream sourceStream = null;
+
+    File sourceFile = new File(wavFile);
+    logger.info("wav2raw Reading from " + sourceFile  + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
+
     try {
-      f = AudioSystem.getAudioInputStream(new File(wavFile));
-      File file = new File(rawFile);
-      String absolutePath = file.getAbsolutePath();
-      logger.debug("wav2raw Writing to " + absolutePath);
-      fout = new FileOutputStream(file);
+      sourceStream = AudioSystem.getAudioInputStream(sourceFile);
+      File outputFile = new File(rawFile);
+      String absolutePath = outputFile.getAbsolutePath();
+      logger.info("wav2raw Writing to " + absolutePath);
 
-      byte[] b = new byte[1024];
+      fout = new FileOutputStream(outputFile);
 
-      int nread = 0;
-      do {
-        if (nread > 0)
-          fout.write(b, 0, nread);
-        nread = f.read(b);
+      {
+        byte[] b = new byte[1024];
+
+        int nread = 0;
+        do {
+          if (nread > 0)
+            fout.write(b, 0, nread);
+          nread = sourceStream.read(b);
+        }
+        while (nread > 0);
       }
-      while (nread > 0);
 
-      f.close();
+      sourceStream.close();
       fout.close();
-      logger.info("wav2raw wrote to " + absolutePath + " exists = " + file.exists());
-      return (!file.exists());
-    } catch (UnsupportedAudioFileException | IOException e) {
+
+      logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists());
+      return outputFile.exists();
+    } catch (Exception e) {
       logger.error("Got " + e, e);
       return false;
     } finally {
       try {
         if (fout != null)
           fout.close();
-        if (f != null)
-          f.close();
+        if (sourceStream != null)
+          sourceStream.close();
       } catch (IOException e) {
         logger.error("Got " + e, e);
       }
