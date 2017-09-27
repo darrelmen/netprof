@@ -46,10 +46,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.*;
-import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
-import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
-import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
-import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
+import mitll.npdata.dao.userexercise.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +104,7 @@ public class SlickUserExerciseDAO
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
     if (!hasMediaDir) {
-      logger.info("no media dir at " + mediaDir + " - this is OK on netprof host.");
+      logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
   }
 
@@ -303,6 +300,7 @@ public class SlickUserExerciseDAO
    * @param lookup
    * @param exercise
    * @param attrTypes
+   * @param pairs
    * @return
    * @see #getExercises
    */
@@ -312,20 +310,24 @@ public class SlickUserExerciseDAO
                                                 Map<Integer, ExercisePhoneInfo> exToPhones,
                                                 PronunciationLookup lookup,
                                                 Exercise exercise,
-                                                Collection<String> attrTypes) {
-    ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup);
+                                                Collection<String> attrTypes,
+                                                List<SlickExercisePhone> pairs) {
+    if (exercise.getNumPhones() < 1) {
+      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
+      ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
-    int numToUse = exercisePhoneInfo.getNumPhones();
-    if (numToUse == 0) {
-      numToUse = exercisePhoneInfo.getNumPhones2();
-      if (numToUse < 1) {
-        logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage());
-      } else {
-        logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
+      int numToUse = exercisePhoneInfo.getNumPhones();
+      if (numToUse == 0) {
+        numToUse = exercisePhoneInfo.getNumPhones2();
+        if (numToUse < 1) {
+          logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage());
+        } else {
+          logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
+        }
       }
-    }
 
-    exercise.setNumPhones(numToUse);
+      exercise.setNumPhones(numToUse);
+    }
 //    logger.info("addExerciseToSectionHelper for " + exercise.getID() + " num phones = " + numToUse);
 
     return addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
@@ -347,7 +349,9 @@ public class SlickUserExerciseDAO
         slick.transliteration(),
         slick.projid(),
         slick.candecode(),
-        slick.candecodechecked().getTime(), slick.iscontext());
+        slick.candecodechecked().getTime(),
+        slick.iscontext(),
+        slick.numphones());
 
     List<String> translations = new ArrayList<String>();
     if (!slick.foreignlanguage().isEmpty()) {
@@ -361,19 +365,33 @@ public class SlickUserExerciseDAO
 
   /**
    * If the number of phones on an exercise has not been calculated yet, look it up.
+   *
    * @param slick
    * @param exToPhones
    * @param lookup
    * @return
+   * @see #addExerciseToSectionHelper
    */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
                                                  Map<Integer, ExercisePhoneInfo> exToPhones,
-                                                 PronunciationLookup lookup) {
+                                                 PronunciationLookup lookup,
+                                                 List<SlickExercisePhone> pairs) {
     ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
     if (exercisePhoneInfo == null || exercisePhoneInfo.getNumPhones() < 1) {
-      exercisePhoneInfo = getExercisePhoneInfo(slick, lookup);
+      if (exercisePhoneInfo == null) {
+        logger.info("getExercisePhoneInfo : no phone info for " + slick.id() + " in " + exToPhones.size());
+      } else {
+        logger.info("getExercisePhoneInfo phone info is " + exercisePhoneInfo.getNumPhones() +
+            " for  " + slick.id());
+
+      }
+      exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup, pairs);
+    } else {
+      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);
+      // exerciseDAO.updatePhones(slick.id(), exercisePhoneInfo.getNumPhones());
+      pairs.add(new SlickExercisePhone(slick.id(), exercisePhoneInfo.getNumPhones()));
     }
 /*
     else if (exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS() <1) {
@@ -387,7 +405,6 @@ public class SlickUserExerciseDAO
   private int cantcalc = 0;
 
   /**
-   *
    * Writes to table on cache miss.
    * <p>
    * Trying to prevent recalc on startup, which slows
@@ -395,14 +412,17 @@ public class SlickUserExerciseDAO
    * @param slick
    * @param lookup
    * @return
-   * @see #getExercisePhoneInfo(SlickExercise, Map, PronunciationLookup)
+   * @see #getExercisePhoneInfo(SlickExercise, Map, PronunciationLookup, List)
    */
   @NotNull
-  private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick, PronunciationLookup lookup) {
+  private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick,
+                                                         PronunciationLookup lookup,
+                                                         List<SlickExercisePhone> pairs) {
     ExercisePhoneInfo exercisePhoneInfo;
 
     int numphones = slick.numphones();
     if (numphones < 1) {
+      logger.info("getExercisePhoneInfoFromDict num phones " + numphones + " for exercise " + slick.id());
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
@@ -410,23 +430,37 @@ public class SlickUserExerciseDAO
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
 
       {
-        int n2 = lookup.getNumPhonesFromDictionary(foreignlanguage, transliteration);
-        if (n2 > 0) {
-          exercisePhoneInfo.setNumPhones2(n2);
+        int numPhones = exercisePhoneInfo.getNumPhones();
+
+        int n2;
+        if (numPhones == 0) {
+          n2 = lookup.getNumPhonesFromDictionary(foreignlanguage, transliteration);
+          if (n2 > 0) {
+            exercisePhoneInfo.setNumPhones2(n2);
+          }
+        } else {
+          n2 = numPhones;
         }
 
         int id = slick.id();
         if (n2 < 1) {
           cantcalc++;
-          if (cantcalc < 25 || cantcalc % 1000 == 0) {
-            logger.debug("getExercisePhoneInfo can't calc num phones for " + cantcalc +
+          if (cantcalc < 100 || cantcalc % 1000 == 0) {
+            logger.info("getExercisePhoneInfo can't calc num phones for " + cantcalc +
                 " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
           }
-        } else if (hasMediaDir) {
-          exerciseDAO.updatePhones(id, n2);
-          updated++;
-          if (updated < 25 || updated % 1000 == 0) logger.debug("getExercisePhoneInfo (project #" + slick.projid() +
-              ") updated " + updated + " exercises with phone info");
+        } else {
+          if (hasMediaDir) {
+            if (n2 > 0) {
+              exerciseDAO.updatePhones(id, n2);
+//            pairs.add(new SlickExercisePhone(id, n2));
+              updated++;
+              if (updated < 100 || updated % 1000 == 0) logger.info("getExercisePhoneInfo (project #" + slick.projid() +
+                  ") updated " + updated + " exercises with phone info (e.g. " + id + " = " + n2);
+            }
+          } else {
+            logger.info("getExercisePhoneInfo no media dir so can't update " + id + " with " + n2);
+          }
         }
       }
     } else {
@@ -648,33 +682,51 @@ public class SlickUserExerciseDAO
                                             Map<Integer, ExerciseAttribute> allByProject,
                                             Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
                                             boolean addTypesToSection) {
-    List<List<Pair>> allPairs = new ArrayList<>();
+    List<List<Pair>> allAttributes = new ArrayList<>();
 
     List<String> baseTypeOrder = getBaseTypeOrder(lookup);
 
     List<CommonExercise> copy = new ArrayList<>();
 
-    Collection<String> attrTypes = allByProject.values().stream().map(Pair::getProperty).collect(Collectors.toCollection(HashSet::new));
+    Collection<String> attrTypes = allByProject
+        .values()
+        .stream()
+        .map(Pair::getProperty)
+        .collect(Collectors.toCollection(HashSet::new));
 
-//    logger.info("getExercises attr types " + attrTypes);
-
+//    logger.info("ExToPhones " + exToPhones.size());
     long then = System.currentTimeMillis();
+    List<SlickExercisePhone> pairs = new ArrayList<>();
+    //  logger.info("examining  " + all.size() + " exercises...");
+
+    int n = 0;
     for (SlickExercise slickExercise : all) {
       Exercise exercise = makeExercise(slickExercise);
+      if (exercise.getNumPhones() == 0 && n++ < 10) {
+        logger.info("getExercises no phones for " + exercise.getID());
+      }
       addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
-      allPairs.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise, attrTypes));
+      allAttributes.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise,
+          attrTypes, pairs));
       copy.add(exercise);
     }
 
+    long then2 = System.currentTimeMillis();
+    logger.info("updating " + pairs.size() + " exercises for num phones.");
+    exerciseDAO.updatePhonesBulk(pairs);
+
     long now = System.currentTimeMillis();
+    if (now - then2 > 50) {
+      logger.info("getExercises took " + (now - then) + " to update # phones on " + pairs.size() + " exercises.");
+    }
     if (now - then > 50) {
       logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
     }
 
     if (addTypesToSection) {
       //  logger.info("getExercises type order " + typeOrder);
-      sectionHelper.rememberTypesInOrder(typeOrder, allPairs);
+      sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");
     return copy;

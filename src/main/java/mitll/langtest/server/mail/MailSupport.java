@@ -79,7 +79,7 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
-    this.testEmail = false;
+    this.testEmail = true;
     if (testEmail) logger.warn("\n\n\n--->using test email");
   }
 

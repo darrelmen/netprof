@@ -102,7 +102,7 @@ public class ExerciseToPhone {
       if (phonesForEx == null) {
         exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
       }
-      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+     // List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 /*      if (transcriptSegments != null) {
         addPhones(phonesForEx, transcriptSegments);
       }*/

@@ -179,15 +179,15 @@ public class DominoExerciseDAO {
   @NotNull
   private List<CommonExercise> getCommonExercises(int projid, int creator, JsonArray docArr, String unitName, String chapterName) {
     List<CommonExercise> exercises = new ArrayList<>();
-    docArr.forEach(docObj -> exercises.add(getExercise(projid, creator, docObj, unitName, chapterName)));
+    docArr.forEach(docObj -> exercises.add(getExerciseFromVocabularyItem(projid, creator, docObj, unitName, chapterName)));
     return exercises;
   }
 
   @NotNull
-  private Exercise getExercise(int projid, int creator, JsonValue docObj, String unitName, String chapterName) {
+  private Exercise getExerciseFromVocabularyItem(int projid, int creator, JsonValue docObj, String unitName, String chapterName) {
     SimpleHeadDocumentRevision shDoc = ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
     VocabularyItem vocabularyItem = (VocabularyItem) shDoc.getDocument();
-    Exercise ex = getExercise(projid, shDoc.getId(), vocabularyItem, creator);
+    Exercise ex = getExerciseFromVocabularyItem(projid, shDoc.getId(), vocabularyItem, creator);
     ex.setUpdateTime(shDoc.getCreateDate().getTime());
 
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
@@ -219,7 +219,7 @@ public class DominoExerciseDAO {
       int compid = shDoc.getId() * 10 + sample.getNum();
 //      logger.info("context import id " + compid);
 
-      Exercise context = getExercise(projid, compid, creator,
+      Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
           removeMarkup(sample.getSentenceVal()),
           removeMarkup(sample.getAlternateFormVal()),
           removeMarkup(sample.getTransliterationVal()),
@@ -241,16 +241,16 @@ public class DominoExerciseDAO {
    * @return
    */
   @NotNull
-  private Exercise getExercise(int projid,
-                               int oldid,
-                               VocabularyItem vocabularyItem,
-                               int creatorID) {
+  private Exercise getExerciseFromVocabularyItem(int projid,
+                                                 int oldid,
+                                                 VocabularyItem vocabularyItem,
+                                                 int creatorID) {
     String termVal = vocabularyItem.getTermVal();
     String alternateFormVal = vocabularyItem.getAlternateFormVal();
     String transliterationVal = vocabularyItem.getTransliterationVal();
     String meaning = vocabularyItem.getMeaningVal();
 
-    return getExercise(projid, oldid, creatorID,
+    return getExerciseFromVocabularyItem(projid, oldid, creatorID,
         removeMarkup(termVal),
         removeMarkup(alternateFormVal),
         removeMarkup(transliterationVal),
@@ -261,13 +261,25 @@ public class DominoExerciseDAO {
     return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "");
   }
 
+  /**
+   * @see #addContextSentences
+   * @param projid
+   * @param oldid
+   * @param creatorID
+   * @param termVal
+   * @param alternateFormVal
+   * @param transliterationVal
+   * @param meaning
+   * @return
+   */
   @NotNull
-  private Exercise getExercise(int projid,
-                               int oldid, int creatorID,
-                               String termVal,
-                               String alternateFormVal,
-                               String transliterationVal,
-                               String meaning) {
+  private Exercise getExerciseFromVocabularyItem(int projid,
+                                                 int oldid,
+                                                 int creatorID,
+                                                 String termVal,
+                                                 String alternateFormVal,
+                                                 String transliterationVal,
+                                                 String meaning) {
     Exercise exercise = new Exercise(-1,
         "" + oldid,
         creatorID,
@@ -280,7 +292,8 @@ public class DominoExerciseDAO {
         projid,
         false,
         0,
-        false
+        false,
+        0
     );
     exercise.setPredef(true);
     exercise.setDominoID(oldid);

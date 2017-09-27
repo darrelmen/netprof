@@ -32,14 +32,8 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.database.exercise.PronunciationLookup;
-import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
 
 /**
  * In the future we could imagine finding words that were close in phone space (dog-bog-fog) or something.
@@ -60,7 +54,7 @@ public class ExercisePhoneInfo {
   }
 
   /**
-   * @see SlickUserExerciseDAO#getExercisePhoneInfo(SlickExercise, PronunciationLookup)
+   * @see SlickUserExerciseDAO#getExercisePhoneInfo
    * @param phoneString
    */
   public ExercisePhoneInfo(String phoneString) {
@@ -78,7 +72,7 @@ public class ExercisePhoneInfo {
         }
       }
     }
-    if (numPhones == 0) logger.warn("no phones for " + phoneString);
+    if (numPhones == 0) logger.warn("ExercisePhoneInfo no phones for " + phoneString);
  //   logger.info("from " + phoneString + " " + phones);
   }
 
@@ -135,4 +129,5 @@ public class ExercisePhoneInfo {
   void setNumPhones2(int numPhones2) {
     this.numPhones2 = numPhones2;
   }
+  public String toString() { return numPhones +  " or " + numPhones2; }
 }

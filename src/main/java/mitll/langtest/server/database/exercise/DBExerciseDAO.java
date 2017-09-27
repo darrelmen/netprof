@@ -38,9 +38,7 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.npdata.dao.SlickExerciseAttributeJoin;
-import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickRelatedExercise;
+import mitll.npdata.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -311,8 +309,19 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     userExerciseDAO.getDao().updateCheckedBulk(unsafe, false);
   }
 
+  /**
+   * @param id
+   * @param count
+   * @see SlickUserExerciseDAO#getExercisePhoneInfo
+   * @deprecated
+   */
   public void updatePhones(int id, int count) {
     userExerciseDAO.getDao().updatePhones(id, count);
+  }
+
+  @Override
+  public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
+    userExerciseDAO.getDao().updatePhonesBulk(pairs);
   }
 
   public String toString() {

@@ -187,7 +187,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String transliteration,
                   int projectid,
                   boolean candecode,
-                  long lastChecked, boolean isContext) {
+                  long lastChecked,
+                  boolean isContext,
+                  int numPhones) {
     super(exid, projectid);
     this.oldid = oldid;
     this.creator = creator;
@@ -200,6 +202,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
     this.isContext = isContext;
+    this.numPhones = numPhones;
   }
 
   /**
@@ -234,7 +237,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int numPhones,
                   List<VocabToken> tokens) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
-        projectid, candecode, lastChecked, false);
+        projectid, candecode, lastChecked, false, numPhones);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;

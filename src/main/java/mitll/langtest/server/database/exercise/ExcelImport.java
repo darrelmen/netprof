@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.Pair;
+import mitll.npdata.dao.SlickExercisePhone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -969,5 +970,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
+  }
+
+  @Override
+  public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
+
   }
 }

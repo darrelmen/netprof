@@ -160,6 +160,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     // mask over old items that have been overridden
     if (userExerciseDAO != null) {
       Collection<Integer> removes = removeExercises();
+      if (!removes.isEmpty())
       logger.info("remove these (" + removes.size() + ") " + removes);
       addOverlays(removes);
     }
@@ -169,25 +170,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     // attachAudio();
   }
-
-/*  private void checkBlackboard(String prefix) {
-    checkBlackboard(prefix, exercises);
-  }
-
-  private void checkBlackboard(String prefix, Collection<CommonExercise> exercises) {
-    for (CommonExercise exercise : exercises) {
-      if (matchBlackboard(exercise)) {
-        logger.info(prefix + " checkBlackboard got " + exercise);
-      } else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
-        logger.info(prefix + " checkBlackboard got blackboard " + exercise);
-      }
-    }
-  }
-
-  private boolean matchBlackboard(CommonExercise exercise) {
-    return exercise.getOldID().equalsIgnoreCase("3473") || (exercise.getEnglish().equalsIgnoreCase("blackboard"));
-  }*/
-
 
   /**
    * @return

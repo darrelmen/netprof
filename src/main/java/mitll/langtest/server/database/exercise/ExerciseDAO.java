@@ -40,7 +40,10 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExercisePhone;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,4 +85,5 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
 
   void updatePhones(int id, int count);
+  void updatePhonesBulk(List<SlickExercisePhone> pairs);
 }
