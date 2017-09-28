@@ -30,48 +30,17 @@
  *
  */
 
-package mitll.langtest.client.gauge;
+package mitll.langtest.server.audio.image;
 
 /**
+ * Possible images we can create from audio files or audio + transcripts.
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/21/2014.
+ * @since 6/16/11
+ * Time: 1:00 PM
  */
-public class SimpleColumnChart {
-  public static String MAX = "#EEF3E2";//getColor(1.0f);
-
-  /**
-   * This gives a smooth range red->yellow->green:
-   *  on green 0->255 over score 0->0.5, 255 for > 0.5 and
-   *  on red from 255->0 over 0.5->1 in score, 255 for < 0.5
-   *
-   *  NOTE : this is the same as in mitll.langtest.server.audio.image.TranscriptImage
-   * @param score
-   * @return color in # hex rgb format
-   */
-  public static String getColor(float score) {
-    if (score > 1.0) score = 1.0f;
-    if (score < 0f)  score = 0f;
-    int red   = (int)Math.max(0,(255f - (Math.max(0, score-0.5)*2f*255f)));
-    int green = (int)Math.min(255f, score*2f*255f);
-    int blue  = 0;
-    // System.out.println("s " +score + " red " + red + " green " + green + " b " +blue);
-    return "#" + getHexNumber(red) + getHexNumber(green) + getHexNumber(blue);
-    //return new Color(red, green, blue, BKG_ALPHA);
-  }
-
-  private static String getHexNumber(int number){
-    String hexString = Integer.toHexString(number).toUpperCase();
-
-    if(hexString.length() == 0){
-      return "00";
-    }
-    else if(hexString.length() == 1){
-      return "0" + hexString;
-    }
-    else{
-      return hexString;
-    }
-  }
+public enum ImageType {
+  PHONE_TRANSCRIPT, SPECTROGRAM, WAVEFORM, WORD_TRANSCRIPT
 }

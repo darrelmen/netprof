@@ -30,7 +30,7 @@
  *
  */
 
-package audio.image;
+package mitll.langtest.server.audio.image;
 
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;

@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.services;
 
-import audio.image.ImageType;
-import audio.imagewriter.SimpleImageWriter;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.audio.*;

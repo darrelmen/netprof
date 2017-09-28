@@ -136,8 +136,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(commonExercise));
-
-      getRefAudio();
     } else {
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
@@ -160,13 +158,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (refID != -1) {
       if (DEBUG) {
         logger.info("getRefAudio asking for" +
-                "\n\texercise " + exercise.getID() +
-                "\n\taudio #" + refID //+
+                "\n\texercise  " + exercise.getID() +
+                "\n\taudio    #" + refID +
+                "\n\talignment " + currentAudioAttr.getAlignmentOutput()
             //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
             //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
         );
       }
-      if (addToRequest(currentAudioAttr, refID)) req.add(refID);
+      if (addToRequest(currentAudioAttr)) req.add(currentAudioAttr.getUniqueID());
+
+      playAudio.getAllPossible().forEach(audioAttribute -> {
+        if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
+      });
     } else {
       //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
     }
@@ -181,7 +184,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             "\n\tisMale " + contextAudioAttr.getUser().isMale()
         );
       }
-      if (addToRequest(contextAudioAttr, contextRefID)) req.add(contextRefID);
+      if (addToRequest(contextAudioAttr)) req.add(contextRefID);
+
+      contextPlay.getAllPossible().forEach(audioAttribute -> {
+        if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
+      });
     } else {
       //logger.warning("no context audio for " + exercise.getID());
     }
@@ -195,26 +202,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       // threre could be a race where we go to get this after we log out...
       if (projectStartupInfo != null) {
-        controller.getScoringService().getAlignments(
-            projectStartupInfo.getProjectid(),
-            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-
-              }
-
-              @Override
-              public void onSuccess(Map<Integer, AlignmentOutput> result) {
-                alignments.putAll(result);
-                registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-                cacheOthers(listener);
-              }
-            });
+        getAlignments(listener, currentAudioAttr, refID, contextAudioAttr, contextRefID, req, projectStartupInfo.getProjectid());
       }
     }
   }
 
-  public int getRefAudio() {
+
+
+/*  public int getRefAudio() {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
     return currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
   }
@@ -222,15 +217,24 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public int getContextRefAudio() {
     AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
     return contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-  }
+  }*/
 
-  private boolean addToRequest(AudioAttribute currentAudioAttr, int refID) {
+  /**
+   * Is the alignment already known and attached?
+   *
+   * @param currentAudioAttr
+   * @return
+   * @paramx refID
+   */
+  private boolean addToRequest(AudioAttribute currentAudioAttr) {
+    int refID = currentAudioAttr.getUniqueID();
     if (!alignments.containsKey(refID)) {
       AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
       if (alignmentOutput == null) {
+       // logger.info("addToRequest nope - no alignment for audio " + refID);
         return true;
       } else {
-        // logger.info("addToRequest remember " + refID + " " + alignmentOutput);
+       // logger.info("addToRequest remember audio " + refID + " " + alignmentOutput);
         alignments.put(refID, alignmentOutput);
         return false;
       }
@@ -253,11 +257,42 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  private void getAlignments(RefAudioListener listener,
+                             AudioAttribute currentAudioAttr,
+                             int refID,
+                             AudioAttribute contextAudioAttr,
+                             int contextRefID,
+                             Set<Integer> req,
+                             int projectid) {
+    if (DEBUG) {
+      logger.info("getAlignments asking for " + req.size() + " alignments.");
+    }
+    controller.getScoringService().getAlignments(
+        projectid,
+        req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Map<Integer, AlignmentOutput> result) {
+            alignments.putAll(result);
+            registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+            cacheOthers(listener);
+          }
+        });
+  }
+
+  /**
+   * @param listener
+   * @see #getRefAudio(RefAudioListener)
+   */
   private void cacheOthers(RefAudioListener listener) {
     Set<Integer> req = getReqAudio();
 
     if (!req.isEmpty()) {
-      //  logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req + " knownAlignments " + alignments.size());
+//      logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -282,10 +317,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   public Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
+//    logger.info("getRefAudio " + req.size() + " audio attrs");
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
+  //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");
     }
     req.removeAll(alignments.keySet());
+  //  logger.info("getRefAudio after removing known " + req.size() + " audio attrs");
 
     return req;
   }
@@ -318,7 +356,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param flclickables
    * @param playAudio
    * @param clickableRow
-   * @paramz typeToSegmentToWidget
    * @see #audioChanged
    * @see #contextAudioChanged
    */
@@ -347,7 +384,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       logger.warning("audioChanged no type to segment for " + id + " and exercise " + exercise.getID());
     } else {
       if (DEBUG) {
-        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
+        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
+            typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
         logger.info("audioChanged segments now for ex " + exercise.getID() +
             " audio " + id + " dur " + duration +
             "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet() +
@@ -360,10 +398,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * TODOx : what to do about chinese?
-   *
    * @param audioID
+   * @param durationInMillis
    * @param alignmentOutput
+   * @param flclickables
+   * @param audioControl
+   * @param clickableRow
+   * @return
    * @see #matchSegmentsToClickables
    */
   private Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> matchSegmentToWidgetForAudio(Integer audioID,
@@ -480,7 +521,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               clickableRow.add(current.asWidget());
 
               // add spacer - also required if we want to select text and copy it somewhere.
-          //    clickableRow.add(new InlineHTML(" "));
+              //    clickableRow.add(new InlineHTML(" "));
 
               if (!isRTL) {
                 current.asWidget().addStyleName("floatLeft");
@@ -784,7 +825,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
     while (!clickable.isClickable() && iterator.hasNext()) {
-     // logger.info("skipUnclickable : skip " + clickable);
+      // logger.info("skipUnclickable : skip " + clickable);
       clickable = iterator.next();
     }
     return clickable;
@@ -986,7 +1027,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   /**
    * @param e
    * @return
-   * @see #makeFirstRow(CommonExercise, DivWidget)
+   * @see #makeFirstRow
    */
   private boolean hasAudio(T e) {
     return e.hasAudio(true);
@@ -1099,6 +1140,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * TODO: do we need this???
+   *
    * @param e
    * @return
    * @see #getItemContent
@@ -1111,8 +1153,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       public boolean isBusy() {
         return false;
       }
+
       @Override
-      public void setBusy(boolean v) {}
+      public void setBusy(boolean v) {
+      }
     }, controller, e, listContainer);
   }
 

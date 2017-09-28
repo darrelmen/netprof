@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.services;
 
-import audio.image.ImageType;
-import audio.image.TranscriptEvent;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
@@ -1430,6 +1430,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return idToScores;
   }
 
+  /**
+   * @param projectID
+   * @param toAddAudioTo
+   * @see #getFullExercises
+   */
   private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
     Project project = db.getProject(projectID);
 
@@ -1437,12 +1442,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
       Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
 
+      logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
+          " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
+
       for (CommonExercise exercise : toAddAudioTo) {
         setAlignmentInfo(audioToAlignment, idToAudio, exercise);
-        for (CommonExercise context : exercise.getDirectlyRelated()) {
-          setAlignmentInfo(audioToAlignment, idToAudio, context);
-
-        }
+        exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
       }
 
       Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio);
@@ -1457,9 +1462,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                 Map<Integer, AudioAttribute> idToAudio,
                                 CommonExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-
-      AlignmentOutput alignmentOutput = audioAttribute.getAlignmentOutput();
-      if (alignmentOutput == null) {
+      AlignmentOutput currentAlignment = audioAttribute.getAlignmentOutput();
+      if (currentAlignment == null) {
         synchronized (audioToAlignment) {
           AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
 
@@ -1473,10 +1477,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
+  /**
+   * @param projectID
+   * @param idToAudio
+   * @return
+   * @see #addAlignmentOutput
+   */
   private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
                                                            Map<Integer, AudioAttribute> idToAudio) {
     if (!idToAudio.isEmpty() && idToAudio.size() > 50)
-      logger.info("getting " + idToAudio.size() + " alignment outputs from database");
+      logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
 
     Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet());
     addAlignmentToAudioAttribute(idToAudio, alignments);
@@ -1487,7 +1497,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                             Map<Integer, AlignmentOutput> alignments) {
     for (Map.Entry<Integer, AudioAttribute> pair : idToAudio.entrySet()) {
       AlignmentOutput alignmentOutput = alignments.get(pair.getKey());
-      if (alignmentOutput == null) logger.warn("couldn't get alignment for " + pair.getValue());
+      if (alignmentOutput == null)
+        logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for " + pair.getValue());
       else pair.getValue().setAlignmentOutput(alignmentOutput);
     }
   }
@@ -1500,16 +1511,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    */
   private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs) {
-//    logger.info("getAlignmentsFromDB asking for " + audioIDs);
+    logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
+    if (audioIDs.isEmpty()) logger.warn("huh? no audio ids?");
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    //logger.info("getAllAlignments recalc " +audioIDMap.size() + " alignments...");
+    logger.info("getAlignmentsFromDB found " + audioIDMap.size() + " alignments...");
     return parseJsonToGetAlignments(audioIDs, audioIDMap);
   }
 
   @NotNull
   private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
     Map<Integer, ISlimResult> audioToResult = new HashMap<>();
-    for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
+    jsonResultsForProject.forEach(slimResult -> audioToResult.put(slimResult.getAudioID(), slimResult));
     return audioToResult;
   }
 
@@ -1525,6 +1537,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
 
       if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now?
+        logger.info("parseJsonToGetAlignments : nothing in database for audio " +audioID);
       } else {
         getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
       }
@@ -1537,7 +1550,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
-//    logger.info("cache HIT for " + audioID + " returning " + typeToSegments);
+    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 

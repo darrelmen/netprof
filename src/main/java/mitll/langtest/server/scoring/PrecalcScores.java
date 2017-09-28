@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.scoring;
 
-import audio.image.ImageType;
-import audio.image.TranscriptEvent;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;

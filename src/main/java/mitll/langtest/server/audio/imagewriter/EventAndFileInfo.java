@@ -30,50 +30,30 @@
  *
  */
 
-package audio.image;
+package mitll.langtest.server.audio.imagewriter;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- */
-public class TranscriptEvent implements Comparable<TranscriptEvent> {
-  private static final NumberFormat format = new DecimalFormat("#.#####");
+ * @since 2/23/15.
+ * For each image type - e.g. word transcript, remember a map of type to file path, and type to transcript events and their offsets into the audio file.
+*/
+public class EventAndFileInfo {
+  public Map<ImageType, String> typeToFile = Collections.emptyMap();
+  public Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = Collections.emptyMap();
 
-  public TranscriptEvent(float s, float e, String name) {
-    this(s, e, name, 0);
-  }
+  public EventAndFileInfo() {}
 
-  /**
-   * Constructor
-   *
-   * @param s     start time in seconds
-   * @param e     end time in seconds
-   * @param name  event name (i.e. phone, word, etc.)
-   * @param score
-   */
-  public TranscriptEvent(float s, float e, String name, float score) {
-    start = s;
-    end = e;
-    event = name;
-    this.score = score;
-  }
-
-  // Data Members
-  public float start;                  /// Start time in seconds
-  public float end;                    /// End time in seconds
-  public String event;                 /// Text to be displayed per event
-  public float score;                  /// posterior score
-
-  @Override
-  public int compareTo(TranscriptEvent o) {
-    return new Float(start).compareTo(o.start);
-  }
-
-  public String toString() {
-    return "[" + format.format(start) + "-" + format.format(end) + "] " + event + "(" + format.format(score) + ")";
+  public EventAndFileInfo(Map<ImageType, String> typeToFile,
+                          Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    this.typeToFile = typeToFile;
+    this.typeToEvent = typeToEvent;
   }
 }

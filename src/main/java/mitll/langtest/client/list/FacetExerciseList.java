@@ -1454,15 +1454,18 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       if (!fetched.containsKey(exercise.getID())) {
         fetched.put(exercise.getID(), exercise);
       }
-      Panel exercisePanel = factory.getExercisePanel(exercise);
-      if (exercisePanel instanceof RefAudioGetter) {
-        getters.add(((RefAudioGetter) exercisePanel));
+
+      {
+        Panel exercisePanel = factory.getExercisePanel(exercise);
+        if (exercisePanel instanceof RefAudioGetter) {
+          getters.add(((RefAudioGetter) exercisePanel));
+        }
+        if (first) {
+          markCurrentExercise(exercise.getID());
+          first = false;
+        }
+        exerciseContainer.add(exercisePanel);
       }
-      if (first) {
-        markCurrentExercise(exercise.getID());
-        first = false;
-      }
-      exerciseContainer.add(exercisePanel);
     }
     return getters;
   }
@@ -1477,6 +1480,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * Don't recurse...
    *
    * @param iterator
+   * @see #showExercises(Collection, int)
    */
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {

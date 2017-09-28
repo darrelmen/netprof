@@ -22,9 +22,9 @@ import java.util.Map;
  * Created by go22670 on 4/5/17.
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  NPFlexSectionExerciseList facetExerciseList;
+  private NPFlexSectionExerciseList facetExerciseList;
 
-  public NewLearnHelper(ExerciseController controller) {
+  NewLearnHelper(ExerciseController controller) {
     super(controller);
   }
 
@@ -66,9 +66,4 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       }
     };
   }
-
-/*  @Override
-  public void showList(int listid) {
-    facetExerciseList.showList(listid);
-  }*/
 }

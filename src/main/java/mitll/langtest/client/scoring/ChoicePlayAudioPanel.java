@@ -43,6 +43,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private final Set<Integer> allIDs = new HashSet<>();
+  private final Set<AudioAttribute> allPossible = new HashSet<>();
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -154,6 +155,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
         allIDs.add(mr.getUniqueID());
+        allPossible.add(mr);
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
         else fallback = mr;
@@ -163,6 +165,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute ms = getAtSpeed(malesMap, false);
       if (ms != null) {
         allIDs.add(ms.getUniqueID());
+        allPossible.add(ms);
         if (playButton != null) addAudioChoice(playButton, true, false, ms);
         if (isMale && isSlow) toUse = ms;
         if (fallback == null) fallback = ms;
@@ -172,6 +175,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute fr = getAtSpeed(femalesMap, true);
       if (fr != null) {
         allIDs.add(fr.getUniqueID());
+        allPossible.add(fr);
         if (playButton != null) addAudioChoice(playButton, false, true, fr);
         if (isFemale && isReg) toUse = fr;
         if (fallback == null) fallback = fr;
@@ -182,6 +186,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       AudioAttribute fs = getAtSpeed(femalesMap, false);
       if (fs != null) {
         allIDs.add(fs.getUniqueID());
+        allPossible.add(fs);
 
         if (playButton != null) addAudioChoice(playButton, false, false, fs);
         if (isFemale && isSlow) toUse = fs;
@@ -287,11 +292,15 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    * @return
    * @see TwoColumnExercisePanel#getRefAudio
    */
-  public AudioAttribute getCurrentAudioAttr() {
+   AudioAttribute getCurrentAudioAttr() {
     return currentAudioAttr;
   }
 
-  public Set<Integer> getAllAudioIDs() {
+   Set<Integer> getAllAudioIDs() {
     return allIDs;
+  }
+
+  public Set<AudioAttribute> getAllPossible() {
+    return allPossible;
   }
 }

@@ -62,9 +62,12 @@ description = 'NetProF pronunciation feedback'
 
 dependencies {
     // our modules
-    compile('mitll.hlt:domino-core:1.2.0-SNAPSHOT') { changing = true;   }
-    compile('mitll.hlt:imagewriter:1.0.0') { changing = true }
+    def dcVers = '1.3.0-SNAPSHOT'
+
+    compile('mitll.hlt:domino-core:' + dcVers) { changing = true;   }
+  //  compile('mitll.hlt:imagewriter:1.0.0') { changing = true }
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
+    compile group: 'com.github.rwl', name: 'jtransforms', version: '2.4.0'
 
     compile group: 'javax.json', name: 'javax.json-api', version: '1.0'
     compile group: 'org.glassfish', name: 'javax.json', version: '1.0.4'
@@ -87,8 +90,10 @@ dependencies {
 //    compile 'org.apache.commons:commons-lang3:latest.integration'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
 
-    def log4jVers = '2+'
-    compile('org.apache.logging.log4j:log4j-api:' + log4jVers) 
+    def log4jVers = '2.8.2'
+
+    compile('org.apache.logging.log4j:log4j-api:' + log4jVers)
+    runtime('org.apache.logging.log4j:log4j-api:' + log4jVers)
     runtime('org.apache.logging.log4j:log4j-core:' + log4jVers)
     runtime('org.apache.logging.log4j:log4j-jcl:' + log4jVers)
     runtime('org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVers) 

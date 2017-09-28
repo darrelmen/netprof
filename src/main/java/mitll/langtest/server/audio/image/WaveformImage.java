@@ -30,7 +30,7 @@
  *
  */
 
-package audio.image;
+package mitll.langtest.server.audio.image;
 
 import java.awt.*;
 

@@ -418,10 +418,18 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return resultid;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addToRequest
+   * @return
+   */
   public AlignmentOutput getAlignmentOutput() {
     return alignmentOutput;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
+   * @param alignmentOutput
+   */
   public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
     this.alignmentOutput = alignmentOutput;
   }

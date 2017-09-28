@@ -30,17 +30,50 @@
  *
  */
 
-package audio.image;
+package mitll.langtest.server.audio.image;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
- * Possible images we can create from audio files or audio + transcripts.
- * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 6/16/11
- * Time: 1:00 PM
  */
-public enum ImageType {
-  PHONE_TRANSCRIPT, SPECTROGRAM, WAVEFORM, WORD_TRANSCRIPT
+public class TranscriptEvent implements Comparable<TranscriptEvent> {
+  private static final NumberFormat format = new DecimalFormat("#.#####");
+
+  public TranscriptEvent(float s, float e, String name) {
+    this(s, e, name, 0);
+  }
+
+  /**
+   * Constructor
+   *
+   * @param s     start time in seconds
+   * @param e     end time in seconds
+   * @param name  event name (i.e. phone, word, etc.)
+   * @param score
+   */
+  public TranscriptEvent(float s, float e, String name, float score) {
+    start = s;
+    end = e;
+    event = name;
+    this.score = score;
+  }
+
+  // Data Members
+  public float start;                  /// Start time in seconds
+  public float end;                    /// End time in seconds
+  public String event;                 /// Text to be displayed per event
+  public float score;                  /// posterior score
+
+  @Override
+  public int compareTo(TranscriptEvent o) {
+    return new Float(start).compareTo(o.start);
+  }
+
+  public String toString() {
+    return "[" + format.format(start) + "-" + format.format(end) + "] " + event + "(" + format.format(score) + ")";
+  }
 }

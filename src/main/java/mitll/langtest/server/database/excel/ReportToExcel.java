@@ -229,6 +229,9 @@ public class ReportToExcel {
     rownum = writeHeaderRow2(sheet, rownum, yellow, sortedLang, getLightGreenStyle(workbook));
     // Map<String, Map<Integer, ReportStats>> langToYearToStats = getLangToYearToStats(stats, true);
 
+    if (langToYearToStats.isEmpty()) {
+      logger.error("huh? no data in " +langToYearToStats);
+    }
     Map<Integer, ReportStats> next = langToYearToStats.values().iterator().next();
     ReportStats reportStats1 = next.get(thisYear);
     Map<String, Integer> weekToCount = reportStats1.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
