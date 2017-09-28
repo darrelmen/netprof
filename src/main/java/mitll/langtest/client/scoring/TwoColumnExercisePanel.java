@@ -207,18 +207,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-
-
-/*  public int getRefAudio() {
-    AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
-    return currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
-  }
-
-  public int getContextRefAudio() {
-    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
-    return contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-  }*/
-
   /**
    * Is the alignment already known and attached?
    *
@@ -231,10 +219,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!alignments.containsKey(refID)) {
       AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
       if (alignmentOutput == null) {
-       // logger.info("addToRequest nope - no alignment for audio " + refID);
+        // logger.info("addToRequest nope - no alignment for audio " + refID);
         return true;
       } else {
-       // logger.info("addToRequest remember audio " + refID + " " + alignmentOutput);
+        // logger.info("addToRequest remember audio " + refID + " " + alignmentOutput);
         alignments.put(refID, alignmentOutput);
         return false;
       }
@@ -320,12 +308,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //    logger.info("getRefAudio " + req.size() + " audio attrs");
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
-  //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");
+      //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");
     }
     req.removeAll(alignments.keySet());
-  //  logger.info("getRefAudio after removing known " + req.size() + " audio attrs");
+    //  logger.info("getRefAudio after removing known " + req.size() + " audio attrs");
 
     return req;
+  }
+
+  @Override
+  public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+    if (phonesChoices == SHOW) {
+      alignments.put(id, alignmentOutputFromAudio);
+//      AlignmentOutput alignmentOutput = alignmentOutputFromAudio == null ? alignments.get(id) : alignmentOutputFromAudio;
+      audioChanged(id, duration);
+    }
   }
 
   /**
@@ -336,16 +333,25 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void audioChanged(int id, long duration) {
     if (phonesChoices == SHOW) {
-      AlignmentOutput alignmentOutput = alignments.get(id);
-      if (alignmentOutput != null) {
-        if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-        List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
-        DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
-        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
-      } else {
-        if (DEBUG)
-          logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
-      }
+      showAlignment(id, duration, alignments.get(id));
+    }
+  }
+
+  /**
+   * TODO : don't do this twice!
+   * @param id
+   * @param duration
+   * @param alignmentOutput
+   */
+  private void showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
+    if (alignmentOutput != null) {
+      if (DEBUG || true) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+      List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
+      DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
+      matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
+    } else {
+      if (DEBUG || true)
+        logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
 
@@ -1295,8 +1301,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private Widget getContextPlay(CommonExercise contextExercise) {
+    AudioChangeListener contextAudioChanged = new AudioChangeListener() {
+      @Override
+      public void audioChanged(int id, long duration) {
+        contextAudioChanged(id, duration);
+      }
+
+      @Override
+      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+        alignments.put(id, alignmentOutputFromAudio);
+        contextAudioChanged(id, duration);
+      }
+    };
     contextPlay
-        = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, this::contextAudioChanged);
+        = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, contextAudioChanged);
     AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
     contextPlay.setEnabled(audioAttrPrefGender != null);
 

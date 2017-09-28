@@ -202,8 +202,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (val) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-//    logger.info("addChoices current audio is " + toUse.getUniqueID());
-      listener.audioChanged(toUse.getUniqueID(), toUse.getDurationInMillis());
+      logger.info("addChoices current audio is " + toUse.getUniqueID());
+      listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
 //      if (exercise.getID() == 2909) {
 //        logger.info("addChoices For exercise " + exercise.getID() + " current audio is " + toUse.getUniqueID());
 //        logger.info("addChoices For exercise " + toUse);
@@ -242,7 +242,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-    logger.info("playAndRemember " + audioID + " " +audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis "+ durationInMillis);
+    logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
     doPause();
     listener.audioChanged(audioID, durationInMillis);
 
@@ -292,11 +292,11 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    * @return
    * @see TwoColumnExercisePanel#getRefAudio
    */
-   AudioAttribute getCurrentAudioAttr() {
+  AudioAttribute getCurrentAudioAttr() {
     return currentAudioAttr;
   }
 
-   Set<Integer> getAllAudioIDs() {
+  Set<Integer> getAllAudioIDs() {
     return allIDs;
   }
 
