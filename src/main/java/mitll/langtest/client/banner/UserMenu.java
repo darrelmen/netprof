@@ -105,7 +105,7 @@ public class UserMenu {
       });
 
     }));
-    choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
+   // choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
     return choices;
   }
 

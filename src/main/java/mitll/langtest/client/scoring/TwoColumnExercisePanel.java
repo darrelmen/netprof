@@ -204,8 +204,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       allPossible.forEach(audioAttribute -> {
         if (addToRequest(audioAttribute)) {
           req.add(audioAttribute.getUniqueID());
-        }
-        else {
+        } else {
           if (DEBUG) {
             logger.info("getRefAudio  context" +
                 "\n\taudio " + audioAttribute.getUniqueID() + " " + audioAttribute.getAudioType() + " not added to request."
@@ -375,6 +374,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  private int currentAudioDisplayed = -1;
+
   /**
    * TODO : don't do this twice!
    *
@@ -384,10 +385,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private void showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
-      if (DEBUG || true) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
-      List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
-      DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
-      matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
+      if (currentAudioDisplayed != id) {
+        currentAudioDisplayed = id;
+        if (DEBUG || true) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+        List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
+        DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
+        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
+      }
     } else {
       if (DEBUG || true)
         logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);

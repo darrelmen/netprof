@@ -104,11 +104,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     toAddTo.add(playButton);
     configureButton2(playButton);
 
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        addChoices(playButton, includeContext);
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> addChoices(playButton, includeContext));
 
     Widget widget = playButton.getWidget(0);
     Button actual = (Button) widget;
@@ -142,14 +138,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     Map<MiniUser, List<AudioAttribute>> femalesMap =
         exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
-/*
-
-    logger.info("addChoices For " + exercise.getID() + " " + exercise.getEnglish() + " "+
-        " male " + isMale + " is reg " + isReg + " male map " + malesMap.size() + " female map " + femalesMap.size());
-*/
+    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
+        "\n\tmale   " + isMale +
+        "\n\tis reg " + isReg +
+        " male map " + malesMap.size() + " female map " + femalesMap.size());
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
+    AudioAttribute genderFallback = null;
 
     {
       AudioAttribute mr = getAtSpeed(malesMap, true);
@@ -158,6 +154,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         allPossible.add(mr);
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
+        else if (isMale) genderFallback = mr;
         else fallback = mr;
       }
     }
@@ -168,6 +165,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         allPossible.add(ms);
         if (playButton != null) addAudioChoice(playButton, true, false, ms);
         if (isMale && isSlow) toUse = ms;
+        else if (isMale) genderFallback = ms;
         if (fallback == null) fallback = ms;
       }
     }
@@ -178,6 +176,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         allPossible.add(fr);
         if (playButton != null) addAudioChoice(playButton, false, true, fr);
         if (isFemale && isReg) toUse = fr;
+        else if (isFemale) genderFallback = fr;
         if (fallback == null) fallback = fr;
       }
     }
@@ -190,19 +189,27 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
         if (playButton != null) addAudioChoice(playButton, false, false, fs);
         if (isFemale && isSlow) toUse = fs;
+        else if (isFemale) genderFallback = fs;
         if (fallback == null) fallback = fs;
       }
     }
 
-    if (toUse == null) toUse = fallback;
-    boolean val = toUse != null;
+    // try to match gender, if possible.
+    if (toUse == null) {
+      if (genderFallback == null) {
+        toUse = fallback;
+      } else {
+        toUse = genderFallback;
+      }
+    }
+    boolean hasAnyAudio = toUse != null;
 
-    setEnabled(val);
-    splitDropdownButton.getTriggerWidget().setEnabled(val);
-    if (val) {
+    setEnabled(hasAnyAudio);
+    splitDropdownButton.getTriggerWidget().setEnabled(hasAnyAudio);
+    if (hasAnyAudio) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-//      logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " +toUse.getAudioType());
+      logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       rememberAudio(toUse.getAudioRef());
     }
