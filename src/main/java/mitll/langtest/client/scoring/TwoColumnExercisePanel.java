@@ -50,7 +50,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
   /**
-   *
+   * @see #getDropdown
    */
   private static final String EMAIL = "Email Item";
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));

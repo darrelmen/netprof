@@ -51,7 +51,7 @@ public class SelectionState {
   private static final String SEARCH = "search";
   public static final String PROJECT = "project";
 
-  public static final String SECTION_SEPARATOR = "###";
+  public static final String SECTION_SEPARATOR = "~";
 
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";

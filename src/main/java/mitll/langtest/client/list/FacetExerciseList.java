@@ -50,6 +50,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.ShowEvent;
@@ -427,17 +428,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @param newUserListID
-   * @see mitll.langtest.client.banner.NewLearnHelper#showList
-   */
-/*  public void showList(int newUserListID) {
-    Map<String, String> candidate = new HashMap<>(typeToSelection);
-    candidate.put(LISTS, "" + newUserListID);
-    // logger.info("showList " + candidate);
-    getTypeToValues(candidate, newUserListID);
-  }*/
-
-  /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    * @see ListInterface#getExercises()
    */
@@ -753,7 +743,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(UserList result) {
-        if (result.getProjid() != controller.getProjectStartupInfo().getProjectid()) {
+        if (result.getProjid() != getCurrentProject()) {
           logger.warning("addVisitor list " + result.getName() + " is NOT in the project #" + result.getProjid());
         } else {
           choices.add(getSelectedAnchor(type, result.getName()));
@@ -1057,11 +1047,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
       String s = typeToSelection.get(type);
-      if (s == null) {
-        pairs.add(new Pair(type, ANY));
-      } else {
-        pairs.add(new Pair(type, s));
-      }
+      pairs.add(new Pair(type, (s == null) ? ANY : s));
+//      if (s == null) {
+//        pairs.add(new Pair(type, ANY));
+//      } else {
+//        pairs.add(new Pair(type, s));
+//      }
     }
     if (typeToSelection.containsKey(LISTS)) {
       pairs.add(new Pair(LISTS, typeToSelection.get(LISTS)));
@@ -1154,10 +1145,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         } else {
           int userListID = getUserListID(newTypeToSelection);
           if (userListID != -1) {
-            getProjectIDForList(newTypeToSelection, userListID);
-          } else {
-            getTypeToValues(newTypeToSelection, userListID);
+            int projid = selectionState.getProject();
+            int currentProject = getCurrentProject();
+            boolean isForSameProject = projid == currentProject;
+            userListID = isForSameProject ? userListID : -1;
+
+            if (!isForSameProject) {
+              logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
+              new ModalInfoDialog("Link for content in different project.",
+                  "Please change to that project if you want to see the item.");
+            }
+
           }
+          getTypeToValues(newTypeToSelection, userListID);
         }
       }
 
@@ -1192,7 +1192,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   @NotNull
   private String getProjectParam() {
-    int projectid = controller.getProjectStartupInfo() == null ? -1 : controller.getProjectStartupInfo().getProjectid();
+    int projectid = controller.getProjectStartupInfo() == null ? -1 : getCurrentProject();
     return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + projectid;
   }
 
@@ -1212,6 +1212,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return userListID;
   }
 
+  /**
+   * Check if the list we get is consistent with the current project - if not, skip it?
+   *
+   * @param newTypeToSelection
+   * @param userListID
+   */
   private void getProjectIDForList(Map<String, String> newTypeToSelection, int userListID) {
     final int fUserListID = userListID;
     controller.getListService().getProjectIDForList(userListID, new AsyncCallback<Integer>() {
@@ -1222,10 +1228,24 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(Integer result) {
-        int fUserListID1 = result == controller.getProjectStartupInfo().getProjectid() ? fUserListID : -1;
+        int currentProject = getCurrentProject();
+        boolean isForSameProject = result == currentProject;
+        int fUserListID1 = isForSameProject ? fUserListID : -1;
+
+        if (!isForSameProject) {
+          logger.warning("getProjectIDForList : list is for project " + result + " but current is " + currentProject);
+          new ModalInfoDialog("Link for content in different project.",
+              "Please change to that project if you want to see the item.");
+        }
+
+
         getTypeToValues(newTypeToSelection, fUserListID1);
       }
     });
+  }
+
+  private int getCurrentProject() {
+    return controller.getProjectStartupInfo().getProjectid();
   }
 
   @NotNull
@@ -1488,7 +1508,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //logger.info("getRefAudio asking next panel...");
       next.getRefAudio(() -> {
         if (iterator.hasNext()) {
-        //  logger.info("\tgetRefAudio panel complete...");
+          //  logger.info("\tgetRefAudio panel complete...");
           Scheduler.get().scheduleDeferred(() -> getRefAudio(iterator));
         } else {
           //logger.info("\tgetRefAudio all panels complete...");

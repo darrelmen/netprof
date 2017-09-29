@@ -24,12 +24,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
-  //  private final Logger logger = Logger.getLogger("UserListSupport");
+ private final Logger logger = Logger.getLogger("UserListSupport");
 
   private static final String ADD_TO_LIST = "Add to List";
   private static final String REMOVE_FROM_LIST = "Remove from List";
@@ -159,7 +160,7 @@ public class UserListSupport {
   }
 
   @NotNull
-  public String getMailToExercise(CommonExercise exercise) {
+  String getMailToExercise(CommonExercise exercise) {
     String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
@@ -175,6 +176,43 @@ public class UserListSupport {
         encode +
         getSuffix();
   }
+/*  @NotNull
+  String getMailToExerciseTrouble(CommonExercise exercise) {
+    String theURL = trimURL(Window.Location.getHref())
+        //+
+        //"#" +
+        //SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
+        //getProjectParam()
+        ;
+
+    String encodedURL = theURL;//URL.encode(theURL);
+    //  String anchor = "<a href='" + encode+ "'>" +encode+"</a>";
+    String english = exercise.getEnglish();
+    String foreignLanguage = exercise.getForeignLanguage();
+    String rawMailTO = "mailto:" +
+        "?" +
+        "Subject=Share netprof " + controller.getLanguage() +
+        " item " + english +
+        "&body=" +
+        //getPrefix()
+        "Hi,\n Here's a link to NetProF item\n\n"
+        + english + "/" + foreignLanguage + " : " +
+        //"\""+
+        // "<"+
+        theURL +
+        // "/>"+
+        //"\""+
+        "\n\nThanks,\n"+
+        getFullName()
+        //getSuffix()
+        ;
+    String encode = URL.encode(rawMailTO);
+    encode = encode.replaceAll("#","%23");
+    logger.info("raw    " + rawMailTO);
+    logger.info("encode " + encode);
+
+    return encode;
+  }*/
 
   public String getMailToList(UserList ul) {  return getMailTo(ul.getID(), ul.getName());  }
 
