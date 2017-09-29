@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -85,7 +86,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     private static final int INITIAL_SCORE_WIDTH = 75;
     private static final String DIFF_COL_HEADER = "+/-";
     */
-  private static final int MIN_RECORDINGS = 5;
+  private static final int MIN_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS;
 
   /**
    *

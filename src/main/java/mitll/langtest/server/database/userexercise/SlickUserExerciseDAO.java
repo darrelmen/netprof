@@ -313,7 +313,7 @@ public class SlickUserExerciseDAO
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
     if (exercise.getNumPhones() < 1) {
-      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
+//      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
       int numToUse = exercisePhoneInfo.getNumPhones();
@@ -389,7 +389,7 @@ public class SlickUserExerciseDAO
       }
       exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup, pairs);
     } else {
-      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);
+//      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);
       // exerciseDAO.updatePhones(slick.id(), exercisePhoneInfo.getNumPhones());
       pairs.add(new SlickExercisePhone(slick.id(), exercisePhoneInfo.getNumPhones()));
     }

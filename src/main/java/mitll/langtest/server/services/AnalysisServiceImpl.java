@@ -49,7 +49,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class AnalysisServiceImpl extends MyRemoteServiceServlet implements AnalysisService {
   private static final Logger logger = LogManager.getLogger(AnalysisServiceImpl.class);
-  private static final int MIN_RECORDINGS = 5;
+  public static final int MIN_RECORDINGS = 1;
 
   /**
    * @param ids

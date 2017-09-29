@@ -40,6 +40,7 @@ import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +62,7 @@ public class StudentAnalysis extends DivWidget {
 
  // private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
-  private static final String OR_MORE_RECORDINGS = "5 or more recordings";
+  private static final String OR_MORE_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS + " or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   /**
