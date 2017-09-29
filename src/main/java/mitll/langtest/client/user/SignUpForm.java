@@ -60,7 +60,10 @@ public class SignUpForm extends UserDialog implements SignUp {
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final int SHORT_USER_ID = 4;
-  private static final String USER_ID_REGEX = "^[a-zA-Z0-9_\\-.]{5,50}$";
+  private static final String USER_ID_REGEX = "^[a-zA-Z0-9_\\-.]{4,50}$";
+  /**
+   * @see #isFormValid(String, boolean)
+   */
   private static final String USER_ID_BAD = "User IDs must contain only alphanumeric characters";
   private static final String LAST_NAME = "Last Name";
   private static final String EMAIL = "Email";
@@ -552,7 +555,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     if (isFormValid(userID, false)) {
       gotSignUp(userID, emailBox.getValue());
     } else {
-      logger.info("getSignUpClickHandler form is not valid!!");
+      logger.info("isFormValid form is not valid!!");
     }
   }
 
@@ -623,6 +626,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       return false;
     } else {
       int minLengthUserId = allowShort ? SHORT_USER_ID : MIN_LENGTH_USER_ID;
+      logger.info("isFormValid : min length is " + minLengthUserId);
       if (userID.length() < minLengthUserId) {
         eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
         markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);

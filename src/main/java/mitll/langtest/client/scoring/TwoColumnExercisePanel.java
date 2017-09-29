@@ -387,13 +387,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG || true) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+        if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
         matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
       }
     } else {
-      if (DEBUG || true)
+      if (DEBUG)
         logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }

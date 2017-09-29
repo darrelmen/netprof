@@ -138,10 +138,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     Map<MiniUser, List<AudioAttribute>> femalesMap =
         exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
+/*
     logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
         "\n\tmale   " + isMale +
         "\n\tis reg " + isReg +
         " male map " + malesMap.size() + " female map " + femalesMap.size());
+        */
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -209,7 +211,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (hasAnyAudio) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-      logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+     // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       rememberAudio(toUse.getAudioRef());
     }
