@@ -340,7 +340,9 @@ public class ReportToExcel {
       if (value == null) {
         logger.error("no value for " + lang);
         value = 0;
-      } else logger.info("Got " + lang + " = " + value);
+      } else {
+        //logger.info("Got " + lang + " = " + value);
+      }
 
       {
         Cell cell1 = row.createCell(col++);

@@ -129,6 +129,7 @@ public class Report implements IReport {
   private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
   private static final int ALL_YEARS = -1;
   private static final String FOOTER = "</body></head></html>";
+  public static final boolean SEND_EACH_REPORT = false;
 
   /**
    * @see #getReportForProject
@@ -274,7 +275,7 @@ public class Report implements IReport {
       try {
         ReportStats stats = new ReportStats(projid, language, site, year);
         List<ReportStats> reportStats = writeReportToFile(file, stats);
-        sendEmails(stats, mailSupport, reportEmails);
+        if (SEND_EACH_REPORT) sendEmails(stats, mailSupport, reportEmails);
         return reportStats;
       } catch (Exception e) {
         logger.error("got " + e, e);
@@ -343,11 +344,13 @@ public class Report implements IReport {
     String subject = getFileName();
     String messageBody = "Hi,<br>Here is the current usage report for NetProF.<br>Thanks, Administrator";
 
+    logger.info("sending excel to " + reportEmails + " using " + summaryReport.getAbsolutePath());
+
     for (int i = 0; i < reportEmails.size(); i++) {
       String dest = reportEmails.get(i);
       String name = receiverNames.get(i);
       if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport, name)) {
-
+        logger.warn("couldn't send email to " + dest);
       }
     }
   }
@@ -364,7 +367,7 @@ public class Report implements IReport {
     try {
       File file2 = getReportPathDLI(pathHelper, ".xlsx");
       new ReportToExcel(logAndNotify).toXLSX(allReports, new FileOutputStream(file2));
-      logger.debug("writeReportToFile wrote to " + file2.getAbsolutePath());
+      logger.info("writeReportToFile wrote to " + file2.getAbsolutePath());
       return file2;
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -592,15 +595,15 @@ public class Report implements IReport {
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
   private String getReportForYear(JSONObject jsonObject,
-                           int year,
-                           List<SlickSlimEvent> allSlim,
-                           List<SlickSlimEvent> allDevicesSlim,
-                           //  Map<Integer, List<AudioAttribute>> exToAudio,
-                           Collection<UserTimeBase> audioAttributes,
-                           Collection<MonitorResult> results,
-                           Collection<MonitorResult> resultsDevices,
-                           String language, Collection<Integer> usersForProject,
-                           ReportStats reportStats) {
+                                  int year,
+                                  List<SlickSlimEvent> allSlim,
+                                  List<SlickSlimEvent> allDevicesSlim,
+                                  //  Map<Integer, List<AudioAttribute>> exToAudio,
+                                  Collection<UserTimeBase> audioAttributes,
+                                  Collection<MonitorResult> results,
+                                  Collection<MonitorResult> resultsDevices,
+                                  String language, Collection<Integer> usersForProject,
+                                  ReportStats reportStats) {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
@@ -655,13 +658,13 @@ public class Report implements IReport {
   }*/
 
   /**
-   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    * @param jsonObject
    * @param year
    * @param results
    * @param builder
    * @param users
    * @param reportStats
+   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    */
   private void addRecordings(JSONObject jsonObject, int year, Collection<MonitorResult> results, StringBuilder builder,
                              Set<Integer> users, ReportStats reportStats) {
@@ -698,12 +701,12 @@ public class Report implements IReport {
   }
 
   /**
-   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    * @param jsonObject
    * @param year
    * @param usersForProject
    * @param builder
    * @return
+   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    */
   private Set<Integer> getUserIDs(JSONObject jsonObject, int year, Collection<Integer> usersForProject, StringBuilder builder) {
     // all users
@@ -1405,7 +1408,7 @@ public class Report implements IReport {
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
 
-    logger.info("Year  " +year+ " Students num = " + students.size());
+    logger.info("Year  " + year + " Students num = " + students.size());
 
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
@@ -1437,7 +1440,7 @@ public class Report implements IReport {
                     }*/
                     ytd++;
 
-                   // if (w==5) logger.info("include " + result);
+                    // if (w==5) logger.info("include " + result);
                     tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
                     seen.add(result.getAnswer());
                   } else {
@@ -1461,7 +1464,7 @@ public class Report implements IReport {
               }
             }
           } else {
-            if (firstWeeks) logger.warn(w+ " invalid score " + result);
+            if (firstWeeks) logger.warn(w + " invalid score " + result);
             invalid++;
           }
         } else {

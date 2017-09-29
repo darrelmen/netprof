@@ -211,7 +211,7 @@ public class MailSupport {
     try {
       message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
       InternetAddress address = new InternetAddress(receiver, receiverName);
-      logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
+      logger.info("makeMessage sending to " + address + " at port " + MAIL_PORT);
       message.addRecipient(Message.RecipientType.TO, address);
       // addCC(ccEmails, msg);
       message.setSubject(subject);
@@ -243,6 +243,7 @@ public class MailSupport {
       message.setContent(multipart);
 
       Transport.send(message);
+      logger.info("emailAttachment sent to " + receiver + " from " + EMAIL + " sub " + subject);
       return true;
     } catch (Exception e) {
       logger.error("Got " + e, e);
