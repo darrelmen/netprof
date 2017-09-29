@@ -202,12 +202,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (val) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-      logger.info("addChoices current audio is " + toUse.getUniqueID());
+//      logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " +toUse.getAudioType());
       listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
-//      if (exercise.getID() == 2909) {
-//        logger.info("addChoices For exercise " + exercise.getID() + " current audio is " + toUse.getUniqueID());
-//        logger.info("addChoices For exercise " + toUse);
-//      }
       rememberAudio(toUse.getAudioRef());
     }
   }

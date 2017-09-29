@@ -184,16 +184,47 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             "\n\tisMale " + contextAudioAttr.getUser().isMale()
         );
       }
-      if (addToRequest(contextAudioAttr)) req.add(contextRefID);
+      if (addToRequest(contextAudioAttr)) {
+        req.add(contextRefID);
 
-      contextPlay.getAllPossible().forEach(audioAttribute -> {
-        if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
+        if (DEBUG) {
+          logger.info("getRefAudio added context" +
+              "\n\taudio #" + contextRefID
+          );
+        }
+      }
+
+      Set<AudioAttribute> allPossible = contextPlay.getAllPossible();
+
+      if (DEBUG) {
+        logger.info("getRefAudio examining context" +
+            "\n\taudio " + allPossible.size()
+        );
+      }
+      allPossible.forEach(audioAttribute -> {
+        if (addToRequest(audioAttribute)) {
+          req.add(audioAttribute.getUniqueID());
+        }
+        else {
+          if (DEBUG) {
+            logger.info("getRefAudio  context" +
+                "\n\taudio " + audioAttribute.getUniqueID() + " " + audioAttribute.getAudioType() + " not added to request."
+            );
+          }
+        }
       });
     } else {
       //logger.warning("no context audio for " + exercise.getID());
     }
 
     if (req.isEmpty()) {
+
+      if (DEBUG) {
+        logger.info("getRefAudio already has alignments for audio   " + refID + " " + alignments.get(refID));
+        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.get(contextRefID));
+
+      }
+
       registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
       listener.refAudioComplete();
       cacheOthers(listener);
@@ -212,22 +243,27 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    *
    * @param currentAudioAttr
    * @return
-   * @paramx refID
    */
   private boolean addToRequest(AudioAttribute currentAudioAttr) {
     int refID = currentAudioAttr.getUniqueID();
-    if (!alignments.containsKey(refID)) {
+    if (alignments.containsKey(refID)) {
+      if (DEBUG)
+        logger.info("addToRequest found " + refID + " " + currentAudioAttr.getAudioType() + " : " + alignments.get(refID));
+
+
+      return false;
+    } else {
       AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
       if (alignmentOutput == null) {
-        // logger.info("addToRequest nope - no alignment for audio " + refID);
+        if (DEBUG)
+          logger.info("addToRequest nope - no alignment for audio " + refID + " " + currentAudioAttr.getAudioType());
         return true;
       } else {
-        // logger.info("addToRequest remember audio " + refID + " " + alignmentOutput);
+        if (DEBUG)
+          logger.info("addToRequest remember audio " + refID + " " + alignmentOutput + " " + currentAudioAttr.getAudioType());
         alignments.put(refID, alignmentOutput);
         return false;
       }
-    } else {
-      return false;
     }
   }
 
@@ -319,7 +355,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
     if (phonesChoices == SHOW) {
-      alignments.put(id, alignmentOutputFromAudio);
+      if (alignmentOutputFromAudio != null) {
+        alignments.put(id, alignmentOutputFromAudio);
+      }
 //      AlignmentOutput alignmentOutput = alignmentOutputFromAudio == null ? alignments.get(id) : alignmentOutputFromAudio;
       audioChanged(id, duration);
     }
@@ -339,6 +377,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * TODO : don't do this twice!
+   *
    * @param id
    * @param duration
    * @param alignmentOutput
@@ -1309,7 +1348,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       @Override
       public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-        alignments.put(id, alignmentOutputFromAudio);
+        if (alignmentOutputFromAudio != null) {
+          alignments.put(id, alignmentOutputFromAudio);
+        }
         contextAudioChanged(id, duration);
       }
     };
@@ -1330,10 +1371,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               " alignment " + alignmentOutput);
         }
         if (contextClickables == null) {
-          logger.warning("huh? context not set for " + id);
+          logger.warning("contextAudioChanged : huh? context not set for " + id);
         } else {
           matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow);
         }
+      } else {
+        logger.warning("contextAudioChanged : no alignment output for " + id);
       }
     }
   }

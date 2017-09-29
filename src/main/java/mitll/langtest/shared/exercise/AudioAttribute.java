@@ -204,23 +204,28 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return exid + "/1";
   }
 
-  public AudioAttribute markSlow() {
-    addAttribute(SPEED, SLOW);
-    return this;
-  }
-
   public AudioAttribute markRegular() {
     addAttribute(SPEED, REGULAR);
     return this;
   }
 
-  public boolean isSlow() {
-    if (audioType == AudioType.SLOW) {
-      return true;
-    }
+  public AudioAttribute markSlow() {
+    addAttribute(SPEED, SLOW);
+    return this;
+  }
+
+  public boolean isRegularSpeed() {
+    return audioType == AudioType.REGULAR || matches(SPEED, REGULAR) || audioType.equals(AudioType.CONTEXT_REGULAR);
+/*
+    if (audioType == AudioType.REGULAR) return true;
     else {
-      return matches(SPEED, SLOW) || audioType.equals(AudioType.CONTEXT_SLOW);
-    }
+      String speed = getSpeed();
+      return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
+    }*/
+  }
+
+  public boolean isSlow() {
+    return audioType == AudioType.SLOW || matches(SPEED, SLOW) || audioType.equals(AudioType.CONTEXT_SLOW);
   }
 
   public AudioType getAudioType() {
@@ -235,16 +240,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return !isMale();
   }
 
-  public boolean isRegularSpeed() {
-    if (audioType == AudioType.REGULAR) return true;
-    else {
-      String speed = getSpeed();
-      return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
-    }
-  }
-
   public String getSpeed() {
-    return getAttributes().get(SPEED);
+    String s = getAttributes().get(SPEED);
+    return s == null ? isRegularSpeed() ? REGULAR : SLOW : s;
   }
 
   private boolean hasOnlySpeed() {
@@ -283,6 +281,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * Why use this as a key??
+   *
    * @return
    */
   public String getKey() {
@@ -419,16 +418,16 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addToRequest
    * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addToRequest
    */
   public AlignmentOutput getAlignmentOutput() {
     return alignmentOutput;
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
    * @param alignmentOutput
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
    */
   public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
     this.alignmentOutput = alignmentOutput;

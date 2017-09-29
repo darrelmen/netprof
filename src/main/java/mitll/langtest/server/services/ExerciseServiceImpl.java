@@ -1514,7 +1514,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
     if (audioIDs.isEmpty()) logger.warn("huh? no audio ids?");
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    logger.info("getAlignmentsFromDB found " + audioIDMap.size() + " alignments...");
+    logger.info("getAlignmentsFromDB found " + audioIDMap.size() + " ref result alignments...");
     return parseJsonToGetAlignments(audioIDs, audioIDMap);
   }
 
