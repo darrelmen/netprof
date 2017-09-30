@@ -366,9 +366,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         logger.error("got " + e, e);
       } finally {
         if (tempDir != null) {
-          tempDir.toFile().deleteOnExit(); // clean up temp file
+        //  tempDir.toFile().deleteOnExit(); // clean up temp file
+          tempDir.toFile().delete(); // clean up temp file
         }
-        cleanUpRawFile(rawAudioPath);
+
+        //cleanUpRawFile(rawAudioPath);
       }
     }
     if (scores == null) {

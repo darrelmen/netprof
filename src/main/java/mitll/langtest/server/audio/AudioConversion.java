@@ -332,6 +332,11 @@ public class AudioConversion extends AudioBase {
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
       File outputFile = new File(rawFile);
+      boolean b1 = outputFile.setReadable(true);
+      if (!b1) {
+        logger.error("wav2raw : can't read the output file " + outputFile.getAbsolutePath());
+      }
+
       String absolutePath = outputFile.getAbsolutePath();
       logger.info("wav2raw Writing to " + absolutePath);
 
