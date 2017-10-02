@@ -105,6 +105,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1621,12 +1622,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void doReport() {
-    if (isTodayAGoodDay()) {
-      sendReports(getReport(), false, -1);
-    } else {
-      logger.debug("not sending email report since this is not monday...");
+    if (serverProps.isFirstHydra()) {
+      if (isTodayAGoodDay()) {
+        sendReports(getReport(), false, -1);
+      } else {
+        logger.debug("not sending email report since this is not monday...");
+      }
+      tryTomorrow();
     }
-    tryTomorrow();
+    else {
+      logger.debug("doReport Host " + serverProps.getHostName() + " not generating a report.");
+    }
   }
 
   private void tryTomorrow() {
@@ -1644,6 +1650,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }
 
+  /**
+   * @see LangTestDatabaseImpl#sendReport
+   * @param userID
+   */
   @Override
   public void sendReport(int userID) {
     sendReports(getReport(), true, userID);
@@ -1657,18 +1667,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private void sendReports(IReport report, boolean forceSend, int userID) {
     MailSupport mailSupport = getMailSupport();
-    List<ReportStats> stats = new ArrayList<>();
-
-    getProjects().forEach(project -> {
-      stats.addAll(report
-          .doReport(project.getID(),
-              project.getLanguage(),
-              project.getProject().name(),
-              serverProps,
-              mailSupport,
-              pathHelper,
-              forceSend, true));
-    });
+    List<ReportStats> stats = getReportStats(report, forceSend, mailSupport);
 
     {
       List<String> reportEmails = serverProps.getReportEmails();
@@ -1685,6 +1684,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       report.sendExcelViaEmail(mailSupport, reportEmails, stats, pathHelper, receiverNames);
     }
+  }
+
+  @NotNull
+  private List<ReportStats> getReportStats(IReport report, boolean forceSend, MailSupport mailSupport) {
+    List<ReportStats> stats = new ArrayList<>();
+
+    getProjects().forEach(project -> {
+      stats.addAll(report
+          .doReport(project.getID(),
+              project.getLanguage(),
+              project.getProject().name(),
+              serverProps,
+              mailSupport,
+              pathHelper,
+              forceSend, true));
+    });
+    return stats;
   }
 
   private MailSupport getMailSupport() {

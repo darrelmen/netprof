@@ -104,7 +104,6 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
-//  private static final String SEND_REPORT = "sendReport";
   private static final String VERSION_NOW = "1.0";
   private static final String EXPORT = "export";
   private static final String REMOVE_REF_RESULT = "removeRefResult";

@@ -76,6 +76,9 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
+  private static final String LINK_FOR_CONTENT = "Link for content in different project.";
+  private static final String PLEASE_CHANGE = "Please change to that project if you want to see the item.";
+
   public static final String LISTS = "Lists";
 
   /**
@@ -1147,13 +1150,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           if (userListID != -1) {
             int projid = selectionState.getProject();
             int currentProject = getCurrentProject();
-            boolean isForSameProject = projid == currentProject;
+            boolean isForSameProject = projid == -1 || projid == currentProject;
             userListID = isForSameProject ? userListID : -1;
 
             if (!isForSameProject) {
               logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
-              new ModalInfoDialog("Link for content in different project.",
-                  "Please change to that project if you want to see the item.");
+              new ModalInfoDialog(LINK_FOR_CONTENT,
+                  PLEASE_CHANGE);
             }
 
           }
@@ -1215,10 +1218,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    * Check if the list we get is consistent with the current project - if not, skip it?
    *
-   * @param newTypeToSelection
-   * @param userListID
+   * @paramx newTypeToSelection
+   * @paramx userListID
    */
-  private void getProjectIDForList(Map<String, String> newTypeToSelection, int userListID) {
+/*  private void getProjectIDForList(Map<String, String> newTypeToSelection, int userListID) {
     final int fUserListID = userListID;
     controller.getListService().getProjectIDForList(userListID, new AsyncCallback<Integer>() {
       @Override
@@ -1234,7 +1237,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
         if (!isForSameProject) {
           logger.warning("getProjectIDForList : list is for project " + result + " but current is " + currentProject);
-          new ModalInfoDialog("Link for content in different project.",
+          new ModalInfoDialog(LINK_FOR_CONTENT,
               "Please change to that project if you want to see the item.");
         }
 
@@ -1242,7 +1245,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         getTypeToValues(newTypeToSelection, fUserListID1);
       }
     });
-  }
+  }*/
 
   private int getCurrentProject() {
     return controller.getProjectStartupInfo().getProjectid();

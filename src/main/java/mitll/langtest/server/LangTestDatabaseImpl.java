@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -164,18 +165,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getContextPractice();
   }*/
 
+  /**
+   * @see UserMenu#getProjectSpecificChoices
+   */
   public void sendReport() {
     db.sendReport(securityManager.getUserIDFromSession(getThreadLocalRequest()));
   }
-
-  /**
-   * Not really hooked up yet...
-   */
- /* @Override
-  public void reloadExercises() {
-    logger.info("reloadExercises --- !");
-    db.reloadExercises(getProjectID());
-  }*/
 
   /**
    * The very first thing that gets called from the client.
@@ -185,7 +180,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * Shows a better message if configuration is bad.
    *
    * @return
-   * @paramx userID
    * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   @Override

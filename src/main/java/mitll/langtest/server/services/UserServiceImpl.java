@@ -359,9 +359,4 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       logger.error("got  " + e, e);
     }
   }
-
-/*  @Override
-  public User getUser(int id) {
-    return db.getUserDAO().getByID(id);
-  }*/
 }

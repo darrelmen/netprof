@@ -68,7 +68,7 @@ public class SelectionState {
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
   private static final boolean DEBUG = false;
-  private int project;
+  private int project = -1;
 
   /**
    * @param token

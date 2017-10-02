@@ -65,6 +65,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
+  private static final int DEFAULT_PROJECT_ID = 1;
+
   static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
   private HandlerRegistration handlerRegistration;
   protected long userID;
@@ -377,9 +379,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   protected void restoreListBoxState(SelectionState selectionState) {
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
-    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    if (sectionWidgetContainer != null) {
-      sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    if (projectStartupInfo != null) {
+      List<String> typeOrder = projectStartupInfo.getTypeOrder();
+      if (sectionWidgetContainer != null) {
+        sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+      }
     }
   }
 
@@ -409,7 +414,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     // logger.info("onValueChange project " + project + " vs " + currentProject);
 
     if (project != currentProject) {
-      if (project != 0) {
+      if (project > DEFAULT_PROJECT_ID) {
         //   logger.info("onValueChange project from state " + project + " != " + currentProject);
         projectChangedTo(project);
       }

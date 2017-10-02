@@ -48,7 +48,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static mitll.langtest.server.ServerProperties.MODELS_DIR;
 import static mitll.langtest.server.database.exercise.Project.*;
@@ -115,7 +117,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     int projid = projectInfo.getID();
     Project currentProject = database.getProject(projid);
 
-    SlickProject project = currentProject.getProject();
     Timestamp created = new Timestamp(projectInfo.getCreated());
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -127,6 +128,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
           " to be consistent with the language " + projectInfo.getLanguage());
       countryCode = ccFromLang;
     }
+
+    SlickProject project = currentProject.getProject();
     SlickProject changed = new SlickProject(projid,
         userid,
         created,
@@ -149,10 +152,32 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
     }
 
-    addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
-    addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
-    addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
-    addOrUpdateProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS() ? "true" : "false");
+    Map<String, String> props = getProps(projid);
+
+    String newHost = projectInfo.getHost();
+    addOrUpdateProperty(projid, WEBSERVICE_HOST, newHost);
+
+    String currentHost = props.get(WEBSERVICE_HOST);
+    didChange |= currentHost == null || !currentHost.equalsIgnoreCase(newHost);
+
+    String newPort = "" + projectInfo.getPort();
+    addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, newPort);
+
+    String currentHostPort = props.get(WEBSERVICE_HOST_PORT);
+    didChange |= currentHostPort == null || !currentHostPort.equalsIgnoreCase(newPort);
+
+    String newModels = projectInfo.getModelsDir();
+    addOrUpdateProperty(projid, MODELS_DIR, newModels);
+    String currentModels = props.get(MODELS_DIR);
+    didChange |= currentModels == null || !currentModels.equalsIgnoreCase(newModels);
+
+    String showOnIOS = projectInfo.isShowOniOS() ? "true" : "false";
+    addOrUpdateProperty(projid, SHOW_ON_IOS, showOnIOS);
+    String currentShowOnIOS = props.get(SHOW_ON_IOS);
+    didChange |= currentShowOnIOS == null || !currentShowOnIOS.equalsIgnoreCase(showOnIOS);
+
+    logger.info("for " + projid + " did change " + didChange);
+
     return didChange;
   }
 
@@ -169,9 +194,15 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         logger.error("addOrUpdateProperty got back " + slickProjectProperties.size() + " properties for " + key);
       SlickProjectProperty next = slickProjectProperties.iterator().next();
       logger.info("addOrUpdateProperty " + next);
-      SlickProjectProperty copy = propertyDAO.getCopy(next, key, port);
-      propertyDAO.update(copy);
+      propertyDAO.update(propertyDAO.getCopy(next, key, port));
     }
+  }
+
+  Map<String,String> getProps(int projid) {
+    Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.getAllForProject(projid);
+    Map<String,String> keyToValue = new HashMap<>();
+    slickProjectProperties.forEach(slickProjectProperty -> keyToValue.put(slickProjectProperty.key(),slickProjectProperty.value()));
+    return keyToValue;
   }
 
   /**

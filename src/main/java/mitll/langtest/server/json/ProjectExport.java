@@ -13,6 +13,9 @@ import java.util.Collection;
 public class ProjectExport {
   //private static final Logger logger = LogManager.getLogger(ProjectExport.class);
 
+  private static final String SHOW_ON_IOS = "showOnIOS";
+  public static final String LOCALHOST = "127.0.0.1";
+
   /**
    * @param productionProjects
    * @return
@@ -22,7 +25,6 @@ public class ProjectExport {
     JsonObject jsonObject = new JsonObject();
     JsonArray value = new JsonArray();
     jsonObject.add("sites", value);
-
     //logger.info("toJSON converting " + productionProjects.size() + " projects");
 
     for (Project project : productionProjects) {
@@ -38,10 +40,10 @@ public class ProjectExport {
       proj.addProperty("status", project.getProject().status());
       proj.addProperty("countrycode", project.getProject().countrycode());
       proj.addProperty("displayorder", project.getProject().displayorder());
-      proj.addProperty("showOnIOS", project.isOnIOS());
+      proj.addProperty(SHOW_ON_IOS, project.isOnIOS());
       proj.addProperty("rtl", project.isRTL());
       String host = project.getWebserviceHost();
-      proj.addProperty("host", host.equals("127.0.0.1") ? "" : host);
+      proj.addProperty("host", host.equals(LOCALHOST) ? "" : host);
     }
     return jsonObject.toString();
   }

@@ -402,11 +402,24 @@ public class ServerProperties {
   }
 
   public boolean isLaptop() {
+    return getHostName().contains("MITLL");
+  }
+
+  /**
+   * Choose a server to do work, like generate the weekly report.
+   * @return
+   */
+  public boolean isFirstHydra() {
+    return getHostName().startsWith("hydra.");
+  }
+
+  public String getHostName() {
     try {
       InetAddress ip = InetAddress.getLocalHost();
-      return ip.getHostName().contains("MITLL");
+      return ip.getHostName();
     } catch (UnknownHostException e) {
-      return false;
+      logger.error("got " + e, e);
+      return "Unknown";
     }
   }
 
@@ -579,8 +592,9 @@ public class ServerProperties {
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
-   *@deprecated
+   *
    * @return true if only use old school hydec decoder
+   * @deprecated
    */
   public boolean getOldSchoolService() {
     return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));// || props.getProperty("webserviceHostPort") == null;
@@ -832,9 +846,9 @@ public class ServerProperties {
 
   /**
    * @return
+   * @deprecatedx
    * @see
    * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
-   * @deprecatedx
    */
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);

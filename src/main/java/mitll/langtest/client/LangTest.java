@@ -802,7 +802,7 @@ public class LangTest implements
    */
   @Override
   public void reallySetTheProject(int projectid) {
-//    logger.info("setProjectForUser set project for " + projectid);
+    logger.info("setProjectForUser set project for " + projectid);
     initialUI.clearContent();
 
     userService.setProject(projectid, new AsyncCallback<User>() {

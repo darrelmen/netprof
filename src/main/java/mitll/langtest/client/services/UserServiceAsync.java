@@ -91,6 +91,5 @@ public interface UserServiceAsync {
    * @see UserManager#getPermissionsAndSetUser
    */
   void getUserFromSession(AsyncCallback<User> async);
-
   // void restoreUserSession(AsyncCallback<LoginResult> async);
 }

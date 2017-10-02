@@ -332,10 +332,6 @@ public class AudioConversion extends AudioBase {
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
       File outputFile = new File(rawFile);
-      boolean b1 = outputFile.setReadable(true);
-      if (!b1) {
-        logger.error("wav2raw : can't read the output file " + outputFile.getAbsolutePath());
-      }
 
       String absolutePath = outputFile.getAbsolutePath();
       logger.info("wav2raw Writing to " + absolutePath);
@@ -357,7 +353,13 @@ public class AudioConversion extends AudioBase {
       sourceStream.close();
       fout.close();
 
-      logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists());
+      boolean b1 = outputFile.setReadable(true);
+      if (!b1) {
+        logger.error("wav2raw : can't read the output file " + absolutePath);
+      }
+
+      logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() +
+          " len " + (outputFile.length()/1024) + "K");
       return outputFile.exists();
     } catch (Exception e) {
       logger.error("Got " + e, e);
