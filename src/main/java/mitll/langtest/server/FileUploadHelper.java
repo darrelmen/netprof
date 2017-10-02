@@ -50,10 +50,9 @@ public class FileUploadHelper {
 
     try {
       List<FileItem> items = upload.parseRequest(request);
-      logger.info("getSite : from http request, got " + items.size() + " items.");
+      logger.info("gotFile : from http request, got " + items.size() + " items.");
 
       DiskFileItem rememberedFileItem = null;
-
 
       Site site = new Site();
       for (FileItem item : items) {
@@ -65,7 +64,7 @@ public class FileUploadHelper {
       }
 
       if (rememberedFileItem != null) {
-        logger.info("got " + rememberedFileItem);
+        logger.info("gotFile " + rememberedFileItem);
 
         readExercises(site, rememberedFileItem);
         site.setValid(true);
@@ -127,7 +126,7 @@ public class FileUploadHelper {
   }
 
   private void readExercises(Site site, FileItem item) throws IOException {
-    logger.info("got upload " + item);
+    logger.info("readExercises upload " + item);
     readExercisesPopulateSite(site, item.getName(), item.getInputStream());
   }
 
@@ -168,17 +167,6 @@ public class FileUploadHelper {
     rememberExercises(site, id, info.getExercises());
   }
 
-  private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
-    logger.info("rememberExercises Read " + exercises.size());
-    if (exercises.isEmpty()) {
-      logger.warn("rememberExercises Read zero? " + exercises.size());
-    } else {
-      idToExercises.put(id, exercises);
-      site.setNum(exercises.size());
-
-      logger.info("rememberExercises Site " + id + " : " + idToExercises.get(id).size());
-    }
-  }
 
   @NotNull
   private List<String> getTypes(Project project) {
@@ -207,6 +195,19 @@ public class FileUploadHelper {
     }
   }
 
+
+  private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
+    logger.info("rememberExercises Read " + exercises.size());
+    if (exercises.isEmpty()) {
+      logger.warn("rememberExercises Read zero? " + exercises.size());
+    } else {
+      idToExercises.put(id, exercises);
+      site.setNum(exercises.size());
+
+      logger.info("rememberExercises Site " + id + " : " + idToExercises.get(id).size());
+    }
+  }
+
   /**
    * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    * @param projid
@@ -215,8 +216,4 @@ public class FileUploadHelper {
   public Collection<CommonExercise> getExercises(int projid) {
     return idToExercises.get(projid);
   }
-
-//  public void forgetExercises(int projid) {
-//    idToExercises.remove(projid);
-//  }
 }
