@@ -209,7 +209,8 @@ public class DominoExerciseDAO {
         } else if (name.equals(CHAPTER)) {
           ex.addUnitToValue(chapterName, displayValue);
         } else {
-          if (!displayValue.isEmpty()) {
+          if (!displayValue.trim().isEmpty()) {
+            logger.info("getExerciseFromVocabularyItem : for " +ex.getID() + " adding " + name + " = " + displayValue);
             ex.addAttribute(new ExerciseAttribute(name, displayValue));
           }
         }
