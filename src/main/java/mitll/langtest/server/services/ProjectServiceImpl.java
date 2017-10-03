@@ -221,7 +221,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       for (Project match : matches) {
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(match.getID());
-        logger.info("copyAudio for project " + match.getID() + "/" + match.getProject().name() + " got " + transcriptToAudio.size() + " candidates");
+        logger.info("copyAudio for project " + match.getID() + "/" + match.getProject().name() +
+            " got " + transcriptToAudio.size() + " candidates");
         getSlickAudios(projectid, newEx, exToInt, transcriptToAudio,
             transcriptToAudioMatch, transcriptToContextAudioMatch);
       }
@@ -355,7 +356,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   private Map<String, List<SlickAudio>> getTranscriptToAudio(int maxID) {
     Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
 
-    Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked = maxID == -1 ? Collections.EMPTY_LIST : db.getAudioDAO().getAll(maxID);
+    Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked
+        = maxID == -1 ? Collections.EMPTY_LIST : db.getAudioDAO().getAll(maxID);
 
     logger.info("getTranscriptToAudio found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + maxID);
     for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
@@ -422,7 +424,17 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     logger.info("getSlickAudio  : vocab " + vocab + " contextCounts " + contextCounts);
   }
 
-  private MatchInfo addAudioForVocab(int projectid, Map<String, List<SlickAudio>> transcriptToAudio,
+  /**
+   * @see #getSlickAudios(int, List, Map, Map, Map, Map)
+   * @param projectid
+   * @param transcriptToAudio
+   * @param transcriptToMatches
+   * @param ex
+   * @param exid
+   * @return
+   */
+  private MatchInfo addAudioForVocab(int projectid,
+                                     Map<String, List<SlickAudio>> transcriptToAudio,
                                      Map<String, AudioMatches> transcriptToMatches,
                                      CommonExercise ex,
                                      Integer exid) {

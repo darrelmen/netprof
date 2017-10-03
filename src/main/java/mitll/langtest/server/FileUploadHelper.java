@@ -203,7 +203,7 @@ public class FileUploadHelper {
    */
   private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
     logger.info("rememberExercises Read " + exercises.size());
-    exercises.forEach(exercise->logger.info("ex  "+exercise.getID() + " " + exercise.getDirectlyRelated()));
+//    exercises.forEach(exercise->logger.info("ex  "+exercise.getID() + " " + exercise.getDirectlyRelated()));
 
     if (exercises.isEmpty()) {
       logger.warn("rememberExercises Read zero? " + exercises.size());
