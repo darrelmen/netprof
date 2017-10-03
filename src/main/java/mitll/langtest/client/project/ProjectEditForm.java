@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -28,6 +29,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String HIERARCHY = "Hierarchy";
+  public static final String COURSE = "Course";
+  public static final String COURSE_OPTIONAL = "Course (optional)";
+  public static final String HYDRA_HOST_PORT = "Hydra Host:Port";
+  public static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
@@ -171,6 +177,24 @@ public class ProjectEditForm extends UserDialog {
     return status;
   }
 
+  boolean isValid() {
+    if (nameField.getSafeText().isEmpty()) {
+      markErrorNoGrabRight(nameField, "Please enter a project name.");
+      return false;
+    }
+    else  if (language.getValue().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE)) {
+      //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
+      Window.alert(PLEASE_SELECT_A_LANGUAGE);
+      return false;
+    }
+    else if (unit.getSafeText().isEmpty()) {
+      markErrorNoGrabRight(unit, "Please enter the first hierarchy.");
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
   /**
    * @see ProjectChoices#showNewProjectDialog
    */
@@ -210,19 +234,18 @@ public class ProjectEditForm extends UserDialog {
     {
       nameField = getName(getHDivLabel(fieldset, NAME), info.getName(), PROJECT_NAME);
       checkNameOnBlur(nameField);
-
       Scheduler.get().scheduleDeferred(() -> nameField.getWidget().setFocus(true));
     }
 
     addLanguage(info, fieldset, isNew);
 
     {
-      course = getName(getHDivLabel(fieldset, "Course"), info.getCourse(), "Course (optional)");
+      course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
       course.setText(info.getCourse());
     }
 
     {
-      DivWidget typesRow = getHDivLabel(fieldset, "Hierarchy");
+      DivWidget typesRow = getHDivLabel(fieldset, HIERARCHY);
       unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 150, 40);
       unit.setText(info.getFirstType());
 
@@ -233,20 +256,15 @@ public class ProjectEditForm extends UserDialog {
     addLifecycle(info, fieldset);
 
     {
-      DivWidget hDivLabel = getHDivLabel(fieldset, "Hydra Host:Port");
+      DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT);
 
-      hydraHost = getName(hDivLabel, info.getHost(), "Hydra Host (optional)", 100, 30);
+      hydraHost = getName(hDivLabel, info.getHost(), HYDRA_HOST_OPTIONAL, 100, 30);
       hydraHost.setText(info.getHost());
 
       hydraPort = getHydraPort(hDivLabel, info.getPort());
     }
 
     model = getModel(getHDivLabel(fieldset, LANGUAGE_MODEL), info.getModelsDir());
-//
-//    {
-//      showOniOSBox = getShowOniOSBox(getHDivLabel(fieldset, "Show On iOS"));//, info.getCourse(), "Course (optional)");
-//      showOniOSBox.setValue(info.isShowOniOS());
-//    }
 
     if (!isNew) {
       fieldset.add(getCheckAudio(info));
@@ -263,20 +281,13 @@ public class ProjectEditForm extends UserDialog {
     return fieldset;
   }
 
-//  private CheckBox getShowOniOSBox(DivWidget course) {
-//    CheckBox w = new CheckBox();
-//    course.add(w);
-//    return w;
-//  }
-
-
   private void addLifecycle(ProjectInfo info, Fieldset fieldset) {
     DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
 
     lifecycle.add(statusBox = getBox());
 
     {
-      showOniOSBox= new CheckBox("Show On iOS");
+      showOniOSBox = new CheckBox("Show On iOS");
 
       logger.info("show on iOS " + info.isShowOniOS());
       showOniOSBox.setValue(info.isShowOniOS());
@@ -356,7 +367,7 @@ public class ProjectEditForm extends UserDialog {
     userField.box.addBlurHandler(event -> {
       String safeText = userField.getSafeText();
       if (!safeText.equalsIgnoreCase(info.getName())) {
-        logger.info("checking name " + safeText);
+     //   logger.info("checking name " + safeText);
         projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -434,6 +445,11 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
+  /**
+   * @see #getFields(ProjectInfo, boolean)
+   * @param info
+   * @return
+   */
   private Button getRecalcRefAudio(final ProjectInfo info) {
     final Button w = new Button("Align ref audio", IconType.STETHOSCOPE);
 
@@ -464,39 +480,16 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
-  private ListBox getBox(/*final Button editButton*/) {
+  private ListBox getBox() {
     ListBox affBox = new ListBox();
     affBox.getElement().setId("Status_Box");
-    //  affBox.setWidth(SIGN_UP_WIDTH );
     affBox.addStyleName("leftTenMargin");
     for (ProjectStatus status : ProjectStatus.values()) {
       affBox.addItem(status.name());
     }
 
-/*
-
-    affBox.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        editButton.setEnabled(changed());
-      }
-    });
-    affBox.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        editButton.setEnabled(changed());
-      }
-    });
-*/
-
     return affBox;
   }
-
-/*
-  private boolean changed() {
-    return (info.getStatus() != ProjectStatus.valueOf(statusBox.getValue()));
-  }
-*/
 
   private void setBox(ProjectStatus statusValue) {
     int i = 0;

@@ -131,7 +131,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   private boolean isNormalRecord() {
     return doNormalRecording;
   }
-
   private boolean isExampleRecord() {
     return !doNormalRecording;
   }
@@ -145,13 +144,12 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   @Override
   protected String getExerciseContent(T e) {
-    Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
-    int size = directlyRelated != null?directlyRelated.size():0;
-
+ //   Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
+//    int size = directlyRelated != null?directlyRelated.size():0;
     if (logger == null) {
       logger = Logger.getLogger("WaveformExercisePanel");
     }
-    logger.info("getExerciseContent " + e.getID() + " context " + size + " " + isNormalRecord());
+ //   logger.info("getExerciseContent " + e.getID() + " context " + size + " " + isNormalRecord());
     String context = isNormalRecord() ? e.getForeignLanguage() :
         hasContext(exercise) ? exercise.getDirectlyRelated().iterator().next().getForeignLanguage() : "No in-context audio for this exercise.";
     return ExerciseFormatter.getArabic(context);
@@ -244,14 +242,14 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
     //completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
-    logger.info("postAnswers " + completedExercise.getID());
+  //  logger.info("postAnswers " + completedExercise.getID());
     showRecordedState(completedExercise);
     exerciseList.loadNextExercise(completedExercise);
   }
 
   protected void showRecordedState(HasID completedExercise) {
     int id = completedExercise.getID();
-    logger.info("showRecordedState setting state on " + id);
+   // logger.info("showRecordedState setting state on " + id);
 
     exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);

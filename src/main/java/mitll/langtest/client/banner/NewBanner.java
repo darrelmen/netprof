@@ -131,8 +131,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    getChoice(recnav, VIEWS.ITEMS);
-    getChoice(recnav, VIEWS.CONTEXT);
+    viewToLink.put(VIEWS.ITEMS, getChoice(recnav, VIEWS.ITEMS));
+    viewToLink.put(VIEWS.CONTEXT, getChoice(recnav, VIEWS.CONTEXT));
     return recnav;
   }
 
@@ -372,7 +372,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     cog.setVisible(admin);
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
- //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
+    //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
     hasProjectChoices.forEach(linkAndTitle -> linkAndTitle.getMyLink().setVisible(hasProject));
   }
 
@@ -427,15 +427,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
     VIEWS currentView = navigation.getCurrentView();
-    //  logger.info("Current view is " + currentView);
-    NavLink learn = viewToLink.get(currentView);
+    NavLink linkToShow = viewToLink.get(currentView);
 
-    //logger.info("Current view link is " + learn);
-    if (learn == null) {
+    if (linkToShow == null) {
+      logger.warning("checkProjectSelected Current view is " + currentView);
+      logger.warning("checkProjectSelected Current view link is " + linkToShow);
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      learn = viewToLink.get(VIEWS.LEARN);
+      linkToShow = viewToLink.get(VIEWS.LEARN);
     }
-    showActive(learn);
+    showActive(linkToShow);
     recordMenuVisible();
   }
 

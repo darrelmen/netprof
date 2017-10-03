@@ -46,6 +46,10 @@ public class ProjectChoices {
 
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final String IMPORT_DATA_INTO = "Import data into ";
+
+  /**
+   * @see #showNewProjectDialog
+   */
   private static final String CREATE_NEW_PROJECT = "Create New Project";
 
   private static final int MIN_HEIGHT = 125;
@@ -363,12 +367,21 @@ public class ProjectChoices {
     }
   }
 
+  /**
+   * Do some validity checking...
+   */
   private void showNewProjectDialog() {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
-        projectEditForm.newProject(); return true;
+        if (projectEditForm.isValid()) {
+          projectEditForm.newProject();
+          return true;
+        }
+        else {
+          return false;
+        }
       }
 
       @Override
@@ -485,12 +498,13 @@ public class ProjectChoices {
     importButtonContainer.addStyleName("leftFiveMargin");
     horiz2.add(importButtonContainer);
 
-    Button deleteButton = getDeleteButton(projectForLang, label);
-    deleteButton.addStyleName("leftFiveMargin");
-    horiz2.add(getButtonContainer(deleteButton));
+    if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+      Button deleteButton = getDeleteButton(projectForLang, label);
+      deleteButton.addStyleName("leftFiveMargin");
+      horiz2.add(getButtonContainer(deleteButton));
+    }
 
     return horiz2;
-//    container.add(horiz2);
   }
 
   @NotNull

@@ -177,7 +177,7 @@ public class DialogHelper {
 */
     closeButton.addClickHandler(event -> {
       //dialogBox.hide();
-      logger.info("clicked on close");
+     // logger.info("clicked on close");
       boolean shouldHide = true;
       if (listener != null) shouldHide = listener.gotYes();
       if (shouldHide) {

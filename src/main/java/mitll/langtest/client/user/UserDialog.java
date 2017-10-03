@@ -119,6 +119,10 @@ public abstract class UserDialog extends BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
   }
 
+  protected void markErrorNoGrabRight(FormField dialectGroup, String message) {
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.RIGHT, false);
+  }
+
   /**
    * Grabs focus on dialectGroup
    *
@@ -154,12 +158,14 @@ public abstract class UserDialog extends BasicDialog {
 //    if (url.contains("127.0.0.1")) {
 //      return url.split("\\?")[0].split("#")[0];
 //    } else {
-      return url.split("\\?")[0].split("#")[0];
+    return url.split("\\?")[0].split("#")[0];
 //    }
   }
 
   //    String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-  protected boolean isValidEmail(String text) { return text.trim().toLowerCase().matches(EMAIL_REGEX);  }
+  protected boolean isValidEmail(String text) {
+    return text.trim().toLowerCase().matches(EMAIL_REGEX);
+  }
 
   /**
    * TODO: store selector and validator?

@@ -72,6 +72,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private int creator = UNDEFINED_USER;
 
   private boolean isPredef;
+  /**
+   *
+   */
+  @Deprecated
   private boolean isOverride;
   private boolean isContext;
 
@@ -353,11 +357,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @seex mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences
    */
   private void addContext(String context, String altcontext, String contextTranslation) {
-    if (!context.isEmpty()) {
+    if (!context.trim().isEmpty()) {
       Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, noAccentFL, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
+   //   logger.info("addContext adding " + contextExercise);
     }
   }
 
