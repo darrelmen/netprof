@@ -352,7 +352,9 @@ public class ProjectChoices {
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Recalculating alignments for " + remove.getName() + "...");
-      controller.getScoringServiceAsyncForHost(remove.getHost()).recalcAlignments(remove.getID(), new AsyncCallback<Void>() {
+      controller
+          .getScoringServiceAsyncForHost(remove.getHost())
+          .recalcAlignments(remove.getID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           status.setText("ERROR - couldn't recalc audio for " + remove.getName());

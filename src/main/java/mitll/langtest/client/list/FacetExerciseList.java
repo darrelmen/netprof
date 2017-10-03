@@ -1446,13 +1446,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (numToShow == 1) { // drill/avp/flashcard
       showDrill(result);
     } else {
-      DivWidget exerciseContainer = new DivWidget();
-      List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
+
 
       if (isStale(reqID)) {
-        logger.info("showExercises Skip stale req " + reqID);
+        logger.info("showExercises Skip stale req " + reqID + " vs current " + freqid);
       } else {
         Scheduler.get().scheduleDeferred((Command) () -> setProgressBarScore(getInOrder()));
+
+        DivWidget exerciseContainer = new DivWidget();
+        List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
+
         Scheduler.get().scheduleDeferred((Command) () -> {
           if (!getters.isEmpty()) {
             getRefAudio(getters.iterator());
@@ -1469,11 +1472,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                                   int reqID) {
     List<RefAudioGetter> getters = new ArrayList<>();
     boolean first = true;
+    logger.info("makeExercisePanels req " + reqID + " vs  current " + (freqid - 1) + " for " + result.size() + " exercises");
     for (CommonExercise exercise : result) {
       if (isStale(reqID)) {
-        logger.info("showExercises stop stale req " + reqID + " vs  current " + (freqid - 1));
+        logger.info("makeExercisePanels stop stale req " + reqID + " vs  current " + (freqid - 1));
         break;
       }
+      
       if (!fetched.containsKey(exercise.getID())) {
         fetched.put(exercise.getID(), exercise);
       }

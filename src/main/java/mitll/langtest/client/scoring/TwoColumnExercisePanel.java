@@ -1389,7 +1389,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private Widget addContextTranslation(AnnotationExercise e, String contextTranslation,
+  private Widget addContextTranslation(AnnotationExercise e,
+                                       String contextTranslation,
                                        AnnotationHelper annotationHelper) {
     if (!contextTranslation.isEmpty()) {
       return getEntry(e,

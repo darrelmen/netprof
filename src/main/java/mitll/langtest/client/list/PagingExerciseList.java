@@ -77,7 +77,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param currentExerciseVPanel
    * @param factory
    * @param controller
-   * @seex mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
   PagingExerciseList(Panel currentExerciseVPanel,

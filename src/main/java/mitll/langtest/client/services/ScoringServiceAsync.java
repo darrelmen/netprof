@@ -81,7 +81,5 @@ public interface ScoringServiceAsync {
   void getAlignments(int projid, Set<Integer> audioIDs,
                      AsyncCallback<Map<Integer, AlignmentOutput>> async);
 
- // void getAllAlignments(AsyncCallback<Void> async);
-
   void recalcAlignments(int projid, AsyncCallback<Void> async);
 }
