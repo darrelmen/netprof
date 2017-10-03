@@ -538,12 +538,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
 
               if (fragmentContainsSegment) {
-                logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + fragment1);
+               // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + fragment1);
 
                 fragment1 = fragment1.substring(lcSegment.length());
                 phonesInWordAll.addAll(phonesInWord);
 
-                logger.info("\t doOneToManyMatch now clickable segment " + fragment1 + " after removing " + lcSegment + " now " + phonesInWordAll.size() + " phones");
+              //  logger.info("\t doOneToManyMatch now clickable segment " + fragment1 + " after removing " + lcSegment + " now " + phonesInWordAll.size() + " phones");
 
                 if (!fragment1.isEmpty()) {
                   if (transcriptSegmentListIterator.hasNext()) {
@@ -563,7 +563,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             if (phonesInWordAll.isEmpty()) {
               logger.warning("doOneToManyMatch no matches for " + current + " and " + lcSegment);
             } else {
-              logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
+          //    logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
 
               current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
               segmentToWord.put(wordSegment, current); // only one for now...
@@ -751,11 +751,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     while (!lcSegment.isEmpty()) {
       String t = clickable.getContent().toLowerCase();
       String fragment = removePunct(t);
+/*
       if (fragment.isEmpty()) {
         logger.info("BEFORE '" + t +
             "' after '" + fragment +
             "'");
       }
+      */
       if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare :" +
           "\n\tsegment     " + lcSegment +
           "\n\tvs fragment '" + fragment + "'");
@@ -784,7 +786,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     if (!lcSegment.isEmpty()) {
-      logger.warning("getMatchingSegments couldn't match all of segment - this left over = " + lcSegment);
+      if (DEBUG_MATCH) {
+        logger.warning("getMatchingSegments couldn't match all of segment - this left over = " + lcSegment);
+      }
     }
     return bulk;
   }
@@ -1380,7 +1384,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow);
         }
       } else {
-        logger.warning("contextAudioChanged : no alignment output for " + id);
+        //logger.warning("contextAudioChanged : no alignment output for " + id);
       }
     }
   }

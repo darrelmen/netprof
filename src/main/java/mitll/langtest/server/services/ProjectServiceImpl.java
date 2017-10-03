@@ -231,7 +231,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         List<SlickAudio> copies = new ArrayList<>();
 
         for (AudioMatches m : transcriptToAudioMatch.values()) {
-          logger.info("copyAudio got transcript match " + m);
+//          logger.info("copyAudio got transcript match " + m);
           m.deposit(copies);
         }
         for (AudioMatches m : transcriptToContextAudioMatch.values()) {
