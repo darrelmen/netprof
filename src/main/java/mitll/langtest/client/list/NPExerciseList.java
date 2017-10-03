@@ -94,10 +94,12 @@ public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, Co
     }
     final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
+/*
     logger.info("makePagingContainer : for" +
         "\n\tinstance " + getInstance() +
         "\n\tshow first not complete " + showFirstNotCompleted +
         "\n\tactivityType " + getActivityType());
+*/
 
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
 

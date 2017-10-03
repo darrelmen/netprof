@@ -35,6 +35,7 @@ package mitll.langtest.client.custom.content;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -68,9 +69,9 @@ import java.util.logging.Logger;
 public class NPFHelper implements RequiresResize {
   private final Logger logger = Logger.getLogger("NPFHelper");
 
-  private static final String LIST_COMPLETE = "List complete!";
-  private static final String COMPLETE = "Complete";
-  private boolean madeNPFContent = false;
+  public static final String LIST_COMPLETE = "List complete!";
+  public static final String COMPLETE = "Complete";
+//  private boolean madeNPFContent = false;
 
   final ExerciseController controller;
 
@@ -92,55 +93,6 @@ public class NPFHelper implements RequiresResize {
   }
 
   /**
-   * @param ul
-   * @param tabAndContent
-   * @param instanceName
-   * @param loadExercises
-   */
-/*  public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
-    logger.info(getClass() + " : adding npf content instanceName = " +
-        instanceName + " for list " + ul + " with " + ul.getExercises().size() + " load " + loadExercises);
-
-    showNPF(ul, tabAndContent, instanceName, loadExercises, null);
-  }*/
-
-  /**
-   * Add npf widget to content of a tab - here marked tabAndContent
-   *
-   * @param ul            show this user list
-   * @param tabAndContent in this tab
-   * @param instanceName  flex, review, etc.
-   * @param loadExercises should we load exercises initially
-   * @param toSelect
-   * @see ListManager#getListOperations
-   */
-/*  public void showNPF(UserList<CommonShell> ul,
-                      TabAndContent tabAndContent,
-                      String instanceName,
-                      boolean loadExercises,
-                      HasID toSelect) {
-    logger.info(getClass() + " : adding npf content instanceName = " +
-        instanceName + " for list " + ul + " with " + ul.getExercises().size());
-    DivWidget content = tabAndContent.getContent();
-    int widgetCount = content.getWidgetCount();
-    if (!madeNPFContent || widgetCount == 0) {
-      madeNPFContent = true;
-      logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul + " load " + loadExercises);
-      addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
-    } else {
-      logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
-      rememberAndLoadFirstFromUserList(ul, toSelect);
-    }
-  }*/
-  private void addNPFToContent(UserList<CommonShell> ul,
-                               Panel listContent,
-                               String instanceName,
-                               boolean loadExercises,
-                               HasID toSelect) {
-    listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
-  }
-
-  /**
    * Make the instance name uses the unique id for the list.
    *
    * @param ul
@@ -148,7 +100,7 @@ public class NPFHelper implements RequiresResize {
    * @param loadExercises
    * @param toSelect
    * @return
-   * @see #addNPFToContent
+   * @see NewContentChooser#getReviewList
    */
   public Panel doNPF(UserList<CommonShell> ul, String instanceName, boolean loadExercises, HasID toSelect) {
     logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size " + loadExercises);

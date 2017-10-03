@@ -44,6 +44,8 @@ public class DominoExerciseDAO {
   public static final String WORKFLOW = "workflow";
   public static final String UNIT = "unit";
   public static final String CHAPTER = "chapter";
+  public static final String V_NP_ID = "v-np-id";
+  public static final String PREFIX = "v-";
   private final JSONSerializer ser;
 
   /**
@@ -108,10 +110,10 @@ public class DominoExerciseDAO {
   /**
    * TODO : use domino language object
    *
-   * @param file
-   * @param inputStream
-   * @param projid
-   * @param importUser
+   * @param file        null except for testing
+   * @param inputStream null only when testing
+   * @param projid      for this project
+   * @param importUser  who is doing the importing - marked as the creator of the exercises
    * @return
    * @see mitll.langtest.server.FileUploadHelper#readJSON
    */
@@ -200,7 +202,7 @@ public class DominoExerciseDAO {
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
     for (IMetadataField field : metadataFields) {
       String name = field.getName();
-      if (name.startsWith("v-") && !name.equals("v-np-id")) {
+      if (name.startsWith(PREFIX) && !name.equals(V_NP_ID)) {
         name = name.substring(2);
 
         String displayValue = field.getDisplayValue();
@@ -210,7 +212,7 @@ public class DominoExerciseDAO {
           ex.addUnitToValue(chapterName, displayValue);
         } else {
           if (!displayValue.trim().isEmpty()) {
-            logger.info("getExerciseFromVocabularyItem : for " +ex.getID() + " adding " + name + " = " + displayValue);
+            logger.info("getExerciseFromVocabularyItem : for " + ex.getID() + " adding " + name + " = " + displayValue);
             ex.addAttribute(new ExerciseAttribute(name, displayValue));
           }
         }
@@ -228,15 +230,17 @@ public class DominoExerciseDAO {
       SampleSentence sample = (SampleSentence) comp;
       int compid = shDoc.getId() * 10 + sample.getNum();
 //      logger.info("context import id " + compid);
+      String sentenceVal = sample.getSentenceVal();
+      if (!sentenceVal.trim().isEmpty()) {
+        Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
+            removeMarkup(sentenceVal),
+            removeMarkup(sample.getAlternateFormVal()),
+            removeMarkup(sample.getTransliterationVal()),
+            removeMarkup(sample.getTranslationVal()));
 
-      Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
-          removeMarkup(sample.getSentenceVal()),
-          removeMarkup(sample.getAlternateFormVal()),
-          removeMarkup(sample.getTransliterationVal()),
-          removeMarkup(sample.getTranslationVal()));
-
-      context.setUnitToValue(ex.getUnitToValue());
-      ex.getDirectlyRelated().add(context);
+        context.setUnitToValue(ex.getUnitToValue());
+        ex.getDirectlyRelated().add(context);
+      }
     }
   }
 
@@ -272,7 +276,6 @@ public class DominoExerciseDAO {
   }
 
   /**
-   * @see #addContextSentences
    * @param projid
    * @param oldid
    * @param creatorID
@@ -281,6 +284,7 @@ public class DominoExerciseDAO {
    * @param transliterationVal
    * @param meaning
    * @return
+   * @see #addContextSentences
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
@@ -309,59 +313,4 @@ public class DominoExerciseDAO {
     exercise.setDominoID(oldid);
     return exercise;
   }
-
-  /*private CommonExercise toExercise(JsonObject jsonObject, List<String> typeOrder) {
-    JsonObject metadata = jsonObject.getJsonObject("metadata");
-    JsonObject content = jsonObject.getJsonObject("content");
-    String updateTime = jsonObject.getString("updateTime");
-    String dominoID = "" + jsonObject.getInt("id");
-    boolean isLegacy = metadata.containsKey("npDID");
-    String npDID = isLegacy ? metadata.getString("npDID") : dominoID;
-
-    long updateMillis = System.currentTimeMillis();
-//    try {
-//      Date update = dateFmt.parse(updateTime);
-//      updateMillis = update.getTime();
-//    } catch (ParseException e) {
-//      logger.warn(e.getMessage() + " : can't parse date '" + updateTime + "' for " + npDID);
-//    }
-
-    String fl = noMarkup(content.getString("pass"));
-    String english = noMarkup(content.getString("trans"));
-    String meaning = noMarkup(content.getString("meaning"));
-    String transliteration = noMarkup(content.getString("translit"));
-
-    String context = noMarkup(content.getString("context"));
-    String contextTranslation = noMarkup(content.getString("context_trans"));
-
-    Exercise exercise = null;
-*//*    Exercise exercise = new Exercise(
-        npDID,
-        english,
-        fl,
-        meaning,
-        transliteration,
-        context,
-        contextTranslation,
-        dominoID);
-    exercise.setUpdateTime(updateMillis);*//*
-    // if (!isLegacy) logger.info("NOT LEGACY " + exercise);
-
-*//*    for (String type : typeOrder) {
-      try {
-        exercise.addUnitToValue(type, noMarkup(content.getString(type.toLowerCase())));
-      } catch (Exception e) {
-        logger.error("couldn't find unit/chapter '" + type + "' in content - see typeOrder property");
-      }
-    }*//*
-
-    return exercise;
-  }*/
-
-  private String noMarkup(String source) {
-    return source.replaceAll("\\<.*?>", "");
-  }
-//  public static void main(String[] arg) {
-//    new DominoExerciseDAO().readExercises("SAMPLE-NO-EXAM.json");
-//  }
 }

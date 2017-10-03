@@ -45,6 +45,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -58,6 +59,9 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
+import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -164,6 +168,11 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
           private String setCheckboxTitle() {
             return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
+          }
+
+          @Override
+          protected void onLastItem() {
+            new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
           }
 
           /**

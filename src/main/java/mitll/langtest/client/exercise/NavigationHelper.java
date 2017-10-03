@@ -178,14 +178,13 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @see #getNextAndPreviousButtons
    */
   public void clickNext(ExerciseController controller, HasID exercise) {
-    logger.info("clickNext " + exercise.getID());
+    //logger.info("clickNext " + exercise.getID());
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
-        logger.info("clickNext  post answers " + exercise.getID());
+       // logger.info("clickNext  post answers " + exercise.getID());
         provider.postAnswers(controller, exercise);
       } else {
         logger.info("clickNext NO PROVIDER " + exercise.getID());
-
       }
     }
   }

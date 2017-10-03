@@ -780,14 +780,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param current
    * @return
-   * @seex AmasNavigationHelper#loadNextExercise
    */
   @Override
   public boolean loadNextExercise(HasID current) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + getInstance());
-    boolean onLast = isOnLastItem(getIndex(current.getID()));
-/*    logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + i +
-        " of " + getSize() + " last is " + (getSize() - 1) + " on last " + onLast);*/
+    int id = current.getID();
+    int index = getIndex(id);
+    boolean onLast = isOnLastItem(index);
+/*
+    logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + index +
+        " of " + getSize() + " last is " + (getSize() - 1) +
+        "\n\ton last " + onLast);
+        */
     if (onLast) {
       onLastItem();
     } else {
@@ -798,7 +802,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public boolean loadNextExercise(int id) {
-    if (DEBUG || true) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
     T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + id);
     return exerciseByID != null && loadNextExercise(exerciseByID);

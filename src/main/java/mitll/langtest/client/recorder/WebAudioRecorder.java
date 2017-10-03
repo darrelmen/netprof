@@ -192,7 +192,7 @@ public class WebAudioRecorder {
 
   public void stopRecording(WavCallback wavCallback) {
     WebAudioRecorder.wavCallback = wavCallback;
-    logger.info("got stopRecording ");
+    //logger.info("got stopRecording ");
     stopRecording();
   }
 }

@@ -11,7 +11,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import java.util.logging.Logger;
 
 class NPExerciseListContainer extends PagingContainer<CommonShell> {
-  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
+//  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
 
   private NPExerciseList exerciseList;
   private final PagingExerciseList<CommonShell, CommonExercise> outer;
@@ -29,12 +29,10 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
     return (pageSize == -1) ? super.getNumTableRowsGivenScreenHeight() : pageSize;
   }
 
-
   @Override
   public void gotClickOnItem(CommonShell e) {
     outer.gotClickOnItem(e);
   }
-
 
   @Override
   protected CellTable.Resources chooseResources() {
@@ -43,10 +41,10 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
 
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
-      logger.info("simplePaging : chooseResources RTL - content");
+     // logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(NPExerciseListContainer.RTLTableResources.class);
     } else {
-      logger.info("simplePaging : chooseResources LTR - content");
+     // logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(NPExerciseListContainer.TableResources.class);
     }
     return o;

@@ -104,8 +104,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     english = controller.getLanguage().equals(ENGLISH);
 
     this.showExerciseState = showExerciseState;
-    // this.instance = instance;
-    logger.info("PagingContainer  show " + showExerciseState + " for recorder " + isRecorder);
+    //  logger.info("PagingContainer  show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   /**
@@ -164,12 +163,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
           // Compare the name columns.
           if (o1 != null) {
-            if (o2 == null) return 1;
-            else {
-              String id1 = o1.getForeignLanguage();
-              String id2 = o2.getForeignLanguage();
-              return id1.toLowerCase().compareTo(id2.toLowerCase());
-            }
+            return (o2 == null) ? 1 : o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
           }
           return -1;
         });
@@ -180,21 +174,17 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return sorter.simpleCompare(o1, o2, isRecorder, isEnglish, "");
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            return (o2 == null) ? 1 : sorter.simpleCompare(o1, o2, isRecorder, isEnglish, "");
+          }
+
+          return -1;
         });
     return columnSortHandler;
   }
@@ -222,7 +212,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
           return getColumnToolTip(columnText);
         } else {
           String html = "" + shell.getID();
-        //  logger.info("got shell " + shell.getID());
+          //  logger.info("got shell " + shell.getID());
           if (columnText != null) {
             columnText = truncate(columnText);
             STATE state = shell.getState();
@@ -271,10 +261,6 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     };
   }
 
-  private boolean isClick(NativeEvent event) {
-    return BrowserEvents.CLICK.equals(event.getType());
-  }
-
   private String truncate(String columnText) {
     int lengthToUse = MAX_LENGTH_ID;
     if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
@@ -306,6 +292,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
+  }
+
+  private boolean isClick(NativeEvent event) {
+    return BrowserEvents.CLICK.equals(event.getType());
   }
 
   /**

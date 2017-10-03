@@ -1305,7 +1305,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (numToShow == 1 && itemID > 0) {
       visibleIDs = new ArrayList<>();
       visibleIDs.add(itemID);
-      logger.info("askServerForExercises ask for single -- " + itemID);
+     // logger.info("askServerForExercises ask for single -- " + itemID);
     }
     return visibleIDs;
   }

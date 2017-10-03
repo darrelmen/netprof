@@ -333,6 +333,11 @@ public class SlickUserExerciseDAO
     return addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
   }
 
+  /**
+   * @see #getExercises(Collection, List, ISection, Map, Project, Map, Map, boolean)
+   * @param slick
+   * @return
+   */
   @NotNull
   private Exercise makeExercise(SlickExercise slick) {
     int id = slick.id();
@@ -353,11 +358,14 @@ public class SlickUserExerciseDAO
         slick.iscontext(),
         slick.numphones());
 
-    List<String> translations = new ArrayList<String>();
-    if (!slick.foreignlanguage().isEmpty()) {
-      translations.add(slick.foreignlanguage());
+    {
+      List<String> translations = new ArrayList<String>();
+      if (!slick.foreignlanguage().isEmpty()) {
+        translations.add(slick.foreignlanguage());
+      }
+      exercise.setRefSentences(translations); // ?
     }
-    exercise.setRefSentences(translations); // ?
+
     exercise.setUpdateTime(lastModified);
     exercise.setAltFL(slick.altfl());
     return exercise;
@@ -422,7 +430,7 @@ public class SlickUserExerciseDAO
 
     int numphones = slick.numphones();
     if (numphones < 1) {
-      logger.info("getExercisePhoneInfoFromDict num phones " + numphones + " for exercise " + slick.id());
+//      logger.info("getExercisePhoneInfoFromDict num phones " + numphones + " for exercise " + slick.id());
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 

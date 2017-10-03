@@ -95,7 +95,7 @@ public class FileUploadHelper {
 //    return false;
   }
 
-  public class Site implements IsSerializable {
+  public static class Site implements IsSerializable {
     private int id;
     private int num = 0;
     private boolean valid = false;
@@ -195,9 +195,16 @@ public class FileUploadHelper {
     }
   }
 
-
+  /**
+   * @see #readJSON(Site, InputStream)
+   * @param site
+   * @param id
+   * @param exercises
+   */
   private void rememberExercises(Site site, int id, List<CommonExercise> exercises) {
     logger.info("rememberExercises Read " + exercises.size());
+    exercises.forEach(exercise->logger.info("ex  "+exercise.getID() + " " + exercise.getDirectlyRelated()));
+
     if (exercises.isEmpty()) {
       logger.warn("rememberExercises Read zero? " + exercises.size());
     } else {
