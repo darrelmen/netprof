@@ -65,20 +65,6 @@ public class EmailList {
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String ADMINS = "admins";
 
-/*  private static final List<String> DLI_APPROVERS = Arrays.asList(
-      "Tamas",
-      "Tamas",
-      "Michael",
-      "Sandy",
-      "Gordon");
-
-  private static final List<String> DLI_EMAILS = Arrays.asList(
-      TAMAS_1,
-      TAMAS_2,
-      GRIMMER,
-      SANDY,
-      GORDON_VIDAVER);*/
-
   private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList(
       "gvidaver",
 
@@ -115,7 +101,7 @@ public class EmailList {
       logger.info("admins now " + admins);
     }
     else {
-      logger.debug("default admins " + admins);
+     // logger.debug("default admins " + admins);
     }
 
     property = props.getProperty(REPORT_EMAILS);

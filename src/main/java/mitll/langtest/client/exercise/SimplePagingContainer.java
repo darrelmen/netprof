@@ -104,12 +104,16 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     Panel column = new FlowPanel();
     column.add(pager);
-    column.add(table);
-    table.addStyleName("floatLeftAndClear");
+    addTable(column);
 
     setMaxWidth();
 
     return column;
+  }
+
+  protected void addTable(Panel column) {
+    column.add(table);
+    table.addStyleName("floatLeftAndClear");
   }
 
   public boolean hasNextPage() {
@@ -195,7 +199,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.addRangeChangeHandler(event -> gotRangeChanged(event.getNewRange()));
   }
 
-  protected void gotRangeChanged(Range newRange) {
+  protected void gotRangeChanged(final Range newRange) {
   }
 
   protected void addSelectionModel() {

@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -43,23 +45,27 @@ import com.google.gwt.user.client.ui.Widget;
  * @since 5/16/2014.
  */
 public class TooltipHelper {
+  private final Logger logger = Logger.getLogger("TooltipHelper");
+
   /**
-   * @see mitll.langtest.client.user.BasicDialog#addTooltip(com.google.gwt.user.client.ui.Widget, String)
    * @param w
    * @param tip
    * @return
+   * @see mitll.langtest.client.user.BasicDialog#addTooltip(com.google.gwt.user.client.ui.Widget, String)
    */
-  public Tooltip addTooltip(Widget w, String tip) { return createAddTooltip(w, tip, Placement.RIGHT);  }
+  public Tooltip addTooltip(Widget w, String tip) {
+    return createAddTooltip(w, tip, Placement.RIGHT);
+  }
 
   /**
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#makeAddToList(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @param widget
    * @param tip
    * @param placement
    * @return
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#makeAddToList(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    */
   public Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
-   // System.out.println("Add tooltip " + tip + " to " + widget.getElement().getExID() + " place " + placement);
+  //  logger.info("createAddTooltip tooltip " + tip + " to " + widget.getElement().getId() + " place " + placement);
     Tooltip tooltip = new Tooltip();
     tooltip.setWidget(widget);
     tooltip.setText(tip);

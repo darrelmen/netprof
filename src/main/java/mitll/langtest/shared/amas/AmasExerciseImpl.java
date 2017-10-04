@@ -303,8 +303,13 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public float getScore() {
+  public int getRawScore() {
     return 0;
+  }
+
+  @Override
+  public boolean hasScore() {
+    return false;
   }
 
   @Override
@@ -335,7 +340,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
 
   @Override
   public int compareTo(HasID o) {
-    return Integer.valueOf(getID()).compareTo(o.getID());
+    return Integer.compare(getID(), o.getID());
   }
 
   public String getId() {

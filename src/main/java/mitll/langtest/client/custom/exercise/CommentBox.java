@@ -39,8 +39,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -161,7 +159,7 @@ public class CommentBox extends PopupContainerFactory {
     styleCommentButton(commentButton);
 
     *//*Tooltip tooltip =*//*
-    setButtonTitle(commentButton, isCorrect, comment);
+    addToolTip(commentButton, isCorrect, comment);
     //showQC(commentButton);
 
     // content on left side, comment button on right
@@ -362,18 +360,17 @@ public class CommentBox extends PopupContainerFactory {
 
     clear.setIcon(IconType.REMOVE);
     clear.setSize(ButtonSize.MINI);
-    clear.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentEntryText.setText("");
-        showOrHideCommentButton(commentButton, clear, true);
-
-        annotationExercise.addAnnotation(field, TYPICAL.CORRECT.toString(), "");
-        setButtonTitle(commentButton, true, "");
-        commentAnnotator.addCorrectComment(exerciseID, field);
-      }
-    });
+    clear.addClickHandler(event -> onClear(commentEntryText, commentButton, field, clear));
     return clear;
+  }
+
+  private void onClear(TextBox commentEntryText, Widget commentButton, String field, Button clear) {
+    commentEntryText.setText("");
+    showOrHideCommentButton(commentButton, clear, true);
+
+    annotationExercise.addAnnotation(field, TYPICAL.CORRECT.toString(), "");
+    addToolTip(commentButton, true, "");
+    commentAnnotator.addCorrectComment(exerciseID, field);
   }
 
   public Widget getTheContent() {
@@ -439,7 +436,7 @@ public class CommentBox extends PopupContainerFactory {
                                       final TextBox commentEntry) {
     styleCommentButton(commentButton);
 
-    Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
+    Tooltip tooltip = addToolTip(commentButton, alreadyMarkedCorrect, comment);
     configurePopupButton(commentButton, commentPopup, commentEntry, tooltip);
 
     showQC(commentButton);
@@ -495,7 +492,7 @@ public class CommentBox extends PopupContainerFactory {
 
       logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
 
-      setButtonTitle(commentButton, isCorrect, comment);
+      //addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
         commentAnnotator.addCorrectComment(exerciseID, field);
@@ -516,7 +513,13 @@ public class CommentBox extends PopupContainerFactory {
     return comment;
   }
 
-  private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {
+  /**
+   * @param button
+   * @param isCorrect
+   * @param comment
+   * @return
+   */
+  private Tooltip addToolTip(Widget button, boolean isCorrect, String comment) {
     String tip = isCorrect ? "Add a comment" : "\"" + comment + "\"";
     return addTooltip(button, tip);
   }

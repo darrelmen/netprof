@@ -118,7 +118,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
             }
           }
 
-          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange) {}
+          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {}
 
           @Override
           protected void onLastItem() {

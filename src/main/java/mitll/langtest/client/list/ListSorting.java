@@ -94,7 +94,7 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private int compareScores(T o1, T o2) {
-    return Float.valueOf(o1.getScore()).compareTo(o2.getScore());
+    return Integer.compare(o1.getRawScore(), o2.getRawScore());
   }
 
   private void sortBy(Comparator<T> comp) {

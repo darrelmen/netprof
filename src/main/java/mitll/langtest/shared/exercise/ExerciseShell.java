@@ -35,6 +35,8 @@ package mitll.langtest.shared.exercise;
 import java.util.Collection;
 import java.util.Collections;
 
+import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,7 +54,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   private String cforeignLanguage = "";
   private String cenglish = "";
   int numPhones;
-  private float score = -1.0f;
+  private int score = -1;//.0f;
 
   public ExerciseShell() {
   }
@@ -71,8 +73,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @param realID
    * @param cfl
    * @param cenglish
-   * @paramx context
-   * @paramx contextTranslation
    * @see CommonShell#getShell(boolean)
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
@@ -145,8 +145,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   /**
-   * @see mitll.langtest.client.list.ListSorting#compPhones
    * @return
+   * @see mitll.langtest.client.list.ListSorting#compPhones
    */
   @Override
   public int getNumPhones() {
@@ -155,7 +155,15 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
 
   @Override
   public void setScore(float score) {
-    this.score = score;
+    this.score = toInt(score);
+  }
+
+  private int toInt(float value) {
+    return (int) (value * SCALE);
+  }
+
+  private float fromInt(int value) {
+    return ((float) value) / SCALE;
   }
 
   /**
@@ -163,14 +171,15 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    */
   public float getScore() {
+    return fromInt(score);
+  }
+
+  public int getRawScore() {
     return score;
   }
 
-  public String toString() {
-    return "ExerciseShell " +
-        "id = " + getID() +
-        " : '" + getEnglish() + "'" +
-        " states " + getState() + "/" + getSecondState();
+  public boolean hasScore() {
+    return score != -1;
   }
 
   @Override
@@ -181,5 +190,12 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   @Override
   public String getCenglish() {
     return cenglish;
+  }
+
+  public String toString() {
+    return "ExerciseShell " +
+        "id = " + getID() +
+        " : '" + getEnglish() + "'" +
+        " states " + getState() + "/" + getSecondState();
   }
 }

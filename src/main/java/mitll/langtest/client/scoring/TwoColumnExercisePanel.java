@@ -64,7 +64,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private final CommentAnnotator annotationHelper;
   private ClickableWords<T> clickableWords;
-  private final boolean showInitially = false;
+  private static final boolean showInitially = false;
   private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio;
@@ -907,7 +907,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private Widget getItemContent(final T e) {
     Panel card = new DivWidget();
-    card.getElement().setId("CommentNPFExercise_QuestionContent");
+    //card.getElement().setId("TwoColumn_QuestionContent");
     card.setWidth("100%");
 
     boolean meaningValid = isMeaningValid(e);
@@ -916,7 +916,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
     DivWidget rowWidget = getRowWidget();
-    rowWidget.getElement().setId("firstRow");
+    //rowWidget.getElement().setId("firstRow");
 
     boolean hasEnglish = isValid(english);
     SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
@@ -935,14 +935,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     rowWidget = getRowWidget();
     card.add(rowWidget);
 
-    rowWidget.getElement().setId("scoringRow");
+    //rowWidget.getElement().setId("scoringRow");
     rowWidget.add(recordPanel);
 
-    rowWidget = getRowWidget();
-    card.add(rowWidget);
-    rowWidget.getElement().setId("contextRow");
+    if (e.hasContext()) {
+      rowWidget = getRowWidget();
+      card.add(rowWidget);
+      //rowWidget.getElement().setId("contextRow");
 
-    addContext(e, card, rowWidget);
+      addContext(e, card, rowWidget);
+    }
 
     return card;
   }
@@ -1040,7 +1042,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget =
-          getEntry(e, QCNPFExercise.MEANING,
+          getEntry(e,
+              QCNPFExercise.MEANING,
               e.getMeaning(),
               FieldType.MEANING,
               showInitially,
@@ -1072,8 +1075,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     flClickableRow = contentWidget;
 
-    DivWidget flEntry = getCommentEntry(FOREIGN_LANGUAGE, e.getAnnotation(FOREIGN_LANGUAGE), false,
-        showInitially, annotationHelper, isRTL, contentWidget);
+    DivWidget flEntry = getCommentEntry(FOREIGN_LANGUAGE,
+        e.getAnnotation(FOREIGN_LANGUAGE),
+        false,
+        showInitially,
+        annotationHelper, isRTL, contentWidget);
 
     if (isRTL) {
       clickableWords.setDirection(flEntry);
@@ -1102,13 +1108,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private void addContext(T e, Panel card, DivWidget rowWidget) {
     int c = 0;
-    String foreignLanguage = e.getForeignLanguage();//e.getNoAccentFL();
+    String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
-    for (CommonExercise contextEx : e.getDirectlyRelated()) {
+    Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
+    for (CommonExercise contextEx : directlyRelated) {
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
 
       c++;
-      if (c < e.getDirectlyRelated().size()) {
+      if (c < directlyRelated.size()) {
         rowWidget = getRowWidget();
         card.add(rowWidget);
         rowWidget.getElement().setId("contextRow_again");
@@ -1229,11 +1236,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private DivWidget getRowWidget() {
+/*
     DivWidget rowWidget = getHorizDiv();
     rowWidget.addStyleName("bottomFiveMargin");
     rowWidget.addStyleName("floatLeft");
     rowWidget.setWidth("100%");
     return rowWidget;
+*/
+    DivWidget flContainer = new DivWidget();
+    flContainer.addStyleName("scoringRowStyle");
+    return flContainer;
   }
 
   private Widget addAltFL(T e, boolean addTopMargin) {
@@ -1492,7 +1504,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private CommentBox getCommentBox(CommentAnnotator annotationHelper) {
     if (logger == null) {
-      logger = Logger.getLogger("CommentNPFExercise");
+      logger = Logger.getLogger("TwoColumnExercisePanel");
     }
     T exercise = this.exercise;
     CommentBox commentBox =

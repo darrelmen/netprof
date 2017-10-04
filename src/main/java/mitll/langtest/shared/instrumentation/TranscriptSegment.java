@@ -75,12 +75,6 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return fromInt(end);
   }
 
-/*
-  public boolean contains(float pos) {
-    return pos >= start && pos < end;
-  }
-*/
-
   public boolean contains(double pos) {
     return pos >= getStart() && pos < getEnd();
   }

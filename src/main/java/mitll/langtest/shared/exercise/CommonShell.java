@@ -58,7 +58,9 @@ public interface CommonShell extends Shell {
   CommonShell getShell(boolean includeContext);
 
   int getNumPhones();
-  float getScore();
+//  float getScore();
+  int getRawScore();
+  boolean hasScore();
 
   String getCforeignLanguage();
 
