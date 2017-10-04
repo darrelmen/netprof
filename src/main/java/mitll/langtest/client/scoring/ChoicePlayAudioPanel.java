@@ -113,9 +113,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void configureButton2(SplitDropdownButton playButton) {
-    playButton.addClickHandler(event -> {
-      playAudio();
-    });
+    playButton.addClickHandler(event -> playAudio());
 
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
@@ -211,7 +209,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (hasAnyAudio) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-     // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+      // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       rememberAudio(toUse.getAudioRef());
     }
@@ -247,7 +245,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-    logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
+    // logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
     doPause();
     listener.audioChanged(audioID, durationInMillis);
 
@@ -256,6 +254,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     storage.setBoolean(IS_MALE, isMale);
     storage.setBoolean(IS_REG, isReg);
 
+    Scheduler.get().scheduleDeferred(this::tellOtherPanels);
+  }
+
+  private void tellOtherPanels() {
     LangTest.EVENT_BUS.fireEvent(new AudioSelectedEvent(exercise == null ? -1 : exercise.getID()));
   }
 
