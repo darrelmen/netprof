@@ -382,11 +382,12 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     });
   }
 
-
+/*
   @Override
   protected void onLastItem() {
-    new ModalInfoDialog("Complete", "List complete!", hiddenEvent -> reloadExercises());
-  }
+  //  new ModalInfoDialog("Complete", "List complete!", hiddenEvent -> reloadExercises());
+    showListComplete();
+  }*/
 
   private void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);

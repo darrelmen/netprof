@@ -10,6 +10,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -61,8 +62,7 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList,
-            getChoices(), getPhoneChoices(), alignments);
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments);
       }
     };
   }

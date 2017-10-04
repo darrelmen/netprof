@@ -81,7 +81,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   public abstract Panel getExercisePanel(U e);
 
   @NotNull
-  protected ShowChoices getChoices() {
+  public ShowChoices getChoices() {
     ShowChoices choices = ShowChoices.FL;
     String show = controller.getStorage().getValue(NewBanner.SHOW);
     if (show != null) {
@@ -97,7 +97,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   }
 
   @NotNull
-  protected PhonesChoices getPhoneChoices() {
+  public PhonesChoices getPhoneChoices() {
     PhonesChoices choices = PhonesChoices.SHOW;
     String show = controller.getStorage().getValue(SHOW_PHONES);
     if (show != null && !show.isEmpty()) {

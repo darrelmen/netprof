@@ -34,6 +34,7 @@ package mitll.langtest.server.database.project;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
@@ -63,6 +64,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -78,6 +80,9 @@ public class ProjectManagement implements IProjectManagement {
 
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
+  public static final String CREATED = "Created";
+  public static final String MODIFIED = "Modified";
+  public static final String NUM_ITEMS = "Num Items";
 
 
   private final PathHelper pathHelper;
@@ -673,19 +678,6 @@ public class ProjectManagement implements IProjectManagement {
     return language1;
   }
 
-  /**
-   * For now, not adding difficulty or sound as properties - sort by difficulty though.
-   *
-   * @return
-   * @paramx project
-   */
-  @NotNull
-/*
-  private List<String> getTypeOrder(Project project) {
-    return project.getTypeOrder();
-  }
-*/
-
   private boolean hasModel(SlickProject project1) {
     return getModel(project1) != null;
   }
@@ -702,7 +694,24 @@ public class ProjectManagement implements IProjectManagement {
     List<SlimProject> projectInfos = new ArrayList<>();
 
     Map<String, List<SlickProject>> langToProject = getLangToProjects();
-    logger.info("getNestedProjectInfo lang->project is " + langToProject);
+
+    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
+
+    langToProject.values().forEach(slickProjects -> {
+      List<SlickProject> production = getProductionProjects(slickProjects);
+      SlickProject firstProject = (production.isEmpty()) ? slickProjects.iterator().next() : production.iterator().next();
+
+      SlimProject parent = getProjectInfo(firstProject);
+      projectInfos.add(parent);
+
+      if (slickProjects.size() > 1) {
+        for (SlickProject slickProject : slickProjects) {
+          parent.addChild(getProjectInfo(slickProject));
+          //  logger.info("\t add child to " + parent);
+        }
+      }
+    });
+
     for (Map.Entry<String, List<SlickProject>> lang : langToProject.entrySet()) {
       List<SlickProject> slickProjects = lang.getValue();//langToProject.get(lang);
       SlickProject firstProject = slickProjects.get(0);
@@ -718,6 +727,14 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     return projectInfos;
+  }
+
+  private List<SlickProject> getProductionProjects(List<SlickProject> slickProjects) {
+    return slickProjects
+            .stream()
+            .filter(project -> project.status()
+                .equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
+            .collect(Collectors.toList());
   }
 
   @NotNull
@@ -739,33 +756,16 @@ public class ProjectManagement implements IProjectManagement {
    * @see #getNestedProjectInfo
    */
   private SlimProject getProjectInfo(SlickProject project) {
-    boolean hasModel = getModel(project) != null;
-
-    ProjectStatus status = null;
-    try {
-      status = ProjectStatus.valueOf(project.status());
-    } catch (IllegalArgumentException e) {
-      logger.error("got " + e, e);
-      status = ProjectStatus.DEVELOPMENT;
-    }
-
     TreeMap<String, String> info = new TreeMap<>();
 
-    DateFormat format = new SimpleDateFormat();
-    info.put("Created", format.format(project.created()));
-    info.put("Modified", format.format(project.modified()));
+    addDateProps(project, info);
 
     boolean isRTL = false;
-    if (status != ProjectStatus.RETIRED) {
+    if (getProjectStatus(project) != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
-      info.put("Num Items", "" + exercises.size());
+      info.put(NUM_ITEMS, "" + exercises.size());
     }
-
-    String prop = project.getProp(Project.WEBSERVICE_HOST);
-    if (prop == null) prop = WEBSERVICE_HOST_DEFAULT;
-
-    boolean onIOS = isOnIOS(project);
 
     return new SlimProject(
         project.id(),
@@ -775,13 +775,41 @@ public class ProjectManagement implements IProjectManagement {
         ProjectStatus.valueOf(project.status()),
         project.displayorder(),
 
-        hasModel,
+        hasModel(project),
         isRTL,
         project.created().getTime(),
-        prop,
+        getHostOrDefault(project),
         getPort(project),
         project.getProp(ServerProperties.MODELS_DIR),
-        project.first(), project.second(), onIOS, info);
+        project.first(),
+        project.second(),
+        isOnIOS(project),
+        info);
+  }
+
+  private void addDateProps(SlickProject project, TreeMap<String, String> info) {
+    DateFormat format = new SimpleDateFormat();
+    info.put(CREATED, format.format(project.created()));
+    info.put(MODIFIED, format.format(project.modified()));
+  }
+
+  @NotNull
+  private String getHostOrDefault(SlickProject project) {
+    String host = project.getProp(Project.WEBSERVICE_HOST);
+    if (host == null) host = WEBSERVICE_HOST_DEFAULT;
+    return host;
+  }
+
+  @NotNull
+  private ProjectStatus getProjectStatus(SlickProject project) {
+    ProjectStatus status = null;
+    try {
+      status = ProjectStatus.valueOf(project.status());
+    } catch (IllegalArgumentException e) {
+      logger.error("got " + e, e);
+      status = ProjectStatus.DEVELOPMENT;
+    }
+    return status;
   }
 
   private boolean isOnIOS(SlickProject project) {

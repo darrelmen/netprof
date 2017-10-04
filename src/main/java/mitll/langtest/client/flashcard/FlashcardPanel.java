@@ -283,12 +283,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   DivWidget getFirstRow(ExerciseController controller) {
     commentBox = new CommentBox(exercise.getID(), controller, new CommentAnnotator() {
       @Override
-      public void addIncorrectComment(String commentToPost, String field) {
+      public void addIncorrectComment(int exid, String field, String commentToPost) {
         addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
       }
 
       @Override
-      public void addCorrectComment(String field) {
+      public void addCorrectComment(int exid, String field) {
         addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
       }
     }, exercise,

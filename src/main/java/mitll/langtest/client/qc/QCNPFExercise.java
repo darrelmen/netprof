@@ -834,12 +834,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     commentEntry.setWidth("400px");
 
     commentEntry.addStyleName("leftFiveMargin");
-    commentEntry.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        addIncorrectComment(sanitize(commentEntry.getText()), field);
-      }
-    });
+    commentEntry.addBlurHandler(event -> addIncorrectComment(exercise.getID(), field, sanitize(commentEntry.getText())));
     addTooltip(commentEntry, COMMENT_TOOLTIP);
     return commentEntry;
   }
@@ -886,7 +881,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       incorrectFields.add(field);
     } else {
       incorrectFields.remove(field);
-      addCorrectComment(field);
+      addCorrectComment(exercise.getID(), field);
     }
 
     //if (isCourseContent()) {

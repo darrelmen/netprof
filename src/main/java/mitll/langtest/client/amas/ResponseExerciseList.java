@@ -306,10 +306,12 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   /**
    * @see ListInterface#loadNextExercise
    */
+/*
   @Override
   protected void onLastItem() {
 //    takeAgain();
   }
+*/
 
   /**
    * TODO : what do we do when we get to the end of a test?

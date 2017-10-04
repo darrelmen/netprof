@@ -39,7 +39,7 @@ package mitll.langtest.client.scoring;
  * @since 9/8/14.
  */
 public interface CommentAnnotator {
-  void addIncorrectComment(String commentToPost, String field);
+  void addIncorrectComment(int exid, String field, String commentToPost);
 
-  void addCorrectComment(String field);
+  void addCorrectComment(int exid, String field);
 }

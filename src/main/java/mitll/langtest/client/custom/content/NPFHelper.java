@@ -201,12 +201,14 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
-    return new NPExerciseList(right, controller, listOptions, -1) {
+    return new NPExerciseList(right, controller, listOptions, -1);
+/*    {
       @Override
       protected void onLastItem() {
-        new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
+       // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
+        showListComplete();
       }
-    };
+    };*/
   }
 
   /**
@@ -231,10 +233,14 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-          return new TwoColumnExercisePanel<>(e,
+        //  getChoices(), getPhoneChoices();
+          TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(e,
               controller,
               exerciseList,
-              getChoices(), getPhoneChoices(), alignments);
+              alignments);
+          widgets.addWidgets(getChoices(),getPhoneChoices());
+
+          return widgets;
         }
       }
     };
@@ -248,8 +254,5 @@ public class NPFHelper implements RequiresResize {
       //logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
   }
-
-  public void setContentPanel(DivWidget content) {
-    DivWidget contentPanel = content;
-  }
+ // public void setContentPanel(DivWidget content) {}
 }

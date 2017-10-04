@@ -370,7 +370,7 @@ public class CommentBox extends PopupContainerFactory {
 
         annotationExercise.addAnnotation(field, TYPICAL.CORRECT.toString(), "");
         setButtonTitle(commentButton, true, "");
-        commentAnnotator.addCorrectComment(field);
+        commentAnnotator.addCorrectComment(exerciseID, field);
       }
     });
     return clear;
@@ -498,9 +498,9 @@ public class CommentBox extends PopupContainerFactory {
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
-        commentAnnotator.addCorrectComment(field);
+        commentAnnotator.addCorrectComment(exerciseID, field);
       } else {
-        commentAnnotator.addIncorrectComment(comment, field);
+        commentAnnotator.addIncorrectComment(exerciseID, field, comment);
       }
 
       // remember to update the exercise itself

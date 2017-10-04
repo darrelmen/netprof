@@ -170,10 +170,11 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
           }
 
-          @Override
+   /*       @Override
           protected void onLastItem() {
-            new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
-          }
+           // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
+            showListComplete();
+          }*/
 
           /**
            * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
@@ -349,17 +350,17 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     }
 
     /**
+     * @param exid
+     * @param field  @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      * @param commentToPost
-     * @param field
-     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      */
     @Override
-    public void addIncorrectComment(final String commentToPost, final String field) {
+    public void addIncorrectComment(int exid, final String field, final String commentToPost) {
       addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
     }
 
     @Override
-    public void addCorrectComment(final String field) {
+    public void addCorrectComment(int exid, final String field) {
       addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
     }
 

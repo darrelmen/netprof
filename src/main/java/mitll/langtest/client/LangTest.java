@@ -70,6 +70,8 @@ import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.recorder.WebAudioRecorder;
+import mitll.langtest.client.scoring.AnnotationHelper;
+import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -275,6 +277,7 @@ public class LangTest implements
   private Map<Integer, ScoringServiceAsync> projectToScoringService;
   private final long then = 0;
 
+  private AnnotationHelper annotationHelper = new AnnotationHelper(this);
 
   /**
    * This gets called first.
@@ -1169,5 +1172,10 @@ public class LangTest implements
   @Override
   public void showDrillList(int id) {
     initialUI.getNavigation().showDrillList(id);
+  }
+
+  @Override
+  public CommentAnnotator getCommentAnnotator() {
+    return annotationHelper;
   }
 }

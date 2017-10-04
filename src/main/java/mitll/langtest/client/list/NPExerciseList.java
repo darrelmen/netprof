@@ -48,11 +48,11 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public abstract class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private Logger logger = Logger.getLogger("NPExerciseList");
   private int pageSize;
 
-  protected NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
+  public NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
                            ListOptions listOptions, int pageSize) {
     super(currentExerciseVPanel, controller, listOptions);
     this.pageSize = pageSize;

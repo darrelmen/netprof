@@ -342,17 +342,17 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }*/
 
   /**
+   * @param exid
+   * @param field  @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    * @param commentToPost
-   * @param field
-   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    */
   @Override
-  public void addIncorrectComment(final String commentToPost, final String field) {
+  public void addIncorrectComment(int exid, final String field, final String commentToPost) {
     addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
   }
 
   @Override
-  public void addCorrectComment(final String field) {
+  public void addCorrectComment(int exid, final String field) {
     addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
   }
 

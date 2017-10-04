@@ -210,10 +210,12 @@ public class EditItem {
           panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
         } else {
-          return new TwoColumnExercisePanel<>(exercise,
+          TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,
-              getChoices(), getPhoneChoices(), alignments);
+              alignments);
+          widgets.addWidgets(getChoices(), getPhoneChoices());
+          return widgets;
         }
 
         return panel;

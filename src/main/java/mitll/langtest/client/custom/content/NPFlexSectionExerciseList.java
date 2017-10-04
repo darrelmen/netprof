@@ -70,10 +70,11 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
     super(topRow, currentExercisePanel, controller, listOptions, listHeader, numToShow);
   }
 
-  @Override
+/*  @Override
   protected void onLastItem() {
-    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
-  }
+   // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
+    showListComplete();
+  }*/
 
   @Override
   protected void noSectionsGetExercises(long userID, int exerciseID) {
