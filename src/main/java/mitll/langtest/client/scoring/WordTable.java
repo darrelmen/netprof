@@ -274,7 +274,7 @@ public class WordTable {
     phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
 
-    new TooltipHelper().addTooltip(phones,"Click to hear word.");
+    new TooltipHelper().addTooltip(phones, "Click to hear word.");
 
   /*  Icon playFeedback = getPlayFeedback();
 
@@ -423,16 +423,22 @@ public class WordTable {
         float v = phoneSegment.getStart() * 100;
         int vi = (int) v;
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, vi);
-        alignCenter(h);
+        boolean hasAudioControl = audioControl != null;
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);
 
         if (simpleLayout) {
           if (iterator.hasNext()) {
-            h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
+            //  h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
+            h.addStyleName("phoneStyle");
+          } else {
+            if (hasAudioControl) addHandStyle(h);
+            alignCenter(h);
+            h.addStyleName("phoneColor");
           }
-          h.addStyleName("phoneColor");
         } else {
+          if (hasAudioControl) addHandStyle(h);
+          alignCenter(h);
           setColorClickable(phoneSegment, h);
           h.addStyleName("phoneWidth");
         }
@@ -448,16 +454,21 @@ public class WordTable {
    * @param audioControl
    * @param segmentToPlay
    * @param header
+   * @see #addPhonesBelowWord2
+   * @see #getDivWord(Map, AudioControl, Map, boolean)
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      header.addStyleName("handCursor");
-    }
-    header.addClickHandler(event -> {
-      if (audioControl != null) {
+     // header.addStyleName("handCursor");
+      header.addClickHandler(event -> {
+//      if (audioControl != null) {
         audioControl.repeatSegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
-      }
-    });
+        //    }
+      });
+    }
+  }
+  private void addHandStyle(Label header) {
+    header.addStyleName("handCursor");
   }
 
   private void setColor(TranscriptSegment phone, UIObject h) {

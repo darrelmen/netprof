@@ -1550,7 +1550,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
-    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
+//    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 

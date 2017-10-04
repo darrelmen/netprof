@@ -198,6 +198,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   /**
    * Add startup info to user.
+   *
    * @return
    */
   public User getUserFromSession() {
@@ -280,8 +281,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       String prefixedMessage = prefix + "\nfor webapp at " + installPath +
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
 
-      String subject = "Server Exception on " + getHostName() + " at " +installPath;
+      String subject = "Server Exception on " + getHostName() + " at " + installPath;
       sendEmail(subject, getInfo(prefixedMessage));
+
+      logger.warn("logAndNotify : " + e, e);
 
       logger.error(getInfo(prefixedMessage), e);
     } else {
@@ -459,7 +462,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return atts.toString();
   }
 */
-
   private MailSupport getMailSupport() {
     return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
@@ -486,13 +488,14 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
-  @Override protected void doUnexpectedFailure(Throwable ex) {
+  @Override
+  protected void doUnexpectedFailure(Throwable ex) {
     logger.info("Look at exception {}", ex.getClass().getCanonicalName());
     if (ex.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
       logger.info("User reload during request.", ex);
     } else {
-    //  logger.error("Got service Exception!", ex);
-      logAndNotifyServerException(ex,"Got service exception in " +this.getClass().getCanonicalName()+ "!");
+      //  logger.error("Got service Exception!", ex);
+      logAndNotifyServerException(ex, "Got service exception in " + this.getClass().getCanonicalName() + "!");
 
       // This may not be necessary in production, but some exceptions
       // traces did not include full cause details when running in dev mode.
@@ -541,6 +544,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   /**
    * Find the shared db reference.
+   *
    * @return
    */
   private DatabaseImpl getDatabase() {
@@ -562,9 +566,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * This depends on the load order of the servlets being defined with this one going first. See
    * load-on-startup parameter in web.xml.
    *
-   * @see #DATABASE_REFERENCE
    * @param servletContext db is shared via the servlet context
    * @param db             to share with other servlets that load after this one
+   * @see #DATABASE_REFERENCE
    * @see #readProperties
    */
   protected void shareDB(ServletContext servletContext, DatabaseServices db) {

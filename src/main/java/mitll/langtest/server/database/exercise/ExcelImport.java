@@ -560,7 +560,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return colNormalized.startsWith(WORD) || colNormalized.equalsIgnoreCase(ENGLISH);
   }
 
-  private final Set<String> toSkip = new HashSet<>(Arrays.asList("Translation".toLowerCase(), "Transliteration".toLowerCase()));
+  private final Set<String> toSkip =
+      new HashSet<>(Arrays.asList(
+          "Translation".toLowerCase(),
+          "Transliteration".toLowerCase(),
+          "Correction".toLowerCase(),
+          "Comment".toLowerCase(),
+          "Comments".toLowerCase()
+      ));
 
   /**
    * @param colToHeader
@@ -594,7 +601,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                                         Row next) {
     List<ExerciseAttribute> toAdd = new ArrayList<>();
     for (Map.Entry<Integer, String> pair : colToHeader.entrySet()) {
-      String value = getCell(next, pair.getKey());
+      Integer colIndex = pair.getKey();
+      String value = getCell(next, colIndex);
       if (!value.isEmpty()) {
         String property = pair.getValue();
 

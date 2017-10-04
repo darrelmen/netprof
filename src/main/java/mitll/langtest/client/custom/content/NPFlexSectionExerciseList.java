@@ -67,7 +67,7 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
                                    DivWidget listHeader,
                                    DivWidget footer,
                                    int numToShow) {
-    super(topRow, currentExercisePanel, controller, listOptions, listHeader, footer, numToShow);
+    super(topRow, currentExercisePanel, controller, listOptions, listHeader, numToShow);
   }
 
   @Override

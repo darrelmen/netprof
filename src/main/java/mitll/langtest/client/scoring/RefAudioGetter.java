@@ -1,5 +1,8 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -7,5 +10,14 @@ import java.util.Set;
  */
 public interface RefAudioGetter {
   void getRefAudio(RefAudioListener listener);
+
   Set<Integer> getReqAudio();
+
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels(Collection, DivWidget, int)
+   * @param req
+   */
+  void setReq(int req);
+
+  int getReq();
 }

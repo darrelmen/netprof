@@ -1875,3 +1875,10 @@ h1, h2, h3, h4, h5, h6 {
 .phoneColor {
      background-color: #EEF3E2;
  }
+
+.phoneStyle {
+    padding-right: 3px;
+    background-color: #EEF3E2;
+    cursor: pointer;
+    text-align: center;
+}

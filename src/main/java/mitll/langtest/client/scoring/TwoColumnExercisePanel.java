@@ -90,6 +90,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
   private DivWidget contextClickableRow;
+  private int req;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -121,9 +122,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     this.choices = choices;
     this.phonesChoices = phonesChoices;
-
-    //logger.info("phone display " + phonesChoices);
-
     this.alignments = alignments;
 
     annotationHelper = new AnnotationHelper(controller, commonExercise.getID());
@@ -348,6 +346,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
     //  logger.info("getRefAudio after removing known " + req.size() + " audio attrs");
 
+    return req;
+  }
+
+  @Override
+  public void setReq(int req) {
+    this.req = req;
+  }
+
+  @Override
+  public int getReq() {
     return req;
   }
 

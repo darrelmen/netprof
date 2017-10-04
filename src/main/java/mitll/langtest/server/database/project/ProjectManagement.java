@@ -368,18 +368,12 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void refreshProjects() {
-    Map<Integer, SlickProject> idToSlickProject = getIdToProjectMap();
-
-    for (Project project : idToProject.values()) {
-      SlickProject update = idToSlickProject.get(project.getProject().id());
-      //logger.info("refreshProjects Was " + project.getProject() + " " + project.isNoModel());
-      project.setProject(update);
-      //logger.info("refreshProjects Now " + project.getProject() + " " + project.isNoModel());
-    }
+    Map<Integer, SlickProject> idToSlickProject = getIdToProjectMapFromDB();
+    idToProject.values().forEach(project -> project.setProject(idToSlickProject.get(project.getID())));
   }
 
   @NotNull
-  private Map<Integer, SlickProject> getIdToProjectMap() {
+  private Map<Integer, SlickProject> getIdToProjectMapFromDB() {
     Collection<SlickProject> all = projectDAO.getAll();
     Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
     for (SlickProject project : all) idToSlickProject.put(project.id(), project);

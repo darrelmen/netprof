@@ -26,7 +26,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
    */
   public SimpleHighlightSegment(String content, int id) {
     super(content);
-    getElement().setId(content+"_s_"+id);
+    //getElement().setId(content+"_s_"+id);
     this.length = content.length();
   }
 

@@ -71,7 +71,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   /**
    * TODO : don't pass in user list
    *
-   * @param uniqueID
+   * @param userListID
    * @param instanceName
    * @param hasTopRow
    * @return
@@ -88,10 +88,10 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     // second row ---------------
     Panel topRow = hasTopRow ? new FluidRow() : new FlowPanel("nav");
     topRow.getElement().setId("NPFHelper_" + (hasTopRow ? "topRow" : "leftSide"));
-    if (!hasTopRow) {
-      styleTopRow(twoRows, topRow);
-    } else {
+    if (hasTopRow) {
       twoRows.add(topRow);
+    } else {
+      styleTopRow(twoRows, topRow);
     }
 
     DivWidget bottomRowDiv = new DivWidget();
@@ -155,6 +155,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 //    section.addStyleName("scrolledpos");
 
     twoRows.add(section);
+    twoRows.setWidth("100%");
     section.add(topRow);
 
   //  makeSureFacetsAlwaysVisible(section);
@@ -203,6 +204,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     bottomRowDiv.addStyleName("floatLeft");
     bottomRowDiv.addStyleName("mainBlock");
     bottomRowDiv.getElement().setId("rightSideDiv");
+    bottomRowDiv.setWidth("100%");
     //bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +    "%");
     // listHeader.addStyleName("listHeader");
     bottomRowDiv.add(listHeader);
