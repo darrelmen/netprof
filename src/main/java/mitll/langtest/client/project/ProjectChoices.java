@@ -194,6 +194,7 @@ public class ProjectChoices {
     List<SlimProject> languages = new ArrayList<>(result);
     sortLanguages(nest, languages);
 
+//    logger.info("addFlags Got " + languages.size() + " langs " + languages);
     for (SlimProject project : languages) {
       current.add(getLangIcon(capitalize(project.getLanguage()), project, nest));
     }
@@ -207,11 +208,11 @@ public class ProjectChoices {
   }
 
   private void sortLanguages(final int nest, List<SlimProject> languages) {
-    Collections.sort(languages, (o1, o2) -> {
+    languages.sort((o1, o2) -> {
       if (nest == 0) {
         return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
       } else {
-        int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
+        int i = Integer.compare(o1.getDisplayOrder(), o2.getDisplayOrder());
         return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
       }
     });

@@ -97,6 +97,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @see #readFromSheet(Sheet)
    */
   private static final String WEEK = "week";
+  public static final String ALT = "alt";
 
   private final List<String> errors = new ArrayList<>();
   private final String file;
@@ -382,9 +383,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               meaningIndex = i;
             } else if (colNormalized.contains(ID)) {
               idIndex = i;
-            } else if (contextColMatch(colNormalized) && colNormalized.contains("alt")) {
+            } else if (contextColMatch(colNormalized) && colNormalized.contains(ALT)) {
               altcontextIndex = i;
-            } else if (colNormalized.contains("alt")) {
+            } else if (colNormalized.contains(ALT)) {
               altIndex = i;
             } else if (contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
               contextTranslationIndex = i;
@@ -695,9 +696,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               meaningIndex = columns.indexOf(col);
             } else if (colNormalized.contains(ID)) {
               idIndex = columns.indexOf(col);
-            } else if (contextColMatch(colNormalized) && colNormalized.contains("alt")) {
+            } else if (contextColMatch(colNormalized) && colNormalized.contains(ALT)) {
               altcontextIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("alt")) {
+            } else if (colNormalized.contains(ALT)) {
               altIndex = columns.indexOf(col);
             } else if (contextColMatch(colNormalized)) {
               contextIndex = columns.indexOf(col);

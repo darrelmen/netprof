@@ -692,7 +692,6 @@ public class ProjectManagement implements IProjectManagement {
    */
   public List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
-
     Map<String, List<SlickProject>> langToProject = getLangToProjects();
 
     logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
@@ -711,20 +710,6 @@ public class ProjectManagement implements IProjectManagement {
         }
       }
     });
-
-    for (Map.Entry<String, List<SlickProject>> lang : langToProject.entrySet()) {
-      List<SlickProject> slickProjects = lang.getValue();//langToProject.get(lang);
-      SlickProject firstProject = slickProjects.get(0);
-      SlimProject parent = getProjectInfo(firstProject);
-      projectInfos.add(parent);
-
-      if (slickProjects.size() > 1) {
-        for (SlickProject slickProject : slickProjects) {
-          parent.addChild(getProjectInfo(slickProject));
-          //  logger.info("\t add child to " + parent);
-        }
-      }
-    }
 
     return projectInfos;
   }
