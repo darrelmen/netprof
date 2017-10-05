@@ -142,7 +142,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                   String prefix,
                                                   int exerciseID, boolean onlyWithAudioAnno,
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-            logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix + " WERE NOT USING PREFIX");
+          //  logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix + " WERE NOT USING PREFIX");
             super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }

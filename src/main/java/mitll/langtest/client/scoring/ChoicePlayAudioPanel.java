@@ -31,19 +31,20 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel extends PlayAudioPanel {
-  protected final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
+  private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
+
   private static final String IS_MALE = "isMale";
   private static final String IS_REG = "isReg";
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
-  private final ExerciseController controller;
-  private final CommonExercise exercise;
+  // private final ExerciseController controller;
+  // private final CommonExercise exercise;
   private boolean includeContext = false;
   private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
-  private final Set<Integer> allIDs = new HashSet<>();
-  private final Set<AudioAttribute> allPossible = new HashSet<>();
+  //private Set<Integer> allIDs;
+  private Set<AudioAttribute> allPossible;
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -68,23 +69,33 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
           }
         },
         "",
-        null);
+        null, exerciseController, exercise, false);
     this.includeContext = includeContext;
-    this.exercise = exercise;
-    this.controller = exerciseController;
+    //   this.exercise = exercise;
+    //this.controller = exerciseController;
     this.listener = listener;
 
-    getElement().setId("ChoicePlayAudioPanel");
+    // getElement().setId("ChoicePlayAudioPanel");
+    addButtons(null);
 
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
       gotAudioSelected(authenticationEvent.getExid());
     });
   }
 
+  /**
+   * @param optionalToTheRight
+   * @see PlayAudioPanel#PlayAudioPanel
+   */
+  @Override
+  protected void addButtons(Widget optionalToTheRight) {
+    playButton = makePlayButton(this);
+  }
+
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
       // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
-      addChoices(null, includeContext);
+      addChoices(null, includeContext, null, true);
     }
   }
 
@@ -104,11 +115,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     toAddTo.add(playButton);
     configureButton2(playButton);
 
-    Scheduler.get().scheduleDeferred(() -> addChoices(playButton, includeContext));
+    // Scheduler.get().scheduleDeferred(() -> addChoices(playButton, includeContext));
 
     Widget widget = playButton.getWidget(0);
     Button actual = (Button) widget;
     actual.setEnabled(false);
+
+    addChoices(playButton, includeContext, actual, false);
+
     return actual;
   }
 
@@ -123,14 +137,21 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.addStyleName("choiceplay");
   }
 
-
-  private void addChoices(SplitDropdownButton playButton, boolean includeContext) {
-    Collection<Integer> preferredVoices = Collections.emptyList();
+  /**
+   * @param playButton
+   * @param includeContext
+   * @param tellListener
+   * @see #gotAudioSelected
+   * @see #makePlayButton
+   */
+  private void addChoices(SplitDropdownButton playButton, boolean includeContext, Button actual, boolean tellListener) {
+    // what we want to match, as closely as possible
     boolean isMale = isMale();
-    boolean isFemale = !isMale();
+    boolean isFemale = !isMale;
     boolean isReg = controller.getStorage().isTrue(IS_REG);
     boolean isSlow = !isReg;
 
+    Collection<Integer> preferredVoices = Collections.emptyList(); // bogus for now...
     Map<MiniUser, List<AudioAttribute>> malesMap =
         exercise.getMostRecentAudio(true, preferredVoices, includeContext);
     Map<MiniUser, List<AudioAttribute>> femalesMap =
@@ -147,10 +168,14 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     AudioAttribute fallback = null;
     AudioAttribute genderFallback = null;
 
+
+    // allIDs = new HashSet<>();
+    allPossible = new HashSet<>();
+
     {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
-        allIDs.add(mr.getUniqueID());
+        //  allIDs.add(mr.getUniqueID());
         allPossible.add(mr);
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
@@ -158,10 +183,11 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         else fallback = mr;
       }
     }
-    {
+
+    if (toUse == null) { // no match yet
       AudioAttribute ms = getAtSpeed(malesMap, false);
       if (ms != null) {
-        allIDs.add(ms.getUniqueID());
+        //    allIDs.add(ms.getUniqueID());
         allPossible.add(ms);
         if (playButton != null) addAudioChoice(playButton, true, false, ms);
         if (isMale && isSlow) toUse = ms;
@@ -169,10 +195,11 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         if (fallback == null) fallback = ms;
       }
     }
-    {
+
+    if (toUse == null) {
       AudioAttribute fr = getAtSpeed(femalesMap, true);
       if (fr != null) {
-        allIDs.add(fr.getUniqueID());
+        //  allIDs.add(fr.getUniqueID());
         allPossible.add(fr);
         if (playButton != null) addAudioChoice(playButton, false, true, fr);
         if (isFemale && isReg) toUse = fr;
@@ -181,10 +208,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       }
     }
 
-    {
+    if (toUse == null) {
       AudioAttribute fs = getAtSpeed(femalesMap, false);
       if (fs != null) {
-        allIDs.add(fs.getUniqueID());
+        //allIDs.add(fs.getUniqueID());
         allPossible.add(fs);
 
         if (playButton != null) addAudioChoice(playButton, false, false, fs);
@@ -204,14 +231,20 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
     boolean hasAnyAudio = toUse != null;
 
-    setEnabled(hasAnyAudio);
+    // setEnabled(hasAnyAudio);
+    if (actual != null) actual.setEnabled(hasAnyAudio);
+
     splitDropdownButton.getTriggerWidget().setEnabled(hasAnyAudio);
     if (hasAnyAudio) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-      // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
-      listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
+     // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+      if (tellListener) {
+        listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
+      }
       rememberAudio(toUse.getAudioRef());
+    } else {
+     // logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
     }
   }
 
@@ -268,7 +301,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
           if (audioAttribute.getAudioRef().startsWith("Fast") || audioAttribute.getAudioRef().startsWith("Slow")) {
-            logger.info("Skip " + audioAttribute);
+            logger.info("getAtSpeed Skip " + audioAttribute);
           } else {
             return audioAttribute;
           }
@@ -286,14 +319,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(true);
   }
 
-  /**
-   * @param optionalToTheRight
-   * @see PlayAudioPanel#PlayAudioPanel
-   */
-  @Override
-  protected void addButtons(Widget optionalToTheRight) {
-    playButton = makePlayButton(this);
-  }
 
   /**
    * @return
@@ -303,11 +328,21 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     return currentAudioAttr;
   }
 
+  /**
+   * @return
+   * @see TwoColumnExercisePanel#getReqAudio
+   */
   Set<Integer> getAllAudioIDs() {
+    Set<Integer> allIDs = new HashSet<>();
+    allPossible.forEach(audioAttribute -> allIDs.add(audioAttribute.getUniqueID()));
     return allIDs;
   }
 
-  public Set<AudioAttribute> getAllPossible() {
+  /**
+   * @return
+   * @see TwoColumnExercisePanel#getRefAudio
+   */
+  Set<AudioAttribute> getAllPossible() {
     return allPossible;
   }
 }

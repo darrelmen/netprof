@@ -45,7 +45,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.CommonAudioExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +70,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
+public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
 
   private static final String RECORD = "Record";
@@ -241,7 +241,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     imageContainer.add(audioPositionPopup);
 
     if (hasAudio()) {
-      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, recordButtonTitle);
+      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
     } else {
@@ -446,15 +446,15 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @return PlayAudioPanel
    * @see #addWidgets(String, String)
    */
-  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle) {
-    PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, recordButtonTitle);
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle, CommonAudioExercise exercise) {
+    PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
     playAudio.setListener(audioPositionPopup);
     return playAudio;
   }
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
-                                              String recordButtonTitle) {
-    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget, false);
+                                              String recordButtonTitle, CommonAudioExercise exercise) {
+    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget, false, controller, exercise, true);
   }
 
   /**

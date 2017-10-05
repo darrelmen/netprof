@@ -60,6 +60,7 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
   List<SlickAudio> getAll(int projid);
+  List<SlickAudio> getAllNoExistsCheck(int projid);
 
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio

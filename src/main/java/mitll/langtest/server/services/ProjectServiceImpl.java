@@ -58,7 +58,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
- // private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
   public static final String ANY = "Any";
 
   private IProjectDAO getProjectDAO() {
@@ -371,7 +370,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
 
     Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked
-        = maxID == -1 ? Collections.EMPTY_LIST : db.getAudioDAO().getAll(maxID);
+        = maxID == -1 ? Collections.EMPTY_LIST : db.getAudioDAO().getAllNoExistsCheck(maxID);
 
     logger.info("getTranscriptToAudio found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + maxID);
     for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
@@ -415,9 +414,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                               Map<String, AudioMatches> transcriptToContextMatches) {
 //    int match = 0;
 //    int nomatch = 0;
-    logger.info("getSlickAudios exToInt " + exToInt.size());
-    logger.info("getSlickAudios transcriptToAudio " + transcriptToAudio.size());
-    logger.info("getSlickAudios transcriptToMatches " + transcriptToMatches.size());
+    logger.info("getSlickAudios exToInt                    " + exToInt.size());
+    logger.info("getSlickAudios transcriptToAudio          " + transcriptToAudio.size());
+    logger.info("getSlickAudios transcriptToMatches        " + transcriptToMatches.size());
     logger.info("getSlickAudios transcriptToContextMatches " + transcriptToContextMatches.size());
 
     MatchInfo vocab = new MatchInfo(0, 0);
@@ -429,7 +428,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 //      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid);
 
       if (exid == null) {
-        logger.error("huh? can't find " + oldID + " in " + exToInt.size());
+        logger.error("getSlickAudios : huh? can't find " + oldID + " in " + exToInt.size());
       } else {
         vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
         contextCounts.add(addAudioForContext(projectid, exToInt, transcriptToAudio, transcriptToContextMatches, ex));
@@ -467,7 +466,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
 
     if (match == 0) {
-      logger.info("addAudioForVocab vocab no match '" + ex.getEnglish() + "' = '" + fl + "' in " + transcriptToAudio.size());
+      logger.info("addAudioForVocab vocab no match '" + ex.getEnglish() + "' = '" + fl + "' in " + transcriptToAudio.size() + " transcripts");
     }
 
     return new MatchInfo(match, nomatch);

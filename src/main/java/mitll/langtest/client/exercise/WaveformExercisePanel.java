@@ -84,9 +84,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
                                boolean doNormalRecording,
                                String instance) {
     super(e, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance, doNormalRecording);
-    getElement().setId("WaveformExercisePanel");
-
-
+//    getElement().setId("WaveformExercisePanel");
   }
 
   @Override

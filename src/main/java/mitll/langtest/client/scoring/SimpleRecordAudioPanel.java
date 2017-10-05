@@ -140,8 +140,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     playAudioPanel = new RecorderPlayAudioPanel(
         controller.getSoundManager(),
-        postAudioRecordButton
-    );
+        postAudioRecordButton,
+        controller, exercise);
     playAudioPanel.hidePlayButton();
 
     return playAudioPanel;

@@ -196,7 +196,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
-    logger.debug("getStartupInfo sending " + startupInfo);
+//    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
 

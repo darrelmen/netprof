@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.audio;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
@@ -74,7 +73,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * @param database
    * @param userDAO
-   * @see DatabaseImpl#initializeDAOs(PathHelper)
+   * @see DatabaseImpl#initializeDAOs
    */
   public AudioDAO(Database database, IUserDAO userDAO) {
     super(database, userDAO);
@@ -234,6 +233,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   public List<SlickAudio> getAll(int projid) {
+    return null;
+  }
+
+  @Override
+  public List<SlickAudio> getAllNoExistsCheck(int projid) {
     return null;
   }
 

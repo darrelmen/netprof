@@ -37,15 +37,16 @@ import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Voc
  */
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
-  public static final String V_UNIT = "v-unit";
-  public static final String V_CHAPTER = "v-chapter";
-  public static final String PROJECT = "project";
-  public static final String DOCUMENTS = "documents";
-  public static final String WORKFLOW = "workflow";
-  public static final String UNIT = "unit";
-  public static final String CHAPTER = "chapter";
-  public static final String V_NP_ID = "v-np-id";
-  public static final String PREFIX = "v-";
+  private static final String V_UNIT = "v-unit";
+  private static final String V_CHAPTER = "v-chapter";
+  private static final String PROJECT = "project";
+  private static final String DOCUMENTS = "documents";
+  private static final String WORKFLOW = "workflow";
+  private static final String UNIT = "unit";
+  private static final String CHAPTER = "chapter";
+  private static final String V_NP_ID = "v-np-id";
+  private static final String PREFIX = "v-";
+
   private final JSONSerializer ser;
 
   /**
@@ -78,7 +79,7 @@ public class DominoExerciseDAO {
       this.dominoID = dominoID;
     }
 
-    Date getExportTime() {
+    private Date getExportTime() {
       return createTime;
     }
 
@@ -86,24 +87,33 @@ public class DominoExerciseDAO {
       return exercises;
     }
 
+/*
     public String getLanguage() {
       return language;
     }
+*/
 
+/*
     public mitll.langtest.shared.project.Language getLang() {
       return lang;
     }
+*/
 
+    /**
+     * @return
+     */
     int getDominoID() {
       return dominoID;
     }
 
+/*
     public Date getModifiedTime() {
       return modifiedTime;
     }
+*/
 
     public String toString() {
-      return "lang " + lang + " " + lang + " " + getDominoID() + " " + getExportTime() + " num " + getExercises().size();
+      return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() + " num " + getExercises().size();
     }
   }
 
@@ -139,13 +149,10 @@ public class DominoExerciseDAO {
 
         if (!unitName.isEmpty()) break;
       }
-      logger.info("readExercises found " + unitName + ", " + chapterName);
-
 //      Language dominoLang = ser.deserialize(Language.class, langObj.toString());
       //logger.info("got Language " + dominoLang);
-
       ProjectDescriptor pd = ser.deserialize(ProjectDescriptor.class, readObj.getJsonObject(PROJECT).toString());
-      logger.info("readExercises got ProjectDescriptor " + pd);
+      logger.info("readExercises got ProjectDescriptor " + pd + " : " + unitName + ", " + chapterName);
 
       String languageName = getLanguage(pd);
 

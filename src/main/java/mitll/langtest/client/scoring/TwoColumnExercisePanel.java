@@ -87,11 +87,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
   private DivWidget contextClickableRow;
   private int req;
-  private boolean DEBUG_STALE = false;
+//  private boolean DEBUG_STALE = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -151,11 +152,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
     int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
 
+
     Set<Integer> req = new HashSet<>();
+    int exerciseID = exercise.getID();
     if (refID != -1) {
       if (DEBUG) {
         logger.info("getRefAudio asking for" +
-                "\n\texercise  " + exercise.getID() +
+                "\n\texercise  " + exerciseID +
                 "\n\taudio    #" + refID +
                 "\n\talignment " + currentAudioAttr.getAlignmentOutput()
             //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
@@ -175,7 +178,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       // logger.info("getRefAudio asking for context " + contextRefID);
       if (DEBUG) {
         logger.info("getRefAudio asking for context" +
-            "\n\texercise " + exercise.getID() +
+            "\n\texercise " + exerciseID +
             "\n\taudio #" + contextRefID +
             "\n\tspeed  " + contextAudioAttr.getSpeed() +
             "\n\tisMale " + contextAudioAttr.getUser().isMale()
@@ -210,15 +213,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       });
     } else {
-      //logger.warning("no context audio for " + exercise.getID());
+      logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
     }
 
     if (req.isEmpty()) {
-
       if (DEBUG) {
-        logger.info("getRefAudio already has alignments for audio   " + refID + " " + alignments.get(refID));
-        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.get(contextRefID));
-
+        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio   " + refID + " " + alignments.containsKey(refID));
+        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.containsKey(contextRefID));
       }
 
       registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
@@ -285,7 +286,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              Set<Integer> req,
                              int projectid) {
     if (DEBUG) {
-      logger.info("getAlignments asking for " + req.size() + " alignments.");
+      logger.info("getAlignments asking for " + req.size() + " alignments for " + refID + " and context " + contextRefID);
     }
     controller.getScoringService().getAlignments(
         projectid,
@@ -692,7 +693,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     IHighlightSegment clickable = clickables.next();
     clickable = skipUnclickable(clickables, clickable);
     String segment = wordSegment.getEvent();
-    if (DEBUG)
+    if (DEBUG_DETAIL)
       logger.info("matchSegmentToWidgetForAudio compare :" +
           "\n\tsegment       " + segment + //" length " + segmentLength +
           "\n\tvs clickable '" + clickable + "'");
@@ -700,7 +701,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String lcSegment = removePunct(segment.toLowerCase());
     String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
-    if (DEBUG)
+    if (DEBUG_DETAIL)
       logger.info("matchSegmentToWidgetForAudio compare :" +
           "\n\tsegment       " + lcSegment + //" length " + segmentLength +
           "\n\tvs clickable '" + fragment1 + "'");
@@ -942,7 +943,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       rowWidget = getRowWidget();
       card.add(rowWidget);
       //rowWidget.getElement().setId("contextRow");
-
       addContext(e, card, rowWidget);
     }
 
@@ -1028,6 +1028,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String trim = e.getAltFL().trim();
     if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
+      if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
+        AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+        audioChangedWithAlignment(currentAudioAttr.getUniqueID(),
+            currentAudioAttr.getDurationInMillis(),
+            currentAudioAttr.getAlignmentOutput());
+      }
     }
 
     if (choices == BOTH || choices == ALTFL) {
@@ -1314,7 +1320,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.getElement().setId("contentContainer");
 
       hp.add(getSpacer());
-      hp.add(getContextPlay(contextExercise));
+      ChoicePlayAudioPanel contextPlay = getContextPlay(contextExercise);
+      hp.add(contextPlay);
 
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           FieldType.FL, contextClickables = new ArrayList<>(), false);
@@ -1352,6 +1359,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       }
 
+      if (contextPlay != null && contextPlay.getCurrentAudioAttr() != null) {
+        AudioAttribute currentAudioAttr = contextPlay.getCurrentAudioAttr();
+        contextAudioChangedWithAlignment(currentAudioAttr.getUniqueID(),
+            currentAudioAttr.getDurationInMillis(),
+            currentAudioAttr.getAlignmentOutput());
+      }
+
       return hp;
     } else {
       return null;
@@ -1366,7 +1380,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return spacer;
   }
 
-  private Widget getContextPlay(CommonExercise contextExercise) {
+  private ChoicePlayAudioPanel getContextPlay(CommonExercise contextExercise) {
     AudioChangeListener contextAudioChanged = new AudioChangeListener() {
       @Override
       public void audioChanged(int id, long duration) {
@@ -1375,10 +1389,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       @Override
       public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-        if (alignmentOutputFromAudio != null) {
-          alignments.put(id, alignmentOutputFromAudio);
-        }
-        contextAudioChanged(id, duration);
+        contextAudioChangedWithAlignment(id, duration, alignmentOutputFromAudio);
       }
     };
     contextPlay
@@ -1387,6 +1398,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     contextPlay.setEnabled(audioAttrPrefGender != null);
 
     return contextPlay;
+  }
+
+  private void contextAudioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+    if (alignmentOutputFromAudio != null) {
+      alignments.put(id, alignmentOutputFromAudio);
+    }
+    contextAudioChanged(id, duration);
   }
 
   private void contextAudioChanged(int id, long duration) {

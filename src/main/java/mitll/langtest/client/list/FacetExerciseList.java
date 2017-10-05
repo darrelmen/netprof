@@ -133,6 +133,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private List<String> rootNodesInOrder = new ArrayList<>();
   private final Map<Integer, String> idToListName = new HashMap<>();
   private int freqid = 0;
+  private DivWidget sortBox;
+  private DivWidget pageSizeContainer;
+
 
   /**
    * @param secondRow             add the section panel to this row
@@ -229,71 +232,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     style.setMarginLeft(5, Style.Unit.PX);
     progressBar.setVisible(false);
   }
-
-  // private Button prev, next;
-  private DivWidget sortBox;
-
-/*  @Deprecated
-  private void addPrevNextPage(DivWidget footer) {
-    DivWidget buttonDiv = new DivWidget();
-    buttonDiv.addStyleName("floatRight");
-    addPrevPageButton(buttonDiv);
-    addNextPageButton(buttonDiv);
-
-
-  //  footer.add(buttonDiv);
-
-    buttonDiv.addStyleName("alignCenter");
-
-   // pagesize = addPageSize(footer);
-
-//    hidePrevNext();
-//    enablePrevNext();
-  }*/
-/*
-  private void addPrevPageButton(DivWidget buttonDiv) {
-    Button prev = new Button("Previous Page");
-    prev.getElement().setId("PrevNextList_Previous");
-    prev.setType(ButtonType.SUCCESS);
-    prev.setIcon(IconType.CARET_LEFT);
-    prev.setIconSize(IconSize.LARGE);
-
-    prev.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        prev.setEnabled(false);
-        pagingContainer.prevPage();
-        scrollToTop();
-        //enablePrevNext();
-      }
-    });
-    this.prev = prev;
-    buttonDiv.add(prev);
-  }
-
-  private void addNextPageButton(DivWidget buttonDiv) {
-    Button next = new Button("Next Page");
-    next.getElement().setId("PrevNextList_Next");
-    next.setType(ButtonType.SUCCESS);
-    next.setIcon(IconType.CARET_RIGHT);
-    next.setIconPosition(IconPosition.RIGHT);
-    next.setIconSize(IconSize.LARGE);
-    next.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        next.setEnabled(false);
-        pagingContainer.nextPage();
-        scrollToTop();
-
-      }
-    });
-
-    buttonDiv.add(next);
-    this.next = next;
-    next.addStyleName("leftTenMargin");
-  }*/
-
-  private DivWidget pageSizeContainer;
 
   /**
    * @param footer
@@ -410,7 +348,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             Scheduler.get().scheduleDeferred((Command) () -> {
               if (isCurrent(currentReq)) {
-                long now = System.currentTimeMillis();
+//                long now = System.currentTimeMillis();
                 //   logger.info("gotRangeChanged (" + (now - then) + ") req " + currentReq + "  for  " + newRange);
                 gotVisibleRangeChanged(getIdsForRange(newRange), currentReq);
               } else {
@@ -1065,9 +1003,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
-            //Map<String, Set<MatchInfo>> result = response.getTypeToValues();
-            //   logger.info("getTypeToValues for " + pairs + " got " + result.size());
-
             changeSelection(response.getTypesToInclude(), typeToSelection);
             setTypeToSelection(typeToSelection);
             addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
@@ -1083,11 +1018,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
       String s = typeToSelection.get(type);
       pairs.add(new Pair(type, (s == null) ? ANY : s));
-//      if (s == null) {
-//        pairs.add(new Pair(type, ANY));
-//      } else {
-//        pairs.add(new Pair(type, s));
-//      }
     }
     if (typeToSelection.containsKey(LISTS)) {
       pairs.add(new Pair(LISTS, typeToSelection.get(LISTS)));
@@ -1247,37 +1177,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return userListID;
   }
 
-  /**
-   * Check if the list we get is consistent with the current project - if not, skip it?
-   *
-   * @paramx newTypeToSelection
-   * @paramx userListID
-   */
-/*  private void getProjectIDForList(Map<String, String> newTypeToSelection, int userListID) {
-    final int fUserListID = userListID;
-    controller.getListService().getProjectIDForList(userListID, new AsyncCallback<Integer>() {
-      @Override
-      public void onFailure(Throwable caught) {
 
-      }
-
-      @Override
-      public void onSuccess(Integer result) {
-        int currentProject = getCurrentProject();
-        boolean isForSameProject = result == currentProject;
-        int fUserListID1 = isForSameProject ? fUserListID : -1;
-
-        if (!isForSameProject) {
-          logger.warning("getProjectIDForList : list is for project " + result + " but current is " + currentProject);
-          new ModalInfoDialog(LINK_FOR_CONTENT,
-              "Please change to that project if you want to see the item.");
-        }
-
-
-        getTypeToValues(newTypeToSelection, fUserListID1);
-      }
-    });
-  }*/
   private int getCurrentProject() {
     return controller.getProjectStartupInfo().getProjectid();
   }
@@ -1298,7 +1198,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   void pushFirstSelection(int exerciseID, String searchIfAny) {
-    if (numToShow == 1) {
+    if (isDrillView()) {
       super.pushFirstSelection(exerciseID, searchIfAny);
     } else {
       updateDownloadLinks();
@@ -1339,7 +1239,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private Collection<Integer> setVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
-    if (numToShow == 1 && itemID > 0) {
+    if (isDrillView() && itemID > 0) {
       visibleIDs = new ArrayList<>();
       visibleIDs.add(itemID);
       // logger.info("askServerForExercises ask for single -- " + itemID);
@@ -1445,7 +1345,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #askServerForExercises(int, Collection, int)
    */
   private void getExercises(final Collection<Integer> visibleIDs, final int currentReq) {
-    setExerciseContainer(new DivWidget());
+    if (!isDrillView()) { // no blink
+      setExerciseContainer(new DivWidget());
+    }
 
     //    logger.warning("getExercises NO timer " + diff);
     // final int currentReq = incrReq();
@@ -1557,7 +1459,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       if (toShow.isEmpty()) {
         hidePrevNext();
       } else {
-        if (numToShow == 1) { // hack for avp
+        if (isDrillView()) { // hack for avp
           hidePrevNextWidgets();
           showExercises(toShow, reqID);
           progressBar.setVisible(false);
@@ -1579,8 +1481,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #gotFullExercises
    */
   private void showExercises(final Collection<CommonExercise> result, final int reqID) {
-    if (numToShow == 1) { // drill/avp/flashcard
-      //innerContainer.getWidget().setVisible(true);
+    if (isDrillView()) { // drill/avp/flashcard
       showDrill(result);
     } else {
       if (isStale(reqID)) {
@@ -1614,6 +1515,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         });*/
       }
     }
+  }
+
+  private boolean isDrillView() {
+    return numToShow == 1;
   }
 
   private void reallyShowExercises(Collection<CommonExercise> result, int reqID) {

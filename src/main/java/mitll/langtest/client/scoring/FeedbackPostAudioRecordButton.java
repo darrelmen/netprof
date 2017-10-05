@@ -9,7 +9,7 @@ import mitll.langtest.shared.answer.AudioType;
 import java.util.logging.Logger;
 
 /**
- * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
+ * @see AudioPanel#makePlayAudioPanel(Widget, String, String, mitll.langtest.shared.exercise.AudioRefExercise)
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");

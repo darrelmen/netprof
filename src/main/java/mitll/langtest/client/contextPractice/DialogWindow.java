@@ -65,28 +65,33 @@ import java.util.*;
  * @since
  */
 public class DialogWindow implements  DialogViewer {
+/*
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final NumberFormat decF = NumberFormat.getFormat("#.####");
   private final ContextPractice cpw;
+*/
 
   /**
-   * @see Navigation#Navigation
+   * @seex Navigation#Navigation
    * @param service
    * @param controller
    * @param cpw
    */
   public DialogWindow(LangTestDatabaseAsync service, ExerciseController controller, ContextPractice cpw) {
-    this.controller = controller;
+/*    this.controller = controller;
     this.service = service;
-    this.cpw = cpw;
+    this.cpw = cpw;*/
   }
 
-  /**
-   *
-   * @param contentPanel
-   */
   public void viewDialog(final HasWidgets contentPanel) {
+  }
+
+    /**
+     *
+     * @param contentPanel
+     */
+  /*public void viewDialog(final HasWidgets contentPanel) {
     contentPanel.clear();
 //    contentPanel.getElement().setId("contentPanel");
     final HorizontalPanel optionPanel = new HorizontalPanel();
@@ -234,14 +239,14 @@ public class DialogWindow implements  DialogViewer {
     }
   }
 
-  private native void addPlayer() /*-{
+  private native void addPlayer() *//*-{
       $wnd.basicMP3Player.init();
-  }-*/;
+  }-*//*;
 
-  private native void resetPlayer() /*-{
+  private native void resetPlayer() *//*-{
       $wnd.soundManager.reset;
       $wnd.soundManager.init;
-  }-*/;
+  }-*//*;
 
   private SimplePostAudioRecordButton getRecordButton(String sent, String transliteration, final HTML resultHolder, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening) {
     SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent, transliteration) {
@@ -369,7 +374,7 @@ public class DialogWindow implements  DialogViewer {
           youStart = true;
         if (!showPart)
           sent.setText("(Say your part)"); // be careful to not get the sentence for scoring from here!
-        PlayAudioPanel play = new PlayAudioPanel(controller.getSoundManager(), "config/mandarinClassroom/bestAudio/" + sentToAudioPath.get(sentence), false);
+        PlayAudioPanel play = new PlayAudioPanel(controller.getSoundManager(), "config/mandarinClassroom/bestAudio/" + sentToAudioPath.get(sentence), false, controller, null);
         controller.register(play.getPlayButton(), "played reference audio for sentence " + sentence);
         play.setMinWidth(82);
         play.setPlayLabel("Play");
@@ -455,7 +460,7 @@ public class DialogWindow implements  DialogViewer {
         sentPanel.setWidget(sentIndex, 7, somethingIsHappening);
         somethingIsHappening.setVisible(false);
       } else {
-        PlayAudioPanel play = new PlayAudioPanel(controller.getSoundManager(), "config/mandarinClassroom/bestAudio/" + sentToAudioPath.get(sentence), false);
+        PlayAudioPanel play = new PlayAudioPanel(controller.getSoundManager(), "config/mandarinClassroom/bestAudio/" + sentToAudioPath.get(sentence), false, controller, null);
         sentPanel.setWidget(sentIndex, 1, play);
         sent.getElement().getStyle().setProperty("fontStyle", "italic");
         play.setVisible(false);
@@ -681,7 +686,7 @@ public class DialogWindow implements  DialogViewer {
 
   private HashMap<String, PlayAudioPanel> getPlayAudioWidget() {
     HashMap<String, PlayAudioPanel> pw = new HashMap<>();
-/*
+*//*
     //at the moment, this list seems complete. wu3 is the only phone recorded by Haohsiang.
     pw.put("a1", new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma1.mp3", false).setPlayLabel("a1"));
     pw.put("a2", new PlayAudioPanel(controller, "config/mandarinClassroom/phones/ma2.mp3", false).setPlayLabel("a2"));
@@ -736,7 +741,7 @@ public class DialogWindow implements  DialogViewer {
     for (String k : pw.keySet()) {
       controller.register(pw.get(k).getPlayButton(), "playing example phone for " + k);
     }
-    */
+    *//*
     return pw;
-  }
+  }*/
 }

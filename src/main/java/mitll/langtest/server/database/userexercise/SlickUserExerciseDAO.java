@@ -388,13 +388,12 @@ public class SlickUserExerciseDAO
     ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
     if (exercisePhoneInfo == null || exercisePhoneInfo.getNumPhones() < 1) {
-      if (exercisePhoneInfo == null) {
+/*      if (exercisePhoneInfo == null) {
         logger.info("getExercisePhoneInfo : no phone info for " + slick.id() + " in " + exToPhones.size());
       } else {
         logger.info("getExercisePhoneInfo phone info is " + exercisePhoneInfo.getNumPhones() +
             " for  " + slick.id());
-
-      }
+      }*/
       exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup, pairs);
     } else {
 //      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);

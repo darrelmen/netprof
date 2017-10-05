@@ -24,6 +24,8 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonAudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -87,11 +89,12 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
    * @param toTheRightWidget
    * @param buttonTitle
    * @param recordButtonTitle
+   * @param exercise
    * @return
    * @see AudioPanel#getPlayButtons
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, CommonAudioExercise exercise) {
     recordImage1 = new Image(UriUtils.fromSafeConstant(FIRST_RED));
     recordImage1.setVisible(false);
     recordImage2 = new Image(UriUtils.fromSafeConstant(SECOND_RED));
@@ -99,7 +102,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
 
     postAudioRecordButton = new MyPostAudioRecordButton(controller);
     postAudioRecordButton.getElement().getStyle().setMargin(8, Style.Unit.PX);
-    playAudioPanel = new MyPlayAudioPanel(soundManager, postAudioRecordButton );
+    playAudioPanel = new MyPlayAudioPanel(soundManager, postAudioRecordButton, controller, this.exercise);
     return playAudioPanel;
   }
 
@@ -124,11 +127,14 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
     /**
      * @param soundManager
      * @param postAudioRecordButton1
+     * @param controller
+     * @param exercise
      * @paramx xgoodwaveExercisePanel
-     * @see #makePlayAudioPanel
+     * @see AudioPanel#makePlayAudioPanel
      */
     public MyPlayAudioPanel(SoundManagerAPI soundManager,
-                            final PostAudioRecordButton postAudioRecordButton1) {
+                            final PostAudioRecordButton postAudioRecordButton1,
+                            ExerciseController controller, CommonExercise exercise) {
       super(soundManager, new PlayListener() {
         public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -140,13 +146,13 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
           //  goodwaveExercisePanel.setBusy(false);
           postAudioRecordButton1.setEnabled(true);
         }
-      }, "", null);
+      }, "", null, controller, exercise, true);
       getElement().setId("GoodwaveExercisePanel_MyPlayAudioPanel");
     }
 
     /**
      * @param optionalToTheRight
-     * @see PlayAudioPanel#PlayAudioPanel(SoundManagerAPI, String, Widget, boolean)
+     * @see PlayAudioPanel#PlayAudioPanel
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {
@@ -298,7 +304,7 @@ public class ASRRecordAudioPanel<T extends CommonExercise> extends ASRScoringAud
   }
 
   /**
-   * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
+   * @see AudioPanel#makePlayAudioPanel(Widget, String, String, AudioRefExercise)
    */
   private class MyPostAudioRecordButton extends PostAudioRecordButton {
     MyPostAudioRecordButton(ExerciseController controller) {

@@ -111,9 +111,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.getAll(projid);
   }
 
+  public List<SlickAudio> getAllNoExistsCheck(int projid) {
+    return dao.getAll(projid);
+  }
+
   public Collection<UserTimeBase> getAudioForReport(int projid) {
     List<UserTimeBase> report = new ArrayList<>();
-    dao.getAllNoCheck(projid).forEach(slickAudio -> report.add(new UserTimeBaseImpl(slickAudio.userid(), slickAudio.modified().getTime())));
+    dao
+        .getAllNoCheck(projid)
+        .forEach(slickAudio -> report.add(new UserTimeBaseImpl(slickAudio.userid(), slickAudio.modified().getTime())));
     return report;
   }
 

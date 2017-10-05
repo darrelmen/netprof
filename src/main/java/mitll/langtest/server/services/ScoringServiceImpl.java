@@ -214,7 +214,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
     logger.info("getAlignments asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    logger.info("getAlignments recalc " +audioIDMap.size() + " alignments...");
+    logger.info("getAlignments recalc " + audioIDMap.size() + " alignments...");
     return recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
   }
@@ -224,11 +224,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                          int userIDFromSession,
                                                          Map<Integer, ISlimResult> audioToResult,
                                                          boolean hasModel) {
-    return recalcAlignments(projid, audioIDs, getAudioFileHelper(), userIDFromSession, audioToResult, hasModel);
+    return recalcAlignments(projid, audioIDs, getAudioFileHelper(projid), userIDFromSession, audioToResult, hasModel);
+  }
+
+  private AudioFileHelper getAudioFileHelper(int projid) {
+    return db.getProject(projid).getAudioFileHelper();
   }
 
   /**
-   *
    * @param projid
    * @param audioIDs
    * @param audioFileHelper
@@ -262,7 +265,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
-   *
    * @param projid
    * @param audioID
    * @param audioFileHelper
@@ -290,7 +292,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         idToAlignment.put(audioID, pretestScore);
       }
     } else {
-      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " +audioID);
+      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
 
       getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
     }
@@ -399,17 +401,20 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           boolean usePhonemeMap) {
     File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav"));
 
-    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), exerciseID);
+    int projectID = getProjectID();
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, exerciseID);
 
     String english = customOrPredefExercise == null ? "" : customOrPredefExercise.getEnglish();
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
     PrecalcScores precalcScores =
-        getAudioFileHelper().checkForWebservice(exerciseID, english, sentence, getProjectID(), getUserIDFromSessionOrDB(), absoluteAudioFile);
+        audioFileHelper
+            .checkForWebservice(exerciseID, english, sentence, projectID, getUserIDFromSessionOrDB(), absoluteAudioFile);
 
     return getPretestScore(reqid,
         (int) resultID,
         testAudioFile,
         sentence, transliteration, imageOptions,
-        exerciseID, usePhonemeMap, precalcScores);
+        exerciseID, usePhonemeMap, precalcScores, audioFileHelper);
   }
 
   /**
@@ -423,7 +428,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param usePhoneToDisplay
    * @param precalcScores
    * @return
-   * @paramx audioID
    */
   private PretestScore getPretestScore(int reqid,
                                        int resultID,
@@ -433,7 +437,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        ImageOptions imageOptions,
                                        int exerciseID,
                                        boolean usePhoneToDisplay,
-                                       PrecalcScores precalcScores) {
+                                       PrecalcScores precalcScores,
+                                       AudioFileHelper audioFileHelper) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -460,7 +465,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         imageOptions,
         exerciseID,
         precalcScores,
-        usePhoneToDisplay1);
+        usePhoneToDisplay1,
+        audioFileHelper);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
@@ -478,8 +484,27 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return asrScoreForAudio;
   }
 
-  private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence, String transliteration, ImageOptions imageOptions, int exerciseID, PrecalcScores precalcScores, boolean usePhoneToDisplay1) {
-    return getAudioFileHelper().getASRScoreForAudio(
+  /**
+   * @param reqid
+   * @param testAudioFile
+   * @param sentence
+   * @param transliteration
+   * @param imageOptions
+   * @param exerciseID
+   * @param precalcScores
+   * @param usePhoneToDisplay1
+   * @return
+   * @see #getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores)
+   */
+  private PretestScore getPretestScoreMaybeUseCache(int reqid,
+                                                    String testAudioFile,
+                                                    String sentence, String transliteration,
+                                                    ImageOptions imageOptions,
+                                                    int exerciseID,
+                                                    PrecalcScores precalcScores,
+                                                    boolean usePhoneToDisplay1,
+                                                    AudioFileHelper audioFileHelper) {
+    return audioFileHelper.getASRScoreForAudio(
         reqid,
         testAudioFile,
         sentence,
@@ -534,7 +559,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
-      logger.warn("getAlignment : huh? got zero length recording for " + identifier + " from " +device);
+      logger.warn("getAlignment : huh? got zero length recording for " + identifier + " from " + device);
       logEvent(identifier, device);
     }
     return audioAnswer;

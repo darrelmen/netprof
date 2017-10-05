@@ -804,7 +804,7 @@ public class RefResultDecoder {
     }
     if (added == 0 && (spew++ < MAX_SPEW || spew % 1000 == 0)) {
       logger.info("queueDecodeExercise (" + spew +
-          ") no audio for " + exercise.getID() + " out of " + possible);
+          ") no audio for ex " + exercise.getID() + " out of " + possible);
     }
   }
 

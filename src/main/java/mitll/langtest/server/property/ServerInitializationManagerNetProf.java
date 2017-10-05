@@ -238,7 +238,10 @@ public class ServerInitializationManagerNetProf {
         grabValue(manifest, atts, Name.IMPLEMENTATION_VERSION);
 
         grabFromAttributes(manifest, atts, BUILT_BY);
-        grabFromAttributes(manifest, atts, BUILT_DATE);
+        String s = grabFromAttributes(manifest, atts, BUILT_DATE);
+        if (s != null) {
+          log.info(BUILT_DATE + " = " + s);
+        }
       }
 
       return new ServerProperties(props, manifest, configDir);
@@ -246,13 +249,14 @@ public class ServerInitializationManagerNetProf {
     return null;
   }
 
-  private void grabFromAttributes(Map<String, String> manifest, Attributes atts, String builtBy) {
+  private String grabFromAttributes(Map<String, String> manifest, Attributes atts, String builtBy) {
     String value = atts.getValue(builtBy);
     if (value == null) {
       log.warn("grabFromAttributes can't find " + builtBy + " in " + atts.keySet());
       value = "";
     }
     manifest.put(builtBy, value);
+    return value;
   }
 
   private void grabValue(Map<String, String> manifest, Attributes atts, Name specificationTitle) {
@@ -308,7 +312,8 @@ public class ServerInitializationManagerNetProf {
     return in;
   }
 
-  boolean warned = false;
+  private static boolean warned = false;
+
   private Attributes getManifestAttributes(ServletContext ctx) {
     InputStream in = ctx.getResourceAsStream("/META-INF/MANIFEST.MF");
     if (in != null) {
@@ -319,10 +324,9 @@ public class ServerInitializationManagerNetProf {
         log.warn("getManifestAttributes Error while reading manifest", ex);
       }
     } else {
-      //if (DEBUG)
       if (!warned) {
         log.info("getManifestAttributes : Could not find manifest.");
-      warned =true;
+        warned = true;
       }
     }
     return null;

@@ -502,7 +502,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         //  goodwaveExercisePanel.setBusy(false);
         // postAudioRecordButton1.setEnabled(true);
       }
-    });
+    }, controller, exercise);
 
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
     downloadContainer.getDownloadContainer().setVisible(true);

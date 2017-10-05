@@ -42,8 +42,11 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -93,15 +96,26 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private static int counter = 0;
   private final int id;
   private boolean playing = false;
+  protected final ExerciseController controller;
+  protected final CommonAudioExercise exercise;
 
   /**
    * @param soundManager
    * @param buttonTitle
    * @param optionalToTheRight
    * @param doSlow
+   * @param controller
+   * @param exercise
+   * @param addButtonsNow
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String buttonTitle, Widget optionalToTheRight, boolean doSlow) {
+  public PlayAudioPanel(SoundManagerAPI soundManager,
+                        String buttonTitle,
+                        Widget optionalToTheRight,
+                        boolean doSlow,
+                        ExerciseController controller,
+                        CommonAudioExercise exercise,
+                        boolean addButtonsNow) {
     this.soundManager = soundManager;
     addStyleName("playButton");
     playLabel = buttonTitle;
@@ -113,7 +127,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     isSlow = doSlow;
 
-    addButtons(optionalToTheRight);
+    this.controller = controller;
+    this.exercise = exercise;
+
+    if (addButtonsNow) {
+      addButtons(optionalToTheRight);
+    }
 
     LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, authenticationEvent -> {
       if (authenticationEvent.getId() != id) {
@@ -130,16 +149,18 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param soundManager
    * @param path
    * @param doSlow
+   * @param controller
+   * @param exercise
    * @seex PressAndHoldExercisePanel#getPlayAudioPanel
    * @deprecated only for amas and dialog
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow) {
-    this(soundManager, "", null, doSlow);
+  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, CommonAudioExercise exercise) {
+    this(soundManager, "", null, doSlow, controller, exercise, true);
     loadAudio(path);
   }
 
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener) {
-    this(soundManager, playListener,"", null);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, CommonAudioExercise exercise) {
+    this(soundManager, playListener, "", null, controller, exercise, true);
   }
 
   /**
@@ -147,19 +168,26 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param playListener
    * @param buttonTitle
    * @param optionalToTheRight
-   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, com.google.gwt.user.client.ui.Widget)
+   * @param controller
+   * @param exercise
+   * @param addButtonsNow
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, Widget, ExerciseController, CommonExercise)
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, String buttonTitle,
-                        Widget optionalToTheRight) {
-    this(soundManager, buttonTitle, optionalToTheRight, false);
+  public PlayAudioPanel(SoundManagerAPI soundManager,
+                        PlayListener playListener,
+                        String buttonTitle,
+                        Widget optionalToTheRight,
+                        ExerciseController controller,
+                        CommonAudioExercise exercise, boolean addButtonsNow) {
+    this(soundManager, buttonTitle, optionalToTheRight, false, controller, exercise, addButtonsNow);
     addPlayListener(playListener);
   }
 
-  public PlayAudioPanel setPlayLabel(String label) {
+  public void setPlayLabel(String label) {
     this.playLabel = label;
     setText();
-    return this;
+    //return this;
   }
 
   protected void setText() {
@@ -239,8 +267,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
     //if (isLarge) {
-   //   playButton.setSize(ButtonSize.LARGE);
-   // }
+    //   playButton.setSize(ButtonSize.LARGE);
+    // }
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
@@ -361,7 +389,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   @Override
   public void repeatSegment(float startInSeconds, float endInSeconds) {
-    if (  currentSound != null) {
+    if (currentSound != null) {
       doPlaySegment(startInSeconds, endInSeconds);
     } else {
       if (DEBUG || currentPath == null) logger.info("repeatSegment - new path " + currentPath);
@@ -480,7 +508,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected String rememberAudio(String path) {
     if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();
-
     this.currentPath = CompressedAudio.getPath(path);
     return currentPath;
   }

@@ -11,9 +11,11 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.download.DownloadContainer;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -34,9 +36,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   /**
    * @param soundManager
    * @param postAudioRecordButton1
+   * @param controller
+   * @param exercise
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1) {
+  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, CommonExercise exercise) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -50,7 +54,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
           }
         },
         "",
-        null);
+        null, controller, exercise, true);
 
     downloadContainer = new DownloadContainer();
     getElement().setId("RecorderPlayAudioPanel");
@@ -70,7 +74,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showPlayButton() {
     playButton.setVisible(true);
   }
-
   void hidePlayButton() {
     playButton.setVisible(false);
   }

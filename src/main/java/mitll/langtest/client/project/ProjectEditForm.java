@@ -29,12 +29,13 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  public static final String HIERARCHY = "Hierarchy";
-  public static final String COURSE = "Course";
-  public static final String COURSE_OPTIONAL = "Course (optional)";
-  public static final String HYDRA_HOST_PORT = "Hydra Host:Port";
-  public static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
+
+  private static final String HIERARCHY = "Hierarchy";
+  private static final String COURSE = "Course";
+  private static final String COURSE_OPTIONAL = "Course (optional)";
+  private static final String HYDRA_HOST_PORT = "Hydra Host:Port";
+  private static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
 
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
   private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
@@ -61,6 +62,7 @@ public class ProjectEditForm extends UserDialog {
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
+  boolean isNew=false;
 
   /**
    * @param lifecycleSupport
@@ -80,6 +82,7 @@ public class ProjectEditForm extends UserDialog {
    */
   Widget getForm(ProjectInfo info, boolean isNew) {
     this.info = info;
+    this.isNew = isNew;
     return getFields(info, isNew);
   }
 
@@ -253,7 +256,8 @@ public class ProjectEditForm extends UserDialog {
       chapter.setText(info.getSecondType());
     }
 
-    addLifecycle(info, fieldset);
+    DivWidget widgets = addLifecycle(info, fieldset);
+    if (isNew) widgets.setVisible(false);
 
     {
       DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT);
@@ -262,9 +266,13 @@ public class ProjectEditForm extends UserDialog {
       hydraHost.setText(info.getHost());
 
       hydraPort = getHydraPort(hDivLabel, info.getPort());
+      if (isNew) hDivLabel.setVisible(false);
     }
 
-    model = getModel(getHDivLabel(fieldset, LANGUAGE_MODEL), info.getModelsDir());
+    DivWidget hDivLabel = getHDivLabel(fieldset, LANGUAGE_MODEL);
+    model = getModel(hDivLabel, info.getModelsDir());
+
+    if (isNew) hDivLabel.setVisible(false);
 
     if (!isNew) {
       fieldset.add(getCheckAudio(info));
@@ -281,7 +289,7 @@ public class ProjectEditForm extends UserDialog {
     return fieldset;
   }
 
-  private void addLifecycle(ProjectInfo info, Fieldset fieldset) {
+  private DivWidget addLifecycle(ProjectInfo info, Fieldset fieldset) {
     DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
 
     lifecycle.add(statusBox = getBox());
@@ -297,6 +305,8 @@ public class ProjectEditForm extends UserDialog {
 
     checkPortOnBlur(statusBox);
     setBox(info.getStatus());
+
+    return lifecycle;
   }
 
   /**

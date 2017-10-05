@@ -50,13 +50,9 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * A waveform record button and a play audio button.
@@ -66,8 +62,8 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
-  private final Logger logger = Logger.getLogger("RecordAudioPanel");
+public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<CommonAudioExercise> {
+ // private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
    * @see #getAfterPlayWidget
@@ -194,16 +190,17 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @param toTheRightWidget
    * @param buttonTitle
    * @param recordButtonTitle
+   * @param exercise
    * @return
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, CommonAudioExercise exercise) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
     // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget, controller, exercise);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -220,7 +217,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @param audioType
    * @param recordButtonTitle
    * @return
-   * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
+   * @see AudioPanel#makePlayAudioPanel
    */
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
@@ -263,7 +260,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
+    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel,
+                            String suffix, Widget toTheRightWidget, ExerciseController controller, CommonAudioExercise exercise) {
       super(RecordAudioPanel.this.soundManager,
           new PlayListener() {
             public void playStarted() {
@@ -280,7 +278,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
               postAudioRecordButton.setEnabled(true);
             }
 
-          }, suffix, toTheRightWidget);
+          }, suffix, toTheRightWidget, controller, exercise, true);
 
       add(recordImage1);
       recordImage1.setVisible(false);
@@ -299,7 +297,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     /**
      * @param optionalToTheRight
      * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel
-     * @see #MyPlayAudioPanel(Image, Image, Panel, String, Widget)
+     * @see #MyPlayAudioPanel
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {

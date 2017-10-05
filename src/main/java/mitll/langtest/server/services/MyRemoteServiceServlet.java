@@ -108,10 +108,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   /**
    * @return
    */
-  protected int getProjectID() {
-    int userIDFromSession = getUserIDFromSessionOrDB();
-    return getProjectID(userIDFromSession);
-  }
+  protected int getProjectID() {  return getProjectID(getUserIDFromSessionOrDB());  }
 
   protected int getProjectID(int userIDFromSession) {
     if (userIDFromSession == -1) {
@@ -511,13 +508,17 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return db.getSectionHelper(getProjectID());
   }
 
+  /**
+   *
+   * @return
+   */
   protected AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;
     } else {
       Project project = getProject();
       if (project == null) {
-        logger.warn("getAudioFileHelper no current project???");
+        logger.error("getAudioFileHelper no current project???");
         return null;
       }
       return project.getAudioFileHelper();

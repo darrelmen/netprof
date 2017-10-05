@@ -36,6 +36,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.CommonAudioExercise;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -54,7 +55,7 @@ import java.util.logging.Logger;
  * Time: 11:31 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
+public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends ScoringAudioPanel<T> {
   private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
@@ -70,7 +71,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exercise
    * @param instance
    * @paramx audioType
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel
    */
   ASRScoringAudioPanel(String refSentence,
                        String transliteration,
@@ -92,7 +93,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exercise
    * @param instance
    * @paramx audioType
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
                               ExerciseController controller, boolean showSpectrogram,
