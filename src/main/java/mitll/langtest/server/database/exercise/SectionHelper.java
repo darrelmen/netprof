@@ -389,7 +389,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
       if (pairs.isEmpty()) {
         if (!type.equals(LISTS)) {
-          logger.error("getTypeToMatchPairs : huh? pairs is empty for type " + type);
+          logger.warn("getTypeToMatchPairs : huh? pairs is empty for type " + type);
         }
       } else {
         for (SectionNode child : node.getChildren()) {

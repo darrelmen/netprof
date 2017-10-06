@@ -158,7 +158,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
     if (toImport != null) {
       int importUser = getUserIDFromSessionOrDB();
-      logger.info("addPending import user = " + importUser);
+      //logger.info("addPending import user = " + importUser);
       if (importUser == -1) {
         logger.info("\t addPending import user now = " + importUser);
         importUser = db.getUserDAO().getImportUser();
@@ -227,7 +227,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     try {
       List<Project> matches = getProjectsForSameLanguage(projectid);
 
-      logger.info("copyAudio found  " + matches.size() + " for project " + projectid);
+      logger.info("copyAudio found " + matches.size() + " source projects for project " + projectid);
 
       Map<String, AudioMatches> transcriptToAudioMatch = new HashMap<>();
       Map<String, AudioMatches> transcriptToContextAudioMatch = new HashMap<>();
@@ -278,10 +278,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
      * @see #copyMatchingAudio(int, AudioMatches, int, List)
      */
     public void add(SlickAudio candidate) {
-      AudioType audioType = getAudioType(candidate);
-      int gender = candidate.gender();
-      boolean regularSpeed = audioType.isRegularSpeed();
-
+   //   int gender = candidate.gender();
+      boolean regularSpeed = getAudioType(candidate).isRegularSpeed();
 //      logger.info("AudioMatches Examine candidate " + candidate);
 //      logger.info("AudioMatches Examine regularSpeed " + regularSpeed + " " + audioType);
 //      logger.info("AudioMatches Examine gender " + gender );
@@ -291,7 +289,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 //        logger.error("Got " + e, e);
 //      }
       int before = getCount();
-      if (gender == 0) {
+      if (candidate.gender() == 0) {
         if (regularSpeed) {
           mr = mr == null ? candidate : mr.dnr() < candidate.dnr() ? candidate : mr;
         } else {
@@ -305,7 +303,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         }
       }
       int after = getCount();
-      if (after > before) logger.info("AudioMatches now " + after+ " added " + candidate);
+      if (after > before) {
+        logger.info("AudioMatches now " + after+ " added " + candidate);
+      }
+      else {
+//        logger.info("AudioMatches not adding " + after+ " added " + candidate);
+      }
     }
 
  /*   public SlickAudio getMr() {
@@ -353,9 +356,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   private static AudioType getAudioType(SlickAudio candidate) {
     AudioType audioType = AudioType.UNSET;
     try {
-      audioType = AudioType.valueOf(candidate.audiotype());
+      audioType = AudioType.valueOf(candidate.audiotype().toUpperCase());
     } catch (IllegalArgumentException e) {
-      //
+      logger.warn("getAudioType : got unknown audio " +candidate.audiotype());
     }
     return audioType;
   }

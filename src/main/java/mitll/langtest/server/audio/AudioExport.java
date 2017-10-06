@@ -473,13 +473,15 @@ public class AudioExport {
 
   private int attachAudio(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String language) {
     int numAttach = 0;
-    int projectID = toWrite.iterator().next().getProjectID();
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
-    for (CommonExercise ex : toWrite) {
-      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
-      if (audioAttributes != null) {
-        audioDAO.attachAudio(ex, audioAttributes, language);
-        numAttach++;
+    if (!toWrite.isEmpty()) {
+      int projectID = toWrite.iterator().next().getProjectID();
+      Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
+      for (CommonExercise ex : toWrite) {
+        Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
+        if (audioAttributes != null) {
+          audioDAO.attachAudio(ex, audioAttributes, language);
+          numAttach++;
+        }
       }
     }
     return numAttach;
