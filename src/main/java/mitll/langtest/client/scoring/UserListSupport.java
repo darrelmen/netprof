@@ -118,7 +118,8 @@ public class UserListSupport {
 
   private void useLists(Collection<UserList<CommonShell>> result,
                         DropdownBase addToList,
-                        DropdownBase removeFromList, DropdownBase emailList, int id, Dropdown container) {
+                        DropdownBase removeFromList,
+                        DropdownBase emailList, int id, Dropdown container) {
     addToList.clear();
     removeFromList.clear();
     emailList.clear();
@@ -299,6 +300,7 @@ public class UserListSupport {
     widget.addClickHandler(event -> {
       controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
 
+     // logger.info("got click on " + ul.getID() + " " + ul.getName());
       controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -307,6 +309,7 @@ public class UserListSupport {
         @Override
         public void onSuccess(Void result) {
           popupContainer.showPopup(ITEM_ADDED, container);
+       //   logger.info("fire event on " + ul.getID() + " " + ul.getName());
           LangTest.EVENT_BUS.fireEvent(new ListChangedEvent());
         }
       });

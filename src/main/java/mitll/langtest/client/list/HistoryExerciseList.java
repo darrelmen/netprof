@@ -543,7 +543,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
-        logger.warning("loadExercisesUsingPrefix Not doing anything as response to request " + request + "\n\tfor exercise " + exerciseID);
+        logger.info("loadExercisesUsingPrefix Not doing anything as response to request " + request + "\n\tfor exercise " + exerciseID);
       }
     }
   }
