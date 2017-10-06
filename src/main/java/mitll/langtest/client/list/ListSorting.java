@@ -6,11 +6,14 @@ import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Comparator;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/22/17.
  */
 public class ListSorting<T extends CommonShell, U extends Shell> {
+  private final Logger logger = Logger.getLogger("ListSorting");
+
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
 
@@ -141,12 +144,13 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     return compareAgainLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
   }
 
+  private int compMeaning(CommonShell o1, CommonShell o2) {
+    int i = o1.getMeaning().toLowerCase().compareTo(o2.getMeaning().toLowerCase());
+    if (i == 0) i = compEnglish(o1, o2);
+    return i;
+  }
+
   private int compEnglish(CommonShell o1, CommonShell o2) {
     return o1.getEnglish().toLowerCase().compareTo(o2.getEnglish().toLowerCase());
   }
-
-  private int compMeaning(CommonShell o1, CommonShell o2) {
-    return o1.getMeaning().toLowerCase().compareTo(o2.getMeaning().toLowerCase());
-  }
-
 }

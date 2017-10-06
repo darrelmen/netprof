@@ -94,9 +94,9 @@ public class NewContentChooser implements INavigation {
           clear();
           listView.showContent(divWidget, "listView");
           break;
-        case ITEMS:
+        case RECORD:
           clear();
-          new RecorderNPFHelper(controller, true).showNPF(divWidget, ITEMS.toString());
+          new RecorderNPFHelper(controller, true).showNPF(divWidget, RECORD.toString());
           break;
         case CONTEXT:
           clear();

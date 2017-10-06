@@ -13,7 +13,7 @@ public interface INavigation {
     PROGRESS,
     LEARN,
     DRILL,
-    ITEMS,
+    RECORD,
     CONTEXT,
     DEFECTS,
     FIX;
@@ -27,7 +27,6 @@ public interface INavigation {
   VIEWS getCurrentView();
 
   void showView(VIEWS view);
-
 
   void showInitialState();
 
