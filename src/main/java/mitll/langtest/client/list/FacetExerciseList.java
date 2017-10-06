@@ -1596,8 +1596,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void showDrill(Collection<CommonExercise> result) {
     CommonExercise next = result.iterator().next();
-    addExerciseWidget(next);
     markCurrentExercise(next.getID());
+    addExerciseWidget(next);
   }
 
   /**

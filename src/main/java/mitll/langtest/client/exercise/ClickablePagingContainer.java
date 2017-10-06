@@ -281,10 +281,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void clearSelection() {
-    SelectionModel<? super T> selectionModel = table.getSelectionModel();
     T currentSelection = getCurrentSelection();
     if (currentSelection != null) {
-      selectionModel.setSelected(currentSelection, false);
+      getSelectionModel().setSelected(currentSelection, false);
     }
   }
 
@@ -296,7 +295,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     int numRows = getNumTableRowsGivenScreenHeight();
     //   logger.info("onResize size is " + numRows);
     if (table.getPageSize() != numRows) {
-      //   logger.info("2 onResize size is " + numRows);
+      logger.info("2 onResize size is " + numRows);
       table.setPageSize(numRows);
       table.redraw();
       markCurrent(currentExercise);

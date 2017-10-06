@@ -423,7 +423,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (DEBUG) logger.info("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
     String exceptionAsString = getExceptionAsString(caught);
     //  caught.printStackTrace();
-    controller.logMessageOnServer("got exception " + caught.getMessage() + " : " +exceptionAsString, " RPCerror?", true);
+    controller.logMessageOnServer("got exception " + caught.getMessage() + " : " + exceptionAsString, " RPCerror?", true);
   }
 
   /**
@@ -503,7 +503,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param es
    * @see PagingExerciseList#forgetExercise(int)
    */
-  public T removeExercise(T es) {
+  T removeExercise(T es) {
     int id = es.getID();
     T current = getCurrentExercise();
     if (current.getID() == id) {
@@ -663,15 +663,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseAsyncCallback#onSuccess
    */
   void showExercise(final U commonExercise) {
-    logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID());
+    if (DEBUG) logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID());
     markCurrentExercise(commonExercise.getID());
 
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " + getCurrentExercise() +
-            " or " + getCurrentExerciseID());
-        addExerciseWidget(commonExercise);
-      }
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " + getCurrentExercise() +
+          " or " + getCurrentExerciseID());
+      addExerciseWidget(commonExercise);
     });
   }
 
@@ -707,10 +705,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     } else {
       int i1 = i + 1;
       Shell next = getAt(i1);
-  /*    for (int j = i; j<i+5;j++) {
-        int id = getAt(j).getID();
-        logger.info("\tat " + j +" = "+ id);
-      }*/
       if (DEBUG) logger.info("ExerciseList.getNextExercise " + next.getID() + " at next index " + i1);
       loadExercise(next.getID());
     }
@@ -734,7 +728,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public int getComplete() {
-    return getIndex(getCurrentExerciseID());
+    int currentExerciseID = getCurrentExerciseID();
+    int index = getIndex(currentExerciseID);
+    return index;
   }
 
   /**
@@ -747,9 +743,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   void clearExerciseContainer() {
-    // logger.info("clearing container --- >");
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//    logger.info("call stack "+ exceptionAsString);
     innerContainer.clear();
   }
 
@@ -815,10 +808,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#loadNextExercise
    */
   protected void onLastItem() {
-//    loadFirstExercise("");
-//  }
-//
-//  protected void showListComplete() {
     new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
   }
 

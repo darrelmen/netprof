@@ -423,12 +423,17 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }
   }
 
-  public CommonExercise getExerciseOld(String id) {
+  /**
+   * @see #addOverlay(CommonExercise)
+   * @param id
+   * @return
+   */
+  private CommonExercise getExerciseOld(String id) {
     synchronized (this) {
       CommonExercise commonExercise = oldidToExercise.get(id);
       if (commonExercise == null) {
         if (warns++ < MAX_WARNS) {
-          logger.warn(this + " couldn't find exercise " + id + " in " + oldidToExercise.size() + " exercises (" + warns + " warned)");
+          logger.warn(this + " couldn't find exercise '" + id + "' in " + oldidToExercise.size() + " exercises (" + warns + " warned)");
           logger.warn(" : " + oldidToExercise.keySet());
         }
       }

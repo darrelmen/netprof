@@ -284,7 +284,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now
       if (cachedResult != null && !cachedResult.isValid()) {
         boolean b = db.getRefResultDAO().removeByAudioID(audioID);
-        logger.error("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
+        if (!b) {
+          logger.warn("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
+        }
       }
 
       PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
