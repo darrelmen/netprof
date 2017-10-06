@@ -374,7 +374,15 @@ public class ProjectManagement implements IProjectManagement {
   @Override
   public void refreshProjects() {
     Map<Integer, SlickProject> idToSlickProject = getIdToProjectMapFromDB();
-    idToProject.values().forEach(project -> project.setProject(idToSlickProject.get(project.getID())));
+    idToProject.values().forEach(project -> {
+      SlickProject project1 = idToSlickProject.get(project.getID());
+      if (project1 == null) {
+        logger.warn("huh? no project for " + project.getID() + " : " + project);
+      }
+      else {
+        project.setProject(project1);
+      }
+    });
   }
 
   @NotNull

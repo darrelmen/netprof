@@ -1157,7 +1157,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @paramx precalcResult
    * @see #getAlignment(String, String, String, String, int, boolean)
    */
   private PretestScore getASRScoreForAudio(int reqid,
@@ -1180,14 +1179,14 @@ public class AudioFileHelper implements AlignDecode {
       return new PretestScore(); // very defensive
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
-    File file1 = new File(testAudioFile);
-    if (!file1.exists()) {
+    File originalFile = new File(testAudioFile);
+    if (!originalFile.exists()) {
       String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
       File file = new File(absolutePath);
       if (!file.exists()) {
         logger.error("getASRScoreForAudio huh? no testAudioFile for " +
             "\n\tsentence " + sentence +
-            "\n\tat       " + file1.getAbsolutePath() +
+            "\n\tat       " + originalFile.getAbsolutePath() +
             "\n\tnor      " + file.getAbsolutePath());
         return new PretestScore();
       } else {

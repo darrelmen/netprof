@@ -38,6 +38,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.recorder.RecordButton;
@@ -400,7 +401,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     path = getReadyToPlayAudio(path);
 
     // wait for rest of page to do layout before asking for the images
-    Scheduler.get().scheduleDeferred(() -> getImages());
+    Scheduler.get().scheduleDeferred(this::getImages);
 
     return path;
   }
@@ -580,6 +581,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
 
           if (!result.successful) {
             logger.warning("getImageURLForAudio : got error for request for type " + type + " and " + path + " and exid " + id);
+            waveform.setUrl(LangTest.LANGTEST_IMAGES + "redx.png");
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);

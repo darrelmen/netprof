@@ -58,7 +58,7 @@ public class AudioConversion extends AudioBase {
   private static final String MP3 = ".mp3";
   public static final String WAV = ".wav";
   private final AudioCheck audioCheck;
-  private static final int MIN_WARN_DUR = 30;
+  private static final int MIN_WARN_DUR = 50;
 
   private final String soxPath;
 //  private final long trimMillisBefore;
@@ -327,14 +327,14 @@ public class AudioConversion extends AudioBase {
     AudioInputStream sourceStream = null;
 
     File sourceFile = new File(wavFile);
-    logger.info("wav2raw Reading from " + sourceFile  + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
+   if (DEBUG) logger.info("wav2raw Reading from " + sourceFile  + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
       File outputFile = new File(rawFile);
 
       String absolutePath = outputFile.getAbsolutePath();
-      logger.info("wav2raw Writing to " + absolutePath);
+      if (DEBUG)  logger.info("wav2raw Writing to " + absolutePath);
 
       fout = new FileOutputStream(outputFile);
 
@@ -586,7 +586,8 @@ public class AudioConversion extends AudioBase {
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) {
-          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?");//,
+          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?",
+               new Exception());//,
           //new Exception("can't find " + pathToAudioFile));
         }
       } else {

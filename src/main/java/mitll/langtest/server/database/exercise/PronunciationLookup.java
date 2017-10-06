@@ -8,4 +8,5 @@ public interface PronunciationLookup {
   int getNumPhonesFromDictionary(String transcript, String transliteration);
 
   boolean hasDict();
+  boolean hasModel();
 }

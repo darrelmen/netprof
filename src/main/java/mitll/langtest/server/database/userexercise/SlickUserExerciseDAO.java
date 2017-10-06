@@ -312,7 +312,7 @@ public class SlickUserExerciseDAO
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
-    if (exercise.getNumPhones() < 1) {
+    if (exercise.getNumPhones() < 1 && lookup.hasModel()) {
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
@@ -494,7 +494,6 @@ public class SlickUserExerciseDAO
    * @param sectionHelper
    * @param exercise
    * @return
-   * @paramx typeOrder
    * @see #addExerciseToSectionHelper
    */
   private List<Pair> addPhoneInfo(SlickExercise slick,
@@ -506,9 +505,9 @@ public class SlickUserExerciseDAO
 
     // Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
     //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
-    int max = 15;
-    int i = 0;
-    boolean addedPhones = false;
+  //  int max = 15;
+  //  int i = 0;
+   // boolean addedPhones = false;
     if (slick.ispredef() && !slick.iscontext()) {
       if (exercise.getAttributes() == null) {
         if (spew++ < 10) {
@@ -540,7 +539,7 @@ public class SlickUserExerciseDAO
       if (true) {//phones == null) {
 //        logger.warn("no phones for " + id);
       } else {
-        addedPhones = true;
+      //  addedPhones = true;
 
         // TODO : maybe put back phone length later ???
  /*       if (ADD_PHONE_LENGTH) {
