@@ -138,6 +138,13 @@ public class UserManager {
     });
   }
 
+  /**
+   * Kick the user out to the login screen if they're not valid in any way.
+   *
+   * @see #getPermissionsAndSetUser
+   * @see #gotNewUser
+   * @param result
+   */
   private void gotSessionUser(User result) {
     if (DEBUG) {
       logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + result);
@@ -145,6 +152,7 @@ public class UserManager {
     if (result == null ||
         !result.isEnabled() ||
         !result.isValid() ||
+        !result.isHasAppPermission() ||
         ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
             result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
             result.getRealGender() == MiniUser.Gender.Unspecified)
@@ -171,7 +179,7 @@ public class UserManager {
     }
   }
 
-  public String getPendingUserID() {
+  String getPendingUserID() {
     if (Storage.isLocalStorageSupported()) {
       return Storage.getLocalStorageIfSupported().getItem(getUserPendingID());
     } else {
