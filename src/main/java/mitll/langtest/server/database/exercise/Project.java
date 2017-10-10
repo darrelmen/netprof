@@ -225,8 +225,12 @@ public class Project implements PronunciationLookup {
    *
    */
   private <T extends CommonShell> void buildExerciseTrie() {
-    fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), true);
-    fullContextTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), false);
+    List<CommonExercise> rawExercises = getRawExercises();
+    String language = project.language();
+    SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
+    //logger.info("build trie from " + rawExercises.size() + " exercises");
+    fullTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, true);
+    fullContextTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, false);
   }
 
   /**
@@ -310,8 +314,7 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    */
   public CommonExercise getExerciseBySearch(String prefix) {
-    List<CommonExercise> exercises1 = fullTrie.getExercises(prefix);
-    return getMatchEither(prefix, exercises1);
+    return getMatchEither(prefix, fullTrie.getExercises(prefix));
   }
 
   public CommonExercise getExerciseBySearchBoth(String english, String fl) {

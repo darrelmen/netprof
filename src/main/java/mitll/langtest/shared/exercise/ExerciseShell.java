@@ -179,7 +179,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   public boolean hasScore() {
-    return score != -1;
+    return score > 0;
   }
 
   @Override

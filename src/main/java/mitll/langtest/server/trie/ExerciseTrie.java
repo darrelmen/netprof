@@ -67,6 +67,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private SmallVocabDecoder smallVocabDecoder;
 
+  private static boolean DEBUG = false;
+
   /**
    * Tokens are normalized to lower case.
    * <p>
@@ -85,7 +87,6 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
                       String language,
                       SmallVocabDecoder smallVocabDecoder,
                       boolean doExercise) {
-    boolean includeForeign = !language.equals(ENGLISH);
     this.smallVocabDecoder = smallVocabDecoder;
     startMakingNodes();
 
@@ -98,11 +99,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
     for (T exercise : exercisesForState) {
       if (doExercise) {
-        addEntriesForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
+        addEntriesForExercise(isMandarin, hasClickableCharacters, exercise);
       } else {
-        addContextSentences(includeForeign, isMandarin, hasClickableCharacters, exercise);
+        addContextSentences(isMandarin, hasClickableCharacters, exercise);
       }
-//      addEntryForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
@@ -113,42 +113,24 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-  /**
-   * @param includeForeign         = not english
-   * @param isMandarin
-   * @param hasClickableCharacters = mandarin, korean, japanese
-   * @param exercise
-   */
-/*
-  private void addEntryForExercise(
-      boolean includeForeign,
-      boolean isMandarin,
-      boolean hasClickableCharacters,
-      T exercise) {
-    addEntriesForExercise(includeForeign, isMandarin, hasClickableCharacters, exercise);
-    addContextSentences  (includeForeign, isMandarin, hasClickableCharacters, exercise);
-  }
-  */
-  private void addEntriesForExercise(boolean includeForeign, boolean isMandarin, boolean hasClickableCharacters, T exercise) {
-    addEnglish(exercise);
-    if (includeForeign) {
-      addForeign(isMandarin, hasClickableCharacters, exercise);
-    } else {
-      String meaning = exercise.getMeaning();
-      String trimmed = getTrimmed(meaning);
 
-      for (String t : smallVocabDecoder.getTokens(trimmed)) {
-        addEntry(exercise, t);
+  private void addEntriesForExercise(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
+    addEnglish(exercise);
+    addForeign(isMandarin, hasClickableCharacters, exercise);
+
+    {
+      String meaning = exercise.getMeaning().trim();
+      if (!meaning.isEmpty()) {
+        String trimmed = getTrimmed(meaning);
+        smallVocabDecoder.getTokens(trimmed).forEach(token -> addEntry(exercise, token));
       }
     }
   }
 
-  private void addContextSentences(boolean includeForeign, boolean isMandarin, boolean hasClickableCharacters, T exercise) {
+  private void addContextSentences(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
     for (CommonExercise ex : exercise.getDirectlyRelated()) {
       addEnglish(exercise, ex.getEnglish());
-      if (includeForeign) {
-        includeForeign(isMandarin, hasClickableCharacters, exercise, ex);
-      }
+      includeForeign(isMandarin, hasClickableCharacters, exercise, ex);
     }
   }
 
@@ -222,14 +204,16 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addEnglish(T exercise) {
-    String english = exercise.getEnglish();
-    addEnglish(exercise, english);
+    //String english = exercise.getEnglish();
+    if (DEBUG) logger.info("addEnglish " + exercise.getEnglish());
+    addEnglish(exercise, exercise.getEnglish());
     // addSubstrings(exercise, english);
   }
 
   private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
+      if (DEBUG) logger.info("addEnglish 2 " + trimmed);
       addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
       addSuffixes(exercise, trimmed);
     }
@@ -247,10 +231,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
           String substring = trimmed.substring(token.length());
 
           String trimmed1 = smallVocabDecoder.getTrimmed(substring.toLowerCase());
-          //logger.info("trimmed '" + trimmed1 + "'");
           if (trimmed1.isEmpty()) {
             //logger.error("is empty ");
           } else {
+            if (DEBUG) logger.info("addSuffixes '" + trimmed1 + "'");
             addEntry(exercise, trimmed1);
           }
           trimmed = trimmed1;
@@ -300,7 +284,6 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       }
     }
   }*/
-
   private void addEntry(T exercise, String token) {
     addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
   }

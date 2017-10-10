@@ -279,7 +279,7 @@ public class DominoExerciseDAO {
   }
 
   private String removeMarkup(String termVal) {
-    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "");
+    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "").replaceAll("&#xa0;","").trim();
   }
 
   /**

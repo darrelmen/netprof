@@ -81,8 +81,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final boolean DEBUG_STALE = false;
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
+  /**
+   * @see #showScore
+   */
   private static final String ALL_PRACTICED = "All practiced!";
-  private static final int DELAY_MILLIS = 150;
+ // private static final int DELAY_MILLIS = 150;
   //private static final int USE_TIMER_DELAY = 2 * DELAY_MILLIS;
 
   private static final String LINK_FOR_CONTENT = "Link for content in different project.";
@@ -1681,16 +1684,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void setProgressBarScore(Collection<CommonShell> result, final int reqid) {
     exercisesWithScores.clear();
     long then = System.currentTimeMillis();
-    //logger.info("checking " + result.size());
+    //logger.info("setProgressBarScore checking " + result.size());
     for (CommonShell exercise : result) {
-      if (exercise.hasScore()) exercisesWithScores.add(exercise.getID());
+      if (exercise.hasScore()) {
+       // logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
+        exercisesWithScores.add(exercise.getID());
+      }
       // if (!isCurrent(reqid)) break;
     }
-    long now = System.currentTimeMillis();
+  //  long now = System.currentTimeMillis();
 
-    if (now - then > 100) {
+/*    if (now - then > 100) {
       logger.info("setProgressBarScore took " + (now - then) + " millis");
-    }
+    }*/
 
     if (isCurrent(reqid)) {
       showScore(exercisesWithScores.size(), result.size());
