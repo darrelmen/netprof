@@ -246,9 +246,8 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
-
       current = null;
-      logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
+  //    logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
