@@ -545,7 +545,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @see #getCustomOrPredefExercise(int, int)
+   * @see #getCustomOrPredefExercise
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
@@ -1374,8 +1374,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
       toRet = getUserExerciseByExID(id);
     }
     if (toRet == null) {
-      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
-          " after looking in exercise table.");
+
+      String message = "getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+          " after looking in exercise table.";
+      if (id == 0) {
+        logger.warn(message);
+      }
+      else {
+        logger.error(message);
+      }
     }
 
     return toRet;

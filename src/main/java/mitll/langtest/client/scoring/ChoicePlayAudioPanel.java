@@ -38,12 +38,9 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
-  // private final ExerciseController controller;
-  // private final CommonExercise exercise;
   private boolean includeContext = false;
   private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
-  //private Set<Integer> allIDs;
   private Set<AudioAttribute> allPossible;
 
   /**
@@ -157,68 +154,58 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     Map<MiniUser, List<AudioAttribute>> femalesMap =
         exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
-/*
-    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
+/*    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
         "\n\tmale   " + isMale +
         "\n\tis reg " + isReg +
-        " male map " + malesMap.size() + " female map " + femalesMap.size());
-        */
+        "\n\tmale map " + malesMap.size() +
+        "\n\tfemale map " + femalesMap.size());*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
     AudioAttribute genderFallback = null;
 
-
-    // allIDs = new HashSet<>();
     allPossible = new HashSet<>();
 
     {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
-        //  allIDs.add(mr.getUniqueID());
         allPossible.add(mr);
         if (playButton != null) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
         else if (isMale) genderFallback = mr;
         else fallback = mr;
       }
-    }
-
-    if (toUse == null) { // no match yet
-      AudioAttribute ms = getAtSpeed(malesMap, false);
-      if (ms != null) {
-        //    allIDs.add(ms.getUniqueID());
-        allPossible.add(ms);
-        if (playButton != null) addAudioChoice(playButton, true, false, ms);
-        if (isMale && isSlow) toUse = ms;
-        else if (isMale) genderFallback = ms;
-        if (fallback == null) fallback = ms;
+      else {
+        //logger.info("no male reg in " +malesMap);
       }
     }
 
-    if (toUse == null) {
-      AudioAttribute fr = getAtSpeed(femalesMap, true);
-      if (fr != null) {
-        //  allIDs.add(fr.getUniqueID());
-        allPossible.add(fr);
-        if (playButton != null) addAudioChoice(playButton, false, true, fr);
-        if (isFemale && isReg) toUse = fr;
-        else if (isFemale) genderFallback = fr;
-        if (fallback == null) fallback = fr;
-      }
+    AudioAttribute ms = getAtSpeed(malesMap, false);
+    if (ms != null) {
+      allPossible.add(ms);
+      if (playButton != null) addAudioChoice(playButton, true, false, ms);
+      if (isMale && isSlow) toUse = ms;
+      else if (isMale) genderFallback = ms;
+      if (fallback == null) fallback = ms;
     }
 
-    if (toUse == null) {
-      AudioAttribute fs = getAtSpeed(femalesMap, false);
-      if (fs != null) {
-        //allIDs.add(fs.getUniqueID());
-        allPossible.add(fs);
+    AudioAttribute fr = getAtSpeed(femalesMap, true);
+    if (fr != null) {
+      allPossible.add(fr);
+      if (playButton != null) addAudioChoice(playButton, false, true, fr);
+      if (isFemale && isReg) toUse = fr;
+      else if (isFemale) genderFallback = fr;
+      if (fallback == null) fallback = fr;
+    }
 
-        if (playButton != null) addAudioChoice(playButton, false, false, fs);
-        if (isFemale && isSlow) toUse = fs;
-        else if (isFemale) genderFallback = fs;
-        if (fallback == null) fallback = fs;
-      }
+    AudioAttribute fs = getAtSpeed(femalesMap, false);
+    if (fs != null) {
+      allPossible.add(fs);
+
+      if (playButton != null) addAudioChoice(playButton, false, false, fs);
+      if (isFemale && isSlow) toUse = fs;
+      else if (isFemale) genderFallback = fs;
+      if (fallback == null) fallback = fs;
     }
 
     // try to match gender, if possible.
@@ -238,13 +225,13 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (hasAnyAudio) {
       // currentAudioID = toUse.getUniqueID();
       currentAudioAttr = toUse;
-     // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+      // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
         listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       }
       rememberAudio(toUse.getAudioRef());
     } else {
-     // logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
+      // logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
     }
   }
 

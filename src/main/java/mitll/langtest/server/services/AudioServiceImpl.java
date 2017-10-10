@@ -307,8 +307,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     int c = 0;
     int success = 0;
-    logger.info("ensureCompressedAudio (" + language +
-        ") examining " + exercises.size() + " exercises");
+    logger.info("ensureCompressedAudio (" + language + ") examining " + exercises.size() + " exercises");
 
     for (CommonExercise exercise : exercises) {
       if (exercise != null) {
@@ -327,9 +326,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             boolean didit = !s.equalsIgnoreCase(FILE_MISSING);
             if (didit) success++;
             if (c % 1000 == 0)
-              logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
+              logger.debug("ensureCompressedAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
           } catch (Exception e1) {
-            logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
+            logger.warn("ensureCompressedAudio Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }
         }
       }

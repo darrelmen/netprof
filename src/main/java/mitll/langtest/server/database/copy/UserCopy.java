@@ -10,6 +10,7 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.IUserProjectDAO;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserProject;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +75,7 @@ public class UserCopy {
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
     if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
-    boolean debug = false;
+    //boolean debug = false;
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
@@ -89,8 +90,8 @@ public class UserCopy {
 
       if (hasSpaces(importUserID)) {
 //      logger.info("replacing spaces in " +importUserID);
-        importUserID = importUserID.trim().replaceAll("\\s++","_");
-        logger.info("now no spaces in " +importUserID);
+        importUserID = importUserID.trim().replaceAll("\\s++", "_");
+        logger.info("copyUsers now no spaces in " + importUserID);
         toImport.setUserID(importUserID);
       }
 
@@ -104,20 +105,16 @@ public class UserCopy {
           lurker++;
         } else {
           if (DEBUG) logger.info("copyUsers #" + c + "/" + importUsers.size() + " : import " + toImport);
-
-       //   User dominoUser = dominoUserDAO.getUserByID(importUserID);
-        //  User dominoUser = dominoUserDAO.getUserByID(importUserID);
-
           mitll.hlt.domino.shared.model.user.DBUser dominoDBUser = dominoUserDAO.getDBUser(importUserID);
 
           if (dominoDBUser == null) { // new user
-            //logger.info("copyUsers no existing user id '" + importUserID + "'");
+            logger.info("copyUsers no existing user id '" + importUserID + "'");
             ClientUserDetail newUser = addUser(dominoUserDAO, oldToNew, toImport, optName);
             userToCreation.put(newUser.getDocumentDBID(), newUser.getAcctDetail().getCrTime().getTime());
             added.add(newUser);
           } else { // user exists
             if (dominoDBUser.getUserId().equals(D_ADMIN)) {
-              logger.warn("found d.admin " + dominoDBUser);
+              logger.warn("copyUsers found d.admin " + dominoDBUser);
             } else {
               long creationTime = dominoDBUser.getAcctDetail().getCrTime().getTime();
               userToCreation.put(dominoDBUser.getDocumentDBID(), creationTime);
@@ -174,22 +171,28 @@ public class UserCopy {
                                     List<ClientUserDetail> added,
                                     User toImport,
                                     mitll.hlt.domino.shared.model.user.DBUser dominoUser
-                                    ) throws Exception {
+  ) throws Exception {
     String passwordHash = toImport.getPasswordHash();
     if (passwordHash == null) passwordHash = "";
     int dominoDBID = dominoUser.getDocumentDBID();
 
     int importID = toImport.getID();
     String importUserID = toImport.getUserID();
-
     boolean didPasswordMatch = dominoUserDAO.isMatchingPassword(importUserID, passwordHash);
-//    int dominoDBID = dominoUser.getID();
     if (didPasswordMatch) { // existing user with same password
       // do nothing, but remember id mapping
+      logger.info("copyUsers found existing user '" + importUserID + "' :" +
+          "\n\tdomino " + dominoUser + " password matches.");
+
+      checkMatchingGender(dominoUserDAO, toImport, dominoUser);
+
       oldToNew.put(importID, dominoDBID);
       return false;
     } else {
-      if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + dominoUser);
+      if (DEBUG) {
+        logger.info("copyUsers found existing user '" + importUserID + "' :" +
+            "\n\tdomino " + dominoUser);
+      }
 
       // User "adam" already exists with a different password - what to do?
       if (MAKE_COLLISION_ACCOUNT) {
@@ -202,8 +205,10 @@ public class UserCopy {
               " : " + dominoUser + "\n");
         }
 
-        checkUserApplications(dominoUserDAO, dominoUser, dominoDBID);
+        checkUserApplications(dominoUserDAO, dominoUser);
         oldToNew.put(importID, dominoDBID);
+
+        checkMatchingGender(dominoUserDAO, toImport, dominoUser);
       }
 
       logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + dominoDBID +
@@ -212,12 +217,25 @@ public class UserCopy {
     }
   }
 
-  private void checkUserApplications(DominoUserDAOImpl dominoUserDAO, DBUser dominoUser, int dominoDBID) {
+  private void checkMatchingGender(DominoUserDAOImpl dominoUserDAO, User toImport, DBUser dominoUser) {
+    MiniUser.Gender realGender = toImport.getRealGender();
+    if (dominoUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Unspecified &&
+        realGender != MiniUser.Gender.Unspecified) {
+      dominoUser.setGender(realGender == MiniUser.Gender.Male ? mitll.hlt.domino.shared.model.user.User.Gender.Male :
+          realGender == MiniUser.Gender.Female ? mitll.hlt.domino.shared.model.user.User.Gender.Female : mitll.hlt.domino.shared.model.user.User.Gender.Unspecified);
+      dominoUserDAO.updateUser(dominoUser);
+      logger.info("checkMatchingGender : update gender for " + dominoUser);
+    } else {
+/*      logger.info("checkMatchingGender : no change - gender for " + dominoUser.getUserId() +
+          " is " + dominoUser.getGender() + " vs " + realGender);*/
+    }
+  }
+
+  private void checkUserApplications(DominoUserDAOImpl dominoUserDAO, DBUser dominoUser) {//}, int dominoDBID) {
     Set<String> applicationAbbreviations = dominoUser.getApplicationAbbreviations();
     if (applicationAbbreviations.contains(NETPROF)) {
-     // logger.info("foundExistingUser : found existing application entry for user #" + dominoDBID);
-    }
-    else {
+      // logger.info("foundExistingUser : found existing application entry for user #" + dominoDBID);
+    } else {
       applicationAbbreviations.add(NETPROF);
 //      logger.info("before " + dominoUser.getApplicationAbbreviationsString());
 //      logger.info("before " + dominoUser.getApplicationAbbreviations());
@@ -282,12 +300,17 @@ public class UserCopy {
                                    Map<Integer, Integer> oldToNew,
                                    User toImport,
                                    String projectName) throws Exception {
-    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
+    logger.info("addUser " + toImport + "\n\twith permissions " + toImport.getPermissions());
     //logger.info("addUser " + toImport.getID()+ " gender " + toImport.getGender() + " " + toImport.getRealGender());
+    ClientUserDetail toAdd = dominoUserDAO.toClientUserDetail(toImport, projectName);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
-        dominoUserDAO.toClientUserDetail(toImport, projectName),
+        toAdd,
         toImport.getPasswordHash()
     );
+    if (toAdd.getGender() != addedUser.getGender()) {
+      logger.error("for " + addedUser +
+          " lost gender after adding " + addedUser.getGender());
+    }
     rememberUser(oldToNew, toImport.getID(), addedUser);
     return addedUser;
   }

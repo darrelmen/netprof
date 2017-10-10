@@ -669,7 +669,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
-
     db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
   }
 
