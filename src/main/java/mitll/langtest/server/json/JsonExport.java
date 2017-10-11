@@ -34,12 +34,14 @@ package mitll.langtest.server.json;
 
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.phone.MakePhoneReport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -57,6 +59,9 @@ public class JsonExport {
   private static final String TYPE = "type";
   private static final String NAME = "name";
   private static final String ITEMS = "items";
+  /**
+   * @see JsonExport#getJsonForNode
+   */
   private static final String CHILDREN = "children";
   private static final String CTMREF = "ctmref";
   private static final String CTFREF = "ctfref";
@@ -71,6 +76,7 @@ public class JsonExport {
   private static final String COUNT = "Count";
   private static final String UNIT_ORDER = "UnitOrder";
   private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
+  private static final int MAX_DEPTH = 2;
 
   private final Map<String, Integer> phoneToCount;
   private final ISection<CommonExercise> sectionHelper;
@@ -118,7 +124,10 @@ public class JsonExport {
   private List<String> getTypes(JSONObject object) {
     List<String> types = new ArrayList<>();
     JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
-    for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
+    for (int i = 0; i < jsonArray.size(); i++) {
+      types.add(jsonArray.getString(i));
+    }
+    if (types.size() > MAX_DEPTH) types = types.subList(0, MAX_DEPTH);
     return types;
   }
 
@@ -137,10 +146,15 @@ public class JsonExport {
 
   private JSONArray addUnitsInOrder() {
     JSONArray value = new JSONArray();
-    for (String type : sectionHelper.getTypeOrder()) {
-      value.add(type);
-    }
+    getTypeOrder().forEach(type -> value.add(type));
     return value;
+  }
+
+  private List<String> getTypeOrder() {
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    if (typeOrder.size() > MAX_DEPTH) typeOrder = typeOrder.subList(0, MAX_DEPTH);
+    logger.info("type order " + typeOrder);
+    return typeOrder;
   }
 
   private JSONArray addSections(Collection<SectionNode> sectionNodes) {
@@ -150,12 +164,12 @@ public class JsonExport {
     Collections.sort(sorted);
     for (SectionNode node : sorted) {
       JSONObject forNode = new JSONObject();
-      forNode.put("type", node.getType());
-      forNode.put("name", node.getName());
+      forNode.put(TYPE, node.getType());
+      forNode.put(NAME, node.getName());
       Collection<SectionNode> children1 = node.getChildren();
       JSONArray children = children1.isEmpty() ? new JSONArray() : addSections(children1);
 
-      forNode.put("children", children);
+      forNode.put(CHILDREN, children);
       nesting.add(forNode);
     }
     return nesting;
@@ -183,19 +197,14 @@ public class JsonExport {
 
   private <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
     List<T> copy = new ArrayList<>(exercises);
-    Collections.sort(copy, new Comparator<T>() {
-      @Override
-      public int compare(T o1, T o2) {
-        return Integer.valueOf(o1.getID()).compareTo(o2.getID());
-      }
-    });
+    copy.sort((o1, o2) -> Integer.compare(o1.getID(), o2.getID()));
     return copy;
   }
 
   private int c = 0;
 
   private <T extends CommonShell & HasUnitChapter> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
-    for (String type : sectionHelper.getTypeOrder()) {
+    for (String type : getTypeOrder()) {
       String value = exercise.getUnitToValue().get(type);
       if (value == null) {
         if (c++ < 10)
@@ -215,10 +224,16 @@ public class JsonExport {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
-    for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
+    Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
+
+    //logger.info("getContentAsJson : section nodes " + sectionNodesForTypes);
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    typeOrder = typeOrder.size() > MAX_DEPTH ? typeOrder.subList(0, MAX_DEPTH) : typeOrder;
+    for (SectionNode node : sectionNodesForTypes) {
       String type = node.getType();
+      //logger.info("\tgetContentAsJson type " + type + " : " + node.getName());
       typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio);
+      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, typeOrder);
       typeToValues.remove(type);
 
       jsonArray.add(jsonForNode);
@@ -230,26 +245,39 @@ public class JsonExport {
    * @param node
    * @param typeToValues
    * @param removeExercisesWithMissingAudio
+   * @param firstTypes
    * @return
    * @see #getContentAsJson
    */
-  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues,
-                                    boolean removeExercisesWithMissingAudio) {
+  private JSONObject getJsonForNode(SectionNode node,
+                                    Map<String, Collection<String>> typeToValues,
+                                    boolean removeExercisesWithMissingAudio,
+                                    Collection<String> firstTypes) {
     JSONObject jsonForNode = new JSONObject();
-    jsonForNode.put(TYPE, node.getType());
+    String type = node.getType();
+    jsonForNode.put(TYPE, type);
     jsonForNode.put(NAME, node.getName());
     JSONArray jsonArray = new JSONArray();
 
-    if (node.isLeaf()) {
-      jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio));
-    } else {
-      for (SectionNode child : node.getChildren()) {
-        typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-        jsonArray.add(getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio));
-        typeToValues.remove(child.getType());
+    {
+     // logger.info("getJsonForNode node " + type + " = " + node.getName() + " vs " + firstTypes);
+
+      if (node.isLeaf() || !firstTypes.iterator().next().equalsIgnoreCase(type)) { // stop when get below first types, e.g. unit,chapter
+       // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
+        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio));
+      } else {
+        List<SectionNode> children = node.getChildren();
+   //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
+
+        for (SectionNode child : children) {
+          typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
+     //     logger.info("\tgetJsonForNode node " + child.getType() + " = " + child.getName() + " typeToValues " + typeToValues);
+          jsonArray.add(getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio, firstTypes));
+          typeToValues.remove(child.getType());
+        }
       }
+      jsonForNode.put(CHILDREN, jsonArray);
     }
-    jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
   }
 
@@ -262,6 +290,10 @@ public class JsonExport {
   private JSONArray getJsonForSelection(
       Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
+
+    if (exercisesForState.isEmpty()) {
+      logger.warn("getJsonForSelection: no exercises for selection " + typeToValues);
+    }
 
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);
 
@@ -277,7 +309,7 @@ public class JsonExport {
   }
 
   private ExerciseSorter getExerciseSorter() {
-    return new ExerciseSorter(sectionHelper.getTypeOrder(), phoneToCount);
+    return new ExerciseSorter(phoneToCount);
   }
 
   /**
@@ -294,9 +326,7 @@ public class JsonExport {
    */
   private JSONArray getJsonArray(Collection<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
-    for (CommonExercise exercise : copy) {
-      exercises.add(getJsonForExercise(exercise));
-    }
+    copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise)));
     return exercises;
   }
 
@@ -377,9 +407,7 @@ public class JsonExport {
    * @param jsonObject
    * @param types
    * @return
-   * @seex #getExercises(String)
    */
-
   private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
     String id = jsonObject.getString(ID);
     CommonExercise exercise = new Exercise(

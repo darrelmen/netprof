@@ -20,8 +20,8 @@ public class SendEmail extends UserDialog {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
   private final EventRegistration eventRegistration;
- // UserServiceAsync service;
- final FormField userField;
+  // UserServiceAsync service;
+  final FormField userField;
 
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
 
@@ -33,16 +33,13 @@ public class SendEmail extends UserDialog {
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String PLEASE_CHECK = "Please check";
 
-  public SendEmail(EventRegistration registration,
-              //     UserServiceAsync service,
-                   FormField userField) {
+  SendEmail(EventRegistration registration, FormField userField) {
     super(null);
     this.eventRegistration = registration;
-    //this.service = service;
     this.userField = userField;
   }
 
-  public void showSendEmail(Anchor forgotPassword,final String text, boolean hasEmail) {
+  void showSendEmail(Anchor forgotPassword, final String text, boolean hasEmail) {
     Heading prompt = new Heading(5, "Click the button to reset.");
     resetEmailPopup = new DecoratedPopupPanel(true);
 
@@ -63,8 +60,7 @@ public class SendEmail extends UserDialog {
       });
 
       makePopup(resetEmailPopup, prompt, sendEmail, "");//ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
-    }
-    else {
+    } else {
       final TextBox emailEntry = new TextBox();
 
       sendEmail.addClickHandler(new ClickHandler() {
@@ -84,7 +80,6 @@ public class SendEmail extends UserDialog {
       });
 
       makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
-
     }
 
     resetEmailPopup.showRelativeTo(forgotPassword);
@@ -96,9 +91,9 @@ public class SendEmail extends UserDialog {
    *
    * @paramx emailEntry - need this since old accounts don't have email with them
    */
-  private void onSendReset(final String userID ) {
+  private void onSendReset(final String userID) {
     sendEmail.setEnabled(false);
-  //  final String userID = userField.box.getText();
+    //  final String userID = userField.box.getText();
     service.resetPassword(userID,
         new AsyncCallback<Boolean>() {
           @Override

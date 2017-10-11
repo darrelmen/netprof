@@ -170,12 +170,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
           }
 
-   /*       @Override
-          protected void onLastItem() {
-           // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
-            showListComplete();
-          }*/
-
           /**
            * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
            * @param search
@@ -306,17 +300,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
     }
 
-    /**
-     * @param controller
-     * @param completedExercise
-     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
-     */
-
-    /*   @Override
-    public void postAnswers(ExerciseController controller, HasID completedExercise) {
-      super.postAnswers(controller, completedExercise);
-      tellOtherListExerciseDirty(exercise);
-    }*/
 
     /**
      * @param e

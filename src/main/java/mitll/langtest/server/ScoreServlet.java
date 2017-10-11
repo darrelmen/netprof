@@ -71,6 +71,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
   private static final String REQUEST = "request";
+
+  /**
+   *
+   */
   private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String ROUND_TRIP1 = "roundTrip";
@@ -526,7 +530,7 @@ public class ScoreServlet extends DatabaseServlet {
     Map<String, Integer> stringIntegerHashMap = new HashMap<>();
     AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
     Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
-    return new ExerciseSorter(db.getSectionHelper(projectid).getTypeOrder(), phoneToCount);
+    return new ExerciseSorter(phoneToCount);
   }
 
   private AudioFileHelper getAudioFileHelper(int projectid) {
@@ -739,31 +743,32 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet
    */
   private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
-    JSONObject jsonObject = new JSONObject();
-
-    long then = System.currentTimeMillis();
 
     if (projectid == -1) {
       logger.error("getJsonNestedChapters project id is not defined : " + projectid);
     } else {
-      logger.debug("getJsonNestedChapters get content for project id " + projectid);
+      logger.debug("getJsonNestedChapters get content for project id " + projectid + " remove exercises " + removeExercisesWithMissingAudio);
     }
 
-    JsonExport jsonExport = getJSONExport(projectid);
-    String language = getLanguage(projectid);
+    long then = System.currentTimeMillis();
+    JsonExport jsonExport = db.getJSONExport(projectid);
     long now = System.currentTimeMillis();
     if (now - then > 1000) {
+      String language = getLanguage(projectid);
       logger.warn("getJsonNestedChapters " + language + " getJSONExport took " + (now - then) + " millis");
     }
     then = now;
 
-    jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
-    now = System.currentTimeMillis();
-    if (now - then > 1000) {
-      logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
+    JSONObject jsonObject = new JSONObject();
+    {
+      jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
+      now = System.currentTimeMillis();
+      if (now - then > 1000) {
+        String language = getLanguage(projectid);
+        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
+      }
+      addVersion(jsonObject, projectid);
     }
-    addVersion(jsonObject, projectid);
-
     return jsonObject;
   }
 
@@ -776,7 +781,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getJSONForExercises(int projectid) {
-    return getJSONExerciseExport(getJSONExport(projectid), projectid);
+    return getJSONExerciseExport(db.getJSONExport(projectid), projectid);
   }
 
   private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
@@ -792,7 +797,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param projectid
    * @return
    */
-  private JsonExport getJSONExport(int projectid) {
+/*  private JsonExport getJSONExport(int projectid) {
     db.getExercises(projectid);
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
@@ -807,7 +812,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     db.attachAllAudio(projectid);
     return jsonExport;
-  }
+  }*/
 
   /**
    * REALLY IMPORTANT.

@@ -35,10 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.server.audio.AudioExportOptions;
-import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
@@ -84,6 +81,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -550,6 +548,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public CommonExercise getExercise(int projectid, int id) {
     return projectManagement.getExercise(projectid, id);
+  }
+
+  public JsonExport getJSONExport(int projectid) {
+    getExercises(projectid);
+
+    Map<String, Integer> stringIntegerMap = Collections.emptyMap();
+    AudioFileHelper audioFileHelper = getProject(projectid).getAudioFileHelper();
+
+    JsonExport jsonExport = new JsonExport(
+        audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
+        getSectionHelper(projectid),
+        serverProps.getPreferredVoices(),
+        getLanguage(projectid).equalsIgnoreCase("english")
+    );
+
+    attachAllAudio(projectid);
+    return jsonExport;
   }
 
   /**
