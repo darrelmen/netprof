@@ -185,6 +185,12 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
+  /**
+   * @see #attachAudioToExercises(Collection, String)
+   * @param language
+   * @param audioAttributesForExercises
+   * @param exercise
+   */
   private void addContextAudio(String language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
                                CommonExercise exercise) {
@@ -212,7 +218,7 @@ public abstract class BaseAudioDAO extends DAO {
 
       if (audioAttributes != null) { // not sure when this would be true...
 //        logger.info("addContextAudio found context audio for context exercise " + contextID + " " + audioAttributes.size());
-        boolean attachedAll = attachAudio(contextSentence, audioAttributes, language);
+        /*boolean attachedAll =*/ attachAudio(contextSentence, audioAttributes, language);
       } else {
         if (doDEBUG)
           logger.info("addContextAudio no audio found for context parent exercise " + id + " and context " + contextID);

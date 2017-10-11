@@ -861,7 +861,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         // create if doesn't exist
         getServerProps().getMediaDir(), getTypeOrder(projectID));
 
-   // Set<AudioAttribute> originalAudio = new HashSet<>(userExercise.getAudioAttributes());
+    // Set<AudioAttribute> originalAudio = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defectAudio = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
     /*
@@ -1394,8 +1394,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           " after looking in exercise table.";
       if (id == 0) {
         logger.warn(message);
-      }
-      else {
+      } else {
         logger.error(message);
       }
     }
@@ -1569,24 +1568,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Expensive ?
    *
    * @param projectid
-   * @see ScoreServlet#getJSONExport
+   * @see DatabaseImpl#getJSONExport
    */
   public void attachAllAudio(int projectid) {
-    IAudioDAO audioDAO = getAudioDAO();
-    Project project = getProject(projectid);
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectid);
-
     long then = System.currentTimeMillis();
+
     Collection<CommonExercise> exercises = getExercises(projectid);
-    for (CommonExercise exercise : exercises) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-      if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, audioAttributes, project.getLanguage());
-      }
-      //if (!debug) ensureMP3s(exercise);
-      // exercises.add(getJsonForExercise(exercise));
-    }
-    logger.info(project.getProject().name() + "/" + project.getLanguage() +
+
+    Project project = getProject(projectid);
+    String language = project.getLanguage();
+    String name = project.getProject().name();
+
+    getAudioDAO().attachAudioToExercises(exercises, language);
+
+    logger.info(name + "/" + language +
         " took " + (System.currentTimeMillis() - then) +
         " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
@@ -1594,7 +1589,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public String getUserListName(int listid) {
     UserList userListByID = getUserListManager().getSimpleUserListByID(listid);
     if (userListByID == null) {
-      logger.error("huh? can't find user list " + listid);
+      logger.error("getUserListName : can't find user list " + listid);
       return "_Unknown";
     } else {
       String language1 = getLanguage(userListByID.getProjid());

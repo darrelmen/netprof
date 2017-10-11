@@ -34,14 +34,12 @@ package mitll.langtest.server.json;
 
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.phone.MakePhoneReport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -288,7 +286,8 @@ public class JsonExport {
    * @see #getJsonForNode
    */
   private JSONArray getJsonForSelection(
-      Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
+      Map<String, Collection<String>> typeToValues,
+      boolean removeExercisesWithMissingAudio) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     if (exercisesForState.isEmpty()) {
@@ -341,7 +340,7 @@ public class JsonExport {
   private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise) {
     JSONObject ex = getJsonForCommonExercise(exercise, false);
 
-    addContextAudioRefs(exercise, ex);
+    addContextAudioRefs(exercise, ex, exercise.getDirectlyRelated());
     addLatestRefs(preferredVoices, exercise, ex);
 
     return ex;
@@ -352,19 +351,38 @@ public class JsonExport {
    * <p>
    * Used to consider checking for MP3 versions.
    *
+   * @param <T>
    * @param exercise
    * @param ex
-   * @param <T>
+   * @param directlyRelated
    * @see #getJsonForExercise(CommonExercise)
    */
-  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex) {
+  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex, Collection<CommonExercise> directlyRelated) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
+
+    if (latestContext == null) {
+      // logger.info("Found " + latestContext);
+      latestContext = directlyRelated
+          .stream()
+          .findFirst()
+          .map(contextSentence -> contextSentence.getLatestContext(true))
+          .orElse(latestContext);
+    }
     //if (latestContext != null) {
     //  String author = latestContext.getUser().getUserID();
     //  if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
     // }
     ex.put(CTMREF, latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
+
+    if (latestContext == null) {
+      latestContext = directlyRelated
+          .stream()
+          .findFirst()
+          .map(contextSentence -> contextSentence.getLatestContext(false))
+          .orElse(latestContext);
+    }
+
     // if (latestContext != null) {
     // String author = latestContext.getUser().getUserID();
     // if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);

@@ -1294,6 +1294,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     int userID = getUserIDFromSessionOrDB();
     int projectID = getProjectID(userID);
+    String language = db.getLanguage(projectID);
 
     long then = System.currentTimeMillis();
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
@@ -1312,7 +1313,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
-    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
     now = System.currentTimeMillis();
 
     if (now - then > 50)

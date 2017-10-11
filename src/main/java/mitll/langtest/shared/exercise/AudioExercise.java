@@ -269,25 +269,6 @@ public class AudioExercise extends ExerciseShell {
     return latest;
   }
 
-  /*public AudioAttribute getLatest(boolean isMale) {
-    long latestTime = 0;
-    AudioAttribute latest = null;
-    for (AudioAttribute audioAttribute : getAudioAttributes()) {
-      if (
-          (isMale && audioAttribute.isMale()) ||
-              (!isMale && !audioAttribute.isMale())
-          ) {
-
-        if (audioAttribute.getTimestamp() >= latestTime) {
-          latest = audioAttribute;
-          latestTime = audioAttribute.getTimestamp();
-        }
-      }
-    }
-
-    return latest;
-  }*/
-
   public Map<String, AudioAttribute> getAudioRefToAttr() {
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) audioToAttr.put(attr.getAudioRef(), attr);
