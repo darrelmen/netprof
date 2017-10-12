@@ -78,6 +78,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String ROUND_TRIP1 = "roundTrip";
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   */
   private static final String PHONE_REPORT = "phoneReport";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
@@ -471,9 +474,12 @@ public class ScoreServlet extends DatabaseServlet {
       int projectID = projid != -1 ? projid : getMostRecentProjectByUser(userid);
       toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
-      if (now - then > 250) {
-        logger.debug("getPhoneReport : user " + user + " selection " + selection +
-            " took " + (now - then) + " millis");
+      if (now - then > 5) {
+        logger.debug("getPhoneReport :" +
+            "\n\tuser      " + user +
+            "\n\tselection " + selection +
+            "\n\tprojectID " + projectID +
+            "\n\ttook      " + (now - then) + " millis");
       }
     } catch (NumberFormatException e) {
       toReturn.put(ERROR, "User id should be a number");

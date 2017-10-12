@@ -541,7 +541,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       if (isKnownType(type)) {
         Collection<T> exercisesForSection = new HashSet<>(getExercisesForSection(type, pair.getValue()));
 
-        // logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
+         logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
         if (currentList == null) {
           currentList = exercisesForSection;
         } else {
@@ -579,7 +579,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       for (String section : sections) {
         Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
-          logger.error("getExercisesForSection : Couldn't find section '" + section + "'");
+          logger.error("getExercisesForSection : Couldn't find section '" + section + "' in ");
           return Collections.emptyList();
         } else {
           Collection<T> exercises1 = lesson.getExercises();

@@ -342,14 +342,6 @@ public class PropertyHandler {
     }
 
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
-
-    // supports headstart mode
- /*   String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
-    if (exercise_title != null) {
-      this.exercise_title = exercise_title;
-    } else {
-      this.exercise_title = DEFAULT_EXERCISE;
-    }*/
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
     }

@@ -1011,7 +1011,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
-    return getJsonSupport(projid).getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
+    return getJsonSupport(projid)
+        .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 
   /**

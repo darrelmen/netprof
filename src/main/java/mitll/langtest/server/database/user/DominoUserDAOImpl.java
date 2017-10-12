@@ -322,18 +322,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param url
    * @param sendEmail
    * @return
-   * @paramx freeTextPassword
    * @see BaseUserDAO#addUser
-   * @see #addAndGet(ClientUserDetail, String)
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
    */
-  private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
-                                                   String url,
-                                                   boolean sendEmail) {
-//    logger.info("adding user " + user);
-    return delegate.addUser(
-        sendEmail ? user : adminUser,
-        user,
-        url);
+  private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user, String url, boolean sendEmail) {
+    return delegate.addUser(sendEmail ? user : adminUser, user, url);
   }
 
   /**

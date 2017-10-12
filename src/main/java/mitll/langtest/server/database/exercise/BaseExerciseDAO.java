@@ -434,7 +434,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       if (commonExercise == null) {
         if (warns++ < MAX_WARNS) {
           logger.warn(this + " couldn't find exercise '" + id + "' in " + oldidToExercise.size() + " exercises (" + warns + " warned)");
-          logger.warn(" : " + oldidToExercise.keySet());
+       //   logger.warn(" : " + oldidToExercise.keySet());
         }
       }
       return commonExercise;

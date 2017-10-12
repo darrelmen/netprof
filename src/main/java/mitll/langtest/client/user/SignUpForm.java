@@ -682,7 +682,6 @@ public class SignUpForm extends UserDialog implements SignUp {
         "",
         firstName.getSafeText(),
         lastName.getSafeText(),
-        trimURL(Window.Location.getHref()),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
     service.addUser(

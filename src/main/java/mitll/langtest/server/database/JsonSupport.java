@@ -62,7 +62,6 @@ public class JsonSupport {
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
-//  private final IRefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
@@ -241,9 +240,13 @@ public class JsonSupport {
   JSONObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
+
+    logger.info("getJsonPhoneReport : for user "+userid + " and\n\tsel " +
+        typeToValues+
+        "\n\tgot " + exercisesForState.size());
     long then = System.currentTimeMillis();
-    int projid = project.getID();
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
+   // int projid = project.getID();
+//    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
     long now = System.currentTimeMillis();
 
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
@@ -251,10 +254,10 @@ public class JsonSupport {
     List<Integer> ids = new ArrayList<>();
    // Map<Integer, String> exidToRefAudio = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+/*      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, /*installPath, configDir, */audioAttributes, language);
-      }
+        audioDAO.attachAudio(exercise, *//*installPath, configDir, *//*audioAttributes, language);
+      }*/
       int id = exercise.getID();
       ids.add(id);
      // exidToRefAudio.put(id, exercise.getRefAudio());

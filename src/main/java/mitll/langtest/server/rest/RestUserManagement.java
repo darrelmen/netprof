@@ -565,7 +565,6 @@ public class RestUserManagement {
                 device,
                 "",
                 "",
-                serverProps.getAppURL(),
                 "OTHER");
 
             user1 = getUserManagement().addUser(user2);
@@ -616,7 +615,7 @@ public class RestUserManagement {
         emailH, email,
         Kind.STUDENT,
         isMale,
-        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, appURL, affiliation);
+        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, affiliation);
     user1 = getUserManagement().addUser(user2);
     return user1;
   }
