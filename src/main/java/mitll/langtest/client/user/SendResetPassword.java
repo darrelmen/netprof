@@ -75,11 +75,10 @@ public class SendResetPassword extends UserDialog {
   }
 
   /**
-   * @param token
    * @return
    * @see InitialUI#handleResetPass
    */
-  public Panel getResetPassword(final String token) {
+  public Panel getResetPassword() {
     Panel container = new DivWidget();
     container.getElement().setId("SendResetPassswordContent");
 
@@ -100,6 +99,9 @@ public class SendResetPassword extends UserDialog {
 
     Form form = new Form();
     form.getElement().setId("resetForm");
+    if (Window.getClientWidth() < 800) { // on iOS
+      form.setWidth("400px");
+    }
     rightDiv.add(form);
 
     form.addStyleName("topMargin");
