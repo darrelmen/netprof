@@ -35,7 +35,7 @@ public class BreadcrumbHelper {
    * @see #getBreadcrumbs()
    *//*
   private void addCrumbs(Breadcrumbs crumbs) {
-    User current = userManager.getCurrent();
+    User current = userManager.getAvg();
     if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {

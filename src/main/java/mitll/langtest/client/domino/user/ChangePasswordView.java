@@ -113,7 +113,7 @@ public class ChangePasswordView extends Composite {
     }
     form.add(new DecoratedFormValue("User ID", editUser.getUserID()).getCtrlGroup());
 
-//    User cUser = userState.getCurrent();
+//    User cUser = userState.getAvg();
     /**
      * When would we want them not to re-enter the password - I guess if it's a reset for someone else???
      */

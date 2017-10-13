@@ -33,14 +33,12 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
-import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExercisePhone;
 
 import java.util.List;
@@ -72,13 +70,14 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   /**
    * @param userExerciseDAO
    * @param projid
+   * @param isMyProject is the data on this host? e.g. hydra2 may only have some projects and audio
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   void setDependencies(IUserExerciseDAO userExerciseDAO,
                        AddRemoveDAO addRemoveDAO,
                        IAudioDAO audioDAO,
                        int projid,
-                       Database database);
+                       Database database, boolean isMyProject);
 
   Map<Integer, String> getIDToFL(int projid);
 

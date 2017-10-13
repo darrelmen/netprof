@@ -34,7 +34,6 @@ package mitll.langtest.server.database.project;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
@@ -59,12 +58,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -103,6 +99,7 @@ public class ProjectManagement implements IProjectManagement {
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
   private FileUploadHelper fileUploadHelper;
+  private String hostName;
 
   /**
    * @param pathHelper
@@ -121,6 +118,7 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
+    hostName = serverProps.getHostName();
   }
 
   /**
@@ -219,7 +217,7 @@ public class ProjectManagement implements IProjectManagement {
         if (isConfigured) {
           //logger.debug("configureProject project already configured " + project.getProject().id());
         } else {
-          logger.info("skipping fully loading project " + project + " since it's retired");
+          logger.info("configureProject skipping fully loading project " + project + " since it's retired");
         }
         return;
       }
@@ -245,7 +243,8 @@ public class ProjectManagement implements IProjectManagement {
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
     int id = slickProject == null ? -1 : slickProject.id();
-    setDependencies(project.getExerciseDAO(), id);
+    boolean myProject = project.isMyProject();
+    setDependencies(project.getExerciseDAO(), id, myProject);
 
     if (forceReload) {
       project.getExerciseDAO().reload();
@@ -256,7 +255,7 @@ public class ProjectManagement implements IProjectManagement {
           ") " +
           "first exercise is " + rawExercises.iterator().next());
     } else {
-      logger.warn("no exercises in project? " + project);
+      logger.warn("configureProject no exercises in project? " + project);
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
         db.getResultDAO(), db.getAudioDAO(),
@@ -274,33 +273,6 @@ public class ProjectManagement implements IProjectManagement {
           )
       );
 
-      boolean myProject = true;
-      try {
-        InetAddress ip = InetAddress.getLocalHost();
-        String hostName = ip.getHostName().toLowerCase();
-        String webserviceHost = project.getWebserviceHost();
-
-        if (hostName.startsWith("hydra2")) {
-          if (webserviceHost.equalsIgnoreCase("h2")) {
-            myProject = true;
-          } else {
-            myProject = false;
-          }
-        } else if (hostName.startsWith("hydra")) {
-          if (webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT)) {
-            myProject = true;
-          } else {
-            myProject = false;
-          }
-        }
-        if (myProject) {
-          logger.info("project " + project + " on " + hostName + " will check lts and count phones.");
-        } else {
-          logger.info("project " + project + " on " + hostName + " will NOT check lts and count phones.");
-        }
-      } catch (UnknownHostException e) {
-        logger.error("got " + e, e);
-      }
 
       if (myProject) {
         project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
@@ -319,9 +291,8 @@ public class ProjectManagement implements IProjectManagement {
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
     } else {
-      logger.warn("\n\n\nhuh? no slick project for " + project);
+      logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
     }
-
   }
 
   /**
@@ -343,6 +314,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * ONLY used on import - copying old netprof v1 data into netprof v2.
    * @return
    * @see DatabaseImpl#makeDAO
    */
@@ -350,7 +322,7 @@ public class ProjectManagement implements IProjectManagement {
     Project project = idToProject.get(IMPORT_PROJECT_ID);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
     logger.info("setDependencies " + project + " : " + exerciseDAO);
-    setDependencies(exerciseDAO, -1);
+    setDependencies(exerciseDAO, -1, false);
 
     return exerciseDAO;
   }
@@ -406,9 +378,10 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param exerciseDAO
    * @param projid
+   * @param isMyProject
    * @see #configureProject
    */
-  private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+  private void setDependencies(ExerciseDAO exerciseDAO, int projid, boolean isMyProject) {
     IAudioDAO audioDAO = db.getAudioDAO();
 //    logger.info("setDependencies - project #" + projid  + " audio dao " + audioDAO);
     if (audioDAO == null) {
@@ -420,7 +393,7 @@ public class ProjectManagement implements IProjectManagement {
         null /*addRemoveDAO*/,
         audioDAO,
         projid,
-        db);
+        db, isMyProject);
   }
 
   private void logMemory() {

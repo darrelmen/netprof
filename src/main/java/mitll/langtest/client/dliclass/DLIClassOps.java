@@ -134,7 +134,7 @@ public class DLIClassOps/* implements RequiresResize */{
 
     // add users ----
     kindsLinks.add(new NavHeader(CLASSES));
-    User current = controller.getUserState().getCurrent();
+    User current = controller.getUserState().getAvg();
   //  User.Kind loggedInUserRole = current.getUserKind();
 
     NavLink first = addClassesLinks(right, detail, kindsLinks, current);

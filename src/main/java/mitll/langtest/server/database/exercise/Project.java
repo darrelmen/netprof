@@ -59,9 +59,15 @@ import java.util.stream.Collectors;
 
 /**
  * Has everything associated with a project
+ *
+ * TODO : give this an interface
  */
 public class Project implements PronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
+
+  private static final String HYDRA_2 = "hydra2";
+  private static final String H_2 = "h2";
+  private static final String HYDRA = "hydra";
 
   /**
    * @see #getWebserviceHost
@@ -489,6 +495,33 @@ public class Project implements PronunciationLookup {
 
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
+  }
+
+  public boolean isMyProject() {
+    String hostName = serverProps.getHostName();
+
+    boolean myProject = true;
+    String webserviceHost = getWebserviceHost();
+
+    if (hostName.startsWith(HYDRA_2)) {
+      if (webserviceHost.equalsIgnoreCase(H_2)) {
+        myProject = true;
+      } else {
+        myProject = false;
+      }
+    } else if (hostName.startsWith(HYDRA)) {
+      if (webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT)) {
+        myProject = true;
+      } else {
+        myProject = false;
+      }
+    }
+    if (myProject) {
+      logger.info("configureProject project " + project + " on " + hostName + " will check lts and count phones.");
+    } else {
+      logger.info("configureProjectvproject " + project + " on " + hostName + " will NOT check lts and count phones.");
+    }
+    return myProject;
   }
 
   public String toString() {

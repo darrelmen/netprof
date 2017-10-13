@@ -116,11 +116,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 
-    logger.info("getPhoneReportFor for " + next +
-        " userid " + userid +
-        " phone " + phone +
-        " from " + from + " " + new Date(from) +
-        " to " + to + " " + new Date(to)
+    logger.info("getPhoneReportFor for" +
+        "\n\tuser   " + next +
+        "\n\tuserid " + userid +
+        "\n\tlistid " + listid +
+        "\n\tphone  " + phone +
+        "\n\tfrom   " + from + " " + new Date(from) +
+        "\n\tto     " + to + " " + new Date(to)
     );
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
 
@@ -131,8 +133,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       return new ArrayList<>();
     } else {
 
-      logger.info("getPhoneReportFor for " + phone +
-          " got word " + wordAndScores.size());
+      logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
 
       SortedSet<WordAndScore> examples = new TreeSet<>();
       examples.addAll(wordAndScores);
@@ -141,7 +142,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
 
       long now = System.currentTimeMillis();
-      logger.info("Return (took " + (now - then) + ") " +
+      logger.info("getPhoneReportFor (took " + (now - then) + ") " +
           "to get " + wordAndScores.size() + " " + filteredWords.size() +
           "  report for " + userid + " and list " + listid);// + analysisReport);
       return filteredWords;
@@ -162,7 +163,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         resultDAO.getPerfForUserOnList(id, listid);
     long now = System.currentTimeMillis();
 
-    logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid + " were " + perfForUser.size());
+    logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
+        " were " + perfForUser.size());
 
     long diff = now - then;
     if (diff > WARN_THRESH) {

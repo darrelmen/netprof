@@ -39,9 +39,8 @@ import java.util.List;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
  * @since 10/26/15.
- *
- * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
  */
 public class PhoneStats implements Serializable {
   // private final Logger logger = LogManager.getLogger("PhoneStats");
@@ -61,34 +60,56 @@ public class PhoneStats implements Serializable {
     this.timeSeries = timeSeries;
   }
 
+  /**
+   * @return
+   * @deprecatedx not really doing this anymore
+   */
+/*
   public int getInitial() {
     List<PhoneSession> sessions = getSessions();
     return getInitial(sessions);
   }
+*/
 
+/*
   public int getInitial(List<PhoneSession> sessions) {
     if (sessions == null || sessions.isEmpty()) return 0;
 
     PhoneSession next = sessions.iterator().next();
     return toHundred(next.getMean());
   }
+*/
+  public float getAvg() {
+    if (sessions == null) return 0f;
+    else {
+      float total = 0;
+      float avg = 0;
+
+      for (PhoneSession session : sessions) {
+        float inSession = Long.valueOf(session.getCount()).floatValue();
+        total += inSession;
+        avg += Double.valueOf(session.getMean()).floatValue() * inSession;
+      }
+      return total > 0 ? avg / total : 0;
+    }
+  }
 
   private int toHundred(double mean) {
     return (int) Math.round(100 * mean);
   }
 
-  public int getCurrent() {
+/*  public int getCurrent() {
     return getCurrent(getSessions());
   }
 
   public int getCurrent(List<PhoneSession> sessions2) {
     if (sessions2 == null || sessions2.isEmpty()) return 0;
     return toHundred(sessions2.get(sessions2.size() - 1).getMean());
-  }
+  }*/
 
-  public int getDiff() {
+/*  public int getDiff() {
     return getCurrent() - getInitial();
-  }
+  }*/
 
   public int getCount() {
     return count;
@@ -114,7 +135,10 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "PhoneStats : childCount " + count + " initial " + getInitial() + " current " + getCurrent() +
+    return "PhoneStats : childCount " + count +
+        " avg " + getAvg() +
+        // " initial " + getInitial() +
+        //     " current " + getCurrent() +
         (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
   }
 }

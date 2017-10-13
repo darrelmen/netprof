@@ -133,7 +133,7 @@ public class ServerProperties {
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
-  @Deprecated
+
   private static final String NP_SERVER = "netprof-1.ll.mit.edu";
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
@@ -846,7 +846,6 @@ public class ServerProperties {
 
   /**
    * @return
-   * @deprecatedx
    * @see
    * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
    */

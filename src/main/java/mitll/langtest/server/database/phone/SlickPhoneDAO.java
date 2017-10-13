@@ -272,7 +272,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    logger.info("added " + num + " transcripts");
+    logger.info("getPhoneReport added " + num + " transcripts");
 
     return new MakePhoneReport()
         .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);

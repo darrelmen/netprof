@@ -35,6 +35,7 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.user.cellview.client.Column;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -45,19 +46,19 @@ import java.util.List;
 class PhoneAndStats implements Comparable<PhoneAndStats>{
   private final String phone;
 
-  private final int score, current;
+//  private final int score;
+  private final int avg;
   private final int count;
 
   /**
    * @param phone
-   * @param score
    * @param count
-   * @see PhoneContainer#getTableWithPager
+   * @see PhoneContainer#getPhoneStatuses(List, Map, long, long)
    */
-  public PhoneAndStats(String phone, int score, int current, int count) {
+  public PhoneAndStats(String phone, int avg, int count) {
     this.phone = phone;
-    this.score = score;
-    this.current = current;
+  //  this.score = score;
+    this.avg = avg;
     this.count = count;
   }
 
@@ -73,21 +74,25 @@ class PhoneAndStats implements Comparable<PhoneAndStats>{
    * @return
    * @see PhoneContainer#getItemColumn()
    */
+/*
   public int getInitial() {
     return score;
   }
+*/
 
-  public int getCurrent() {
-    return current;
+  public int getAvg() {
+    return avg;
   }
 
   /**
    * @return
-   * @see PhoneContainer#getDiffSorter(Column, List)
+   * @seez PhoneContainer#getDiffSorter(Column, List)
    */
+/*
   public int getDiff() {
-    return current - score;
+    return avg - score;
   }
+*/
 
   /**
    * @return
@@ -99,7 +104,7 @@ class PhoneAndStats implements Comparable<PhoneAndStats>{
 
   @Override
   public int compareTo(PhoneAndStats o) {
-    int i = Integer.valueOf(current).compareTo(o.getCurrent());
+    int i = Integer.compare(avg, o.getAvg());
     return i == 0 ? phone.compareTo(o.getPhone()) : i;
   }
 }

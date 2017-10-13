@@ -33,7 +33,7 @@ public class MakePhoneReport {
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
     if (DEBUG) {
       logger.warn(
-          "\n\tscore " + overallScore +
+          "getPhoneReport : \n\tscore " + overallScore +
               "\n\titems " + totalItems +
               "\n\tpercent " + percentOverall +
               "\n\tphoneToScores " + phoneToScores.size() +
@@ -41,30 +41,30 @@ public class MakePhoneReport {
     }
 
     final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
-    if (DEBUG) logger.warn("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     // set sessions on each phone stats
     setSessions(phoneToAvg);
 
-    if (DEBUG) logger.warn("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
 
-    if (DEBUG) logger.warn("before sorted " + sorted);
+    if (DEBUG) logger.warn("getPhoneReport before sorted " + sorted);
 
     if (sortByLatestExample) {
       phoneToWordAndScore = sortPhonesByLatest(phoneToAvg, sorted);
     } else {
-      sortPhonesByCurrentScore(phoneToAvg, sorted);
+      sortPhonesByAvg(phoneToAvg, sorted);
     }
 
-    if (DEBUG) logger.warn("sorted " + sorted.size() + " " + sorted);
+    if (DEBUG) logger.warn("getPhoneReport sorted " + sorted.size() + " " + sorted);
 
     Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
     sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
 
     if (DEBUG) {
-      logger.warn("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+      logger.warn("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
@@ -73,44 +73,45 @@ public class MakePhoneReport {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       Collections.sort(value);
       if (DEBUG) {
-        logger.warn("phone->words for " + phone + " : " + value.size());
+        logger.warn("getPhoneReport phone->words for " + phone + " : " + value.size());
         for (WordAndScore wordAndScore : value) {
-          logger.warn("for " + phone+ " got " + wordAndScore);
+          logger.warn("getPhoneReport for " + phone+ " got " + wordAndScore);
         }
       }
       phoneToWordAndScoreSorted.put(phone, value);
     }
 
     if (DEBUG) {
-      logger.warn("phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
+      logger.warn("getPhoneReport phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
     }
 
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
   }
 
   /**
+   *
    * Compare by score for phone, then by phone name.
    * @param phoneToAvg
    * @param sorted
    * @see #getPhoneReport
    */
-  private void sortPhonesByCurrentScore(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
+  private void sortPhonesByAvg(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
     sorted.sort((o1, o2) -> {
       PhoneStats first = phoneToAvg.get(o1);
       PhoneStats second = phoneToAvg.get(o2);
-      int current = first.getCurrent();
-      int current1 = second.getCurrent();
+      float current = first.getAvg();
+      float current1 = second.getAvg();
       //if (current == current1) {
       //  logger.info("got same " + current + " for " + o1 + " and " + o2);
       //} else {
       // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
       //}
-      int i = Integer.compare(current, current1);
+      int i = Float.compare(current, current1);
       return i == 0 ? o1.compareTo(o2) : i;
     });
 /*
     for (String phone : sorted) {
-      logger.info("phone " + phone + " : " + phoneToAvg.get(phone).getCurrent());
+      logger.info("phone " + phone + " : " + phoneToAvg.get(phone).getAvg());
     }
 */
   }

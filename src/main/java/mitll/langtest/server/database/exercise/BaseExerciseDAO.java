@@ -189,11 +189,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    *
    * @param audioDAO
    * @param projectID
+   * @param isMyProject
    * @see #setDependencies
    */
-  void setAudioDAO(IAudioDAO audioDAO, int projectID) {
+  void setAudioDAO(IAudioDAO audioDAO, int projectID, boolean isMyProject) {
     this.audioDAO = audioDAO;
-    if (!serverProps.isLaptop()) {
+    if (!serverProps.isLaptop() && isMyProject) {
       logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
@@ -384,6 +385,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param addRemoveDAO
    * @param audioDAO
    * @param projid
+   * @param myProject
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
@@ -391,10 +393,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
                               IAudioDAO audioDAO,
                               int projid,
 
-                              Database database) {
+                              Database database, boolean isMyProject) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
-    setAudioDAO(audioDAO, projid);
+    setAudioDAO(audioDAO, projid, isMyProject);
   }
 
   public boolean isConfigured() {

@@ -190,7 +190,7 @@ public abstract class BaseUserDAO extends DAO {
    * @see #addUser
    */
   private int addUserAndGetID(SignUpUser user) {
-    String urlToUse = "https://" + getDatabase().getServerProps().getHostName() + "/netprof";
+    String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/netprof";
 
     logger.info("addUserAndGetID user will see url = " + urlToUse);
 

@@ -56,7 +56,6 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.*;
 
 import java.util.*;
@@ -183,6 +182,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   /**
+   * Recalculate an average score for those sessions within the time period first to last.
+   *
    * @param phoneAndStatses
    * @param phoneToAvgSorted
    * @param first
@@ -192,7 +193,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
                                 long first, long last) {
     if (DEBUG) {
-      logger.info("getPhoneStatuses From " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
+      logger.info("getPhoneStatuses From    " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
       logger.info("getPhoneStatuses examine " + phoneToAvgSorted.entrySet().size());
     }
 
@@ -203,19 +204,30 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       //  logger.info("Filtered " + filtered.size());
 
       if (!filtered.isEmpty()) {
-        int initial = value.getInitial(filtered);
-        int current = value.getCurrent(filtered);
+        //int initial = value.getInitial(filtered);
+        float total = 0;
+        float avg = 0;
+        for (PhoneSession session : filtered) {
+          float count = Long.valueOf(session.getCount()).floatValue();
+          total += count;
+          avg += Double.valueOf(session.getMean()).floatValue() * count;
+        }
+        float overall = avg / total;
+
+        int v = Float.valueOf(overall * 100).intValue();
+        if (DEBUG) logger.info("overall " + overall + " avg " + avg + " total " + total + " report " + v);
+//        int current = value.getAvg(filtered);
         int count = value.getCount(filtered);
 
         phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
-            initial,
-            current,
+            v,
             count
         ));
       }
     }
 
     Collections.sort(phoneAndStatses);
+
     if (DEBUG) {
       logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
       if (phoneAndStatses.isEmpty()) {
@@ -253,7 +265,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param first
    * @param last
    * @return
-   * @see #clickOnPhone(String)
+   * @see #clickOnPhone2
    * @see #getFiltered(long, long, PhoneStats)
    */
   private List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
@@ -414,7 +426,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
               logger.warning("------- o2 is null?");
               return -1;
             } else {
-              return compIntThenPhone(o1, o2, o1.getCurrent(), o2.getCurrent());
+              return compIntThenPhone(o1, o2, o1.getAvg(), o2.getAvg());
             }
           } else {
             logger.warning("------- o1 is null?");
@@ -468,7 +480,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        int current = shell.getCurrent();
+        int current = shell.getAvg();
         float percent = ((float) current) / 100f;
         String columnText = new WordTable().getColoredSpan(shell.getPhone(), percent);
         return getSafeHtml(columnText);
@@ -478,7 +490,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
-   //   clickOnPhone(object.getPhone());
+      //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
     } else {
       logger.info("got other event " + event.getType());
@@ -521,7 +533,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     phonePlot.showErrorBarData(filtered, phone);
   }*/
-
   private void clickOnPhone2(String phone) {
     PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
     //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
@@ -567,7 +578,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getCurrent())).toSafeHtml();
+        int current = shell.getAvg();
+
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(current)).toSafeHtml();
       }
     };
   }

@@ -615,7 +615,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
             if (o2 == null) return 1;
             else {
               return Boolean.compare(myStudents.contains(o1.getID()), myStudents.contains(o2.getID()));
-              //        return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
+              //        return Integer.valueOf(o1.getAvg()).compareTo(o2.getAvg());
             }
           }
           return -1;
