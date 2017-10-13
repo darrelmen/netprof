@@ -1154,6 +1154,11 @@ body > .dropdown-popup .nav-list > li.active > a {
     position: absolute;
 }
 
+.resetPageMobile {
+    left: 10%;
+    position: absolute;
+}
+
 .loginPageBack {
     position: fixed;
     width: 200%;

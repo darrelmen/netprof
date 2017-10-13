@@ -633,20 +633,6 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-/*
-  private void logMemory() {
-    int MB = (1024 * 1024);
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
-
-    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
-        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
-  }
-*/
-
   /**
    * TODO : check for empty by project
    *
@@ -693,7 +679,6 @@ public class CopyToPostgres<T extends CommonShell> {
                                            Map<Integer, Integer> oldToNewUser,
                                            Map<Integer, Integer> oldToNewUserList,
                                            SlickUserListExerciseVisitorDAO visitorDAO) {
-    //if (visitorDAO.isEmpty()) {
     UserExerciseListVisitorDAO uelDAO = new UserExerciseListVisitorDAO(db);
     Collection<UserExerciseListVisitorDAO.Pair> all = uelDAO.getAll();
     logger.info("copying " + all.size() + " user exercise list visitors");
@@ -848,19 +833,19 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     RefResultDAO originalDAO = new RefResultDAO(db, false);
     List<SlickRefResult> bulk = new ArrayList<>();
-    Collection<Result> all = originalDAO.getResults();
-    logger.info("copyRefResult for project " + projid + " found " + all.size() + " original ref results.");
+    Collection<Result> toImport = originalDAO.getResults();
+    logger.info("copyRefResult for project " + projid + " found " + toImport.size() + " original ref results.");
     logger.info("copyRefResult found " + oldToNewUser.size() + " oldToNewUser entries.");
     logger.info("copyRefResult found " + exToID.size() + " ex to id entries.");
     logger.info("copyRefResult found " + pathToAudioID.size() + " path to audio id entries.");
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
-    for (Result result : all) {
+    for (Result result : toImport) {
       int userid = result.getUserid();
-      Integer userID = oldToNewUser.get((int) userid);
+      Integer userID = oldToNewUser.get(userid);
       if (userID == null) {
         boolean add = missingUsers.add(userid);
-        if (add) logger.warn("copyReviewed no user " + userid);
+        if (add) logger.warn("copyRefResult no user " + userid);
       } else {
         result.setUserID(userID);
         Integer exid = exToID.get(result.getOldExID());
@@ -876,10 +861,17 @@ public class CopyToPostgres<T extends CommonShell> {
             String bestAudio = bestAudios[1];
             bestAudio = "bestAudio" + bestAudio;
             audioID = pathToAudioID.get(bestAudio);
-            if (audioID == null) logger.warn("can't find '" + bestAudio + "'");
+         //   if (audioID == null) logger.warn("copyRefResult : can't find '" + bestAudio + "'");
+          }
+          else {
+            audioID = pathToAudioID.get(answer);
+            logger.info("path " + answer + " audio id "+ audioID);
           }
 
-          if (audioID != null) {
+          if (audioID == null) {
+            logger.warn("copyRefResult : can't find audio from audio table at '" + answer + "'");
+          }
+          else {
             bulk.add(dao.toSlick(projid, result, audioID));
           }
 
@@ -889,7 +881,7 @@ public class CopyToPostgres<T extends CommonShell> {
     dao.addBulk(bulk);
     if (missing > 0) logger.warn("copyRefResult missing " + missing + " due to missing ex id fk");
 
-    logger.info("copyRefResult added " + dao.getNumResults());
+    logger.info("copyRefResult added " + bulk.size() + " and now has " +dao.getNumResults());
   }
 
   /**

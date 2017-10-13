@@ -57,6 +57,7 @@ public class ResetPassword extends UserDialog {
   private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
 
   private static final String PASSWORD = "Password";
+  private static final String HINT = "Confirm " + PASSWORD;
 
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
   private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
@@ -65,6 +66,8 @@ public class ResetPassword extends UserDialog {
   private static final String SUCCESS = "Success";
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
+  private static final String USER_ID = "User ID";
+  private static final String PASSWORD_HAS_ALREADY_BEEN_CHANGED = "Password has already been changed?";
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -96,7 +99,8 @@ public class ResetPassword extends UserDialog {
     child.addStyleName("loginPageBack");
 
     Panel leftAndRight = new DivWidget();
-    leftAndRight.addStyleName("resetPage");
+    boolean isIOS = Window.getClientWidth() < 800;
+    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
     container.add(leftAndRight);
 
     DivWidget right = new DivWidget();
@@ -109,9 +113,6 @@ public class ResetPassword extends UserDialog {
     Form form = new Form();
     {
       form.getElement().setId("resetForm");
-      if (Window.getClientWidth() < 800) { // on iOS
-        form.setWidth("400px");
-      }
       rightDiv.add(form);
 
       form.addStyleName("topMargin");
@@ -127,7 +128,7 @@ public class ResetPassword extends UserDialog {
 
     final TextBox user = new TextBox();
     user.setMaxLength(35);
-    user.setPlaceholder("User ID");
+    user.setPlaceholder(USER_ID);
     String pendingUserID = userManager.getPendingUserID();
     user.setText(userManager.getPendingUserID());
     FormField useridField = getSimpleFormField(fieldset, user, 4);
@@ -139,7 +140,7 @@ public class ResetPassword extends UserDialog {
             token,
             useridField,
             firstPassword,
-            getPasswordField(fieldset, "Confirm " + PASSWORD));
+            getPasswordField(fieldset, HINT));
 
     fieldset.add(changePasswordButton);
 
@@ -166,7 +167,6 @@ public class ResetPassword extends UserDialog {
     final Button changePassword = new Button(CHANGE_PASSWORD);
     changePassword.setType(ButtonType.PRIMARY);
 
-    // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");
     changePassword.addStyleName("floatRight");
     changePassword.addStyleName("rightFiveMargin");
@@ -217,7 +217,7 @@ public class ResetPassword extends UserDialog {
         @Override
         public void onSuccess(User result) {
           if (result == null) {
-            markErrorBlur(changePassword, "Password has already been changed?");
+            markErrorBlur(changePassword, PASSWORD_HAS_ALREADY_BEEN_CHANGED);
             changePassword.setEnabled(true);
           } else {
             markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);

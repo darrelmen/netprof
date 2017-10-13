@@ -15,6 +15,7 @@ import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -33,6 +34,7 @@ public class UserCopy {
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
   private static final boolean WARN_ON_COLLISION = true;
   private static final String D_ADMIN = "d.admin";
+  private static final String UNALLOWED_REGEX = "[^a-zA-Z0-9_\\-.]";
 
   /**
    * What can happen:
@@ -75,7 +77,6 @@ public class UserCopy {
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
     if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
-    //boolean debug = false;
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
@@ -86,14 +87,7 @@ public class UserCopy {
       c++;
 
       int importID = toImport.getID();
-      String importUserID = toImport.getUserID();
-
-      if (hasSpaces(importUserID)) {
-//      logger.info("replacing spaces in " +importUserID);
-        importUserID = importUserID.trim().replaceAll("\\s++", "_");
-        logger.info("copyUsers now no spaces in " + importUserID);
-        toImport.setUserID(importUserID);
-      }
+      String importUserID = getNormalizedUserID(toImport);
 
       if (DEBUG) logger.info("copying " + importID + " : " + importUserID);
 
@@ -142,6 +136,36 @@ public class UserCopy {
     return oldToNew;
   }
 
+  @NotNull
+  private String getNormalizedUserID(User toImport) {
+    String importUserID = toImport.getUserID();
+
+    // deal with spaces
+
+    if (hasSpaces(importUserID)) {
+//      logger.info("replacing spaces in " +importUserID);
+      importUserID = importUserID.trim().replaceAll("\\s++", "_");
+      logger.info("copyUsers now no spaces in " + importUserID);
+      toImport.setUserID(importUserID);
+    }
+
+    // deal with short user id
+    if (importUserID.length() == 4) { // domino only really wants user ids that are 5 long, and old netprof would allow 4 (like "demo")
+      importUserID += "_";
+      toImport.setUserID(importUserID);
+    }
+
+    // deal with punct
+
+    String normalized = importUserID.replaceAll(UNALLOWED_REGEX, "_");
+    if (!normalized.equals(importUserID)) {
+      importUserID = normalized;
+      toImport.setUserID(importUserID);
+    }
+
+    return importUserID;
+  }
+
   private boolean hasSpaces(String s) {
     Pattern pattern = Pattern.compile("\\s");
     Matcher matcher = pattern.matcher(s);
@@ -178,11 +202,13 @@ public class UserCopy {
 
     int importID = toImport.getID();
     String importUserID = toImport.getUserID();
+
     boolean didPasswordMatch = dominoUserDAO.isMatchingPassword(importUserID, passwordHash);
     if (didPasswordMatch) { // existing user with same password
       // do nothing, but remember id mapping
-      logger.info("copyUsers found existing user '" + importUserID + "' :" +
-          "\n\tdomino " + dominoUser + " password matches.");
+      if (DEBUG) {
+        logger.info("copyUsers found existing user '" + importUserID + "' :" + "\n\tdomino " + dominoUser + " password matches.");
+      }
 
       checkMatchingGender(dominoUserDAO, toImport, dominoUser);
 
@@ -337,9 +363,7 @@ public class UserCopy {
    * @see #copyUsers
    */
   private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, Map<Integer, Long> added) {
-    logger.info("addUserProjectBinding adding user->project for " + projid);
-    // Timestamp modified = new Timestamp(System.currentTimeMillis());
-
+   // logger.info("addUserProjectBinding adding user->project for " + projid);
     List<SlickUserProject> toAdd = new ArrayList<>();
     added.forEach((userID, modified) -> toAdd.add(new SlickUserProject(-1, userID, projid, new Timestamp(modified))));
     slickUserProjectDAO.addBulk(toAdd);

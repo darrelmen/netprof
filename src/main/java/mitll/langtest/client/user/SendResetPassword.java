@@ -54,7 +54,14 @@ import java.util.logging.Logger;
  * @since 10/2/14.
  */
 public class SendResetPassword extends UserDialog {
-  private final Logger logger = Logger.getLogger("ResetPassword");
+//  private final Logger logger = Logger.getLogger("ResetPassword");
+  private static final String ENTER_USER_ID = "Enter User ID";
+  private static final String USER_ID = "User ID";
+  private static final String SEND_RESET_PASSWORD = "Send Reset Password";
+  private static final String PLEASE_ENTER_A_USER_ID = "Please enter a user id.";
+  private static final String UNKNOWN_USER = "Unknown user.";
+  private static final String CAN_T_COMMUNICATE_WITH_SERVER_CHECK_NETWORK_CONNECTION = "Can't communicate with server - check network connection.";
+  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
 
   private static final String SUCCESS = "Success";
 
@@ -87,7 +94,8 @@ public class SendResetPassword extends UserDialog {
     child.addStyleName("loginPageBack");
 
     Panel leftAndRight = new DivWidget();
-    leftAndRight.addStyleName("resetPage");
+    boolean isIOS = Window.getClientWidth() < 800;
+    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
     container.add(leftAndRight);
 
     DivWidget right = new DivWidget();
@@ -99,9 +107,6 @@ public class SendResetPassword extends UserDialog {
 
     Form form = new Form();
     form.getElement().setId("resetForm");
-    if (Window.getClientWidth() < 800) { // on iOS
-      form.setWidth("400px");
-    }
     rightDiv.add(form);
 
     form.addStyleName("topMargin");
@@ -111,13 +116,13 @@ public class SendResetPassword extends UserDialog {
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
-    Heading w = new Heading(3, "Enter User ID");
+    Heading w = new Heading(3, ENTER_USER_ID);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
 
     final TextBox user = new TextBox();
     user.setMaxLength(35);
-    user.setPlaceholder("User ID");
+    user.setPlaceholder(USER_ID);
     String pendingUserID = userManager.getPendingUserID();
     user.setText(pendingUserID);
     FormField useridField = getSimpleFormField(fieldset, user, 4);
@@ -136,10 +141,8 @@ public class SendResetPassword extends UserDialog {
    * @see #getResetPassword
    */
   private Button getChangePasswordButton(final FormField userID) {
-    final Button changePassword = new Button("Send Reset Password");
+    final Button changePassword = new Button(SEND_RESET_PASSWORD);
     changePassword.setType(ButtonType.PRIMARY);
-
-    // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");
     changePassword.addStyleName("floatRight");
     changePassword.addStyleName("rightFiveMargin");
@@ -159,7 +162,7 @@ public class SendResetPassword extends UserDialog {
                                 final Button changePassword) {
 
     if (userIDForm.isEmpty()) {
-      markErrorBlur(userIDForm, "Please enter a user id.");
+      markErrorBlur(userIDForm, PLEASE_ENTER_A_USER_ID);
     } else {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
@@ -168,16 +171,16 @@ public class SendResetPassword extends UserDialog {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);
-          markErrorBlur(changePassword, "Can't communicate with server - check network connection.");
+          markErrorBlur(changePassword, CAN_T_COMMUNICATE_WITH_SERVER_CHECK_NETWORK_CONNECTION);
         }
 
         @Override
         public void onSuccess(Boolean result) {
           if (!result) {
-            markErrorBlur(userIDForm, "Unknown user.");
+            markErrorBlur(userIDForm, UNKNOWN_USER);
             changePassword.setEnabled(true);
           } else {
-            markErrorBlur(changePassword, SUCCESS, "Please check your email.", Placement.LEFT);
+            markErrorBlur(changePassword, SUCCESS, PLEASE_CHECK_YOUR_EMAIL, Placement.LEFT);
             reloadPageInThreeSeconds();
           }
         }

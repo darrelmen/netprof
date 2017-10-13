@@ -81,9 +81,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
-  public Map<String, Integer> getPairs(int projid) {
-    return dao.getPairs(projid);
-  }
+  public Map<String, Integer> getPairs(int projid) {  return dao.getPairs(projid);  }
 
   public void createTable() {
     dao.createTable();
