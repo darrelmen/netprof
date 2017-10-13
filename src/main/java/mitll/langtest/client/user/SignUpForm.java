@@ -361,7 +361,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reallyOnUserIDBlur(String uidVal) {
-    logger.info("reallyOnUserIDBlur user id blur " + uidVal);
+//    logger.info("reallyOnUserIDBlur user id blur " + uidVal);
 /*    if (uidVal.length() < MIN_LENGTH_USER_ID) {
       logger.info("markErrorBlurNoGrab user id blur " + uidVal);
 
@@ -383,7 +383,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     } else {
       markErrorBlurNoGrab(signUpUser, USER_ID_BAD);
     }*/
-
 
     service.getUserByID(uidVal, new AsyncCallback<User>() {
       @Override
@@ -414,7 +413,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     final TextBoxBase userBox = firstName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "firstName");
-    //return userBox;
   }
 
   private FormField getFormField(Fieldset fieldset, boolean isPassword, int minLength, int usernameWidth, String hint) {
@@ -428,7 +426,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     final TextBoxBase userBox = lastName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "lastName");
-    //return userBox;
   }
 
   /**
@@ -442,19 +439,9 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUpEmail = getFormField(fieldset, false, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
     final TextBoxBase emailBox = signUpEmail.box;
     styleBox(emailBox);
-   // emailBox.addBlurHandler(event -> onEmailBlur(emailBox));
     addFocusHandler(emailBox, "email");
     return emailBox;
   }
-
-/*  private void onEmailBlur(TextBoxBase emailBox) {
-    String value = emailBox.getValue();
-    if (value.length() < MIN_EMAIL_LENGTH) {
-      markErrorBlurNoGrab(signUpEmail, "Please enter a valid email address");
-    } else if (!isValidEmail(value)) {
-      markErrorBlurNoGrab(signUpEmail, INVALID_EMAIL);
-    }
-  }*/
 
   private void addFocusHandler(final TextBoxBase userBox, final String username) {
     userBox.addFocusHandler(event -> {
@@ -626,7 +613,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       return false;
     } else {
       int minLengthUserId = allowShort ? SHORT_USER_ID : MIN_LENGTH_USER_ID;
-      logger.info("isFormValid : min length is " + minLengthUserId);
+    //  logger.info("isFormValid : min length is " + minLengthUserId);
       if (userID.length() < minLengthUserId) {
         eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
         markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
@@ -695,7 +682,6 @@ public class SignUpForm extends UserDialog implements SignUp {
         "",
         firstName.getSafeText(),
         lastName.getSafeText(),
-        trimURL(Window.Location.getHref()),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
     service.addUser(

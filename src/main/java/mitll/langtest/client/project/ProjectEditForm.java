@@ -136,12 +136,10 @@ public class ProjectEditForm extends UserDialog {
     try {
       info.setPort(Integer.parseInt(hydraPort.getSafeText()));
     } catch (NumberFormatException e) {
-
     }
 
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
-
     info.setShowOniOS(showOniOSBox.getValue());
     //   logger.info("updateProject now " + info);
 
@@ -293,11 +291,9 @@ public class ProjectEditForm extends UserDialog {
     DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
 
     lifecycle.add(statusBox = getBox());
-
     {
       showOniOSBox = new CheckBox("Show On iOS");
-
-      logger.info("show on iOS " + info.isShowOniOS());
+//      logger.info("show on iOS " + info.isShowOniOS());
       showOniOSBox.setValue(info.isShowOniOS());
       lifecycle.add(showOniOSBox);
       showOniOSBox.addStyleName("leftTenMargin");

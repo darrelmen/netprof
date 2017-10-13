@@ -37,7 +37,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum AudioType implements IsSerializable {
   UNSET("unset"),
 
-  REGULAR("regular", "", "regular"),
+  REGULAR(Constants.REGULAR1, "", Constants.REGULAR1),
   SLOW("slow", "", "slow"),
   @Deprecated FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
   PRACTICE("practice"),  // or avp or flashcard
@@ -48,7 +48,7 @@ public enum AudioType implements IsSerializable {
   @Deprecated REVIEW("review"),      // maybe only see this in legacy data
   @Deprecated RECORDER("recorder"),  // maybe only see this in legacy data
 
-  CONTEXT_REGULAR("context=regular", "context", "regular"),
+  CONTEXT_REGULAR("context=regular", "context", Constants.REGULAR1),
 
   // Note this is notional for now - we don't collect slow speed sentences (yet)
   CONTEXT_SLOW("context=slow", "context", "slow");
@@ -83,7 +83,7 @@ public enum AudioType implements IsSerializable {
   }
 
   public boolean isRegularSpeed() {
-    return speed.equals("regular");
+    return speed.equals(Constants.REGULAR1);
   }
 
   public boolean isSlowSpeed() {
@@ -96,5 +96,9 @@ public enum AudioType implements IsSerializable {
 
   public boolean isContext() {
     return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
+  }
+
+  private static class Constants {
+    public static final String REGULAR1 = "regular";
   }
 }

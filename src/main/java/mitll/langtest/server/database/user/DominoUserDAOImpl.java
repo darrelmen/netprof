@@ -129,7 +129,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     try {
       connectToMongo(database, database.getServerProps().getProps());
     } catch (Exception e) {
-      logger.error("Couldn't connect to mongo - is it running and accessible? " + e,e);
+      logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
       throw e;
     }
   }
@@ -322,18 +322,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param url
    * @param sendEmail
    * @return
-   * @paramx freeTextPassword
    * @see BaseUserDAO#addUser
-   * @see #addAndGet(ClientUserDetail, String)
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
    */
-  private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
-                                                   String url,
-                                                   boolean sendEmail) {
-//    logger.info("adding user " + user);
-    return delegate.addUser(
-        sendEmail ? user : adminUser,
-        user,
-        url);
+  private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user, String url, boolean sendEmail) {
+    return delegate.addUser(sendEmail ? user : adminUser, user, url);
   }
 
   /**
@@ -635,8 +628,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     mitll.hlt.domino.shared.model.user.DBUser dominoUser = getDBUser(userID);
     if (dominoUser == null) {
       logger.warn("getUserByID no user by '" + userID + "'");
-    }
-    else {
+    } else {
       logger.info("found " + userID);
     }
 
@@ -698,6 +690,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * Convert a netprof user into a domino user.
+   * <p>
+   * special weird case for FernandoM01
    *
    * @param user        to import
    * @param projectName so we can make a secondary group for this language/project
@@ -723,9 +717,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
-    mitll.hlt.domino.shared.model.user.User.Gender gender = userKind ==
-        STUDENT ? UNSPECIFIED :
-        user.isMale() ? DMALE : DFEMALE;
+    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
+        userID.equalsIgnoreCase("FernandoM01");
+
+    mitll.hlt.domino.shared.model.user.User.Gender gender =
+        userKind ==
+            STUDENT && !copyGender ? UNSPECIFIED :
+            user.isMale() ? DMALE : DFEMALE;
 
     if (gender == UNSPECIFIED) {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
@@ -746,7 +745,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     );
 
     if (clientUserDetail.getGender() != gender)
-      logger.error("huh? wrote " + gender + " but got back " + clientUserDetail.getGender());
+      logger.error("toClientUserDetail huh? wrote " + gender + " but got back " + clientUserDetail.getGender());
 
     clientUserDetail.addSecondaryGroup(getGroupOrMake(projectName));
     clientUserDetail.setAcctDetail(new AccountDetail(
@@ -1009,6 +1008,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * TODO: try to avoid?
    *
    * @return
+   * @see #getMiniUsers
+   * @see #getReportUsers
+   * @see #getUsers
    * @deprecated
    */
   public List<DBUser> getAll() {
@@ -1237,7 +1239,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (updateUser.getEmail().isEmpty()) logger.error("empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
 
-   return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
+    return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
 
   private boolean isValidAsEmail(String text) {

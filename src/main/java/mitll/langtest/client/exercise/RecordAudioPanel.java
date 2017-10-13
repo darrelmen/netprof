@@ -366,9 +366,6 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
-//      if (result.isValid()) {
-        // System.out.println("tell other tabs that audio has arrived!");
-  //    }
       showDynamicRange(result);
     }
 

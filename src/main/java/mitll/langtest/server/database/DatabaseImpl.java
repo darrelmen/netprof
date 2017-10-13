@@ -35,10 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.server.audio.AudioExportOptions;
-import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
@@ -84,6 +81,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -545,11 +543,28 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @see #getCustomOrPredefExercise(int, int)
+   * @see #getCustomOrPredefExercise
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
     return projectManagement.getExercise(projectid, id);
+  }
+
+  public JsonExport getJSONExport(int projectid) {
+    getExercises(projectid);
+
+    Map<String, Integer> stringIntegerMap = Collections.emptyMap();
+    AudioFileHelper audioFileHelper = getProject(projectid).getAudioFileHelper();
+
+    JsonExport jsonExport = new JsonExport(
+        audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
+        getSectionHelper(projectid),
+        serverProps.getPreferredVoices(),
+        getLanguage(projectid).equalsIgnoreCase("english")
+    );
+
+    attachAllAudio(projectid);
+    return jsonExport;
   }
 
   /**
@@ -838,24 +853,24 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
-
-    if (userExercise.getProjectID() < 0) {
+    int projectID = userExercise.getProjectID();
+    if (projectID < 0) {
       logger.warn("huh? no project id on user exer " + userExercise);
     }
     getUserListManager().editItem(userExercise,
         // create if doesn't exist
-        getServerProps().getMediaDir(), getTypeOrder(userExercise.getProjectID()));
+        getServerProps().getMediaDir(), getTypeOrder(projectID));
 
-    Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
-    Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
+    // Set<AudioAttribute> originalAudio = new HashSet<>(userExercise.getAudioAttributes());
+    Set<AudioAttribute> defectAudio = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
-    if (!original.isEmpty()) {
-      logger.debug("editItem originally had " + original.size() + " attributes, and " + defects.size() + " defects");
-    }
-
-    int projectID = userExercise.getProjectID();
-
+    /*
+    if (!originalAudio.isEmpty()) {
+      logger.debug("editItem originally had " + originalAudio.size() + " attributes, and " + defectAudio.size() + " defectAudio");
+    }*/
     boolean isPredef = userExercise.isPredefined();
+
+/*
     CommonExercise exercise = isPredef ? getExerciseDAO(projectID).addOverlay(userExercise) : null;
     //boolean notOverlay = exercise == null;
     if (isPredef) {
@@ -865,25 +880,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
 // not an overlay! it's a new user exercise
       exercise = getUserExerciseByExID(userExercise.getID());
       logger.debug("editItem user custom exercise is " + exercise);
-    }
+    }*/
+
 
     if (isPredef) {
-      boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
-      logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
-
-      MutableAudioExercise mutableAudio = exercise.getMutableAudio();
-      for (AudioAttribute attribute : defects) {
-        if (!mutableAudio.removeAudio(attribute)) {
-          logger.warn("editItem huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
-        }
-      }
+      clearDefects(//soriginalAudio,
+          defectAudio, userExercise);
 
       // why would this make sense to do???
 /*      String overlayID = exercise.getOldID();
 
-      logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
+      logger.debug("editItem copying " + originalAudio.size() + " audio attrs under exercise overlay id " + overlayID);
 
-        for (AudioAttribute toCopy : original) {
+        for (AudioAttribute toCopy : originalAudio) {
           if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
             logger.error("bad user id for " + toCopy);
           }
@@ -891,14 +900,25 @@ public class DatabaseImpl implements Database, DatabaseServices {
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
       }*/
 
-    } else if (exercise == null) {
-      logger.error("editItem huh? couldn't make overlay or find user exercise for " + userExercise);
     }
 
     if (isPredef) {
-      getSectionHelper(projectID).refreshExercise(exercise);
+      getSectionHelper(projectID).refreshExercise(userExercise);
     }
-    return exercise;
+    return userExercise;
+  }
+
+  private void clearDefects(//Set<AudioAttribute> original,
+                            Set<AudioAttribute> defects, CommonExercise exercise) {
+    //boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
+    //logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
+
+    MutableAudioExercise mutableAudio = exercise.getMutableAudio();
+    for (AudioAttribute attribute : defects) {
+      if (!mutableAudio.removeAudio(attribute)) {
+        logger.warn("editItem huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
+      }
+    }
   }
 
   /**
@@ -991,7 +1011,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
-    return getJsonSupport(projid).getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
+    return getJsonSupport(projid)
+        .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 
   /**
@@ -1369,8 +1390,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       toRet = getUserExerciseByExID(id);
     }
     if (toRet == null) {
-      logger.error("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
-          " after looking in exercise table.");
+
+      String message = "getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+          " after looking in exercise table.";
+      if (id == 0) {
+        logger.warn(message);
+      } else {
+        logger.error(message);
+      }
     }
 
     return toRet;
@@ -1542,24 +1569,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Expensive ?
    *
    * @param projectid
-   * @see ScoreServlet#getJSONExport
+   * @see DatabaseImpl#getJSONExport
    */
   public void attachAllAudio(int projectid) {
-    IAudioDAO audioDAO = getAudioDAO();
-    Project project = getProject(projectid);
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectid);
-
     long then = System.currentTimeMillis();
+
     Collection<CommonExercise> exercises = getExercises(projectid);
-    for (CommonExercise exercise : exercises) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-      if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, audioAttributes, project.getLanguage());
-      }
-      //if (!debug) ensureMP3s(exercise);
-      // exercises.add(getJsonForExercise(exercise));
-    }
-    logger.info(project.getProject().name() + "/" + project.getLanguage() +
+
+    Project project = getProject(projectid);
+    String language = project.getLanguage();
+    String name = project.getProject().name();
+
+    getAudioDAO().attachAudioToExercises(exercises, language);
+
+    logger.info(name + "/" + language +
         " took " + (System.currentTimeMillis() - then) +
         " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
@@ -1567,7 +1590,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public String getUserListName(int listid) {
     UserList userListByID = getUserListManager().getSimpleUserListByID(listid);
     if (userListByID == null) {
-      logger.error("huh? can't find user list " + listid);
+      logger.error("getUserListName : can't find user list " + listid);
       return "_Unknown";
     } else {
       String language1 = getLanguage(userListByID.getProjid());
@@ -1629,8 +1652,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         logger.debug("not sending email report since this is not monday...");
       }
       tryTomorrow();
-    }
-    else {
+    } else {
       logger.debug("doReport Host " + serverProps.getHostName() + " not generating a report.");
     }
   }
@@ -1651,8 +1673,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see LangTestDatabaseImpl#sendReport
    * @param userID
+   * @see LangTestDatabaseImpl#sendReport
    */
   @Override
   public void sendReport(int userID) {

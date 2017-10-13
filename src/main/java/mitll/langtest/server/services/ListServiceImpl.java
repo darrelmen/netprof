@@ -212,9 +212,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {
-    int projectID = userExercise.getProjectID();
-    String foreignLanguage = userExercise.getForeignLanguage();
-    return getExerciseByVocab(projectID, foreignLanguage);
+    return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
   }
 
   private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {

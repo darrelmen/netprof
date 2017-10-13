@@ -32,11 +32,12 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.client.services.AudioService;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.exercise.Project;
@@ -55,6 +56,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -207,7 +210,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logger.warn("huh? got zero length recording " + user + " " + exerciseID);
         logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
       } else {
-        ensureCompressedAudio(user, commonExercise, audioAnswer.getPath(), audioContext.getAudioType(), language);
+        String path = audioAnswer.getPath();
+        String actualPath = ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language);
+        //logger.info("Was " + path);
+        // logger.info("Now " + actualPath);
+        if (actualPath.startsWith(serverProps.getAudioBaseDir())) {
+          actualPath = actualPath.substring(serverProps.getAudioBaseDir().length());
+          // logger.info("Now " + actualPath);
+        }
+        audioAnswer.setPath(actualPath);
 //        logger.info("wrote compressed...");
       }
     } catch (Exception e) {
@@ -271,9 +282,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }*/
 
   /**
-   * @see #ensureAudio(int)
    * @param exercises
    * @param language
+   * @see #ensureAudio(int)
    */
   private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
     long then = System.currentTimeMillis();
@@ -296,8 +307,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     int c = 0;
     int success = 0;
-    logger.info("ensureCompressedAudio (" + language +
-        ") examining " + exercises.size() + " exercises");
+    logger.info("ensureCompressedAudio (" + language + ") examining " + exercises.size() + " exercises");
 
     for (CommonExercise exercise : exercises) {
       if (exercise != null) {
@@ -307,17 +317,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //            logger.info("checkAudio exercise.g. ensure audio for " + audioAttribute + " on " + exercise);
           }
           try {
-            boolean didit = ensureCompressedAudio(
+            String s = ensureCompressedAudio(
                 audioAttribute.getUserid(),
                 exercise,
                 audioAttribute.getAudioRef(),
                 audioAttribute.getAudioType(),
                 language);
+            boolean didit = !s.equalsIgnoreCase(FILE_MISSING);
             if (didit) success++;
             if (c % 1000 == 0)
-              logger.debug("checkAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
+              logger.debug("ensureCompressedAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
           } catch (Exception e1) {
-            logger.warn("Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
+            logger.warn("ensureCompressedAudio Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }
         }
       }
@@ -341,12 +352,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param language
    * @see #writeAudioFile
    */
-  private boolean ensureCompressedAudio(int user,
-                                        CommonExercise commonShell,
-                                        String path,
-                                        AudioType audioType,
-                                        String language) {
-    if (checkedExists.contains(path)) return true;
+  private String ensureCompressedAudio(int user,
+                                       CommonExercise commonShell,
+                                       String path,
+                                       AudioType audioType,
+                                       String language) {
+    if (checkedExists.contains(path)) return path;
 
     String userID = getUserID(user);
     if (userID == null) {
@@ -364,13 +375,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }
     }
 
-    boolean b = ensureMP3(path, new TrackInfo(title, userID, comment, language));
-    if (b) {
+    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language), language);
+    boolean isMissing = filePath.equals(FILE_MISSING);
+
+    if (!isMissing) {
       checkedExists.add(path);
       if (checkedExists.size() % CHECKED_INTERVAL == 10)
         logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
     }
-    return b;
+    return filePath;
   }
 
   private final Set<String> checkedExists = new HashSet<>();
@@ -380,11 +393,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    *
    * @param wavFile
    * @param trackInfo
+   * @param language
    * @return true if mp3 file exists
-   * @seex #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
+  private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);
@@ -399,6 +412,21 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
       }
 
+      File fileUnderParent = new File(parent, wavFile);
+
+      if (!fileUnderParent.exists()) {
+        parent += ServerProperties.BEST_AUDIO + File.separator + language.toLowerCase();
+        File fileUnderParent2 = new File(parent, wavFile);
+
+        if (DEBUG)
+          logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+
+        if (!fileUnderParent2.exists()) {
+          logger.error("ensureMP3 nope " + fileUnderParent2.getAbsolutePath());
+        } else {
+          // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());
+        }
+      }
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
         if (WARN_MISSING_FILE && spew++ < 10) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
@@ -406,16 +434,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }*/
 
       String s = audioConversion.ensureWriteMP3(parent, wavFile, false, trackInfo);
-      boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
+      boolean isMissing = s.equals(FILE_MISSING);
       if (isMissing) {
         if (spew++ < 10 || spew % 1000 == 0) {
           logger.error("ensureMP3 : (count = " + spew + ")" +
               " can't find " + wavFile + " under " + parent + " for " + trackInfo);
         }
       }
-      return !isMissing;
+      return s;
+    } else {
+      return FILE_MISSING;
     }
-    return false;
   }
 
   private int spew = 0;
@@ -570,10 +599,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
-    String wavAudioFile = getWavAudioFile(audioFile);
+    String wavAudioFile = getWavAudioFile(audioFile, language);
     File testFile = new File(wavAudioFile);
     if (!testFile.exists() || testFile.length() == 0) {
-      if (testFile.length() == 0) logger.error("getImageForAudioFile : huh? " + wavAudioFile + " is empty???");
+      if (!testFile.exists()) {
+        logger.error("getImageForAudioFile no audio at " + testFile.getAbsolutePath());
+      } else if (testFile.length() == 0) {
+        logger.error("getImageForAudioFile : huh? " + wavAudioFile + " is empty???");
+      }
       return new ImageResponse();
     }
     ImageType imageType1 =
@@ -606,9 +639,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.debug("getImageForAudioFile : got images " +
           // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
-          "\n\tfor wav" + wavAudioFile +
-          "\n\timage " + absolutePathToImage +
-          "\n\ttook " + diff + " millis");
+          "\n\tfor wav " + wavAudioFile +
+          "\n\timage   " + absolutePathToImage +
+          "\n\ttook    " + diff + " millis");
     }
     String installPath = pathHelper.getInstallPath();
 
@@ -648,7 +681,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param audioFile
    * @return
    */
-  private String getWavAudioFile(String audioFile) {
+  private String getWavAudioFile(String audioFile, String language) {
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
 //      logger.info("getWavAudioFile " + audioFile);
@@ -656,8 +689,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         return wavFile;
       } else {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
+        if (!test.exists()) {
+          //     logger.warn("not at " + test.getAbsolutePath());
+          test = pathHelper.getAbsoluteBestAudioFile(wavFile, language.toLowerCase());
+          if (!test.exists()) {
+            logger.warn("getWavAudioFile NOPE at " + test.getAbsolutePath());
+          }
+        }
         //      logger.info("getWavAudioFile test " + test.getAbsolutePath());
-        audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";//getAudioFileHelper().getWavForMP3(audioFile, );
+        audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";
       }
     }
 

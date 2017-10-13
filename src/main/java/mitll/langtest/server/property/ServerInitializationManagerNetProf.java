@@ -191,6 +191,8 @@ public class ServerInitializationManagerNetProf {
     in = buildConfigNameAndOpenFile(ctx, DEFAULT_PROPERTY_HOME);
   }*/
 
+  private static boolean warned2 = false;
+
   /**
    * Build the config file name based on the provided home. Returns null if no home is provided
    */
@@ -226,10 +228,11 @@ public class ServerInitializationManagerNetProf {
       Attributes atts = (ctx != null) ? getManifestAttributes(ctx) : null;
 
       if (atts == null) {
-        //if (DEBUG) {
-        log.info("getServerProperties Did not load attribute information. Are you running in " +
-            "a servlet container? Context:" + ctx);
-        //}
+        if (!warned2) {
+          log.info("getServerProperties Did not load attribute information. Are you running in " +
+              "a servlet container? Context:" + ctx);
+          warned2 = true;
+        }
       } else {
         //log.info("getServerProperties : found manifest with " + atts.size() + " attributes.");
 
@@ -239,8 +242,9 @@ public class ServerInitializationManagerNetProf {
 
         grabFromAttributes(manifest, atts, BUILT_BY);
         String s = grabFromAttributes(manifest, atts, BUILT_DATE);
-        if (s != null) {
+        if (s != null && !warned2) {
           log.info(BUILT_DATE + " = " + s);
+          warned2 = true;
         }
       }
 

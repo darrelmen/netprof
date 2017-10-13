@@ -74,15 +74,24 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * JUST FOR TESTING
+   *
+   * @see #populateProjects
    */
   private static final boolean DEBUG_ONE_PROJECT = false;
-  private static final String LANG_TO_LOAD = "spanish";
+  /**
+   * JUST FOR TESTING
+   */
+  private static final String LANG_TO_LOAD = "";
+  /**
+   * JUST FOR TESTING
+   */
+  private static final int LANG_ID = 3;
 
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
-  public static final String CREATED = "Created";
-  public static final String MODIFIED = "Modified";
-  public static final String NUM_ITEMS = "Num Items";
+  private static final String CREATED = "Created";
+  private static final String MODIFIED = "Modified";
+  private static final String NUM_ITEMS = "Num Items";
 
 
   private final PathHelper pathHelper;
@@ -155,7 +164,9 @@ public class ProjectManagement implements IProjectManagement {
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
         if (DEBUG_ONE_PROJECT) {
-          if (slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)) {
+          if (slickProject.id() == LANG_ID ||
+              slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
+              ) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
@@ -374,7 +385,14 @@ public class ProjectManagement implements IProjectManagement {
   @Override
   public void refreshProjects() {
     Map<Integer, SlickProject> idToSlickProject = getIdToProjectMapFromDB();
-    idToProject.values().forEach(project -> project.setProject(idToSlickProject.get(project.getID())));
+    idToProject.values().forEach(project -> {
+      SlickProject project1 = idToSlickProject.get(project.getID());
+      if (project1 == null) {
+        logger.warn("huh? no project for " + project.getID() + " : " + project);
+      } else {
+        project.setProject(project1);
+      }
+    });
   }
 
   @NotNull
@@ -498,6 +516,7 @@ public class ProjectManagement implements IProjectManagement {
       return Collections.emptyList();
     }
     Project project = getProjectOrFirst(projectid);
+    if (project == null) return Collections.emptyList();
 //    logger.info("getExercises " + projectid  + " = " +project);
 
     if (!project.isConfigured()) {
@@ -716,10 +735,10 @@ public class ProjectManagement implements IProjectManagement {
 
   private List<SlickProject> getProductionProjects(List<SlickProject> slickProjects) {
     return slickProjects
-            .stream()
-            .filter(project -> project.status()
-                .equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
-            .collect(Collectors.toList());
+        .stream()
+        .filter(project -> project.status()
+            .equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
+        .collect(Collectors.toList());
   }
 
   @NotNull
@@ -727,7 +746,7 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
     Collection<SlickProject> all = db.getProjectDAO().getAll();
 
-    logger.info("getNestedProjectInfo : found " + all.size() + " projects");
+    //   logger.info("getNestedProjectInfo : found " + all.size() + " projects");
     for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.computeIfAbsent(project.language(), k -> new ArrayList<>());
       slimProjects.add(project);

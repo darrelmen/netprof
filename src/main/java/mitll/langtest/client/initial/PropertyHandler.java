@@ -96,7 +96,14 @@ public class PropertyHandler {
   private static final String DOMINO_SERVER = "domino.url";
 
   private static final String HELP = "help";
-  private static final String HELP_DEFAULT = "Please consult the user manual or send email to netprof-help@dliflc.edu.";
+  private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
+  private static final String HELP_DEFAULT = "Please consult the user manual or send email to " +
+      "<a href=\"mailto:" +
+      NETPROF_HELP_DLIFLC_EDU +
+      "\">" +
+      NETPROF_HELP_DLIFLC_EDU +
+      "</a>" +
+      ".";
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
@@ -160,11 +167,13 @@ public class PropertyHandler {
 
   /**
    * ONLY AMAS
+   *
    * @return
    */
   public String getFontFamily() {
     return fontFamily;
   }
+
   public void setFontFamily(String fontFamily) {
     this.fontFamily = fontFamily;
   }
@@ -196,7 +205,7 @@ public class PropertyHandler {
   private String splashTitle = null;
   private String appTitle = null;
 
- // private boolean showFlashcardAnswer = true;
+  // private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
 
   private static final String RESPONSE_TYPE = "responseType";
@@ -333,14 +342,6 @@ public class PropertyHandler {
     }
 
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
-
-    // supports headstart mode
- /*   String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
-    if (exercise_title != null) {
-      this.exercise_title = exercise_title;
-    } else {
-      this.exercise_title = DEFAULT_EXERCISE;
-    }*/
     if (bkgColorForRefParam != null) {
       bkgColorForRef = !bkgColorForRefParam.equals("false");
     }
@@ -396,7 +397,6 @@ public class PropertyHandler {
     return exercise_title;
   }
 */
-
   public String getAppTitle() {
     return appTitle;
   }

@@ -34,7 +34,6 @@ package mitll.langtest.client.initial;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -54,8 +53,6 @@ import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
-import mitll.langtest.client.services.LangTestDatabase;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
@@ -411,8 +408,7 @@ public class InitialUI implements UILifecycle {
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
-
+      //logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
       controller.getUserService().forgetProject(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
@@ -528,7 +524,7 @@ public class InitialUI implements UILifecycle {
                                    final EventRegistration eventRegistration,
                                    final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
+    firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword());
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();

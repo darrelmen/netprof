@@ -53,8 +53,8 @@ public abstract class BaseUserDAO extends DAO {
   protected static final String IMPORT_USER = "importUser";
 
   public static final String USERS = "users";
-  public static final String MALE = "male";
-  public static final String FEMALE = "female";
+  //public static final String MALE = "male";
+  //public static final String FEMALE = "female";
   static final String PERMISSIONS = "permissions";
   static final String KIND = "kind";
   static final String PASS = "passwordH";
@@ -71,7 +71,7 @@ public abstract class BaseUserDAO extends DAO {
   public static final String DEFAULT_USER1 = "defaultUser";
   public static final String DEFAULT_MALE_USER = "defaultMaleUser";
   public static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
-  public static final String UNSET_EMAIL = "unset@unset.com";
+  private static final String UNSET_EMAIL = "unset@unset.com";
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
@@ -166,7 +166,6 @@ public abstract class BaseUserDAO extends DAO {
     } else {
       // user exists!
       return null;
-
       /*String emailHash = currentUser.getEmailHash();
 
       if (emailHash != null &&
@@ -191,6 +190,11 @@ public abstract class BaseUserDAO extends DAO {
    * @see #addUser
    */
   private int addUserAndGetID(SignUpUser user) {
+
+    String urlToUse = "https://" + getDatabase().getServerProps().getHostName();
+
+    logger.info("addUserAndGetID using " + urlToUse);
+
     return addUser(user.getAge(),
         user.getRealGender(),
         0,
@@ -207,13 +211,11 @@ public abstract class BaseUserDAO extends DAO {
         user.getEmail(),
         user.getDevice(),
         user.getFirst(), user.getLast(),
-        user.getUrl(),
+        urlToUse,
         user.getAffiliation());
   }
 
   abstract User getUserByID(String id);
-
-  //abstract void updateUser(int id, User.Kind kind, String emailH, String email);
 
   abstract User getUserWhere(int userid);
 
@@ -230,22 +232,12 @@ public abstract class BaseUserDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   abstract public void ensureDefaultUsers();
-/*  {
-    this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
-    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
-    this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
-    this.defaultUser = getOrAdd(DEFAULT_USER1, "Default", "User", User.Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", User.Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
-
-    this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
-  }*/
 
   public boolean isDefaultUser(String userid) {
     return defaultUsers.contains(userid);
   }
 
-  protected int getOrAdd(String beforeLoginUser, String first, String last, Kind kind) {
+  int getOrAdd(String beforeLoginUser, String first, String last, Kind kind) {
     int beforeLoginUserID = getIdForUserID(beforeLoginUser);
     if (beforeLoginUserID == -1) {
       beforeLoginUserID = addShellUser(beforeLoginUser, first, last, kind);

@@ -67,6 +67,7 @@ import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
@@ -77,6 +78,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  */
 public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+  private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
 
   private static final int CARD_HEIGHT = 362;//320;
 
@@ -175,11 +177,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     inner.add(threePartContent);
 
     //  logger.info("Adding recording widgets to " + middleVert.getElement().getExID());
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        addRecordingAndFeedbackWidgets(getID(), controller, middleVert);
-      }
-    });
+    Scheduler.get().scheduleDeferred((Command) () -> addRecordingAndFeedbackWidgets(getID(), controller, middleVert));
     //  logger.info("After adding recording widgets to " + middleVert.getElement().getExID());
     middleVert.add(getFinalWidgets());
 
@@ -187,8 +185,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     warnNoFlash.setVisible(false);
     inner.add(warnNoFlash);
 
-    getElement().setId("FlashcardPanel");
-
+//    getElement().setId("FlashcardPanel");
     addPrevNextWidgets(prevNextRow);
 
     addRowBelowPrevNext(lowestRow);
@@ -733,32 +730,35 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     vp.setWidth("78%");
     vp.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
 
-    ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-    showAdvance(exerciseList, progressBar);
-    progressBar.addStyleName("progressBar");
 
-    Heading child = new Heading(6, Math.max(1, exerciseList.getComplete() + 1) + " of " + exerciseList.getSize());
-    child.getElement().getStyle().setMarginLeft(39, Style.Unit.PCT);
-    vp.add(child);
-    vp.add(progressBar);
+    {
+      int complete = exerciseList.getComplete();
+      int firstValue = Math.max(1, complete + 1);
+      Heading child = new Heading(6, firstValue + " of " + exerciseList.getSize());
+      child.getElement().getStyle().setMarginLeft(39, Style.Unit.PCT);
+      vp.add(child);
+    }
+    {
+      ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+      showAdvance(exerciseList, progressBar);
+      progressBar.addStyleName("progressBar");
+      vp.add(progressBar);
+    }
     return vp;
   }
 
   private Button getNextButton() {
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
-    new TooltipHelper().addTooltip(right, "Right Arrow Key");
+    new TooltipHelper().addTooltip(right, RIGHT_ARROW_KEY);
     controller.register(right, getID(), "next button");
 
     right.addStyleName("floatRight");
     right.setSize(ButtonSize.LARGE);
     right.getElement().getStyle().setMarginTop(-30, Style.Unit.PX);
-    right.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        right.setEnabled(false);
-        gotClickOnNext();
-      }
+    right.addClickHandler(event -> {
+      right.setEnabled(false);
+      gotClickOnNext();
     });
     return right;
   }

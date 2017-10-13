@@ -32,12 +32,14 @@
 
 package mitll.langtest.server.sorter;
 
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -56,11 +58,10 @@ public class ExerciseSorter extends SimpleSorter {
   public ExerciseSorter() { super(false); }
 
   /**
-   * @param typeOrder
    * @param phoneToCount
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
-  public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount) {
+  public ExerciseSorter(Map<String, Integer> phoneToCount) {
     this();
     this.phoneToCount = phoneToCount;
   }
@@ -71,12 +72,9 @@ public class ExerciseSorter extends SimpleSorter {
    * @param phoneToCount
    */
   public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort,final Map<String, Integer> phoneToCount) {
-    Collections.sort(toSort, new Comparator<CommonExercise>() {
-      @Override
-      public int compare(CommonExercise o1, CommonExercise o2) {
-        // items in same chapter alphabetical by tooltip
-        return phoneCompFirst(o1, o2, phoneToCount);
-      }
+    toSort.sort((Comparator<CommonExercise>) (o1, o2) -> {
+      // items in same chapter alphabetical by tooltip
+      return phoneCompFirst(o1, o2, phoneToCount);
     });
   }
 
@@ -84,7 +82,7 @@ public class ExerciseSorter extends SimpleSorter {
      * @param o1
      * @param o2
      * @return
-     * @see IResultDAO#getSortedAVPHistoryByPhones
+     * @see mitll.langtest.server.database.result.BaseResultDAO#compareUsingPhones(ExerciseCorrectAndScore, ExerciseCorrectAndScore, CommonExercise, CommonExercise, ExerciseSorter)
      */
   public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) { return phoneCompFirst(o1, o2, phoneToCount);  }
 
@@ -122,7 +120,7 @@ public class ExerciseSorter extends SimpleSorter {
     int o1Num = pron1.size();
     int o2Num = pron2.size();
 
-    int comp = new Integer(o1Num).compareTo(o2Num);
+    int comp = Integer.compare(o1Num, o2Num);
     if (comp != 0) {
       return comp;
     } else {

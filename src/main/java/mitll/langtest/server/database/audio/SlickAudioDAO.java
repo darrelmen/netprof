@@ -111,9 +111,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.getAll(projid);
   }
 
-  public List<SlickAudio> getAllNoExistsCheck(int projid) {
-    return dao.getAll(projid);
-  }
+  public List<SlickAudio> getAllNoExistsCheck(int projid) {  return dao.getAllNoCheck(projid);  }
 
   public Collection<UserTimeBase> getAudioForReport(int projid) {
     List<UserTimeBase> report = new ArrayList<>();
@@ -462,6 +460,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * Skips over audio that has negative infinity DNR - usually a bad sign.
+   *
    * TODO : consider cache for mini users
    *
    * @param all
@@ -470,8 +470,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
 
-    for (SlickAudio s : all) {
-      copy.add(getAudioAttribute(s, idToMini));
+    for (SlickAudio slickAudio : all) {
+      AudioAttribute audioAttribute = getAudioAttribute(slickAudio, idToMini);
+      if (audioAttribute.getDnr() == Float.NEGATIVE_INFINITY) {
+        logger.info("toAudioAttributes : Skip bogus " + audioAttribute);
+      }
+      else {
+        copy.add(audioAttribute);
+      }
     }
     return copy;
   }

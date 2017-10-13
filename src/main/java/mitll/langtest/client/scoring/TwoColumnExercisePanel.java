@@ -213,7 +213,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       });
     } else {
-      logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
+     // logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
     }
 
     if (req.isEmpty()) {

@@ -78,8 +78,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
-  // private final Map<Integer, ExerciseListWrapper<T>> projidToWrapper = new HashMap<>();
-
   private static final boolean DEBUG = false;
 
   /**
@@ -141,14 +139,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (serverProps.isAMAS()) {
       return (ExerciseListWrapper<T>) getAMASExerciseIds(request); // TODO : how to do this without forcing it.
     }
-/*
-    if (request.isNoFilter()) {
-      ExerciseListWrapper<T> tExerciseListWrapper = getCachedExerciseWrapper(request, projectID);
-      if (tExerciseListWrapper != null) {
-        return tExerciseListWrapper;
-      }
-    }*/
-
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {
@@ -296,47 +286,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     return commonExercises;
   }
-
-/*  @Nullable
-  private ExerciseListWrapper<T> getCachedExerciseWrapper(ExerciseListRequest request, int projectID) {
-    synchronized (projidToWrapper) {
-      ExerciseListWrapper<T> exerciseListWrapper = projidToWrapper.get(projectID);
-      if (exerciseListWrapper != null && false) {
-        logger.info("getExerciseIds Returning cached exercises " + exerciseListWrapper);
-
-        ExerciseListWrapper<T> tExerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(),
-            exerciseListWrapper.getExercises(),
-            exerciseListWrapper.getFirstExercise());
-
-        addScoresForAll(request.getUserID(), exerciseListWrapper.getExercises());
-        return tExerciseListWrapper;
-      }
-    }
-    return null;
-  }*/
-
-/*
-  private void addScoresForAll(int userid, List<T> exercises) {
-    db.getResultDAO().addScoresForAll(userid, exercises);
-  }
-*/
-
-  /**
-   * TODO: How does this work with multiple simultaneous users???
-   * <p>
-   * Maybe we should get scores separately?
-   * Or copy exercises?
-   * Or return on separate info channel?
-   *
-   * @param userid
-   * @param exercises
-   * @param <X>
-   */
-/*
-  private <X extends CommonShell> void getScores(int userid, List<X> exercises) {
-    db.getResultDAO().getScores(userid, exercises);
-  }
-  */
 
   /**
    * Return shortest matches first (on fl term).
@@ -720,7 +669,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
-
     db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
   }
 
@@ -1346,6 +1294,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     int userID = getUserIDFromSessionOrDB();
     int projectID = getProjectID(userID);
+    String language = db.getLanguage(projectID);
 
     long then = System.currentTimeMillis();
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
@@ -1364,7 +1313,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
-    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, getLanguage(toAddAudioTo.iterator().next()));
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
     now = System.currentTimeMillis();
 
     if (now - then > 50)

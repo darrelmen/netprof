@@ -7,15 +7,9 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class ListChangedEvent extends GwtEvent<ListChangedEventHandler> {
   public static final Type<ListChangedEventHandler> TYPE = new Type<>();
-//  private int exid;
 
   public ListChangedEvent() {
-  //  this.exid = exid;
   }
-//
-//  public int getExid() {
-//    return exid;
-//  }
 
   @Override
   public Type<ListChangedEventHandler> getAssociatedType() {

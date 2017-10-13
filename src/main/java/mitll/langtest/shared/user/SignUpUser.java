@@ -48,7 +48,7 @@ public class SignUpUser implements IsSerializable {
   private String first;
   private String last;
   private String ip;
-  private String url;
+ // private String url;
   private String affiliation;
 
   public SignUpUser() {
@@ -66,8 +66,6 @@ public class SignUpUser implements IsSerializable {
    * @param ip
    * @param first
    * @param last
-   * @param url
-
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public SignUpUser(String userID,
@@ -83,7 +81,7 @@ public class SignUpUser implements IsSerializable {
                     String device,
                     String ip,
                     String first,
-                    String last, String url,
+                    String last,
                     String affiliation) {
     this.userID = userID;
 
@@ -98,7 +96,7 @@ public class SignUpUser implements IsSerializable {
     this.ip = ip;
     this.first = first;
     this.last = last;
-    this.url = url;
+   // this.url = url;
     this.affiliation = affiliation;
   }
 
@@ -171,9 +169,11 @@ public class SignUpUser implements IsSerializable {
     return this;
   }
 
+/*
   public String getUrl() {
     return url;
   }
+*/
 
   /**
    * @see mitll.langtest.server.database.user.BaseUserDAO#addUserAndGetID(SignUpUser)

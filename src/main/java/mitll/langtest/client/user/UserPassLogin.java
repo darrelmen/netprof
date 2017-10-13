@@ -215,13 +215,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     modal.show();
   }
 
-  private void showWelcome2() {
-    new ModalInfoDialog("Login options", getLoginInfo());
-  }
-
-  private String getLoginInfo() {
-    return props.getHelpMessage();
-  }
+  private void showWelcome2() { new ModalInfoDialog("Help", props.getHelpMessage());  }
 
   /**
    * @return

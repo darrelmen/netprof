@@ -126,10 +126,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        Collection<Integer> exids,
                                        String language,
                                        Project project) {
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises(userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, false, true,
         userid, project);
-    // logger.info("getWorstPhonesJson phone report " + report);
+     logger.info("getWorstPhonesJson phone report for" +
+         "\n\tuser " +
+         userid +
+         "\n\texids " +
+         exids.size() +
+         " report : \n\t" + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
@@ -150,7 +155,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     long then = System.currentTimeMillis();
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
     long now = System.currentTimeMillis();
-    if (now - then > 1)
+    if (now - then > 0)
       logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
 
 //    then = System.currentTimeMillis();
@@ -171,8 +176,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     long then = System.currentTimeMillis();
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResultForPhone(userid, ids, phone, new Timestamp(from), new Timestamp(to));
     long now = System.currentTimeMillis();
-    if (now - then > 1)
-      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
+    if (now - then > 0)
+      logger.info("getWorstPhonesForResultsForPhone took " + (now - then) + " to get " + phoneReportByResult.size());
 
 //    then = System.currentTimeMillis();
 //    Collection<SlickPhoneReport> phoneReportByResult2 = dao.getPhoneReportByResultForUser(userid, ids);
@@ -197,6 +202,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @return
    * @throws SQLException
    * @see #getWorstPhonesForResults
+   * @see #getWorstPhonesForResultsForPhone(int, Collection, Project, String, long, long)
    */
   private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
                                      boolean addTranscript,
@@ -207,8 +213,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     String language = project.getLanguage();
-    logger.info("user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
-    logger.info("phoneReportByResult " + phoneReportByResult.size());
+    logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
+    logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
 
     float totalScore = 0;
 

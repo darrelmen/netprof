@@ -340,7 +340,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   private void alwaysSetTypeAhead(String t) {
     //if (getTypeAheadText().isEmpty()) {
-    logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
+  //  logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
     typeAhead.setText(t);
     //}
   }

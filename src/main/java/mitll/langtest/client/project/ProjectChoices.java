@@ -41,8 +41,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String CHECK_AUDIO = "Check Audio";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final String CHECK_AUDIO = "Check Audio";
 
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final String IMPORT_DATA_INTO = "Import data into ";
@@ -68,7 +69,6 @@ public class ProjectChoices {
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
 
   protected static final String LOGIN = "Login";
-  //private static final int NO_USER_INITIAL = -2;
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
@@ -76,7 +76,6 @@ public class ProjectChoices {
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
-  //protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
@@ -356,17 +355,17 @@ public class ProjectChoices {
       controller
           .getScoringServiceAsyncForHost(remove.getHost())
           .recalcAlignments(remove.getID(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          status.setText("ERROR - couldn't recalc audio for " + remove.getName());
-        }
+            @Override
+            public void onFailure(Throwable caught) {
+              status.setText("ERROR - couldn't recalc audio for " + remove.getName());
+            }
 
-        @Override
-        public void onSuccess(Void result) {
-          status.setText(remove.getName() + " complete...");
-          recalcProject(projects, status);
-        }
-      });
+            @Override
+            public void onSuccess(Void result) {
+              status.setText(remove.getName() + " complete...");
+              recalcProject(projects, status);
+            }
+          });
     }
   }
 
@@ -381,8 +380,7 @@ public class ProjectChoices {
         if (projectEditForm.isValid()) {
           projectEditForm.newProject();
           return true;
-        }
-        else {
+        } else {
           return false;
         }
       }
@@ -404,7 +402,7 @@ public class ProjectChoices {
    * @param projectForLang
    * @param nest
    * @return
-   * @see #showProjectChoices
+   * @see #addFlags
    */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
     String lang1 =
@@ -426,11 +424,11 @@ public class ProjectChoices {
     Thumbnail thumbnail = new Thumbnail();
     thumbnail.setWidth("195px");
     thumbnail.setSize(2);
-    final int projid = projectForLang.getID();
 
     boolean isQC = isQC();
     {
       PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
+      final int projid = projectForLang.getID();
       button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
       thumbnail.add(button);
       if (isQC) {
@@ -459,7 +457,6 @@ public class ProjectChoices {
 
       if (isQC && !hasChildren) {
         container.add(getQCButtons(projectForLang, label));
-
       }
 
       horiz.add(container);
@@ -469,37 +466,57 @@ public class ProjectChoices {
     return thumbnail;
   }
 
+  /**
+   * @param name
+   * @param projectForLang
+   * @param hasChildren
+   * @return
+   * @see #getImageAnchor
+   */
   @NotNull
   private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren) {
     Heading label = new Heading(LANGUAGE_SIZE, name);
     label.addStyleName("floatLeft");
-    Widget subtitle = label.getWidget(0);
-    subtitle.addStyleName("floatLeft");
-    subtitle.setWidth("100%");
-    subtitle.addStyleName("topFiveMargin");
     label.setWidth("100%");
     label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
+
+    {
+      Widget subtitle = label.getWidget(0);
+      subtitle.addStyleName("floatLeft");
+      subtitle.setWidth("100%");
+      subtitle.addStyleName("topFiveMargin");
+    }
 
     if (hasChildren) {
       List<SlimProject> visibleProjects = getVisibleProjects(projectForLang.getChildren());
       String suffix = (visibleProjects.size() == 1) ? " course" : " courses";
       label.setSubtext(visibleProjects.size() + suffix);
-    } else if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
-      label.setSubtext(projectForLang.getStatus().name());
+    } else {
+      showProjectStatus(projectForLang, label);
     }
 
     label.addStyleName("floatLeft");
     return label;
   }
 
+  private void showProjectStatus(SlimProject projectForLang, Heading label) {
+    if (projectForLang.getStatus() == ProjectStatus.PRODUCTION) {
+      label.setSubtext("");
+    } else {
+      label.setSubtext(projectForLang.getStatus().name());
+    }
+  }
+
   private DivWidget getQCButtons(SlimProject projectForLang, Heading label) {
     DivWidget horiz2 = new DivWidget();
     horiz2.addStyleName("inlineFlex");
-    horiz2.add(getEditButtonContainer(projectForLang));
+    horiz2.add(getEditButtonContainer(projectForLang, label));
 
-    DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
-    importButtonContainer.addStyleName("leftFiveMargin");
-    horiz2.add(importButtonContainer);
+    {
+      DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
+      importButtonContainer.addStyleName("leftFiveMargin");
+      horiz2.add(importButtonContainer);
+    }
 
     if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
       Button deleteButton = getDeleteButton(projectForLang, label);
@@ -511,8 +528,8 @@ public class ProjectChoices {
   }
 
   @NotNull
-  private DivWidget getEditButtonContainer(SlimProject projectForLang) {
-    return getButtonContainer(getEditButton(projectForLang));
+  private DivWidget getEditButtonContainer(SlimProject projectForLang, Heading label) {
+    return getButtonContainer(getEditButton(projectForLang, label));
   }
 
   @NotNull
@@ -532,10 +549,10 @@ public class ProjectChoices {
   }
 
   @NotNull
-  private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang) {
+  private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang, Heading label) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.PENCIL);
-    w.addClickHandler(event -> showEditDialog(projectForLang));
+    w.addClickHandler(event -> showEditDialog(projectForLang, label));
     return w;
   }
 
@@ -556,12 +573,15 @@ public class ProjectChoices {
     return w;
   }
 
-  private void showEditDialog(SlimProject projectForLang) {
+  private void showEditDialog(SlimProject projectForLang, Heading label) {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
-        projectEditForm.updateProject(); return true;
+
+        projectEditForm.updateProject();
+        showProjectStatus(projectForLang, label);
+        return true;
       }
 
       @Override
@@ -649,12 +669,14 @@ public class ProjectChoices {
     List<SlimProject> children = projectForLang.getChildren();
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
     if (children.size() < 2) {
+/*
       logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
+          */
       uiLifecycle.makeBreadcrumb(name);
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
-      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+     // logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
 

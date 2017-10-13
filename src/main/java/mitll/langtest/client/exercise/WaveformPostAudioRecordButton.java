@@ -136,7 +136,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
       ((BusyPanel) parentPanel).setBusy(false);
     }
     else {
-      logger.info("parent is not a busy panel - " + parentPanel.getElement().getId() + " " + parentPanel.getClass());
+      logger.info("stopRecording parent is not a busy panel - " + parentPanel.getElement().getId() + " " + parentPanel.getClass());
     }
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
@@ -173,7 +173,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-//    logger.info("WaveformPostAudioRecordButton : " + getElement().getExID() + " : got invalid result " +result);
+    logger.info("WaveformPostAudioRecordButton : got invalid result " +result);
     hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {

@@ -52,6 +52,7 @@ import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -248,6 +249,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   protected String getLanguage() {
     Project project = getProject();
+    return getLanguage(project);
+  }
+
+  private String getLanguage(Project project) {
     if (project == null) {
       logger.error("getLanguage : no current project ");
       return "unset";
@@ -517,12 +522,17 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       return audioFileHelper;
     } else {
       Project project = getProject();
-      if (project == null) {
-        logger.error("getAudioFileHelper no current project???");
-        return null;
-      }
-      return project.getAudioFileHelper();
+      return getAudioFileHelper(project);
     }
+  }
+
+  @Nullable
+  private AudioFileHelper getAudioFileHelper(Project project) {
+    if (project == null) {
+      logger.error("getAudioFileHelper no current project???");
+      return null;
+    }
+    return project.getAudioFileHelper();
   }
 
   protected IUserListManager getUserListManager() {

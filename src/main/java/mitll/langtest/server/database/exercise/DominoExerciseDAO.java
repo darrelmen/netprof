@@ -279,7 +279,7 @@ public class DominoExerciseDAO {
   }
 
   private String removeMarkup(String termVal) {
-    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "");
+    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "").replaceAll("&#xa0;","").trim();
   }
 
   /**
@@ -301,15 +301,16 @@ public class DominoExerciseDAO {
                                                  String alternateFormVal,
                                                  String transliterationVal,
                                                  String meaning) {
+    String trim = termVal.trim();
     Exercise exercise = new Exercise(-1,
         "" + oldid,
         creatorID,
-        meaning,
-        termVal,
-        StringUtils.stripAccents(termVal),
-        alternateFormVal,
+        meaning.trim(),
+        trim,
+        StringUtils.stripAccents(trim),
+        alternateFormVal.trim(),
         "",
-        transliterationVal,
+        transliterationVal.trim(),
         projid,
         false,
         0,

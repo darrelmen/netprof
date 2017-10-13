@@ -54,7 +54,6 @@ import mitll.langtest.shared.user.User;
  */
 public class ResetPassword extends UserDialog {
   //private final Logger logger = Logger.getLogger("ResetPassword");
-
   private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
 
   private static final String PASSWORD = "Password";
@@ -108,13 +107,17 @@ public class ResetPassword extends UserDialog {
     DivWidget rightDiv = new DivWidget();
 
     Form form = new Form();
-    form.getElement().setId("resetForm");
-    rightDiv.add(form);
+    {
+      form.getElement().setId("resetForm");
+      if (Window.getClientWidth() < 800) { // on iOS
+        form.setWidth("400px");
+      }
+      rightDiv.add(form);
 
-    form.addStyleName("topMargin");
-    form.addStyleName("formRounded");
-    form.getElement().getStyle().setBackgroundColor("white");
-
+      form.addStyleName("topMargin");
+      form.addStyleName("formRounded");
+      form.getElement().getStyle().setBackgroundColor("white");
+    }
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
@@ -126,7 +129,7 @@ public class ResetPassword extends UserDialog {
     user.setMaxLength(35);
     user.setPlaceholder("User ID");
     String pendingUserID = userManager.getPendingUserID();
-    user.setText(pendingUserID);
+    user.setText(userManager.getPendingUserID());
     FormField useridField = getSimpleFormField(fieldset, user, 4);
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);

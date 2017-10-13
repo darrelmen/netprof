@@ -102,14 +102,25 @@ public class PathWriter {
                                       int exid,
                                       ServerProperties serverProperties,
                                       TrackInfo trackInfo) {
-    File bestDirForExercise = new File(bestDir + File.separator + language.toLowerCase(), "" + exid);
+
+    // this path will look like
+    // /opt/netprof/bestAudio/LANG/bestAudio/1234
+    String commonAudioPrefix = bestDir +
+        File.separator + language.toLowerCase() +
+        File.separator;
+    File bestDirForExercise = new File(
+        commonAudioPrefix + ServerProperties.BEST_AUDIO
+        , "" + exid);
     if (!bestDirForExercise.exists() && (foundBestDir && !bestDirForExercise.mkdirs())) {
       if (!bestDirForExercise.exists()) {
         logger.warn("getPermanentAudioPath huh? couldn't make " + bestDirForExercise.getAbsolutePath()); // need chmod, not writeable
       }
     }
     File destination = new File(bestDirForExercise, destFileName);
-    logger.debug("getPermanentAudioPath : copying from " + wavFileRef + " to " + destination.getAbsolutePath());
+    logger.debug("getPermanentAudioPath : copying from" +
+        "\n\tprefix  " + commonAudioPrefix +
+        "\n\twav     " + wavFileRef +
+        "\n\tto dest " + destination.getAbsolutePath());
 
 //    String bestAudioPath =
 //        File.separator + language +
@@ -128,8 +139,11 @@ public class PathWriter {
     }
     String s = getAudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
 
-    String relPath = destination.getAbsolutePath().substring(serverProperties.getAudioBaseDir().length());
+  //  String audioBaseDir = serverProperties.getAudioBaseDir();
+    String audioBaseDir = commonAudioPrefix;
+    String relPath = destination.getAbsolutePath().substring(audioBaseDir.length());
     logger.info("getPermanentAudioPath " +
+        "\n\tbase      " + audioBaseDir +
         "\n\twrote to  " + s +
         "\n\trel path  " + relPath
     );

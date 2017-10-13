@@ -54,7 +54,7 @@ import java.util.logging.Logger;
 public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignInForm");
 
-   static final String NO_SPACES = "Please no spaces in user id.";
+  static final String NO_SPACES = "Please no spaces in user id.";
 
   /**
    * @see #gotGoodPassword
@@ -206,11 +206,13 @@ public class SignInForm extends UserDialog implements SignIn {
     signIn.getElement().setId("SignIn");
     eventRegistration.register(signIn);
 
-    signIn.addClickHandler(event -> tryLogin());
     signIn.addStyleName("rightFiveMargin");
     signIn.addStyleName("leftFiveMargin");
 
     signIn.setType(ButtonType.PRIMARY);
+
+    signIn.addClickHandler(event -> tryLogin());
+
     return signIn;
   }
 
@@ -222,7 +224,7 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void tryLoginWithUserID(String userID) {
-    if (hasSpaces(userID)) {//s.length() != userID.length()) {
+    if (hasSpaces(userID)) {
       eventRegistration.logEvent(signIn, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
       checkLegacyUserWithSpaces(userID);
     } else if (userID.length() < MIN_LENGTH_USER_ID) {
@@ -254,11 +256,11 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onSuccess(User result) {
         if (result != null) {
-      //    logger.info("try again with " + testUserID);
+          //    logger.info("try again with " + testUserID);
           tryLoginWithUserID(testUserID);
         } else {
-     //     logger.info("nobody with " + testUserID);
-          markErrorBlur(userField, NO_SPACES,Placement.BOTTOM);
+          //     logger.info("nobody with " + testUserID);
+          markErrorBlur(userField, NO_SPACES, Placement.BOTTOM);
         }
       }
     });
@@ -442,28 +444,37 @@ public class SignInForm extends UserDialog implements SignIn {
       if (safeText.isEmpty()) {
         markErrorBlur(userField, ENTER_A_USER_NAME);
       } else {
-        service.getUserByID(safeText, new AsyncCallback<User>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            logger.warning("\tgot FAILURE on userExists ");
-          }
-
-          @Override
-          public void onSuccess(User result) {
-            if (result == null) {
-              markErrorBlur(userField, NO_USER_FOUND);
-            } else {
-              //  if (result.isValid()) {
-              sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
-              //} else {
-              //copyInfoToSignUp(safeText, result);
-              // }
-            }
-          }
-        });
+        sendEmailIfExists(forgotPassword, safeText);
       }
     });
     return forgotPassword;
+  }
+
+  private void sendEmailIfExists(Anchor forgotPassword, String safeText) {
+    service.getUserByID(safeText, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        logger.warning("\tgot FAILURE on userExists ");
+      }
+
+      @Override
+      public void onSuccess(User result) {
+        if (result == null) {
+          String testUserID = normalizeSpaces(safeText);
+          if (testUserID.equalsIgnoreCase(safeText)) {
+            markErrorBlur(userField, NO_USER_FOUND);
+          } else {
+            sendEmailIfExists(forgotPassword, testUserID);
+          }
+        } else {
+          //  if (result.isValid()) {
+          sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
+          //} else {
+          //copyInfoToSignUp(safeText, result);
+          // }
+        }
+      }
+    });
   }
 
   /**

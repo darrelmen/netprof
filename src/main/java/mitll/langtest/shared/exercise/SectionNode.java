@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.SectionHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +64,8 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
 
   /**
    * @param name
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
+   * @see SectionHelper#makeRoot
+   * @see #getChild
    */
   public SectionNode(String type, String name) {
     this.type = type;
@@ -82,7 +84,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
     return children == null || children.isEmpty();
   }
 
-  public Collection<SectionNode> getChildren() {
+  public List<SectionNode> getChildren() {
     return isLeaf() ? Collections.emptyList() : children;
   }
 
@@ -166,6 +168,14 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
             (leaf ? "" :  (" : [(" + this.children.size() + "), " + builder.toString() + "]"));
   }
 
+  public int getCount() {
+    return count;
+  }
+
+  public String easy() {
+    return name + " " + childType + " " + children.size();
+  }
+
   public String toString() {
     String example = isLeaf() ? "" : children.toString();
     return
@@ -174,13 +184,5 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
             (isLeaf() ? "" : (" " + childType +
                 " : [" +
                 example + "]"));
-  }
-
-  public String easy() {
-    return name + " " + childType + " " + children.size();
-  }
-
-  public int getCount() {
-    return count;
   }
 }

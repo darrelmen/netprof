@@ -114,7 +114,7 @@ public class Project implements PronunciationLookup {
    * @param serverProps
    * @param db
    * @param logAndNotify
-   * @see DatabaseImpl#rememberProject
+   * @see ProjectManagement#rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
   public Project(SlickProject project,
                  PathHelper pathHelper,
@@ -224,9 +224,13 @@ public class Project implements PronunciationLookup {
    *
    *
    */
-  private  <T extends CommonShell> void buildExerciseTrie() {
-    fullTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), true);
-    fullContextTrie = new ExerciseTrie<>(getRawExercises(), project.language(), getSmallVocabDecoder(), false);
+  private <T extends CommonShell> void buildExerciseTrie() {
+    List<CommonExercise> rawExercises = getRawExercises();
+    String language = project.language();
+    SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
+    //logger.info("build trie from " + rawExercises.size() + " exercises");
+    fullTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, true);
+    fullContextTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, false);
   }
 
   /**
@@ -297,7 +301,9 @@ public class Project implements PronunciationLookup {
     return getProject().getProp(webserviceHostIp1);
   }
 
-  public CommonExercise getExerciseByID(int id) {  return exerciseDAO.getExercise(id);  }
+  public CommonExercise getExerciseByID(int id) {
+    return exerciseDAO.getExercise(id);
+  }
 
   /**
    * Only accept an exact match
@@ -308,8 +314,7 @@ public class Project implements PronunciationLookup {
    * @see mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    */
   public CommonExercise getExerciseBySearch(String prefix) {
-    List<CommonExercise> exercises1 = fullTrie.getExercises(prefix);
-    return getMatchEither(prefix, exercises1);
+    return getMatchEither(prefix, fullTrie.getExercises(prefix));
   }
 
   public CommonExercise getExerciseBySearchBoth(String english, String fl) {
@@ -445,7 +450,7 @@ public class Project implements PronunciationLookup {
 
   @Override
   public boolean hasDict() {
-    return hasModel() ? audioFileHelper.hasDict() : false;
+    return hasModel() && audioFileHelper.hasDict();
   }
 
   /**
@@ -475,7 +480,7 @@ public class Project implements PronunciationLookup {
   }
 
   public int getID() {
-    return project.id();
+    return project == null ? -1 : project.id();
   }
 
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
