@@ -279,7 +279,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           testAudioDir = audioDir;
         }
       }
-      testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange()).convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange())
+          .convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
     }

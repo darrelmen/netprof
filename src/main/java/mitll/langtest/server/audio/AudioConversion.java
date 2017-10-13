@@ -180,13 +180,16 @@ public class AudioConversion extends AudioBase {
    * Checks if the sample rate is not 16K (as required by things like sv).
    * If not, then uses sox to make an audio file with the right sample rate.
    *
+   * Sox can take awhile, two threads could touch the same file.
+   *
    * @param testAudioDir          directory for audio
    * @param testAudioFileNoSuffix name without suffix
-   * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
+   * @return unique file path - could be same request is made by two different threads
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
-    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
+    long uniqueTimestamp = System.currentTimeMillis();
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + "_"+uniqueTimestamp+WAV;
     File wavFile = convertTo16Khz(new File(pathname));
     return removeSuffix(wavFile.getName());
   }
