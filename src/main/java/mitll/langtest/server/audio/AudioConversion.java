@@ -188,8 +188,7 @@ public class AudioConversion extends AudioBase {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
-    long uniqueTimestamp = System.currentTimeMillis();
-    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + "_"+uniqueTimestamp+WAV;
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix +WAV;
     File wavFile = convertTo16Khz(new File(pathname));
     return removeSuffix(wavFile.getName());
   }
@@ -221,7 +220,9 @@ public class AudioConversion extends AudioBase {
       if (sampleRate != SIXTEEN_K) {
         long then = System.currentTimeMillis();
         String convertTo16KHZ = convertTo16KHZ(wavFile.getAbsolutePath());
-        wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);
+        long uniqueTimestamp = System.currentTimeMillis();
+
+        wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);//+"_"+uniqueTimestamp);
 
         long now = System.currentTimeMillis();
         long diff = now - then;
