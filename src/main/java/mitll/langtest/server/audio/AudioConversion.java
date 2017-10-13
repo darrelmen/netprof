@@ -56,7 +56,7 @@ public class AudioConversion extends AudioBase {
   private static final String LAME = "lame";
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
-  public static final String WAV = ".wav";
+  private static final String WAV = ".wav";
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 50;
 
@@ -179,7 +179,7 @@ public class AudioConversion extends AudioBase {
   /**
    * Checks if the sample rate is not 16K (as required by things like sv).
    * If not, then uses sox to make an audio file with the right sample rate.
-   *
+   * <p>
    * Sox can take awhile, two threads could touch the same file.
    *
    * @param testAudioDir          directory for audio
@@ -187,9 +187,9 @@ public class AudioConversion extends AudioBase {
    * @return unique file path - could be same request is made by two different threads
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
-  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
-    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix +WAV;
-    File wavFile = convertTo16Khz(new File(pathname));
+  public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, long uniqueTimestamp) throws UnsupportedAudioFileException {
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
+    File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
     return removeSuffix(wavFile.getName());
   }
 
@@ -206,9 +206,9 @@ public class AudioConversion extends AudioBase {
    * @param wavFile
    * @return
    * @throws UnsupportedAudioFileException
-   * @see #convertTo16Khz(String, String)
+   * @see #convertTo16Khz
    */
-  private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+  private File convertTo16Khz(File wavFile, long uniqueTimestamp) throws UnsupportedAudioFileException {
     if (!wavFile.exists()) {
       logger.error("convertTo16Khz " + wavFile + " doesn't exist");
       return wavFile;
@@ -220,9 +220,7 @@ public class AudioConversion extends AudioBase {
       if (sampleRate != SIXTEEN_K) {
         long then = System.currentTimeMillis();
         String convertTo16KHZ = convertTo16KHZ(wavFile.getAbsolutePath());
-        long uniqueTimestamp = System.currentTimeMillis();
-
-        wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);//+"_"+uniqueTimestamp);
+        wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX + "_" + uniqueTimestamp);
 
         long now = System.currentTimeMillis();
         long diff = now - then;
@@ -241,7 +239,7 @@ public class AudioConversion extends AudioBase {
   /**
    * Note that wavFile input will be changed if trim is successful.
    * <p>
-   * If trimming doesn't really change the length, we leave it alone {@link #DIFF_THRESHOLD}.
+   * OBE:  If trimming doesn't really change the length, we leave it alone {@linkx #DIFF_THRESHOLD}.
    * <p>
    * Trimmed file will be empty if it's not successful.
    *
@@ -270,7 +268,7 @@ public class AudioConversion extends AudioBase {
    * @param pathToAudioFile
    * @return
    * @throws IOException
-   * @see #convertTo16Khz(File)
+   * @see #convertTo16Khz
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));
@@ -331,14 +329,15 @@ public class AudioConversion extends AudioBase {
     AudioInputStream sourceStream = null;
 
     File sourceFile = new File(wavFile);
-   if (DEBUG) logger.info("wav2raw Reading from " + sourceFile  + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
+    if (DEBUG)
+      logger.info("wav2raw Reading from " + sourceFile + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
       File outputFile = new File(rawFile);
 
       String absolutePath = outputFile.getAbsolutePath();
-      if (DEBUG)  logger.info("wav2raw Writing to " + absolutePath);
+      if (DEBUG) logger.info("wav2raw Writing to " + absolutePath);
 
       fout = new FileOutputStream(outputFile);
 
@@ -363,7 +362,7 @@ public class AudioConversion extends AudioBase {
       }
 
       logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() +
-          " len " + (outputFile.length()/1024) + "K");
+          " len " + (outputFile.length() / 1024) + "K");
       return outputFile.exists();
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -520,10 +519,9 @@ public class AudioConversion extends AudioBase {
   private File getAbsoluteFile(String realContextPath, String filePath) {
     return getAbsolute(realContextPath, filePath);
   }
-
-  public boolean exists(String realContextPath, String filePath) {
-    return getAbsoluteFile(realContextPath, filePath).exists();
-  }
+//  public boolean exists(String realContextPath, String filePath) {
+//    return getAbsoluteFile(realContextPath, filePath).exists();
+//  }
 
   private File getAbsolute(String realContextPath, String filePath) {
     return new File(realContextPath, filePath);
@@ -591,7 +589,7 @@ public class AudioConversion extends AudioBase {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) {
           logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?",
-               new Exception());//,
+              new Exception());//,
           //new Exception("can't find " + pathToAudioFile));
         }
       } else {

@@ -84,6 +84,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String DCODR = "dcodr";
   private static final String UNK = "+UNK+";
   private static final String SEMI = ";";
+  public static final String SIL = "sil";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -110,7 +111,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
   private boolean available = false;
-  private Project project;
+  private final Project project;
 
   /**
    * @param deployPath
@@ -270,6 +271,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
+    long uniqueTimestamp = System.currentTimeMillis();
     try {
       String audioDir = testAudioDir;
       if (mustPrepend) {
@@ -280,17 +282,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         }
       }
       testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange())
-          .convertTo16Khz(audioDir, testAudioFileNoSuffix);
+          .convertTo16Khz(audioDir, testAudioFileNoSuffix, uniqueTimestamp);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
     }
 
     if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
-      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX + "_" + uniqueTimestamp;
     }
     String filePath = testAudioDir + File.separator + testAudioFileNoSuffix;
-    //String rawAudioPath = filePath + ".raw";
-    //AudioConversion.wav2raw(filePath+ ".wav", rawAudioPath);
 
     // check the cache...
     Object[] cached = useCache ? (decode ?
@@ -367,11 +367,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         logger.error("got " + e, e);
       } finally {
         if (tempDir != null) {
-        //  tempDir.toFile().deleteOnExit(); // clean up temp file
+          //  tempDir.toFile().deleteOnExit(); // clean up temp file
           tempDir.toFile().delete(); // clean up temp file
         }
 
-        //cleanUpRawFile(rawAudioPath);
+        cleanUpRawFile(rawAudioPath);
       }
     }
     if (scores == null) {
@@ -398,7 +398,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (rawFile.delete()) {
         logger.info("cleanUpRawFile : deleted " + absolutePath);
       } else {
-        String mes = "huh? couldn't delete raw audio rawFile " + absolutePath;
+        String mes = "cleanUpRawFile : huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);
         logAndNotify.logAndNotifyServerException(null, mes);
       }
@@ -543,7 +543,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return dict;
   }
 
-  private Set<String> seen = new HashSet<>();
+  private final Set<String> seen = new HashSet<>();
 
   /**
    * TODO : Why this method here too? Duplicate?
@@ -959,7 +959,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   @NotNull
-  public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
@@ -1003,13 +1003,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
 
-        if (!key.equalsIgnoreCase("sil")) {
+        if (!key.equalsIgnoreCase(SIL)) {
           Float value = phoneScorePair.getValue();
           //   logger.info("getTokenToScore adding '" + key + "' : " + value);
           phoneToScore.put(key, Math.min(1.0f, value));
-        } else {
-          // logger.info("getTokenToScore skipping key '" + key + "'");
         }
+//        else {
+//          // logger.info("getTokenToScore skipping key '" + key + "'");
+//        }
 
       }
       return phoneToScore;

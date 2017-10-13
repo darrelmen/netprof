@@ -215,7 +215,7 @@ public class PathHelper {
         tomcatWriteDirectory + File.separator +
             planAndTestPath + File.separator +
             ANSWER + System.currentTimeMillis() + ".wav";
-    logger.debug("getWavPath : file  : " + wavPath);
+//    logger.debug("getWavPath : file  : " + wavPath);
     //if (mkdirs) logger.debug("getAbsoluteToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
     return wavPath;
   }
