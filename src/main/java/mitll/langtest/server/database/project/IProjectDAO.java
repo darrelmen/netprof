@@ -40,6 +40,8 @@ import mitll.npdata.dao.SlickProject;
 import java.util.Collection;
 
 public interface IProjectDAO extends IDAO {
+  String getPropValue(int projid, String key);
+
   int add(int userid, String name, String language, String course,
           String firstType, String secondType, String countryCode, int displayOrder, boolean isDev);
 

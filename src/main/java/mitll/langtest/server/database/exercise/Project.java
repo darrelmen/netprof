@@ -39,6 +39,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
 
 /**
  * Has everything associated with a project
- *
+ * <p>
  * TODO : give this an interface
  */
 public class Project implements PronunciationLookup {
@@ -128,8 +129,8 @@ public class Project implements PronunciationLookup {
                  DatabaseImpl db,
                  LogAndNotify logAndNotify) {
     this.project = project;
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
     this.db = db;
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
     this.serverProps = serverProps;
     this.pathHelper = pathHelper;
   }
@@ -300,12 +301,18 @@ public class Project implements PronunciationLookup {
   }
 
   public String getModelsDir() {
-    return project.getProp(ServerProperties.MODELS_DIR);
+    return getProp(ServerProperties.MODELS_DIR);
   }
 
-  private String getProp(String webserviceHostIp1) {
-    return getProject().getProp(webserviceHostIp1);
+  private String getProp(String modelsDir) {
+    IProjectDAO projectDAO = db.getProjectDAO();
+    logger.info("prject dao " + projectDAO);
+    return projectDAO.getPropValue(getID(), modelsDir);
   }
+
+//  private String getProp(String webserviceHostIp1) {
+//    return getPropValue(webserviceHostIp1);
+//  }
 
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);

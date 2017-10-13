@@ -99,7 +99,6 @@ public class ProjectManagement implements IProjectManagement {
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
   private FileUploadHelper fileUploadHelper;
-  private String hostName;
 
   /**
    * @param pathHelper
@@ -118,7 +117,7 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
-    hostName = serverProps.getHostName();
+    //hostName = serverProps.getHostName();
   }
 
   /**
@@ -315,6 +314,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * ONLY used on import - copying old netprof v1 data into netprof v2.
+   *
    * @return
    * @see DatabaseImpl#makeDAO
    */
@@ -675,7 +675,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private String getModel(SlickProject project1) {
-    return project1.getProp(ServerProperties.MODELS_DIR);
+    return getProp(project1.id(), ServerProperties.MODELS_DIR);
   }
 
   /**
@@ -757,7 +757,7 @@ public class ProjectManagement implements IProjectManagement {
         project.created().getTime(),
         getHostOrDefault(project),
         getPort(project),
-        project.getProp(ServerProperties.MODELS_DIR),
+        getProp(project.id(), ServerProperties.MODELS_DIR),
         project.first(),
         project.second(),
         isOnIOS(project),
@@ -772,14 +772,14 @@ public class ProjectManagement implements IProjectManagement {
 
   @NotNull
   private String getHostOrDefault(SlickProject project) {
-    String host = project.getProp(Project.WEBSERVICE_HOST);
+    String host = getProp(project.id(), Project.WEBSERVICE_HOST);
     if (host == null) host = WEBSERVICE_HOST_DEFAULT;
     return host;
   }
 
   @NotNull
   private ProjectStatus getProjectStatus(SlickProject project) {
-    ProjectStatus status = null;
+    ProjectStatus status;
     try {
       status = ProjectStatus.valueOf(project.status());
     } catch (IllegalArgumentException e) {
@@ -790,14 +790,14 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private boolean isOnIOS(SlickProject project) {
-    String prop2 = project.getProp(Project.SHOW_ON_IOS);
+    String prop2 = getProp(project.id(), Project.SHOW_ON_IOS);
     if (prop2 == null) prop2 = "false";
     return prop2.equalsIgnoreCase("true");
   }
 
   private int getPort(SlickProject project) {
     try {
-      String prop = project.getProp(Project.WEBSERVICE_HOST_PORT);
+      String prop = getProp(project.id(), Project.WEBSERVICE_HOST_PORT);
       if (prop == null) return -1;
       else return Integer.parseInt(prop);
     } catch (NumberFormatException e) {
@@ -805,6 +805,11 @@ public class ProjectManagement implements IProjectManagement {
       return -1;
     }
   }
+
+  private String getProp(int id, String modelsDir) {
+    return db.getProjectDAO().getPropValue(id, modelsDir);
+  }
+
 
   @Override
   public FileUploadHelper getFileUploadHelper() {

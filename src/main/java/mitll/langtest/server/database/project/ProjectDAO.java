@@ -107,6 +107,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   /**
    * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...
+   *
    * @param userid
    * @param projectInfo
    * @return
@@ -176,32 +177,49 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     String currentShowOnIOS = props.get(SHOW_ON_IOS);
     didChange |= currentShowOnIOS == null || !currentShowOnIOS.equalsIgnoreCase(showOnIOS);
 
-    logger.info("for " + projid + " did change " + didChange);
+    logger.info("update for " + projid + " did change " + didChange);
 
     return didChange;
   }
 
-  private void addOrUpdateProperty(int projid, String key, String port) {
-    logger.info("addOrUpdateProperty " + projid + " " + key + "=" + port);
+  private void addOrUpdateProperty(int projid, String key, String newValue) {
+    logger.info("addOrUpdateProperty project " + projid + " : " + key + "=" + newValue);
 
     ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
     if (slickProjectProperties.isEmpty()) {
       propertyDAO.add(projid, System.currentTimeMillis(),
-          key, port, CreateProject.MODEL_PROPERTY_TYPE, "");
+          key, newValue, CreateProject.MODEL_PROPERTY_TYPE, "");
     } else {
       if (slickProjectProperties.size() > 1)
         logger.error("addOrUpdateProperty got back " + slickProjectProperties.size() + " properties for " + key);
       SlickProjectProperty next = slickProjectProperties.iterator().next();
-      logger.info("addOrUpdateProperty " + next);
-      propertyDAO.update(propertyDAO.getCopy(next, key, port));
+      String currentValue = next.value();
+
+      if (!currentValue.equals(newValue)) {
+        logger.info("addOrUpdateProperty before " + next);
+        SlickProjectProperty copy = propertyDAO.getCopy(next, key, newValue);
+        logger.info("addOrUpdateProperty after  " + next);
+        propertyDAO.update(copy);
+      }
     }
   }
 
-  Map<String,String> getProps(int projid) {
+  @Override
+  public String getPropValue(int projid, String key) {
+    Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
+    return slickProjectProperties.isEmpty() ? "" : slickProjectProperties.iterator().next().value();
+  }
+
+  /**
+   * @param projid
+   * @return
+   * @see #update(int, ProjectInfo)
+   */
+  private Map<String, String> getProps(int projid) {
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.getAllForProject(projid);
-    Map<String,String> keyToValue = new HashMap<>();
-    slickProjectProperties.forEach(slickProjectProperty -> keyToValue.put(slickProjectProperty.key(),slickProjectProperty.value()));
+    Map<String, String> keyToValue = new HashMap<>();
+    slickProjectProperties.forEach(slickProjectProperty -> keyToValue.put(slickProjectProperty.key(), slickProjectProperty.value()));
     return keyToValue;
   }
 
@@ -354,9 +372,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
   }
 
-  public void updateProperty(SlickProjectProperty property) {
+/*  public void updateProperty(SlickProjectProperty property) {
     propertyDAO.update(property);
-  }
+  }*/
 
   @Override
   public int getByName(String name) {

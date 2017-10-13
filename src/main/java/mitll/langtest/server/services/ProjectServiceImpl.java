@@ -100,7 +100,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     if (update) {
       logger.info("update for " +
           "\n\tuser      " +userIDFromSessionOrDB  +
-          "\n\tconfigure " + id);
+          "\n\tconfigure project " + id);
 
       db.configureProject(db.getProject(id), true);
     }

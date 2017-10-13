@@ -55,7 +55,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
-  public static final int MAX_TO_SEND = 25;
+  private static final int MAX_TO_SEND = 25;
   private final SlickResultDAO resultDAO;
   private final String language;
   private final int projid;
@@ -116,14 +116,17 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 
-    logger.info("getPhoneReportFor for" +
-        "\n\tuser   " + next +
-        "\n\tuserid " + userid +
-        "\n\tlistid " + listid +
-        "\n\tphone  " + phone +
-        "\n\tfrom   " + from + " " + new Date(from) +
-        "\n\tto     " + to + " " + new Date(to)
-    );
+    if (DEBUG) {
+      logger.info("getPhoneReportFor for" +
+          "\n\tuser   " + next +
+          "\n\tuserid " + userid +
+          "\n\tlistid " + listid +
+          "\n\tphone  " + phone +
+          "\n\tfrom   " + from + " " + new Date(from) +
+          "\n\tto     " + to + " " + new Date(to)
+      );
+    }
+
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
 
     List<WordAndScore> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);

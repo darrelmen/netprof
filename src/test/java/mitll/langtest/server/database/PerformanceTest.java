@@ -224,12 +224,12 @@ public class PerformanceTest extends BaseTest {
       for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
         PhoneStats value = ps.getValue();
         logger.warn("got " + value);
-        //   logger.info(ps.getKey() + ",\t"+  value.getInitial() +",\t"+ value.getCurrent() +",\t"+ value.getDiff()+",\t" +value.getCount());
-        itotal += value.getInitial();
-        iwtotal += value.getCount() * value.getInitial();
-
-        total += value.getCurrent();
-        wtotal += value.getCount() * value.getCurrent();
+        //   logger.info(ps.getKey() + ",\t"+  value.getInitial() +",\t"+ value.getAvg() +",\t"+ value.getDiff()+",\t" +value.getCount());
+//        itotal += value.getInitial();
+//        iwtotal += value.getCount() * value.getInitial();
+//
+//        total += value.getCurrent();
+//        wtotal += value.getCount() * value.getCurrent();
         c += value.getCount();
 /*
         int totalExamples = 0;

@@ -328,7 +328,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       long then = System.currentTimeMillis();
       int end = (int) (cachedDuration * 100.0);
       Path tempDir = null;
-      String rawAudioPath = getRawAudioPath(filePath);
+      long uniqueTimestamp2 = System.currentTimeMillis();
+
+      String rawAudioPath = getRawAudioPath(filePath, uniqueTimestamp2);
       try {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
 
@@ -368,7 +370,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       } finally {
         if (tempDir != null) {
           //  tempDir.toFile().deleteOnExit(); // clean up temp file
-          tempDir.toFile().delete(); // clean up temp file
+          if (!tempDir.toFile().delete()) logger.error("couldn't delete " + tempDir); // clean up temp file
         }
 
         cleanUpRawFile(rawAudioPath);
@@ -408,8 +410,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   @NotNull
-  private String getRawAudioPath(String filePath) {
-    return filePath.replaceAll("\\=", "") + ".raw";
+  private String getRawAudioPath(String filePath, long unique) {
+    return filePath.replaceAll("\\=", "") + "_"+unique+".raw";
   }
 
   private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {

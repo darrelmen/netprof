@@ -116,7 +116,13 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
     return dao.getAllForProject(projid);
   }
 
-  public Collection<SlickProjectProperty> byProjectAndKey(int projid, String key) {
+  /**
+   * @see ProjectDAO#addOrUpdateProperty(int, String, String)
+   * @param projid
+   * @param key
+   * @return
+   */
+  Collection<SlickProjectProperty> byProjectAndKey(int projid, String key) {
     return dao.byProjectAndKey(projid, key);
   }
 }

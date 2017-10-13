@@ -93,9 +93,9 @@ public class ProjectTest extends BaseTest {
     Collection<SlickProject> all = projectDAO.getAll();
     for (SlickProject project : all) {
       logger.info("Got " + project);
-      for (SlickProjectProperty prop : project.getProps()) {
-        logger.info("\t prop " + prop);
-      }
+//      for (SlickProjectProperty prop : project.getProps()) {
+//        logger.info("\t prop " + prop);
+//      }
     }
   }
 
