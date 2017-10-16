@@ -149,8 +149,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
+   * Adding a exercises to a project!
+   *
    * @param projectid
-   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog(SlimProject)
+   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    */
   @Override
   public void addPending(int projectid) {
@@ -190,8 +192,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       Project project = db.getProject(projectid);
       Collection<String> typeOrder2 = project.getTypeOrder();
-
-     // setAttributes(projectid, newEx, updateEx, typeOrder2);
 
       new ExerciseCopy().addExercises(importUser,
           projectid,
@@ -560,9 +560,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           audio.gender()
       );
       matches.add(audio1);
-
-      //copies.add(
-      //    audio1);
     }
   }
 
@@ -678,9 +675,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                                 List<SlickExerciseAttributeJoin> newJoins,
                                 int updateExerciseID,
                                 Set<Integer> dbIDs) {
-    for (Integer dbID : dbIDs) {
-      newJoins.add(new SlickExerciseAttributeJoin(-1, importUser, modified, updateExerciseID, dbID));
-    }
+    dbIDs.forEach(dbID -> newJoins.add(new SlickExerciseAttributeJoin(-1, importUser, modified, updateExerciseID, dbID)));
   }
 
   private void storeAndRememberAttributes(int projectid,
@@ -692,15 +687,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     for (ExerciseAttribute newAttr : newAttributes) {
       int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
       attrToID.put(newAttr, i);
-      logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
+   //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }
-
- /* private boolean getWasRetired(Project currentProject) {
-    boolean wasRetired = false;
-    if (currentProject != null) {
-      wasRetired = currentProject.getStatus() == ProjectStatus.RETIRED;
-    }
-    return wasRetired;
-  }*/
 }

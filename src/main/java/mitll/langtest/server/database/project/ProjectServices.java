@@ -20,6 +20,11 @@ public interface ProjectServices {
 
   Collection<Project> getProjects();
 
+  /**
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectID(int)
+   * @param project
+   * @param forceReload
+   */
   void configureProject(Project project, boolean forceReload);
 
   String getLanguage(int projectid);

@@ -150,7 +150,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     boolean didChange = dao.update(changed) > 0;
 
     if (!didChange) {
-      logger.error("update : didn't update " + projectInfo + " for current " + currentProject);
+      logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
+    }
+    else {
+      currentProject.clearPropCache();
     }
 
     Map<String, String> props = getProps(projid);

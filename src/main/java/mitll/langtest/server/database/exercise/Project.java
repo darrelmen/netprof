@@ -295,7 +295,7 @@ public class Project implements PronunciationLookup {
       }
       return ip;
     } catch (NumberFormatException e) {
-      logger.error("for " +this + " couldn't parse prop for " +WEBSERVICE_HOST_PORT);
+      logger.error("for " + this + " couldn't parse prop for " + WEBSERVICE_HOST_PORT);
       return -1;
     }
   }
@@ -309,15 +309,25 @@ public class Project implements PronunciationLookup {
     return getProp(ServerProperties.MODELS_DIR);
   }
 
-  private String getProp(String modelsDir) {
-    IProjectDAO projectDAO = db.getProjectDAO();
-    logger.info("prject dao " + projectDAO);
-    return projectDAO.getPropValue(getID(), modelsDir);
+ private Map<String, String> propCache = new HashMap<>();
+
+  public void clearPropCache() {
+    logger.debug("clear project #" + getID());
+    propCache.clear();
   }
 
-//  private String getProp(String webserviceHostIp1) {
-//    return getPropValue(webserviceHostIp1);
-//  }
+  private String getProp(String prop) {
+    String s = propCache.get(prop);
+    if (s == null) {
+      IProjectDAO projectDAO = db.getProjectDAO();
+//      logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
+      String propValue = projectDAO.getPropValue(getID(), prop);
+      propCache.put(prop, propValue);
+      return propValue;
+    } else {
+      return s;
+    }
+  }
 
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
@@ -516,22 +526,14 @@ public class Project implements PronunciationLookup {
     String webserviceHost = getWebserviceHost();
 
     if (hostName.startsWith(HYDRA_2)) {
-      if (webserviceHost.equalsIgnoreCase(H_2)) {
-        myProject = true;
-      } else {
-        myProject = false;
-      }
+      myProject = webserviceHost.equalsIgnoreCase(H_2);
     } else if (hostName.startsWith(HYDRA)) {
-      if (webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT)) {
-        myProject = true;
-      } else {
-        myProject = false;
-      }
+      myProject = webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
     }
     if (myProject) {
-      logger.info("configureProject project " + project + " on " + hostName + " will check lts and count phones.");
+      logger.info("isMyProject project " + project.id() + " on " + hostName + " will check lts and count phones.");
     } else {
-      logger.info("configureProjectvproject " + project + " on " + hostName + " will NOT check lts and count phones.");
+      logger.info("isMyProject project " + project.id() + " on " + hostName + " will NOT check lts and count phones.");
     }
     return myProject;
   }

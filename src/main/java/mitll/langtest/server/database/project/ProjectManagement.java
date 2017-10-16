@@ -201,6 +201,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * Lazy - only configure project if it isn't already or forceReload is true
+   *
    * only configured if we have a slick project for it... how could we not???
    *
    * @param project
@@ -222,22 +224,13 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
+    project.clearPropCache();
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");
     SlickProject slickProject = project.getProject();
 
     if (slickProject == null) {
       logger.info("configureProject : note : no project for " + project);
     }
-/*    else {
-      try {
-        if (project.isRetired() && !configureEvenRetired) {
-          logger.info("skipping fully loading project " + project + " since it's retired");
-          return;
-        }
-      } catch (IllegalArgumentException e) {
-        logger.error("couldn't parse status " + slickProject.status() + " expecting one of " + ProjectStatus.values());
-      }
-    }*/
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
@@ -250,9 +243,7 @@ public class ProjectManagement implements IProjectManagement {
     }
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
-      logger.debug("configureProject (" + project.getLanguage() +
-          ") " +
-          "first exercise is " + rawExercises.iterator().next());
+      logger.debug("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
     } else {
       logger.warn("configureProject no exercises in project? " + project);
     }
@@ -271,7 +262,6 @@ public class ProjectManagement implements IProjectManagement {
               id
           )
       );
-
 
       if (myProject) {
         project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);

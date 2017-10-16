@@ -719,7 +719,9 @@ public class SlickUserExerciseDAO
     }
 
     long then2 = System.currentTimeMillis();
-    logger.info("updating " + pairs.size() + " exercises for num phones.");
+    if (!pairs.isEmpty()) {
+      logger.info("updating " + pairs.size() + " exercises for num phones.");
+    }
     exerciseDAO.updatePhonesBulk(pairs);
 
     long now = System.currentTimeMillis();
