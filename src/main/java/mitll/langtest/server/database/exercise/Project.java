@@ -287,12 +287,17 @@ public class Project implements PronunciationLookup {
    */
   public int getWebservicePort() {
     String prop = getProp(WEBSERVICE_HOST_PORT);
-    if (prop == null) prop = "-1";
-    int ip = Integer.parseInt(prop);
-    if (ip == 1) {
-      logger.error("No webservice host port found.");
+    if (prop == null || prop.isEmpty()) prop = "-1";
+    try {
+      int ip = Integer.parseInt(prop);
+      if (ip == 1) {
+        logger.error("No webservice host port found.");
+      }
+      return ip;
+    } catch (NumberFormatException e) {
+      logger.error("for " +this + " couldn't parse prop for " +WEBSERVICE_HOST_PORT);
+      return -1;
     }
-    return ip;
   }
 
   public boolean isOnIOS() {
