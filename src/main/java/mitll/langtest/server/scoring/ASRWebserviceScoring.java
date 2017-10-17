@@ -370,7 +370,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       } finally {
         if (tempDir != null) {
           //  tempDir.toFile().deleteOnExit(); // clean up temp file
-          if (!tempDir.toFile().delete()) logger.error("couldn't delete " + tempDir); // clean up temp file
+
+          if (!tempDir.toFile().delete()) {
+            logger.debug("couldn't delete " + tempDir); // clean up temp file
+          }
         }
 
         cleanUpRawFile(rawAudioPath);
