@@ -277,7 +277,9 @@ public class Project implements PronunciationLookup {
    */
   public String getWebserviceHost() {
     String prop = getProp(WEBSERVICE_HOST);
-    if (prop == null) prop = WEBSERVICE_HOST_DEFAULT;
+    if (prop == null || prop.isEmpty()) {
+      prop = WEBSERVICE_HOST_DEFAULT;
+    }
     return prop;
   }
 
