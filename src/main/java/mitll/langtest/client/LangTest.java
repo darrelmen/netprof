@@ -346,7 +346,6 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
-
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -418,6 +417,7 @@ public class LangTest implements
    *
    * @param projects
    * @return
+   * @see #rememberStartup
    */
   private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(List<SlimProject> projects) {
     Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
@@ -434,6 +434,7 @@ public class LangTest implements
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
+      logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
       if (scoringServiceAsync == null) {
         logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {
@@ -1032,6 +1033,10 @@ public class LangTest implements
     return audioServiceAsync == null ? defaultScoringServiceAsync : audioServiceAsync;
   }
 
+  /**
+   *
+   * @return
+   */
   @Override
   public String getHost() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
@@ -1039,7 +1044,10 @@ public class LangTest implements
       logger.warning("\n\n\ngetAudioService has no project yet...");
       return "";
     } else {
-      return startupInfo.getHost(projectStartupInfo.getProjectid());
+      String host = startupInfo.getHost(projectStartupInfo.getProjectid());
+      logger.info("host for " + projectStartupInfo.getProjectid() + " = '" + host +"'");
+
+      return host;
     }
   }
 

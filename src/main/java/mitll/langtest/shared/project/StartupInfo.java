@@ -120,10 +120,12 @@ public class StartupInfo implements IsSerializable {
             .filter(slimProject -> slimProject.getID() == id)
             .collect(Collectors.toList());
 
-    if (withThisID.isEmpty()) return "";
-    else {
+    if (withThisID.isEmpty()) {
+      return "";
+    } else {
       String host = withThisID.iterator().next().getHost();
-      return (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
+      String s = (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
+      return s;
     }
   }
 

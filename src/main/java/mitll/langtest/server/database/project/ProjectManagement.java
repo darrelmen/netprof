@@ -763,7 +763,9 @@ public class ProjectManagement implements IProjectManagement {
   @NotNull
   private String getHostOrDefault(SlickProject project) {
     String host = getProp(project.id(), Project.WEBSERVICE_HOST);
-    if (host == null) host = WEBSERVICE_HOST_DEFAULT;
+    if (host == null || host.isEmpty()) {
+      host = WEBSERVICE_HOST_DEFAULT;
+    }
     return host;
   }
 
@@ -788,7 +790,7 @@ public class ProjectManagement implements IProjectManagement {
   private int getPort(SlickProject project) {
     try {
       String prop = getProp(project.id(), Project.WEBSERVICE_HOST_PORT);
-      if (prop == null) return -1;
+      if (prop == null || prop.isEmpty()) return -1;
       else return Integer.parseInt(prop);
     } catch (NumberFormatException e) {
       logger.error("for " + project + " got " + e);
