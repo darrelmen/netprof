@@ -72,6 +72,7 @@ import java.util.logging.Logger;
  */
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
+  private static final int MARGIN_TOP = 49;
 
   /**
    * @see #getRootContainer
@@ -248,7 +249,7 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().clear();   // necessary?
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
-    verticalContainer.getElement().getStyle().setMarginTop(49, Style.Unit.PX);
+    verticalContainer.getElement().getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
     return verticalContainer;
   }
 
@@ -263,8 +264,6 @@ public class InitialUI implements UILifecycle {
    * * TODO : FIX ME for headstart?
    *
    * @param verticalContainer
-   * @paramx contentRow        where we put the flash permission window if it gets shown
-   * @seex #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see #populateRootPanel()
    * @see #showLogin()
    */
@@ -305,7 +304,7 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @return
-   * @see #addBreadcrumbs
+   * @see #InitialUI
    */
   private Breadcrumbs getBreadcrumbs() {
     Breadcrumbs crumbs = new Breadcrumbs(">");
@@ -574,8 +573,12 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @see ProjectChoices#showDeleteDialog
+   */
   @Override
   public void startOver() {
+    breadcrumbs.clear();
     configureUIGivenUser(userManager.getUser());
   }
 
@@ -588,12 +591,13 @@ public class InitialUI implements UILifecycle {
    */
   protected void configureUIGivenUser(long userID) {
     //logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
-    if (lifecycleSupport.getProjectStartupInfo() == null) {
-      addProjectChoices(0, null);
-    } else {
-      //   logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+    boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
+    if (hasStartupInfo) {
+      //logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
+    } else {
+      addProjectChoices(0, null);
     }
     showUserPermissions(userID);
   }
@@ -628,9 +632,7 @@ public class InitialUI implements UILifecycle {
    * @see #addProjectChoices
    */
   @Override
-  public void addBreadcrumbs() {
-    addCrumbs(breadcrumbs);
-  }
+  public void addBreadcrumbs() {    addCrumbs(breadcrumbs);  }
 
   /**
    * @param name
