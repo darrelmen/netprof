@@ -25,7 +25,7 @@ public interface ProjectServices {
    * @param project
    * @param forceReload
    */
-  void configureProject(Project project, boolean forceReload);
+  int configureProject(Project project, boolean forceReload);
 
   String getLanguage(int projectid);
 }

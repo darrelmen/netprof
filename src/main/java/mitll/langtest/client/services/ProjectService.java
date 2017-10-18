@@ -36,13 +36,20 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.project.ProjectInfo;
 
+import java.util.Map;
+
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
-  //List<ProjectInfo> getAll();
   boolean exists(int projectid);
+
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#checkNameOnBlur
+   * @param name
+   * @return
+   */
   boolean existsByName(String name);
   boolean update(ProjectInfo info);
   boolean create(ProjectInfo newProject);
   boolean delete(int id);
-  void addPending(int id);
+  Map<String,String> addPending(int id);
 }

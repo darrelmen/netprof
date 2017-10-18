@@ -406,7 +406,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   @NotNull
-  private Group getGroup() {
+  public Group getGroup() {
     List<Group> groups = delegate.getGroupDAO().searchGroups("");
     Group primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
 
@@ -417,12 +417,24 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return primaryGroup;
   }
 
-  private Group getGroupOrMake(String name) {
-    List<Group> groups = delegate.getGroupDAO().searchGroups(name);
-    Group group = groups.isEmpty() ? null : groups.iterator().next();
+  private Map<String,Group> nameToGroup = new HashMap<>();
 
-    if (group == null) { //defensive
-      group = makeAGroup(name);
+  /**
+   * Cache secondary group so don't have to search for it.
+   * @param name
+   * @return
+   */
+  private Group getGroupOrMake(String name) {
+    Group group = nameToGroup.get(name);
+    if (group == null) {
+      List<Group> groups = delegate.getGroupDAO().searchGroups(name);
+      group = groups.isEmpty() ? null : groups.iterator().next();
+
+      if (group == null) { //defensive
+        group = makeAGroup(name);
+      }
+      nameToGroup.put(name, group);
+      logger.info("now " + nameToGroup.size() + " groups.");
     }
     return group;
   }
@@ -682,9 +694,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private List<User> toUsers(List<DBUser> all) {
     List<User> copy = new ArrayList<>();
-    for (DBUser s : all) {
-      copy.add(toUser(s));
-    }
+    all.forEach(dbUser -> copy.add(toUser(dbUser)));
     return copy;
   }
 
@@ -698,7 +708,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return the domino user
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
-  public ClientUserDetail toClientUserDetail(User user, String projectName) {
+  public ClientUserDetail toClientUserDetail(User user, String projectName,  Group group) {
     String first = user.getFirst();
     String userID = user.getUserID();
     if (userID.isEmpty()) {
@@ -740,7 +750,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         DEFAULT_AFFILIATION,
         gender,
         roleAbbreviations,
-        getGroup(),
+        group,
         APPLICATION_ABBREVIATIONS
     );
 

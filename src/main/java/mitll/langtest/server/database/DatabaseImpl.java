@@ -53,7 +53,6 @@ import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
-import mitll.langtest.server.database.excel.ReportToExcel;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
@@ -748,8 +747,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
-  public void configureProject(Project project, boolean forceReload) {
-    projectManagement.configureProject(project, false, forceReload);
+  public int configureProject(Project project, boolean forceReload) {
+    return projectManagement.configureProject(project, false, forceReload);
   }
 
   /**

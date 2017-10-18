@@ -105,6 +105,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return !dao.byID(projid).isEmpty();
   }
 
+  @Override
+  public boolean easyUpdate(SlickProject changed) {
+    return dao.update(changed) > 0;
+  }
+
   /**
    * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...
    *
@@ -147,12 +152,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         project.dominoid(),
         projectInfo.getDisplayOrder()
     );
-    boolean didChange = dao.update(changed) > 0;
+    boolean didChange = easyUpdate(changed);
 
     if (!didChange) {
       logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
-    }
-    else {
+    } else {
       currentProject.clearPropCache();
     }
 

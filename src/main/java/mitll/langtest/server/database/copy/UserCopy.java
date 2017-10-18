@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
+import mitll.hlt.domino.shared.model.user.Group;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
@@ -77,6 +78,8 @@ public class UserCopy {
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
     if (DEBUG) logger.info("copyUsers id->childCount " + idToCount.size() + " values " + idToCount.values().size());
 
+    Group group = dominoUserDAO.getGroup();
+
     int collisions = 0;
     int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
@@ -103,7 +106,7 @@ public class UserCopy {
 
           if (dominoDBUser == null) { // new user
             logger.info("copyUsers no existing user id '" + importUserID + "'");
-            ClientUserDetail newUser = addUser(dominoUserDAO, oldToNew, toImport, optName);
+            ClientUserDetail newUser = addUser(dominoUserDAO, oldToNew, toImport, optName, group);
             userToCreation.put(newUser.getDocumentDBID(), newUser.getAcctDetail().getCrTime().getTime());
             added.add(newUser);
           } else { // user exists
@@ -118,7 +121,8 @@ public class UserCopy {
                 dominoUserDAO, oldToNew,
                 added,
                 toImport,
-                dominoDBUser)) {
+                dominoDBUser,
+                group)) {
               collisions++;
             }
           }
@@ -139,7 +143,6 @@ public class UserCopy {
   @NotNull
   private String getNormalizedUserID(User toImport) {
     String importUserID = toImport.getUserID();
-
     // deal with spaces
 
     if (hasSpaces(importUserID)) {
@@ -194,7 +197,8 @@ public class UserCopy {
                                     Map<Integer, Integer> oldToNew,
                                     List<ClientUserDetail> added,
                                     User toImport,
-                                    mitll.hlt.domino.shared.model.user.DBUser dominoUser
+                                    mitll.hlt.domino.shared.model.user.DBUser dominoUser,
+                                    Group group
   ) throws Exception {
     String passwordHash = toImport.getPasswordHash();
     if (passwordHash == null) passwordHash = "";
@@ -223,7 +227,7 @@ public class UserCopy {
       // User "adam" already exists with a different password - what to do?
       if (MAKE_COLLISION_ACCOUNT) {
         // give the person a new id in the name space of the language
-        makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID);
+        makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID,group);
       } else {
         // second person is out of luck - they need to make a new account
         if (WARN_ON_COLLISION) {
@@ -290,7 +294,8 @@ public class UserCopy {
   private void makeCollisionAccount(String optName, DominoUserDAOImpl dominoUserDAO,
                                     Map<Integer, Integer> oldToNew,
                                     List<ClientUserDetail> added,
-                                    User toImport, String importUserID) throws Exception {
+                                    User toImport, String importUserID,
+                                    Group group) throws Exception {
     String compoundID = importUserID + "#" + optName;
     User userByCompound = dominoUserDAO.getUserByID(compoundID);
 
@@ -302,7 +307,7 @@ public class UserCopy {
       logger.warn("copyUsers no user for '" + compoundID + "'");
 
       toImport.setUserID(compoundID);
-      added.add(addUser(dominoUserDAO, oldToNew, toImport, optName));
+      added.add(addUser(dominoUserDAO, oldToNew, toImport, optName, group));
     }
 //              String passwordHash1 = userByID1.getPasswordHash();
 //              if (!passwordHash1.isEmpty()) {
@@ -325,10 +330,11 @@ public class UserCopy {
   private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
                                    User toImport,
-                                   String projectName) throws Exception {
+                                   String projectName,
+                                   Group group) throws Exception {
     logger.info("addUser " + toImport + "\n\twith permissions " + toImport.getPermissions());
     //logger.info("addUser " + toImport.getID()+ " gender " + toImport.getGender() + " " + toImport.getRealGender());
-    ClientUserDetail toAdd = dominoUserDAO.toClientUserDetail(toImport, projectName);
+    ClientUserDetail toAdd = dominoUserDAO.toClientUserDetail(toImport, projectName, group);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
         toAdd,
         toImport.getPasswordHash()

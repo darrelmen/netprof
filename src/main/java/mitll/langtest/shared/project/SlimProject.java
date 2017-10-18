@@ -106,8 +106,8 @@ public class SlimProject extends ProjectInfo {
   }
 
   public List<SlimProject> getChildren() {
-    Collections.sort(children, (o1, o2) -> {
-      int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
+    children.sort((o1, o2) -> {
+      int i = Integer.compare(o1.getDisplayOrder(), o2.getDisplayOrder());
       return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
     });
     return children;
@@ -121,6 +121,10 @@ public class SlimProject extends ProjectInfo {
     return isRTL;
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
+   * @return
+   */
   public TreeMap<String, String> getProps() {
     return props;
   }

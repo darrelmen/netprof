@@ -81,7 +81,7 @@ public interface IProjectManagement {
    * @param configureEvenRetired
    * @param forceReload
    */
-  void configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
+  int configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
   void configureProjectByID(int projid);
 
   List<SlimProject> getNestedProjectInfo();

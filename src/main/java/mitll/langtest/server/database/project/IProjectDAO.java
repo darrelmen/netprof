@@ -73,5 +73,7 @@ public interface IProjectDAO extends IDAO {
 
   boolean exists(int projid);
 
+  boolean easyUpdate(SlickProject changed);
+
   boolean update(int userid, ProjectInfo projectInfo);
 }

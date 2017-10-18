@@ -86,9 +86,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final String CREATED = "Created";
-  private static final String MODIFIED = "Modified";
-  private static final String NUM_ITEMS = "Num Items";
-
+  public static final String MODIFIED = "Modified";
+  public static final String NUM_ITEMS = "Num Items";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -117,7 +116,6 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
-    //hostName = serverProps.getHostName();
   }
 
   /**
@@ -210,7 +208,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param forceReload
    * @see #configureProjects
    */
-  public void configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
+  public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
     boolean skipRetired = project.isRetired() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (!forceReload) {
@@ -220,7 +218,7 @@ public class ProjectManagement implements IProjectManagement {
         } else {
           logger.info("configureProject skipping fully loading project " + project + " since it's retired");
         }
-        return;
+        return 0;
       }
     }
 
@@ -279,8 +277,10 @@ public class ProjectManagement implements IProjectManagement {
       //   db.getUserExerciseDAO().useExToPhones();
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
+      return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
+      return 0;
     }
   }
 
@@ -756,7 +756,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private void addDateProps(SlickProject project, TreeMap<String, String> info) {
     DateFormat format = new SimpleDateFormat();
-    info.put(CREATED, format.format(project.created()));
+    info.put(CREATED,  format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
   }
 

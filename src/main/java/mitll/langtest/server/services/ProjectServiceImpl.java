@@ -43,7 +43,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.SlimProject;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
@@ -52,8 +51,13 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
+import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
@@ -75,9 +79,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see ProjectEditForm#checkNameOnBlur
    * @param name
    * @return
+   * @see ProjectEditForm#checkNameOnBlur
    */
   @Override
   public boolean existsByName(String name) {
@@ -93,30 +97,29 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public boolean update(ProjectInfo info) {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     logger.info("update for " +
-        "\n\tuser    " +userIDFromSessionOrDB + " update" +
+        "\n\tuser    " + userIDFromSessionOrDB + " update" +
         "\n\tproject " + info);
     boolean update = getProjectDAO().update(userIDFromSessionOrDB, info);
     int id = info.getID();
     if (update) {
       logger.info("update for " +
-          "\n\tuser      " +userIDFromSessionOrDB  +
+          "\n\tuser      " + userIDFromSessionOrDB +
           "\n\tconfigure project " + id);
 
       db.configureProject(db.getProject(id), true);
-    }
-    else {
+    } else {
       logger.info("update for " +
-          "\n\tuser      " +userIDFromSessionOrDB  +
-          "\n\tNOT configuring " +id);
+          "\n\tuser      " + userIDFromSessionOrDB +
+          "\n\tNOT configuring " + id);
     }
     db.getProjectManagement().refreshProjects();
     return update;
   }
 
   /**
-   * @see ProjectEditForm#newProject
    * @param newProject
    * @return
+   * @see ProjectEditForm#newProject
    */
   @Override
   public boolean create(ProjectInfo newProject) {
@@ -155,16 +158,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    */
   @Override
-  public void addPending(int projectid) {
+  public Map<String, String> addPending(int projectid) {
     Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
 
     if (toImport != null) {
-      int importUser = getUserIDFromSessionOrDB();
-      //logger.info("addPending import user = " + importUser);
-      if (importUser == -1) {
-        logger.info("\t addPending import user now = " + importUser);
-        importUser = db.getUserDAO().getImportUser();
-      }
 
       SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
@@ -193,6 +190,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       Project project = db.getProject(projectid);
       Collection<String> typeOrder2 = project.getTypeOrder();
 
+      int importUser = getImportUser();
       new ExerciseCopy().addExercises(importUser,
           projectid,
           new HashMap<>(),
@@ -204,8 +202,32 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
       copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
 
-      db.configureProject(project, true);
+      if (!newEx.isEmpty() || !updateEx.isEmpty()) {
+        project.getProject().updateModified();
+        getProjectDAO().easyUpdate(project.getProject());
+      }
+
+      int i = db.configureProject(project, true);
+      //  Timestamp modified = project.getProject().modified();
+
+      DateFormat format = new SimpleDateFormat();
+      Map<String, String> info = new HashMap<>();
+      info.put(MODIFIED, format.format(project.getProject().modified()));
+      info.put(NUM_ITEMS, "" + i);
+      return info;
+    } else {
+      return new HashMap<>();
     }
+  }
+
+  private int getImportUser() {
+    int importUser = getUserIDFromSessionOrDB();
+    //logger.info("addPending import user = " + importUser);
+    if (importUser == -1) {
+      logger.info("\t addPending import user now = " + importUser);
+      importUser = db.getUserDAO().getImportUser();
+    }
+    return importUser;
   }
 
   @NotNull
@@ -278,7 +300,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
      * @see #copyMatchingAudio(int, AudioMatches, int, List)
      */
     public void add(SlickAudio candidate) {
-   //   int gender = candidate.gender();
+      //   int gender = candidate.gender();
       boolean regularSpeed = getAudioType(candidate).isRegularSpeed();
 //      logger.info("AudioMatches Examine candidate " + candidate);
 //      logger.info("AudioMatches Examine regularSpeed " + regularSpeed + " " + audioType);
@@ -304,9 +326,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       }
       int after = getCount();
       if (after > before) {
-        logger.info("AudioMatches now " + after+ " added " + candidate);
-      }
-      else {
+        logger.info("AudioMatches now " + after + " added " + candidate);
+      } else {
 //        logger.info("AudioMatches not adding " + after+ " added " + candidate);
       }
     }
@@ -358,15 +379,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     try {
       audioType = AudioType.valueOf(candidate.audiotype().toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.warn("getAudioType : got unknown audio " +candidate.audiotype());
+      logger.warn("getAudioType : got unknown audio " + candidate.audiotype());
     }
     return audioType;
   }
 
   /**
-   * @see #copyAudio(int, List, Map)
    * @param maxID
    * @return
+   * @see #copyAudio(int, List, Map)
    */
   @NotNull
   private Map<String, List<SlickAudio>> getTranscriptToAudio(int maxID) {
@@ -441,13 +462,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see #getSlickAudios(int, List, Map, Map, Map, Map)
    * @param projectid
    * @param transcriptToAudio
    * @param transcriptToMatches
    * @param ex
    * @param exid
    * @return
+   * @see #getSlickAudios(int, List, Map, Map, Map, Map)
    */
   private MatchInfo addAudioForVocab(int projectid,
                                      Map<String, List<SlickAudio>> transcriptToAudio,
@@ -464,7 +485,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       copyMatchingAudio(projectid, audioMatches, exid, audioAttributes);
       match++;
     } else {
-     // logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
+      // logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
       nomatch++;
     }
 
@@ -687,7 +708,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     for (ExerciseAttribute newAttr : newAttributes) {
       int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
       attrToID.put(newAttr, i);
-   //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
+      //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }
 }
