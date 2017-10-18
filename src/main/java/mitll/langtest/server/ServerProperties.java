@@ -792,6 +792,9 @@ public class ServerProperties {
   public boolean doAudioChecksInProduction() {
     return getDefaultTrue(DO_AUDIO_CHECKS_IN_PRODUCTION);
   }
+  public boolean debugOneProject() {
+    return getDefaultFalse("debugOneProject");
+  }
 
   public int getSleepBetweenDecodes() {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, SLEEP_BETWEEN_DECODES_DEFAULT);
@@ -890,4 +893,6 @@ public class ServerProperties {
   Map<String, String> getUIProperties() {
     return getPropertyMap(uiprops);
   }
+
+
 }

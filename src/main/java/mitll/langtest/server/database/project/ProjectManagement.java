@@ -73,7 +73,7 @@ public class ProjectManagement implements IProjectManagement {
    *
    * @see #populateProjects
    */
-  private static final boolean DEBUG_ONE_PROJECT = false;
+  //private static final boolean DEBUG_ONE_PROJECT = false;
   /**
    * JUST FOR TESTING
    */
@@ -81,7 +81,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR TESTING
    */
-  private static final int LANG_ID = 3;
+  private static final int LANG_ID = 14;
 
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
@@ -98,7 +98,7 @@ public class ProjectManagement implements IProjectManagement {
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
   private FileUploadHelper fileUploadHelper;
-
+  private final boolean debugOne;
   /**
    * @param pathHelper
    * @param properties
@@ -114,6 +114,7 @@ public class ProjectManagement implements IProjectManagement {
     this.serverProps = properties;
     this.logAndNotify = logAndNotify;
     this.db = db;
+    this.debugOne = properties.debugOneProject();
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
   }
@@ -158,7 +159,7 @@ public class ProjectManagement implements IProjectManagement {
 //    }
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
-        if (DEBUG_ONE_PROJECT) {
+        if (debugOne) {
           if (slickProject.id() == LANG_ID ||
               slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
               ) {

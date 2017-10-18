@@ -49,8 +49,6 @@ public enum AudioType implements IsSerializable {
   @Deprecated RECORDER("recorder"),  // maybe only see this in legacy data
 
   CONTEXT_REGULAR("context=regular", "context", Constants.REGULAR1),
-
-  // Note this is notional for now - we don't collect slow speed sentences (yet)
   CONTEXT_SLOW("context=slow", "context", "slow");
 
   private final String text;

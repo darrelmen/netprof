@@ -47,53 +47,73 @@ import java.util.Map;
  * @since 3/2/16.
  */
 public class RecordingProgressTable extends FlexTable {
-  private static final String MALE_CONTEXT = BaseAudioDAO.MALE_CONTEXT;
   private static final String FEMALE_SLOW = BaseAudioDAO.FEMALE_SLOW;
   private static final String FEMALE_FAST = BaseAudioDAO.FEMALE_FAST;
-  private static final String FEMALE_CONTEXT = BaseAudioDAO.FEMALE_CONTEXT;
+
+//  private static final String MALE_CONTEXT = BaseAudioDAO.MALE_CONTEXT;
+//  private static final String FEMALE_CONTEXT = BaseAudioDAO.FEMALE_CONTEXT;
+
   private static final String FEMALE = BaseAudioDAO.FEMALE;
   private static final String MALE_SLOW = BaseAudioDAO.MALE_SLOW;
   private static final String MALE = BaseAudioDAO.MALE;
   private static final String MALE_FAST = BaseAudioDAO.MALE_FAST;
+  public static final String REGULAR = "regular";
+  public static final String SLOW = "slow";
+  public static final String TOTAL = "Total";
 
   /**
+   * 4 cols for male
+   * 3 for female
+   *
    * @param result
    * @see RecorderNPFHelper#getProgressInfo
    */
   public void populate(Map<String, Float> result) {
-    float total = result.get("total");
-    float ctotal = result.get("totalContext");
-
-    getElement().setId("RecordingProgressTable");
+    float total  = result.get(BaseAudioDAO.TOTAL);
+    //getElement().setId("RecordingProgressTable");
 
     int r = 0;
-    int col = 0;
+    int col;
 
-    List<String> labels = Arrays.asList("Male ", "regular", "slow");
-    List<String> keys = Arrays.asList(MALE, MALE_FAST, MALE_SLOW);
-    for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i), true);
-    }
-    col = setLabelAndVal(result, total, r, col, "Total", "total", false);
+    List<String> labels = Arrays.asList("Male ", REGULAR, SLOW);
+    List<String> keys   = Arrays.asList(MALE, MALE_FAST, MALE_SLOW);
+    col = addCols(result, total, 0, 0, labels, keys);
 
-    labels = Arrays.<String>asList("Female ", "regular", "slow");
+    // fourth col
+    setLabelAndVal(result, total, r, col, TOTAL, "total", false);
+
+    labels = Arrays.<String>asList("Female ", REGULAR, SLOW);
     keys = Arrays.asList(FEMALE, FEMALE_FAST, FEMALE_SLOW);
-    col = 0;
     r++;
+    addCols(result, total, r, 0, labels, keys);
+
+
+    float ctotal = result.get(BaseAudioDAO.TOTAL_CONTEXT);
+
+    //labels = Arrays.<String>asList("Context Male ", "Female");
+    labels = Arrays.<String>asList("Context Male ", REGULAR, SLOW);
+    keys   = Arrays.asList(BaseAudioDAO.CMALE, BaseAudioDAO.CMALE_FAST, BaseAudioDAO.CMALE_SLOW);
+
+    r++;
+    col = addCols(result, ctotal, r, 0, labels, keys);
+    setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
+
+    labels = Arrays.<String>asList("Context Female ", REGULAR, SLOW);
+    keys   = Arrays.asList(BaseAudioDAO.CFEMALE, BaseAudioDAO.CFEMALE_FAST, BaseAudioDAO.CFEMALE_SLOW);
+
+    r++;
+    addCols(result, ctotal, r, 0, labels, keys);
+
+//    col += 3;
+  //  col = setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
+
+  }
+
+  private int addCols(Map<String, Float> result, float total, int r, int col, List<String> labels, List<String> keys) {
     for (int i = 0; i < labels.size(); i++) {
       col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i), true);
     }
-
-    labels = Arrays.<String>asList("Context Male ", "Female");
-    keys = Arrays.asList(MALE_CONTEXT, FEMALE_CONTEXT);
-    col = 0;
-    r++;
-    for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, ctotal, r, col, labels.get(i), keys.get(i), true);
-    }
-    col += 3;
-    col = setLabelAndVal(result, total, r, col, "Total", "totalContext", false);
-
+    return col;
   }
 
   private int setLabelAndVal(Map<String, Float> result, float total, int r, int col, String label, String key, boolean addPercent) {

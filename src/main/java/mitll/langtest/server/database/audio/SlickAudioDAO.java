@@ -81,7 +81,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
-  public Map<String, Integer> getPairs(int projid) {  return dao.getPairs(projid);  }
+  public Map<String, Integer> getPairs(int projid) {
+    return dao.getPairs(projid);
+  }
 
   public void createTable() {
     dao.createTable();
@@ -109,7 +111,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.getAll(projid);
   }
 
-  public List<SlickAudio> getAllNoExistsCheck(int projid) {  return dao.getAllNoCheck(projid);  }
+  public List<SlickAudio> getAllNoExistsCheck(int projid) {
+    return dao.getAllNoCheck(projid);
+  }
 
   public Collection<UserTimeBase> getAudioForReport(int projid) {
     List<UserTimeBase> report = new ArrayList<>();
@@ -259,6 +263,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * Do this differently
    *
+   * TODO : the audio is already marked with a gender - we don't have to ask about the users.
+   *
    * @param projid
    * @param audioSpeed
    * @param uniqueIDs
@@ -268,21 +274,30 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see BaseAudioDAO#getRecordedReport
    */
   @Override
-  void getCountForGender(int projid, AudioType audioSpeed,
+  void getCountForGender(int projid,
+                         AudioType audioSpeed,
                          Set<Integer> uniqueIDs,
                          Map<Integer, String> exToTranscript,
                          Set<Integer> idsOfRecordedExercisesForMales,
                          Set<Integer> idsOfRecordedExercisesForFemales) {
+    String speed = audioSpeed.toString();
+
+
     Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
-        dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
+        dao.getCountForGender(speed, uniqueIDs, exToTranscript, true, projid);
+    logger.info("for '" + speed + "' given ids " + uniqueIDs.size() +
+            " and " + exToTranscript.size() +
+        " got " + countForGender4.size());
+//    countForGender4.forEach((k,v)->{});
+    for (Integer userID : countForGender4.keySet()) {
+      Collection<Tuple2<Integer, Integer>> tuple2s = countForGender4.get(userID);
+      Set<Integer> exIDs = getExIDs(tuple2s.iterator());
 
-    for (Integer key : countForGender4.keySet()) {
-      boolean male = userDAO.isMale(key);
-      Set<Integer> exIDs = getExIDs(countForGender4.get(key).iterator());
-
-      if (male) {
+      if (userDAO.isMale(userID)) {
+//        logger.info("male   user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForMales.addAll(exIDs);
       } else {
+  //      logger.info("female user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
@@ -418,11 +433,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   private Set<Integer> getExIDs(Iterator<Tuple2<Integer, Integer>> iterator) {
     Set<Integer> pairs = new HashSet<>();
-    while (iterator.hasNext()
-        ) {
+    while (iterator.hasNext()) {
       Tuple2<Integer, Integer> next = iterator.next();
-      //  Integer o = next._1();
-      //Integer userid = (Integer) next._2();
       pairs.add(next._1());
     }
     return pairs;
@@ -459,7 +471,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Skips over audio that has negative infinity DNR - usually a bad sign.
-   *
+   * <p>
    * TODO : consider cache for mini users
    *
    * @param all
@@ -472,8 +484,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       AudioAttribute audioAttribute = getAudioAttribute(slickAudio, idToMini);
       if (audioAttribute.getDnr() == Float.NEGATIVE_INFINITY) {
         logger.info("toAudioAttributes : Skip bogus " + audioAttribute);
-      }
-      else {
+      } else {
         copy.add(audioAttribute);
       }
     }

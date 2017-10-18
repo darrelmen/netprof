@@ -1170,9 +1170,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
-  public boolean isMale(int userid) {
-    return getByID(userid).isMale();
-  }
+  public boolean isMale(int userid) { return getByID(userid).isMale(); }
 
   /**
    * @param user

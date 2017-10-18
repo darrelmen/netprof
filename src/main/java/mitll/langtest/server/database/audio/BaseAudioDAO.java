@@ -60,16 +60,27 @@ public abstract class BaseAudioDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseAudioDAO.class);
 
   private static final String UNKNOWN = "unknown";
-  private static final String TOTAL = "total";
-  private static final String TOTAL_CONTEXT = "totalContext";
+  public static final String TOTAL = "total";
+  public static final String TOTAL_CONTEXT = "totalContext";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
+
+  public static final String CMALE = "cmale";
+  public static final String CFEMALE = "cfemale";
+
   public static final String MALE_FAST = "maleFast";
   public static final String MALE_SLOW = "maleSlow";
   public static final String FEMALE_FAST = "femaleFast";
   public static final String FEMALE_SLOW = "femaleSlow";
-  public static final String MALE_CONTEXT = "maleContext";
-  public static final String FEMALE_CONTEXT = "femaleContext";
+
+  //public static final String MALE_CONTEXT = "maleContext";
+  //public static final String FEMALE_CONTEXT = "femaleContext";
+
+  public static final String CMALE_FAST = "cmaleFast";
+  public static final String CMALE_SLOW = "cmaleSlow";
+  public static final String CFEMALE_FAST = "cfemaleFast";
+  public static final String CFEMALE_SLOW = "cfemaleSlow";
+
   private static final String TRANSLITERATION = "transliteration";
   private static final int WARN_DURATION = 25;
 
@@ -186,10 +197,10 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   * @see #attachAudioToExercises(Collection, String)
    * @param language
    * @param audioAttributesForExercises
    * @param exercise
+   * @see #attachAudioToExercises(Collection, String)
    */
   private void addContextAudio(String language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
@@ -218,7 +229,8 @@ public abstract class BaseAudioDAO extends DAO {
 
       if (audioAttributes != null) { // not sure when this would be true...
 //        logger.info("addContextAudio found context audio for context exercise " + contextID + " " + audioAttributes.size());
-        /*boolean attachedAll =*/ attachAudio(contextSentence, audioAttributes, language);
+        /*boolean attachedAll =*/
+        attachAudio(contextSentence, audioAttributes, language);
       } else {
         if (doDEBUG)
           logger.info("addContextAudio no audio found for context parent exercise " + id + " and context " + contextID);
@@ -501,13 +513,22 @@ public abstract class BaseAudioDAO extends DAO {
     Map<Integer, String> exToContextTranscript = new HashMap<>();
 
     for (CommonExercise shell : exercises) {
-      if (shell.hasContext()) context++;
-      boolean add = uniqueIDs.add(shell.getID());
-      if (!add) {
-        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+      {
+        int exid = shell.getID();
+        boolean add = uniqueIDs.add(exid);
+        if (!add) {
+          logger.warn("getMaleFemaleProgress found duplicate id " + exid + " : " + shell);
+        }
+        exToTranscript.put(exid, shell.getForeignLanguage());
       }
-      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
-      exToContextTranscript.put(shell.getID(), shell.getContext());
+      {
+        if (shell.hasContext()) context++;
+        shell.getDirectlyRelated().forEach(commonExercise ->
+            exToContextTranscript.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
+
+        //exToContextTranscript.put(exid, shell.getContext());
+        if (context == 20) logger.info("getMaleFemaleProgress " + exToContextTranscript);
+      }
     }
 
 //    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +        uniqueIDs.size());// +
@@ -515,12 +536,12 @@ public abstract class BaseAudioDAO extends DAO {
     // " males " + userMapMales.size() + " females " + userMapFemales.size());
 
     long then = System.currentTimeMillis();
-    Map<String, Float> recordedReport = getRecordedReport(projectid, total, context, uniqueIDs,
+    Map<String, Float> recordedReport = getRecordedReport(projectid, total, exToContextTranscript.size(), uniqueIDs,
         exToTranscript, exToContextTranscript);
     long now = System.currentTimeMillis();
     if (now - then > 100) logger.info("getRecordedReport for" +
-        "\n\t project " + projectid+
-        "\n\twith     " + exercises.size() + " exercises "+
+        "\n\t project " + projectid +
+        "\n\twith     " + exercises.size() + " exercises " +
         "\n\ttook     " + (now - then));
 
     return recordedReport;
@@ -531,13 +552,14 @@ public abstract class BaseAudioDAO extends DAO {
    * @param total
    * @param exerciseIDs
    * @return
-   * @see DatabaseImpl#getMaleFemaleProgress(int)
+   * @see DatabaseImpl#getMaleFemaleProgress
    */
-  public Map<String, Float> getRecordedReport(int projid,
-                                              float total,
-                                              float totalContext, Set<Integer> exerciseIDs,
-                                              Map<Integer, String> exToTranscript,
-                                              Map<Integer, String> exToContextTranscript) {
+  private Map<String, Float> getRecordedReport(int projid,
+                                               float total,
+                                               float totalContext,
+                                               Set<Integer> exerciseIDs,
+                                               Map<Integer, String> exToTranscript,
+                                               Map<Integer, String> exToContextTranscript) {
     Set<Integer> maleReg = new HashSet<>();
     Set<Integer> femaleReg = new HashSet<>();
     getCountForGender(projid, AudioType.REGULAR, exerciseIDs, exToTranscript, maleReg, femaleReg);
@@ -566,30 +588,58 @@ public abstract class BaseAudioDAO extends DAO {
 
     if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
 
+    // overlap
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
     if (DEBUG_AUDIO_REPORT) logger.info("female total " + female);
 
-    Set<Integer> conMale = new HashSet<>();
-    Set<Integer> conFemale = new HashSet<>();
+    Set<Integer> conMaleReg = new HashSet<>();
+    Set<Integer> conFemaleReg = new HashSet<>();
 
-    getCountForGender(projid, AudioType.CONTEXT_REGULAR, exerciseIDs, exToContextTranscript, conMale, conFemale);
+    // TODO : add male/female fast/slow for context
+    getCountForGender(projid, AudioType.CONTEXT_REGULAR, exToContextTranscript.keySet(), exToContextTranscript, conMaleReg, conFemaleReg);
     // float cfemale = getCountForGender(projid, AudioType.CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conSlow, , false);
 
-    float cmale = conMale.size();
-    float cfemale = conFemale.size();
-    if (DEBUG_AUDIO_REPORT) logger.info("cmale fast " + cmale + " cfemale fast " + cfemale);
+    float cmaleReg = conMaleReg.size();
+    float cfemaleReg = conFemaleReg.size();
+
+    Set<Integer> conMaleSlow = new HashSet<>();
+    Set<Integer> conFemaleSlow = new HashSet<>();
+
+    // TODO : add male/female fast/slow for context
+    getCountForGender(projid, AudioType.CONTEXT_SLOW, exToContextTranscript.keySet(), exToContextTranscript, conMaleSlow, conFemaleSlow);
+
+
+    conMaleReg.retainAll(conMaleSlow);
+    float cmale = conMaleReg.size();
+
+    conFemaleReg.retainAll(conFemaleSlow);
+    float cfemale = conFemaleReg.size();
+
+
+    float cmaleSlow  = conMaleSlow.size();
+    float cfemaleSlow = conFemaleSlow.size();
+
+    if (DEBUG_AUDIO_REPORT) logger.info("cmale fast " + cmaleReg + " cfemale fast " + cfemaleReg);
     Map<String, Float> report = new HashMap<>();
     report.put(BaseAudioDAO.TOTAL, total);
     report.put(BaseAudioDAO.TOTAL_CONTEXT, totalContext);
     report.put(BaseAudioDAO.MALE, male);
     report.put(BaseAudioDAO.FEMALE, female);
+
     report.put(BaseAudioDAO.MALE_FAST, maleFast);
     report.put(BaseAudioDAO.MALE_SLOW, maleSlow);
     report.put(BaseAudioDAO.FEMALE_FAST, femaleFast);
     report.put(BaseAudioDAO.FEMALE_SLOW, femaleSlow);
-    report.put(BaseAudioDAO.MALE_CONTEXT, cmale);
-    report.put(BaseAudioDAO.FEMALE_CONTEXT, cfemale);
+
+    report.put(BaseAudioDAO.CMALE, cmale);
+    report.put(BaseAudioDAO.CFEMALE, cfemale);
+
+    report.put(BaseAudioDAO.CMALE_FAST, cmaleReg);
+    report.put(BaseAudioDAO.CFEMALE_FAST, cfemaleReg);
+
+    report.put(BaseAudioDAO.CMALE_SLOW, cmaleSlow);
+    report.put(BaseAudioDAO.CFEMALE_SLOW, cfemaleSlow);
     return report;
   }
 
