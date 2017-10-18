@@ -497,8 +497,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
-    String context = noExistingExercise ? "" :
-        isContext ? exercise1.getDirectlyRelated().iterator().next().getEnglish() : exercise1.getEnglish();
+    String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
     String permanentAudioPath = pathWriter.
@@ -533,6 +532,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.error("got " + e, e);
     }
     return audioAttribute;
+  }
+
+  private String getEnglish(CommonExercise exercise1) {
+    return exercise1.isContext() ? exercise1.getEnglish() : exercise1.getDirectlyRelated().iterator().next().getEnglish();
   }
 
   private String getAudioTranscript(AudioType audioType, CommonExercise exercise1) {

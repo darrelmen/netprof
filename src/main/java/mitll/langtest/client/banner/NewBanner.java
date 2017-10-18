@@ -131,7 +131,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    viewToLink.put(VIEWS.RECORD, getChoice(recnav, VIEWS.RECORD));
+    viewToLink.put(VIEWS.RECORD,  getChoice(recnav, VIEWS.RECORD));
     viewToLink.put(VIEWS.CONTEXT, getChoice(recnav, VIEWS.CONTEXT));
     return recnav;
   }

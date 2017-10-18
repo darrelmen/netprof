@@ -663,7 +663,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseAsyncCallback#onSuccess
    */
   void showExercise(final U commonExercise) {
-    if (DEBUG) logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID());
+    if (DEBUG) {
+      logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID() + " " + commonExercise.getClass());
+    }
     markCurrentExercise(commonExercise.getID());
 
     Scheduler.get().scheduleDeferred((Command) () -> {

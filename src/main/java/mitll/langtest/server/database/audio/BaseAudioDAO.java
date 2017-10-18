@@ -525,9 +525,7 @@ public abstract class BaseAudioDAO extends DAO {
         if (shell.hasContext()) context++;
         shell.getDirectlyRelated().forEach(commonExercise ->
             exToContextTranscript.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
-
-        //exToContextTranscript.put(exid, shell.getContext());
-        if (context == 20) logger.info("getMaleFemaleProgress " + exToContextTranscript);
+//        if (context == 20) logger.info("getMaleFemaleProgress " + exToContextTranscript);
       }
     }
 

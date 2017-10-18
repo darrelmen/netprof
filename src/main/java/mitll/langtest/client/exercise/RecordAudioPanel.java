@@ -53,6 +53,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A waveform record button and a play audio button.
@@ -63,7 +64,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<CommonAudioExercise> {
- // private final Logger logger = Logger.getLogger("RecordAudioPanel");
+  private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
    * @see #getAfterPlayWidget
@@ -120,15 +121,19 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
     this.exercise = exercise;
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
-/*    System.out.println("RecordAudioPanel for " + exercise.getOldID() +
-      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);
-  */
+
+    /*
+    logger.info("RecordAudioPanel for " + exercise.getID() +
+        "\n\taudio type " + audioType +
+        "\n\tref        " + exercise.getRefAudio() +
+        "\n\tpath       " + attribute);*/
+
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
     }
 
     addWidgets("", getRecordButtonTitle());
-    getElement().setId("RecordAudioPanel_" + exercise.getID() + "_" + index + "_" + audioType);
+    //getElement().setId("RecordAudioPanel_" + exercise.getID() + "_" + index + "_" + audioType);
   }
 
   /**
@@ -181,9 +186,13 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
 
   private String getRecordButtonTitle() {
     return
-        audioType.equals(AudioType.REGULAR) ? "Record regular"
+        (audioType.equals(AudioType.REGULAR)
+            || audioType.equals(AudioType.CONTEXT_REGULAR)
+        ) ? "Record regular"
             :
-            audioType.equals(AudioType.SLOW) ? "Record slow" : "Record";
+            (audioType.equals(AudioType.SLOW)
+                || audioType.equals(AudioType.CONTEXT_SLOW)
+            ) ? "Record slow" : "Record";
   }
 
   /**
@@ -209,6 +218,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
   public void clickStop() {
     postAudioRecordButton.clickStop();
   }
+
   public boolean isRecording() {
     return postAudioRecordButton.isRecording();
   }
@@ -287,7 +297,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
       recordImage2.setVisible(false);
 
       getElement().setId("MyPlayAudioPanel");
-     // setHeight(HEIGHT_OF_RECORD_ROW + "px");
+      // setHeight(HEIGHT_OF_RECORD_ROW + "px");
 
       postAudioRecordButton.addStyleName("leftFiveMargin");
       postAudioRecordButton.addStyleName("floatLeft");

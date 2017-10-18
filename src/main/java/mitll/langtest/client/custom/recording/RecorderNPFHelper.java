@@ -59,6 +59,7 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
 import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
@@ -97,8 +98,10 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+      private final Logger logger = Logger.getLogger("RecorderNPFHelper_ExercisePanelFactory");
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
+        logger.info("make rec panel for " +e.getID() + " " + e.getClass() + " " + e.isContext());
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };

@@ -61,14 +61,16 @@ import java.util.logging.Logger;
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
+  private static final String NO_AUDIO_TO_RECORD = "No in-context audio for this exercise.";
+
   public static final String CONTEXT = "context=";
 
   /**
    * @see #addInstructions
    */
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
-  private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
-  private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
+  //private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
+//  private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -83,7 +85,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
                                ExerciseController controller, ListInterface<L, T> exerciseList,
                                boolean doNormalRecording,
                                String instance) {
-    super(e, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance, doNormalRecording);
+    super(e, controller, exerciseList, instance, doNormalRecording);
 //    getElement().setId("WaveformExercisePanel");
   }
 
@@ -123,12 +125,17 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
-    add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
+    add(new Heading(4, RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
+  /**
+   * @return
+   * @see #getAnswerWidget(CommonExercise, ExerciseController, int)
+   */
   private boolean isNormalRecord() {
     return doNormalRecording;
   }
+
   private boolean isExampleRecord() {
     return !doNormalRecording;
   }
@@ -142,15 +149,17 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   @Override
   protected String getExerciseContent(T e) {
- //   Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
-//    int size = directlyRelated != null?directlyRelated.size():0;
     if (logger == null) {
       logger = Logger.getLogger("WaveformExercisePanel");
     }
- //   logger.info("getExerciseContent " + e.getID() + " context " + size + " " + isNormalRecord());
-    String context = isNormalRecord() ? e.getForeignLanguage() :
-        hasContext(exercise) ? exercise.getDirectlyRelated().iterator().next().getForeignLanguage() : "No in-context audio for this exercise.";
+//    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
+
+    String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? getForeignLanguage() : NO_AUDIO_TO_RECORD;
     return ExerciseFormatter.getArabic(context);
+  }
+
+  private String getForeignLanguage() {
+    return exercise.isContext() ? exercise.getForeignLanguage() : exercise.getDirectlyRelated().iterator().next().getForeignLanguage();
   }
 
   /**
@@ -167,24 +176,29 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    if (isNormalRecord()) {
-      addRecordAudioPanelNoCaption(exercise, controller, index, vp, AudioType.REGULAR);
-      // add slow speed recording widget
-      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, AudioType.SLOW);
-      widgets.addStyleName("topFiveMargin");
-    } else {
-      addExampleSentenceRecorder(exercise, controller, index, vp);
-    }
+    // if (isNormalRecord()) {
+    boolean normalRecord = isNormalRecord();
+    AudioType regular = normalRecord ? AudioType.REGULAR : AudioType.CONTEXT_REGULAR;
+    addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular);
+    // add slow speed recording widget
+    AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
+    VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
+    widgets.addStyleName("topFiveMargin");
+    //} else {
+    //  addExampleSentenceRecorder(exercise, controller, index, vp);
+   // }
 
     return vp;
   }
 
   private boolean hasContext(T exercise) {
-    return !exercise.getDirectlyRelated().isEmpty();// exercise.getContext() != null && !exercise.getContext().isEmpty();
+    return exercise.isContext() || !exercise.getDirectlyRelated().isEmpty();
   }
 
-  private void addExampleSentenceRecorder(T exercise, ExerciseController controller,
+  /*private void addExampleSentenceRecorder(T exercise, ExerciseController controller,
                                           int index, Panel vp) {
+    logger.info("addExampleSentenceRecorder for " + exercise.getID() + " is context = " + exercise.isContext());
+
     RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false,
         AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
     audioPanels.add(fast);
@@ -192,7 +206,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
     if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
-  }
+  }*/
 
   /**
    * @param exercise
@@ -205,7 +219,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
                                                      ExerciseController controller, int index, Panel vp, AudioType audioType) {
-    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, instance);
+    RecordAudioPanel fast =
+        new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -240,14 +255,14 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
     //completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
-  //  logger.info("postAnswers " + completedExercise.getID());
+    //  logger.info("postAnswers " + completedExercise.getID());
     showRecordedState(completedExercise);
     exerciseList.loadNextExercise(completedExercise);
   }
 
   protected void showRecordedState(HasID completedExercise) {
     int id = completedExercise.getID();
-   // logger.info("showRecordedState setting state on " + id);
+    // logger.info("showRecordedState setting state on " + id);
 
     exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);

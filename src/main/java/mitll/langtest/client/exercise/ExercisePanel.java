@@ -69,17 +69,15 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   protected T exercise = null;
   final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
-  final ListInterface<L,T> exerciseList;
+  final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
-  final String message;
   protected final String instance;
-  protected boolean doNormalRecording = true;
+  boolean doNormalRecording;
 
   /**
    * @param e
    * @param controller
    * @param exerciseList
-   * @param instructionMessage
    * @param instance
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
@@ -87,14 +85,17 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   ExercisePanel(final T e,
                 final ExerciseController controller,
                 ListInterface<L, T> exerciseList,
-                String instructionMessage,
                 String instance,
                 boolean doNormalRecording) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    this.message = instructionMessage;
+    //String message = instructionMessage;
     this.instance = instance;
+    this.doNormalRecording = doNormalRecording;
+
+    /*    logger.info("for " + e.getID() + " instance " + instance +
+        " doNormal " + doNormalRecording);*/
 
     this.navigationHelper = getNavigationHelper(controller);
 
@@ -106,10 +107,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
-    getElement().setId("ExercisePanel");
-    this.doNormalRecording = doNormalRecording;
-
- //   logger.info("doNormal " + doNormalRecording);
+    //getElement().setId("ExercisePanel");
   }
 
   /**
@@ -154,7 +152,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     maybeRTLContent.addStyleName("rightTenMargin");
     maybeRTLContent.addStyleName("topMargin");
 
-    return (content.length() > 200)  ? getContentScroller(maybeRTLContent) : maybeRTLContent;
+    return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
 
   protected abstract String getExerciseContent(T e);
@@ -230,13 +228,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @param e
    * @param controller used in subclasses for audio control
    */
-  private void addQuestions(T e,   ExerciseController controller) {
-    add(getQuestionPanel(e, controller, 1
-    ));
-  }
+  private void addQuestions(T e, ExerciseController controller) { add(getQuestionPanel(e, controller, 1));  }
 
-  private Panel getQuestionPanel(T exercise,  ExerciseController controller,
-                                 int questionNumber) {
+  private Panel getQuestionPanel(T exercise, ExerciseController controller, int questionNumber) {
     Panel vp = new VerticalPanel();
     // add answer widget
     vp.add(getAnswerWidget(exercise, controller, questionNumber));

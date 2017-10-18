@@ -75,8 +75,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    *
    */
-  @Deprecated
   private boolean isOverride;
+
+  /**
+   *
+   */
   private boolean isContext;
 
   /**
@@ -223,6 +226,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param projectid
    * @param candecode
    * @param lastChecked
+   * @param isContext
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlick(SlickExercise)
    */
   public Exercise(int uniqueID,
@@ -238,10 +242,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   boolean candecode,
                   long lastChecked,
+                  boolean isContext,
                   int numPhones,
                   List<VocabToken> tokens) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
-        projectid, candecode, lastChecked, false, numPhones);
+        projectid, candecode, lastChecked, isContext, numPhones);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
@@ -251,12 +256,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
+   * be careful not to lose any fields
    * @param exercise
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
     super(exercise.getID(), exercise.getProjectID());
-    this.isPredef = true;
+    this.isPredef = exercise.isPredefined();
+    this.isContext= exercise.isContext();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
@@ -267,9 +274,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
 
-    for (CommonExercise contextEx : exercise.getDirectlyRelated()) {
-      addContextExercise(contextEx);
-    }
+    exercise.getDirectlyRelated().forEach(this::addContextExercise);
+
     copyAudio(exercise);
     this.creator = exercise.getCreator();
   }

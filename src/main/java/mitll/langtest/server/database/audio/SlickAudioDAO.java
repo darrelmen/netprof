@@ -285,10 +285,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
         dao.getCountForGender(speed, uniqueIDs, exToTranscript, true, projid);
-    logger.info("for '" + speed + "' given ids " + uniqueIDs.size() +
+
+/*    logger.info("for '" + speed + "' given ids " + uniqueIDs.size() +
             " and " + exToTranscript.size() +
-        " got " + countForGender4.size());
+        " got " + countForGender4.size());*/
+
 //    countForGender4.forEach((k,v)->{});
+
     for (Integer userID : countForGender4.keySet()) {
       Collection<Tuple2<Integer, Integer>> tuple2s = countForGender4.get(userID);
       Set<Integer> exIDs = getExIDs(tuple2s.iterator());

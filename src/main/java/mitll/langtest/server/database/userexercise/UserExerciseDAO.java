@@ -550,8 +550,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date.getTime(),
-        -1, false,
-        System.currentTimeMillis(), -1,
+        -1,
+        false,
+        System.currentTimeMillis(),
+        false,
+        -1,
         factory.getTokens(foreignLanguage));
   }
 

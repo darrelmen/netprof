@@ -424,7 +424,6 @@ public class LangTest implements
     Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-//    List<SlimProject> projects = startupInfo.getAllProjects();
     projects.forEach(slimProject ->
         hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost));
 
@@ -434,7 +433,7 @@ public class LangTest implements
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
-      logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
+     // logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
       if (scoringServiceAsync == null) {
         logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {

@@ -42,7 +42,8 @@ package mitll.langtest.shared;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseFormatter {
-  public static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
+  private static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
+
   public static final String MEANING_PROMPT = "Meaning:";
   public static final String ENGLISH_PROMPT = "Translation:";
   public static final String TRANSLITERATION = "Transliteration:";

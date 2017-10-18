@@ -1390,10 +1390,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     if (toRet == null) {
 
-      String message = "getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+      String message = "getCustomOrPredefExercise couldn't find exercise " + id + " (context?) in project #" + projid +
           " after looking in exercise table.";
       if (id == 0) {
-        logger.warn(message);
+        logger.info(message);
       } else {
         logger.error(message);
       }
@@ -1440,9 +1440,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id) {
-    return userExerciseDAO.getByExID(id);
-  }
+  private CommonExercise getUserExerciseByExID(int id) { return userExerciseDAO.getByExID(id);  }
 
   @Override
   public ServerProperties getServerProps() {

@@ -238,7 +238,7 @@ public class SlickUserExerciseDAO
 
   private final Timestamp never = new Timestamp(0);
 
-  VocabFactory factory = new VocabFactory();
+  private VocabFactory factory = new VocabFactory();
 
   /**
    * @param slick
@@ -263,9 +263,15 @@ public class SlickUserExerciseDAO
         slick.projid(),
         slick.candecode(),
         slick.candecodechecked().getTime(),
+        slick.iscontext(),
         slick.numphones(),
         factory.getTokens(slick.foreignlanguage()));
-//    logger.info("fromSlick created " + userExercise);
+ /*   logger.info("fromSlick " +
+
+        "\n\tfrom    " + slick+
+        "\n\tcreated " + userExercise+
+        "\n\tcontext " + userExercise.isContext()
+    );*/
     return userExercise;
   }
 
