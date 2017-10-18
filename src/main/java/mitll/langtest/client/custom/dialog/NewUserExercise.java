@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -53,6 +54,7 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -178,6 +180,8 @@ abstract class NewUserExercise extends BasicDialog {
     addItemsAtTop(container);
     container.add(upper);
 
+    upper.add(getDominoEditInfo());
+
     makeForeignLangRow(upper);
 //    int listID = originalList.getID();
     final String id1 = "" + listID;
@@ -240,6 +244,22 @@ abstract class NewUserExercise extends BasicDialog {
     Panel row = new FluidRow();
     container.add(row);
     contextTrans = addContextTranslation(container, newUserExercise);
+  }
+
+  @NotNull
+  protected DivWidget getDominoEditInfo() {
+    DivWidget h= new DivWidget();
+    h.addStyleName("leftFiveMargin");
+    h.addStyleName("bottomFiveMargin");
+    h.addStyleName("inlineFlex");
+    HTML child1 = new HTML("To edit text, go into domino, edit the item, and then re-import.");
+    h.add(child1);
+    Anchor child = new Anchor("Click here to go to domino.");
+    child.addStyleName("leftFiveMargin");
+    child.setTarget("_blank");
+    child.setHref(controller.getProps().getDominoURL());
+    h.add(child);
+    return h;
   }
 
   /**

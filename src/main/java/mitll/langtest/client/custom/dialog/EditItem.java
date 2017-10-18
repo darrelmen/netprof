@@ -79,7 +79,7 @@ public class EditItem {
 
   /**
    * @param controller
-   * @see ListView#editList()
+   * @see ListView#editList
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
@@ -188,10 +188,10 @@ public class EditItem {
 
       @Override
       public Panel getExercisePanel(CommonExercise exercise) {
-        Panel panel = new ResizableSimple();
-        panel.getElement().setId("EditItemPanel");
+    //    Panel panel = new ResizableSimple();
+    //    panel.getElement().setId("EditItemPanel");
 
-        logger.info("Creator " + exercise.getCreator() + " vs " + controller.getUser());
+ /*       logger.info("Creator " + exercise.getCreator() + " vs " + controller.getUser());
         boolean iCreatedThisItem = didICreateThisItem(exercise) ||
             (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
         if (iCreatedThisItem) {  // it's mine!
@@ -209,21 +209,21 @@ public class EditItem {
               };
           panel.add(editableExercise.addFields(outer, panel));
           editableExercise.setFields(exercise);
-        } else {
+        } else {*/
           TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,
               alignments);
           widgets.addWidgets(getChoices(), getPhoneChoices());
           return widgets;
-        }
+   //     }
 
-        return panel;
+     //   return panel;
       }
     });
   }
 
-  private class ResizableSimple extends SimplePanel implements RequiresResize {
+ /* private class ResizableSimple extends SimplePanel implements RequiresResize {
 
     @Override
     public void onResize() {
@@ -235,7 +235,7 @@ public class EditItem {
       }
     }
   }
-
+*/
   /**
    * @param ul
    * @param npfExerciseList
@@ -247,9 +247,11 @@ public class EditItem {
     npfExerciseList.rememberAndLoadFirst(ul.getExercises());
   }
 
+/*
   private String getInstance() {
     return instanceName;
   }
+*/
 
   /**
    * @param exercise
@@ -257,7 +259,7 @@ public class EditItem {
    * @paramx originalList
    * @seex EditItem#getAddOrEditPanel(CommonExercise, UserList, boolean)
    */
-  private boolean didICreateThisItem(CommonExercise exercise) {
+/*  private boolean didICreateThisItem(CommonExercise exercise) {
     return exercise.getCreator() == controller.getUser();
-  }
+  }*/
 }
