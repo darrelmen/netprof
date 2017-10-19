@@ -36,16 +36,19 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
+import mitll.langtest.server.database.exercise.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
+import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +61,8 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
+import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.FAIL;
+import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.SUCCESS;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
@@ -158,66 +163,94 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    */
   @Override
-  public Map<String, String> addPending(int projectid) {
-    Collection<CommonExercise> toImport = db.getProjectManagement().getFileUploadHelper().getExercises(projectid);
+  public DominoUpdateResponse addPending(int projectid) {
+    ImportInfo info = db.getProjectManagement().getImport(projectid);
 
-    if (toImport != null) {
+    if (info != null) {
+      Project project = db.getProject(projectid);
 
-      SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
+      int dominoid = project.getProject().dominoid();
+      int jsonDominoID = info.getDominoID();
+      if (dominoid != -1 && dominoid != jsonDominoID) {
+        logger.warn("addPending - json domino id = " + dominoid + " vs " + jsonDominoID);
+        return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
 
-      List<CommonExercise> newEx = new ArrayList<>();
-      List<CommonExercise> updateEx = new ArrayList<>();
-
-      Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
-
-      logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
-      {
-        Set<Integer> current = legacyToEx.keySet();
-
-        for (Map.Entry<Integer, CommonExercise> pair : getDominoIDToExercise(toImport).entrySet()) {
-          Integer dominoID = pair.getKey();
-          CommonExercise importEx = pair.getValue();
-
-          if (current.contains(dominoID)) {
-            updateEx.add(importEx);
-            importEx.getMutable().setID(legacyToEx.get(dominoID).id());
-          } else {
-            newEx.add(importEx);
+      } else {
+        if (dominoid == -1) {
+          List<Project> existingBound = new ArrayList<>();
+          db.getProjects().forEach(project1 -> {
+            if (project1.getProject().dominoid() == jsonDominoID) {
+              existingBound.add(project1);
+            }
+          });
+          if (!existingBound.isEmpty()) {
+            String name = existingBound.iterator().next().getProject().name();
+            DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+            dominoUpdateResponse.setMessage(name);
+            return dominoUpdateResponse;
           }
         }
+        Collection<CommonExercise> toImport = info.getExercises();
+        SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
+
+        List<CommonExercise> newEx = new ArrayList<>();
+        List<CommonExercise> updateEx = new ArrayList<>();
+
+        Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+
+        logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
+        {
+          Set<Integer> current = legacyToEx.keySet();
+
+          for (Map.Entry<Integer, CommonExercise> pair : getDominoIDToExercise(toImport).entrySet()) {
+            Integer dominoID = pair.getKey();
+            CommonExercise importEx = pair.getValue();
+
+            if (current.contains(dominoID)) {
+              updateEx.add(importEx);
+              importEx.getMutable().setID(legacyToEx.get(dominoID).id());
+            } else {
+              newEx.add(importEx);
+            }
+          }
+        }
+
+        Collection<String> typeOrder2 = project.getTypeOrder();
+
+        int importUser = getImportUser();
+        new ExerciseCopy().addExercises(importUser,
+            projectid,
+            new HashMap<>(),
+            slickUEDAO, newEx, typeOrder2, new HashMap<>());
+
+        // now update...
+        // update the exercises...
+        logger.info("addPending updating  " + updateEx.size() + " exercises");
+        doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
+        copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
+
+        SlickProject project1 = project.getProject();
+        if (!newEx.isEmpty() || !updateEx.isEmpty()) {
+          project1.updateModified();
+          project1.updateDominoID(jsonDominoID);
+          getProjectDAO().easyUpdate(project1);
+        }
+
+        int i = db.configureProject(project, true);
+        return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project1, i));
       }
-
-      Project project = db.getProject(projectid);
-      Collection<String> typeOrder2 = project.getTypeOrder();
-
-      int importUser = getImportUser();
-      new ExerciseCopy().addExercises(importUser,
-          projectid,
-          new HashMap<>(),
-          slickUEDAO, newEx, typeOrder2, new HashMap<>());
-
-      // now update...
-      // update the exercises...
-      logger.info("addPending updating  " + updateEx.size() + " exercises");
-      doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
-      copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
-
-      if (!newEx.isEmpty() || !updateEx.isEmpty()) {
-        project.getProject().updateModified();
-        getProjectDAO().easyUpdate(project.getProject());
-      }
-
-      int i = db.configureProject(project, true);
-      //  Timestamp modified = project.getProject().modified();
-
-      DateFormat format = new SimpleDateFormat();
-      Map<String, String> info = new HashMap<>();
-      info.put(MODIFIED, format.format(project.getProject().modified()));
-      info.put(NUM_ITEMS, "" + i);
-      return info;
     } else {
-      return new HashMap<>();
+      return new DominoUpdateResponse(FAIL, -1, -1, new HashMap<>());
     }
+  }
+
+  @NotNull
+  private Map<String, String> getProps(SlickProject project1, int i) {
+    DateFormat format = new SimpleDateFormat();
+    Map<String, String> infoProps = new HashMap<>();
+    infoProps.put(MODIFIED, format.format(project1.modified()));
+    infoProps.put(NUM_ITEMS, "" + i);
+    return infoProps;
   }
 
   private int getImportUser() {

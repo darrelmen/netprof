@@ -137,16 +137,15 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
                          HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
     boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
-
 //    String contentType = ctx.getContentType();
     //logger.info("service content type " + contentType + " multi " + isMultipart);
     if (isMultipart) {
       logger.debug("isMultipart : Request " + request.getQueryString() + " path " + request.getPathInfo());
-      FileUploadHelper.Site site = db.getProjectManagement().getFileUploadHelper().gotFile(request);
+      FileUploadHelper.UploadInfo site = db.getProjectManagement().getFileUploadHelper().gotFile(request);
       if (site == null) {
         super.service(request, response);
       } else {
-        db.getProjectManagement().getFileUploadHelper().doSiteResponse(response, site);
+        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, site);
       }
     } else {
       super.service(request, response);

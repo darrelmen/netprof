@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -25,6 +26,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.SlimProject;
@@ -661,14 +663,42 @@ public class ProjectChoices {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
-        projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<Map<String,String>>() {
+        projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
-          public void onSuccess(Map<String,String> result) {
-            projectForLang.getProps().putAll(result);
+          public void onSuccess(DominoUpdateResponse result) {
+            DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
+            if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
+              projectForLang.getProps().putAll(result.getProps());
+            }
+            else {
+              String title = "" ;
+              String message = "" ;
+
+              switch (status) {
+                case FAIL:
+                  title = "Import failed";
+                  message = "Server error importing items - please report.";
+                  break;
+                case WRONG_PROJECT:
+                  title = "Wrong domino project";
+                   message = "Upload data is from domino project #" + result.getDominoID() +
+                      " but this project is for #" + result.getCurrentDominoID() +
+                      ".<br/>You probably want to make a new NetProF project and add it to there.";
+                  break;
+                case ANOTHER_PROJECT:
+                  title = "Another domino project";
+                   message = "Upload data is from domino project #" + result.getDominoID() +
+                      ", which is already associated with the " + result.getMessage() + " project."+
+                      "<br/>You probably want to add it to there.";
+                  break;
+              }
+              new ModalInfoDialog(title,
+                  message);
+            }
           }
         });
         return true;

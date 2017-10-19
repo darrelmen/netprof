@@ -39,10 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.scoring.LTSFactory;
@@ -803,6 +800,10 @@ public class ProjectManagement implements IProjectManagement {
     return db.getProjectDAO().getPropValue(id, modelsDir);
   }
 
+  @Override
+  public ImportInfo getImport(int projid) {
+    return  getFileUploadHelper().getExercises(projid);
+  }
 
   @Override
   public FileUploadHelper getFileUploadHelper() {

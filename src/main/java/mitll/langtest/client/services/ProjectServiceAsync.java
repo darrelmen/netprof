@@ -33,13 +33,10 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 
-import java.util.Map;
-
 public interface ProjectServiceAsync {
-  //void getAll(AsyncCallback<List<ProjectInfo>> async);
-
   void exists(int projectid, AsyncCallback<Boolean> async);
 
   void update(ProjectInfo info, AsyncCallback<Boolean> async);
@@ -50,5 +47,5 @@ public interface ProjectServiceAsync {
 
   void delete(int id, AsyncCallback<Boolean> async);
 
-  void addPending(int id, AsyncCallback<Map<String, String>> async);
+  void addPending(int id, AsyncCallback<DominoUpdateResponse> async);
 }

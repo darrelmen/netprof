@@ -25,7 +25,6 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
@@ -56,67 +55,6 @@ public class DominoExerciseDAO {
     this.ser = serializer;
   }
 
-  public static class Info {
-    private final Date createTime;
-    private final Date modifiedTime;
-    private final List<CommonExercise> exercises;
-
-    private final String language;
-    private final mitll.langtest.shared.project.Language lang;
-
-    private final int dominoID;
-
-    public Info(Date exportTime, Date updateTime,
-                List<CommonExercise> exercises,
-                String language,
-                mitll.langtest.shared.project.Language lang,
-                int dominoID) {
-      this.createTime = exportTime;
-      this.modifiedTime = updateTime;
-      this.exercises = exercises;
-      this.language = language;
-      this.lang = lang;
-      this.dominoID = dominoID;
-    }
-
-    private Date getExportTime() {
-      return createTime;
-    }
-
-    public List<CommonExercise> getExercises() {
-      return exercises;
-    }
-
-/*
-    public String getLanguage() {
-      return language;
-    }
-*/
-
-/*
-    public mitll.langtest.shared.project.Language getLang() {
-      return lang;
-    }
-*/
-
-    /**
-     * @return
-     */
-    int getDominoID() {
-      return dominoID;
-    }
-
-/*
-    public Date getModifiedTime() {
-      return modifiedTime;
-    }
-*/
-
-    public String toString() {
-      return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() + " num " + getExercises().size();
-    }
-  }
-
   /**
    * TODO : use domino language object
    *
@@ -127,7 +65,7 @@ public class DominoExerciseDAO {
    * @return
    * @see mitll.langtest.server.FileUploadHelper#readJSON
    */
-  public Info readExercises(String file, InputStream inputStream, int projid, int importUser) {
+  public ImportInfo readExercises(String file, InputStream inputStream, int projid, int importUser) {
     try {
       JsonReader reader = file == null ?
           Json.createReader(inputStream) :
@@ -159,9 +97,11 @@ public class DominoExerciseDAO {
       List<CommonExercise> exercises =
           getCommonExercises(projid, getCreator(importUser, pd), readObj.getJsonArray(DOCUMENTS), unitName, chapterName);
 
-      return new Info(pd.getCreateTime(), pd.getUpdateTime(), exercises, languageName, getLanguage(languageName), pd.getId());
+      return new ImportInfo(pd.getCreateTime(),
+          //pd.getUpdateTime(),
+          exercises, languageName, getLanguage(languageName), pd.getId());
     } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      logger.error("Got " +e,e);
     }
     return null;
   }

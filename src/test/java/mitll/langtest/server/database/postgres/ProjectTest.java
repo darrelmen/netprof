@@ -40,6 +40,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
+import mitll.langtest.server.database.exercise.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectType;
@@ -235,7 +236,15 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testMaleFemale() {
     DatabaseImpl database = getAndPopulate();
-    Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
+    Project project = database.getProject(14);
+    CommonExercise exerciseByID = project.getExerciseByID(41301);
+
+    logger.info("Got " + exerciseByID);
+
+    CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(14, 41301);
+
+    logger.info("Got " + customOrPredefExercise);
+    Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(14);
     logger.info(maleFemaleProgress.toString());
   }
 
@@ -354,7 +363,7 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testReadDominoJSON() {
     DominoExerciseDAO dominoExerciseDAO = getAndPopulate().getDominoExerciseDAO();
-    DominoExerciseDAO.Info info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", null,
+    ImportInfo info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", null,
         -1, 1);
 
     logger.info("Got " + info);

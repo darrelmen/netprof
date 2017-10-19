@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 
 import java.util.Map;
@@ -51,5 +52,5 @@ public interface ProjectService extends RemoteService {
   boolean update(ProjectInfo info);
   boolean create(ProjectInfo newProject);
   boolean delete(int id);
-  Map<String,String> addPending(int id);
+  DominoUpdateResponse addPending(int id);
 }
