@@ -730,6 +730,9 @@ public class ProjectManagement implements IProjectManagement {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());
+      if (project.dominoid() > 0) {
+        info.put("Domino ID", ""+project.dominoid());
+      }
     }
 
     return new SlimProject(
