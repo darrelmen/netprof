@@ -227,20 +227,26 @@ public class SignInForm extends UserDialog implements SignIn {
     if (hasSpaces(userID)) {
       eventRegistration.logEvent(signIn, "TextBox", "N/A", "no spaces in userid '" + userID + "'");
       checkLegacyUserWithSpaces(userID);
-    } else if (userID.length() < MIN_LENGTH_USER_ID) {
-      markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
     } else {
-      String value = password.box.getValue();
-      if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-        markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
-      } else if (value.isEmpty()) {
-        final String text = userField.getSafeText();
-
-        if (!text.isEmpty()) {
-          checkUserExists(text);
-        }
+      int length = userID.length();
+      if (length < MIN_LENGTH_USER_ID) {
+        markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
       } else {
-        gotLogin(userID, value);
+        if (length == 4) {
+          userID += "_"; // old netprof 1 accounts could be 4 long.
+        }
+        String value = password.box.getValue();
+        if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
+          markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
+        } else if (value.isEmpty()) {
+          final String text = userField.getSafeText();
+
+          if (!text.isEmpty()) {
+            checkUserExists(text);
+          }
+        } else {
+          gotLogin(userID, value);
+        }
       }
     }
   }
@@ -329,7 +335,7 @@ public class SignInForm extends UserDialog implements SignIn {
       logger.info("No userField with that name '" + user +
           "' freeTextPassword " + freeTextPassword.length() + " characters - ");
 
-      markErrorBlur(password, NO_USER_FOUND);
+      markErrorBlur(password, NO_USER_FOUND, Placement.BOTTOM);
       signIn.setEnabled(true);
     } else {
       User loggedInUser = result.getLoggedInUser();
@@ -444,6 +450,7 @@ public class SignInForm extends UserDialog implements SignIn {
       if (safeText.isEmpty()) {
         markErrorBlur(userField, ENTER_A_USER_NAME);
       } else {
+        if (safeText.length() == 4) safeText += "_";
         sendEmailIfExists(forgotPassword, safeText);
       }
     });
@@ -462,16 +469,12 @@ public class SignInForm extends UserDialog implements SignIn {
         if (result == null) {
           String testUserID = normalizeSpaces(safeText);
           if (testUserID.equalsIgnoreCase(safeText)) {
-            markErrorBlur(userField, NO_USER_FOUND);
+            markErrorBlur(userField, NO_USER_FOUND, Placement.BOTTOM);
           } else {
             sendEmailIfExists(forgotPassword, testUserID);
           }
         } else {
-          //  if (result.isValid()) {
           sendEmail.showSendEmail(forgotPassword, safeText, result.isValid());
-          //} else {
-          //copyInfoToSignUp(safeText, result);
-          // }
         }
       }
     });

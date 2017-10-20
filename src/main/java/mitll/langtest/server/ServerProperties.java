@@ -134,7 +134,8 @@ public class ServerProperties {
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
-  private static final String NP_SERVER = "netprof-1.ll.mit.edu";
+
+  private static final String NP_SERVER = "netprof.ll.mit.edu";
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";

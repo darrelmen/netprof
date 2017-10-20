@@ -73,6 +73,7 @@ public class SlickUserExerciseDAO
   private static final String DEFAULT_FOR_EMPTY = ANY;
   //  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
+  public static final String HYDRA = "hydra";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -85,7 +86,7 @@ public class SlickUserExerciseDAO
   public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
-
+  private String hostName;
   /**
    * @param database
    * @param dbConnection
@@ -106,6 +107,7 @@ public class SlickUserExerciseDAO
     if (!hasMediaDir) {
       logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
+    hostName = database.getServerProps().getHostName();
   }
 
   public void createTable() {
@@ -318,7 +320,7 @@ public class SlickUserExerciseDAO
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
-    if (exercise.getNumPhones() < 1 && lookup.hasModel()) {
+    if (exercise.getNumPhones() < 1 && lookup.hasModel() && hostName.startsWith(HYDRA)) {
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
