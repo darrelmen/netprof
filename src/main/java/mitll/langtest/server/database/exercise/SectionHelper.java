@@ -541,7 +541,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       if (isKnownType(type)) {
         Collection<T> exercisesForSection = new HashSet<>(getExercisesForSection(type, pair.getValue()));
 
-         logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
+        logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
         if (currentList == null) {
           currentList = exercisesForSection;
         } else {
@@ -684,8 +684,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
           logger.warn("removeExercise didn't remove " + exercise.getID() + " for " + pair);
           didRemove = false;
-        }
-        else {
+        } else {
           logger.info("removeExercise remove " + exercise.getID() + " " + exercise);
         }
       }
@@ -747,8 +746,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
-
-  private final File temp = new File("output.txt");
+  // private final File temp = new File("output.txt");
 
   @Override
   public void report() {
@@ -758,42 +756,42 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 //      logger.debug("pair " + pair.getKey() + " " + pair.getValue().size());
 //
 //    }
-    try {
-      FileWriter writer = new FileWriter(temp);
-      logger.info("write to " + temp.getName());
-      for (String key : typeToUnitToLesson.keySet()) {
-        Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
-        Set<String> sections = new TreeSet<>(categoryToLesson.keySet());
-        if (!sections.isEmpty()) {
-          String message = "\treport : " + key + " = (" + sections.size() + ") " + sections;
+//    try {
+    //FileWriter writer = new FileWriter(temp);
+    //logger.info("write to " + temp.getName());
+    for (String key : typeToUnitToLesson.keySet()) {
+      Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
+      Set<String> sections = new TreeSet<>(categoryToLesson.keySet());
+      if (!sections.isEmpty()) {
+        String message = "\treport : " + key + " = (" + sections.size() + ") " + sections;
 
-          logger.debug(message);
-          writer.write(message);
+        logger.debug(message);
+        //  writer.write(message);
 
-          for (String section : sections) {
-            Lesson<T> tLesson = categoryToLesson.get(section);
-            String message1 = "\t\t" + section + " : " + tLesson.size();
-            logger.debug(message1);
-            writer.write(message1);
+        for (String section : sections) {
+          Lesson<T> tLesson = categoryToLesson.get(section);
+          String message1 = "\t\t" + section + " : " + tLesson.size();
+          logger.debug(message1);
+          //  writer.write(message1);
 
-          }
-          writer.write("\n");
         }
+        // writer.write("\n");
       }
-      logger.debug("\t# section nodes " + getSectionNodesForTypes().size());
-      for (SectionNode node : getSectionNodesForTypes()) {
-        logger.info("--- node " + node.getType() + " : " + node.getName());
-        Collection<T> exercisesForSelectionState = getExercisesForSelectionState(node.getType(), node.getName());
-        String message = "\tfor " + node.toComplete(0) + " got " + exercisesForSelectionState.size();
-        logger.info(message);
-        writer.write(message);
-        writer.write("\n");
-      }
-
-      writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     }
+    logger.debug("\t# section nodes " + getSectionNodesForTypes().size());
+    for (SectionNode node : getSectionNodesForTypes()) {
+      logger.info("--- node " + node.getType() + " : " + node.getName());
+      Collection<T> exercisesForSelectionState = getExercisesForSelectionState(node.getType(), node.getName());
+      String message = "\tfor " + node.toComplete(0) + " got " + exercisesForSelectionState.size();
+      logger.info(message);
+      //  writer.write(message);
+      //  writer.write("\n");
+    }
+
+//      writer.close();
+    //   } catch (IOException e) {
+    //     e.printStackTrace();
+    //   }
   }
 
   private List<List<Pair>> seen = new ArrayList<>();
