@@ -118,9 +118,6 @@ public class ServerProperties {
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
-  //public static final String CONFIG = "config";
-  //public static final String CONFIG_JSON = "config.json";
-
   /**
    * @see #useProperties
    */
@@ -264,23 +261,23 @@ public class ServerProperties {
    */
   public ServerProperties(String configDir, String configFile) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
-    readProps(configDir, configFile, "");//getDateFromManifest(servletContext));
+    readProps(configDir, configFile);//, "");//getDateFromManifest(servletContext));
     readPhonemeMap(configDir);
   }
 
   /**
    * @param configDir
    * @param configFile
-   * @param dateFromManifest
+   * @paramx dateFromManifest
    */
-  private void readProps(String configDir, String configFile, String dateFromManifest) {
+  private void readProps(String configDir, String configFile) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
       logger.error("couldn't find config file " + new File(configFileFullPath));
     } else {
       try {
         props = readPropertiesFromFile(configFileFullPath);
-        useProperties(new File(configDir), dateFromManifest);
+        useProperties(new File(configDir), "");
         this.configFileFullPath = configFileFullPath;
       } catch (IOException e) {
         logger.error("got " + e, e);

@@ -81,10 +81,13 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     String floatDir = isLTR ? "floatLeft" : "floatRight";
     north.addStyleName(floatDir);
 
-    InlineHTML spacer = new InlineHTML(" ");
-    spacer.setWidth("4px");
-    spacer.addStyleName(floatDir);
-    north.add(spacer);
+    if (isLTR) {
+      north.addStyleName("wordSpacerRight");
+    }
+    else {
+      north.addStyleName("wordSpacerLeft");
+      north.addStyleName("rtlMarginBottom");
+    }
   }
 
   public int getLength() {

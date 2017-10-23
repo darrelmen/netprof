@@ -1044,8 +1044,7 @@ public class LangTest implements
       return "";
     } else {
       String host = startupInfo.getHost(projectStartupInfo.getProjectid());
-      logger.info("host for " + projectStartupInfo.getProjectid() + " = '" + host +"'");
-
+ //     logger.info("host for " + projectStartupInfo.getProjectid() + " = '" + host +"'");
       return host;
     }
   }

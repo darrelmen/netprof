@@ -297,7 +297,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
-    row.addStyleName("inlineFlex");
+    //row.addStyleName("inlineFlex");
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
     if (scores.isEmpty()) {
       logger.warning("makeColoredTable no segments for " + scoreAndPath);
