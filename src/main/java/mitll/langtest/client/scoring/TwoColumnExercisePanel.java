@@ -531,7 +531,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap);
 
         if (value1 == null) {
-          logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
+          if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
 
           // so here we have something where we need more segments for this clickable...?
           if (clickablesIterator.hasPrevious()) {  // so now we want to put segment phones underneath clickable
@@ -561,7 +561,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                   }
                 }
               } else {
-                logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
+                if (DEBUG_MATCH)  logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
                     "'  vs '" + fragment1 +
                     "'");
                 break;
@@ -569,7 +569,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             }
 
             if (phonesInWordAll.isEmpty()) {
-              logger.warning("doOneToManyMatch no matches for " + current + " and " + lcSegment);
+              if (DEBUG) logger.warning("doOneToManyMatch no matches for " + current + " and " + lcSegment);
             } else {
               //    logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
 
@@ -592,7 +592,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //            segmentToWord.put(wordSegment, value1);
 //            clickableRow.add(value1.asWidget());
 
-            logger.warning("doOneToManyMatch no match for " + wordSegment);
+            if (DEBUG_MATCH) logger.warning("doOneToManyMatch no match for " + wordSegment);
           }
         } else {
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
@@ -639,12 +639,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             matchEventSegmentToClickable(iterator, wordSegment, phonesInWord, audioControl, phoneMap);
 
         if (value1 == null) {
-          logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
+          if (DEBUG) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
         } else {
           segmentToWord.put(wordSegment, value1);
         }
       } else {
-        logger.warning("doOneToOneMatch no match for " + wordSegment);
+        if (DEBUG) logger.warning("doOneToOneMatch no match for " + wordSegment);
       }
     }
   }
