@@ -68,7 +68,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param dbConnection
    * @param userDAO
    * @param userExerciseDAO
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public SlickUserListDAO(Database database,
                           DBConnection dbConnection,
@@ -365,12 +365,29 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }
   }
 
+  /**
+   * Don't return empty lists.
+   * @param userid
+   * @param projid
+   * @return
+   */
   @Override
   public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
     List<UserList<CommonShell>> ret = new ArrayList<>();
-    getAllListsForUser(userid, projid).forEach(ue -> ret.add(fromSlick(ue)));
+    getAllListsForUser(userid, projid)
+        .forEach(ue -> ret.add(fromSlick(ue)));
     ret.forEach(this::populateList);
-    return ret;
+
+    return getNonEmpty(ret);
+  }
+
+  @NotNull
+  private Collection<UserList<CommonShell>> getNonEmpty(List<UserList<CommonShell>> ret) {
+    List<UserList<CommonShell>> nonEmpty = new ArrayList<>();
+    ret.forEach(commonShellUserList -> {
+      if (!commonShellUserList.isEmpty()) nonEmpty.add(commonShellUserList);
+    });
+    return nonEmpty;
   }
 
   /**

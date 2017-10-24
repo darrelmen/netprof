@@ -58,8 +58,6 @@ public interface IUserListManager   {
 
   int getNumLists(int userid, int projid);
 
-//  Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
-
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
   /**

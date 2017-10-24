@@ -230,7 +230,7 @@ public class CreateProject {
         new Pair("serbian", "rs"),
         new Pair("sorani", "ku"),
         new Pair("spanish", "es"),
-        new Pair("sudanese", "ss"),
+        new Pair("sudanese", "sd"),
         new Pair("tagalog", "ph"),
         new Pair("turkish", "tr"),
         new Pair("urdu", "pk"));

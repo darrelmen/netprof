@@ -21,11 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/6/17.
  */
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
+  private final Logger logger = Logger.getLogger("ListContainer");
+
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";
@@ -191,7 +194,11 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(truncate(shell.getDescription()));
+        String description = shell.getDescription();
+     //   logger.info("Desc " + description + " length " + description.length());
+        String truncate = truncate(description);
+     //   logger.info("truncate " + truncate + " length " + truncate.length());
+        return getSafeHtml(truncate);
       }
     };
   }

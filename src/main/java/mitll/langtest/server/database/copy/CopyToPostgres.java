@@ -97,9 +97,9 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
   private static final String OPT_NETPROF = "/opt/netprof/import";
 
-  private void copySeveral(List<String> configs) {
+/*  private void copySeveral(List<String> configs) {
 
-  }
+  }*/
 
   /**
    * @param config
@@ -275,7 +275,6 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc      country code
    * @param optName non-default name (not language) - null OK
    * @param isDev   i.e. not production
-   * @seex PostgresTest#testCopy
    * @see #copyOneConfigCommand
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {

@@ -174,6 +174,7 @@ public class ListView implements ContentView, CreateListComplete {
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
         tableWithPager.setHeight(BROWSE_HEIGHT + "px");
+        tableWithPager.getElement().getStyle().setProperty("minWidth","700px");
 
         new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
 

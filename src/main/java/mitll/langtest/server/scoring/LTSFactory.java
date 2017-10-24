@@ -144,13 +144,10 @@ public class LTSFactory {
       exToKey.put(t, collationKey);
     }
 
-    Collections.sort(toSort, new Comparator<T>() {
-      @Override
-      public int compare(T o1, T o2) {
-        CollationKey collationKey1 = exToKey.get(o1);
-        CollationKey collationKey2 = exToKey.get(o2);
-        return collationKey1.compareTo(collationKey2);
-      }
+    toSort.sort((o1, o2) -> {
+      CollationKey collationKey1 = exToKey.get(o1);
+      CollationKey collationKey2 = exToKey.get(o2);
+      return collationKey1.compareTo(collationKey2);
     });
   }
 

@@ -131,9 +131,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param onlyCreated
    * @param visited
    * @return
-   * @seex mitll.langtest.client.custom.Navigation#showInitialState()
-   * @seex ListManager#viewLessons
-   * @seex mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
@@ -144,16 +141,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       return Collections.emptyList();
     }
   }
-
-  /**
-   * @param search
-   * @return
-   * @see ListManager#viewLessons
-   */
-//  @Override
-//  public Collection<UserList<CommonShell>> getUserListsForText(String search) {
-//    return getUserListManager().getUserListsForText(search, getUserIDFromSessionOrDB(), getProjectID());
-//  }
 
   /**
    * TODO : maybe remove second arg
