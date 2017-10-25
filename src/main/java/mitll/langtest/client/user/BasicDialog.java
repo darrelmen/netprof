@@ -370,11 +370,15 @@ public class BasicDialog {
   }
 
   void markErrorBlur(FocusWidget focusWidget, String message, Placement placement) {
-    markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, placement, false);
+    markErrorBlurFocus(focusWidget, focusWidget, TRY_AGAIN, message, placement, false);
   }
 
   void markErrorBlur(Button button, String message) {
-    markErrorBlurFocus(button, button, "Try Again", message, Placement.RIGHT, false);
+    markErrorBlurFocus(button, button, TRY_AGAIN, message, Placement.RIGHT, false);
+  }
+
+  void markErrorBlur(Button button, String message, Placement placement) {
+    markErrorBlurFocus(button, button, TRY_AGAIN, message, placement, false);
   }
 
   void markErrorBlur(Button button, String heading, String message, Placement placement) {

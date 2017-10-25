@@ -44,6 +44,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -54,13 +55,11 @@ import java.util.logging.Logger;
  * @since 10/2/14.
  */
 public class SendResetPassword extends UserDialog {
-//  private final Logger logger = Logger.getLogger("ResetPassword");
+  //  private final Logger logger = Logger.getLogger("ResetPassword");
   private static final String ENTER_USER_ID = "Enter User ID";
-  private static final String USER_ID = "User ID";
   private static final String SEND_RESET_PASSWORD = "Send Reset Password";
   private static final String PLEASE_ENTER_A_USER_ID = "Please enter a user id.";
   private static final String UNKNOWN_USER = "Unknown user.";
-  private static final String CAN_T_COMMUNICATE_WITH_SERVER_CHECK_NETWORK_CONNECTION = "Can't communicate with server - check network connection.";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
 
   private static final String SUCCESS = "Success";
@@ -74,7 +73,9 @@ public class SendResetPassword extends UserDialog {
    * @param eventRegistration
    * @see
    */
-  public SendResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
+  public SendResetPassword(PropertyHandler props,
+                           EventRegistration eventRegistration,
+                           UserManager userManager) {
     super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
@@ -141,17 +142,8 @@ public class SendResetPassword extends UserDialog {
    * @see #getResetPassword
    */
   private Button getChangePasswordButton(final FormField userID) {
-    final Button changePassword = new Button(SEND_RESET_PASSWORD);
-    changePassword.setType(ButtonType.PRIMARY);
-    changePassword.getElement().setId("changePassword");
-    changePassword.addStyleName("floatRight");
-    changePassword.addStyleName("rightFiveMargin");
-    changePassword.addStyleName("leftFiveMargin");
-
+    final Button changePassword = getChangePasswordButton(SEND_RESET_PASSWORD, enterKeyButtonHelper, eventRegistration);
     changePassword.addClickHandler(event -> onChangePassword(userID, changePassword));
-    enterKeyButtonHelper.addKeyHandler(changePassword);
-    eventRegistration.register(changePassword);
-
     return changePassword;
   }
 
@@ -167,11 +159,14 @@ public class SendResetPassword extends UserDialog {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
 
-      service.resetPassword(userIDForm.getSafeText(), new AsyncCallback<Boolean>() {
+      String safeText = userIDForm.getSafeText();
+
+      if (safeText.length() == 4) safeText += "_"; // legacy user ids can be 4 but domino requires length 5
+      service.resetPassword(safeText, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);
-          markErrorBlur(changePassword, CAN_T_COMMUNICATE_WITH_SERVER_CHECK_NETWORK_CONNECTION);
+          markErrorBlur(changePassword, NO_SERVER);
         }
 
         @Override

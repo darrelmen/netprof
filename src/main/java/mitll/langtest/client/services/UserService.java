@@ -38,10 +38,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -81,7 +78,7 @@ public interface UserService extends RemoteService {
    * @return
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
-  User changePasswordWithToken(String userId, String userKey, String newPassword);
+  ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword);
 
   /**
    * @param userid

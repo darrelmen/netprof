@@ -35,6 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.user.ChoosePasswordResult;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
@@ -59,7 +60,7 @@ public interface UserServiceAsync {
                                  String newHashedPassword,
                                  AsyncCallback<Boolean> async);
 
-  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<User> async);
+  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<ChoosePasswordResult> async);
 
   void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
 

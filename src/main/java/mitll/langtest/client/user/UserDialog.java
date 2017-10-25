@@ -59,6 +59,8 @@ import org.jetbrains.annotations.NotNull;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
+  public static final String NO_SERVER = "Can't communicate with server - check network connection.";
+  protected static final String USER_ID = "User ID";
   static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
@@ -257,5 +259,29 @@ public abstract class UserDialog extends BasicDialog {
 
   protected String normalizeSpaces(String trim) {
     return trim.replaceAll("\\s+", "_");
+  }
+
+  /**
+   * On mobile this is really annoying if we don't turn it off.
+   * @param useridField
+   */
+  protected void turnOffAutoCapitalize(FormField useridField) {
+    useridField.getWidget().getElement().setAttribute("autocapitalize", "off");
+  }
+
+  @NotNull
+  protected Button getChangePasswordButton(String sendResetPassword,
+                                           KeyPressHelper enterKeyButtonHelper,
+                                           EventRegistration eventRegistration
+  ) {
+    final Button changePassword = new Button(sendResetPassword);
+    changePassword.setType(ButtonType.PRIMARY);
+    changePassword.getElement().setId("changePassword");
+    changePassword.addStyleName("floatRight");
+    changePassword.addStyleName("rightFiveMargin");
+    changePassword.addStyleName("leftFiveMargin");
+    enterKeyButtonHelper.addKeyHandler(changePassword);
+    eventRegistration.register(changePassword);
+    return changePassword;
   }
 }

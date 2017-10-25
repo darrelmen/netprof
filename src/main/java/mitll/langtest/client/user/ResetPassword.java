@@ -34,7 +34,6 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -44,6 +43,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.user.ChoosePasswordResult;
 import mitll.langtest.shared.user.User;
 
 /**
@@ -66,8 +66,9 @@ public class ResetPassword extends UserDialog {
   private static final String SUCCESS = "Success";
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
-  private static final String USER_ID = "User ID";
   private static final String PASSWORD_HAS_ALREADY_BEEN_CHANGED = "Password has already been changed?";
+  private static final int DELAY_MILLIS = 2000;
+  private static final int OLD_NETPROF_LEN = 4;
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -131,7 +132,9 @@ public class ResetPassword extends UserDialog {
     user.setPlaceholder(USER_ID);
     String pendingUserID = userManager.getPendingUserID();
     user.setText(userManager.getPendingUserID());
-    FormField useridField = getSimpleFormField(fieldset, user, 4);
+    FormField useridField = getSimpleFormField(fieldset, user, OLD_NETPROF_LEN);
+
+    turnOffAutoCapitalize(useridField);
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
 
@@ -151,7 +154,9 @@ public class ResetPassword extends UserDialog {
   }
 
   private FormField getPasswordField(Fieldset fieldset, String hint) {
-    return addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
+    FormField formField = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
+    turnOffAutoCapitalize(formField);
+    return formField;
   }
 
   /**
@@ -164,19 +169,8 @@ public class ResetPassword extends UserDialog {
                                          final FormField userID,
                                          final FormField firstPassword,
                                          final FormField secondPassword) {
-    final Button changePassword = new Button(CHANGE_PASSWORD);
-    changePassword.setType(ButtonType.PRIMARY);
-
-    changePassword.getElement().setId("changePassword");
-    changePassword.addStyleName("floatRight");
-    changePassword.addStyleName("rightFiveMargin");
-    changePassword.addStyleName("leftFiveMargin");
-
+    final Button changePassword = getChangePasswordButton(CHANGE_PASSWORD, enterKeyButtonHelper, eventRegistration);
     changePassword.addClickHandler(event -> onChangePassword(userID, firstPassword, secondPassword, changePassword, token));
-    enterKeyButtonHelper.addKeyHandler(changePassword);
-
-    eventRegistration.register(changePassword);
-
     return changePassword;
   }
 
@@ -193,7 +187,9 @@ public class ResetPassword extends UserDialog {
                                 String token) {
     String newPassword = firstPassword.box.getText();
     String second = secondPassword.box.getText();
-    if (newPassword.isEmpty()) {
+    if (userIDForm.getSafeText().length()< OLD_NETPROF_LEN) {
+      markErrorBlur(userIDForm, "Please enter a longer id.");
+    } else if (newPassword.isEmpty()) {
       markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
     } else if (newPassword.length() < MIN_PASSWORD) {
       markErrorBlur(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
@@ -203,28 +199,35 @@ public class ResetPassword extends UserDialog {
       markErrorBlur(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
     } else if (!second.equals(newPassword)) {
       markErrorBlur(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
-
     } else {
+
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
-      service.changePasswordWithToken(userIDForm.getSafeText(), token, newPassword, new AsyncCallback<User>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          changePassword.setEnabled(true);
-          markErrorBlur(changePassword, "Can't communicate with server - check network connection.");
-        }
+      String safeText = userIDForm.getSafeText();
+      if (safeText.length() == OLD_NETPROF_LEN) safeText += "_"; // legacy user ids can be 4 but domino requires length 5
+      service.changePasswordWithToken(safeText, token, newPassword,
+          new AsyncCallback<ChoosePasswordResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              changePassword.setEnabled(true);
+              markErrorBlur(changePassword, NO_SERVER, Placement.LEFT);
+            }
 
-        @Override
-        public void onSuccess(User result) {
-          if (result == null) {
-            markErrorBlur(changePassword, PASSWORD_HAS_ALREADY_BEEN_CHANGED);
-            changePassword.setEnabled(true);
-          } else {
-            markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
-            reloadPageInThreeSeconds(result);
-          }
-        }
-      });
+            @Override
+            public void onSuccess(ChoosePasswordResult result) {
+              ChoosePasswordResult.ResultType resultType = result.getResultType();
+              if (resultType == ChoosePasswordResult.ResultType.AlreadySet) {
+                markErrorBlur(changePassword, PASSWORD_HAS_ALREADY_BEEN_CHANGED, Placement.TOP);
+                changePassword.setEnabled(true);
+              } else if (resultType == ChoosePasswordResult.ResultType.NotExists) {
+                markErrorBlur(changePassword, "No user with this id.", Placement.TOP);
+                changePassword.setEnabled(true);
+              } else if (resultType == ChoosePasswordResult.ResultType.Success) {
+                markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.TOP);
+                reloadPageInThreeSeconds(result.getUser());
+              }
+            }
+          });
     }
   }
 
@@ -235,7 +238,7 @@ public class ResetPassword extends UserDialog {
         reloadPage(user);
       }
     };
-    t.schedule(2000);
+    t.schedule(DELAY_MILLIS);
   }
 
   private void reloadPage(User user) {

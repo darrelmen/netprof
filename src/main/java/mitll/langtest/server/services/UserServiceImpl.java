@@ -42,10 +42,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,6 +50,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
+import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.AlreadySet;
+import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.NotExists;
+import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.Success;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 
 @SuppressWarnings("serial")
@@ -255,22 +255,22 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
   @Override
-  public User changePasswordWithToken(String userId, String userKey, String newPassword) {
+  public ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
-    logger.info("changePasswordWithToken - userId " + userId + " key " + userKey + " pass length " + newPassword.length());
+    logger.info("changePasswordWithToken - userId '" + userId + "' key " + userKey + " pass length " + newPassword.length());
     boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
 
+    User userByID = getUserByID(userId);
     if (result) {
-      User userByID = getUserByID(userId);
       if (userByID != null) {
         HttpSession currentSession = getCurrentSession();
         if (currentSession == null) currentSession = createSession();
         securityManager.setSessionUser(currentSession, userByID);
       }
-      return userByID;
+      return new ChoosePasswordResult(userByID, userByID == null ? NotExists : Success);
     } else {
       //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
-      return null;
+      return new ChoosePasswordResult(null, userByID == null ? NotExists : AlreadySet);
     }
   }
 
@@ -311,7 +311,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
     return
         userWhereResetKey != null &&
-        (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
+            (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
 
   }
 
