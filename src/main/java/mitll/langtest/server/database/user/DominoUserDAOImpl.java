@@ -98,6 +98,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public static final String NETPROF = DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
+  public static final String LYDIA_01 = "Lydia01";
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -742,6 +743,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is " + gender);
     }
 
+    if (userID.equals(LYDIA_01) && gender != mitll.hlt.domino.shared.model.user.User.Gender.Female) {
+      logger.warn("\n\n\ntoClientUserDetail make sure " + userID + " is marked as a female! In english she was marked as a male.\n\n\n");
+      gender = mitll.hlt.domino.shared.model.user.User.Gender.Female;
+    }
+
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         userID,
         first,
@@ -1147,9 +1153,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return miniUser;
   }
 
+/*
   private boolean isMale(DBUser dominoUser) {
     return isGenderMale(dominoUser.getGender());
   }
+*/
 
   private boolean isGenderMale(mitll.hlt.domino.shared.model.user.User.Gender dominoUser) {
     return dominoUser == DMALE;

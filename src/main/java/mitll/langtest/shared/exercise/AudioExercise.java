@@ -296,7 +296,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   private void sortByAge(List<AudioAttribute> males) {
-    males.sort((o1, o2) -> Integer.compare(o1.getUser().getAge(), o2.getUser().getAge()));
+    males.sort(Comparator.comparingInt(o -> o.getUser().getAge()));
   }
 
   /**
@@ -503,7 +503,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
-    maleUsers.sort((o1, o2) -> Integer.compare(o1.getAge(), o2.getAge()));
+    maleUsers.sort(Comparator.comparingInt(MiniUser::getAge));
     return maleUsers;
   }
 
@@ -525,7 +525,7 @@ public class AudioExercise extends ExerciseShell {
    * @param fieldToAnnotation
    * @see Exercise#Exercise
    */
-  protected void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
+  void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
     this.fieldToAnnotation = fieldToAnnotation;
   }
 

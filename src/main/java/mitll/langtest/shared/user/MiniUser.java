@@ -56,6 +56,14 @@ public class MiniUser extends FirstLastUser {
   public MiniUser() {
   } // for serialization
 
+  /**
+   * @see mitll.langtest.server.database.user.BaseUserDAO#DEFAULT_USER
+   * @param id
+   * @param age
+   * @param isMale
+   * @param userID
+   * @param isAdmin
+   */
   public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
     super(id);
     this.age = age;
