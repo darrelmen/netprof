@@ -77,7 +77,7 @@ import static mitll.langtest.shared.user.Kind.*;
 /**
  * Store user info in domino tables.
  */
-public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
+public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
 
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
@@ -98,7 +98,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public static final String NETPROF = DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
-  public static final String LYDIA_01 = "Lydia01";
+  private static final String LYDIA_01 = "Lydia01";
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -296,6 +296,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
+  @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
     invalidateCache();
 
@@ -312,7 +313,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
       if (clientUserDetail.getGender() == UNSPECIFIED) {
-        logger.info("addAndGet note : " + clientUserDetail.getUserId() + " gender is " + clientUserDetail.getGender());
+//        logger.info("addAndGet note : " + clientUserDetail.getUserId() + " gender is " + clientUserDetail.getGender());
       }
       return clientUserDetail;
     }
@@ -709,7 +710,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return the domino user
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
-  public ClientUserDetail toClientUserDetail(User user, String projectName,  Group group) {
+  @Override
+  public ClientUserDetail toClientUserDetail(User user, String projectName, Group group) {
     String first = user.getFirst();
     String userID = user.getUserID();
     if (userID.isEmpty()) {
@@ -745,7 +747,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     if (userID.equals(LYDIA_01) && gender != mitll.hlt.domino.shared.model.user.User.Gender.Female) {
       logger.warn("\n\n\ntoClientUserDetail make sure " + userID + " is marked as a female! In english she was marked as a male.\n\n\n");
-      gender = mitll.hlt.domino.shared.model.user.User.Gender.Female;
+      //gender = mitll.hlt.domino.shared.model.user.User.Gender.Female;
     }
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
@@ -1231,13 +1233,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       dbUser.setFirstName(toUpdate.getFirst());
       dbUser.setLastName(toUpdate.getLast());
       dbUser.setAffiliation(toUpdate.getAffiliation());
-      MiniUser.Gender realGender = toUpdate.getRealGender();
-
-      mitll.hlt.domino.shared.model.user.User.Gender gender =
-          mitll.hlt.domino.shared.model.user.User.Gender.valueOf(realGender.name());
-      dbUser.setGender(gender);
+      setGender(toUpdate, dbUser);
       updateUser(dbUser);
     }
+  }
+
+  private void setGender(User toUpdate, DBUser dbUser) {
+    MiniUser.Gender realGender = toUpdate.getRealGender();
+
+    mitll.hlt.domino.shared.model.user.User.Gender gender =
+        mitll.hlt.domino.shared.model.user.User.Gender.valueOf(realGender.name());
+    dbUser.setGender(gender);
   }
 
   @Override

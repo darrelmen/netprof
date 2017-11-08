@@ -497,11 +497,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     }
   }
 
+  /**
+   * Remember to convert the path (which might be .wav) to a browser dependent format - IE can't do ogg, only mp3.
+   * @param path
+   */
   public void loadAudio(String path) {
     if (DEBUG) logger.info("playAudio - loadAudio " + path);
     String fixedPath = rememberAudio(path);
     if (isPlaying()) pause();
-    startSong(path);
+    startSong(fixedPath);
     if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
   }
 
@@ -509,6 +513,11 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);
+/*    if (path != null && path.endsWith(".wav")) {
+      logger.info("convert" +
+          "\nfrom " + path +
+          "\nto   " + currentPath);
+    }*/
     return currentPath;
   }
 

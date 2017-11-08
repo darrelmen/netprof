@@ -126,11 +126,17 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyResult
    */
-  public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt, String transcript) {
-    Integer realExID = exToInt.get(shared.getOldExID());
-
-    if (realExID == null) return null;
-    else {
+  public SlickResult toSlick(Result shared,
+                             int projid,
+                            // Map<String, Integer> exToInt,
+                             Integer realExID,
+                             String transcript) {
+//    Integer realExID = exToInt.get(shared.getOldExID());
+//
+//    if (realExID == null) {
+//      return null;
+//    }
+//    else {
       String model = shared.getModel();
       if (model == null) model = "";
       return new SlickResult(-1,
@@ -158,7 +164,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           projid,
           model
       );
-    }
+//    }
   }
 
   private String checkNull(String deviceType) {

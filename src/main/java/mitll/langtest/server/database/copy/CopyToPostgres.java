@@ -309,7 +309,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild);
 
       SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
-      copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
+      copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(), db.getUserDAO().getDefaultUser());
 
       logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
@@ -701,12 +701,13 @@ public class CopyToPostgres<T extends CommonShell> {
 
 
   /**
+   * Make sure all results are copied, even when we have missing user id or exercise references.
+   *
    * @param slickResultDAO
    * @param oldToNewUser
    * @param projid
    * @param exToID
    * @param resultDAO
-   * @paramx db
    * @see #copyOneConfig
    */
   private void copyResult(
@@ -715,66 +716,63 @@ public class CopyToPostgres<T extends CommonShell> {
       int projid,
       Map<String, Integer> exToID,
       ResultDAO resultDAO,
-      Map<Integer, String> idToFL) {
+      Map<Integer, String> idToFL,
+      int unknownExerciseID,
+      int unknownUserID) {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
     logger.info("copyResult " + projid + " : copying " + results.size() + " results...");
 
-    int missing = 0;
+  //  int missing = 0;
     int missing2 = 0;
 
-//    ExerciseDAO<CommonExercise> exerciseDAO = db.getExerciseDAO(projid);
-//    Map<Integer, String> idToFL = Collections.emptyMap();
-//    if (exerciseDAO == null) {
-//      logger.error("huh? no project " + projid);
-//    } else {
-//      idToFL = exerciseDAO.getIDToFL(projid);
-//    }
-    //Map<Integer, String> idToFL = exerciseDAO.getIDToFL(projid);
+    logger.info("copyResult id->fl has " + idToFL.size() + " items");
 
-    logger.info("id-fl has " + idToFL.size() + " items");
-
-    Set<Integer> userids = new HashSet<>();
+    Set<Integer> missingUserIDs = new HashSet<>();
 
     for (Result result : results) {
       int oldUserID = result.getUserid();
       Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
-        boolean add = userids.add(oldUserID);
+        boolean add = missingUserIDs.add(oldUserID);
         if (add) {
           logger.error("copyResult no user " + oldUserID);
         }
-      } else {
-        result.setUserID(userID);
-        Integer realExID = exToID.get(result.getOldExID());
-
-        if (realExID == null) {
-          missing2++;
-        } else {
-          // TODO : don't - this is really slow - since every call hits exercise table with a select
-
-          //    CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
-          //   String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
-          String transcript = idToFL.get(realExID);
-          SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
-          if (e == null) {
-            if (missing < 10 || true) logger.warn("missing exid ref " + result.getOldExID()  + " so skipping " + result);
-            missing++;
-          } else {
-            bulk.add(e);
-            if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
-          }
-        }
+        userID = unknownUserID;
       }
+
+      result.setUserID(userID);
+      Integer realExID = exToID.get(result.getOldExID());
+
+      if (realExID == null) {
+        missing2++;
+        realExID = unknownExerciseID;
+      }
+      //else {
+      String transcript = idToFL.get(realExID);
+
+      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript == null?"no transcript found":transcript);
+//        if (e == null) {
+//          if (missing < 10 || true) logger.warn("missing exid ref " + result.getOldExID() + " so skipping " + result);
+//          missing++;
+//        } else {
+          bulk.add(e);
+          if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
+     //   }
+      //}
+
     }
-    if (missing > 0) {
-      logger.warn("skipped " + missing + "/" + results.size() +
-          "  results b/c of exercise id fk missing");
-    }
+//    if (missing > 0) {
+//      logger.warn("skipped " + missing + "/" + results.size() +
+//          "  results b/c of exercise id fk missing");
+//    }
     if (missing2 > 0) {
       logger.warn("skipped " + missing2 + "/" + results.size() +
-          "  results b/c of exercise id fk missing");
+          "  results b/c of exercise id fk missing (old->new ids)");
+    }
+    if (!missingUserIDs.isEmpty()) {
+      logger.warn("found " + missingUserIDs.size() + " missing users " + missingUserIDs);
     }
     logger.debug("adding " + bulk.size() + " results...");
     slickResultDAO.addBulk(bulk);
@@ -860,17 +858,15 @@ public class CopyToPostgres<T extends CommonShell> {
             String bestAudio = bestAudios[1];
             bestAudio = "bestAudio" + bestAudio;
             audioID = pathToAudioID.get(bestAudio);
-         //   if (audioID == null) logger.warn("copyRefResult : can't find '" + bestAudio + "'");
-          }
-          else {
+            //   if (audioID == null) logger.warn("copyRefResult : can't find '" + bestAudio + "'");
+          } else {
             audioID = pathToAudioID.get(answer);
-            logger.info("path " + answer + " audio id "+ audioID);
+            logger.info("path " + answer + " audio id " + audioID);
           }
 
           if (audioID == null) {
             logger.warn("copyRefResult : can't find audio from audio table at '" + answer + "'");
-          }
-          else {
+          } else {
             bulk.add(dao.toSlick(projid, result, audioID));
           }
 
@@ -880,7 +876,7 @@ public class CopyToPostgres<T extends CommonShell> {
     dao.addBulk(bulk);
     if (missing > 0) logger.warn("copyRefResult missing " + missing + " due to missing ex id fk");
 
-    logger.info("copyRefResult added " + bulk.size() + " and now has " +dao.getNumResults());
+    logger.info("copyRefResult added " + bulk.size() + " and now has " + dao.getNumResults());
   }
 
   /**
@@ -962,7 +958,6 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Drop all doesn't require mongo connection, etc.
-   *
    */
   private static void doDropAll() {
     DatabaseImpl database = null;

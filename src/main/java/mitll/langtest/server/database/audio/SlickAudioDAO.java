@@ -247,7 +247,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
-      logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exids.size());
+      logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() +
+          " attr for " + exids.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
@@ -255,7 +256,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
     }
     if (copy.size() != exids.size()) {
-      logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " + copy.size());
+      logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
+          copy.size());
     }
     return copy;
   }
@@ -528,7 +530,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.transcript(),
         s.actualpath(),
         s.dnr(),
-        s.resultid(), realGender);
+        s.resultid(),
+        realGender);
   }
 
   private int c = 0;

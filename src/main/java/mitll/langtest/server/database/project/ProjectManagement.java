@@ -67,12 +67,6 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * JUST FOR TESTING
-   *
-   * @see #populateProjects
-   */
-  //private static final boolean DEBUG_ONE_PROJECT = false;
-  /**
-   * JUST FOR TESTING
    */
   private static final String LANG_TO_LOAD = "";
   /**
@@ -189,6 +183,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void configureProjects() {
     getProjects().forEach(project -> configureProject(project, false, false));
+    logger.info("configureProjects " +getProjects().size()+  " configured.");
     logMemory();
   }
 
@@ -207,6 +202,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProjects
    */
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
+    logger.info("configure START " +project.getID() +  "/" +getProjects().size()+  " : " + project.getLanguage());
+    long then = System.currentTimeMillis();
     boolean skipRetired = project.isRetired() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (!forceReload) {
@@ -275,6 +272,9 @@ public class ProjectManagement implements IProjectManagement {
       //   db.getUserExerciseDAO().useExToPhones();
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
+
+      logger.info("configure END " +project.getID() +  " " + project.getLanguage() + " in " +(System.currentTimeMillis()-then) + " millis.");
+
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
@@ -305,13 +305,12 @@ public class ProjectManagement implements IProjectManagement {
    *
    * @return
    * @see DatabaseImpl#makeDAO
+   * @see #addSingleProject
    */
   public ExerciseDAO<CommonExercise> setDependencies() {
-    Project project = idToProject.get(IMPORT_PROJECT_ID);
-    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    logger.info("setDependencies " + project + " : " + exerciseDAO);
+    ExerciseDAO<CommonExercise> exerciseDAO = idToProject.get(IMPORT_PROJECT_ID).getExerciseDAO();
+    //logger.info("setDependencies " + project + " : " + exerciseDAO);
     setDependencies(exerciseDAO, -1, false);
-
     return exerciseDAO;
   }
 

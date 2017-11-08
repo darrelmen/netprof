@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
@@ -42,6 +43,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.PronunciationLookup;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -73,7 +75,7 @@ public class SlickUserExerciseDAO
   private static final String DEFAULT_FOR_EMPTY = ANY;
   //  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
-  public static final String HYDRA = "hydra";
+  private static final String HYDRA = "hydra";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -869,9 +871,11 @@ public class SlickUserExerciseDAO
   }
 
   private CommonExercise templateExercise;
+  private int unknownExerciseID;
 
   /**
    * @param projID
+   * @see DatabaseImpl#initializeDAOs
    */
   public int ensureTemplateExercise(int projID) {
     int id = 0;
@@ -888,6 +892,7 @@ public class SlickUserExerciseDAO
       unknownExercise = again.iterator().next();
       id = unknownExercise.id();
     }
+    unknownExerciseID =id;
     return id;
   }
 
@@ -1246,5 +1251,10 @@ public class SlickUserExerciseDAO
 
   public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
     return dao.getLegacyToExercise(projectid);
+  }
+
+  @Override
+  public int getUnknownExerciseID() {
+    return unknownExerciseID;
   }
 }

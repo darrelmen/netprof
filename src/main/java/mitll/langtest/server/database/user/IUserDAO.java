@@ -203,6 +203,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   int getBeforeLoginUser();
 
   int getDefaultUser();
+  int getDefaultMale();
+  int getDefaultFemale();
 
   int getImportUser();
 

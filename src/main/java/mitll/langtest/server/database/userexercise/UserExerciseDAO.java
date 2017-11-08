@@ -659,6 +659,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return 0;
   }
 
+  @Override
+  public int getUnknownExerciseID() {
+    return 0;
+  }
+
   private void addColumnToTable(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, TRANSLITERATION);
   }

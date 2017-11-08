@@ -91,4 +91,6 @@ public interface IUserExerciseDAO extends IDAO {
   //void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones);
 
   int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
+
+  int getUnknownExerciseID();
 }

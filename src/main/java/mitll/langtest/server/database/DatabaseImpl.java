@@ -705,7 +705,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 //          logger.info("Got " + lessonPlanFile);
           // TODO : get media directory from properties
           // TODO : get install path directory from properties
-          //numExercises =
           readAMASExercises(lessonPlanFile, "", "", isURL);
         } else {
           //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
@@ -725,10 +724,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
               userExerciseDAO.setExerciseDAO(exerciseDAO);
             }*/
           }
-
-          // TODO
-          // TODO : will this break import???
-          // TODO
 
           if (serverProps.useH2()) {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
