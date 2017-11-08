@@ -557,9 +557,10 @@ public class CopyToPostgres<T extends CommonShell> {
     if (c > 0) logger.warn("missing result id fks " + c + " : " + missingrids);
     if (d > 0) logger.warn("missing word   id fks " + d + " : " + missingwids);
 
+    long then = System.currentTimeMillis();
     logger.info("copyPhone adding " + bulk.size());
     slickPhoneAO.addBulk(bulk);
-    logger.info("copyPhone added  " + slickPhoneAO.getNumRows());
+    logger.info("copyPhone added  " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis()-then) + " millis.");
   }
 
   private final Set<Long> missingRIDs = new HashSet<>();

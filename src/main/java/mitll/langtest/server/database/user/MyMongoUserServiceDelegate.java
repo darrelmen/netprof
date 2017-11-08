@@ -75,8 +75,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
   }
 
   private String encodePass(String encodedCurrPass, String txtPass, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
-    byte[] salt = extractSalt(encodedCurrPass, pEnc);
-    return encodePass(txtPass, salt, pEnc);
+    return encodePass(txtPass, extractSalt(encodedCurrPass, pEnc), pEnc);
   }
 
   private static final String PASS_PREFIX = "{SSHA}";

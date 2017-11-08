@@ -167,8 +167,13 @@ class CheckLTS {
 
           // so we've checked with LTS - why first ?
           // but if it's not in LTS, check in dict
+          boolean legitLTS = isLegitLTS(process);
+          if (!legitLTS) { // deal with upper case better
+            process = (!isEmptyLTS) ? lts.process(token.toLowerCase()) : null;
+            legitLTS = isLegitLTS(process);
+          }
           if (!translitOk &&
-              !isLegitLTS(process)
+              !legitLTS
           /*    (process == null || process.length == 0 || process[0].length == 0 ||
               process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))
           */) {
@@ -195,8 +200,17 @@ class CheckLTS {
                 logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
                     " : '" + token + "' hash " + token.hashCode() +
                     " is invalid in '" + foreignLanguagePhrase +
-                    "' and not in dictionary of size " + htkDictionary.size()
+                    "' and not in dictionary of size " + htkDictionary.size() + " translitOk " + translitOk + " legitLTS " + legitLTS
                 );
+    /*            if (process != null) {
+                  logger.info("2 " +token + " checkLTS in dict for " + process.length);
+                  if (process.length > 0) {
+                      logger.info("2 in dict for " + process[0].length + " : " + (StringUtils.join(process[0], "-")));
+                    if (process[0].length > 0) {
+                       logger.info("2 in dict for " + process[0][0].length());
+                    }
+                  }
+                }*/
               }
               else if (DEBUG) {
                 logger.debug("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
@@ -271,8 +285,11 @@ class CheckLTS {
   }
 
   private boolean isLegitLTS(String[][] process) {
-    return !(process == null || process.length == 0 || process[0].length == 0 ||
-        process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
+    return !(process == null ||
+        process.length == 0 ||
+        process[0].length == 0 ||
+        process[0][0].length() == 0 ||
+        (StringUtils.join(process[0], "-")).contains("#"));
   }
 
   //private int multiple = 0;

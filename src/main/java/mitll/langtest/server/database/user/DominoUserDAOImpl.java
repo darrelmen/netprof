@@ -573,13 +573,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return getUser(loggedInUser);
   }
 
-/*
-  private void getUserFields() {
-    delegate.getUserFields();
-  }
-*/
+  private Map<String,Map<String,Boolean>> dominoToEncodedToMatch= new HashMap<>();
 
   /**
+   * Remember pair of user password and encoded password and their match result to speed up this call.
+   *
    * @param userID
    * @param encodedPassword
    * @return
@@ -591,7 +589,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     String dominoPassword = getUserCredentials(userID);
 
     long then = System.currentTimeMillis();
+
+    Map<String, Boolean> encodedToMatch = dominoToEncodedToMatch.computeIfAbsent(dominoPassword, k -> new HashMap<>());
+    Boolean isRememberedMatch = encodedToMatch.get(encodedPassword);
+
+    if (isRememberedMatch != null) {
+      logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
+      return isRememberedMatch;
+    }
+
     boolean match = myDelegate.isMatch(dominoPassword, encodedPassword);
+
+    encodedToMatch.put(encodedPassword, match);
+//    logger.info("isMatchingPassword remember match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
+
     long now = System.currentTimeMillis();
 
     long diff = now - then;

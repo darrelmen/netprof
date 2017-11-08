@@ -249,14 +249,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
 
     if (hasModel) {
-      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids");
+      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
 
       if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
 
-      for (Integer audioID : audioIDs) {
-        // do we have alignment for this audio in the map
-        recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment);
-      }
+      audioIDs.forEach(audioID ->
+          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment));
+
     } else {
       logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
     }
@@ -272,7 +271,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param cachedResult
    * @param idToAlignment
    */
-  private void recalcOneOrGetCached(int projid, Integer audioID,
+  private void recalcOneOrGetCached(int projid,
+                                    Integer audioID,
                                     AudioFileHelper audioFileHelper,
                                     int userIDFromSession,
                                     ISlimResult cachedResult,

@@ -174,15 +174,16 @@ public class SlickUserExerciseDAO
     return toSlick(shared, isOverride, shared.getProjectID(), BaseUserDAO.DEFAULT_USER_ID, isContext, typeOrder);
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
+   * Deals with &quot; in the fl text.
+   *
    * @param shared
    * @param isOverride
    * @param isContext
    * @param typeOrder
    * @return
-   * @paramx isPredef
    * @see #toSlick
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
    */
@@ -218,13 +219,20 @@ public class SlickUserExerciseDAO
 //        " = '" + firstType + "' " +
 //        "" + second + " = '" + secondType + "'");
 
+    String foreignLanguage = shared.getForeignLanguage();
+    if (foreignLanguage.contains("&quot;")) {
+      String convert = foreignLanguage.replaceAll("&quot;","\"");
+      //logger.info("toSlick : convert\nfrom "+ foreignLanguage + "\nto  " + convert);
+      foreignLanguage = convert;
+    }
+
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
         shared.getEnglish(),
         shared.getMeaning(),
-        shared.getForeignLanguage(),
+        foreignLanguage,
         shared.getAltFL(),
         shared.getTransliteration(),
         isOverride,

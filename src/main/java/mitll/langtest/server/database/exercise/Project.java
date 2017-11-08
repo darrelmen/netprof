@@ -314,7 +314,7 @@ public class Project implements PronunciationLookup {
  private Map<String, String> propCache = new HashMap<>();
 
   public void clearPropCache() {
-    logger.debug("clear project #" + getID());
+//    logger.debug("clear project #" + getID());
     propCache.clear();
   }
 
