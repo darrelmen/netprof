@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -70,8 +71,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     if (isLTR) {
       south.addStyleName("floatLeft");
     }
-    south.getElement().getStyle().setClear(Style.Clear.BOTH);
-    south.getElement().setId("Highlight_South_" + id);
+    Element element = south.getElement();
+    Style style = element.getStyle();
+    style.setClear(Style.Clear.BOTH);
+    style.setHeight(20, Style.Unit.PX);
+    element.setId("Highlight_South_" + id);
   }
 
   private void configureNorth(int id, DivWidget north, boolean isLTR, InlineHTML span) {

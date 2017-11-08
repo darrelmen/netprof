@@ -518,6 +518,7 @@ public class ClickableWords<T extends CommonExercise> {
    * TODO : Not sure why we're doing this...
    *
    * First is russian accent mark.
+   * russian hyphen
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
    * reverse solidus
@@ -531,6 +532,6 @@ public class ClickableWords<T extends CommonExercise> {
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
        // .replaceAll("\\u00E9", "\\u0435")
-        .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u003F\\u00BF\\u002E\\u002C\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

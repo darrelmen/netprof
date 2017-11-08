@@ -1242,13 +1242,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private DivWidget getRowWidget() {
-/*
-    DivWidget rowWidget = getHorizDiv();
-    rowWidget.addStyleName("bottomFiveMargin");
-    rowWidget.addStyleName("floatLeft");
-    rowWidget.setWidth("100%");
-    return rowWidget;
-*/
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("scoringRowStyle");
     return flContainer;
@@ -1450,7 +1443,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param annotationHelper
    * @param isRTL
    * @return
-   * @paramx label
    * @see #getFLEntry
    * @see #addAltFL
    * @see #addContextTranslation
@@ -1480,7 +1472,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param isRTL
    * @return
    * @paramx label
-   * @seex #makeFastAndSlowAudio(String)
    * @see #getEntry
    */
   private DivWidget getEntry(final String field,
@@ -1525,8 +1516,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       logger = Logger.getLogger("TwoColumnExercisePanel");
     }
     T exercise = this.exercise;
-    CommentBox commentBox =
-        new CommentBox(this.exercise.getID(), controller,
+    CommentBox commentBox = new CommentBox(this.exercise.getID(), controller,
             annotationHelper, exercise.getMutableAnnotation(), true);
     comments.add(commentBox);
     return commentBox;

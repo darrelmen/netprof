@@ -154,11 +154,13 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     Map<MiniUser, List<AudioAttribute>> femalesMap =
         exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
-/*    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
-        "\n\tmale   " + isMale +
-        "\n\tis reg " + isReg +
-        "\n\tmale map " + malesMap.size() +
-        "\n\tfemale map " + femalesMap.size());*/
+/*
+    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
+        "\n\tmale       " + isMale +
+        "\n\tis reg     " + isReg +
+        "\n\tmale map   " + malesMap.size() +
+        "\n\tfemale map " + femalesMap.size());
+        */
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
