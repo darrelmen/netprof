@@ -131,7 +131,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    viewToLink.put(VIEWS.RECORD,  getChoice(recnav, VIEWS.RECORD));
+    viewToLink.put(VIEWS.RECORD, getChoice(recnav, VIEWS.RECORD));
     viewToLink.put(VIEWS.CONTEXT, getChoice(recnav, VIEWS.CONTEXT));
     return recnav;
   }
@@ -195,16 +195,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     {
       cog = new Dropdown("");
       cog.setIcon(IconType.COG);
-      userMenu.getCogMenuChoicesForAdmin().forEach(lt -> {
-        NavLink link = lt.makeNewLink();
-        cog.add(link);
-      });
+
+      userMenu.getCogMenuChoicesForAdmin().forEach(lt -> cog.add(lt.makeNewLink()));
 
       hasProjectChoices = userMenu.getProjectSpecificChoices();
-      hasProjectChoices.forEach(lt -> {
-        NavLink link = lt.makeNewLink();
-        cog.add(link);
-      });
+      hasProjectChoices.forEach(lt -> cog.add(lt.makeNewLink()));
+
       rnav.add(cog);
     }
 
@@ -367,9 +363,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
-    for (Widget choice : choices) choice.setVisible(val);
-    boolean admin = isAdmin();
-    cog.setVisible(admin);
+    choices.forEach(choice->choice.setVisible(val));
+    cog.setVisible(isAdmin());
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
     //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);

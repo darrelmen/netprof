@@ -445,7 +445,6 @@ public class RestUserManagement {
                       String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
-
     //  String passwordH = request.getHeader(PASSWORD_H);
 /*
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
@@ -466,7 +465,6 @@ public class RestUserManagement {
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
     }
-
     if (existingUser == null) {
       User checkExisting = existingUser;// kinda stupid but here we are
 

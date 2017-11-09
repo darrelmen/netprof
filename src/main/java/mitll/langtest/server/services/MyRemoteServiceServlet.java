@@ -116,14 +116,16 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @return
    * @throws DominoSessionException
    */
-  private Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
+  protected Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {
-      logger.error("no user in session?");
+      logger.error("getPermissions : no user in session?");
       throw new DominoSessionException();
     }
     boolean enabled = userFromSession.isEnabled();
     boolean isApprovedForNetprof = userFromSession.isHasAppPermission();
+    if (!enabled) logger.info("user " +userIDFromSessionOrDB + " not enabled");
+    if (!isApprovedForNetprof) logger.info("user " +userIDFromSessionOrDB + " not approved to use netprof");
     return enabled && isApprovedForNetprof ? userFromSession.getPermissions() : Collections.emptyList();
   }
 

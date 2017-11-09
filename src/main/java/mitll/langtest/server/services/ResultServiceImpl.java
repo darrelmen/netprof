@@ -107,9 +107,11 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
   @Override
   public int getNumResults() throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
       return db.getResultDAO().getNumResults(getProjectIDFromUser());
     } else {
+      logger.info("user " + userIDFromSessionOrDB + " only has " + getPermissions(userIDFromSessionOrDB));
       throw getRestricted("getting number of results");
     }
   }
@@ -283,8 +285,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
       if (userid > -1) { // asking for userid
         // make trie from results
-
         logger.debug("making trie for userid " + userid);
+
+        // TODO : dude this doesn't scale - what if have to walk through 100K items?
 
         trie = new Trie<>();
         trie.startMakingNodes();

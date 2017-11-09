@@ -149,7 +149,7 @@ public class MessageHelper {
       logOnServer("Refreshing token ! Original message\n" + msg, throwable, false);
       makeInternalDialog("", DDialogType.RefreshToken, true);
     } else if (throwable instanceof RestrictedOperationException) {
-      makeInternalDialog("Operation not Permitted!", DDialogType.NonFatalError, true);
+      makeInternalDialog("Operation not Permitted! (" +msg+ ")", DDialogType.NonFatalError, true);
     } else if (throwable instanceof IncompatibleRemoteServiceException) {
       makeInternalDialog("Your version of Domino is out of date. Please click refresh on your browser to get the latest version.<br/><br/>",
           DDialogType.NonFatalError, false);

@@ -152,7 +152,7 @@ public class UserManagement {
       for (User u : users) {
         Integer numResults = idToCount.getIdToCount().get(u.getID());
         if (numResults != null) {
-          u.setNumResults(numResults);
+          //u.setNumResults(numResults);
 
           //    if (userToRate.containsKey(u.getID())) {
           //     u.setRate(userToRate.get(u.getID()));

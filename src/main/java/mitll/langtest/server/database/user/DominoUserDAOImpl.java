@@ -835,6 +835,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
+    if (user.isAdmin()) permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     user.setPermissions(permissionSet);
 
 //    logger.info("\ttoUser return " + user);
@@ -912,7 +913,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
   @NotNull
   private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<Kind> seen = new HashSet<>();
-
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
       Kind kind = getKindForRole(role);

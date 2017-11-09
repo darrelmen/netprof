@@ -36,11 +36,11 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.user.MiniUser;
 
-public class UserTitle {
+class UserTitle {
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 
-  public String getUserTitle(int me, MiniUser user) {
+  String getUserTitle(int me, MiniUser user) {
     long id = user.getID();
     if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
     else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
