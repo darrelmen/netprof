@@ -338,19 +338,19 @@ public class SignUpForm extends UserDialog implements SignUp {
       //    logger.info("\tonUserIDBlur checking " + text);
 
       if (hasSpaces(text)) {
-        service.getUserByID(normalizeSpaces(text), new AsyncCallback<User>() {
+        service.isKnownUser(normalizeSpaces(text), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\tgot FAILURE on userExists " + text);
           }
 
           @Override
-          public void onSuccess(User result) {
-            if (result == null) {
-              //          logger.warning("got no user for " + text);
-              markErrorBlurNoGrab(signUpUser, NO_SPACES);
-            } else {
+          public void onSuccess(Boolean found) {
+            if (found) {
               reallyOnUserIDBlur(text);
+              //          logger.warning("got no user for " + text);
+            } else {
+              markErrorBlurNoGrab(signUpUser, NO_SPACES);
             }
           }
         });
@@ -361,38 +361,15 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reallyOnUserIDBlur(String uidVal) {
-//    logger.info("reallyOnUserIDBlur user id blur " + uidVal);
-/*    if (uidVal.length() < MIN_LENGTH_USER_ID) {
-      logger.info("markErrorBlurNoGrab user id blur " + uidVal);
-
-      markErrorBlurNoGrab(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
-    } else if (isValidUserID(uidVal)) {
-      service.getUserByID(uidVal, new AsyncCallback<User>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          logger.warning("\tgot FAILURE on userExists " + uidVal);
-        }
-
-        @Override
-        public void onSuccess(User result) {
-          boolean isNewUser = result == null;
-          setSignUpButtonTitle(isNewUser);
-          setNewUserPrompt(isNewUser);
-        }
-      });
-    } else {
-      markErrorBlurNoGrab(signUpUser, USER_ID_BAD);
-    }*/
-
-    service.getUserByID(uidVal, new AsyncCallback<User>() {
+    service.isKnownUser(uidVal, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + uidVal);
       }
 
       @Override
-      public void onSuccess(User result) {
-        boolean isNewUser = result == null;
+      public void onSuccess(Boolean found) {
+        boolean isNewUser = !found;
         setSignUpButtonTitle(isNewUser);
         setNewUserPrompt(isNewUser);
       }
@@ -501,18 +478,15 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpClickHandler
    */
   private void signUpNewOrAddInfoToOld(final String userID) {
-    service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
+    service.isKnownUser(signUpUser.getSafeText(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
 
       }
 
       @Override
-      public void onSuccess(User result) {
-        if (result == null) {
-          //  logger.info("valid " + signUpUser.getSafeText());
-          checkForm(userID);
-        } else {
+      public void onSuccess(Boolean found) {
+        if (found) {
           // existing legacy users can have shorter userids than
           String fUserID = userID.trim();
           if (hasSpaces(fUserID)) {
@@ -520,6 +494,8 @@ public class SignUpForm extends UserDialog implements SignUp {
           } else {
             isFormValidLongUserID(fUserID);
           }
+        } else {
+          checkForm(userID);
         }
       }
     });
@@ -556,19 +532,19 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
-    service.getUserByID(testUserID, new AsyncCallback<User>() {
+    service.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
       }
 
       @Override
-      public void onSuccess(User result) {
-        if (result != null) {
-          logger.info("try again with " + testUserID);
+      public void onSuccess(Boolean result) {
+        if (result) {
+          logger.info("checkLegacyUserWithSpaces try again with " + testUserID);
           isFormValid(testUserID);
         } else {
-          logger.info("nobody with " + testUserID);
+          logger.info("checkLegacyUserWithSpaces nobody with " + testUserID);
           isFormValid(userID);
         }
       }
@@ -577,19 +553,19 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpacesLong(String userID) {
     String testUserID = normalizeSpaces(userID);
-    service.getUserByID(testUserID, new AsyncCallback<User>() {
+    service.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
       }
 
       @Override
-      public void onSuccess(User result) {
-        if (result != null) {
-          logger.info("try again with " + testUserID);
+      public void onSuccess(Boolean result) {
+        if (result) {
+          logger.info("checkLegacyUserWithSpacesLong try again with " + testUserID);
           isFormValidLongUserID(testUserID);
         } else {
-          logger.info("nobody with " + testUserID);
+          logger.info("checkLegacyUserWithSpacesLong nobody with " + testUserID);
           isFormValidLongUserID(userID);
         }
       }
@@ -613,7 +589,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       return false;
     } else {
       int minLengthUserId = allowShort ? SHORT_USER_ID : MIN_LENGTH_USER_ID;
-    //  logger.info("isFormValid : min length is " + minLengthUserId);
+      //  logger.info("isFormValid : min length is " + minLengthUserId);
       if (userID.length() < minLengthUserId) {
         eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
         markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);

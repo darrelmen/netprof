@@ -32,31 +32,10 @@
 
 package mitll.langtest.client.contextPractice;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.RadioButton;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.TooltipHelper;
+import com.google.gwt.user.client.ui.HasWidgets;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.SimpleColumnChart;
-import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.answer.AudioAnswer;
-
-import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

@@ -1,6 +1,7 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
@@ -10,20 +11,21 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
  */
 public class AnnotationHelper implements CommentAnnotator {
   private final Services controller;
-  //private final int exid;
+  MessageHelper messageHelper;
 
   /**
-   * @see TwoColumnExercisePanel#TwoColumnExercisePanel
    * @param controller
    * @paramx exid
+   * @see TwoColumnExercisePanel#TwoColumnExercisePanel
    */
-  public AnnotationHelper(Services controller) {
+  public AnnotationHelper(Services controller, MessageHelper messageHelper) {
     this.controller = controller;
+    this.messageHelper = messageHelper;
   }
 
   /**
    * @param exid
-   * @param field  @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+   * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    * @param commentToPost
    */
   public void addIncorrectComment(int exid, final String field, final String commentToPost) {
@@ -39,6 +41,7 @@ public class AnnotationHelper implements CommentAnnotator {
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            messageHelper.handleNonFatalError("adding annotation", caught);
           }
 
           @Override

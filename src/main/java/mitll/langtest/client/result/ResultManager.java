@@ -318,7 +318,7 @@ public class ResultManager extends PagerTable {
               public void onFailure(Throwable caught) {
                 // Window.alert("Can't contact server.");
                 logger.warning("Got  " + caught);
-                controller.getMessageHelper().handleNonFatalError("getting recordings", caught);
+                controller.handleNonFatalError("getting recordings", caught);
               }
 
               @Override

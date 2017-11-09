@@ -82,6 +82,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) {
+
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);

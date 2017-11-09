@@ -233,7 +233,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
               recordButton.setEnabled(true);
               // receivedAudioFailure();
               String stackTrace = getExceptionAsString(caught);
-              logMessage("postAudioFile : failed to post " + getLog(then) + "\n"+stackTrace,true);
+              logMessage("postAudioFile : failed to post " + getLog(then) + "\n" + stackTrace, true);
               Window.alert("postAudioFile : Couldn't post audio for exercise.");
               new ExceptionHandlerDialog(caught);
             }
@@ -251,6 +251,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             controller.getScoringService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
+                controller.handleNonFatalError("adding round trip to recording", caught);
               }
 
               @Override
@@ -261,7 +262,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             receivedAudioAnswer(result, outer);
 
             if (diff > 1000) {
-              logMessage("posted " + getLog(then),false);
+              logMessage("posted " + getLog(then), false);
             }
           }
 
@@ -278,6 +279,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     controller.getService().logMessage(message, sendEmail, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
+        logger.warning("couldn't log message " + caught.getMessage());
       }
 
       @Override

@@ -332,10 +332,12 @@ public class ProjectChoices {
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Checking " + remove.getName() + "...");
-      controller.getAudioServiceAsyncForHost(remove.getHost()).checkAudio(remove.getID(), new AsyncCallback<Void>() {
+      controller.getAudioServiceAsyncForHost(remove.getHost())
+          .checkAudio(remove.getID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           status.setText("ERROR - couldn't check audio for " + remove.getName());
+          controller.handleNonFatalError("checking audio for project", caught);
         }
 
         @Override
@@ -375,6 +377,7 @@ public class ProjectChoices {
             @Override
             public void onFailure(Throwable caught) {
               status.setText("ERROR - couldn't recalc audio for " + remove.getName());
+              controller.handleNonFatalError("recald alignments for audio in project", caught);
             }
 
             @Override
@@ -666,6 +669,7 @@ public class ProjectChoices {
         projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("add pending exercises to project", caught);
           }
 
           @Override
@@ -724,6 +728,7 @@ public class ProjectChoices {
         projectServiceAsync.delete(projectForLang.getID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("delete project", caught);
           }
 
           @Override
@@ -796,6 +801,7 @@ public class ProjectChoices {
     projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("project exists?", caught);
 
       }
 
@@ -820,7 +826,8 @@ public class ProjectChoices {
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
-        Window.alert("Can't contact server.");
+//        Window.alert("Can't contact server.");
+        controller.handleNonFatalError("setting project", throwable);
       }
 
       @Override

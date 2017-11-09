@@ -185,11 +185,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
-
-
-            String exceptionAsString = getExceptionAsString(caught);
-
-            onPostFailure(then, user,exceptionAsString);
+            onPostFailure(then, user,getExceptionAsString(caught));
+            controller.handleNonFatalError("posting audio",caught);
           }
 
           public void onSuccess(AudioAnswer result) {            onPostSuccess(result, then);          }
@@ -243,6 +240,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("addRoundTrip",caught);
       }
 
       @Override

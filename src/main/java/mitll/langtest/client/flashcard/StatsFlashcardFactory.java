@@ -428,7 +428,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       controller.getService().getUserHistoryForList(copies, latestResultID, selection, userListID, new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
+//          logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          controller.handleNonFatalError("getting user history", caught);
         }
 
         @Override

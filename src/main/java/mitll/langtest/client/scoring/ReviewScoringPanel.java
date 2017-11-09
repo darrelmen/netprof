@@ -227,6 +227,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
       public void onFailure(Throwable caught) {
         wordTranscript.getImage().setVisible(false);
         phoneTranscript.getImage().setVisible(false);
+    controller.handleNonFatalError("get asr score",caught);
       }
 
       public void onSuccess(PretestScore result) {

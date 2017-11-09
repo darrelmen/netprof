@@ -294,7 +294,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            controller.handleNonFatalError("get alignments",caught);
           }
 
           @Override
@@ -321,7 +321,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
               @Override
               public void onFailure(Throwable caught) {
-
+                controller.handleNonFatalError("get alignments",caught);
               }
 
               @Override
@@ -1134,7 +1134,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 String foreignLanguage,
                                 String altFL,
                                 CommonExercise contextEx) {
-    AnnotationHelper annotationHelper = new AnnotationHelper(controller/*, contextEx.getID()*/);
+    AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
     Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper);
     if (context != null) {
       rowWidget.add(context);

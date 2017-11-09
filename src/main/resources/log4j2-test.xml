@@ -37,7 +37,7 @@
     <Properties>
         <Property name="log.mailhost">localhost</Property>
         <Property name="log.mailfrom">noreply@dliflc.edu</Property>
-        <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
+        <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
     </Properties>
 
     <appenders>
@@ -117,11 +117,16 @@
 
         <logger name="mitll.hlt.domino.server.util" level="WARN"/>
         <logger name="mitll.hlt.domino.server.user" level="WARN"/>
-        <logger name="org.eclipse.jetty.io" level="WARN">
+        <logger name="com.zaxxer.hikari.pool" level="WARN"/>
+
+<!--
+        <logger name="org.eclipse.jetty" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
-        <root level="debug">
-            <appender-ref ref="STDOUT" level="debug"/>
+-->
+
+        <root level="info">
+            <appender-ref ref="STDOUT" level="info"/>
         </root>
 
     </loggers>

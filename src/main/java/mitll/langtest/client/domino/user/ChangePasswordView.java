@@ -242,6 +242,7 @@ public class ChangePasswordView extends Composite {
           public void onFailure(Throwable caught) {
             df.clearError();
             df.setError("Password update failed.");
+
             modal.show();
           }
 

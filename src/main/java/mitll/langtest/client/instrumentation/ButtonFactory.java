@@ -153,7 +153,7 @@ public class ButtonFactory implements EventLogger {
                         caught.getMessage() != null &&
                         !caught.getMessage().trim().equals("0")) {
                       logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
-                      caught.printStackTrace();
+                      //caught.printStackTrace();
                     }
                   }
 

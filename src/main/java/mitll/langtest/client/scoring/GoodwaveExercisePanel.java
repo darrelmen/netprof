@@ -122,10 +122,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param commonExercise for this exercise
    * @param controller
    * @param listContainer
-   * @paramx screenPortion
-   * @paramx instance
-   * @paramx allowRecording
-   * @paramx includeListButtons
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
   protected GoodwaveExercisePanel(final T commonExercise,
@@ -142,7 +138,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
     setWidth("100%");
     //   addStyleName("inlineBlockStyle");
-    getElement().setId("GoodwaveExercisePanel");
+   // getElement().setId("GoodwaveExercisePanel");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
     this.listContainer = listContainer;
@@ -180,9 +176,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //  }
   }
 
-  protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
+  protected abstract NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell, T> listContainer,
-                                                              boolean addKeyHandler, boolean includeListButtons) {
+                                                              boolean addKeyHandler, boolean includeListButtons);
+/*  {
     NavigationHelper<CommonShell> widgets = new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
       public void postAnswers(ExerciseController controller, HasID completedExercise) {
@@ -196,20 +193,22 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
         false);
     widgets.addStyleName("topBarMargin");
     return widgets;
-  }
+  }*/
 
   public void wasRevealed() {
   }
 
-  protected void makeScorePanel(T e, String instance) {
+  protected abstract void makeScorePanel(T e, String instance);
+/*  {
     //return null;
-  }
+  }*/
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise)
+  {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
@@ -258,9 +257,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     answerWidget.showChart();
   }
 
-  protected void addGroupingStyle(Widget div) {
+  protected abstract void addGroupingStyle(Widget div);
+/*
+  {
     div.addStyleName("buttonGroupInset6");
   }
+*/
 
   public void onResize() {
     // logger.info("got onResize for" + instance);
@@ -361,6 +363,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("adding annotation",caught);
           }
 
           @Override

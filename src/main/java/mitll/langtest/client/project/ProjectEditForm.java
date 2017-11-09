@@ -448,6 +448,7 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onFailure(Throwable caught) {
         w.setEnabled(true);
+        messageHelper.handleNonFatalError("check audo for project", caught);
       }
 
       @Override
@@ -483,6 +484,7 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onFailure(Throwable caught) {
         w.setEnabled(true);
+        messageHelper.handleNonFatalError("recalc audio alignments for project", caught);
       }
 
       @Override

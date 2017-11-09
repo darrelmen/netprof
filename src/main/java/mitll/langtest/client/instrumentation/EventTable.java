@@ -33,8 +33,6 @@
 package mitll.langtest.client.instrumentation;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -46,7 +44,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.instrumentation.Event;
@@ -63,11 +61,12 @@ public class EventTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
   private Widget lastTable = null;
   private Button closeButton;
+  MessageHelper messageHelper;
 
   /**
-   * @see InitialUI.EventsClickHandler#onClick(ClickEvent)
+   * @see mitll.langtest.client.banner.UserMenu.EventsClickHandler#onClick
    */
-  public void show(final LangTestDatabaseAsync service) {
+  public void show(final LangTestDatabaseAsync service, MessageHelper messageHelper) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Events");
@@ -87,9 +86,10 @@ public class EventTable extends PagerTable {
 
     service.getEvents(new AsyncCallback<Collection<Event>>() {
       public void onFailure(Throwable caught) {
-        if (!caught.getMessage().trim().equals("0")) {
-          Window.alert("getEvents couldn't contact server");
-        }
+//        if (!caught.getMessage().trim().equals("0")) {
+//          Window.alert("getEvents couldn't contact server");
+//        }
+        messageHelper.handleNonFatalError("getting events", caught);
       }
 
       public void onSuccess(Collection<Event> result) {
@@ -110,11 +110,7 @@ public class EventTable extends PagerTable {
     dialogBox.setWidget(dialogVPanel);
 
     // Add a handler to send the name to the server
-    closeButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-      }
-    });
+    closeButton.addClickHandler(event -> dialogBox.hide());
   }
 
   @Override
@@ -138,17 +134,14 @@ public class EventTable extends PagerTable {
     // Add the data to the data provider, which automatically pushes it to the
     // widget.
     List<Event> list = dataProvider.getList();
-    for (Event contact : result) {
-      list.add(contact);
-    }
+    list.addAll(result);
     table.setRowCount(list.size());
-
     // We know that the data is sorted alphabetically by default.
 
     return getOldSchoolPagerAndTable(table, table, 10, 10, rightOfPager);
   }
 
-  private TextColumn<Event> addColumns(CellTable<Event> table) {
+  private void addColumns(CellTable<Event> table) {
     TextColumn<Event> id = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
@@ -213,10 +206,9 @@ public class EventTable extends PagerTable {
     table.addColumn(device, "Device");
 
     getDateColumn(table);
-    return id;
   }
 
-  private Column<Event, SafeHtml> getDateColumn(CellTable<Event> table) {
+  private void getDateColumn(CellTable<Event> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<Event, SafeHtml> dateCol = new Column<Event, SafeHtml>(cell) {
       @Override
@@ -226,6 +218,5 @@ public class EventTable extends PagerTable {
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
-    return dateCol;
   }
 }

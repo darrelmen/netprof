@@ -102,7 +102,7 @@ public class ListView implements ContentView, CreateListComplete {
     listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting lists created by user", caught);
       }
 
       @Override
@@ -127,7 +127,7 @@ public class ListView implements ContentView, CreateListComplete {
     listService.getListsForUser(false, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting lists visited by user", caught);
       }
 
       @Override
@@ -159,7 +159,7 @@ public class ListView implements ContentView, CreateListComplete {
     listService.getLists(new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting all lists", caught);
       }
 
       @Override
@@ -426,7 +426,8 @@ public class ListView implements ContentView, CreateListComplete {
         controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-            logger.warning("delete list call failed?");
+         //   logger.warning("delete list call failed?");
+            controller.handleNonFatalError("deleting a list", caught);
           }
 
           @Override
@@ -450,6 +451,7 @@ public class ListView implements ContentView, CreateListComplete {
       @Override
       public void onFailure(Throwable caught) {
         delete.setEnabled(true);
+        controller.handleNonFatalError("removing a visitor to a list", caught);
       }
 
       @Override

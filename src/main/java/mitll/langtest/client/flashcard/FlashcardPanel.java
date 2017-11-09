@@ -192,7 +192,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     playRefOrAutoPlay();
 
-  //  addKeyListener();
+    //  addKeyListener();
   }
 
 /*  protected void addKeyListener() {
@@ -313,6 +313,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("adding annotation in flashcard", caught);
           }
 
           @Override
@@ -424,7 +425,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
-    contentMiddle.setHeight(CARD_HEIGHT +        "px");
+    contentMiddle.setHeight(CARD_HEIGHT + "px");
     contentMiddle.getElement().setId("Focusable_content");
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override

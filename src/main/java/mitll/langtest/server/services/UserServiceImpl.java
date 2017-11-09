@@ -94,7 +94,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return remoteAddr;
   }
 
-  public User getUserByID(String id) {
+  private User getUserByID(String id) {
     return db.getUserDAO().getUserByID(id);
   }
 

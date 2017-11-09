@@ -284,38 +284,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     listContainer.setState(id, allCorrect ? STATE.APPROVED : STATE.DEFECT);
     listContainer.redraw();
     navigationHelper.clickNext(controller, completedExercise);
-    //  }
   }
-
-  /**
-   * So if the attention LL button has been pressed, clicking next should not step on that setting
-   *
-   * @paramx listContainer
-   * @paramx completedExercise
-   * @seex #addAttnLLButton(ListInterface, NavigationHelper)
-   */
-/*  private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
-    if (isCourseContent()) {
-      controller.getQCService().markState(completedExercise.getID(), STATE.ATTN_LL,
-          new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-            }
-          });
-
-      listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
-      listContainer.redraw();
-      navigationHelper.clickNext(controller, completedExercise);
-    }
-  }*/
-
-//  private boolean isCourseContent() {
-//    return !getInstance().equals(REVIEW) && !getInstance().equalsIgnoreCase(COMMENT);
-//  }
 
   /**
    * @param completedExercise
@@ -330,6 +299,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("marking reviewed on exercise", caught);
           }
 
           @Override
@@ -587,6 +557,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       @Override
       public void onFailure(Throwable caught) {
         offButton.setEnabled(true);
+        controller.handleNonFatalError("marking gender on audio", caught);
       }
 
       @Override

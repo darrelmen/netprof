@@ -208,6 +208,7 @@ public class InitialUI implements UILifecycle {
     controller.getUserService().logout(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
+        controller.handleNonFatalError("logging out user", throwable);
       }
 
       @Override
@@ -412,6 +413,7 @@ public class InitialUI implements UILifecycle {
       controller.getUserService().forgetProject(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
+          controller.handleNonFatalError("forgetting project for user", throwable);
         }
 
         @Override

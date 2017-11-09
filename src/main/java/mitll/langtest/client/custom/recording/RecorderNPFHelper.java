@@ -45,7 +45,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -60,9 +59,6 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
-import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -202,7 +198,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
       if (!authenticationEvent.getSource().equals(instanceName)) {
         // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
-        getProgressInfo(instanceName);
+        getProgressInfo();
       }
     });
   }
@@ -210,7 +206,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
-    getProgressInfo("RecordedNPFHelper");
+    getProgressInfo();
     return flex;
   }
 
@@ -218,11 +214,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    * @see #doMaleFemale()
    * @see MyWaveformExercisePanel#onLoad
    */
-  private void getProgressInfo(String instance) {
+  private void getProgressInfo() {
     //logger.info("Get progress info for " +getClass() + " instance " + instance);
     controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting recording progress", caught);
       }
 
       @Override
@@ -237,7 +234,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
-
     /**
      * @param e
      * @param controller1
@@ -270,7 +266,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
         ((Panel) parent).add(c);
         added = true;
       } else {
-        getProgressInfo(instance);
+        getProgressInfo();
       }
     }
 
@@ -355,6 +351,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("adding annotation", caught);
             }
 
             @Override

@@ -157,9 +157,8 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
-          new EventTable().show(lazyGetService());
+          new EventTable().show(lazyGetService(),controller.getMessageHelper());
         }
       });
     }

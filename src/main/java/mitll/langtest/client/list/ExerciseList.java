@@ -424,6 +424,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     String exceptionAsString = getExceptionAsString(caught);
     //  caught.printStackTrace();
     controller.logMessageOnServer("got exception " + caught.getMessage() + " : " + exceptionAsString, " RPCerror?", true);
+
+    controller.handleNonFatalError("getting exercise", caught);
   }
 
   /**
@@ -642,6 +644,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       service.getExercise(next.getID(), false, new AsyncCallback<U>() {
         @Override
         public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("getting exercise", caught);
         }
 
         @Override

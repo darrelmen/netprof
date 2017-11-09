@@ -76,6 +76,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+  public static final String ADDING_VISITOR = "adding visitor";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final boolean DEBUG_STALE = false;
@@ -597,6 +598,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting lists for user", caught);
       }
 
       @Override
@@ -719,6 +721,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError(ADDING_VISITOR, caught);
       }
 
       @Override
@@ -1034,6 +1037,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("getting type->values", caught);
           }
 
           /**

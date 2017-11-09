@@ -35,9 +35,6 @@
     <Properties>
         <Property name="log.mailhost">localhost</Property>
         <Property name="log.mailfrom">noreply@dliflc.edu</Property>
-        <!--
-                <Property name="log.mailto">raymond.budd@ll.mit.edu,ray.budd@gmail.com,gordon.vidaver@ll.mit.edu</Property>
-        -->
         <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
     </Properties>
 
@@ -133,6 +130,7 @@
         <logger name="slick.jdbc" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
+
         <logger name="slick.jdbc.JdbcBackend" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
@@ -164,7 +162,22 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="org.eclipse.jetty" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
         <logger name="org.eclipse.jetty.io" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.eclipse.jetty.servlet" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="org.eclipse.jetty.util.component" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="com.zaxxer.hikari" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
 
@@ -182,7 +195,9 @@
 
         <root level="debug">
             <appender-ref ref="LogFile" level="info"/>
+<!--
             <appender-ref ref="Mail" level="error"/>
+-->
         </root>
 
         <!--

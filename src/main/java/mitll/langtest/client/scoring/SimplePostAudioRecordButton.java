@@ -164,6 +164,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
         logMessage("failed to post audio for " + controller.getUser(), true);// + " exercise " + exercise.getOldID());
         showPopup(Validity.INVALID.getPrompt());
+        controller.handleNonFatalError("get alignment",caught);
       }
 
       /**

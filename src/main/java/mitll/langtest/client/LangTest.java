@@ -277,8 +277,9 @@ public class LangTest implements
   private Map<Integer, AudioServiceAsync> projectToAudioService;
   private Map<Integer, ScoringServiceAsync> projectToScoringService;
   private final long then = 0;
+  private MessageHelper messageHelper = new MessageHelper(initialUI, this);
 
-  private AnnotationHelper annotationHelper = new AnnotationHelper(this);
+  private AnnotationHelper annotationHelper = new AnnotationHelper(this, messageHelper);
 
   /**
    * This gets called first.
@@ -1148,9 +1149,11 @@ public class LangTest implements
     return flashRecordPanel.usingFlash();
   }
 
+/*
   private void downloadFailedAlert() {
     Window.alert("Code download failed");
   }
+*/
 
   public boolean isMicAvailable() {
     return isMicConnected;
@@ -1186,7 +1189,6 @@ public class LangTest implements
     return annotationHelper;
   }
 
-  MessageHelper messageHelper = new MessageHelper(initialUI, this);
 
   @Override
   public MessageHelper getMessageHelper() {
@@ -1194,6 +1196,6 @@ public class LangTest implements
   }
 
   public void handleNonFatalError(String message, Throwable throwable) {
-    messageHelper.handleNonFatalError(message,throwable);
+    messageHelper.handleNonFatalError(message, throwable);
   }
 }

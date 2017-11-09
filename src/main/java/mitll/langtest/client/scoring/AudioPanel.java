@@ -573,6 +573,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
             controller.logMessageOnServer("getImageFailed for " + path + " " + type + " width" + toUse, "onFailure", true);
           }
           logger.info("message " + caught.getMessage() + " " + caught);
+          controller.handleNonFatalError("getting image",caught);
         }
 
         public void onSuccess(ImageResponse result) {

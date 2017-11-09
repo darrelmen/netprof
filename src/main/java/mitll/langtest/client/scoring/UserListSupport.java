@@ -106,12 +106,12 @@ public class UserListSupport {
     controller.getListService().getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("get lists for user",caught);
       }
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         useLists(result, addToList, removeFromList, emailList, id, container);
-        //   addSendLinkWhatYouSee(container);
       }
     });
   }
@@ -304,6 +304,7 @@ public class UserListSupport {
       controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("add item to list",caught);
         }
 
         @Override
@@ -323,6 +324,13 @@ public class UserListSupport {
     return new NavLink(name);
   }
 
+  /**
+   * @see #useLists
+   * @param ul
+   * @param removeFromList
+   * @param exid
+   * @param container
+   */
   private void getRemoveListLink(UserList ul, DropdownBase removeFromList, int exid, Dropdown container) {
     final NavLink widget = getListLink(ul);
     removeFromList.add(widget);
@@ -332,6 +340,7 @@ public class UserListSupport {
       controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("delete item from list",caught);
         }
 
         @Override

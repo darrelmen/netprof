@@ -160,6 +160,7 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
         //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
         wordTranscript.setVisible(false);
         phoneTranscript.setVisible(false);
+        controller.handleNonFatalError("scoring audio",caught);
       }
 
       public void onSuccess(PretestScore result) {

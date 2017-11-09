@@ -111,7 +111,7 @@ public interface UserService extends RemoteService {
    * @return
    * @see SignInForm#tryLogin
    */
-  User getUserByID(String id);
+//  User getUserByID(String id);
 
   boolean isKnownUser(String id);
   boolean isKnownUserWithEmail(String id);
