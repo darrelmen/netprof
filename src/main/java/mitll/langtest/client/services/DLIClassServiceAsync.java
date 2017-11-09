@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.common.DominoSessionException;
 
 import java.util.Set;
 

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -52,6 +53,7 @@ public class ProjectEditForm extends UserDialog {
   private static final int USER_ID_MAX_LENGTH = 5;
 
   private final LifecycleSupport lifecycleSupport;
+  private final MessageHelper messageHelper;
   private ListBox statusBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
@@ -62,7 +64,7 @@ public class ProjectEditForm extends UserDialog {
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
-  boolean isNew=false;
+  private boolean isNew=false;
 
   /**
    * @param lifecycleSupport
@@ -72,6 +74,7 @@ public class ProjectEditForm extends UserDialog {
     super(controller.getProps());
     this.lifecycleSupport = lifecycleSupport;
     services = controller;
+    messageHelper = controller.getMessageHelper();
   }
 
   /**
@@ -102,6 +105,7 @@ public class ProjectEditForm extends UserDialog {
     services.getScoringServiceAsyncForHost(info.getHost()).isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Checking for hydra status",caught);
       }
 
       @Override
@@ -146,6 +150,7 @@ public class ProjectEditForm extends UserDialog {
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Updating project.",caught);
       }
 
       @Override
@@ -216,6 +221,7 @@ public class ProjectEditForm extends UserDialog {
     projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Creating project.",caught);
       }
 
       @Override
@@ -377,6 +383,7 @@ public class ProjectEditForm extends UserDialog {
         projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
+            messageHelper.handleNonFatalError("Checking name.",caught);
           }
 
           @Override

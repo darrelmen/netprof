@@ -113,10 +113,6 @@ public class ResultManager extends PagerTable {
   private CellTable<MonitorResult> cellTable;
   private Panel reviewContainer;
 
-//  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
-//  private Typeahead userIDSuggest, textSuggest;
-  // ResultTypeAhead resultTypeAhead;
-
   /**
    * @param nameForAnswer
    * @param eventRegistration
@@ -156,6 +152,7 @@ public class ResultManager extends PagerTable {
     resultServiceAsync.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.getMessageHelper().handleNonFatalError("getting number of recordings", caught);
       }
 
       @Override
@@ -198,7 +195,7 @@ public class ResultManager extends PagerTable {
     dialogVPanel.clear();
 
     cellTable = new CellTable<>();
-    ResultTypeAhead resultTypeAhead = new ResultTypeAhead(typeOrder, cellTable, resultServiceAsync);
+    ResultTypeAhead resultTypeAhead = new ResultTypeAhead(typeOrder, cellTable, resultServiceAsync, controller.getMessageHelper());
     Widget table = getAsyncTable(numResults, getDownloadAnchor(), resultTypeAhead);
     table.setWidth("100%");
 
@@ -319,8 +316,9 @@ public class ResultManager extends PagerTable {
             new AsyncCallback<ResultAndTotal>() {
               @Override
               public void onFailure(Throwable caught) {
-                Window.alert("Can't contact server.");
+                // Window.alert("Can't contact server.");
                 logger.warning("Got  " + caught);
+                controller.getMessageHelper().handleNonFatalError("getting recordings", caught);
               }
 
               @Override

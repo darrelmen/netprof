@@ -199,6 +199,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param project
    * @param configureEvenRetired
    * @param forceReload
+   * @return number of exercises in the project
    * @see #configureProjects
    */
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {

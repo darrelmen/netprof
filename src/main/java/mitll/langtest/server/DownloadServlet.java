@@ -433,11 +433,13 @@ public class DownloadServlet extends DatabaseServlet {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     String prefix = language + "_";
-    if (encodedFileName.toLowerCase().contains(USERS)) {
+/*    if (encodedFileName.toLowerCase().contains(USERS)) {
       String filename = prefix + "users.xlsx";
       response.setHeader("Content-Disposition", "attachment; filename=" + filename);
       db.usersToXLSX(response.getOutputStream());
-    } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
+    } else
+      */
+    if (encodedFileName.toLowerCase().contains(RESULTS)) {
       String filename = prefix + "results.xlsx";
       response.setHeader("Content-Disposition", "attachment; filename=" + filename);
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), response.getOutputStream());

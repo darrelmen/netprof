@@ -34,7 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -165,7 +164,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     this.userid = userid;
     populateGranToLabel();
 
-    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback, this);
+    this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, this);
   }
 
   private void populateGranToLabel() {

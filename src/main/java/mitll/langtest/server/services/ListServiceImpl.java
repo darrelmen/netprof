@@ -149,7 +149,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (hasQCPerm(userIDFromSessionOrDB)) {
       return getUserListManager().getCommentedList(db.getIDs(getProjectIDFromUser(userIDFromSessionOrDB)));
     } else {
-      throw new RestrictedOperationException("getting review lists", true);
+      throw getRestricted("getting review lists");
     }
   }
 

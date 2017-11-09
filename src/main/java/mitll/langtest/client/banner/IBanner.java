@@ -2,7 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -25,7 +25,7 @@ public interface IBanner {
   void reset();
 
   /**
-   * @see InitialUI#gotUser
+   * @see UILifecycle#gotUser
    * @param name
    */
   void setUserName(String name);

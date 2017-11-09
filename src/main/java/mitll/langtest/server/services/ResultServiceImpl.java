@@ -36,6 +36,8 @@ import mitll.langtest.client.services.ResultService;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,34 +73,45 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
                                    String sortInfo,
                                    Map<String, String> unitToValue,
                                    String flText,
-                                   int req) {
-    //  int userIDFromSession = getUserIDFromSessionOrDB();
-    List<MonitorResult> results = getResults(unitToValue, -1, flText);
-    if (!results.isEmpty()) {
-      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
-      try {
-        Collections.sort(results, comparator);
-      } catch (Exception e) {
-        logger.error("Doing " + sortInfo + " " + unitToValue +
-            //" " + userIDFromSession +
-            " " + flText + " " + start + "-" + end +
-            " Got " + e, e);
+                                   int req) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+
+    if (hasAdminPerm(userIDFromSession)) {
+
+      int projectID = getProjectIDFromUser(userIDFromSession);
+      List<MonitorResult> results = getResults(projectID, unitToValue, -1, flText);
+      if (!results.isEmpty()) {
+        Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
+        try {
+          results.sort(comparator);
+        } catch (Exception e) {
+          logger.error("Doing " + sortInfo + " " + unitToValue +
+              //" " + userIDFromSession +
+              " " + flText + " " + start + "-" + end +
+              " Got " + e, e);
+        }
       }
+      int n = results.size();
+      int min = Math.min(end, n);
+      if (start > min) {
+        logger.debug("original req from " + start + " to " + end);
+        start = 0;
+      }
+      List<MonitorResult> resultList = results.subList(start, min);
+      //logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
+      return new ResultAndTotal(new ArrayList<>(resultList), n, req);
+    } else {
+      throw getRestricted("getting results");
     }
-    int n = results.size();
-    int min = Math.min(end, n);
-    if (start > min) {
-      logger.debug("original req from " + start + " to " + end);
-      start = 0;
-    }
-    List<MonitorResult> resultList = results.subList(start, min);
-    //logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
-    return new ResultAndTotal(new ArrayList<>(resultList), n, req);
   }
 
   @Override
-  public int getNumResults() {
-    return db.getResultDAO().getNumResults(getProjectIDFromUser());
+  public int getNumResults() throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return db.getResultDAO().getNumResults(getProjectIDFromUser());
+    } else {
+      throw getRestricted("getting number of results");
+    }
   }
 
   /**
@@ -111,9 +124,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @return
    * @see #getResults
    */
-  private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
+  private List<MonitorResult> getResults(int projectID, Map<String, String> unitToValue, int userid, String flText) {
     logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
-    int projectID = getProjectIDFromUser();
+    //  int projectID = getProjectIDFromUser();
 
     if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
@@ -124,7 +137,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       return monitorResultsByID;
     }
 
-    Collection<MonitorResult> results = getMonitorResults();
+    Collection<MonitorResult> results = db.getMonitorResults(projectID);
 
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
@@ -199,8 +212,8 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
-  private Collection<MonitorResult> getMonitorResults() {
-    return db.getMonitorResults(getProjectIDFromUser());
+  private Collection<MonitorResult> getMonitorResults(int userid) {
+    return db.getMonitorResults(getProjectIDFromUser(userid));
   }
 
   /**
@@ -215,116 +228,121 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
                                                   String flText,
-                                                  String which) {
-    Collection<MonitorResult> results = getMonitorResults();
+                                                  String which) throws DominoSessionException, RestrictedOperationException {
     int userid = getUserIDFromSessionOrDB();
 
-    logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
+    if (hasAdminPerm(userid)) {
+      Collection<MonitorResult> results = getMonitorResults(userid);
 
-    Collection<String> matches = new TreeSet<>();
-    Trie<MonitorResult> trie;
+      logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
 
-    for (String type : db.getTypeOrder(getProjectIDFromUser())) {
-      if (unitToValue.containsKey(type)) {
-        logger.debug("getResultAlternatives making trie for " + type);
+      Collection<String> matches = new TreeSet<>();
+      Trie<MonitorResult> trie;
+
+      for (String type : db.getTypeOrder(getProjectIDFromUser())) {
+        if (unitToValue.containsKey(type)) {
+          logger.debug("getResultAlternatives making trie for " + type);
+          // make trie from results
+          trie = new Trie<>();
+
+          trie.startMakingNodes();
+          for (MonitorResult result : results) {
+            String s = result.getUnitToValue().get(type);
+            if (s != null) {
+              trie.addEntryToTrie(new ResultWrapper(s, result));
+            }
+          }
+          trie.endMakingNodes();
+
+          String valueForType = unitToValue.get(type);
+          Collection<MonitorResult> matchesLC = trie.getMatchesLC(valueForType);
+
+          // stop!
+          if (which.equals(type)) {
+            //        logger.debug("\tmatch for " + type);
+
+            boolean allInt = true;
+            for (MonitorResult result : matchesLC) {
+              String e = result.getUnitToValue().get(type);
+              if (allInt) {
+                try {
+                  Integer.parseInt(e);
+                } catch (NumberFormatException e1) {
+                  allInt = false;
+                }
+              }
+              matches.add(e);
+            }
+
+            return allInt ? getIntSorted(matches) : matches;
+          } else {
+            results = matchesLC;
+          }
+        }
+      }
+
+      if (userid > -1) { // asking for userid
         // make trie from results
-        trie = new Trie<>();
 
+        logger.debug("making trie for userid " + userid);
+
+        trie = new Trie<>();
         trie.startMakingNodes();
         for (MonitorResult result : results) {
-          String s = result.getUnitToValue().get(type);
-          if (s != null) {
-            trie.addEntryToTrie(new ResultWrapper(s, result));
-          }
+          trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
         }
         trie.endMakingNodes();
 
-        String valueForType = unitToValue.get(type);
-        Collection<MonitorResult> matchesLC = trie.getMatchesLC(valueForType);
+        Set<Integer> imatches = new TreeSet<>();
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
 
         // stop!
-        if (which.equals(type)) {
-          //        logger.debug("\tmatch for " + type);
-
-          boolean allInt = true;
+        if (which.equals(MonitorResult.USERID)) {
           for (MonitorResult result : matchesLC) {
-            String e = result.getUnitToValue().get(type);
-            if (allInt) {
-              try {
-                Integer.parseInt(e);
-              } catch (NumberFormatException e1) {
-                allInt = false;
-              }
-            }
-            matches.add(e);
+            imatches.add(result.getUserid());
           }
+          //logger.debug("returning " + imatches);
 
-          return allInt ? getIntSorted(matches) : matches;
+          for (Integer m : imatches) matches.add(Long.toString(m));
+          matches = getLimitedSizeList(matches);
+          return matches;
         } else {
           results = matchesLC;
         }
       }
-    }
 
-    if (userid > -1) { // asking for userid
-      // make trie from results
-
-      logger.debug("making trie for userid " + userid);
-
-      trie = new Trie<>();
-      trie.startMakingNodes();
-      for (MonitorResult result : results) {
-        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
-      }
-      trie.endMakingNodes();
-
-      Set<Integer> imatches = new TreeSet<>();
-      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
-
-      // stop!
-      if (which.equals(MonitorResult.USERID)) {
-        for (MonitorResult result : matchesLC) {
-          imatches.add(result.getUserid());
+      // must be asking for text
+      if (!flText.isEmpty()) {
+        trie = new Trie<>();
+        trie.startMakingNodes();
+        logger.debug("text searching over " + results.size());
+        for (MonitorResult result : results) {
+          trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+          trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
         }
-        //logger.debug("returning " + imatches);
+        trie.endMakingNodes();
 
-        for (Integer m : imatches) matches.add(Long.toString(m));
-        matches = getLimitedSizeList(matches);
-        return matches;
+        results = trie.getMatchesLC(flText);
+        logger.debug("matchesLC for '" + flText + "' " + results);
+      }
+
+      boolean isNumber = isNumber(flText);
+
+      if (isNumber) {
+        for (MonitorResult result : results) {
+          matches.add("" + result.getExID());
+        }
       } else {
-        results = matchesLC;
+        for (MonitorResult result : results) {
+          matches.add(result.getForeignText().trim());
+        }
       }
-    }
+      logger.debug("returning text " + matches);
 
-    // must be asking for text
-    if (!flText.isEmpty()) {
-      trie = new Trie<>();
-      trie.startMakingNodes();
-      logger.debug("text searching over " + results.size());
-      for (MonitorResult result : results) {
-        trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
-        trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
-      }
-      trie.endMakingNodes();
-
-      results = trie.getMatchesLC(flText);
-      logger.debug("matchesLC for '" + flText + "' " + results);
-    }
-
-    boolean isNumber = isNumber(flText);
-
-    if (isNumber) {
-      for (MonitorResult result : results) {
-        matches.add("" + result.getExID());
-      }
+      return getLimitedSizeList(matches);
     } else {
-      for (MonitorResult result : results) {
-        matches.add(result.getForeignText().trim());
-      }
+      throw getRestricted("getting sorted results");
     }
-    logger.debug("returning text " + matches);
-
-    return getLimitedSizeList(matches);
   }
 
 //  private boolean isNumber(String flText) {

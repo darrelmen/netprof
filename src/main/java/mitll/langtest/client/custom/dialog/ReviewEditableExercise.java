@@ -73,6 +73,7 @@ import static mitll.langtest.shared.answer.AudioType.SLOW;
  * @since 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExerciseDialog {
+  public static final String MARKING_AUDIO_DEFECT = "marking audio defect";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String YOUR_RECORDING = "Your Recording";
@@ -477,42 +478,25 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #getPanelForAudio
    */
   private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final HasID exercise, String tip) {
-    ClickHandler handler = new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logger.info("marking audio defect for " + audio + " on " + exercise.getID());
-        controller.getQCService().markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+    return getDeleteButton(tip, event -> {
+      logger.info("marking audio defect for " + audio + " on " + exercise.getID());
+      controller.getQCService().markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError(MARKING_AUDIO_DEFECT, caught);
+        }
 
-          @Override
-          public void onSuccess(Void result) {
-            widgets.getParent().setVisible(false);
-            //   reloadLearnList();
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
-            // TODO : need to update other lists too?
-          }
-        });
-      }
-    };
-
-    return getDeleteButton(tip, handler);
+        @Override
+        public void onSuccess(Void result) {
+          widgets.getParent().setVisible(false);
+          //   reloadLearnList();
+          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+          // TODO : need to update other lists too?
+        }
+      });
+    });
   }
-
-  /**
-   * @see #doAfterEditComplete(ListInterface, boolean)
-   */
- /* private void reloadLearnList() {
-    Reloadable exerciseList = predefinedContentList.getReloadable();
-    if (exerciseList != null) {
-      exerciseList.clearCachedExercise();
-      exerciseList.reload();
-    } else {
-//      logger.warning("reloadLearnList : no exercise list ref ");
-    }
-  }
-*/
+ 
   private Button getDeleteButton(String tip, ClickHandler handler) {
     Button delete = new Button(DELETE_AUDIO);
     addTooltip(delete, tip);
@@ -909,7 +893,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         controller.getQCService().markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
           @Override
           public void onFailure(Throwable caught) {
-            controller.getMessageHelper().handleNonFatalError("marking audio defect", caught);
+            controller.getMessageHelper().handleNonFatalError(MARKING_AUDIO_DEFECT, caught);
           }
 
           @Override

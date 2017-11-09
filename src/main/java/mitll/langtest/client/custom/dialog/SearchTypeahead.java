@@ -61,6 +61,7 @@ public class SearchTypeahead {
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
               public void onFailure(Throwable caught) {
+                controller.handleNonFatalError("searching for exercises", caught);
               }
 
               @Override

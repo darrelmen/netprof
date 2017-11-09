@@ -54,6 +54,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.*;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -192,7 +193,7 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @return
-   * @see #gotUser
+   * @see UILifecycle#gotUser
    * @see #makeHeaderRow()
    */
   private String getGreeting() {
@@ -289,7 +290,7 @@ public class InitialUI implements UILifecycle {
    * languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
    *
    * @see #configureUIGivenUser
-   * @see #gotUser(User)
+   * @see UILifecycle#gotUser(HasID)
    */
   private void showNavigation() {
     if (contentRow.getElement().getChildCount() <= 2) {
@@ -545,7 +546,7 @@ public class InitialUI implements UILifecycle {
    * @see UserManager#storeUser
    */
   @Override
-  public void gotUser(User user) {
+  public void gotUser(HasID user) {
     populateRootPanelIfLogin();
     long userID = -1;
     if (user != null) {
@@ -587,7 +588,7 @@ public class InitialUI implements UILifecycle {
    *
    * @param userID
    * @return
-   * @see #gotUser
+   * @see UILifecycle#gotUser
    */
   protected void configureUIGivenUser(long userID) {
     //logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
@@ -685,7 +686,7 @@ public class InitialUI implements UILifecycle {
   /**
    * So, if we're currently showing the login, let's switch to the tab panel...
    *
-   * @see #gotUser
+   * @see UILifecycle#gotUser
    * @see #configureUIGivenUser(long) (long)
    */
   protected void populateRootPanelIfLogin() {

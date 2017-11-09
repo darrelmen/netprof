@@ -85,17 +85,14 @@ public class RestUserManagement {
   private static final String USER = "user";
 
   /**
-   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    * @see #addUser
    */
   private static final String EMAIL_H = "emailH";
   private static final String EMAIL = "email";
   /**
-   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    */
   private static final String USERID = "userid";
   /**
-   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    */
   private static final String PASSWORD_CORRECT = "passwordCorrect";
 
@@ -148,18 +145,6 @@ public class RestUserManagement {
                        HttpServletResponse response,
                        String queryString,
                        JSONObject toReturn) {
-/*    if (queryString.startsWith(HAS_USER)) {
-      String[] split1 = getParams(queryString);
-      if (split1.length < 2) {
-        toReturn.put(ERROR, "expecting two or three parameters");
-      } else {
-//        String freeTextPassword = request.getParameter("pass");
-        if (passwordFromBody != null) logger.info("doGet got free text password " + passwordFromBody.length());
-        gotHasUser(toReturn, split1, passwordFromBody, request, securityManager, projid);
-      }
-      return true;
-    } else
-      */
     if (queryString.startsWith(FORGOT_USERNAME)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
@@ -216,10 +201,11 @@ public class RestUserManagement {
         toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
       return true;
-    } else if (queryString.equals(USERS)) {  // TODO - require a session
+    }
+/*    else if (queryString.equals(USERS)) {  // TODO - require a session
       toReturn.put(USERS, db.usersToJSON());
       return true;
-    }
+    }*/
     return false;
   }
 
@@ -242,41 +228,7 @@ public class RestUserManagement {
     }
   }
 
-  /**
-   * Return enough information so we could create a new user from the json.
-   *
-   * @paramx toReturn
-   * @paramx split1
-   * @paramx projid
-   * @see #doGet
-   */
-/*
-  private void gotHasUser(JSONObject toReturn,
-                          String[] split1,
-                          String freeTextPassword,
-                          HttpServletRequest request,
-                          IUserSecurityManager securityManager,
-                          int projid) {
-    String first = split1[0];
-    String user = first.split("=")[1];
-
-    String second = split1[1];
-    String[] split = second.split("=");
-    String passwordH = split.length > 1 ? split[1] : "";
-    // String freeTextPassword = split.length > 2 ? split[2] : "";
-
-    if (freeTextPassword == null) {
-      freeTextPassword = split.length > 2 ? split[2] : "";
-    }
-    if (!freeTextPassword.isEmpty()) {
-      passwordH = freeTextPassword;
-    }
-    // logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "'");
-
-    tryToLogin(toReturn, freeTextPassword, request, securityManager, projid, user);//, passwordH);
-  }
-*/
-  public void tryToLogin(JSONObject toReturn,
+   public void tryToLogin(JSONObject toReturn,
                          String freeTextPassword,
                          HttpServletRequest request,
                          IUserSecurityManager securityManager,
@@ -456,22 +408,6 @@ public class RestUserManagement {
     }
 
     return b;
-/*
-    User userByID = db.getUserDAO().getUserWithResetKey(userid);
-    if (userByID != null) {
-      logger.debug("clearing key for " + userByID);
-      db.getUserDAO().clearKey(userByID.getID(), true);
-
-      if (!db.getUserDAO().changePassword(userByID.getID(), freeTextPassword)) {
-        logger.error("couldn't update user password for user " + userByID);
-      }
-      return true;
-    } else {
-      logger.debug("NOT clearing key for " + userid);
-
-      return false;
-    }
-*/
   }
 
   private String getBaseURL(HttpServletRequest r) {

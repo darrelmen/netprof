@@ -138,7 +138,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          controller.getMessageHelper().handleNonFatalError("trying to get students", caught);
         }
 
         @Override
@@ -157,7 +157,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          controller.getMessageHelper().handleNonFatalError("trying to get students", caught);
         }
 
         @Override
@@ -223,7 +223,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().add(id, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          controller.handleNonFatalError("adding a student to my students", caught);
         }
 
         @Override
@@ -259,7 +259,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().remove(id, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          controller.handleNonFatalError("removing a student from my students",caught);
         }
 
         @Override
@@ -273,7 +273,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
           mineOnly.setEnabled(!myStudents.isEmpty());
 
           if (myStudents.isEmpty()) {
-         //   logger.info("student list is empty!");
+            //   logger.info("student list is empty!");
             mineOnly.setActive(false);
             showAllUsers();
           }
@@ -374,6 +374,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     controller.getListService().getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting my lists", caught);
       }
 
       @Override

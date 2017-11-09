@@ -81,6 +81,7 @@ public interface IProjectManagement {
    * @param project
    * @param configureEvenRetired
    * @param forceReload
+   * @return number of exercises in the project
    */
   int configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
   void configureProjectByID(int projid);

@@ -33,18 +33,12 @@
 package mitll.langtest.client.analysis;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -55,20 +49,19 @@ import java.util.logging.Logger;
  */
 class PlayAudio {
   private final Logger logger = Logger.getLogger("PlayAudio");
-  private final ExerciseServiceAsync service;
+  //private final ExerciseServiceAsync service;
   private final SoundPlayer soundFeedback;
   private final Widget playFeedback;
   private Timer t;
   private ExerciseLookup exerciseLookup;
 
   /**
-   * @param service
    * @param soundFeedback
    * @param playFeedback
    * @see AnalysisPlot#AnalysisPlot
    */
-  PlayAudio(ExerciseServiceAsync service, SoundPlayer soundFeedback, Widget playFeedback, ExerciseLookup exerciseLookup) {
-    this.service = service;
+  PlayAudio(SoundPlayer soundFeedback, Widget playFeedback, ExerciseLookup exerciseLookup) {
+    //this.service = service;
     this.soundFeedback = soundFeedback;
     this.playFeedback = playFeedback;
     this.exerciseLookup = exerciseLookup;
@@ -206,7 +199,6 @@ class PlayAudio {
   private void showPlayback() {
     playFeedback.setVisible(true);
   }
-
   private void hidePlayback() {
     playFeedback.setVisible(false);
   }

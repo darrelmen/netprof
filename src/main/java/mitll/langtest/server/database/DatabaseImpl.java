@@ -739,6 +739,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param project
    * @param forceReload
+   * @return number of exercises in the project
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
    */
   @Override
@@ -1057,29 +1058,32 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
    */
+/*
   public void usersToXLSX(OutputStream out) {
     userManagement.usersToXLSX(out);
   }
+*/
 
   /**
-   * TODO : who calls this - reporting?
+   * TODOx : who calls this - reporting?
    *
    * @return
    * @see mitll.langtest.server.rest.RestUserManagement#doGet
    */
-  public JSON usersToJSON() {
+ /* public JSON usersToJSON() {
     return userManagement.usersToJSON();
-  }
+  }*/
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#getUsers()
    */
+/*
   public List<User> getUsers() {
     return userManagement.getUsers();
   }
+*/
 
   public void logEvent(String exid, String context, int userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");

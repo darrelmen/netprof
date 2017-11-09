@@ -33,7 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -337,7 +337,7 @@ public class User extends MiniUser implements ReportUser {
 
   /**
    * @return
-   * @see UserTable#getTable
+   * @see mitll.langtest.server.database.excel.UserDAOToExcel#getSpreadsheet
    */
   public int getNumResults() {
     return numResults;
@@ -353,7 +353,7 @@ public class User extends MiniUser implements ReportUser {
 
   /**
    * @return
-   * @see InitialUI#gotUser(User)
+   * @see UILifecycle#gotUser
    */
   public boolean isAdmin() {
     return admin;

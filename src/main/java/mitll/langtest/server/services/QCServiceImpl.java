@@ -108,7 +108,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
     }*/
     } else {
-      throw new RestrictedOperationException("marking audio defect", true);
+      throw getRestricted("marking audio defect");
     }
   }
 
@@ -166,7 +166,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       }
       getSectionHelper().refreshExercise(byID);
     } else {
-      throw new RestrictedOperationException("marking gender", true);
+      throw getRestricted("marking gender");
     }
   }
 

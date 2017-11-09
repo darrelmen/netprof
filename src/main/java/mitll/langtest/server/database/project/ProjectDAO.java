@@ -286,6 +286,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
+   * Really does delete it - could take a long time if a big project.
+   *
    * Mainly called from drop.sh or tests
    * In general we want to retire projects when we don't want them visible.
    *

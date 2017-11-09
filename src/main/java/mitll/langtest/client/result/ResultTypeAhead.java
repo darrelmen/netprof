@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.view.client.RangeChangeEvent;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.list.TypeAhead;
 import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.shared.result.MonitorResult;
@@ -32,12 +33,16 @@ public class ResultTypeAhead {
   private final Collection<String> typeOrder;
   private final CellTable<MonitorResult> cellTable;
   private final ResultServiceAsync resultServiceAsync;
+  private MessageHelper messageHelper;
 
   ResultTypeAhead(Collection<String> typeOrder,
-                  CellTable<MonitorResult> cellTable, ResultServiceAsync resultServiceAsync) {
+                  CellTable<MonitorResult> cellTable,
+                  ResultServiceAsync resultServiceAsync,
+                  MessageHelper messageHelper) {
     this.typeOrder = typeOrder;
     this.cellTable = cellTable;
     this.resultServiceAsync = resultServiceAsync;
+    this.messageHelper = messageHelper;
   }
 
   Panel getSearchBoxes() {
@@ -57,8 +62,7 @@ public class ResultTypeAhead {
   }
 
   private ControlGroup getUserIDSuggestWidget() {
-    Typeahead userIDSuggest = getTypeahead(MonitorResult.USERID);
-    return TypeAhead.getControlGroup(USER_ID, userIDSuggest.asWidget());
+    return TypeAhead.getControlGroup(USER_ID, getTypeahead(MonitorResult.USERID).asWidget());
   }
 
   private ControlGroup getTextSuggestWidget() {
@@ -88,6 +92,7 @@ public class ResultTypeAhead {
         resultServiceAsync.getResultAlternatives(getUnitToValue(), getText(), whichField, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
+            messageHelper.handleNonFatalError("searching for recordings", caught);
           }
 
           @Override
@@ -136,7 +141,9 @@ public class ResultTypeAhead {
     return suggestions;
   }
 
-  private void configureTextBox(final TextBox w) {  w.addKeyUpHandler(getKeyUpHandler()); }
+  private void configureTextBox(final TextBox w) {
+    w.addKeyUpHandler(getKeyUpHandler());
+  }
 
   /**
    * NOTE : we need both a redraw on key up and one on selection!
@@ -144,11 +151,19 @@ public class ResultTypeAhead {
    * @return
    * @paramx w
    */
-  private KeyUpHandler getKeyUpHandler() { return event -> { redraw(); };  }
+  private KeyUpHandler getKeyUpHandler() {
+    return event -> {
+      redraw();
+    };
+  }
 
-  private void redraw() { RangeChangeEvent.fire(cellTable, cellTable.getVisibleRange());  }
+  private void redraw() {
+    RangeChangeEvent.fire(cellTable, cellTable.getVisibleRange());
+  }
 
-  private void addCallbacks(final Typeahead user) { user.setUpdaterCallback(getUpdaterCallback());  }
+  private void addCallbacks(final Typeahead user) {
+    user.setUpdaterCallback(getUpdaterCallback());
+  }
 
   private Typeahead.UpdaterCallback getUpdaterCallback() {
     return selectedSuggestion -> {
@@ -167,7 +182,9 @@ public class ResultTypeAhead {
     };
   }
 
-  public String getText() {  return textSuggest == null ? "" : getTextFromTypeahead(textSuggest);  }
+  public String getText() {
+    return textSuggest == null ? "" : getTextFromTypeahead(textSuggest);
+  }
 
   private String getTextFromTypeahead(Typeahead textSuggest) {
     if (textSuggest == null) {

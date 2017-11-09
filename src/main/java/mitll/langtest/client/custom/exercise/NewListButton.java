@@ -99,6 +99,7 @@ public class NewListButton {
         isPublic, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("adding a new list", caught);
           }
 
           @Override

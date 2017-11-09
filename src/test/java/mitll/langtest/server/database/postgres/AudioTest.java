@@ -100,13 +100,13 @@ public class AudioTest extends BaseTest {
     }
 
     IAudioDAO dao = spanish.getAudioDAO();
-    for (User user : spanish.getUsers()) {
-//      Collection<String> recordedBy = dao.getRecordedBySameGender(user.getID());
-      Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getID());
-      if (!recordedBy.isEmpty()) {
-        logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
-      }
-    }
+//    for (User user : spanish.getUsers()) {
+////      Collection<String> recordedBy = dao.getRecordedBySameGender(user.getID());
+//      Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getID());
+//      if (!recordedBy.isEmpty()) {
+//        logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
+//      }
+//    }
   }
 
 /*  @Test

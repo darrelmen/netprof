@@ -123,7 +123,7 @@ public class NewContentChooser implements INavigation {
     controller.getListService().getReviewList(new AsyncCallback<UserList<CommonShell>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting defect list", caught);
       }
 
       @Override

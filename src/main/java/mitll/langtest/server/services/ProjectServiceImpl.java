@@ -41,6 +41,8 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -68,6 +70,9 @@ import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
   public static final String ANY = "Any";
+  private static final String UPDATING_PROJECT_INFO = "updating project info";
+  private static final String CREATING_PROJECT = "Creating project";
+  private static final String DELETING_A_PROJECT = "deleting a project";
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
@@ -79,8 +84,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   @Override
-  public boolean exists(int projectid) {
-    return getProjectDAO().exists(projectid);
+  public boolean exists(int projectid)  throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().exists(projectid);
+    } else {
+      throw getRestricted("project exists");
+    }
   }
 
   /**
@@ -89,8 +98,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see ProjectEditForm#checkNameOnBlur
    */
   @Override
-  public boolean existsByName(String name) {
-    return getProjectDAO().getByName(name) != -1;
+  public boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().getByName(name) != -1;
+    }
+    else {
+      throw getRestricted("exists by name");
+    }
   }
 
   /**
@@ -99,26 +113,30 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see ProjectEditForm#updateProject
    */
   @Override
-  public boolean update(ProjectInfo info) {
+  public boolean update(ProjectInfo info) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    logger.info("update for " +
-        "\n\tuser    " + userIDFromSessionOrDB + " update" +
-        "\n\tproject " + info);
-    boolean update = getProjectDAO().update(userIDFromSessionOrDB, info);
-    int id = info.getID();
-    if (update) {
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
       logger.info("update for " +
-          "\n\tuser      " + userIDFromSessionOrDB +
-          "\n\tconfigure project " + id);
+          "\n\tuser    " + userIDFromSessionOrDB + " update" +
+          "\n\tproject " + info);
+      boolean update = getProjectDAO().update(userIDFromSessionOrDB, info);
+      int id = info.getID();
+      if (update) {
+        logger.info("update for " +
+            "\n\tuser      " + userIDFromSessionOrDB +
+            "\n\tconfigure project " + id);
 
-      db.configureProject(db.getProject(id), true);
+        db.configureProject(db.getProject(id), true);
+      } else {
+        logger.info("update for " +
+            "\n\tuser      " + userIDFromSessionOrDB +
+            "\n\tNOT configuring " + id);
+      }
+      db.getProjectManagement().refreshProjects();
+      return update;
     } else {
-      logger.info("update for " +
-          "\n\tuser      " + userIDFromSessionOrDB +
-          "\n\tNOT configuring " + id);
+      throw getRestricted(UPDATING_PROJECT_INFO);
     }
-    db.getProjectManagement().refreshProjects();
-    return update;
   }
 
   /**
@@ -127,11 +145,15 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see ProjectEditForm#newProject
    */
   @Override
-  public boolean create(ProjectInfo newProject) {
-    if (newProject.getModelsDir().isEmpty()) {
-      setDefaultsIfMissing(newProject);
+  public boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      if (newProject.getModelsDir().isEmpty()) {
+        setDefaultsIfMissing(newProject);
+      }
+      return new CreateProject().createProject(db, db, newProject);
+    } else {
+      throw getRestricted(CREATING_PROJECT);
     }
-    return new CreateProject().createProject(db, db, newProject);
   }
 
   private void setDefaultsIfMissing(ProjectInfo newProject) {
@@ -152,108 +174,146 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   @Override
-  public boolean delete(int id) {
-    return getProjectDAO().delete(id);
+  public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().delete(id);
+    } else {
+      throw getRestricted(DELETING_A_PROJECT);
+    }
   }
 
   /**
-   * Adding a exercises to a project!
+   * Adding exercises to a project!
+   * Copies any existing audio for the language (from a production project) that has matching transcripts.
+   *
+   * I.e. if there's already a recording of "dog" in another english project, just reuse that recording for your
+   * new "dog" vocabulary item.  Good for projects that are subsets (or collages?) of existing content.
+   *
+   * Does some sanity checking - the exercises come from a domino project:
+   *
+   * 1) Is the project an existing project and is it associated with the domino project for this bundle of exercises?
+   * 2) Is the project a new project (and hence has no domino id yet) and is there already another project bound
+   * to this exercise bundle's domino project?
    *
    * @param projectid
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    */
   @Override
-  public DominoUpdateResponse addPending(int projectid) {
-    ImportInfo info = db.getProjectManagement().getImport(projectid);
+  public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      ImportInfo info = db.getProjectManagement().getImport(projectid);
 
-    if (info != null) {
-      Project project = db.getProject(projectid);
+      if (info != null) {
+        Project project = db.getProject(projectid);
 
-      int dominoid = project.getProject().dominoid();
-      int jsonDominoID = info.getDominoID();
-      if (dominoid != -1 && dominoid != jsonDominoID) {
-        logger.warn("addPending - json domino id = " + dominoid + " vs " + jsonDominoID);
-        return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+        int dominoid = project.getProject().dominoid();
+        int jsonDominoID = info.getDominoID();
+        if (dominoid != -1 && dominoid != jsonDominoID) {
+          logger.warn("addPending - json domino id = " + dominoid + " vs " + jsonDominoID);
+          return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+        } else {
+          if (dominoid == -1) {
+            List<Project> existingBound = getProjectForDominoID(jsonDominoID);
+            if (!existingBound.isEmpty()) {
+              return getAnotherProjectResponse(dominoid, jsonDominoID, existingBound);
+            }
+          }
 
+          SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
+
+          List<CommonExercise> newEx = new ArrayList<>();
+          List<CommonExercise> updateEx = new ArrayList<>();
+
+          Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+
+          logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
+          {
+            Set<Integer> current = legacyToEx.keySet();
+
+            for (Map.Entry<Integer, CommonExercise> pair : getDominoIDToExercise(info.getExercises()).entrySet()) {
+              Integer dominoID = pair.getKey();
+              CommonExercise importEx = pair.getValue();
+
+              if (current.contains(dominoID)) {
+                updateEx.add(importEx);
+                importEx.getMutable().setID(legacyToEx.get(dominoID).id());
+              } else {
+                newEx.add(importEx);
+              }
+            }
+          }
+
+          {
+            Collection<String> typeOrder2 = project.getTypeOrder();
+
+            new ExerciseCopy().addExercises(getImportUser(),
+                projectid,
+                new HashMap<>(),
+                slickUEDAO, newEx, typeOrder2, new HashMap<>());
+
+            // now update...
+            // update the exercises...
+            logger.info("addPending updating  " + updateEx.size() + " exercises");
+            doUpdate(projectid, getImportUser(), slickUEDAO, updateEx, typeOrder2);
+          }
+
+          copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
+
+          updateProjectIfSomethingChanged(jsonDominoID, newEx, updateEx, project.getProject());
+
+          // todo : shoudl we configure project if it didn't change?
+          int i = db.getProjectManagement().configureProject(project, false,true);
+          return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
+        }
       } else {
-        if (dominoid == -1) {
-          List<Project> existingBound = new ArrayList<>();
-          db.getProjects().forEach(project1 -> {
-            if (project1.getProject().dominoid() == jsonDominoID) {
-              existingBound.add(project1);
-            }
-          });
-          if (!existingBound.isEmpty()) {
-            String name = existingBound.iterator().next().getProject().name();
-            DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
-            dominoUpdateResponse.setMessage(name);
-            return dominoUpdateResponse;
-          }
-        }
-        Collection<CommonExercise> toImport = info.getExercises();
-        SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
-
-        List<CommonExercise> newEx = new ArrayList<>();
-        List<CommonExercise> updateEx = new ArrayList<>();
-
-        Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
-
-        logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
-        {
-          Set<Integer> current = legacyToEx.keySet();
-
-          for (Map.Entry<Integer, CommonExercise> pair : getDominoIDToExercise(toImport).entrySet()) {
-            Integer dominoID = pair.getKey();
-            CommonExercise importEx = pair.getValue();
-
-            if (current.contains(dominoID)) {
-              updateEx.add(importEx);
-              importEx.getMutable().setID(legacyToEx.get(dominoID).id());
-            } else {
-              newEx.add(importEx);
-            }
-          }
-        }
-
-        Collection<String> typeOrder2 = project.getTypeOrder();
-
-        int importUser = getImportUser();
-        new ExerciseCopy().addExercises(importUser,
-            projectid,
-            new HashMap<>(),
-            slickUEDAO, newEx, typeOrder2, new HashMap<>());
-
-        // now update...
-        // update the exercises...
-        logger.info("addPending updating  " + updateEx.size() + " exercises");
-        doUpdate(projectid, importUser, slickUEDAO, updateEx, typeOrder2);
-        copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
-
-        SlickProject project1 = project.getProject();
-        if (!newEx.isEmpty() || !updateEx.isEmpty()) {
-          project1.updateModified();
-          project1.updateDominoID(jsonDominoID);
-          getProjectDAO().easyUpdate(project1);
-        }
-
-        int i = db.configureProject(project, true);
-        return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project1, i));
+        return new DominoUpdateResponse(FAIL, -1, -1, new HashMap<>());
       }
-    } else {
-      return new DominoUpdateResponse(FAIL, -1, -1, new HashMap<>());
+    }
+    else {
+      throw getRestricted("adding pending exercises");
+    }
+  }
+
+  private void updateProjectIfSomethingChanged(int jsonDominoID,
+                                               Collection<CommonExercise> newEx,
+                                               Collection<CommonExercise> updateEx,
+                                               SlickProject project1) {
+    if (!newEx.isEmpty() || !updateEx.isEmpty()) {
+      project1.updateModified();
+      project1.updateDominoID(jsonDominoID);
+      getProjectDAO().easyUpdate(project1);
     }
   }
 
   @NotNull
-  private Map<String, String> getProps(SlickProject project1, int i) {
+  private List<Project> getProjectForDominoID(int jsonDominoID) {
+    List<Project> existingBound = new ArrayList<>();
+    db.getProjects().forEach(project1 -> {
+      if (project1.getProject().dominoid() == jsonDominoID) {
+        existingBound.add(project1);
+      }
+    });
+    return existingBound;
+  }
+
+  @NotNull
+  private DominoUpdateResponse getAnotherProjectResponse(int dominoid, int jsonDominoID, List<Project> existingBound) {
+    String name = existingBound.iterator().next().getProject().name();
+    DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+    dominoUpdateResponse.setMessage(name);
+    return dominoUpdateResponse;
+  }
+
+  @NotNull
+  private Map<String, String> getProps(SlickProject project1, int numExercises) {
     DateFormat format = new SimpleDateFormat();
     Map<String, String> infoProps = new HashMap<>();
     infoProps.put(MODIFIED, format.format(project1.modified()));
-    infoProps.put(NUM_ITEMS, "" + i);
+    infoProps.put(NUM_ITEMS, "" + numExercises);
     return infoProps;
   }
 
-  private int getImportUser() {
+  private int getImportUser() throws DominoSessionException {
     int importUser = getUserIDFromSessionOrDB();
     //logger.info("addPending import user = " + importUser);
     if (importUser == -1) {

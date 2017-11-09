@@ -421,6 +421,7 @@ abstract class NewUserExercise extends BasicDialog {
     controller.getListService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("changin an exercise", caught);
       }
 
       @Override
@@ -665,6 +666,7 @@ abstract class NewUserExercise extends BasicDialog {
     controller.getScoringService().isValidForeignPhrase(foreignLang.getSafeText(), "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("is valid exercise", caught);
       }
 
       @Override

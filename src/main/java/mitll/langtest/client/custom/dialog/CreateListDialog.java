@@ -59,6 +59,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  public static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
   private static final String CLASS = "Course Info (optional)";
@@ -234,7 +235,7 @@ public class CreateListDialog extends BasicDialog {
         classBox.getSafeText(), isPublic, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
-            logger.info("FAILREU ");
+            controller.handleNonFatalError("making a new list", caught);
           }
 
           @Override
@@ -242,10 +243,10 @@ public class CreateListDialog extends BasicDialog {
             if (result == null) {
               markError(titleBox, "You already have a list named " + safeText);
 //              Window.alert("You already have a list with that name.");
-              logger.info("NOIT SUCCESS " + result);
+              //logger.info("NOIT SUCCESS " + result);
               //listView.madeIt(result);
             } else {
-              logger.info("Success " + result);
+              //logger.info("Success " + result);
               listView.madeIt(result);
             }
           }
@@ -259,7 +260,7 @@ public class CreateListDialog extends BasicDialog {
 
   private boolean validateCreateList(FormField titleBox) {
     if (titleBox.getSafeText().isEmpty()) {
-      markError(titleBox, "Please fill in a title");
+      markError(titleBox, PLEASE_FILL_IN_A_TITLE);
       return false;
     } else {
       return true;
@@ -279,7 +280,7 @@ public class CreateListDialog extends BasicDialog {
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("changing a list", caught);
       }
 
       @Override
@@ -288,8 +289,4 @@ public class CreateListDialog extends BasicDialog {
       }
     });
   }
-
-//  public Button getSubmit() {
-//    return submit;
-//  }
 }

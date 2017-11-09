@@ -306,7 +306,7 @@ public class LangTest implements
 
         if (isLogClientMessages() && (now - then > 500)) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
-          logMessageOnServer(message,false);
+          logMessageOnServer(message, false);
         }
       }
     });
@@ -331,7 +331,7 @@ public class LangTest implements
       if (!caught.getMessage().trim().equals("0")) {
         logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
         Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
-        logMessageOnServer(message,true);
+        logMessageOnServer(message, true);
       }
     }
   }
@@ -347,6 +347,7 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -434,7 +435,7 @@ public class LangTest implements
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
-     // logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
+      // logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
       if (scoringServiceAsync == null) {
         logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {
@@ -611,7 +612,7 @@ public class LangTest implements
 
     makeFlashContainer();
 
-    if (props.isAMAS()) {
+ /*   if (props.isAMAS()) {
       final LangTest outer = this;
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -625,18 +626,18 @@ public class LangTest implements
         }
       });
     } else {
-      this.initialUI = new InitialUI(this, userManager);
-      populateRootPanel();
+    */
+    this.initialUI = new InitialUI(this, userManager);
+    populateRootPanel();
 
-      setPageTitle();
-      //if (browserCheck == null) logger.warning("no browser check?");
-      browserCheck.checkForCompatibleBrowser();
+    setPageTitle();
+    browserCheck.checkForCompatibleBrowser();
 
-      String message = startupInfo.getMessage();
-      if (message != null && !message.isEmpty()) {
-        showErrorMessage("Configuration Error", message);
-      }
+    String message = startupInfo.getMessage();
+    if (message != null && !message.isEmpty()) {
+      showErrorMessage("Configuration Error", message);
     }
+    //}
   }
 
   /**
@@ -794,7 +795,7 @@ public class LangTest implements
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
- //   logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
+    //   logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
     initialUI.showCogMenu();
   }
 
@@ -806,13 +807,13 @@ public class LangTest implements
    */
   @Override
   public void reallySetTheProject(int projectid) {
-    logger.info("setProjectForUser set project for " + projectid);
+//    logger.info("setProjectForUser set project for " + projectid);
     initialUI.clearContent();
 
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
-
+        messageHelper.handleNonFatalError("setting project for user", throwable);
       }
 
       @Override
@@ -1034,7 +1035,6 @@ public class LangTest implements
   }
 
   /**
-   *
    * @return
    */
   @Override
@@ -1045,7 +1045,7 @@ public class LangTest implements
       return "";
     } else {
       String host = startupInfo.getHost(projectStartupInfo.getProjectid());
- //     logger.info("host for " + projectStartupInfo.getProjectid() + " = '" + host +"'");
+      //     logger.info("host for " + projectStartupInfo.getProjectid() + " = '" + host +"'");
       return host;
     }
   }
@@ -1186,9 +1186,14 @@ public class LangTest implements
     return annotationHelper;
   }
 
-  MessageHelper messageHelper = new MessageHelper(initialUI,this);
+  MessageHelper messageHelper = new MessageHelper(initialUI, this);
+
   @Override
   public MessageHelper getMessageHelper() {
     return messageHelper;
+  }
+
+  public void handleNonFatalError(String message, Throwable throwable) {
+    messageHelper.handleNonFatalError(message,throwable);
   }
 }

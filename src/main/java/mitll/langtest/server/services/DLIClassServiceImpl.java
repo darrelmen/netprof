@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.DLIClassService;
+import mitll.langtest.shared.common.DominoSessionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,20 +42,20 @@ import java.util.Set;
 
 @SuppressWarnings("serial")
 public class DLIClassServiceImpl extends MyRemoteServiceServlet implements DLIClassService {
-  private static final Logger logger = LogManager.getLogger(DLIClassServiceImpl.class);
+//  private static final Logger logger = LogManager.getLogger(DLIClassServiceImpl.class);
 
   @Override
-  public Set<Integer> getStudents() {
+  public Set<Integer> getStudents() throws DominoSessionException {
     return new HashSet<>(db.getDliClassJoinDAO().getStudents(getUserIDFromSessionOrDB()));
   }
 
   @Override
-  public void add(int student) {
+  public void add(int student) throws DominoSessionException {
     db.getDliClassJoinDAO().insert(getUserIDFromSessionOrDB(), student);
   }
 
   @Override
-  public void remove(int student) {
+  public void remove(int student) throws DominoSessionException {
     db.getDliClassJoinDAO().remove(getUserIDFromSessionOrDB(), student);
   }
 }

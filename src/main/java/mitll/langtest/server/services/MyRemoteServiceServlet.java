@@ -46,11 +46,13 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
@@ -58,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Collections;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
@@ -96,7 +99,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return getPermissions(userIDFromSessionOrDB).contains(User.Permission.PROJECT_ADMIN);
   }
 
-  protected boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+  boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
@@ -106,13 +109,22 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return permissions.contains(User.Permission.RECORD_AUDIO) || permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
+  /**
+   * Also checks whether user is enabled and approved for netprof.
+   *
+   * @param userIDFromSessionOrDB
+   * @return
+   * @throws DominoSessionException
+   */
   private Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {
       logger.error("no user in session?");
       throw new DominoSessionException();
     }
-    return userFromSession.getPermissions();
+    boolean enabled = userFromSession.isEnabled();
+    boolean isApprovedForNetprof = userFromSession.isHasAppPermission();
+    return enabled && isApprovedForNetprof ? userFromSession.getPermissions() : Collections.emptyList();
   }
 
   /**
@@ -150,7 +162,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     return i;
   }
 
-  protected Project getProject(int projID) { return db.getProject(projID); }
+  protected Project getProject(int projID) {
+    return db.getProject(projID);
+  }
 
   protected Project getProject() throws DominoSessionException {
     int userIDFromSession = getUserIDFromSessionOrDB();
@@ -419,5 +433,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
     servletContext.setAttribute(DATABASE_REFERENCE, db);
 //    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
+  }
+
+  @NotNull
+  protected RestrictedOperationException getRestricted(String updating_project_info) {
+    return new RestrictedOperationException(updating_project_info,true);
   }
 }

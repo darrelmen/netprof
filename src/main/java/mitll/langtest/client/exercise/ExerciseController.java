@@ -123,4 +123,6 @@ public interface ExerciseController extends Services, ExceptionSupport {
   CommentAnnotator getCommentAnnotator();
 
   MessageHelper getMessageHelper();
+
+  void handleNonFatalError(String message, Throwable throwable);
 }

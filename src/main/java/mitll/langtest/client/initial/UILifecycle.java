@@ -35,8 +35,8 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 public interface UILifecycle {
@@ -50,10 +50,10 @@ public interface UILifecycle {
   int getHeightOfTopRows();
 
   /**
-   * @see LangTest#gotUser(User)
+   * @see LangTest#gotUser
    * @param user
    */
-  void gotUser(User user);
+  void gotUser(HasID user);
 
   void startOver();
 

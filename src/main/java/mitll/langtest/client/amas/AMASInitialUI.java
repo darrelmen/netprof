@@ -95,7 +95,7 @@ public class AMASInitialUI extends InitialUI {
   }
 
   /**
-   * @see #gotUser
+   * @see UILifecycle#gotUser
    * @see #configureUIGivenUser(long) (long)
    */
   @Override
@@ -142,7 +142,7 @@ public class AMASInitialUI extends InitialUI {
   /**
    * @param userID
    * @return
-   * @see #gotUser
+   * @see UILifecycle#gotUser
    */
   @Override
   public void configureUIGivenUser(long userID) {

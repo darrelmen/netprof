@@ -176,7 +176,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       if (hasPerm) {
         db.sendReport(userIDFromSession);
       } else {
-        throw new RestrictedOperationException("send report", true);
+        throw getRestricted("send report");
       }
     }
   }
@@ -244,7 +244,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       return db.getEventDAO().getAll(getProjectIDFromUser(userIDFromSessionOrDB));
     } else {
-      throw new RestrictedOperationException("getting events", true);
+      throw getRestricted("getting events");
     }
   }
 
@@ -260,7 +260,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (hasRecordPerm(userIDFromSessionOrDB)) {
       return db.getMaleFemaleProgress(getProjectIDFromUser(userIDFromSessionOrDB));
     } else {
-      throw new RestrictedOperationException("getting recording progress", true);
+      throw getRestricted("getting recording progress");
     }
   }
 

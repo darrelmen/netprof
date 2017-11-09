@@ -152,7 +152,7 @@ public class AnalysisTab extends DivWidget {
     analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, new AsyncCallback<AnalysisReport>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting performance report for user", caught);
       }
 
       @Override

@@ -90,7 +90,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       }
       return userInfo;
     } else {
-      throw new RestrictedOperationException("performance report", true);
+      throw getRestricted("performance report");
     }
   }
 
@@ -113,7 +113,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         return getSlickAnalysis(projectID)
             .getPerformanceReportForUser(userid, minRecordings, listid);
       } else {
-        throw new RestrictedOperationException("performance report", true);
+        throw getRestricted("performance report");
       }
     }
   }
@@ -142,7 +142,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       if (hasTeacherPerm(userid)) {
         return getSlickAnalysis(projectID).getPhoneReportFor(userid, listid, phone, from, to);
       } else {
-        throw new RestrictedOperationException("performance report for phone", true);
+        throw getRestricted("performance report for phone");
       }
     }
   }

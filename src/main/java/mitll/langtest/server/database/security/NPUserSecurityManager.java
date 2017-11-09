@@ -496,7 +496,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       throws DominoSessionException {
     String sid = request.getRequestedSessionId();
     int userForSession = userSessionDAO.getUserForSession(sid);
-    log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} - {}", sid, userForSession);
+    log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);
     if (userForSession == -1 && sid != null) {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;

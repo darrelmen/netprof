@@ -46,7 +46,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   private final EditItem editItem;
   private final UserList<CommonShell> list;
-  private  SearchTypeahead searchTypeahead;
+  private SearchTypeahead searchTypeahead;
   private TextBox quickAddText;
   private HTML message;
 
@@ -77,8 +77,8 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   }
 
   /**
-   * @see #addTableWithPager
    * @return
+   * @see #addTableWithPager
    */
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
@@ -87,12 +87,12 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     widgets.addStyleName("bottomFiveMargin");
 //
     widgets.add(getAddButtonContainer());
-    widgets.add( message = getFeedback());
+    widgets.add(message = getFeedback());
 
     addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
 
     return widgets;
-   // return getAddButtonContainer();
+    // return getAddButtonContainer();
   }
 
   @Override
@@ -124,13 +124,13 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     }
     message = getFeedback();
 //    addW.add(message = getFeedback());
-     addW.add(getRemoveButtonContainer());
+    addW.add(getRemoveButtonContainer());
     return addW;
   }
 
   /**
-   * @see #getOptionalWidget
    * @return
+   * @see #getOptionalWidget
    */
   @NotNull
   private DivWidget getRemoveButtonContainer() {
@@ -182,7 +182,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    * @return
    * @see #getAddButtonContainer
    */
-  private Typeahead getTypeahead( Button add) {
+  private Typeahead getTypeahead(Button add) {
     quickAddText = new TextBox();
     quickAddText.setMaxLength(100);
     quickAddText.setVisibleLength(40);
@@ -190,7 +190,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     quickAddText.setWidth(235 + "px");
 
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
-    this.searchTypeahead = new SearchTypeahead(controller, this,add);
+    this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
 
@@ -227,6 +227,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
         controller.getListService().addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("adding an exercise to a list", caught);
             enableButton(add);
           }
 
@@ -248,10 +249,16 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     }
   }
 
+  /**
+   * TODO : this should be simpler - does the exercise exist or not - we don't create new exercises anymore.
+   * @param add
+   * @param safeText
+   */
   private void checkIsValidPhrase(Button add, String safeText) {
     controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("checking exercise validity", caught);
         enableButton(add);
       }
 
@@ -267,6 +274,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
               new AsyncCallback<CommonExercise>() {
                 @Override
                 public void onFailure(Throwable caught) {
+                  controller.handleNonFatalError("adding an exercise to a list", caught);
                 }
 
                 @Override
@@ -314,7 +322,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
 //    int before = getSize();
     addExercise(currentExercise);
- //   int after = getSize();
+    //   int after = getSize();
 
 //    logger.info("before " + before + " after " + after);
     enableRemove(true);
@@ -332,8 +340,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   }
 
 
-
-  protected int getNumTableRowsGivenScreenHeight() { return 12; }
+  protected int getNumTableRowsGivenScreenHeight() {
+    return 12;
+  }
 
   /**
    * Removes from 4 lists!
@@ -353,6 +362,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     controller.getListService().deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("removing an exercise from a list", caught);
         enableButton();
       }
 

@@ -150,7 +150,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       recalcAlignments(userIDFromSessionOrDB, db.getProject(projid));
     } else {
-      throw new RestrictedOperationException("recalc alignments", true);
+      throw getRestricted("recalc alignments");
     }
   }
 
@@ -606,7 +606,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
-      throw new RestrictedOperationException("checking hydra status", true);
+      throw getRestricted("checking hydra status");
     }
   }
 

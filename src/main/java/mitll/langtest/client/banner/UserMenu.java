@@ -95,6 +95,7 @@ public class UserMenu {
       lazyGetService().sendReport(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("sending usage report", caught);
         }
 
         @Override

@@ -547,7 +547,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, min, max, new AsyncCallback<List<WordAndScore>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("getting performance report for user and phone", caught);
       }
 
       @Override
@@ -559,10 +559,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         phonePlot.showErrorBarData(filtered, phone);
       }
     });
-
-
   }
-
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();

@@ -83,7 +83,7 @@ public class StudentAnalysis extends DivWidget {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
-        controller.getMessageHelper().handleNonFatalError("Error retrieving user performance!", throwable);
+        controller.handleNonFatalError("Error retrieving user performance!", throwable);
       }
 
       @Override
@@ -102,7 +102,6 @@ public class StudentAnalysis extends DivWidget {
         add(bottom);
         //   logger.info("onSuccess added top and bottom " + top.getElement().getId());
         //   logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
-
       }
     });
   }

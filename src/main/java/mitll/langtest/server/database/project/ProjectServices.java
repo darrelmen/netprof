@@ -24,6 +24,7 @@ public interface ProjectServices {
    * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
    * @param project
    * @param forceReload
+   * @return number of exercises in the project
    */
   int configureProject(Project project, boolean forceReload);
 

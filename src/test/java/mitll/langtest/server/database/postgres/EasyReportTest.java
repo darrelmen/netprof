@@ -34,9 +34,18 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.shared.exercise.CommonExercise;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
@@ -63,5 +72,49 @@ public class EasyReportTest extends BaseTest {
     andPopulate.doReportForYear(-1);
     andPopulate.close();
   }
+  @Test
+  public void testFind() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    Project project = andPopulate.getProject(3);
+    CommonExercise vit = project.getExerciseBySearch("vit");
+    logger.info(vit);
+    logger.info(project.getExerciseBySearch("Vit"));
+    logger.info(project.getExerciseBySearch("gourd"));
+    //andPopulate.doReportForYear(-1);
+    andPopulate.close();
+  }
 
+  @Test
+  public void testJson() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    //   Project project = andPopulate.getProject(3);
+    JsonExport jsonExport = andPopulate.getJSONExport(3);
+    // long now = System.currentTimeMillis();
+
+    JSONArray contentAsJson = jsonExport.getContentAsJson(false);
+    logger.info("Got\n\t" +contentAsJson);
+  }
+
+  @Test
+  public void testJson2() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    //   Project project = andPopulate.getProject(3);
+    HashMap<String, Collection<String>> typeToValues = new HashMap<>();
+    typeToValues.put("Unit", Collections.singleton("21"));
+    JSONObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
+    // long now = System.currentTimeMillis();
+
+    logger.info("Got\n\t" +jsonPhoneReport);
+  }
+
+
+  @Test
+  public void testProp() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    Project project = andPopulate.getProject(2);
+    int webservicePort = project.getWebservicePort();
+    logger.info("port " + webservicePort);
+    logger.info("host " + project.getWebserviceHost());
+  }
 }

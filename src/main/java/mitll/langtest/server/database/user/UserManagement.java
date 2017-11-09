@@ -33,12 +33,10 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,17 +106,19 @@ public class UserManagement {
    * @param out
    * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    */
-  public void usersToXLSX(OutputStream out) {
+/*  public void usersToXLSX(OutputStream out) {
     new UserDAOToExcel().toXLSX(out, getUsers());
-  }
+  }*/
 
   /**
    * @return
    * @see DatabaseImpl#usersToJSON
    */
+/*
   public JSON usersToJSON() {
     return new UserDAOToExcel().toJSON(getUsers());
   }
+*/
 
   /**
    * TODO : come back and re-examine percent complete in context of a project

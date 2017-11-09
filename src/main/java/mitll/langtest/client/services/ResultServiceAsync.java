@@ -32,8 +32,10 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.common.DominoSessionException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -44,6 +46,13 @@ public interface ResultServiceAsync {
 
   void getNumResults(AsyncCallback<Integer> async);
 
+  /**
+   * @see mitll.langtest.client.result.ResultTypeAhead#getTypeaheadUsing(String, TextBox)
+   * @param unitToValue
+   * @param flText
+   * @param which
+   * @param async
+   */
   void getResultAlternatives(Map<String, String> unitToValue,
                              String flText,
                              String which,
