@@ -203,7 +203,6 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProjects
    */
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
-    logger.info("configure START " +project.getID() +  "/" +getProjects().size()+  " : " + project.getLanguage());
     long then = System.currentTimeMillis();
     boolean skipRetired = project.isRetired() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
@@ -217,6 +216,8 @@ public class ProjectManagement implements IProjectManagement {
         return 0;
       }
     }
+
+    logger.info("configure START " +project.getID() +  "/" +getProjects().size()+  " : " + project.getLanguage());
 
     project.clearPropCache();
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");

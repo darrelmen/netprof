@@ -72,6 +72,7 @@ import java.util.logging.Logger;
  */
 public class MessageHelper {
   private static final Logger log = Logger.getLogger(MessageHelper.class.getName());
+  public static final String DOMINO_ERROR = "NetProF Error!";
 
   public enum DDialogType {
     Loading, FatalError, NonFatalError,
@@ -201,7 +202,7 @@ public class MessageHelper {
     }
     final Alert a = new Alert(fullMsg.toString());
     if (dType == DDialogType.NonFatalError || dType == DDialogType.FatalError) {
-      String heading = "Domino Error!" + (msg.isEmpty() ? "" : "<br/><br/>");
+      String heading = DOMINO_ERROR + (msg.isEmpty() ? "" : "<br/><br/>");
       a.setHeading(heading);
       a.setType(AlertType.ERROR);
     } else if (dType == DDialogType.Info) {

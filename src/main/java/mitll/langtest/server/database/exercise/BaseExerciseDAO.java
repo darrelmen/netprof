@@ -418,7 +418,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     synchronized (this) {
       CommonExercise commonExercise = idToExercise.get(id);
       if (commonExercise == null) {
-        if (warns++ < MAX_WARNS)
+        if (warns++ < MAX_WARNS &&
+            id != userExerciseDAO.getUnknownExerciseID())
           logger.warn(this + " couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
       }
       return commonExercise;

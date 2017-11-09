@@ -517,7 +517,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     getExercises(projectid);
-    return getProject(projectid).getSectionHelper();
+    Project project = getProject(projectid);
+    if (project == null) {
+      logger.error("huh? couldn't find project with id " +projectid);
+    }
+    return project.getSectionHelper();
   }
 
   private boolean isAmas() {
@@ -1376,19 +1380,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param projid
    * @param id
-   * @return
+   * @return null if it's a bogus exercise - the unknown exercise
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercise
    */
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
     CommonExercise toRet = getExercise(projid, id);
-    if (toRet == null) {
+    if (toRet == null && id != userExerciseDAO.getUnknownExerciseID()) {
       // if (warns++ < 50)
-      logger.warn("getCustomOrPredefExercise couldn't find exercise " + id + " in project #" + projid +
+      logger.warn("getCustomOrPredefExercise couldn't find exercise " + id + " vs unk ex " +
+              userExerciseDAO.getUnknownExerciseID()+
+          " in project #" + projid +
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
     if (toRet == null) {
-
       String message = "getCustomOrPredefExercise couldn't find exercise " + id + " (context?) in project #" + projid +
           " after looking in exercise table.";
       if (id == 0) {
@@ -1419,7 +1424,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                Map<Integer, MiniUser> idToMini) {
     CommonExercise exercise = project.getExerciseByID(exid);
 
-    if (exercise == null) {
+    if (exercise == null && exid != getUserExerciseDAO().getUnknownExerciseID()) {
       if (warns++ < 50 || warns % 100 == 0) {
         int projid = project.getID();
         logger.info("getCustomOrPredefExercise couldn't find exercise " + exid + " in project #" + projid + " looking in user exercise table");

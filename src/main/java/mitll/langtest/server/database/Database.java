@@ -73,8 +73,6 @@ public interface Database extends AutoCloseable {
 
   Collection<String> getTypeOrder(int projectid);
 
- // int configureProject(Project project, boolean forceReload);
-
   void setStartupInfo(User userWhere);
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);

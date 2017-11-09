@@ -150,8 +150,7 @@ public class ScoreServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String queryString = request.getQueryString();
     if (queryString == null) queryString = ""; // how could this happen???
-
-    String passwordFromBody = "";
+   // String passwordFromBody = "";
     int projid = getProject(request);
 
     // language overrides user id mapping...
@@ -187,7 +186,6 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject toReturn = new JSONObject();
     String jsonString = "";
     //toReturn.put(ERROR, "expecting request");
-
 
     try {
       queryString = URLDecoder.decode(queryString, "UTF-8");

@@ -76,6 +76,8 @@ public class SlickUserExerciseDAO
   //  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
   private static final String HYDRA = "hydra";
+  public static final int DEFAULT_PROJECT = 1;
+  public static final boolean WARN_ABOUT_MISSING_PHONES = false;
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -89,6 +91,7 @@ public class SlickUserExerciseDAO
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private String hostName;
+
   /**
    * @param database
    * @param dbConnection
@@ -221,7 +224,7 @@ public class SlickUserExerciseDAO
 
     String foreignLanguage = shared.getForeignLanguage();
     if (foreignLanguage.contains("&quot;")) {
-      String convert = foreignLanguage.replaceAll("&quot;","\"");
+      String convert = foreignLanguage.replaceAll("&quot;", "\"");
       //logger.info("toSlick : convert\nfrom "+ foreignLanguage + "\nto  " + convert);
       foreignLanguage = convert;
     }
@@ -287,13 +290,19 @@ public class SlickUserExerciseDAO
     return userExercise;
   }
 
+  /**
+   *
+   * @param slick
+   * @return
+   */
   @NotNull
   private Map<String, String> getUnitToValue(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
-    Collection<String> typeOrder = userDAO.getDatabase().getTypeOrder(slick.projid());
+    boolean isDefault = slick.projid() == DEFAULT_PROJECT;
+    Collection<String> typeOrder = isDefault ? Collections.emptyList() : userDAO.getDatabase().getTypeOrder(slick.projid());
 
     if (typeOrder == null || typeOrder.isEmpty()) {
-      logger.warn("getUnitToValue no types for exercise " + slick);
+      logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "")+slick);
     }
 
     Iterator<String> iterator = typeOrder != null ? typeOrder.iterator() : null;
@@ -352,9 +361,9 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see #getExercises(Collection, List, ISection, Map, Project, Map, Map, boolean)
    * @param slick
    * @return
+   * @see #getExercises(Collection, List, ISection, Map, Project, Map, Map, boolean)
    */
   @NotNull
   private Exercise makeExercise(SlickExercise slick) {
@@ -523,9 +532,9 @@ public class SlickUserExerciseDAO
 
     // Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
     //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
-  //  int max = 15;
-  //  int i = 0;
-   // boolean addedPhones = false;
+    //  int max = 15;
+    //  int i = 0;
+    // boolean addedPhones = false;
     if (slick.ispredef() && !slick.iscontext()) {
       if (exercise.getAttributes() == null) {
         if (spew++ < 10) {
@@ -557,7 +566,7 @@ public class SlickUserExerciseDAO
       if (true) {//phones == null) {
 //        logger.warn("no phones for " + id);
       } else {
-      //  addedPhones = true;
+        //  addedPhones = true;
 
         // TODO : maybe put back phone length later ???
  /*       if (ADD_PHONE_LENGTH) {
@@ -726,9 +735,13 @@ public class SlickUserExerciseDAO
     int n = 0;
     for (SlickExercise slickExercise : all) {
       Exercise exercise = makeExercise(slickExercise);
-      if (exercise.getNumPhones() == 0 && n++ < 10) {
-        logger.info("getExercises no phones for " + exercise.getID());
+
+      if (WARN_ABOUT_MISSING_PHONES) {
+        if (exercise.getNumPhones() == 0 && n++ < 10) {
+          logger.info("getExercises no phones for exercise " + exercise.getID());
+        }
       }
+
       addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
       allAttributes.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise,
@@ -900,7 +913,8 @@ public class SlickUserExerciseDAO
       unknownExercise = again.iterator().next();
       id = unknownExercise.id();
     }
-    unknownExerciseID =id;
+    unknownExerciseID = id;
+    logger.info("unknown ex " + unknownExerciseID);
     return id;
   }
 

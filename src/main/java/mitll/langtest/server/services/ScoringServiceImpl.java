@@ -81,68 +81,73 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   @Override
-  public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) {
+  public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
-    PretestScore asrScoreForAudio = null;
-    try {
-      Result result = db.getResultDAO().getResultByID(resultID);
-      int exerciseID = result.getExerciseID();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      PretestScore asrScoreForAudio = null;
+      try {
+        Result result = db.getResultDAO().getResultByID(resultID);
+        int exerciseID = result.getExerciseID();
 
-      boolean isAMAS = serverProps.isAMAS();
-      CommonShell exercise = null;
-      String sentence = "";
-      String transliteration = "";
-      if (isAMAS) {
-        exercise = db.getAMASExercise(exerciseID);
-        sentence = exercise.getForeignLanguage();
-      } else {
-        CommonExercise exercise1 = db.getExercise(getProjectIDFromUser(), exerciseID);
+        boolean isAMAS = serverProps.isAMAS();
+        CommonShell exercise = null;
+        String sentence = "";
+        String transliteration = "";
+        if (isAMAS) {
+          exercise = db.getAMASExercise(exerciseID);
+          sentence = exercise.getForeignLanguage();
+        } else {
+          CommonExercise exercise1 = db.getExercise(getProjectIDFromUser(), exerciseID);
 
-        if (exercise1 != null) {
-          transliteration = exercise1.getTransliteration();
-          exercise = exercise1;
-          Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
-          sentence =
-              result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
-                  directlyRelated.iterator().next().getForeignLanguage() :
-                  exercise.getForeignLanguage();
+          if (exercise1 != null) {
+            transliteration = exercise1.getTransliteration();
+            exercise = exercise1;
+            Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+            sentence =
+                result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
+                    directlyRelated.iterator().next().getForeignLanguage() :
+                    exercise.getForeignLanguage();
+          }
         }
-      }
 
-      // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
+        // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
 //      String sentence = isAMAS ? exercise.getForeignLanguage() :
 //          (result.getAudioType().isContext()) ?
 //              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
 //              exercise.getForeignLanguage();
 
-      if (exercise == null) {
-        logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
-        return new PretestScore();
-      } else {
-        String audioFilePath = result.getAnswer();
+        if (exercise == null) {
+          logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
+          return new PretestScore();
+        } else {
+          String audioFilePath = result.getAnswer();
 
-        // NOTE : actively avoid doing this -
-        //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
-        //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-        asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
-            1,
-            audioFilePath,
-            sentence,
-            transliteration,
-            imageOptions,
-            "" + exerciseID,
-            getPrecalcScores(serverProps.usePhoneToDisplay(), result),
+          // NOTE : actively avoid doing this -
+          //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
+          //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
+          asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
+              1,
+              audioFilePath,
+              sentence,
+              transliteration,
+              imageOptions,
+              "" + exerciseID,
+              getPrecalcScores(serverProps.usePhoneToDisplay(), result),
 
-            new DecoderOptions()
-                .setDoFlashcard(false)
-                .setCanUseCache(serverProps.useScoreCache())
-                .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
+              new DecoderOptions()
+                  .setDoFlashcard(false)
+                  .setCanUseCache(serverProps.useScoreCache())
+                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
+        }
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
       }
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
 
-    return asrScoreForAudio;
+      return asrScoreForAudio;
+    } else {
+      throw getRestricted("result asr");
+    }
   }
 
   @Override
@@ -234,10 +239,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                          boolean hasModel) {
     return recalcAlignments(projid, audioIDs, getAudioFileHelper(projid), userIDFromSession, audioToResult, hasModel);
   }
-
-/*  private AudioFileHelper getAudioFileHelper(int projid) {
-    return db.getProject(projid).getAudioFileHelper();
-  }*/
 
   /**
    * @param projid

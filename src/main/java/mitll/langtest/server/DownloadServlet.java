@@ -76,7 +76,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
-  private static final String USERS = "users";
+ // private static final String USERS = "users";
   private static final String RESULTS = "results";
   private static final String EVENTS = "events";
   private static final String REQUEST = "request";
@@ -87,7 +87,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @see #getAudioExportOptions
    */
   private static final String ALLCONTEXT = "allcontext";
-  public static final String LISTS = "Lists=[";
+  private static final String LISTS = "Lists=[";
 
   /**
    * This is getting complicated.
@@ -547,7 +547,6 @@ public class DownloadServlet extends DatabaseServlet {
           s = s.substring(1);
         }
         s = s.replaceAll("]", "");
-
         //   logger.debug("\ts " + s);
 
         List<String> values = Arrays.asList(s.split(","));

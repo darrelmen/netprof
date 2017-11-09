@@ -81,7 +81,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
-  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
+  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
 
   /**
    * @see #getForgotPassword

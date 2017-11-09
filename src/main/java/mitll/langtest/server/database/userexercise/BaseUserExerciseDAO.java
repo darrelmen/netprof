@@ -103,9 +103,7 @@ public class BaseUserExerciseDAO extends DAO {
    * @return
    * @see IUserListManager#getReviewedUserExercises
    */
-  public CommonExercise getPredefExercise(int exid) {
-    return exerciseDAO.getExercise(exid);
-  }
+  public CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO

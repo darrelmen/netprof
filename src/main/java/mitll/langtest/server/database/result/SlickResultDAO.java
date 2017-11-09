@@ -543,9 +543,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getBestForUser
    */
-  public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) {
-    return dao.perfForUser(userid, projid);
-  }
+  public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) { return dao.perfForUser(userid, projid);  }
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfForUserOnList(userid, listid);

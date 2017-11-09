@@ -108,9 +108,9 @@ public interface ScoringService extends RemoteService {
    * @param resultid
    * @param roundTrip
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    */
-  void addRoundTrip(int resultid, int roundTrip) throws DominoSessionException;
+  void addRoundTrip(int resultid, int roundTrip);
 
   boolean isHydraRunning(int projid) throws DominoSessionException, RestrictedOperationException;
 

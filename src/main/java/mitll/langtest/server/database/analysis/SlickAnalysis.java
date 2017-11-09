@@ -56,6 +56,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
   private static final int MAX_TO_SEND = 25;
+  public static final int DEFAULT_PROJECT = 1;
   private final SlickResultDAO resultDAO;
   private final String language;
   private final int projid;
@@ -213,6 +214,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param addNativeAudio
    * @return
+   * @see #getBestForUser
    */
   private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings, boolean addNativeAudio) {
     Map<Integer, List<BestScore>> userToResults = getUserToResults(perfForUser, addNativeAudio);
@@ -322,14 +324,26 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return userToBest;
   }
 
+  /**
+   * Skip results for default project - orphan exercises.
+   * @see #getUserToResults
+   * @param perfs
+   */
   private void getNativeAudio(Collection<SlickPerfResult> perfs) {
     List<CommonExercise> exercises = new ArrayList<>();
 
-    logger.info("getNativeAudio getting exercises for " + perfs.size());
+    logger.info("getNativeAudio getting exercises for " + perfs.size() + " and project " + projid);
 
-    perfs.forEach(perf -> exercises.add(database.getCustomOrPredefExercise(projid, perf.exid())));
 
-    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size());
+    perfs.forEach(perf -> {
+      CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, perf.exid());
+      if (customOrPredefExercise != null &&
+          customOrPredefExercise.getProjectID() != DEFAULT_PROJECT) {
+        exercises.add(customOrPredefExercise);
+      }
+    });
+
+    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size()+ " and project " + projid);
 
     audioDAO.attachAudioToExercises(exercises, language);
   }
