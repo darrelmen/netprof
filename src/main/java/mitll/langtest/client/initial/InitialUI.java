@@ -204,7 +204,7 @@ public class InitialUI implements UILifecycle {
     breadcrumbs.clear();
     breadcrumbs.setVisible(false);
 
-    controller.getUserService().logout(userManager.getUserID(), new AsyncCallback<Void>() {
+    controller.getUserService().logout(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
       }

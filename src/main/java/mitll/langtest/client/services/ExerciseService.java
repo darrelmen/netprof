@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
@@ -46,7 +47,7 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @paramx <T>
    * @return
    */
-  ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
+  ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request)throws DominoSessionException;
 
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
@@ -55,9 +56,9 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @param isFlashcardReq
    * @return
    */
-  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
-  ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids);
+  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq)throws DominoSessionException;
 
-  FilterResponse getTypeToValues(FilterRequest request);
+  ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
 
+  FilterResponse getTypeToValues(FilterRequest request)throws DominoSessionException;
 }

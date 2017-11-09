@@ -42,6 +42,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -136,6 +137,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private TimeWidgets timeWidgets;
   private final ExceptionSupport exceptionSupport;
   private Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer;
+  private MessageHelper messageHelper;
 
   /**
    * @param service
@@ -146,7 +148,9 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
                       int userid,
                       SoundManagerAPI soundManagerAPI,
                       Icon playFeedback,
-                      ExceptionSupport exceptionSupport) {
+                      ExceptionSupport exceptionSupport,
+                      MessageHelper messageHelper) {
+    this.messageHelper = messageHelper;
     getElement().setId("AnalysisPlot");
     this.exceptionSupport = exceptionSupport;
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
@@ -246,7 +250,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @param userPerformance
    * @param userChosenID
    * @param isTeacherView
-   * @see #getPerformanceForUser(AnalysisServiceAsync, int, String, int, int, boolean)
+   * @see #getPerformanceForUser
    */
   private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList, boolean isTeacherView) {
     clear();
@@ -330,6 +334,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
           @Override
           public void onFailure(Throwable throwable) {
             logger.warning("\n\n\n-> getExerciseIds " + throwable);
+            messageHelper.handleNonFatalError("problem getting exercise ids", throwable);
           }
 
           @Override
@@ -797,9 +802,11 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     }
   }
 
+/*
   private String getFormat(long start) {
     return shortFormat.format(new Date(start));
   }
+*/
 
   /**
    * Remember time window of data (x-axis).
@@ -840,11 +847,12 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
+            messageHelper.handleNonFatalError("problem getting exercise shells", throwable);
           }
 
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
-            for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
+            commonShells.forEach(commonShell -> idToEx.put(commonShell.getID(), commonShell));
 //            logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });

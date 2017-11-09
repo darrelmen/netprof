@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/13/17.
+ * @see UserListSupport#addListOptions
  */
 public class NewListButton {
   private final Logger logger = Logger.getLogger("NewListButton");
@@ -27,6 +28,13 @@ public class NewListButton {
   private final ExerciseController controller;
   private final Widget dropdown;
 
+  /**
+   * @see UserListSupport#addListOptions
+   * @param exid
+   * @param controller
+   * @param userListSupport
+   * @param dropdown
+   */
   public NewListButton(int exid, ExerciseController controller, UserListSupport userListSupport,
                        Widget dropdown) {
     this.exid = exid;

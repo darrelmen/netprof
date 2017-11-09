@@ -86,7 +86,7 @@ public interface IUserListDAO extends IDAO {
 
   List<UserList<CommonShell>> getByName(long userid, String name, int projid);
 
-  boolean remove(long unique);
+  boolean remove(int unique);
 
   void bringBack(long unique);
 

@@ -32,27 +32,27 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.user.*;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
   /**
+   *
    * @return
    * @see UserManager#getPermissionsAndSetUser
    */
-  User getUserFromSession();
+  User getUserFromSession() throws DominoSessionException;
 
   /**
+   * OPEN call - this is how we get a session.
    * @param userId
    * @param attemptedFreeTextPassword
    * @return
@@ -60,8 +60,7 @@ public interface UserService extends RemoteService {
    */
   LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
-  void logout(String login);
- // LoginResult restoreUserSession();
+  void logout() throws DominoSessionException;
 
   /**
    * @param currentHashedPassword
@@ -69,9 +68,10 @@ public interface UserService extends RemoteService {
    * @return
    * @see ChangePasswordView#changePassword
    */
-  boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword);
+  boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
 
   /**
+   * Open call. No session - creates a session.
    * @param userId
    * @param userKey
    * @param newPassword
@@ -81,15 +81,15 @@ public interface UserService extends RemoteService {
   ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword);
 
   /**
+   * Open call - no session.
    * @param userid
-   * @paramx url
-   * @paramx emailForLegacy
    * @return
    * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
    */
   boolean resetPassword(String userid);
 
   /**
+   * Open call - no session.
    * @param emailH
    * @param email
    * @return
@@ -98,6 +98,7 @@ public interface UserService extends RemoteService {
   boolean forgotUsername(String emailH, String email);
 
   /**
+   * No session created - we need to do set password via email first.
    * @param user
    * @param url
    * @return
@@ -106,17 +107,15 @@ public interface UserService extends RemoteService {
   LoginResult addUser(SignUpUser user, String url);
 
   /**
-   * @return
-   * @see UserTable#showUsers
-   */
-  List<User> getUsers();
-
-  /**
-   * @see SignInForm#tryLogin
    * @param id
    * @return
+   * @see SignInForm#tryLogin
    */
   User getUserByID(String id);
+
+  boolean isKnownUser(String id);
+  boolean isKnownUserWithEmail(String id);
+  boolean isValidUser(String id);
 
   /**
    * @param projectid

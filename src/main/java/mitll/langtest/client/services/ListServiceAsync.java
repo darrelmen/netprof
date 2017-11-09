@@ -51,10 +51,12 @@ public interface ListServiceAsync {
 
   void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
+/*
   void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
+*/
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    * @param userExercise
    * @param keepAudio
    * @param async
@@ -65,7 +67,7 @@ public interface ListServiceAsync {
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
-  void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
+ // void getProjectIDForList(int userListID, AsyncCallback<Integer> async);
 
   void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
 

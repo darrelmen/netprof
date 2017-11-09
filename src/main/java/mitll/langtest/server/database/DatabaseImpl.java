@@ -878,7 +878,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
 
     if (isPredef) {
-      clearDefects(//soriginalAudio,
+      clearDefects(
           defectAudio, userExercise);
 
       // why would this make sense to do???

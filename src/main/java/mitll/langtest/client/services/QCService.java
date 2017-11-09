@@ -35,8 +35,11 @@ package mitll.langtest.client.services;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
@@ -47,42 +50,42 @@ import java.util.List;
 @RemoteServiceRelativePath("qc-manager")
 public interface QCService extends RemoteService {
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    * @param exerciseID
    * @param field
    * @param status
    * @param comment
+   * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
-  void addAnnotation(int exerciseID, String field, String status, String comment);
+  void addAnnotation(int exerciseID, String field, String status, String comment) throws DominoSessionException;
 
   // QC State changes
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton
    * @param audioAttribute
    * @param exid
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton
    */
-  void markAudioDefect(AudioAttribute audioAttribute, HasID exid);
+  void markAudioDefect(AudioAttribute audioAttribute, HasID exid) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
    * @param attr
    * @param isMale
+   * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
    */
-  void markGender(AudioAttribute attr, boolean isMale);
+  void markGender(AudioAttribute attr, boolean isMale) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed(HasID)
    * @param exid
    * @param isCorrect
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed(HasID)
    */
-  void markReviewed(int exid, boolean isCorrect);
+  void markReviewed(int exid, boolean isCorrect) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, HasID)
    * @param exid
    * @param state
+   * @see ReviewEditableExercise#userSaidExerciseIsFixed
    */
-  void markState(int exid, STATE state);
+  void markState(int exid, STATE state) throws DominoSessionException, RestrictedOperationException;
 }

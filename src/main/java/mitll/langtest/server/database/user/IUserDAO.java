@@ -95,6 +95,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
                  String remoteAddr,
                  String sessionID);
 
+  boolean isKnownUser(String userid);
   /**
    * @param id
    * @return

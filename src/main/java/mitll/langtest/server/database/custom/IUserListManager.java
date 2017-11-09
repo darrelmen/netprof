@@ -47,12 +47,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface IUserListManager   {
-  //@Deprecated
-  //int REVIEW_MAGIC_ID = -100;
   @Deprecated
   int COMMENT_MAGIC_ID = -200;
-  //@Deprecated
-  //int ATTN_LL_MAGIC_ID = -300;
 
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
@@ -70,15 +66,7 @@ public interface IUserListManager   {
 
   UserList<CommonShell> getCommentedList(Set<Integer> ids);
 
-//  UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids);
-//
-//  UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids);
-
   UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids);
-
-//  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids);
-//
-//  UserList<CommonExercise> getDefectListEx(Set<Integer> ids);
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);

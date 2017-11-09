@@ -158,10 +158,10 @@ public class ExerciseListRequest implements IsSerializable {
     return userID;
   }
 
-  public ExerciseListRequest setUserID(int userID) {
+/*  public ExerciseListRequest setUserID(int userID) {
     this.userID = userID;
     return this;
-  }
+  }*/
 
   /**
    * @return

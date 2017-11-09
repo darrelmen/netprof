@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.server.database.security;
+package mitll.langtest.shared.common;
 
 /**
  * DominoSessionException

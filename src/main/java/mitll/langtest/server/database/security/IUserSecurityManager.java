@@ -1,5 +1,7 @@
 package mitll.langtest.server.database.security;
 
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
@@ -18,7 +20,7 @@ public interface IUserSecurityManager {
    */
   String USER_SESSION_ATT = "user-db-id";
 
-  int getUserIDFromSession(HttpServletRequest threadLocalRequest);
+  int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException;
 
   int getUserIDFromRequest(HttpServletRequest request);
 

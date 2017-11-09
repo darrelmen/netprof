@@ -238,7 +238,7 @@ public class SlickUserExerciseDAO
         isOverride,
         firstType,
         secondType,
-        projectID,//shared.getProjectID(),  // project id fk
+        projectID,//shared.getProjectIDFromUser(),  // project id fk
         shared.isPredefined(),
         isContext,
         false,

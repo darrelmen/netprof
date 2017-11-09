@@ -91,7 +91,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   /**
    * @paramx listid
-   * @see UserListDAO#remove
+   * @see IUserListDAO#remove
    */
 /*
   private void removeVisitor(long listid) {
@@ -309,7 +309,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean remove(long unique) {
+  public boolean remove(int unique) {
 //    removeVisitor(unique);
     logger.debug("remove from " + USER_EXERCISE_LIST + " = " + unique);
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);

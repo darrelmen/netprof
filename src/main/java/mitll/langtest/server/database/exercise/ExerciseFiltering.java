@@ -260,7 +260,7 @@ public class ExerciseFiltering<T extends CommonShell> {
     if (exid > 0) {
       logger.info("getExerciseByExid return exid " + exid);
       T exercise = getExercise(exid, false);
-      if (exercise != null && exercise.getProjectID() == projectID) {
+      if (exercise != null && exercise.getProjectIDFromUser() == projectID) {
         return Collections.singletonList(exercise);
       }
     }

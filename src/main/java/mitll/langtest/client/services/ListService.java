@@ -34,10 +34,17 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
+import mitll.langtest.client.custom.userlist.ListContainer;
+import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -46,9 +53,12 @@ import java.util.Collection;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
- // int getNumLists();
-
-  Collection<UserList<CommonShell>> getLists();
+  /**
+   * @return
+   * @throws DominoSessionException
+   * @see mitll.langtest.client.custom.userlist.ListView#showContent
+   */
+  Collection<UserList<CommonShell>> getLists() throws DominoSessionException;
 
   /**
    * @param name
@@ -58,55 +68,46 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
-  UserList addUserList(String name, String description, String dliClass, boolean isPublic);
-  void update(UserList userList);
+  UserList addUserList(String name, String description, String dliClass, boolean isPublic) throws DominoSessionException;
 
-  /**
-   * @param userListID
-   * @param isPublic
-   * @see ListManager#setPublic(long, boolean)
-   */
- // void setPublicOnList(int userListID, boolean isPublic);
-  // Deleting lists and exercises from lists
+  void update(UserList userList) throws DominoSessionException;
 
   /**
    * @param id
    * @return
-   * @see ListManager#deleteList(Button, UserList, boolean)
+   * @see mitll.langtest.client.custom.userlist.ListView#gotDelete(Button, UserList)
    */
-  boolean deleteList(int id);
+  boolean deleteList(int id) throws DominoSessionException;
 
   /**
    * @param listid
    * @param exid
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#deleteItem
    */
-  boolean deleteItemFromList(int listid, int exid);
-  /**
-   * @see ReviewEditableExercise#confirmThenDeleteItem()
-   * @param exid
-   * @return
-   */
-  // boolean deleteItem(String exid);
+  boolean deleteItemFromList(int listid, int exid) throws DominoSessionException;
 
   /**
    * @param userListID
    * @param user
-   * @see ListManager#addVisitor
+   * @see mitll.langtest.client.list.FacetExerciseList#addVisitor
    */
-  UserList addVisitor(int userListID, int user);
-  void removeVisitor(int userListID, int user);
+  UserList addVisitor(int userListID, int user) throws DominoSessionException;
 
-  int getProjectIDForList(int userListID);
+  /**
+   * @param userListID
+   * @param user
+   * @see mitll.langtest.client.custom.userlist.ListView#gotDeleteVisitor
+   */
+  void removeVisitor(int userListID, int user) throws DominoSessionException;
 
   /**
    * @param onlyCreated
    * @param visited
    * @return
-   * @see ListManager#viewLessons
+   * @see UserContainer#getListBox
    */
-  Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited);
+  Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
   /**
    * TODO : not filled in yet
@@ -117,47 +118,44 @@ public interface ListService extends RemoteService {
   //Collection<UserList<CommonShell>> getUserListsForText(String search);
 
   /**
-   * @return
-   * @see ListManager#viewReview(Panel)
-   */
-  //List<UserList<CommonShell>> getReviewLists();
-
-  /**
    * @param userListID
    * @param exID
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.scoring.UserListSupport#getAddListLink
    */
-  void addItemToUserList(int userListID, int exID);
+  void addItemToUserList(int userListID, int exID) throws DominoSessionException;
 
-  UserList<CommonShell> getReviewList();
+  UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-  CommonExercise newExercise(int userListID, CommonExercise userExercise);
+  CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
+
   /**
    * @param userListID
    * @param userExerciseText
    * @return
-   * @see ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
+   * @seex ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
    */
+/*
   Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText);
+*/
 
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
- // CommonExercise duplicateExercise(CommonExercise id);
+  // CommonExercise duplicateExercise(CommonExercise id);
 
   /**
    * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
-  void editItem(CommonExercise userExercise, boolean keepAudio);
+  void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
 
 //  void updateContext(long userListID, String context);
 //  void updateRichText(long userListID, String richText);

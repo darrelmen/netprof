@@ -36,6 +36,8 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.server.services.UserServiceImpl;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserSession;
@@ -57,14 +59,6 @@ import java.util.Enumeration;
  */
 public class NPUserSecurityManager implements IUserSecurityManager {
   private static final Logger log = LogManager.getLogger(NPUserSecurityManager.class);
-
-  /**
-   * The key to get/set the request attribute that holds the
-   * user looked up by the security filter.
-   */
-  //public static final String USER_REQUEST_ATT = "d-user";
-  //private static final Marker TIMING = MarkerManager.getMarker("TIMING");
-//  private Map<Integer, User> idToSession = new HashMap<>();
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
@@ -176,7 +170,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
       userDAO.getDatabase().setStartupInfo(loggedInUser);
 
-      return 1;//l;
+      return 1;
     } catch (Exception e) {
       log.error("got " + e, e);
       return -1;
@@ -204,7 +198,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * Creates a new session at the end???? why?
    * TODO : remove userId param?
    * <p>
    * When would we want to kill all sessions?
@@ -212,15 +205,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param request
    * @param userId          not really needed
    * @param killAllSessions remove???
-   * @see mitll.langtest.server.services.UserServiceImpl#logout(String)
+   * @see mitll.langtest.server.services.UserServiceImpl#logout
    */
   @Override
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
-/*
-    SecurityUtils.getSubject().logout();
-*/
     if (session != null) {
       log.info("Invalidating session {}", session.getId());
       if (userId != null) {
@@ -233,16 +223,13 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       log.warn(">Session Activity> No session found on logout for id " + userId);
     }
 
-//    request.getSession(true);
     log.warn(">Session Activity> User logout complete for id {} on primary host in {} ms",
         () -> userId,
         //	"primary",
         () -> elapsedMS(startMS));
   }
 
-  private HttpSession getCurrentSession(HttpServletRequest request) {
-    return request.getSession(false);
-  }
+  private HttpSession getCurrentSession(HttpServletRequest request) {   return request.getSession(false);  }
 
   private static long elapsedMS(long startMS) {
     return System.currentTimeMillis() - startMS;
@@ -439,7 +426,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @return
    */
   @Override
-  public int getUserIDFromSession(HttpServletRequest threadLocalRequest) {
+  public int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException {
     int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
@@ -452,9 +439,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         }
         return i;
       } catch (DominoSessionException e) {
-        log.error("got " + e, e);
+        log.error("getUserIDFromSession : session exception : " + e, e);
+        throw e;
       }
-      return -1;
     } else {
       return userIDFromSession;
     }
@@ -499,7 +486,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * TODO : consider how to do this.
    *
    * @param request
    * @return null if there is no user for the session
@@ -520,24 +506,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * @param uidI
-   * @return
-   * @see #lookupUserFromHttpSession(HttpServletRequest)
-   */
-/*  private User rememberUser(int uidI) {
-    User sessUser = userDAO.getByID(uidI);
-    if (sessUser == null) {
-      log.error("rememberUser huh? no user with id " + uidI);
-      return null;
-    } else {
-      return sessUser;
-    }
-  }*/
-
-  /**
    * @param id
    * @return
-   * @see #rememberUser(int)
+   * @see #lookupUserFromHttpSession
    */
   private User getUserForID(int id) {
     long then = System.currentTimeMillis();
@@ -545,7 +516,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long now = System.currentTimeMillis();
     if (now - then > 20) log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
     return sessUser;
-    //return idToSession.get(id);
   }
 
   private void throwException(String opName, User cUser, String checkDesc)

@@ -21,7 +21,7 @@ public interface ProjectServices {
   Collection<Project> getProjects();
 
   /**
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectID(int)
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
    * @param project
    * @param forceReload
    */

@@ -34,6 +34,8 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 
@@ -41,16 +43,16 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
-  boolean exists(int projectid);
+  boolean exists(int projectid) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @see mitll.langtest.client.project.ProjectEditForm#checkNameOnBlur
    * @param name
    * @return
    */
-  boolean existsByName(String name);
-  boolean update(ProjectInfo info);
-  boolean create(ProjectInfo newProject);
-  boolean delete(int id);
-  DominoUpdateResponse addPending(int id);
+  boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException;
+  boolean update(ProjectInfo info) throws DominoSessionException, RestrictedOperationException;
+  boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
+  boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
+  DominoUpdateResponse addPending(int id) throws DominoSessionException, RestrictedOperationException;
 }

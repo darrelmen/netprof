@@ -33,7 +33,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.StartupInfo;
@@ -56,9 +55,7 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 
-
-  void getUserHistoryForList(int userid,
-                             Collection<Integer> ids,
+  void getUserHistoryForList(Collection<Integer> ids,
                              long latestResultID,
                              Map<String, Collection<String>> typeToSection,
                              int userListID, AsyncCallback<AVPScoreReport> async);
@@ -67,7 +64,4 @@ public interface LangTestDatabaseAsync {
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 
   void sendReport(AsyncCallback<Void> async);
-
-  // void getContextPractice(AsyncCallback<ContextPractice> async);
-
 }

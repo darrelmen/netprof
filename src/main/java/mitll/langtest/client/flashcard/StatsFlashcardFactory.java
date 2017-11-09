@@ -399,7 +399,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         sticky.storeCurrent(exercise);
       }
 
-      final int user = controller.getUser();
+      //final int user = controller.getUser();
 
       Set<Integer> copies = new HashSet<>(exToCorrect.keySet());
       if (copies.isEmpty()) {
@@ -425,7 +425,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       // TODO simplify this
 
-      controller.getService().getUserHistoryForList(user, copies, latestResultID, selection, userListID, new AsyncCallback<AVPScoreReport>() {
+      controller.getService().getUserHistoryForList(copies, latestResultID, selection, userListID, new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);

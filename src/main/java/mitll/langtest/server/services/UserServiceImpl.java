@@ -37,14 +37,14 @@ import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.UserTable;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -60,12 +60,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
 
   /**
+   * If successful, establishes a session.
+   *
    * TODO record additional session info in database.
    *
    * @param userId
    * @param attemptedFreeTextPassword
    * @return
-   * @seex #userExists
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
@@ -77,16 +78,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       // ensure a session is created.
       HttpSession session = createSession();
       logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
-    /*
-    UsernamePasswordToken token = new UsernamePasswordToken(userId, attemptedHashedPassword);
-    token.setRememberMe(true);
-    Subject subject = SecurityUtils.getSubject();
-    if (subject != null) {
-      subject.login(token);
-    }
-
-    logger.info("sub " + subject);*/
-
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -103,71 +94,62 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return remoteAddr;
   }
 
-  /*public LoginResult getLoginResult(String userId,
-                                     String attemptedFreeTextPassword,
-                                     String remoteAddr,
-                                     String userAgent,
-                                     HttpSession session) {
-    IUserDAO userDAO = db.getUserDAO();
-    User loggedInUser = userDAO.loginUser(
-        userId,
-        attemptedFreeTextPassword,
-        userAgent,
-        remoteAddr,
-        session.getId());
-
-    boolean success = loggedInUser != null;
-
-    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
-
-    if (success) {
-      return getValidLogin(session, loggedInUser);
-    } else {
-      return getInvalidLoginResult(userDAO.getUserByID(userId));
-    }
-  }
-
-  private void logActivity(String userId, String remoteAddr, String userAgent, User loggedInUser, boolean success) {
-    String resultStr = success ? " was successful" : " failed";
-    logger.info(">Session Activity> User login for id " + userId + resultStr +
-        ". IP: " + remoteAddr +
-        ", UA: " + userAgent +
-        (success ? ", user: " + loggedInUser.getID() : ""));
-  }*/
-
-/*  @Override
-  public LoginResult restoreUserSession() {
-    try {
-      User dbUser = getSessionUser();
-      boolean isSessionActive = dbUser != null;
-      String uid = (dbUser != null) ? dbUser.getUserID() : null;
-      logger.info(">Session Activity> User session restoration for id " +
-          uid + ((isSessionActive) ? " was successful" : " failed"));
-      // ensure a session is created.
-      if (!isSessionActive) {
-        securityManager.logoutUser(getThreadLocalRequest(), uid, true);
-        logger.info(">Session Activity> Sending Session Not Restored. Return early");
-        return new LoginResult(SessionNotRestored);
-      }
-      logger.info(">Session Activity> Session restoration successful. Checking login status.");
-      return new LoginResult(LoginResult.ResultType.Success);
-    } catch (DominoSessionException e) {
-      logger.info("got " + e, e);
-      return new LoginResult(LoginResult.ResultType.SessionExpired);
-    }
-  }*/
-
   public User getUserByID(String id) {
     return db.getUserDAO().getUserByID(id);
   }
 
   /**
-   * @param login
+   * This call is open - you do not need a session.
+   * It's called from the sign in form.
+   * @param id
+   * @return
+   */
+  @Override
+  public boolean isKnownUser(String id) {
+    boolean knownUser = db.getUserDAO().isKnownUser(id);
+    if (!knownUser) {
+      String normalized = normalizeSpaces(id);
+      if (!normalized.equals(id)) {
+        knownUser = db.getUserDAO().isKnownUser(normalized);
+      }
+    }
+    return knownUser;
+  }
+
+  @Override
+  public boolean isValidUser(String id) {
+    User userByID = getUserDealWithSpaces(id);
+    return userByID != null && userByID.isValid();
+  }
+
+  @Override
+  public boolean isKnownUserWithEmail(String id) {
+    User userByID = getUserDealWithSpaces(id);
+    return userByID != null && userByID.hasValidEmail();
+  }
+
+  @Nullable
+  private User getUserDealWithSpaces(String id) {
+    User userByID = db.getUserDAO().getUserByID(id);
+    if (userByID == null) {
+      String normalized = normalizeSpaces(id);
+      if (!normalized.equals(id)) {
+        userByID = db.getUserDAO().getUserByID(normalized);
+      }
+    }
+    return userByID;
+  }
+
+  private String normalizeSpaces(String trim) {
+    return trim.replaceAll("\\s+", "_");
+  }
+
+  /**
    * @see InitialUI#logout
    */
-  public void logout(String login) {
-    securityManager.logoutUser(getThreadLocalRequest(), login, true);
-    //removeCookie(getThreadLocalResponse(), "r");
+  public void logout() throws DominoSessionException {
+    User sessionUser = getSessionUser();
+    securityManager.logoutUser(getThreadLocalRequest(), sessionUser.getUserID(), true);
   }
 
   /**
@@ -220,20 +202,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @return
-   * @see UserTable#showUsers(UserServiceAsync)
-   */
-  public List<User> getUsers() {
-    return db.getUserManagement().getUsers();
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.dliclass.DLIClassOps#showUsers
+   * @seex UserTable#showUsers(UserServiceAsync)
    */
 /*
-  @Override
-  public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
-    return db.getUserDAO().getMiniByKind();
+  public List<User> getUsers() {
+    return db.getUserManagement().getUsers();
   }
 */
 
@@ -248,6 +221,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
+   * Also creates a session.
+   *
    * @param userId
    * @param userKey
    * @param newPassword
@@ -299,14 +274,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * TODOx: consider stronger passwords like in domino.
+   *  consider stronger passwords like in domino.
    *
    * @param currentHashedPassword
    * @param newHashedPassword
    * @return
    * @see ChangePasswordView#changePassword
    */
-  public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) {
+  public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException{
     int userIDFromSession = getUserIDFromSessionOrDB();
     User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
     return

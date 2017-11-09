@@ -170,9 +170,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       playAudio.getAllPossible().forEach(audioAttribute -> {
         if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
       });
-    } else {
-      //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
     }
+    //else {
+      //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
+    //}
 
     if (contextRefID != -1) {
       // logger.info("getRefAudio asking for context " + contextRefID);

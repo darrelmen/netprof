@@ -96,8 +96,12 @@ public class AnalysisTab extends DivWidget {
    * @param showTab
    */
   public AnalysisTab(ExerciseController controller, final ShowTab showTab) {
-    this(controller, showTab, 1, null,
-        controller.getUser(), controller.getUserManager().getUserID(),
+    this(controller,
+        showTab,
+        1,
+        null,
+        controller.getUser(),
+        controller.getUserManager().getUserID(),
         -1);
   }
 
@@ -117,7 +121,7 @@ public class AnalysisTab extends DivWidget {
                      int listid) {
     this.userid = userid;
     this.listid = listid;
-    getElement().setId("AnalysisTab");
+    //getElement().setId("AnalysisTab");
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
@@ -127,7 +131,7 @@ public class AnalysisTab extends DivWidget {
 
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
-        controller.getSoundManager(), playFeedback, controller);
+        controller.getSoundManager(), playFeedback, controller, controller.getMessageHelper());
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);

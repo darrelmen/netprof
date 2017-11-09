@@ -35,7 +35,6 @@ package mitll.langtest.shared.user;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.SignUpForm;
-import mitll.langtest.client.user.UserTable;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -484,24 +483,21 @@ public class User extends MiniUser implements ReportUser {
    */
   public boolean isValid() {
     boolean hasStandardInfo =
-        //   isValid(emailHash) &&
-        isValidEmailGrammar(email) &&
+        hasValidEmail() &&
             isValid(first) &&
             isValid(last);
 
     // must have a gender (and ideally age and dialect) if you want to record audio
-//    boolean hasOptInfo =
-//        (getPermissions().isEmpty() ||
-//            ((getPermissions().contains(Permission.RECORD_AUDIO) ||
-//                getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
-//                getRealGender() != Gender.Unspecified));
-
     boolean recordInfoSet =
         !(getPermissions().contains(Permission.RECORD_AUDIO) ||
             getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
             getRealGender() != Gender.Unspecified;
 
     return hasStandardInfo && recordInfoSet;
+  }
+
+  public boolean hasValidEmail() {
+    return isValidEmailGrammar(email);
   }
 
   private boolean isValidEmailGrammar(String text) {

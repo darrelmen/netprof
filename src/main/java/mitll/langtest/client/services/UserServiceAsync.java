@@ -64,15 +64,12 @@ public interface UserServiceAsync {
 
   void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
 
-  void getUsers(AsyncCallback<List<User>> async);
-
   /**
    * No real need to pass this in
    *
-   * @param login
    * @param async
    */
-  void logout(String login, AsyncCallback<Void> async);
+  void logout(AsyncCallback<Void> async);
 
   void addUser(
       SignUpUser user,
@@ -86,11 +83,19 @@ public interface UserServiceAsync {
   void forgetProject(AsyncCallback<Void> async);
 
   void getUserByID(String id, AsyncCallback<User> async);
+  void isKnownUser(String id, AsyncCallback<Boolean> async);
+  void isValidUser(String id, AsyncCallback<Boolean> async);
 
   /**
    * @param async
    * @see UserManager#getPermissionsAndSetUser
    */
   void getUserFromSession(AsyncCallback<User> async);
-  // void restoreUserSession(AsyncCallback<LoginResult> async);
+
+  /**
+   * No user session needed.
+   * @param id
+   * @param async
+   */
+  void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 }

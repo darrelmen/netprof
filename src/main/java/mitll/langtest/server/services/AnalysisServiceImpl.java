@@ -36,8 +36,11 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -54,12 +57,12 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   /**
    * @param ids
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
    */
   @Override
-  public List<CommonShell> getShells(List<Integer> ids) {
+  public List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException {
     List<CommonShell> shells = new ArrayList<>();
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser();
 
     for (Integer id : ids) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, id);
@@ -77,42 +80,70 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
-  public Collection<UserInfo> getUsersWithRecordings() {
+  public Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
-    List<UserInfo> userInfo = db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
-    long now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+    if (hasTeacherPerm(-1)) {
+      List<UserInfo> userInfo = db.getAnalysis(getProjectIDFromUser()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+      long now = System.currentTimeMillis();
+      if (now - then > 100) {
+        logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+      }
+      return userInfo;
+    } else {
+      throw new RestrictedOperationException("performance report", true);
     }
-    return userInfo;
   }
 
   /**
-   * @param id
+   * @param userid
    * @param minRecordings
    * @param listid
    * @return
    * @seex mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
    */
   @Override
-  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid) {
-    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
-    int projectID = getProjectID();
+  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid)
+      throws DominoSessionException, RestrictedOperationException {
+    // logger.info("getPerformanceForUser " +userid+ " list " + listid + " min " + minRecordings);
+    int projectID = getProjectIDFromUser();
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      return getSlickAnalysis(projectID).getPerformanceReportForUser(id, minRecordings, listid);
+      if (hasTeacherPerm(userid)) {
+        return getSlickAnalysis(projectID)
+            .getPerformanceReportForUser(userid, minRecordings, listid);
+      } else {
+        throw new RestrictedOperationException("performance report", true);
+      }
     }
   }
 
+  private boolean hasTeacherPerm(int userid) throws DominoSessionException {
+    User userFromSession = getUserFromSession();
+    if (userFromSession == null) {
+      logger.error("no user in session?");
+      throw new DominoSessionException();
+    }
+    Collection<User.Permission> permissions = userFromSession.getPermissions();
+    return
+        userFromSession.getID() == userid || // self
+            permissions.contains(User.Permission.TEACHER_PERM) ||
+            permissions.contains(User.Permission.PROJECT_ADMIN);
+  }
+
   @Override
-  public List<WordAndScore> getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to) {
+  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to)
+      throws DominoSessionException, RestrictedOperationException {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser();
     if (projectID == -1) {
       return new ArrayList<>();
     } else {
-      return getSlickAnalysis(projectID).getPhoneReportFor(id, listid, phone, from, to);
+      if (hasTeacherPerm(userid)) {
+        return getSlickAnalysis(projectID).getPhoneReportFor(userid, listid, phone, from, to);
+      } else {
+        throw new RestrictedOperationException("performance report for phone", true);
+      }
     }
   }
 
@@ -137,7 +168,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
 /*  @Override
   public List<WordScore> getWordScores(int id, int minRecordings, int listid) {
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser();
     if (projectID == -1) return new ArrayList<>();
 
     List<WordScore> wordScoresForUser = db.getAnalysis(projectID).getWordScoresForUser(id, minRecordings, listid);
@@ -154,7 +185,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
 /*  @Override
   public PhoneReport getPhoneScores(int id, int minRecordings, int listid) {
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser();
     if (projectID == -1) return new PhoneReport();
     return db.getAnalysis(projectID).getPhonesForUser(id, minRecordings, listid);
   }*/

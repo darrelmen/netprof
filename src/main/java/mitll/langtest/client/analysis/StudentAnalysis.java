@@ -37,6 +37,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -82,6 +83,7 @@ public class StudentAnalysis extends DivWidget {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
+        controller.getMessageHelper().handleNonFatalError("Error retrieving user performance!", throwable);
       }
 
       @Override

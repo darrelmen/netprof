@@ -43,6 +43,7 @@ import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -129,8 +130,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean doFlashcard,
                                     boolean recordInResults,
                                     boolean addToAudioTable,
-                                    boolean allowAlternates) {
-    AudioFileHelper audioFileHelper = getAudioFileHelper();
+                                    boolean allowAlternates) throws DominoSessionException {
+    int projectID = getProjectIDFromUser();
+    AudioFileHelper audioFileHelper = getAudioFileHelper(db.getProject(projectID));
 
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
@@ -151,14 +153,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean amas = serverProps.isAMAS();
 
     CommonExercise commonExercise = amas || isExistingExercise ?
-        db.getCustomOrPredefExercise(getProjectID(), exerciseID) :
+        db.getCustomOrPredefExercise(projectID, exerciseID) :
         db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
 
-    int projid = audioContext.getProjid();
-    String language = db.getProject(projid).getLanguage();
+    int audioContextProjid = audioContext.getProjid();
+
+    if (audioContextProjid !=  projectID) logger.error("huh? session project " + projectID + " vs " + audioContextProjid);
+
+    String language = db.getProject(audioContextProjid).getLanguage();
 
     if (!isExistingExercise) {
-      ((Exercise) commonExercise).setProjectID(projid);
+      ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
 

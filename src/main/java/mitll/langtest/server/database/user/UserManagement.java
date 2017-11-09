@@ -160,11 +160,11 @@ public class UserManagement {
           //  int size = idToCount.idToUniqueCount.get(u.getID()).size();
 
           // TODO : put this back
-          if (false) {
+//          if (false) {
    /*         boolean complete = size >= numExercises;
             u.setComplete(complete);
             u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));*/
-          }
+  //        }
 /*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
             " vs total exercises " + total + " complete " + complete);*/
         }

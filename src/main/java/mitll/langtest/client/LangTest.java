@@ -54,6 +54,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.amas.AMASInitialUI;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -1183,5 +1184,11 @@ public class LangTest implements
   @Override
   public CommentAnnotator getCommentAnnotator() {
     return annotationHelper;
+  }
+
+  MessageHelper messageHelper = new MessageHelper(initialUI,this);
+  @Override
+  public MessageHelper getMessageHelper() {
+    return messageHelper;
   }
 }

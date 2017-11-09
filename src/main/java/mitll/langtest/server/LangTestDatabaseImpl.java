@@ -38,10 +38,11 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
-import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -49,6 +50,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.User;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.logging.log4j.LogManager;
@@ -152,23 +154,31 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  protected ISection<CommonExercise> getSectionHelper() {
+  protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
     return super.getSectionHelper();
   }
 
-  private Collection<CommonExercise> getExercisesForUser() {
-    return db.getExercises(getProjectID());
+  private Collection<CommonExercise> getExercisesForUser() throws DominoSessionException {
+    return db.getExercises(getProjectIDFromUser());
   }
-
-/*  public ContextPractice getContextPractice() {
-    return db.getContextPractice();
-  }*/
 
   /**
    * @see UserMenu#getProjectSpecificChoices
    */
-  public void sendReport() {
-    db.sendReport(securityManager.getUserIDFromSession(getThreadLocalRequest()));
+  public void sendReport() throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSession = securityManager.getUserIDFromSession(getThreadLocalRequest());
+
+    User byID = db.getUserDAO().getByID(userIDFromSession);
+    if (byID == null) {
+      logger.error("huh? no user by " + userIDFromSession);
+    } else {
+      boolean hasPerm = byID.getPermissions().contains(User.Permission.PROJECT_ADMIN);
+      if (hasPerm) {
+        db.sendReport(userIDFromSession);
+      } else {
+        throw new RestrictedOperationException("send report", true);
+      }
+    }
   }
 
   /**
@@ -195,6 +205,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
+
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
@@ -228,8 +239,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  public List<Event> getEvents() {
-    return db.getEventDAO().getAll(getProjectID());
+  public List<Event> getEvents() throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      return db.getEventDAO().getAll(getProjectIDFromUser(userIDFromSessionOrDB));
+    } else {
+      throw new RestrictedOperationException("getting events", true);
+    }
   }
 
   /**
@@ -239,12 +255,16 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see mitll.langtest.client.custom.recording.RecorderNPFHelper#getProgressInfo
    */
   @Override
-  public Map<String, Float> getMaleFemaleProgress() {
-    return db.getMaleFemaleProgress(getProjectID());
+  public Map<String, Float> getMaleFemaleProgress() throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasRecordPerm(userIDFromSessionOrDB)) {
+      return db.getMaleFemaleProgress(getProjectIDFromUser(userIDFromSessionOrDB));
+    } else {
+      throw new RestrictedOperationException("getting recording progress", true);
+    }
   }
 
   /**
-   * @param userid         who's asking?
    * @param ids            items the user has actually practiced/recorded audio for
    * @param latestResultID
    * @param typeToSection  indicates the unit and chapter(s) we're asking about
@@ -253,17 +273,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   @Override
-  public AVPScoreReport getUserHistoryForList(int userid,
-                                              Collection<Integer> ids,
+  public AVPScoreReport getUserHistoryForList(Collection<Integer> ids,
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
-                                              int userListID) {
+                                              int userListID) throws DominoSessionException {
 /*    logger.debug("getUserHistoryForList" +
         "\n\tuser " + userid + " and" +
         "\n\tids " + ids.size() +
         "\n\tlist " + userListID+
         " type to section " + typeToSection);
     */
+    int userIDFromSession = getUserIDFromSessionOrDB();
+
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
 
     if (userListByID == null && userListID != -1) logger.error("no user list for " + userListID);
@@ -271,7 +292,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     List<Integer> allIDs = new ArrayList<>();
     Map<Integer, CollationKey> idToKey = new HashMap<>();
 
-    Collator collator = getCollator();
+    int projectID = getProjectIDFromUser(userIDFromSession);
+    Collator collator = getCollator(projectID);
     if (userListByID != null) {
       for (CommonShell exercise : userListByID.getExercises()) {
         populateCollatorMap(allIDs, idToKey, collator, exercise);
@@ -284,13 +306,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     }
-    String language = db.getLanguage(getProjectID());
+    String language = db.getLanguage(projectID);
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, (int) latestResultID, allIDs, idToKey, language);
+    return db.getUserHistoryForList(userIDFromSession, ids, (int) latestResultID, allIDs, idToKey, language);
   }
 
-  private Collator getCollator() {
-    return getAudioFileHelper().getCollator();
+  private Collator getCollator(int projid) {
+    AudioFileHelper audioFileHelper = getAudioFileHelper(db.getProject(projid));
+    return audioFileHelper == null ? null : audioFileHelper.getCollator();
   }
 
   private void populateCollatorMap(List<Integer> allIDs, Map<Integer, CollationKey> idToKey, Collator collator,

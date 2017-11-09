@@ -643,10 +643,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return pool.getMongoCollection(USERS_C);
   }
 
+
   /**
    * @param userID
    * @return
-   * @seex mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
+   * @see mitll.langtest.server.database.copy.UserCopy#makeCollisionAccount
    */
   @Override
   public User getUserByID(String userID) {
@@ -660,6 +661,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return getUser(dominoUser);
   }
 
+  public boolean isKnownUser(String userid) { return getDBUser(userid) != null; }
   @Override
   public DBUser getDBUser(String userID) {
     return delegate.getDBUser(userID);

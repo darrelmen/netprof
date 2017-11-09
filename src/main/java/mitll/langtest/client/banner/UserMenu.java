@@ -26,7 +26,6 @@ import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.client.user.UserTable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -137,7 +136,7 @@ public class UserMenu {
     return new LinkAndTitle(LOG_OUT, new LogoutClickHandler());
   }
 
-  private class UsersClickHandler implements ClickHandler {
+/*  private class UsersClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -149,7 +148,7 @@ public class UserMenu {
         }
       });
     }
-  }
+  }*/
 
   private class EventsClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {

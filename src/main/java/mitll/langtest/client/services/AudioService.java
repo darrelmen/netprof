@@ -37,6 +37,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -69,11 +71,11 @@ public interface AudioService extends RemoteService {
                              boolean doFlashcard,
                              boolean recordInResults,
                              boolean addToAudioTable,
-                             boolean allowAlternates);
+                             boolean allowAlternates) throws DominoSessionException;
 
   /**
    * TODO : why exerciseID a String
-   * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
+   * @see LangTest#getImage
    * @param reqid
    * @param audioFile
    * @param imageType
@@ -84,13 +86,13 @@ public interface AudioService extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid,
                                      String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID,
-                                     String language);
+                                     String language) throws DominoSessionException;
 
   /**
    * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio(ProjectInfo)
    * @param projectid
    */
-  void checkAudio(int projectid);
-  void ensureAllAudio();
-  void recalcRefAudio(int projectid);
+  void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
+  void ensureAllAudio() throws DominoSessionException, RestrictedOperationException;
+  void recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 }

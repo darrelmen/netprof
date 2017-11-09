@@ -90,7 +90,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #makeFixedButton
    */
   private static final String FIXED = "Mark Fixed";
- // private static final String DUPLICATE = "Duplicate";
+  // private static final String DUPLICATE = "Duplicate";
   /**
    * @seex #getRemove
    */
@@ -206,7 +206,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
     Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, preferredVoices, false);
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-    return maleUsers.isEmpty() ?  Collections.emptyList() : malesMap.get(maleUsers.get(0));
+    return maleUsers.isEmpty() ? Collections.emptyList() : malesMap.get(maleUsers.get(0));
   }
 
   /**
@@ -628,8 +628,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param exerciseList
    * @param toAddTo
    * @param onClick
-   * @see #isValidForeignPhrase
    * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   * @see #isValidForeignPhrase
    */
   @Override
   void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
@@ -816,7 +816,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected void doAfterEditComplete(ListInterface<CommonShell, CommonExercise> pagingContainer, boolean buttonClicked) {
-      super.doAfterEditComplete(pagingContainer, buttonClicked);
+    super.doAfterEditComplete(pagingContainer, buttonClicked);
     //changeTooltip(pagingContainer);
     if (buttonClicked) {
       userSaidExerciseIsFixed();
@@ -902,28 +902,26 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
      */
     @Override
     protected Widget getAfterPlayWidget() {
-      ClickHandler handler = new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          deleteButton.setEnabled(false);
-          int id = exercise.getID();
-          logger.info("marking audio defect for " + getAudioAttribute() + " on " + id);
-          controller.getQCService().markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+      ClickHandler handler = event -> {
+        deleteButton.setEnabled(false);
+        int id = exercise.getID();
+        logger.info("marking audio defect for " + getAudioAttribute() + " on " + id);
+        controller.getQCService().markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.getMessageHelper().handleNonFatalError("marking audio defect", caught);
+          }
 
-            @Override
-            public void onSuccess(Void result) {
-              getWaveform().setVisible(false);
-              setEnabled(false);
-              if (comment != null) {
-                comment.setVisible(false);
-              }
-              LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+          @Override
+          public void onSuccess(Void result) {
+            getWaveform().setVisible(false);
+            setEnabled(false);
+            if (comment != null) {
+              comment.setVisible(false);
             }
-          });
-        }
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+          }
+        });
       };
 
       deleteButton = getDeleteButton(DELETE_THIS_AUDIO_CUT, handler);

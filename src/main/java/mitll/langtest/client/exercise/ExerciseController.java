@@ -33,9 +33,11 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -119,4 +121,6 @@ public interface ExerciseController extends Services, ExceptionSupport {
   void showDrillList(int id);
 
   CommentAnnotator getCommentAnnotator();
+
+  MessageHelper getMessageHelper();
 }

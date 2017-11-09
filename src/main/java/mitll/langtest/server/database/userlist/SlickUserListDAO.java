@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.userlist;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -314,9 +313,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean remove(long unique) {
-    return dao.markDeleted((int) unique);
-  }
+  public boolean remove(int unique) { return dao.markDeleted(unique);  }
 
   @Override
   public void bringBack(long unique) {

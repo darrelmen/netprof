@@ -162,7 +162,8 @@ public class ReviewItemHelper extends NPFHelper {
                                                              String prefix,
                                                              boolean onlyWithAudioAnno, boolean onlyUnrecorded,
                                                              boolean onlyDefaultUser, boolean onlyUninspected) {
-          return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected).setQC(true);
+          return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser,
+              onlyUninspected).setQC(true);
         }
 
         /**

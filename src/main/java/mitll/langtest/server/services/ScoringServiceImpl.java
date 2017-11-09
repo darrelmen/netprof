@@ -46,6 +46,8 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -93,7 +95,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         exercise = db.getAMASExercise(exerciseID);
         sentence = exercise.getForeignLanguage();
       } else {
-        CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
+        CommonExercise exercise1 = db.getExercise(getProjectIDFromUser(), exerciseID);
 
         if (exercise1 != null) {
           transliteration = exercise1.getTransliteration();
@@ -143,8 +145,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @Override
-  public void recalcAlignments(int projid) {
-    recalcAlignments(getUserIDFromSessionOrDB(), db.getProject(projid));
+  public void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      recalcAlignments(userIDFromSessionOrDB, db.getProject(projid));
+    } else {
+      throw new RestrictedOperationException("recalc alignments", true);
+    }
   }
 
   private void recalcAlignments(int userIDFromSession, Project project) {
@@ -208,10 +215,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param projid
    * @param audioIDs
    * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getRefAudio
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getAlignments
    */
   @Override
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) {
+  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
     logger.info("getAlignments asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     logger.info("getAlignments recalc " + audioIDMap.size() + " alignments...");
@@ -227,9 +234,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return recalcAlignments(projid, audioIDs, getAudioFileHelper(projid), userIDFromSession, audioToResult, hasModel);
   }
 
-  private AudioFileHelper getAudioFileHelper(int projid) {
+/*  private AudioFileHelper getAudioFileHelper(int projid) {
     return db.getProject(projid).getAudioFileHelper();
-  }
+  }*/
 
   /**
    * @param projid
@@ -400,17 +407,18 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
                                           ImageOptions imageOptions,
                                           int exerciseID,
-                                          boolean usePhonemeMap) {
+                                          boolean usePhonemeMap) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav"));
 
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, exerciseID);
 
     String english = customOrPredefExercise == null ? "" : customOrPredefExercise.getEnglish();
     AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
     PrecalcScores precalcScores =
         audioFileHelper
-            .checkForWebservice(exerciseID, english, sentence, projectID, getUserIDFromSessionOrDB(), absoluteAudioFile);
+            .checkForWebservice(exerciseID, english, sentence, projectID, userIDFromSessionOrDB, absoluteAudioFile);
 
     return getPretestScore(reqid,
         (int) resultID,
@@ -556,9 +564,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                   String transliteration,
                                   String identifier,
                                   int reqid,
-                                  String device) {
-    AudioAnswer audioAnswer = getAudioFileHelper().getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
-        serverProps.usePhoneToDisplay());
+                                  String device) throws DominoSessionException {
+    AudioAnswer audioAnswer = getAudioFileHelper()
+        .getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
+            serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("getAlignment : huh? got zero length recording for " + identifier + " from " + device);
@@ -573,27 +582,31 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.project.ProjectEditForm#getUserForm
    */
   @Override
-  public boolean isHydraRunning(int projid) {
-    Project project = db.getProject(projid);
-    if (project == null) {
-      logger.debug("isHydraRunning no project with id " + projid);
-      return false;
-    } else {
-      try {
-        //  logger.debug("isHydraRunning  project with id " + projid);
-        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-        //logger.debug("isHydraRunning  audioFileHelper " + audioFileHelper);
-        boolean hydraAvailable = audioFileHelper.isHydraAvailable();
-        // logger.debug("isHydraRunning  hydraAvailable " + hydraAvailable);
-        boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
-        // logger.debug("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
-
-        if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
-        return hydraAvailableCheckNow;
-      } catch (Exception e) {
-        logger.error("got " + e, e);
+  public boolean isHydraRunning(int projid) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      Project project = db.getProject(projid);
+      if (project == null) {
+        logger.debug("isHydraRunning no project with id " + projid);
         return false;
+      } else {
+        try {
+          //  logger.debug("isHydraRunning  project with id " + projid);
+          AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+          //logger.debug("isHydraRunning  audioFileHelper " + audioFileHelper);
+          boolean hydraAvailable = audioFileHelper.isHydraAvailable();
+          // logger.debug("isHydraRunning  hydraAvailable " + hydraAvailable);
+          boolean hydraAvailableCheckNow = audioFileHelper.isHydraAvailableCheckNow();
+          // logger.debug("isHydraRunning  isHydraAvailableCheckNow " + hydraAvailableCheckNow);
+
+          if (!hydraAvailable && hydraAvailableCheckNow) audioFileHelper.setAvailable();
+          return hydraAvailableCheckNow;
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+          return false;
+        }
       }
+    } else {
+      throw new RestrictedOperationException("checking hydra status", true);
     }
   }
 
@@ -606,6 +619,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
+   * TODO : remove me - we don't do this anymore.
+   * <p>
    * Can't check if it's valid if we don't have a model.
    *
    * @param foreign
@@ -613,7 +628,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+  public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 }

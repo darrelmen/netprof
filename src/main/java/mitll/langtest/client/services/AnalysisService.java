@@ -34,7 +34,9 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -42,7 +44,7 @@ import java.util.List;
 
 @RemoteServiceRelativePath("analysis-manager")
 public interface AnalysisService extends RemoteService {
-  Collection<UserInfo> getUsersWithRecordings();
+  Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
 
   /**
    * TODO : why do we have to do this at all???
@@ -50,9 +52,9 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
    */
-  List<CommonShell> getShells(List<Integer> ids);
+  List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException;
 
-  AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
+  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) throws DominoSessionException,RestrictedOperationException;
 
-  List<WordAndScore> getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to);
+  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException,RestrictedOperationException;
 }

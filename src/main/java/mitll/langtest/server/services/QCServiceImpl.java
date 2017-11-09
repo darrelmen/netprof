@@ -32,9 +32,12 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.services.QCService;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -54,7 +57,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   @Override
-  public void addAnnotation(int exerciseID, String field, String status, String comment) {
+  public void addAnnotation(int exerciseID, String field, String status, String comment) throws DominoSessionException {
     getUserListManager().addAnnotation(exerciseID, field, status, comment, getUserIDFromSessionOrDB());
   }
 
@@ -63,16 +66,16 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @param isCorrect
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markReviewed(int id, boolean isCorrect) {
+  public void markReviewed(int id, boolean isCorrect) throws DominoSessionException {
     getUserListManager().markCorrectness(id, isCorrect, getUserIDFromSessionOrDB());
   }
 
   /**
    * @param exid
    * @param state
-   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
+   * @see ReviewEditableExercise#userSaidExerciseIsFixed
    */
-  public void markState(int exid, STATE state) {
+  public void markState(int exid, STATE state) throws DominoSessionException {
     getUserListManager().markState(exid, state, getUserIDFromSessionOrDB());
   }
 
@@ -82,26 +85,31 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   @Override
-  public void markAudioDefect(AudioAttribute audioAttribute, HasID exid) {
-    logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
-    //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
-    //int beforeNumAudio = before.getAudioAttributes().size();
-    db.markAudioDefect(audioAttribute);
+  public void markAudioDefect(AudioAttribute audioAttribute, HasID exid) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasQCPerm(userIDFromSessionOrDB)) {
+      logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
+      //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
+      //int beforeNumAudio = before.getAudioAttributes().size();
+      db.markAudioDefect(audioAttribute);
 
-    CommonExercise byID = db.getCustomOrPredefExercise(getProjectID(), exid.getID());  // allow custom items to mask out non-custom items
+      CommonExercise byID = db.getCustomOrPredefExercise(getProjectIDFromUser(userIDFromSessionOrDB), exid.getID());  // allow custom items to mask out non-custom items
 
-    if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
-      String key = audioAttribute.getKey();
-      logger.warn("markAudioDefect huh? couldn't remove key '" + key +
-          "' : " + audioAttribute + " from ex #" + exid +
-          "\n\tkeys were " + byID.getAudioRefToAttr().keySet()
-      //    + " contains " + byID.getAudioRefToAttr().containsKey(key)
-      );
-    }
+      if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
+        String key = audioAttribute.getKey();
+        logger.warn("markAudioDefect huh? couldn't remove key '" + key +
+                "' : " + audioAttribute + " from ex #" + exid +
+                "\n\tkeys were " + byID.getAudioRefToAttr().keySet()
+            //    + " contains " + byID.getAudioRefToAttr().containsKey(key)
+        );
+      }
     /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
       logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
     }*/
+    } else {
+      throw new RestrictedOperationException("marking audio defect", true);
+    }
   }
 
   /**
@@ -114,36 +122,39 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup
    */
   @Override
-  public void markGender(AudioAttribute attr, boolean isMale) {
-    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), attr.getExid());
-    int projid = -1;
-    if (customOrPredefExercise == null) {
-      logger.error("markGender can't find exercise id " + attr.getExid() + "?");
-    } else {
-      projid = customOrPredefExercise.getProjectID();
-    }
-    db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
+  public void markGender(AudioAttribute attr, boolean isMale) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasQCPerm(userIDFromSessionOrDB)) {
 
-    int exid = attr.getExid();
-    CommonExercise byID = db.getCustomOrPredefExercise(projid, exid);
-    if (byID == null) {
-      logger.error(getLanguage() + " : couldn't find exercise " + exid);
-      logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
-    } else {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectIDFromUser(), attr.getExid());
+      int projid = -1;
+      if (customOrPredefExercise == null) {
+        logger.error("markGender can't find exercise id " + attr.getExid() + "?");
+      } else {
+        projid = customOrPredefExercise.getProjectID();
+      }
+      db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
 
-      // TODO : consider putting this back???
-      //   byID.getAudioAttributes().clear();
+      int exid = attr.getExid();
+      CommonExercise byID = db.getCustomOrPredefExercise(projid, exid);
+      if (byID == null) {
+        logger.error(getLanguage() + " : couldn't find exercise " + exid);
+        logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
+      } else {
+
+        // TODO : consider putting this back???
+        //   byID.getAudioAttributes().clear();
 //      logger.debug("re-attach " + attr + " given isMale " + isMale);
 
-      // TODO : consider putting this back???
-      //   attachAudio(byID);
+        // TODO : consider putting this back???
+        //   attachAudio(byID);
 /*
       String addr = Integer.toHexString(byID.hashCode());
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
         logger.debug("markGender 1 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on " + addr);
       }
 */
-      db.getExerciseDAO(getProjectID()).addOverlay(byID);
+        db.getExerciseDAO(getProjectIDFromUser()).addOverlay(byID);
 
 /*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
       String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());
@@ -152,8 +163,11 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
         logger.debug("markGender 2 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on "+ adrr3);
       }*/
 
+      }
+      getSectionHelper().refreshExercise(byID);
+    } else {
+      throw new RestrictedOperationException("marking gender", true);
     }
-    getSectionHelper().refreshExercise(byID);
   }
 
   /**
@@ -164,7 +178,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @seex ReviewEditableExercise#confirmThenDeleteItem
    */
 /*  public boolean deleteItem(int id) {
-    boolean b = db.deleteItem(id, getProjectID());
+    boolean b = db.deleteItem(id, getProjectIDFromUser());
     if (b) {
       // force rebuild of full trie
       getProject().buildExerciseTrie();

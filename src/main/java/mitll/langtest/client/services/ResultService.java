@@ -37,6 +37,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -44,23 +46,22 @@ import java.util.Map;
 @RemoteServiceRelativePath("result-manager")
 public interface ResultService extends RemoteService {
   /**
-   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
    * @param unitToValue
    * @param flText
    * @param which
    * @return
+   * @see mitll.langtest.client.result.ResultTypeAhead#getTypeaheadUsing
    */
-  Collection<String> getResultAlternatives(Map<String, String> unitToValue, String flText, String which);
+  Collection<String> getResultAlternatives(Map<String, String> unitToValue, String flText, String which) throws DominoSessionException, RestrictedOperationException;
 
 
   /**
-   * @see ResultManager#showResults
    * @return
+   * @see ResultManager#showResults
    */
-  int getNumResults();
+  int getNumResults() throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see ResultManager#createProvider
    * @param start
    * @param end
    * @param sortInfo
@@ -68,7 +69,8 @@ public interface ResultService extends RemoteService {
    * @param flText
    * @param req
    * @return
+   * @see ResultManager#createProvider
    */
   ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue,
-                            String flText, int req);
+                            String flText, int req) throws DominoSessionException, RestrictedOperationException;
 }

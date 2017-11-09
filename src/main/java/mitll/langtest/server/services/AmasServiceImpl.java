@@ -36,6 +36,7 @@ import mitll.langtest.client.services.AmasService;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.shared.amas.Answer;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
 
@@ -82,7 +83,12 @@ public class AmasServiceImpl extends MyRemoteServiceServlet implements AmasServi
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
                                               Collection<Integer> exids) {
-    return new QuizCorrect(db).getScoresForUser(typeToSection, getUserIDFromSessionOrDB(), exids, getProjectID());
+    try {
+      return new QuizCorrect(db).getScoresForUser(typeToSection, getUserIDFromSessionOrDB(), exids, getProjectIDFromUser());
+    } catch (DominoSessionException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**

@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.common.DominoSessionException;
 
 import java.util.Set;
 
@@ -42,7 +43,7 @@ import java.util.Set;
  */
 @RemoteServiceRelativePath("dliclass-manager")
 public interface DLIClassService extends RemoteService {
-  Set<Integer> getStudents();
-  void add(int student);
-  void remove(int student);
+  Set<Integer> getStudents() throws DominoSessionException;
+  void add(int student) throws DominoSessionException;
+  void remove(int student) throws DominoSessionException;
 }

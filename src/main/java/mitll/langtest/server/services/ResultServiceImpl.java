@@ -98,7 +98,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
   @Override
   public int getNumResults() {
-    return db.getResultDAO().getNumResults(getProjectID());
+    return db.getResultDAO().getNumResults(getProjectIDFromUser());
   }
 
   /**
@@ -113,7 +113,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    */
   private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
     logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
-    int projectID = getProjectID();
+    int projectID = getProjectIDFromUser();
 
     if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
@@ -200,7 +200,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   }
 
   private Collection<MonitorResult> getMonitorResults() {
-    return db.getMonitorResults(getProjectID());
+    return db.getMonitorResults(getProjectIDFromUser());
   }
 
   /**
@@ -224,7 +224,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     Collection<String> matches = new TreeSet<>();
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder(getProjectID())) {
+    for (String type : db.getTypeOrder(getProjectIDFromUser())) {
       if (unitToValue.containsKey(type)) {
         logger.debug("getResultAlternatives making trie for " + type);
         // make trie from results

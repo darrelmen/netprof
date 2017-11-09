@@ -35,8 +35,8 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.StartupInfo;
@@ -57,19 +57,22 @@ import java.util.Map;
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
   /**
+   * Open call...
+   *
+   * Before log in...
    * @return
-   * @see LangTest#onModuleLoad()
+   * @see LangTest#onModuleLoad
    */
-  StartupInfo getStartupInfo();
+  StartupInfo getStartupInfo()  ;
 
   /**
+   * Only recorders can call this.
    * @return
-   * @seex RecorderNPFHelper#getProgressInfo
+   * @see mitll.langtest.client.custom.recording.RecorderNPFHelper#getProgressInfo
    */
-  Map<String, Float> getMaleFemaleProgress();
+  Map<String, Float> getMaleFemaleProgress() throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @param userid
    * @param ids
    * @param latestResultID
    * @param typeToSection
@@ -77,17 +80,19 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
-  AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
-                                       Map<String, Collection<String>> typeToSection, int userListID);
+  AVPScoreReport getUserHistoryForList(Collection<Integer> ids, long latestResultID,
+                                       Map<String, Collection<String>> typeToSection, int userListID) throws DominoSessionException;
   // Telemetry ---
 
   /**
+   * Anyone can call this.
    * @param message
    * @see LangTest#logMessageOnServer
    */
   void logMessage(String message, boolean sendEmail);
 
   /**
+   * Anyone can call this.
    * @param id
    * @param widgetType
    * @param exid
@@ -103,14 +108,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  Collection<Event> getEvents();
+  Collection<Event> getEvents() throws DominoSessionException, RestrictedOperationException;
 
-  void sendReport();
-  /**
-   * Dialog support...
-   *
-   * @return
-   * @seex mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
-   */
-  //ContextPractice getContextPractice();
+  void sendReport() throws DominoSessionException, RestrictedOperationException;
 }

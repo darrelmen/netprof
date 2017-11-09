@@ -39,6 +39,8 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -58,15 +60,15 @@ public interface ScoringService extends RemoteService {
    * @return
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
-  PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
+  PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
    * @param projid
+   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
    */
-  void recalcAlignments(int projid);
+  void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
-  Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs);
+  Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
 
   /**
    * @param reqid
@@ -84,7 +86,7 @@ public interface ScoringService extends RemoteService {
                                    String sentence,
                                    String transliteration,
 
-                                   ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap);
+                                   ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @param base64EncodedString
@@ -100,7 +102,7 @@ public interface ScoringService extends RemoteService {
                            String transliteration,
                            String identifier,
                            int reqid,
-                           String device);
+                           String device) throws DominoSessionException;
 
   /**
    * @param resultid
@@ -108,14 +110,14 @@ public interface ScoringService extends RemoteService {
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
    * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
    */
-  void addRoundTrip(int resultid, int roundTrip);
+  void addRoundTrip(int resultid, int roundTrip) throws DominoSessionException;
 
-  boolean isHydraRunning(int projid);
+  boolean isHydraRunning(int projid) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @param foreign
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-  boolean isValidForeignPhrase(String foreign, String transliteration);
+  boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
 }

@@ -33,7 +33,9 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -44,6 +46,7 @@ public interface AnalysisServiceAsync {
 
   /**
    * TODO : not sure why this is ever needed
+   *
    * @param ids
    * @param async
    */
@@ -51,5 +54,15 @@ public interface AnalysisServiceAsync {
 
   void getPerformanceReportForUser(int id, int minRecordings, int listid, AsyncCallback<AnalysisReport> async);
 
-  void getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to, AsyncCallback<List<WordAndScore>> async);
+  /**
+   * @param id
+   * @param listid
+   * @param phone
+   * @param from
+   * @param to
+   * @param async
+   * @see PhoneContainer#clickOnPhone2
+   */
+  void getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to,
+                                           AsyncCallback<List<WordAndScore>> async);
 }
