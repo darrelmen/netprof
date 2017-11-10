@@ -513,11 +513,11 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);
-    if (path != null && path.endsWith(".wav")) {
-      logger.info("rememberAudio convert" +
-          "\nfrom " + path +
-          "\nto   " + currentPath);
-    }
+//    if (path != null && path.endsWith(".wav")) {
+//      logger.info("rememberAudio convert" +
+//          "\nfrom " + path +
+//          "\nto   " + currentPath);
+//    }
     return currentPath;
   }
 

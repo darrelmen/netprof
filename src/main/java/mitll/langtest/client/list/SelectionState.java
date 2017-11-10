@@ -161,7 +161,8 @@ public class SelectionState {
           }
         }
       } else if (part.length() > 0) {
-        logger.info("parseToken skipping part '" + part + "'");
+        if (!part.equals("null"))
+          logger.info("parseToken skipping part '" + part + "'");
       }
     }
 
@@ -194,9 +195,9 @@ public class SelectionState {
 
 
   /**
-   * @see mitll.langtest.client.download.DownloadHelper#showDialog
    * @param typeOrder
    * @return
+   * @see mitll.langtest.client.download.DownloadHelper#showDialog
    */
   public String getDescription(Collection<String> typeOrder) {
     if (typeToSection.isEmpty()) {
@@ -276,6 +277,6 @@ public class SelectionState {
         "item " + item + ", " +
         "project " + project + ", " +
         "unit->chapter " + getTypeToSection() +
-        " onlyWithAudioDefects="+isOnlyWithAudioDefects();
+        " onlyWithAudioDefects=" + isOnlyWithAudioDefects();
   }
 }

@@ -14,7 +14,6 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.client.sound.SimpleHighlightSegment;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +51,7 @@ public class ClickableWords<T extends CommonExercise> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-  // private boolean showPhones = true;
+   private boolean showPhones = true;
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
@@ -65,6 +64,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param exercise
    * @param language
    * @param fontSize
+   * @see TwoColumnExercisePanel#addWidgets
    */
   ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
     this.listContainer = listContainer;
@@ -72,7 +72,7 @@ public class ClickableWords<T extends CommonExercise> {
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
-    //  this.showPhones = showPhones;
+      this.showPhones = showPhones;
   }
 
   /**
@@ -432,7 +432,7 @@ public class ClickableWords<T extends CommonExercise> {
       int id,
       boolean isSimple,
       TwoColumnExercisePanel.FieldType fieldType) {
-    final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir, !isSimple);
+    final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir, !isSimple, showPhones);
 
     InlineHTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == TwoColumnExercisePanel.FieldType.FL) {

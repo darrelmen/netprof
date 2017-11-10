@@ -48,6 +48,7 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
+import javax.servlet.http.HttpSession;
 import java.util.logging.Logger;
 
 public class SignInForm extends UserDialog implements SignIn {
@@ -350,7 +351,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private void handleLoginResponse(LoginResult result, String user, String freeTextPassword) {
     if (result.getResultType() == LoginResult.ResultType.Failed) {
       eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
-      logger.info("No userField with that name '" + user +
+      logger.info("handleLoginResponse No userField with that name '" + user +
           "' freeTextPassword " + freeTextPassword.length() + " characters - ");
 
       markErrorBlur(password, NO_USER_FOUND, Placement.BOTTOM);
@@ -364,7 +365,10 @@ public class SignInForm extends UserDialog implements SignIn {
         markErrorBlur(userField, APPLICATION_PERMISSION, Placement.BOTTOM);
         signIn.setEnabled(true);
       } else {
-        //    logger.info("user is enabled...");
+           logger.info("handleLoginResponse user is enabled... result " + result.getResultType());
+        /**
+         * {@link mitll.langtest.server.database.security.NPUserSecurityManager#getValidLogin}
+         */
         if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
           copyInfoToSignUp(user, loggedInUser);
           signIn.setEnabled(true);
@@ -448,7 +452,7 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public void setFocusPassword() {
     setFocusOn(password.box);
-    markErrorBlur(password, "Please enter your password.");
+    markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
   }
 
   /**

@@ -82,7 +82,6 @@ public interface UserServiceAsync {
 
   void forgetProject(AsyncCallback<Void> async);
 
- // void getUserByID(String id, AsyncCallback<User> async);
   void isKnownUser(String id, AsyncCallback<Boolean> async);
   void isValidUser(String id, AsyncCallback<Boolean> async);
 

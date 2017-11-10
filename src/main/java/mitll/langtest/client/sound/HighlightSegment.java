@@ -22,7 +22,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private boolean highlighted = false;
   private boolean clickable = true;
   private final DivWidget north, south;
-  // private final int id;
   private final String content;
   private final InlineHTML span;
 
@@ -32,7 +31,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR, true);
+    this(id, content, HasDirection.Direction.LTR, true, true);
   }
 
   /**
@@ -40,9 +39,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param html
    * @param dir
    * @param addSouth
+   * @param showPhones
    * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    */
-  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth) {
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth, boolean showPhones) {
     DivWidget north;
     add(north = new DivWidget());
 
@@ -59,22 +59,24 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     if (addSouth) {
       add(south = new DivWidget());
-      configureSouth(id, south, isLTR);
+      configureSouth(id, south, isLTR, showPhones);
     } else {
       south = null;
     }
     length = html.length();
-    // this.id = id;
   }
 
-  private void configureSouth(int id, DivWidget south, boolean isLTR) {
+  private void configureSouth(int id, DivWidget south, boolean isLTR, boolean ensureHeight) {
     if (isLTR) {
       south.addStyleName("floatLeft");
     }
     Element element = south.getElement();
     Style style = element.getStyle();
     style.setClear(Style.Clear.BOTH);
-    style.setHeight(20, Style.Unit.PX);
+
+    if (ensureHeight)
+      style.setHeight(20, Style.Unit.PX); // if all the phones are there but one, make sure it has height
+
     element.setId("Highlight_South_" + id);
   }
 
@@ -87,8 +89,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     if (isLTR) {
       north.addStyleName("wordSpacerRight");
-    }
-    else {
+    } else {
       north.addStyleName("wordSpacerLeft");
       north.addStyleName("rtlMarginBottom");
     }

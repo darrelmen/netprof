@@ -593,10 +593,10 @@ public class InitialUI implements UILifecycle {
    * @see UILifecycle#gotUser
    */
   protected void configureUIGivenUser(long userID) {
-    //logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
+    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-      //logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {

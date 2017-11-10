@@ -629,6 +629,7 @@ public class LangTest implements
     } else {
     */
     this.initialUI = new InitialUI(this, userManager);
+    messageHelper = new MessageHelper(initialUI, this);
     populateRootPanel();
 
     setPageTitle();

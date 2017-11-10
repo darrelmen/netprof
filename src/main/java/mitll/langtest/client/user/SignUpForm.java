@@ -57,6 +57,7 @@ import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
   public static final int MIN_EMAIL_LENGTH = 7;
+  public static final String BAD_PASS = "Your password is incorrect. Please try again.";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final int SHORT_USER_ID = 4;
@@ -183,23 +184,27 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 
     String affiliation = candidate.getAffiliation();
-    if (affiliation == null || affiliation.isEmpty()) {
-      logger.info("no affiliation?");
+    boolean hasAff = affiliation == null || affiliation.isEmpty();
+    if (hasAff) {
+      logger.info("copyInfoToSignUp no affiliation?");
     } else {
       setAffBox(affiliation);
     }
 
-    boolean b = askForDemographic(candidate);
-    // demoHeader.setVisible(b);
-    registrationInfo.setVisible(b);
+    boolean askForDemographic = askForDemographic(candidate);
+    // demoHeader.setVisible(askForDemographic);
+    registrationInfo.setVisible(askForDemographic);
 
     FormField firstFocus =
         firstName.isEmpty() ?
             firstName :
             lastName.isEmpty() ? lastName :
-                email.isEmpty() ? signUpEmail : null;
+                email.isEmpty() ? signUpEmail :
 
-    if (b) {
+                    null;
+
+    if (askForDemographic) {
+      registrationInfo.setGender(candidate.getRealGender());
       if (firstFocus == null) {
         boolean isValid = registrationInfo.checkValidity();
         if (!isValid) {
@@ -312,8 +317,10 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private boolean askForDemographic(User user) {
     Collection<User.Permission> permissions = user.getPermissions();
-    return permissions.contains(User.Permission.DEVELOP_CONTENT) || permissions.contains(User.Permission.RECORD_AUDIO) ||
-        permissions.contains(User.Permission.QUALITY_CONTROL);
+    return
+        permissions.contains(User.Permission.DEVELOP_CONTENT) ||
+            permissions.contains(User.Permission.RECORD_AUDIO) ||
+            permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
@@ -660,6 +667,9 @@ public class SignUpForm extends UserDialog implements SignUp {
         lastName.getSafeText(),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
+    logger.info("OK sending " + newUser);
+    logger.info("OK sending " + newUser.getAffiliation());
+
     service.addUser(
         newUser,
         Window.Location.getHref(),
@@ -704,8 +714,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private void handleAddUserResponse(LoginResult result, String user) {
     LoginResult.ResultType resultType = result.getResultType();
     if (resultType == LoginResult.ResultType.BadPassword) {
-      markErrorBlur(signUp, I_M_SORRY,
-          "Your password is incorrect. Please try again.", Placement.TOP);
+      markErrorBlur(signUp, I_M_SORRY, BAD_PASS, Placement.TOP);
     } else if (resultType == LoginResult.ResultType.Exists) {
       eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
       signUp.setEnabled(true);

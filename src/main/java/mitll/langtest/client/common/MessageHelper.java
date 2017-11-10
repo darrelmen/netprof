@@ -35,6 +35,8 @@ import com.github.gwtbootstrap.client.ui.base.AlertBase;
 import com.github.gwtbootstrap.client.ui.constants.AlertType;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.event.ClosedEvent;
+import com.github.gwtbootstrap.client.ui.event.ClosedHandler;
 import com.github.gwtbootstrap.client.ui.event.HideEvent;
 import com.github.gwtbootstrap.client.ui.event.HideHandler;
 import com.google.gwt.core.client.GWT;
@@ -216,15 +218,10 @@ public class MessageHelper {
 
     if (dType != DDialogType.FatalError && dType != DDialogType.Loading) {
       a.setClose(true);
-/*			a.addClosedHandler(new ClosedHandler<AlertBase>() {
-        @Override public void onClosed(ClosedEvent<AlertBase> event) {
-					m.hide();
-					if (dType == DDialogType.RefreshToken) {
-						log.warning("Refreshing");
-						parentHelper.restoreUserOrGoToLogin(true);
-					}
-				}
-			});*/
+			a.addClosedHandler(event -> {
+        m.hide();
+        parentHelper.showInitialState();
+      });
     } else {
       a.setClose(false);
     }
@@ -241,10 +238,10 @@ public class MessageHelper {
       }
       closeBtn.addClickHandler(arg0 -> {
         m.hide();
-        if (dType == DDialogType.RefreshToken) {
-          log.warning("Refreshing");
-          parentHelper.startOver();
-        }
+       // if (dType == DDialogType.RefreshToken) {
+         // log.warning("Refreshing");
+          parentHelper.showInitialState();
+       // }
       });
       a.add(closeBtn);
     }

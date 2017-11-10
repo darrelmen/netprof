@@ -40,6 +40,7 @@ import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.shared.user.MiniUser;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -60,7 +61,8 @@ class RegistrationInfo extends BasicDialog {
   private final RadioButton male = new RadioButton(GENDER_GROUP, "Male");
   private final RadioButton female = new RadioButton(GENDER_GROUP, "Female");
   private final Panel genders;
-  private static final Boolean ADD_AGE = true;
+  private static final Boolean ADD_AGE = false;
+  // private MiniUser.Gender gender;
 
   RegistrationInfo(ComplexWidget toAddTo, boolean includeDialect) {
     genders = new HorizontalPanel();
@@ -123,11 +125,7 @@ class RegistrationInfo extends BasicDialog {
    * @see SignUpForm#isFormValid
    */
   boolean checkValid() {
-    if (isVisible()) {
-      boolean valid = checkValidGender();
-      if (!valid) return false;
-      else return checkMissingAge();
-    } else return true;
+    return !isVisible() || checkValidGender() && (!ADD_AGE || checkMissingAge());
   }
 
   boolean checkValidity() {
@@ -162,7 +160,9 @@ class RegistrationInfo extends BasicDialog {
           return false;
         }
       }
-    } else return true;
+    } else {
+      return true;
+    }
   }
 
   public boolean isMale() {
@@ -183,5 +183,10 @@ class RegistrationInfo extends BasicDialog {
 
   public RadioButton getFemale() {
     return female;
+  }
+
+  public void setGender(MiniUser.Gender gender) {
+    if (gender == MiniUser.Gender.Male) male.setValue(true);
+    else if (gender == MiniUser.Gender.Female) female.setValue(true);
   }
 }

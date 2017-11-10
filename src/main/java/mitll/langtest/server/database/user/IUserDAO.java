@@ -118,7 +118,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   /**
    * @param userid
    * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
+   * @see mitll.langtest.server.ScoreServlet#getUser
    */
   User getUserWhere(int userid);
 
