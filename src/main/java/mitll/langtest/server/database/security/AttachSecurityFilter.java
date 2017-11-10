@@ -55,7 +55,7 @@ public class AttachSecurityFilter implements Filter {
   private static final String DATABASE_REFERENCE = "databaseReference";
 
 	private static final Logger log = LogManager.getLogger(AttachSecurityFilter.class);
-  protected IUserSecurityManager securityManager;
+  private IUserSecurityManager securityManager;
   private ServletContext servletContext;
 
   public void init(FilterConfig filterConfig) throws ServletException {
@@ -72,10 +72,11 @@ public class AttachSecurityFilter implements Filter {
     }
 		final HttpServletRequest httpRequest = (HttpServletRequest) request;
 		try {
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
-      log.info("doFilter found session user " + userIDFromSessionOrDB);
+      //int userIDFromSessionOrDB =
+          getUserIDFromSessionOrDB(httpRequest);
+   //   log.info("doFilter found session user " + userIDFromSessionOrDB);
     } catch (DominoSessionException dse) {
-		  log.warn("nope - no session " + dse);
+	//	  log.warn("nope - no session " + dse);
       handleAccessFailure(httpRequest, response);
     } catch (Exception e) {
 			if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {

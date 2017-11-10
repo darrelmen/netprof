@@ -84,12 +84,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   @Override
-  public boolean exists(int projectid)  throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+  public boolean exists(int projectid)  throws DominoSessionException  {
+   // if (hasAdminPerm(getUserIDFromSessionOrDB())) {
       return getProjectDAO().exists(projectid);
-    } else {
-      throw getRestricted("project exists");
-    }
+  //  } else {
+   //   throw getRestricted("project exists");
+   // }
   }
 
   /**

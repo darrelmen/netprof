@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.apache.logging.log4j.LogManager;
@@ -228,7 +229,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @param status
    * @param comment
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
+   * @see IUserListManager#addDefect
    */
 /*
   public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {

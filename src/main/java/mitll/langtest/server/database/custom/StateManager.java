@@ -264,7 +264,7 @@ public class StateManager implements IStateManager {
    * @param state
    * @param creatorID
    * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
-   * @see mitll.langtest.server.database.custom.UserListManager#markState
+   * @see IUserListManager#markState
    */
   @Override
   public void setSecondState(Shell shell, STATE state, long creatorID) {

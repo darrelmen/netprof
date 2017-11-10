@@ -34,6 +34,7 @@ package mitll.langtest.server.database.reviewed;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
 import org.apache.logging.log4j.LogManager;
@@ -206,7 +207,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    * @return
    * @see UserListManager#getDefectList
    * @see UserListManager#getExerciseToState
-   * @see UserListManager#markState
+   * @see IUserListManager#markState
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
    */
   @Override

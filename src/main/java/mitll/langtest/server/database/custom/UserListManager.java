@@ -79,14 +79,14 @@ public class UserListManager implements IUserListManager {
   private static final String MY_FAVORITES = "My Favorites";
   private static final String COMMENTS = "Comments";
   private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
-  private static final String REVIEW = "Defects";
+//  private static final String REVIEW = "Defects";
 //  private static final String ATTENTION = "AttentionLL";
-  private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
+//  private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
 
   private static final boolean DEBUG = false;
 
   private final IUserDAO userDAO;
- // private final IReviewedDAO reviewedDAO, secondStateDAO;
+  // private final IReviewedDAO reviewedDAO, secondStateDAO;
   private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
@@ -102,16 +102,13 @@ public class UserListManager implements IUserListManager {
    * @param userListDAO
    * @param userListExerciseJoinDAO
    * @param annotationDAO
-   * @paramx reviewedDAO
    * @param pathHelper
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public UserListManager(IUserDAO userDAO,
                          IUserListDAO userListDAO,
                          IUserListExerciseJoinDAO userListExerciseJoinDAO,
                          IAnnotationDAO annotationDAO,
-//                         IReviewedDAO reviewedDAO,
-//                         IReviewedDAO secondStateDAO,
                          IStateManager stateManager,
                          IUserExerciseListVisitorDAO visitorDAO,
                          PathHelper pathHelper) {
@@ -119,13 +116,10 @@ public class UserListManager implements IUserListManager {
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-  //  this.reviewedDAO = reviewedDAO;
-   // this.secondStateDAO = secondStateDAO;
     this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
   }
-
 
 
   /**
@@ -152,7 +146,7 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public int getNumLists(int userid, int projid) {
-    return userListDAO.getNumMineAndPublic(userid,projid);
+    return userListDAO.getNumMineAndPublic(userid, projid);
   }
 
   /**
@@ -183,8 +177,7 @@ public class UserListManager implements IUserListManager {
         if (commonShellUserList.isDeleted()) {
           userListDAO.bringBack(commonShellUserList.getID());
           return commonShellUserList;
-        }
-        else {
+        } else {
           return null;
         }
       }
@@ -255,7 +248,7 @@ public class UserListManager implements IUserListManager {
 
     if (visitedLists) {
       //Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
-   //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getAllPublicNotMine(userid, projid);
+      //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getAllPublicNotMine(userid, projid);
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
       //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
 
@@ -335,10 +328,10 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
    * @param typeOrder
    * @param ids
    * @return
+   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
    */
   @Override
   public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids) {
@@ -832,7 +825,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userExerciseDAO
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -848,7 +841,7 @@ public class UserListManager implements IUserListManager {
    * @param ids
    * @return
    * @see
-   * @see  #deleteItemFromList(int, int, Collection)
+   * @see #deleteItemFromList(int, int, Collection)
    * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
    */
   @Override
@@ -858,10 +851,10 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-      //  id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
-            id == COMMENT_MAGIC_ID ? getCommentedList(ids) :
-        //        id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
-                    userListDAO.getWithExercises(id);
+        //  id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
+        id == COMMENT_MAGIC_ID ? getCommentedList(ids) :
+            //        id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
+            userListDAO.getWithExercises(id);
   }
 
   @Override
@@ -878,7 +871,7 @@ public class UserListManager implements IUserListManager {
    * the review, comment, and attention LL (if needed) lists need to be in context of project?
    *
    * @param id
-   * @param projid IGNORED HERE
+   * @param projid    IGNORED HERE
    * @param typeOrder
    * @param ids
    * @return
@@ -894,8 +887,8 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-            id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
-                    userListDAO.getWithExercisesEx(id);
+        id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
+            userListDAO.getWithExercisesEx(id);
 
   }
 
@@ -929,16 +922,17 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @param exerciseID
+   * @param exercise
    * @param field
    * @param comment
    * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#addDefects
    */
   @Override
-  public boolean addDefect(int exerciseID, String field, String comment) {
-    if (!annotationDAO.hasDefect(exerciseID, field, INCORRECT, comment)) {
-      addAnnotation(exerciseID, field, INCORRECT, comment, userDAO.getDefectDetector());
-      markState(exerciseID, STATE.DEFECT, userDAO.getDefectDetector());
+  public boolean addDefect(CommonExercise exercise, String field, String comment) {
+    int id = exercise.getID();
+    if (!annotationDAO.hasDefect(id, field, INCORRECT, comment)) {
+      addAnnotation(id, field, INCORRECT, comment, userDAO.getDefectDetector());
+      markState(exercise, STATE.DEFECT, userDAO.getDefectDetector());
       return true;
     } else {
       return false;
@@ -962,6 +956,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * TODO : really should do this in batch!
+   *
    * @param exercise
    * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotations
    * @see #markAllFieldsFixed
@@ -981,87 +976,38 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @param id
+   * @param exercise
    * @param correct
    * @param userid
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   @Override
-  public void markCorrectness(int id, boolean correct, int userid) {
-    markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userid);
+  public void markCorrectness(CommonExercise exercise, boolean correct, int userid) {
+    markState(exercise, correct ? STATE.APPROVED : STATE.DEFECT, userid);
   }
 
   /**
-   * @param exid
+   * @param exercise
    * @param state
    * @param creatorID
    * @see #addAnnotation
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   @Override
-  public void markState(int exid, STATE state, int creatorID) {
-    logger.debug("markState mark state " + exid + " = " + state + " by " +creatorID);
-    CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
+  public void markState(CommonExercise exercise, STATE state, int creatorID) {
+    logger.info("markState mark state " + exercise + " = " + state + " by " + creatorID);
 
-    if (predefExercise == null) {
-      logger.debug("markState " + exid + " = " + state + " by " + creatorID);
-      predefExercise = userExerciseDAO.getByExID(exid);
-    }
-    if (predefExercise != null) {
-      if (state.equals(STATE.ATTN_LL)) {
-        stateManager.setSecondState(predefExercise, state, creatorID);
-      } else {
-        stateManager.setState(predefExercise, state, creatorID);
-      }
-      if (state.equals(STATE.FIXED)) {
-        markAllFieldsFixed(predefExercise, creatorID);
-      }
-    } else {
-      logger.error("huh? couldn't find exercise " + exid);
+    stateManager.setState(exercise, state, creatorID);
+
+    if (state.equals(STATE.FIXED)) {
+      markAllFieldsFixed(exercise, creatorID);
     }
   }
-
-
-  /**
-   * @param shell
-   * @param state
-   * @param creatorID
-   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
-   * @see mitll.langtest.server.database.custom.UserListManager#markState
-   */
-/*
-  @Override
-  public void setSecondState(Shell shell, STATE state, long creatorID) {
-    shell.setSecondState(state);
-    secondStateDAO.setState(shell.getID(), state, creatorID);
-  }
-*/
-
-  /**
-   * @param exerciseID
-   * @return
-   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
-   */
-/*
-  @Override
-  public STATE getCurrentState(int exerciseID) {
-    return reviewedDAO.getCurrentState(exerciseID);
-  }
-*/
-
-  /**
-   * @param exerciseid
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
-   */
-/*  @Override
-  public void removeReviewed(int exerciseid) {
-    reviewedDAO.remove(exerciseid);
-  }*/
 
   /**
    * @param userExercise
    * @param userid
-   * @see #markState
+   * @see IUserListManager#markState
    */
   private void markAllFieldsFixed(CommonExercise userExercise, int userid) {
     Collection<String> fields = userExercise.getFields();
@@ -1081,8 +1027,8 @@ public class UserListManager implements IUserListManager {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#deleteList
    * @seez ListManager#deleteList
+   * @see mitll.langtest.server.services.ListServiceImpl#deleteList
    */
   @Override
   public boolean deleteList(int id) {

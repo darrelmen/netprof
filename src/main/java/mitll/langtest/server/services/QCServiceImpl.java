@@ -62,12 +62,19 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
   }
 
   /**
-   * @param id
+   * @param exid
    * @param isCorrect
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markReviewed(int id, boolean isCorrect) throws DominoSessionException {
-    getUserListManager().markCorrectness(id, isCorrect, getUserIDFromSessionOrDB());
+  public void markReviewed(int exid, boolean isCorrect) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasQCPerm(userIDFromSessionOrDB)) {
+      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectIDFromUser, exid);
+      getUserListManager().markCorrectness(customOrPredefExercise, isCorrect, userIDFromSessionOrDB);
+    } else {
+      throw getRestricted("mark reviewed");
+    }
   }
 
   /**
@@ -76,7 +83,14 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @see ReviewEditableExercise#userSaidExerciseIsFixed
    */
   public void markState(int exid, STATE state) throws DominoSessionException {
-    getUserListManager().markState(exid, state, getUserIDFromSessionOrDB());
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasQCPerm(userIDFromSessionOrDB)) {
+      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectIDFromUser, exid);
+      getUserListManager().markState(customOrPredefExercise, state, getUserIDFromSessionOrDB());
+    } else {
+      throw getRestricted("mark state");
+    }
   }
 
   /**
@@ -169,20 +183,4 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       throw getRestricted("marking gender");
     }
   }
-
-  /**
-   * TODOx : maybe fully support this
-   *
-   * @param id
-   * @return
-   * @seex ReviewEditableExercise#confirmThenDeleteItem
-   */
-/*  public boolean deleteItem(int id) {
-    boolean b = db.deleteItem(id, getProjectIDFromUser());
-    if (b) {
-      // force rebuild of full trie
-      getProject().buildExerciseTrie();
-    }
-    return b;
-  }*/
 }

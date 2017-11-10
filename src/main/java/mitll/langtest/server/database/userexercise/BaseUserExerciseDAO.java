@@ -99,7 +99,7 @@ public class BaseUserExerciseDAO extends DAO {
    * @param exid
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getReviewedUserExercises
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(int, STATE, int)
+   * @see IUserListManager#markState(CommonExercise, STATE, int)
    */
   public CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
 

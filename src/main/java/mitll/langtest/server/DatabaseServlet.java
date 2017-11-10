@@ -54,7 +54,7 @@ public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
   DatabaseImpl db = null;
-  ServerProperties serverProps;
+  private ServerProperties serverProps;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
 

@@ -42,6 +42,7 @@ import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
@@ -137,6 +138,10 @@ public class ScoreServlet extends DatabaseServlet {
   private JsonScoring jsonScoring;
 
   /**
+   * Must have a session...?
+   *
+   * How does iOS do a login?
+   *
    * Remembers chapters from previous requests...
    * <p>
    * OK, so we can make a number of requests - mainly for the iOS app.
@@ -148,149 +153,157 @@ public class ScoreServlet extends DatabaseServlet {
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String queryString = request.getQueryString();
-    if (queryString == null) queryString = ""; // how could this happen???
-   // String passwordFromBody = "";
-    int projid = getProject(request);
-
-    // language overrides user id mapping...
-    {
-      String language = request.getHeader("language");
-      if (language != null) {
-        projid = getProjectID(language);
-        if (projid == -1) projid = getProject(request);
-      }
-    }
-
-    // ok can't figure it out from language, check header.
-    if (projid == -1) {
-      projid = request.getIntHeader("projid");
-      logger.warn("doGet got project id from url header " + projid);
-    }
-
-    ReportingServices reportingServices = getDatabase();
-    String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
-    // if (!queryString.contains(NESTED_CHAPTERS) || true) { // quiet output for polling from status webapp
-    logger.debug("ScoreServlet.doGet (" + language + "):" +
-        "\n\tRequest '" + queryString + "'" +
-        "\n\tprojid " + projid +
-        "\n\tpath   " + request.getPathInfo() +
-        "\n\turi    " + request.getRequestURI() +
-        "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
-    //}
-
-    long then = System.currentTimeMillis();
-    configureResponse(response);
-
-    makeAudioFileHelper();
-    JSONObject toReturn = new JSONObject();
-    String jsonString = "";
-    //toReturn.put(ERROR, "expecting request");
-
     try {
-      queryString = URLDecoder.decode(queryString, "UTF-8");
-      if (matchesRequest(queryString, NESTED_CHAPTERS)) {
-        String[] split1 = queryString.split("&");
-        if (split1.length == 2) {
-          String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-          boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
-          boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
-          if (shouldRemoveExercisesWithNoAudio || dontRemove) {
-            if (dontRemove) {
-              JSONObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
-              Long whenCachedEverything = projectToWhenCachedEverything.get(projid);
-              if (nestedChaptersEverything == null ||
-                  (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
-                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
-                projectToNestedChaptersEverything.put(projid, nestedChaptersEverything);
-                projectToWhenCachedEverything.put(projid, System.currentTimeMillis());
+      securityManager.getUserIDFromSession(request);
+
+      String queryString = request.getQueryString();
+      if (queryString == null) queryString = ""; // how could this happen???
+
+      int projid = getProject(request);
+
+      // language overrides user id mapping...
+      {
+        String language = request.getHeader("language");
+        if (language != null) {
+          projid = getProjectID(language);
+          if (projid == -1) projid = getProject(request);
+        }
+      }
+
+      // ok can't figure it out from language, check header.
+      if (projid == -1) {
+        projid = request.getIntHeader("projid");
+        logger.warn("doGet got project id from url header " + projid);
+      }
+
+      ReportingServices reportingServices = getDatabase();
+      String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
+      // if (!queryString.contains(NESTED_CHAPTERS) || true) { // quiet output for polling from status webapp
+      logger.debug("ScoreServlet.doGet (" + language + "):" +
+          "\n\tRequest '" + queryString + "'" +
+          "\n\tprojid " + projid +
+          "\n\tpath   " + request.getPathInfo() +
+          "\n\turi    " + request.getRequestURI() +
+          "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
+      //}
+
+      long then = System.currentTimeMillis();
+      configureResponse(response);
+
+      makeAudioFileHelper();
+      JSONObject toReturn = new JSONObject();
+      String jsonString = "";
+      //toReturn.put(ERROR, "expecting request");
+
+      try {
+        queryString = URLDecoder.decode(queryString, "UTF-8");
+        if (matchesRequest(queryString, NESTED_CHAPTERS)) {
+          String[] split1 = queryString.split("&");
+          if (split1.length == 2) {
+            String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
+            boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
+            boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
+            if (shouldRemoveExercisesWithNoAudio || dontRemove) {
+              if (dontRemove) {
+                JSONObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
+                Long whenCachedEverything = projectToWhenCachedEverything.get(projid);
+                if (nestedChaptersEverything == null ||
+                    (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
+                  nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
+                  projectToNestedChaptersEverything.put(projid, nestedChaptersEverything);
+                  projectToWhenCachedEverything.put(projid, System.currentTimeMillis());
+                }
+                toReturn = nestedChaptersEverything;
+              } else {
+                toReturn = getJsonNestedChapters(true, projid);
               }
-              toReturn = nestedChaptersEverything;
             } else {
-              toReturn = getJsonNestedChapters(true, projid);
+              toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
             }
           } else {
-            toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
-          }
-        } else {
-          JSONObject nestedChapters = projectToNestedChapters.get(projid);
-          Long whenCached = projectToWhenCached.get(projid);
+            JSONObject nestedChapters = projectToNestedChapters.get(projid);
+            Long whenCached = projectToWhenCached.get(projid);
 
-          if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-            nestedChapters = getJsonNestedChapters(true, projid);
-            projectToNestedChapters.put(projid, nestedChapters);
-            projectToWhenCached.put(projid, System.currentTimeMillis());
+            if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
+              nestedChapters = getJsonNestedChapters(true, projid);
+              projectToNestedChapters.put(projid, nestedChapters);
+              projectToWhenCached.put(projid, System.currentTimeMillis());
+            }
+            toReturn = nestedChapters;
           }
-          toReturn = nestedChapters;
-        }
-      } else if (matchesRequest(queryString, "hasUser")) {
-        logger.info("got doGet hasUser " + queryString);
-        checkUserAndLogin(request, toReturn);
-      } else if (userManagement.doGet(
-          request,
-          response,
-          queryString,
-          toReturn
-      )) {
-        logger.info("doGet " + language + " handled user command");
-      } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
-        queryString = removePrefix(queryString, CHAPTER_HISTORY);
-        toReturn = getChapterHistory(queryString, toReturn, projid);
-      } else if (matchesRequest(queryString, PROJECTS)) {
-        queryString = removePrefix(queryString, PROJECTS);
-        jsonString = getProjects();
+        } else if (matchesRequest(queryString, "hasUser")) {
+          logger.info("got doGet hasUser " + queryString);
+          checkUserAndLogin(request, toReturn);
+        } else if (userManagement.doGet(
+            request,
+            response,
+            queryString,
+            toReturn
+        )) {
+          logger.info("doGet " + language + " handled user command");
+        } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
+          queryString = removePrefix(queryString, CHAPTER_HISTORY);
+          toReturn = getChapterHistory(queryString, toReturn, projid);
+        } else if (matchesRequest(queryString, PROJECTS)) {
+          queryString = removePrefix(queryString, PROJECTS);
+          jsonString = getProjects();
 //      } else if (matchesRequest(queryString, REF_INFO)) {
 //        logger.warn("\n\n\n someone made this request " + REF_INFO);
 //        queryString = removePrefix(queryString, REF_INFO);
 //        toReturn = getRefInfo(queryString, toReturn);
-      } else if (matchesRequest(queryString, JSON_REPORT)) {
-        queryString = removePrefix(queryString, JSON_REPORT);
-        reportingServices.getReport(getYear(queryString), toReturn);
+        } else if (matchesRequest(queryString, JSON_REPORT)) {
+          queryString = removePrefix(queryString, JSON_REPORT);
+          reportingServices.getReport(getYear(queryString), toReturn);
 /*      } else if (matchesRequest(queryString, SEND_REPORT)) {
         queryString = removePrefix(queryString, SEND_REPORT);
         reportingServices.sendReport(securityManager.getUserIDFromSession(request));*/
-      } else if (matchesRequest(queryString, EXPORT)) {
-        toReturn = getJSONForExercises(projid);
-      } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
-        toReturn = removeRefResult(queryString);
-      } else if (matchesRequest(queryString, REPORT)) {
-        queryString = removePrefix(queryString, REPORT);
-        int year = getYear(queryString);
-        configureResponseHTML(response, year);
-        reply(response, reportingServices.getReport(year, toReturn));
-        return;
-      } else if (matchesRequest(queryString, PHONE_REPORT)) {
-        queryString = removePrefix(queryString, PHONE_REPORT);
-        String[] split1 = queryString.split("&");
-        if (split1.length < 2) {
-          toReturn.put(ERROR, "expecting at least two query parameters");
+        } else if (matchesRequest(queryString, EXPORT)) {
+          toReturn = getJSONForExercises(projid);
+        } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
+          toReturn = removeRefResult(queryString);
+        } else if (matchesRequest(queryString, REPORT)) {
+          queryString = removePrefix(queryString, REPORT);
+          int year = getYear(queryString);
+          configureResponseHTML(response, year);
+          reply(response, reportingServices.getReport(year, toReturn));
+          return;
+        } else if (matchesRequest(queryString, PHONE_REPORT)) {
+          queryString = removePrefix(queryString, PHONE_REPORT);
+          String[] split1 = queryString.split("&");
+          if (split1.length < 2) {
+            toReturn.put(ERROR, "expecting at least two query parameters");
+          } else {
+            toReturn = getPhoneReport(toReturn, split1, projid);
+          }
         } else {
-          toReturn = getPhoneReport(toReturn, split1, projid);
+          toReturn.put(ERROR, "unknown req " + queryString);
         }
-      } else {
-        toReturn.put(ERROR, "unknown req " + queryString);
+      } catch (Exception e) {
+        logger.error(getLanguage(projid) + " : doing query " + queryString + " got " + e, e);
+        reportingServices.getLogAndNotify().logAndNotifyServerException(e);
       }
-    } catch (Exception e) {
-      logger.error(getLanguage(projid) + " : doing query " + queryString + " got " + e, e);
-      reportingServices.getLogAndNotify().logAndNotifyServerException(e);
-    }
 
-    long now = System.currentTimeMillis();
-    long l = now - then;
-    if (l > 10) {
-      logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
-    }
-    then = now;
-    String x = jsonString.isEmpty() ? toReturn.toString() : jsonString;
-    now = System.currentTimeMillis();
-    l = now - then;
-    if (l > 50) {
-      logger.info("doGet : (" + language + ") took " + l + " millis" +
-          //" to do " + request.getQueryString() +
-          " and to do toString on json");
-    }
+      long now = System.currentTimeMillis();
+      long l = now - then;
+      if (l > 10) {
+        logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
+      }
+      then = now;
+      String x = jsonString.isEmpty() ? toReturn.toString() : jsonString;
+      now = System.currentTimeMillis();
+      l = now - then;
+      if (l > 50) {
+        logger.info("doGet : (" + language + ") took " + l + " millis" +
+            //" to do " + request.getQueryString() +
+            " and to do toString on json");
+      }
 
-    reply(response, x);
+      reply(response, x);
+    } catch (DominoSessionException e) {
+      logger.error("doGet Got " + e, e);
+      db.logAndNotify(e);
+      throw new IOException("doGet couldn't process request.", e);
+    }
   }
 
   private int getProjectID(String language) {
@@ -298,7 +311,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private DAOContainer getDAOContainer() {
-    return (DAOContainer) db;
+    return db;
   }
 
 /*  private int getIntValue(String projid) {
@@ -327,7 +340,6 @@ public class ScoreServlet extends DatabaseServlet {
       return getJsonResponse("Expecting exid and projid");
     } else {
       // http://netprof/sccoreServlet?removeRefResult&projid=2&exid=3
-
       // http://netprof/sccoreServlet?removeRefResult
       // projid=2
       // exid=3
@@ -375,12 +387,6 @@ public class ScoreServlet extends DatabaseServlet {
   private void addSuccess(JSONObject jsonObject, boolean b) {
     jsonObject.put(SUCCESS, Boolean.valueOf(b).toString());
   }
-
-/*
-  private String getReport(JSONObject jsonObject, int year) {
-    return db.getReport(year, jsonObject);
-  }
-*/
 
   /**
    * Defaults to this year.
@@ -634,10 +640,10 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   * @see #doPost(HttpServletRequest, HttpServletResponse)
    * @param request
    * @param jsonObject
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
   private void checkUserAndLogin(HttpServletRequest request, JSONObject jsonObject) {
     userManagement.tryToLogin(

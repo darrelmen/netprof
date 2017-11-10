@@ -91,16 +91,16 @@ public interface IUserListManager   {
 
   void removeVisitor(int userListID, int user);
 
-  boolean addDefect(int exerciseID, String field, String comment);
+  boolean addDefect(CommonExercise exercise, String field, String comment);
 
   void addAnnotation(int exerciseID, String field, String status, String comment, int userid);
 
 
   void addAnnotations(CommonExercise exercise);
 
-  void markState(int exid, STATE state, int creatorID);
+  void markState(CommonExercise exercise, STATE state, int creatorID);
 
-  void markCorrectness(int id, boolean correct, int userid);
+  void markCorrectness(CommonExercise exercise, boolean correct, int userid);
 
   boolean deleteList(int id);
 

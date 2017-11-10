@@ -120,7 +120,7 @@ public abstract class BaseUserDAO extends DAO {
 
   /**
    * @return
-   * @see IUserListManager#addDefect(int, String, String)
+   * @see IUserListManager#addDefect(mitll.langtest.shared.exercise.CommonExercise, String, String)
    * @see AnnotationDAO#AnnotationDAO
    */
   public int getDefectDetector() {

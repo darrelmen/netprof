@@ -448,12 +448,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param exTofieldToDefect
    * @see #afterReadingExercises()
    */
-  private void addDefects(Map<Integer, Map<String, String>> exTofieldToDefect) {
+  private void addDefects(Map<CommonExercise, Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
       int count = 0;
-      logger.info("adding defects, num = " + exTofieldToDefect.size());
+      logger.info("addDefects adding defects, num = " + exTofieldToDefect.size());
 
-      for (Map.Entry<Integer, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
+      for (Map.Entry<CommonExercise, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
         for (Map.Entry<String, String> fieldToDefect : pair.getValue().entrySet()) {
           if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {
             count++;
@@ -461,10 +461,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         }
       }
       if (count > 0) {
-        logger.info("Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
+        logger.info("addDefects Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
       }
     } else {
-      if (DEBUG) logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
+      if (DEBUG) logger.info("addDefects NOT Automatically adding " + exTofieldToDefect.size() + " defects");
     }
   }
 
@@ -473,8 +473,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    *
    * @return
    */
-  private Map<Integer, Map<String, String>> findDefects() {
-    Map<Integer, Map<String, String>> idToDefectMap = new HashMap<>();
+  private Map<CommonExercise, Map<String, String>> findDefects() {
+    Map<CommonExercise, Map<String, String>> idToDefectMap = new HashMap<>();
 
     for (CommonExercise shell : exercises) {
       Map<String, String> fieldToDefect = new HashMap<>();
@@ -485,7 +485,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
 
       if (!fieldToDefect.isEmpty()) {
-        idToDefectMap.put(shell.getID(), fieldToDefect);
+        idToDefectMap.put(shell, fieldToDefect);
       }
     }
     return idToDefectMap;

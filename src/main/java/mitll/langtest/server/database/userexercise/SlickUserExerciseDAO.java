@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
@@ -43,12 +42,14 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.PronunciationLookup;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.*;
-import mitll.npdata.dao.userexercise.*;
+import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
+import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
+import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
