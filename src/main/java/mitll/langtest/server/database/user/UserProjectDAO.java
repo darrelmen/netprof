@@ -86,12 +86,14 @@ public class UserProjectDAO implements IUserProjectDAO {
    * TODO - we seem to hit this too often
    *
    * @param user
-   * @return
+   * @return -1 if has no project
    */
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    if (slickUserProjects.isEmpty()) return -1;
+    if (slickUserProjects.isEmpty()) {
+      return -1;
+    }
     else {
       SlickUserProject next = slickUserProjects.iterator().next();
       return next.projid();

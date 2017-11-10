@@ -22,7 +22,9 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -61,12 +63,27 @@ public class NewContentChooser implements INavigation {
     showView(getCurrentView());
   }
 
+  /**
+   * So it could be that you've lost a permssion, so the view you were on before isn't allowed for you any more.
+   * In which case we have to drop down to an allowed view.
+   * @return
+   */
   @Override
   @NotNull
   public VIEWS getCurrentView() {
-    String currentView = controller.getStorage().getValue(CURRENT_VIEW);
-    return (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
+    String currentView = getCurrentStoredView();
+    VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
+
+    Set<User.Permission> permissions = new HashSet<>(controller.getPermissions());
+    permissions.retainAll(currentStoredView.getPerms());
+
+    if (permissions.isEmpty()) { // if no overlap, you don't have permission
+      currentStoredView = LEARN;
+    }
+
+    return currentStoredView;
   }
+
 
   @Override
   public void showView(VIEWS view) {
@@ -136,19 +153,21 @@ public class NewContentChooser implements INavigation {
     });
   }
 
+  private String getCurrentStoredView() {
+    return controller.getStorage().getValue(CURRENT_VIEW);
+  }
+
   private void storeValue(VIEWS view) {
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
   public void showProgress() {
-    boolean hasTeacher = controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
     ShowTab showTab = getShowTab();
 
-    DivWidget w = hasTeacher ?
+    divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab);
+        new AnalysisTab(controller, showTab));
 
-    divWidget.add(w);
     currentSection = PROGRESS;
   }
 
@@ -174,14 +193,12 @@ public class NewContentChooser implements INavigation {
   public void showLearnList(int listid) {
     setHistoryWithList(listid);
     banner.showLearn();
-    //  learnHelper.showList(listid);
   }
 
   @Override
   public void showDrillList(int listid) {
     setHistoryWithList(listid);
     banner.showDrill();
-    // practiceHelper.showList(listid);
   }
 
   private void setHistoryWithList(int listid) {
@@ -202,8 +219,5 @@ public class NewContentChooser implements INavigation {
   }
 
   @Override
-  public void clearCurrent() {
-    currentSection = NONE;
-    //  banner.setVisibleChoices(false);
-  }
+  public void clearCurrent() {   currentSection = NONE;  }
 }

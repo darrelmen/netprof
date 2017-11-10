@@ -63,10 +63,10 @@ public class User extends MiniUser implements ReportUser {
   private String email = "";
   private boolean enabled;
   private boolean admin;
-  private int numResults;
-  private float rate = 0.0f;
-  private boolean complete;
-  private float completePercent = 0.0f;
+//  private int numResults;
+//  private float rate = 0.0f;
+//  private boolean complete;
+//  private float completePercent = 0.0f;
   private Kind userKind;
   @Deprecated
   private String nativeLang;
@@ -84,11 +84,13 @@ public class User extends MiniUser implements ReportUser {
    * For right now,  you can only choose to be a student initially.
    *
    * @return
-   * @see SignUpForm#getRoles
+   * @seex SignUpForm#getRoles
    */
+/*
   public static Collection<Kind> getSelfChoiceRoles() {
     return Collections.singletonList(STUDENT);
   }
+*/
 
   /**
    * These are the permissions you get when you are invited by program manager or admin
@@ -127,12 +129,15 @@ public class User extends MiniUser implements ReportUser {
     return hasAppPermission;
   }
 
+  /**
+   * Closely related to {@link mitll.langtest.client.custom.INavigation.VIEWS}
+   */
   public enum Permission implements IsSerializable {
-    TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
-    QUALITY_CONTROL("Quality Control"),
-    RECORD_AUDIO("Record Audio"),
-    DEVELOP_CONTENT("Develop Content"),
-    PROJECT_ADMIN("Project Admin");//? make new projects? edit via domino?
+    TEACHER_PERM("View Student Data"),  // gets to see teacher things like student analysis, invite
+    QUALITY_CONTROL("Quality Control"), // mark defects, fix defects
+    RECORD_AUDIO("Record Audio"),       // record audio
+    DEVELOP_CONTENT("Develop Content"), // not sure how different from Record Audio
+    PROJECT_ADMIN("Project Admin");     // make new projects, edit via domino
 
     String name;
 

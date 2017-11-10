@@ -105,6 +105,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -519,7 +520,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getExercises(projectid);
     Project project = getProject(projectid);
     if (project == null) {
-      logger.error("huh? couldn't find project with id " +projectid);
+      logger.error("huh? couldn't find project with id " + projectid);
     }
     return project.getSectionHelper();
   }
@@ -631,7 +632,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void rememberUsersCurrentProject(int userid, int projectid) {
-    //  logger.info("rememberProject user " + userid + " -> " + projectid);
+    logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -766,7 +767,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @param projectid
+   * @param projectid if it's -1 only do something if it's on import
    * @return
    */
   public Project getProject(int projectid) {
@@ -777,7 +778,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         logger.warn("getProject asking for project -1?");//, new Exception());
       }
     }
-    return projectManagement.getProject(projectid);
+    return serverProps.useH2() ? null:projectManagement.getProject(projectid);
   }
 
   public Collection<Project> getProjects() {
@@ -1088,7 +1089,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userManagement.getUsers();
   }
 */
-
   public void logEvent(String exid, String context, int userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     logEvent(UNKNOWN, "server", exid, context, userid, device);
@@ -1388,7 +1388,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (toRet == null && id != userExerciseDAO.getUnknownExerciseID()) {
       // if (warns++ < 50)
       logger.warn("getCustomOrPredefExercise couldn't find exercise " + id + " vs unk ex " +
-              userExerciseDAO.getUnknownExerciseID()+
+          userExerciseDAO.getUnknownExerciseID() +
           " in project #" + projid +
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
@@ -1444,7 +1444,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id) { return userExerciseDAO.getByExID(id);  }
+  private CommonExercise getUserExerciseByExID(int id) {
+    return userExerciseDAO.getByExID(id);
+  }
 
   @Override
   public ServerProperties getServerProps() {
@@ -1917,6 +1919,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userSecurityManager;
   }
 
+  /**
+   * @see LangTestDatabaseImpl#readProperties
+   * @param userSecurityManager
+   */
   @Override
   public void setUserSecurityManager(IUserSecurityManager userSecurityManager) {
     this.userSecurityManager = userSecurityManager;

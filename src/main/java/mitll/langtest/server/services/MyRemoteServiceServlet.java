@@ -76,6 +76,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   protected DatabaseServices db;
   protected ServerProperties serverProps;
+  /**
+   *
+   */
   protected IUserSecurityManager securityManager;
   protected PathHelper pathHelper;
 
@@ -124,8 +127,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
     boolean enabled = userFromSession.isEnabled();
     boolean isApprovedForNetprof = userFromSession.isHasAppPermission();
-    if (!enabled) logger.info("user " +userIDFromSessionOrDB + " not enabled");
-    if (!isApprovedForNetprof) logger.info("user " +userIDFromSessionOrDB + " not approved to use netprof");
+    if (!enabled) logger.info("user " + userIDFromSessionOrDB + " not enabled");
+    if (!isApprovedForNetprof) logger.info("user " + userIDFromSessionOrDB + " not approved to use net");
     return enabled && isApprovedForNetprof ? userFromSession.getPermissions() : Collections.emptyList();
   }
 
@@ -156,12 +159,15 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       logger.warn("getProjectIDFromUser : no user in session, so we can't get the project id for the user.");
       return -1;
     }
-    int i = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
-    Project project = db.getProject(i);
-    if (project != null) {
+    int mostRecentByUser = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+    Project project = db.getProject(mostRecentByUser);
+    if (project == null) {
+      logger.warn("getProjectIDFromUser user " + userIDFromSession + " no project for id " + mostRecentByUser);
+    } else {
+      logger.info("getProjectIDFromUser user " + userIDFromSession + " = project " + project.getID() + " " + project.getLanguage());
       db.configureProject(project, false); //check if we should configure it - might be a new project
     }
-    return i;
+    return mostRecentByUser;
   }
 
   protected Project getProject(int projID) {
@@ -439,6 +445,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   @NotNull
   protected RestrictedOperationException getRestricted(String updating_project_info) {
-    return new RestrictedOperationException(updating_project_info,true);
+    return new RestrictedOperationException(updating_project_info, true);
   }
 }

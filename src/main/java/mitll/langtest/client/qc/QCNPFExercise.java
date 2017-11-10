@@ -276,11 +276,10 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @see #nextWasPressed
    */
   private void markReviewed(ListInterface listContainer, HasID completedExercise) {
-//    if (isCourseContent()) {
     markReviewed(completedExercise);
     boolean allCorrect = incorrectFields.isEmpty();
     int id = completedExercise.getID();
-    logger.info("mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size()  + " : " +incorrectFields);
+    logger.info("markReviewed : mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size()  + " : " +incorrectFields);
     listContainer.setState(id, allCorrect ? STATE.APPROVED : STATE.DEFECT);
     listContainer.redraw();
     navigationHelper.clickNext(controller, completedExercise);

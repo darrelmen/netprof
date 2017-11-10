@@ -36,10 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,7 +98,8 @@ public class BaseUserExerciseDAO extends DAO {
   /**
    * @param exid
    * @return
-   * @see IUserListManager#getReviewedUserExercises
+   * @see mitll.langtest.server.database.custom.UserListManager#getReviewedUserExercises
+   * @see mitll.langtest.server.database.custom.UserListManager#markState(int, STATE, int)
    */
   public CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
 

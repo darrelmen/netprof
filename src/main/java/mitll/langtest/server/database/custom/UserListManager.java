@@ -1000,7 +1000,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void markState(int exid, STATE state, int creatorID) {
-    //logger.debug("mark state " + id + " = " + state + " by " +creatorID);
+    logger.debug("markState mark state " + exid + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
 
     if (predefExercise == null) {
@@ -1021,19 +1021,6 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  /**
-   * @param shell
-   * @param state
-   * @param creatorID
-   * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
-   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
-   */
-/*  @Override
-  public void setState(Shell shell, STATE state, long creatorID) {
-    shell.setState(state);
-    reviewedDAO.setState(shell.getID(), state, creatorID);
-  }*/
 
   /**
    * @param shell
