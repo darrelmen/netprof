@@ -467,7 +467,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
   }
 
   private ClientUserDetail getClientUserDetail(DBUser dbUser) {
-    return new ClientUserDetail(dbUser, new AccountDetail());
+    AccountDetail acctDtl = new AccountDetail();
+    acctDtl.setUpdTime(new Date());
+    acctDtl.setUpdater(dbUser);
+    return new ClientUserDetail(dbUser, acctDtl);
   }
 
   /**
@@ -475,7 +478,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
    * @param newHashedPassword
    * @param baseURL
    * @return
-   * @seex BaseUserDAO#updateUser
    * @see IUserDAO#changePassword
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
@@ -655,7 +657,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     if (dominoUser == null) {
       logger.warn("getUserByID no user by '" + userID + "'");
     } else {
-      logger.info("found " + userID);
+      logger.info("getUserByID found " + userID + " user #"+ dominoUser.getDocumentDBID());
     }
 
     return getUser(dominoUser);
@@ -1245,9 +1247,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
       dbUser.setEmail(toUpdate.getEmail());
       dbUser.setFirstName(toUpdate.getFirst());
       dbUser.setLastName(toUpdate.getLast());
-      dbUser.setAffiliation(toUpdate.getAffiliation());
+      String affiliation = toUpdate.getAffiliation();
+      logger.info("update Set affiliation '" + affiliation + "' for " + toUpdate.getID());
+      dbUser.setAffiliation(affiliation);
       setGender(toUpdate, dbUser);
+
       updateUser(dbUser);
+    }
+    else {
+      logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n"+toUpdate);
     }
   }
 
@@ -1271,10 +1279,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     if (updateUser.getFirstName() == null) logger.error("no first  for " + updateUser);
     if (updateUser.getLastName() == null) logger.error("no last for " + updateUser);
     if (updateUser.getEmail() == null) logger.error("no email for " + updateUser);
-    if (updateUser.getEmail().isEmpty()) logger.error("empty email for " + updateUser);
+    if (updateUser.getEmail().isEmpty()) logger.error("updateUser empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
+    if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
+    else if (updateUser.getAffiliation().isEmpty()) logger.warn("updateUser empty affiliation for " + updateUser);
 
-    return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.updateUser(adminUser, getClientUserDetail(updateUser));
+    ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+    if (clientUserDetail != null) {
+      String affiliation = clientUserDetail.getAffiliation();
+      if (affiliation == null || affiliation.isEmpty()) {
+        logger.warn("after " + affiliation + " for " + clientUserDetail);
+      }
+    }
+    return clientUserDetailSResult;
   }
 
   private boolean isValidAsEmail(String text) {
@@ -1298,22 +1316,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
       if (next.getPrimaryGroup() == null) {
         next.setPrimaryGroup(getGroup());
       }
-      ClientUserDetail clientUserDetail = getClientUserDetail(next);
 
-      logger.info("forgotPassword users for " + user + " : " + clientUserDetail);
+      logger.info("forgotPassword users for " + user + " : " + next);
 
       ClientUserDetail clientUserDetail1 = null;
       try {
-        if (!isValidAsEmail(clientUserDetail.getEmail())) {
-          logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
+        String email = next.getEmail();
+        if (!isValidAsEmail(email)) {
+          logger.error("forgotPassword huh? email " + email + " not valid?");
         }
 
         clientUserDetail1 = delegate.forgotPassword(next,
-            clientUserDetail,
+            getClientUserDetail(next),
             url);
 
         logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
-
       } catch (Exception e) {
         logger.error("Got " + e, e);
       }

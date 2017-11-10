@@ -54,7 +54,6 @@ public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
   DatabaseImpl db = null;
-  private ServerProperties serverProps;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
 
@@ -71,7 +70,7 @@ public class DatabaseServlet extends HttpServlet {
       logger.warn("huh? no database?");
       return null;
     }
-    serverProps = database.getServerProps();
+    ServerProperties serverProps = database.getServerProps();
     if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
   }

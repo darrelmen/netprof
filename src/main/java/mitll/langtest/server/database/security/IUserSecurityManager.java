@@ -47,7 +47,7 @@ public interface IUserSecurityManager {
    * @param loggedInUser
    * @return
    */
-  long setSessionUser(HttpSession session, User loggedInUser);
+  void setSessionUser(HttpSession session, User loggedInUser);
 
   String getRemoteAddr(HttpServletRequest request);
 }

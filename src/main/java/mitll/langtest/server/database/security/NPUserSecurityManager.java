@@ -62,9 +62,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
+  private static boolean DEBUG = false;
 
   /**
    * Only made once but shared with servlets.
+   *
    * @param userDAO
    * @param userSessionDAO
    * @see
@@ -134,11 +136,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   @NotNull
   private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
     LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
-    if (!loggedInUser.isValid()) {
-      log.info("user " + loggedInUser + "\n\tis not valid ");
-      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
-    } else {
+    if (loggedInUser.isValid()) {
       setSessionUser(session, loggedInUser);
+    } else {
+      log.info("getValidLogin user " + loggedInUser + "\n\tis not valid ");
+      loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
     }
     return loginResult;
   }
@@ -151,7 +153,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
-  public long setSessionUser(HttpSession session, User loggedInUser) {
+  /**
+   * Adds startup info to user...
+   *
+   * @param session
+   * @param loggedInUser
+   * @return
+   */
+  public void setSessionUser(HttpSession session, User loggedInUser) {
 //    logger.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
     try {
       int id1 = loggedInUser.getID();
@@ -169,11 +178,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       logSetSession(session, sessionID);
 
       userDAO.getDatabase().setStartupInfo(loggedInUser);
-
-      return 1;
     } catch (Exception e) {
       log.error("got " + e, e);
-      return -1;
     }
   }
 
@@ -212,7 +218,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
     if (session != null) {
-      log.info("Invalidating session {}", session.getId());
+      log.info("logoutUser : Invalidating session {}", session.getId());
       if (userId != null) {
         userSessionDAO.removeSession(session.getId());
       }
@@ -225,7 +231,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
     log.warn(">Session Activity> User logout complete for id {} on primary host in {} ms",
         () -> userId,
-        //	"primary",
         () -> elapsedMS(startMS));
   }
 
@@ -250,40 +255,19 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   /**
    * Get the currently logged in user.
    *
-   * @see IUserSecurityManager#getLoggedInUser(HttpServletRequest)
+   * @see #getUserIDFromSession(HttpServletRequest)
+   * @see #getLoggedInUser(HttpServletRequest)
    */
   private User getLoggedInUser(HttpServletRequest request,
                                String opName,
                                boolean throwOnFail)
       throws RestrictedOperationException, DominoSessionException {
-/*
-    Subject subject = SecurityUtils.getSubject();
-    log.info("subject is " +subject);
-    if (subject != null) {
-      log.info("subject is " + subject.isRemembered());
-    }*/
     User user = lookupUserFromSessionOrDB(request, throwOnFail);
     if (user == null && throwOnFail) {
       throwException(opName, user, null);
     }
     return user;
   }
-
-  /**
-   * Get the current user out of the request. This is stored once the
-   * initial filter is passed (see SecurityFilter).
-   *
-   * @param request The incoming request.
-   * @return The user from the data store. Should not be null.
-   * @throws DominoSessionException when session is empty or has no user token.
-   */
-/*  private User getUser(HttpServletRequest request) throws DominoSessionException {
-    User user = (User) request.getAttribute(USER_REQUEST_ATT);
-    if (user == null) {
-      throw new DominoSessionException("No user found");
-    }
-    return user;
-  }*/
 
   /**
    * Get the current user out of the HTTP session or DB.
@@ -306,35 +290,32 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       sessUser = lookupUserFromDBSession(request);
       HttpSession session = request.getSession(false);
       if (session == null) {
-//        log.debug("lookupUserFromSessionOrDB note - no current session - ");
+        if (DEBUG) log.info("lookupUserFromSessionOrDB note - no current session - ");
         try {
           session = request.getSession();
-          //        log.debug("lookupUserFromSessionOrDB note - made session - ");
+          if (DEBUG) log.info("lookupUserFromSessionOrDB note - made session - ");
         } catch (Exception e) {
           log.error("got " + e, e);
         }
       } else {
-        //  log.debug("lookupUserFromSessionOrDB found current session - ");
+        if (DEBUG) log.info("lookupUserFromSessionOrDB found current session - ");
       }
-      /*long cookie =*/
       if (sessUser != null) {
-        /*userService.*/
         setSessionUser(session, sessUser);
       } else {
-        log.debug("lookupUserFromSessionOrDB no user for session - " + session + " logged out?");
+        if (DEBUG) log.info("lookupUserFromSessionOrDB no user for session - " + session + " logged out?");
       }
-      // if (cookie != -1) addCookie(response,"r",""+cookie);
     } else {
-//      log.debug("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
+      if (DEBUG)
+        log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
-//		if (sessUser != null && (!sessUser.isActive())) {
-//			sessUser = null;
-//		}
 
     //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
       log.error("About to fail due to missing user in session! SID: {}",
-          request.getRequestedSessionId(), new Throwable());
+          request.getRequestedSessionId()
+          //, new Throwable()
+      );
       throw new DominoSessionException("Could not look up user!");
     }
     return sessUser;
@@ -347,20 +328,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
     return remoteAddr;
   }
-
-  /**
-   *
-   */
-/*
-  public void addCookie(HttpServletResponse response, String name, String value) {
-    log.info("addCookie " + name);
-    Cookie cookie = new Cookie(name, value);
-    cookie.setPath("/");
-    cookie.setMaxAge(60 * 60 * 24 * 365);
-    cookie.setSecure(true);
-    response.addCookie(cookie);
-  }
-*/
 
   /**
    * TODO : what do we do if they come back after an hour and browser has a requested session id but
@@ -376,15 +343,17 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     HttpSession session = request != null ? getCurrentSession(request) : null;
     if (session != null) {
       Integer uidI = getUserIDFromSession(session);
-/*      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
-          session.getID(), request.getRequestedSessionId(),
-          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);*/
+      log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
+              //"SID={} " +
+              "Request SID={}, Session Created={}, isNew={}, result={}",
+          //session.getID(),
+          request.getRequestedSessionId(),
+          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
 
       if (uidI != null && uidI > 0) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
-          // log.info("lookupUserFromHttpSession got cache miss for " + uidI);
-          log.info("Lookup user from HTTP session. " +
+          log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
                   "SID={} " +
                   "Request SID={}, " +
                   "Session Created={}, " +
@@ -429,20 +398,20 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   public int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException {
     int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
     if (userIDFromSession == -1) {
-      // it's not in the current session - can we recover it from the remember me cookie?
+      // it's not in the current session - can we recover it?
       try {
-        User sessionUser = getLoggedInUser(threadLocalRequest);
+        User sessionUser = getLoggedInUser(threadLocalRequest, "", true);
         int i = (sessionUser == null) ? -1 : sessionUser.getID();
-
-        if (i == -1) { // OK, try the cookie???
+        if (i == -1) { // this shouldn't happen if we throw on bad sessions
           log.error("getUserIDFromSession huh? couldn't get user from session or database?");
         }
         return i;
       } catch (DominoSessionException e) {
-        log.error("getUserIDFromSession : session exception : " + e, e);
+        log.error("getUserIDFromSession : session exception : " + e);
         throw e;
       }
     } else {
+//      log.info("getUserIDFromSession found user id from session = " + userIDFromSession);
       return userIDFromSession;
     }
   }
@@ -461,7 +430,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     } else {
       HttpSession session = getCurrentSession(request);
       if (session == null) {
-        log.info("getUserIDFromRequest no current session for request " +request);
+        log.info("getUserIDFromRequest no current session for request " + request);
         return -1;
       } else {
         return getUserIDFromSession(session);
@@ -471,29 +440,26 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   /**
    * Not sure when the attribute would be missing...
+   *
    * @param session
    * @return
    */
   private Integer getUserIDFromSession(HttpSession session) {
     Object attribute = session.getAttribute(USER_SESSION_ATT);
     if (attribute == null) {
-      log.warn("getUserIDFromSession huh? no attribute " + USER_SESSION_ATT +  " on session?");
+      log.warn("getUserIDFromSession huh? no attribute " + USER_SESSION_ATT + " on session?");
       return -1;
-    }
-    else {
+    } else {
       return (Integer) attribute;
     }
   }
 
   /**
-   *
    * @param request
    * @return null if there is no user for the session
-   * @throws DominoSessionException
    * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
-  private User lookupUserFromDBSession(HttpServletRequest request)
-      throws DominoSessionException {
+  private User lookupUserFromDBSession(HttpServletRequest request) {// throws DominoSessionException {
     String sid = request.getRequestedSessionId();
     int userForSession = userSessionDAO.getUserForSession(sid);
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);

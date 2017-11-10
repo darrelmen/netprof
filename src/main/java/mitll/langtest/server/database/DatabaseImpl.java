@@ -520,7 +520,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getExercises(projectid);
     Project project = getProject(projectid);
     if (project == null) {
-      logger.error("huh? couldn't find project with id " + projectid);
+      logger.error("getSectionHelper huh? couldn't find project with id " + projectid);
     }
     return project.getSectionHelper();
   }
@@ -777,8 +777,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else {
         logger.warn("getProject asking for project -1?");//, new Exception());
       }
+      return null;
     }
-    return serverProps.useH2() ? null:projectManagement.getProject(projectid);
+    else {
+      return
+          //serverProps.useH2() ? null:
+          projectManagement.getProject(projectid);
+    }
   }
 
   public Collection<Project> getProjects() {

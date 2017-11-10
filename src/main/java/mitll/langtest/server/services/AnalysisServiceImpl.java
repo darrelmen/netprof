@@ -63,7 +63,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   public List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException {
     List<CommonShell> shells = new ArrayList<>();
     int projectID = getProjectIDFromUser();
-
+    logger.info("getShells project id from user " + projectID + " ids " + ids.size());
     for (Integer id : ids) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, id);
       if (customOrPredefExercise == null) {

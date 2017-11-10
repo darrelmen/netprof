@@ -154,6 +154,7 @@ public class ScoreServlet extends DatabaseServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
+      getDatabase();
       securityManager.getUserIDFromSession(request);
 
       String queryString = request.getQueryString();

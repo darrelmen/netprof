@@ -61,7 +61,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * If successful, establishes a session.
-   *
+   * <p>
    * TODO record additional session info in database.
    *
    * @param userId
@@ -101,6 +101,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * This call is open - you do not need a session.
    * It's called from the sign in form.
+   *
    * @param id
    * @return
    */
@@ -168,18 +169,21 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     User userByID = getUserByID(user.getUserID());
 
     if (userByID != null) {
-      if (userByID.isValid()) {
-        return new LoginResult(userByID, LoginResult.ResultType.Exists);
-      } else {
+      LoginResult.ResultType resultType = LoginResult.ResultType.Exists;
+      if (!userByID.isValid()) {
+        //logger.info("addUser user " + userByID + " resultType.");
+    //  } else {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
         userByID.setMale(user.isMale());
         userByID.setRealGender(user.isMale() ? MiniUser.Gender.Male : MiniUser.Gender.Female);
-
+        userByID.setAffilation(user.getAffiliation());
+        //logger.info("addUser user " + userByID + " updating.");
         db.getUserDAO().update(userByID);
-        return new LoginResult(userByID, LoginResult.ResultType.Updated);
+        resultType = LoginResult.ResultType.Updated;
       }
+      return new LoginResult(userByID, resultType);
     } else {
       User newUser = db.getUserManagement().addUser(getThreadLocalRequest(), user);
 
@@ -274,14 +278,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   *  consider stronger passwords like in domino.
+   * consider stronger passwords like in domino.
    *
    * @param currentHashedPassword
    * @param newHashedPassword
    * @return
    * @see ChangePasswordView#changePassword
    */
-  public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException{
+  public boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException {
     int userIDFromSession = getUserIDFromSessionOrDB();
     User userWhereResetKey = db.getUserDAO().getByID(userIDFromSession);
     return
