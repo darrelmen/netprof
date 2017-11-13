@@ -54,8 +54,8 @@ import mitll.langtest.client.user.UserManager;
  * @since 12/21/15.
  */
 public class AMASInitialUI extends InitialUI {
-//  private final Logger logger = Logger.getLogger("AMASInitialUI");
-  protected AutoCRTChapterNPFHelper learnHelper;
+  //  private final Logger logger = Logger.getLogger("AMASInitialUI");
+  private AutoCRTChapterNPFHelper learnHelper;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
 
   public AMASInitialUI(LangTest langTest, UserManager userManager) {

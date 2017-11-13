@@ -77,7 +77,7 @@ import static mitll.langtest.shared.user.Kind.*;
 /**
  * Store user info in domino tables.
  */
-public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUserDAO {
+public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
 
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
@@ -163,36 +163,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
         logger.debug("DominoUserDAOImpl no cache");
       }
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
-      logger.debug("DominoUserDAOImpl made delegate " + delegate.getClass());
-      logger.debug("DominoUserDAOImpl ignite = " + ignite);
-      logger.debug("DominoUserDAOImpl isCacheEnabled = " + dominoProps.isCacheEnabled());
-      myDelegate = makeMyServiceDelegate();//dominoProps.getUserServiceProperties(), mailer, pool, serializer);
+      logger.debug("made" +
+          "\ndelegate " + delegate.getClass() +
+          "\nignite = " + ignite +
+          "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
+      myDelegate = makeMyServiceDelegate();
 
       dominoAdminUser = delegate.getAdminUser();
     } else {
       logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
     }
   }
-
-/*
-  public static final IUserServiceDelegate makeServiceDelegate(ServerProperties props,
-                                                               Mailer mailer, Mongo mongoCP, JSONSerializer serializer, Ignite ignite) {
-    MongoUserServiceDelegate d = null;
-    switch (props.getUserServiceProperties().serviceType) {
-      case LDAP:
-        d = new LDAPUserServiceDelegate(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP);
-        break;
-      case Mongo:
-        d = (ignite != null && props.isCacheEnabled()) ?
-            new CachingMongoUserService(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP, ignite) :
-            new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, props.getAcctTypeName(), mongoCP);
-        break;
-    }
-    d.initializeDAOs(serializer);
-    logger.info("Initialized user service of type {}", d.getClass().getSimpleName());
-    return d;
-  }
-*/
 
   public JSONSerializer getSerializer() {
     return serializer;
@@ -419,10 +400,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return primaryGroup;
   }
 
-  private Map<String,Group> nameToGroup = new HashMap<>();
+  private Map<String, Group> nameToGroup = new HashMap<>();
 
   /**
    * Cache secondary group so don't have to search for it.
+   *
    * @param name
    * @return
    */
@@ -575,7 +557,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return getUser(loggedInUser);
   }
 
-  private Map<String,Map<String,Boolean>> dominoToEncodedToMatch= new HashMap<>();
+  private Map<String, Map<String, Boolean>> dominoToEncodedToMatch = new HashMap<>();
 
   /**
    * Remember pair of user password and encoded password and their match result to speed up this call.
@@ -657,13 +639,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     if (dominoUser == null) {
       logger.warn("getUserByID no user by '" + userID + "'");
     } else {
-      logger.info("getUserByID found " + userID + " user #"+ dominoUser.getDocumentDBID());
+      logger.info("getUserByID found " + userID + " user #" + dominoUser.getDocumentDBID());
     }
 
     return getUser(dominoUser);
   }
 
-  public boolean isKnownUser(String userid) { return getDBUser(userid) != null; }
+  public boolean isKnownUser(String userid) {
+    return getDBUser(userid) != null;
+  }
+
   @Override
   public DBUser getDBUser(String userID) {
     return delegate.getDBUser(userID);
@@ -1195,7 +1180,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
-  public boolean isMale(int userid) { return getByID(userid).isMale(); }
+  public boolean isMale(int userid) {
+    return getByID(userid).isMale();
+  }
 
   /**
    * @param user
@@ -1256,9 +1243,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
 
       User byID = getByID(toUpdate.getID());
       logger.info("after update\n" + byID);
-    }
-    else {
-      logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n"+toUpdate);
+    } else {
+      logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n" + toUpdate);
     }
   }
 

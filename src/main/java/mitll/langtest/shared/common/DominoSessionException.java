@@ -32,13 +32,15 @@
 
 package mitll.langtest.shared.common;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * DominoSessionException
  *
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since Nov 23, 2013 12:21:48 PM
  */
-public class DominoSessionException extends Exception {
+public class DominoSessionException extends Exception implements IsSerializable {
 	private static final long serialVersionUID = 1103725499652557690L;
 
 	public DominoSessionException() { super(); }
@@ -54,5 +56,4 @@ public class DominoSessionException extends Exception {
 	public DominoSessionException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
 }

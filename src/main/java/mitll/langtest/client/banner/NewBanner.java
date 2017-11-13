@@ -363,7 +363,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
-    choices.forEach(choice->choice.setVisible(val));
+    choices.forEach(choice -> choice.setVisible(val));
     cog.setVisible(isAdmin());
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
@@ -410,14 +410,18 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private boolean isQC() {
-    //  logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
+   // logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     boolean admin = isAdmin();
-    //   logger.info("is admin " + admin);
+   // logger.info("is admin " + admin);
     boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
-    // logger.info("is canDoQC " + canDoQC);
+   // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
   }
 
+  /**
+   * @see InitialUI#addCrumbs
+   * @see InitialUI#showInitialState
+   */
   @Override
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);

@@ -57,7 +57,10 @@ public interface UILifecycle {
 
   void startOver();
 
+  void getUserPermissions();
+
   void showInitialState();
+
 
   void addBreadcrumbs();
 
@@ -70,6 +73,7 @@ public interface UILifecycle {
   NavLink makeBreadcrumb(String name);
 
   void clickOnParentCrumb(SlimProject parent);
+
 
   /**
    * @see LangTest#makeFlashContainer()

@@ -562,12 +562,12 @@ public class InitialUI implements UILifecycle {
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      logger.info("gotUser ignoring got user for current user " + userID);
+      logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();
       } else {
-        logger.warning("how can navigation be null????");
+        logger.warning("gotUser how can navigation be null????");
       }
     }
 
@@ -583,6 +583,11 @@ public class InitialUI implements UILifecycle {
   public void startOver() {
     breadcrumbs.clear();
     configureUIGivenUser(userManager.getUser());
+  }
+
+  @Override
+  public void getUserPermissions() {
+    userManager.getPermissionsAndSetUser();
   }
 
   /**

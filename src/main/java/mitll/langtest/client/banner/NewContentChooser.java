@@ -67,6 +67,8 @@ public class NewContentChooser implements INavigation {
    * So it could be that you've lost a permssion, so the view you were on before isn't allowed for you any more.
    * In which case we have to drop down to an allowed view.
    * @return
+   * @see NewBanner#checkProjectSelected
+   * @see #showInitialState
    */
   @Override
   @NotNull
@@ -75,9 +77,14 @@ public class NewContentChooser implements INavigation {
     VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
 
     Set<User.Permission> permissions = new HashSet<>(controller.getPermissions());
+
+//    logger.info("user permissions " + permissions + " vs current view perms " + currentStoredView.getPerms());
     permissions.retainAll(currentStoredView.getPerms());
 
+//    logger.info("user permissions " + permissions + " overlap =  " + permissions);
+
     if (permissions.isEmpty()) { // if no overlap, you don't have permission
+      logger.info("user permissions " + permissions + " falling back to learn view");
       currentStoredView = LEARN;
     }
 
@@ -216,6 +223,7 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showPreviousState() {
+    showView(getCurrentView());
   }
 
   @Override

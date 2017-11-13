@@ -220,7 +220,7 @@ public class MessageHelper {
       a.setClose(true);
 			a.addClosedHandler(event -> {
         m.hide();
-        parentHelper.showInitialState();
+        parentHelper.getUserPermissions(); // since the user permissions may have changed
       });
     } else {
       a.setClose(false);
@@ -240,7 +240,7 @@ public class MessageHelper {
         m.hide();
        // if (dType == DDialogType.RefreshToken) {
          // log.warning("Refreshing");
-          parentHelper.showInitialState();
+          parentHelper.getUserPermissions(); // since the user permissions may have changed
        // }
       });
       a.add(closeBtn);

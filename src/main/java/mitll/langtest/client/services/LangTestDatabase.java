@@ -70,7 +70,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.recording.RecorderNPFHelper#getProgressInfo
    */
-  Map<String, Float> getMaleFemaleProgress() throws DominoSessionException, RestrictedOperationException;
+  Map<String, Float> getMaleFemaleProgress() throws DominoSessionException;
 
   /**
    * @param ids

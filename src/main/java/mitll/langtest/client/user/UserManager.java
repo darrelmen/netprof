@@ -100,7 +100,7 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#checkLogin()
+   * @see mitll.langtest.client.LangTest#checkLogin
    */
   public void checkLogin() {
     final int user = getUser();
@@ -121,7 +121,7 @@ public class UserManager {
    *
    * @see #checkLogin
    */
-  private void getPermissionsAndSetUser() {
+  public void getPermissionsAndSetUser() {
     if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " +
         " asking server for info...");
     final long then = System.currentTimeMillis();

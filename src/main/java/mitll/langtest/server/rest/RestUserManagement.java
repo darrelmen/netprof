@@ -238,7 +238,7 @@ public class RestUserManagement {
   ) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
-    logger.debug("gotHasUser user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
+    logger.debug("tryToLogin user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
 
     if (userFound == null) {
       toReturn.put(USERID, -1);
@@ -280,8 +280,8 @@ public class RestUserManagement {
       String userAgent = request.getHeader("User-Agent");
       // ensure a session is created.
       HttpSession session = createSession(request);
-      logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
-      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
+      logger.info("loginUser : Login session " + session.getId() + " isNew=" + session.isNew() + " userid " + userId);
+//      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
     } catch (Exception e) {
       logger.error("got " + e, e);
