@@ -450,7 +450,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private ClientUserDetail getClientUserDetail(DBUser dbUser) {
     AccountDetail acctDtl = new AccountDetail();
-    acctDtl.setUpdTime(new Date());
     acctDtl.setUpdater(dbUser);
     return new ClientUserDetail(dbUser, acctDtl);
   }

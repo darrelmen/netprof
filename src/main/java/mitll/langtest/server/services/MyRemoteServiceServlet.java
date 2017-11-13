@@ -127,8 +127,13 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
     boolean enabled = userFromSession.isEnabled();
     boolean isApprovedForNetprof = userFromSession.isHasAppPermission();
-    if (!enabled) logger.info("user " + userIDFromSessionOrDB + " not enabled");
-    if (!isApprovedForNetprof) logger.info("user " + userIDFromSessionOrDB + " not approved to use net");
+    if (!enabled) logger.info("getPermissions user " + userIDFromSessionOrDB + " not enabled");
+    if (!isApprovedForNetprof) logger.info("getPermissions user " + userIDFromSessionOrDB + " not approved to use net");
+
+/*    logger.info("getPermissions for" +
+        "\nuser " + userFromSession +
+        "\nperms " + userFromSession.getPermissions());*/
+
     return enabled && isApprovedForNetprof ? userFromSession.getPermissions() : Collections.emptyList();
   }
 
@@ -237,18 +242,14 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    * @return
    * @throws DominoSessionException
    */
-  User getSessionUser() throws DominoSessionException {
-    return securityManager.getLoggedInUser(getThreadLocalRequest());
-  }
+  User getSessionUser() throws DominoSessionException {return securityManager.getLoggedInUser(getThreadLocalRequest());}
 
   /**
    * This is safe!
    *
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {
-    return getLanguage(getProject());
-  }
+  protected String getLanguage() throws DominoSessionException {    return getLanguage(getProject());  }
 
   protected String getLanguage(Project project) {
     if (project == null) {

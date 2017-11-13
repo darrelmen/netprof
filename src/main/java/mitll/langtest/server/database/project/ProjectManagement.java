@@ -74,7 +74,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private static final int LANG_ID = 14;
 
-  private static final int IMPORT_PROJECT_ID = -100;
+  private static final int IMPORT_PROJECT_ID =DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
@@ -500,7 +500,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProject(int projectid) {
-    if (projectid == -1 && !idToProject.isEmpty()) {
+    if (projectid == IMPORT_PROJECT_ID && !idToProject.isEmpty()) {
       return getFirstProject();
     } else {
       Project project = idToProject.get(projectid);
