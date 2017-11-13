@@ -51,7 +51,6 @@ public class LoginResult implements Serializable {
     BadPassword,
     SessionNotRestored,
     SessionExpired,
-    //  MissingEmail,
     MissingInfo,
     Updated,
     Added,
@@ -61,7 +60,6 @@ public class LoginResult implements Serializable {
   private static final long serialVersionUID = -8359612864581208214L;
   private User loggedInUser;
   private ResultType resultType;
-//  private long rKey = 0;
 
   public LoginResult() {
   }

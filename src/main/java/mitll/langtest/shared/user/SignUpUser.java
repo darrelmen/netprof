@@ -48,7 +48,6 @@ public class SignUpUser implements IsSerializable {
   private String first;
   private String last;
   private String ip;
- // private String url;
   private String affiliation;
 
   public SignUpUser() {
@@ -96,7 +95,6 @@ public class SignUpUser implements IsSerializable {
     this.ip = ip;
     this.first = first;
     this.last = last;
-   // this.url = url;
     this.affiliation = affiliation;
   }
 

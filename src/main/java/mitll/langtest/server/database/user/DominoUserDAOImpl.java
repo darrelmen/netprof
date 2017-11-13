@@ -1253,6 +1253,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
       setGender(toUpdate, dbUser);
 
       updateUser(dbUser);
+
+      User byID = getByID(toUpdate.getID());
+      logger.info("after update\n" + byID);
     }
     else {
       logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n"+toUpdate);
@@ -1284,7 +1287,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
     else if (updateUser.getAffiliation().isEmpty()) logger.warn("updateUser empty affiliation for " + updateUser);
 
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.updateUser(adminUser, getClientUserDetail(updateUser));
+    ClientUserDetail clientUserDetail1 = getClientUserDetail(updateUser);
+
+    {
+      String affiliation = clientUserDetail1.getAffiliation();
+      if (affiliation == null || affiliation.isEmpty()) {
+        logger.warn("client user " + affiliation + " for " + clientUserDetail1);
+      }
+    }
+
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.updateUser(adminUser, clientUserDetail1);
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
     if (clientUserDetail != null) {
       String affiliation = clientUserDetail.getAffiliation();
@@ -1292,6 +1304,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO,IDominoUs
         logger.warn("after " + affiliation + " for " + clientUserDetail);
       }
     }
+    logger.info("after " + clientUserDetailSResult);
+
     return clientUserDetailSResult;
   }
 

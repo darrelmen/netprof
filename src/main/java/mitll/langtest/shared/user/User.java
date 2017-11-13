@@ -63,7 +63,7 @@ public class User extends MiniUser implements ReportUser {
   private String email = "";
   private boolean enabled;
   private boolean admin;
-//  private int numResults;
+  //  private int numResults;
 //  private float rate = 0.0f;
 //  private boolean complete;
 //  private float completePercent = 0.0f;
@@ -79,18 +79,6 @@ public class User extends MiniUser implements ReportUser {
 
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
-
-  /**
-   * For right now,  you can only choose to be a student initially.
-   *
-   * @return
-   * @seex SignUpForm#getRoles
-   */
-/*
-  public static Collection<Kind> getSelfChoiceRoles() {
-    return Collections.singletonList(STUDENT);
-  }
-*/
 
   /**
    * These are the permissions you get when you are invited by program manager or admin
@@ -405,7 +393,6 @@ public class User extends MiniUser implements ReportUser {
     this.completePercent = completePercent;
   }
 */
-
   public int getExperience() {
     return experience;
   }
@@ -467,11 +454,9 @@ public class User extends MiniUser implements ReportUser {
 
   /**
    * @param email
-   * @see mitll.langtest.client.userops.EditUserForm#gotSignUp
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
-  public void setEmail(String email) {
-    this.email = email;
-  }
+  public void setEmail(String email) {  this.email = email;  }
 
   public void setDialect(String dialect) {
     this.dialect = dialect;
@@ -490,7 +475,11 @@ public class User extends MiniUser implements ReportUser {
   }
 
   public String getAffiliation() {
-    return affiliation;
+    return this.affiliation;
+  }
+
+  public void setAffiliation(String affilation) {
+    this.affiliation = affilation;
   }
 
   /**
@@ -501,18 +490,16 @@ public class User extends MiniUser implements ReportUser {
    * @return
    */
   public boolean isValid() {
-    boolean hasStandardInfo =
-        hasValidEmail() &&
-            isValid(first) &&
-            isValid(last);
+    return hasValidEmail() &&
+        isValid(first) &&
+        isValid(last) &&
+        isValid(affiliation) &&
 
-    // must have a gender (and ideally age and dialect) if you want to record audio
-    boolean recordInfoSet =
-        !(getPermissions().contains(Permission.RECORD_AUDIO) ||
+        // must have a gender (and ideally age and dialect) if you want to record audio
+
+        (!(getPermissions().contains(Permission.RECORD_AUDIO) ||
             getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
-            getRealGender() != Gender.Unspecified;
-
-    return hasStandardInfo && recordInfoSet;
+            getRealGender() != Gender.Unspecified);
   }
 
   public boolean hasValidEmail() {
@@ -524,7 +511,7 @@ public class User extends MiniUser implements ReportUser {
   }
 
   public boolean isValid(String email) {
-    return email != null && !email.isEmpty();
+    return email != null && !email.trim().isEmpty();
   }
 
 /*  public String toStringShort() {
@@ -566,7 +553,8 @@ public class User extends MiniUser implements ReportUser {
             "\n\treset   '" + resetKey + "'") +
         (startupInfo == null ? "" :
             "\n\tstartup  " + startupInfo) +
-        "\n\thasPermission  " + isHasAppPermission()
+        "\n\thasPermission  " + isHasAppPermission() +
+        "\n\taffiliation '" + getAffiliation() + "'"
         ;
   }
 }

@@ -178,8 +178,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         userByID.setLast(user.getLast());
         userByID.setMale(user.isMale());
         userByID.setRealGender(user.isMale() ? MiniUser.Gender.Male : MiniUser.Gender.Female);
-        userByID.setAffilation(user.getAffiliation());
-        //logger.info("addUser user " + userByID + " updating.");
+        userByID.setAffiliation(user.getAffiliation());
+        logger.info("addUser user " + userByID + " updating.");
         db.getUserDAO().update(userByID);
         resultType = LoginResult.ResultType.Updated;
       }
