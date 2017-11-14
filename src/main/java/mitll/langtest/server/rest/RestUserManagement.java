@@ -419,7 +419,7 @@ public class RestUserManagement {
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
   }
 
   /**

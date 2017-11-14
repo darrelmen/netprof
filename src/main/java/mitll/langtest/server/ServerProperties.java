@@ -127,6 +127,7 @@ public class ServerProperties {
   private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
   private static final String RELEASE_DATE = "releaseDate";
+  public static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -852,6 +853,9 @@ public class ServerProperties {
    */
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);
+  }
+  public String getMailServer() {
+    return props.getProperty("mail.server", LLMAIL_LL_MIT_EDU);
   }
 
   /**

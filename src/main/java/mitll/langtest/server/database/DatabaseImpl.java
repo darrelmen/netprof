@@ -648,7 +648,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
-   // logger.info("setStartupInfo on " + userWhere);
+    // logger.info("setStartupInfo on " + userWhere);
     setStartupInfo(userWhere, projectForUser(userWhere.getID()));
   }
 
@@ -763,8 +763,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (serverProps.useH2()) {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       projectManagement.addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
-    }
-    else {
+    } else {
       logger.info("*not* making import project");
     }
   }
@@ -781,8 +780,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         logger.warn("getProject asking for project -1?");//, new Exception());
       }
       return null;
-    }
-    else {
+    } else {
       return
           //serverProps.useH2() ? null:
           projectManagement.getProject(projectid);
@@ -1737,7 +1735,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
   }
 
   /**
@@ -1866,7 +1864,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public IProjectDAO getProjectDAO() {    return projectDAO;  }
+  public IProjectDAO getProjectDAO() {
+    return projectDAO;
+  }
 
   @Override
   public IUserProjectDAO getUserProjectDAO() {
@@ -1926,8 +1926,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see LangTestDatabaseImpl#readProperties
    * @param userSecurityManager
+   * @see LangTestDatabaseImpl#readProperties
    */
   @Override
   public void setUserSecurityManager(IUserSecurityManager userSecurityManager) {

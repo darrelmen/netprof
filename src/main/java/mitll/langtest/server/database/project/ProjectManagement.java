@@ -183,7 +183,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void configureProjects() {
     getProjects().forEach(project -> configureProject(project, false, false));
-    logger.info("configureProjects " +getProjects().size()+  " configured.");
+    logger.info("FINISHED : configureProjects " +getProjects().size()+  " configured.");
     logMemory();
   }
 

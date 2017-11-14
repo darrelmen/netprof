@@ -61,7 +61,10 @@ public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
+  /**
+   * @see #email
+   */
+ // private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
   private static final int MAIL_PORT = 25;
   private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
@@ -70,6 +73,7 @@ public class MailSupport {
   private static final String TEXT_HTML = "text/html";
   private final boolean debugEmail;
   private final boolean testEmail;
+  private final String mailServer;
 
   /**
    * @param debugEmail
@@ -77,9 +81,10 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    * @see RestUserManagement#getMailSupport()
    */
-  public MailSupport(boolean debugEmail, boolean testEmail) {
+  public MailSupport(boolean debugEmail, boolean testEmail, String mailServer) {
     this.debugEmail = debugEmail;
     this.testEmail  = testEmail;
+    this.mailServer =mailServer;
     if (testEmail) logger.warn("\n\n\n--->using test email");
   }
 
@@ -193,7 +198,7 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, MAILSERVER, testEmail);
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, mailServer, testEmail);
   }
 
   /**
@@ -206,12 +211,12 @@ public class MailSupport {
    * @see Report#sendExcelViaEmail(MailSupport, List, List, PathHelper, List)
    */
   public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach, String receiverName) {
-    Message message = new MimeMessage(getMailSession(MAILSERVER, testEmail));
+    Message message = new MimeMessage(getMailSession(mailServer, testEmail));
 
     try {
       message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
       InternetAddress address = new InternetAddress(receiver, receiverName);
-      logger.info("makeMessage sending to " + address + " at port " + MAIL_PORT);
+      logger.info("makeMessage sending to " + address + " at port " + MAIL_PORT + " via " + mailServer);
       message.addRecipient(Message.RecipientType.TO, address);
       // addCC(ccEmails, msg);
       message.setSubject(subject);
@@ -325,7 +330,7 @@ public class MailSupport {
                                   String subject,
                                   String message) {
     try {
-      Transport.send(makeHTMLMessage(getMailSession(MAILSERVER, testEmail),
+      Transport.send(makeHTMLMessage(getMailSession(mailServer, testEmail),
           senderName, senderEmail, replyToEmail, recipientEmails,
           ccEmails, subject, message));
       return true;

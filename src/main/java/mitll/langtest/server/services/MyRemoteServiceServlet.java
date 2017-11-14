@@ -305,9 +305,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
-
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
   }
 
   protected String getInfo(String message) {

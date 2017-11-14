@@ -201,7 +201,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
   }
 
   /**

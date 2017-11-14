@@ -85,6 +85,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String UNK = "+UNK+";
   private static final String SEMI = ";";
   public static final String SIL = "sil";
+  public static final int MAX_FROM_ANY_TOKEN = 10;
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -574,7 +575,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         for (int i = 0; i < prons.size(); i++) {
           String[] apply = prons.apply(i);
           numForThisWord = Math.max(numForThisWord, apply.length);
-
 /*
           StringBuilder builder = new StringBuilder();
           for (String s:apply) builder.append(s).append("-");
@@ -635,7 +635,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
 
-
           for (int i = 0; i < prons.size(); i++) {
             dict.append(getPronStringForWord(word, prons.apply(i), justPhones));
           }
@@ -693,8 +692,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 dict.append(getUnkPron(word));
               }
             } else { // it's ok -use it
-              if (process.length > 50) logger.info("prons length " + process.length + " for " + transcript);
+              if (process.length > 50) logger.info("prons length " + process.length + " for " + word + " in " + transcript);
+              int max = MAX_FROM_ANY_TOKEN;
               for (String[] pron : process) {
+                if (max-- == 0) break;
                 dict.append(getPronStringForWord(word, pron, justPhones));
               }
             }
