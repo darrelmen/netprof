@@ -41,6 +41,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -75,10 +76,33 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
+   * so first look in the main id->ex map and then in the context->exercise map
+   * @param id
+   * @return
+   */
+  @Override
+  public CommonExercise getExercise(int id) {
+    synchronized (idToExercise) { //?
+      CommonExercise commonExercise = idToExercise.get(id);
+
+      if (commonExercise == null) {
+        if (
+            id != userExerciseDAO.getUnknownExerciseID()) {
+          commonExercise= idToContextExercise.get(id);
+        }
+        if (commonExercise == null) {
+          logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises ");
+        }
+      }
+      return commonExercise;
+    }
+  }
+
+  /**
    * TODO : remove duplicate
    *
    * @return
-   * @see SlickUserExerciseDAO#getTypeOrder
+   * @see ExcelImport#readFromSheet
    */
   @Override
   public List<String> getTypeOrder() {
@@ -91,6 +115,16 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       if (second != null && !second.isEmpty()) typeOrder.add(second);
     }
     return typeOrder;
+  }
+
+  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
+
+  protected void populateIdToExercise() {
+    super.populateIdToExercise();
+
+    getRawExercises()
+        .forEach(e -> e.getDirectlyRelated()
+            .forEach(commonExercise -> idToContextExercise.put(commonExercise.getID(), commonExercise)));
   }
 
   /**
@@ -183,7 +217,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private void attachContextExercises(List<CommonExercise> allNonContextExercises,
                                       Collection<SlickRelatedExercise> related,
                                       Map<Integer, CommonExercise> idToContext) {
-    int attached = 0;
+    //  int attached = 0;
     int c = 0;
     String prefix = "Project " + project.name();
 
@@ -200,7 +234,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         CommonExercise context = idToContext.get(relatedExercise.contextexid());
         if (context != null) {
           root.getMutable().addContextExercise(context);
-          attached++;
+          //      attached++;
         } else if (c++ < 2) {
           logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
         }

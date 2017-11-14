@@ -155,9 +155,10 @@ public class ScoreServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
       getDatabase();
-      int userIDFromSession = securityManager.getUserIDFromSession(request);
-
-      logger.info("doGet user id from session is " + userIDFromSession);
+      {
+        int userIDFromSession = securityManager.getUserIDFromSession(request);
+        logger.info("doGet user id from session is " + userIDFromSession);
+      }
 
       String queryString = request.getQueryString();
       if (queryString == null) queryString = ""; // how could this happen???
@@ -808,29 +809,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * Install path, etc. should have been done by now
-   *
-   * @param projectid
-   * @return
-   */
-/*  private JsonExport getJSONExport(int projectid) {
-    db.getExercises(projectid);
-
-    Map<String, Integer> stringIntegerMap = Collections.emptyMap();
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
-
-    JsonExport jsonExport = new JsonExport(
-        audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
-        db.getSectionHelper(projectid),
-        serverProps.getPreferredVoices(),
-        getLanguage(projectid).equalsIgnoreCase("english")
-    );
-
-    db.attachAllAudio(projectid);
-    return jsonExport;
-  }*/
-
-  /**
    * REALLY IMPORTANT.
    * <p>
    * Write the posted audio file to a location based on the user id and the exercise id.
@@ -852,6 +830,17 @@ public class ScoreServlet extends DatabaseServlet {
                                      Request requestType,
                                      String deviceType,
                                      String device) throws IOException {
+    // check session
+    try {
+      int userIDFromSession = securityManager.getUserIDFromSession(request);
+      logger.info("doGet user id from session is " + userIDFromSession);
+    } catch (DominoSessionException dse) {
+      logger.info("got " + dse);
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("message", "no session");
+      return jsonObject;
+    }
+
     int realExID = 0;
     try {
       realExID = Integer.parseInt(request.getHeader(EXERCISE));

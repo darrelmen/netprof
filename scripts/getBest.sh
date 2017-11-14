@@ -34,20 +34,25 @@ then
  file="turkish"
 fi
 
-cd /opt/netprof/bestAudio/$file
+path=/opt/netprof/bestAudio/$file
+mkdir $path
+cd $path
 
 echo `pwd`
 
+echo "start curl..."
 date
 curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/bestAudio/$orig.tar.gz"
+echo "finished curl..."
 
 date
+echo "start untar..."
+
 tar xfz $orig.tar.gz
-rm $orig.tar.gz
-#sudo chown -R tomcat8 .
-date
+echo "done untar..."
 
-cd ..
+rm $orig.tar.gz
+date
 }
 
 files=(cm croatianeval dari egyptian english farsi french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
@@ -56,3 +61,4 @@ do
  fun $file
 done
 
+sudo chown -R tomcat8 /opt/netprof/bestAudio/

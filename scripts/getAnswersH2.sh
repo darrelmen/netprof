@@ -34,21 +34,25 @@ then
  file="turkish"
 fi
 
-cd /opt/netprof/answers/$file
+path=/opt/netprof/answers/$file
+mkdir $path
+cd $path
 
 echo `pwd`
 
+echo "start curl..."
 date
 suffix="Answers"
 curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$orig$suffix.tar.gz"
 
+echo "finished curl..."
 date
-tar xfz $orig.tar.gz
-rm $orig.tar.gz
-#sudo chown -R tomcat8 .
-date
+echo "start untar..."
 
-cd ..
+tar xfz $orig.tar.gz
+echo "done untar..."
+rm $orig.tar.gz
+date
 }
 
 files=( korean levantine msa russian)
@@ -56,3 +60,5 @@ for file in ${files[@]}
 do
  fun $file
 done
+
+sudo chown -R tomcat8 /opt/netprof/answers/

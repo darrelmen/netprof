@@ -35,6 +35,7 @@ then
 fi
 
 path=/opt/netprof/answers/$file
+mkdir $path
 cd $path
 
 echo `pwd`
@@ -54,10 +55,6 @@ tar xfz $realName.tar.gz
 echo "done untar..."
 rm $realName.tar.gz
 date
-
-
-
-cd ..
 }
 
 files=(cm croatianeval dari egyptian english farsi french german hindieval iraqi japanese korean levantine msa pashto1 pashto2 pashto3 portuguese russian serbian soranieval spanish sudanese tagalog turkisheval urdu)
@@ -65,3 +62,5 @@ for file in ${files[@]}
 do
  fun $file
 done
+
+sudo chown -R tomcat8 /opt/netprof/answers/

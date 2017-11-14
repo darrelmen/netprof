@@ -34,20 +34,23 @@ then
  file="turkish"
 fi
 
-cd /opt/netprof/bestAudio/$file
+path=/opt/netprof/bestAudio/$file
+mkdir $path
+cd $path
 
 echo `pwd`
 
+echo "start curl..."
 date
 curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/bestAudio/$orig.tar.gz"
+echo "finished curl..."
 
 date
-sudo tar xfz $orig.tar.gz
+echo "start untar..."
+tar xfz $orig.tar.gz
+echo "done untar..."
 rm $orig.tar.gz
-sudo chown -R tomcat8 .
 date
-
-cd ..
 }
 
 files=(korean levantine msa russian)
@@ -56,3 +59,4 @@ do
  fun $file
 done
 
+sudo chown -R tomcat8 /opt/netprof/bestAudio/

@@ -63,7 +63,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String SEMI = ";";
   private static final int MAX_WARNS = Integer.MAX_VALUE;
 
-  private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
+  protected final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
   private final Map<String, CommonExercise> oldidToExercise = new HashMap<>();
 
   private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
@@ -111,7 +111,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   public Set<Integer> getIDs() {
-    return idToExercise.keySet();
+    synchronized (idToExercise) {
+      return idToExercise.keySet();
+    }
   }
 
   /**
@@ -119,7 +121,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see DatabaseImpl#getExercises(int)
    */
   public List<CommonExercise> getRawExercises() {
-    synchronized (this) {
+    synchronized (idToExercise) {
       if (exercises == null) {
         exercises = readExercises();
         afterReadingExercises();
@@ -206,7 +208,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    *
    * @see #afterReadingExercises
    */
-  private void populateIdToExercise() {
+  protected void populateIdToExercise() {
     // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
@@ -331,7 +333,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       logger.info("addOverlay : huh? can't find " + userExercise);
     } else {
       logger.debug("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
-      synchronized (this) {
+      synchronized (idToExercise) {
         int i = exercises.indexOf(currentExercise);
         logger.debug("addOverlay at " + i + " when looking for " + currentExercise);
         if (i == -1) {
@@ -355,7 +357,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see #addNewExercises()
    */
   public void add(CommonExercise ue) {
-    synchronized (this) {
+    synchronized (idToExercise) {
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
       oldidToExercise.put(ue.getOldID(), ue);
@@ -385,7 +387,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param addRemoveDAO
    * @param audioDAO
    * @param projid
-   * @param myProject
+   * @param isMyProject
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
@@ -415,12 +417,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see DatabaseImpl#getExercise
    */
   public CommonExercise getExercise(int id) {
-    synchronized (this) { //?
+    synchronized (idToExercise) { //?
       CommonExercise commonExercise = idToExercise.get(id);
       if (commonExercise == null) {
-        if (warns++ < MAX_WARNS &&
-            id != userExerciseDAO.getUnknownExerciseID())
-          logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)", new Exception());
+        if (id != userExerciseDAO.getUnknownExerciseID()) {
+
+        if (warns++ < MAX_WARNS)
+          logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
+        }
       }
       return commonExercise;
     }
@@ -432,7 +436,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @return
    */
   private CommonExercise getExerciseOld(String id) {
-    synchronized (this) {
+    synchronized (idToExercise) {
       CommonExercise commonExercise = oldidToExercise.get(id);
       if (commonExercise == null) {
         if (warns++ < MAX_WARNS) {
@@ -492,11 +496,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-   * TODO: Need to turn this back on eventually
+   * Only on import...
    *
    * @see #getRawExercises()
    */
-  @Deprecated
   private void addNewExercises() {
     if (addRemoveDAO != null) {
       for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {

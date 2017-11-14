@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-#sites=(npfClassroomCroatianEval)
-#$for file in ${sites[@]}
-
 date
 
 for file in `ls ~/webapps | grep npfClass | grep -v war| grep -v Test | grep -v FrenchEval | grep -v SudaneseEval`;
@@ -16,7 +13,9 @@ echo $toPost
 mkdir -p /data/tempBest/$langlc
 cd ~/webapps/$file
 
-tar cfz /data/tempBest/$langlc/$toPost bestAudio
+date
+tar cfz /data/tempBest/$langlc/$toPost --exclude='*.raw' bestAudio
+date
 cd /data/tempBest/$langlc/
 #split -b5G $toPost $langlc
 
