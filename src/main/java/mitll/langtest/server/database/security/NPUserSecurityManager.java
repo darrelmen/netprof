@@ -312,7 +312,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
     //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
-      log.error("About to fail due to missing user in session! SID: {}",
+      log.warn("About to fail due to missing user in session! SID: {}",
           request.getRequestedSessionId()
           //, new Throwable()
       );

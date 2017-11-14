@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -84,7 +85,7 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private static final String PHONE_REPORT = "phoneReport";
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @see #getProjects
    */
   private static final String PROJECTS = "projects";
 
@@ -138,7 +139,7 @@ public class ScoreServlet extends DatabaseServlet {
   private JsonScoring jsonScoring;
 
   /**
-   * Must have a session...?
+   * Must have a session... unless asking for projects, which we need up front.
    * <p>
    * How does iOS do a login?
    * <p>
@@ -154,14 +155,16 @@ public class ScoreServlet extends DatabaseServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
-      getDatabase();
-      {
-        int userIDFromSession = securityManager.getUserIDFromSession(request);
-        logger.info("doGet user id from session is " + userIDFromSession);
+      ReportingServices reportingServices = getDatabase();
+
+      String queryString = getQuery(request);
+
+      if (matchesRequest(queryString, PROJECTS)) {
+        reply(response, getProjects());
+        return;
       }
 
-      String queryString = request.getQueryString();
-      if (queryString == null) queryString = ""; // how could this happen???
+      checkSession(request);
 
       int projid = getProject(request);
 
@@ -180,16 +183,14 @@ public class ScoreServlet extends DatabaseServlet {
         logger.warn("doGet got project id from url header " + projid);
       }
 
-      ReportingServices reportingServices = getDatabase();
       String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
-      // if (!queryString.contains(NESTED_CHAPTERS) || true) { // quiet output for polling from status webapp
+
       logger.debug("ScoreServlet.doGet (" + language + "):" +
           "\n\tRequest '" + queryString + "'" +
           "\n\tprojid " + projid +
           "\n\tpath   " + request.getPathInfo() +
           "\n\turi    " + request.getRequestURI() +
           "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
-      //}
 
       long then = System.currentTimeMillis();
       configureResponse(response);
@@ -200,8 +201,7 @@ public class ScoreServlet extends DatabaseServlet {
       //toReturn.put(ERROR, "expecting request");
 
       try {
-        queryString = URLDecoder.decode(queryString, "UTF-8");
-        if (matchesRequest(queryString, NESTED_CHAPTERS)) {
+         if (matchesRequest(queryString, NESTED_CHAPTERS)) {
           String[] split1 = queryString.split("&");
           if (split1.length == 2) {
             String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
@@ -248,19 +248,12 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
           queryString = removePrefix(queryString, CHAPTER_HISTORY);
           toReturn = getChapterHistory(queryString, toReturn, projid);
-        } else if (matchesRequest(queryString, PROJECTS)) {
-          queryString = removePrefix(queryString, PROJECTS);
-          jsonString = getProjects();
-//      } else if (matchesRequest(queryString, REF_INFO)) {
-//        logger.warn("\n\n\n someone made this request " + REF_INFO);
-//        queryString = removePrefix(queryString, REF_INFO);
-//        toReturn = getRefInfo(queryString, toReturn);
+//        } else if (matchesRequest(queryString, PROJECTS)) {
+//          queryString = removePrefix(queryString, PROJECTS);
+//          jsonString = getProjects();
         } else if (matchesRequest(queryString, JSON_REPORT)) {
           queryString = removePrefix(queryString, JSON_REPORT);
           reportingServices.getReport(getYear(queryString), toReturn);
-/*      } else if (matchesRequest(queryString, SEND_REPORT)) {
-        queryString = removePrefix(queryString, SEND_REPORT);
-        reportingServices.sendReport(securityManager.getUserIDFromSession(request));*/
         } else if (matchesRequest(queryString, EXPORT)) {
           toReturn = getJSONForExercises(projid);
         } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
@@ -293,7 +286,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
       }
       then = now;
-      String x = jsonString.isEmpty() ? toReturn.toString() : jsonString;
+      String respString = jsonString.isEmpty() ? toReturn.toString() : jsonString;
       now = System.currentTimeMillis();
       l = now - then;
       if (l > 50) {
@@ -302,7 +295,7 @@ public class ScoreServlet extends DatabaseServlet {
             " and to do toString on json");
       }
 
-      reply(response, x);
+      reply(response, respString);
     } catch (DominoSessionException e) {
       logger.warn("doGet Got " + e);
       reply(response, "no session");
@@ -311,6 +304,21 @@ public class ScoreServlet extends DatabaseServlet {
       db.logAndNotify(e);
       throw new IOException("doGet couldn't process request.", e);
     }
+  }
+
+  private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
+    String queryString = request.getQueryString();
+    if (queryString == null) {
+      queryString = ""; // how could this happen???
+    } else {
+      queryString = URLDecoder.decode(request.getQueryString(), "UTF-8");
+    }
+    return queryString;
+  }
+
+  private void checkSession(HttpServletRequest request) throws DominoSessionException {
+    int userIDFromSession = securityManager.getUserIDFromSession(request);
+    logger.info("doGet user id from session is " + userIDFromSession);
   }
 
   private int getProjectID(String language) {
@@ -832,8 +840,7 @@ public class ScoreServlet extends DatabaseServlet {
                                      String device) throws IOException {
     // check session
     try {
-      int userIDFromSession = securityManager.getUserIDFromSession(request);
-      logger.info("doGet user id from session is " + userIDFromSession);
+      checkSession(request);
     } catch (DominoSessionException dse) {
       logger.info("got " + dse);
       JSONObject jsonObject = new JSONObject();

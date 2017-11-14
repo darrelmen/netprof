@@ -22,7 +22,7 @@ cd /data/tempBest/$langlc/
 for file2 in `ls`
 do
 date
-curl -ugvidaver -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$langlc/bestAudio/$file2"
+curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$langlc/bestAudio/$file2"
 date
 done
 
