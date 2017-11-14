@@ -90,13 +90,11 @@ public class ExerciseToPhone {
 //    long now = System.currentTimeMillis();
 //    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
-
-    ParseResultJson parseResultJson = new ParseResultJson(null);
+   // ParseResultJson parseResultJson = new ParseResultJson(null);
 
     for (SlickRefResultJson exjson : jsonResults) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(exjson.scorejson());
+//      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.readFromJSON(exjson.scorejson());
       /*List<TranscriptSegment> transcriptSegments =*/ //netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-
       int exid = exjson.exid();
       ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
       if (phonesForEx == null) {

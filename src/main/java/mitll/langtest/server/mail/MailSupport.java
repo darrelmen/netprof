@@ -61,7 +61,7 @@ public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final String LOCALHOST = "localhost";
+  private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
   private static final int MAIL_PORT = 25;
   private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
@@ -193,7 +193,7 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST, testEmail);
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, MAILSERVER, testEmail);
   }
 
   /**
@@ -206,7 +206,7 @@ public class MailSupport {
    * @see Report#sendExcelViaEmail(MailSupport, List, List, PathHelper, List)
    */
   public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach, String receiverName) {
-    Message message = new MimeMessage(getMailSession(LOCALHOST, testEmail));
+    Message message = new MimeMessage(getMailSession(MAILSERVER, testEmail));
 
     try {
       message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
@@ -325,7 +325,7 @@ public class MailSupport {
                                   String subject,
                                   String message) {
     try {
-      Transport.send(makeHTMLMessage(getMailSession(LOCALHOST, testEmail),
+      Transport.send(makeHTMLMessage(getMailSession(MAILSERVER, testEmail),
           senderName, senderEmail, replyToEmail, recipientEmails,
           ccEmails, subject, message));
       return true;

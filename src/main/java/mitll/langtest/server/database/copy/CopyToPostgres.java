@@ -290,7 +290,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     logger.info("copyOneConfig" +
         "\n\tproject #" + projectID +
-        "\n\ttype order is " + typeOrder + " for import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
+        "\n\ttype order is " + typeOrder +
+        "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();

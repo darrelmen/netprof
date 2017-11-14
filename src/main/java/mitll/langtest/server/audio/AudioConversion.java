@@ -98,14 +98,14 @@ public class AudioConversion extends AudioBase {
     long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
 
-    if (DEBUG) logger.debug("writeAudioFile: write wav file " + file.getAbsolutePath());
+    if (DEBUG) logger.debug("convertBase64ToAudioFiles: write wav file " + file.getAbsolutePath());
 
     writeToFile(getBytesFromBase64String(base64EncodedString), file);
 
-    if (DEBUG) logger.debug("writeAudioFile: wrote wav file " + file.getAbsolutePath());
+    if (DEBUG) logger.debug("convertBase64ToAudioFiles: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {
-      logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
+      logger.error("convertBase64ToAudioFiles : after writing, can't find file at " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid() && trimAudio) {

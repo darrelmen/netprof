@@ -233,11 +233,15 @@ public class Project implements PronunciationLookup {
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     List<CommonExercise> rawExercises = getRawExercises();
-    String language = project.language();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
     //logger.info("build trie from " + rawExercises.size() + " exercises");
-    fullTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, true);
-    fullContextTrie = new ExerciseTrie<>(rawExercises, language, smallVocabDecoder, false);
+    long then=System.currentTimeMillis();
+    fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
+    logger.info("for " + project.id() + " took " + (System.currentTimeMillis()-then) +  " millis to build trie for " + rawExercises.size() + " exercises");
+
+    then=System.currentTimeMillis();
+    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
+    logger.info("for " + project.id() + " took " + (System.currentTimeMillis()-then) +  " millis to build context trie for " + rawExercises.size() + " exercises");
   }
 
   /**

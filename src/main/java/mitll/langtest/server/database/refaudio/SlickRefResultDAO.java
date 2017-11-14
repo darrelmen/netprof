@@ -189,10 +189,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getAllAudioID(projid);
   }
 
-  public Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {
-    return dao.getAllSlimForProject(projid);
-  }
-
   public Collection<ISlimResult> getAllSlimForProject(int projid) {
     return dao.getAllSlimForProject(projid).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
@@ -209,6 +205,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
     return new ExerciseToPhone().getExerciseToPhoneForProject(getJsonResultsForProject(projid));
+  }
+
+  public Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {
+    return dao.getAllSlimForProject(projid);
   }
 
   @Override
@@ -261,6 +261,12 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     } else return null;
   }
 
+  /**
+   * @see #getAllSlimForProject
+   * @see #getResult
+   * @param slickRef
+   * @return
+   */
   private SlimResult fromSlickToSlim(SlickRefResultJson slickRef) {
     String scoreJson = slickRef.scorejson();
     float alignScore = slickRef.alignscore();

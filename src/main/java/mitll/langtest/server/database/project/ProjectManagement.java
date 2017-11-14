@@ -240,7 +240,12 @@ public class ProjectManagement implements IProjectManagement {
     if (!rawExercises.isEmpty()) {
       logger.debug("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
     } else {
-      logger.warn("configureProject no exercises in project? " + project);
+      if (project.getStatus() == ProjectStatus.PRODUCTION) {
+        logger.error("configureProject no exercises in project? " + project);
+      }
+      else {
+        logger.warn("configureProject no exercises in project? " + project);
+      }
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
         db.getResultDAO(), db.getAudioDAO(),
@@ -330,7 +335,7 @@ public class ProjectManagement implements IProjectManagement {
                                DatabaseImpl db) {
     Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
     idToProject.put(project.getProject().id(), project);
-//    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
+    logger.info("rememberProject : " + project + " now " + idToProject.size() + " projects");
     setExerciseDAO(project);
   }
 
@@ -382,10 +387,11 @@ public class ProjectManagement implements IProjectManagement {
         null /*addRemoveDAO*/,
         audioDAO,
         projid,
-        db, isMyProject);
+        db,
+        isMyProject);
   }
 
-  private void logMemory() {
+  public static void logMemory() {
     int MB = (1024 * 1024);
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
@@ -398,7 +404,9 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private Project getProjectOrFirst(int projectid) {
-    return projectid == -1 ? getFirstProject() : getProject(projectid);
+    boolean getFirst = projectid == -1;
+    if (getFirst) logger.warn("returning first project for " + projectid);
+    return getFirst ? getFirstProject() : getProject(projectid);
   }
 
   @Override
@@ -472,19 +480,22 @@ public class ProjectManagement implements IProjectManagement {
       return Collections.emptyList();
     }
     Project project = getProjectOrFirst(projectid);
-    if (project == null) return Collections.emptyList();
+    if (project == null) {
+      logger.error("getExercises no project for " + projectid + " so returning empty exercises.");
+      return Collections.emptyList();
+    }
 //    logger.info("getExercises " + projectid  + " = " +project);
 
     if (!project.isConfigured()) {
-      logger.info("\tgetExercises configure " + projectid);
+      logger.info("\tgetExercises configure " + projectid + " and project " + project);
       configureProject(project, false, false);
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
-/*    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
+    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
       logger.warn("getExercises for " + projectid +
           " no exercises in '" + serverProps.getLessonPlan() + "' = " + rawExercises.size());
-    }*/
+    }
     return rawExercises;
   }
 
@@ -500,9 +511,10 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProject(int projectid) {
-    if (projectid == IMPORT_PROJECT_ID && !idToProject.isEmpty()) {
-      return getFirstProject();
-    } else {
+/*    if (projectid == IMPORT_PROJECT_ID && !idToProject.isEmpty()) {
+      logger.info("getProject not returning project for " + projectid);
+      return null;//getFirstProject();
+    } else {*/
       Project project = idToProject.get(projectid);
 
       if (project == null) {
@@ -521,12 +533,12 @@ public class ProjectManagement implements IProjectManagement {
         }
       }
       return project;
-    }
+  //  }
   }
 
   private Project lazyGetProject(int projectid) {
     logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-        ") - refreshing projects");
+        ") - refreshing projects", new Exception());
     populateProjects();
     return idToProject.get(projectid);
   }

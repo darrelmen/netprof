@@ -139,9 +139,9 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * Must have a session...?
-   *
+   * <p>
    * How does iOS do a login?
-   *
+   * <p>
    * Remembers chapters from previous requests...
    * <p>
    * OK, so we can make a number of requests - mainly for the iOS app.
@@ -155,7 +155,9 @@ public class ScoreServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
       getDatabase();
-      securityManager.getUserIDFromSession(request);
+      int userIDFromSession = securityManager.getUserIDFromSession(request);
+
+      logger.info("doGet user id from session is " + userIDFromSession);
 
       String queryString = request.getQueryString();
       if (queryString == null) queryString = ""; // how could this happen???
@@ -301,6 +303,9 @@ public class ScoreServlet extends DatabaseServlet {
 
       reply(response, x);
     } catch (DominoSessionException e) {
+      logger.warn("doGet Got " + e);
+      reply(response, "no session");
+    } catch (Exception e) {
       logger.error("doGet Got " + e, e);
       db.logAndNotify(e);
       throw new IOException("doGet couldn't process request.", e);

@@ -346,7 +346,7 @@ public class MessageHelper {
   }
 
   private void logOnServer(String message, Throwable throwable, boolean email) {
-    log.log(Level.INFO, "log to server");
+    log.log(Level.INFO, "log to server " + throwable.getMessage() + " doing " + message);
     exceptionSupport.logMessageOnServer(message, "", email);
   }
 

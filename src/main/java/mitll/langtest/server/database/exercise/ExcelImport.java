@@ -97,7 +97,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @see #readFromSheet(Sheet)
    */
   private static final String WEEK = "week";
-  public static final String ALT = "alt";
+  private static final String ALT = "alt";
 
   private final List<String> errors = new ArrayList<>();
   private final String file;
@@ -120,7 +120,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @param file
    * @param userListManager
    * @param addDefects
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
    */
   public ExcelImport(String file,
                      ServerProperties serverProps,
@@ -129,7 +129,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.file = file;
 
-    //  logger.info("Reading from " + file);
+    logger.info("Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
@@ -156,8 +156,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   /**
-   * @see #getRawExercises
    * @return
+   * @see #getRawExercises
    */
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
@@ -167,11 +167,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     List<CommonExercise> exercises = readExercises(file);
 
-    for (CommonExercise exercise:exercises) {
+    for (CommonExercise exercise : exercises) {
       if (exercise.getOldID().equalsIgnoreCase("3473")) {
         logger.info("readExercises got " + exercise);
-      }
-      else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
+      } else if (exercise.getEnglish().equalsIgnoreCase("blackboard")) {
         logger.info("readExercises got blackboard " + exercise);
       }
     }
@@ -345,7 +344,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unitName = null, chapterName = null, weekName = null;
 
     List<String> typeOrder = getTypeOrder();
-    String first  = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String first = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     logger.info("readFromSheet initial type order First '" + first + "' second '" + second + "'");
@@ -395,7 +394,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               audioIndex = i;
 //              hasAudioIndex = true;
             } else if (gotUCW) {
-              if (DEBUG || true) logger.debug("readFromSheet using predef unit/chapter/week ");
+              if (DEBUG || true)
+                logger.debug("readFromSheet using predef unit/chapter/week " + unitIndex + "," + chapterIndex + "," + weekIndex);
               if (i == unitIndex) {
                 predefinedTypeOrder.add(col);
                 unitName = col;

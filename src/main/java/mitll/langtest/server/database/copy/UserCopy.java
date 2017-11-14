@@ -1,6 +1,5 @@
 package mitll.langtest.server.database.copy;
 
-import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.domino.shared.model.user.Group;
@@ -213,18 +212,19 @@ public class UserCopy {
 
     if (didPasswordMatch) { // existing user with same password
       // do nothing, but remember id mapping
-      if (DEBUG) {
-        logger.info("foundExistingUser found existing user '" + importUserID + "' :" + "\n\tdomino " + dominoUser + " password matches.");
-      }
+
 
       if (makeCollisionAnyway) {
         logger.info("foundExistingUser different gender : current netprof user " + toImport + " is a " + toImport.getRealGender());
         logger.info("foundExistingUser different gender : current domino  user " + dominoUser + " is a " + dominoUser.getGender());
-        makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID, group);
+        dominoDBID = makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID, group);
       } else {
+        if (DEBUG) {
+          logger.info("foundExistingUser found existing user '" + importUserID + "' :" + "\n\tdomino " + dominoUser + " password matches.");
+        }
         checkMatchingGender(dominoUserDAO, toImport, dominoUser);
-        oldToNew.put(importID, dominoDBID);
       }
+      oldToNew.put(importID, dominoDBID);
       return false;
     } else {
       if (DEBUG) {
@@ -239,7 +239,8 @@ public class UserCopy {
           logger.info("different gender : current netprof user " + toImport + " is a " + toImport.getRealGender());
           logger.info("different gender : current domino  user " + dominoUser + " is a " + dominoUser.getGender());
         }
-        makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID, group);
+        dominoDBID = makeCollisionAccount(optName, dominoUserDAO, oldToNew, added, toImport, importUserID, group);
+        //oldToNew.put(importID, dominoID);
       } else {
         // second person is out of luck - they need to make a new account
         if (WARN_ON_COLLISION) {
@@ -248,12 +249,11 @@ public class UserCopy {
         }
 
         checkUserApplications(dominoUserDAO, dominoUser);
-        oldToNew.put(importID, dominoDBID);
-
         checkMatchingGender(dominoUserDAO, toImport, dominoUser);
       }
+      oldToNew.put(importID, dominoDBID);
 
-      logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + dominoDBID +
+      logger.info("copyUsers user collision to project #" + projid + " map old user id " + importID + "-> new " + dominoDBID +
           " : " + dominoUser);
       return true;
     }
@@ -266,6 +266,12 @@ public class UserCopy {
         permissions.contains(User.Permission.TEACHER_PERM);
   }
 
+  /**
+   * Update the gender if it's missing.
+   * @param dominoUserDAO
+   * @param toImport
+   * @param dominoUser
+   */
   private void checkMatchingGender(IUserDAO dominoUserDAO, User toImport, DBUser dominoUser) {
     MiniUser.Gender realGender = toImport.getRealGender();
     if (dominoUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Unspecified &&
@@ -287,6 +293,11 @@ public class UserCopy {
         realGender == MiniUser.Gender.Female && gender == mitll.hlt.domino.shared.model.user.User.Gender.Male;
   }
 
+  /**
+   * Update the application slot if needed.
+   * @param dominoUserDAO
+   * @param dominoUser
+   */
   private void checkUserApplications(IUserDAO dominoUserDAO, DBUser dominoUser) {//}, int dominoDBID) {
     Set<String> applicationAbbreviations = dominoUser.getApplicationAbbreviations();
     if (applicationAbbreviations.contains(NETPROF)) {
@@ -308,7 +319,7 @@ public class UserCopy {
   }
 
   /**
-   * For the moment this is never done.
+   * For the moment
    *
    * @param optName
    * @param dominoUserDAO
@@ -318,12 +329,12 @@ public class UserCopy {
    * @param importUserID
    * @throws Exception
    */
-  private void makeCollisionAccount(String optName,
-                                    IDominoUserDAO dominoUserDAO,
-                                    Map<Integer, Integer> oldToNew,
-                                    List<ClientUserDetail> added,
-                                    User toImport, String importUserID,
-                                    Group group) throws Exception {
+  private int makeCollisionAccount(String optName,
+                                   IDominoUserDAO dominoUserDAO,
+                                   Map<Integer, Integer> oldToNew,
+                                   List<ClientUserDetail> added,
+                                   User toImport, String importUserID,
+                                   Group group) throws Exception {
     String compoundID = importUserID + USER_LANG_SEPARATOR + optName;
     User userByCompound = dominoUserDAO.getUserByID(compoundID);
 
@@ -332,11 +343,14 @@ public class UserCopy {
       logger.warn("copyUsers already added " + compoundID + " : " +
           userByCompound +
           " so moving on...?");
+      return userByCompound.getID();
     } else {
       logger.info("copyUsers no user for '" + compoundID + "' so adding one.");
 
       toImport.setUserID(compoundID);
-      added.add(addUser(dominoUserDAO, oldToNew, toImport, optName, group));
+      ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName, group);
+      added.add(e);
+      return e.getDocumentDBID();
     }
   }
 

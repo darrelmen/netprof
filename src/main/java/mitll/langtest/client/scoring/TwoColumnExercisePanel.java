@@ -321,7 +321,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
               @Override
               public void onFailure(Throwable caught) {
-                controller.handleNonFatalError("get alignments",caught);
+                controller.handleNonFatalError("cacheOthers get alignments",caught);
               }
 
               @Override

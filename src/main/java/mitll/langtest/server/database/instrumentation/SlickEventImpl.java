@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -86,7 +87,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
         }
       }
 
-      logMemory();
+      ProjectManagement.logMemory();
       if (missing > 0) {
         logger.warn("skipped " + missing + " out of " + all.size() + " : " + missingEx.size());// + " missing " + missingEx);
         logger.warn("missing users " + userids);
@@ -100,7 +101,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
     }
   }
 
-
+/*
   private void logMemory() {
     int MB = (1024 * 1024);
     Runtime rt = Runtime.getRuntime();
@@ -112,6 +113,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
     logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
+*/
 
   /**
    * @param event

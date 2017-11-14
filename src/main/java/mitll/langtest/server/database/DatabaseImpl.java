@@ -596,9 +596,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
-    //logger.debug("getExerciseDAO " + projectid + " found project " + project);
+    logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    //logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
+    logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
     return exerciseDAO;
   }
 
@@ -714,7 +714,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
           readAMASExercises(lessonPlanFile, "", "", isURL);
         } else {
           //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
-
           makeExerciseDAO(lessonPlanFile);
 
           if (!serverProps.useH2()) {
@@ -764,6 +763,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (serverProps.useH2()) {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       projectManagement.addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
+    }
+    else {
+      logger.info("*not* making import project");
     }
   }
 
@@ -1864,9 +1866,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public IProjectDAO getProjectDAO() {
-    return projectDAO;
-  }
+  public IProjectDAO getProjectDAO() {    return projectDAO;  }
 
   @Override
   public IUserProjectDAO getUserProjectDAO() {

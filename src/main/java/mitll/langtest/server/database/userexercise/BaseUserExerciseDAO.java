@@ -109,5 +109,6 @@ public class BaseUserExerciseDAO extends DAO {
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
+    logger.info("setExerciseDAO : exercise dao now " + exerciseDAO);
   }
 }

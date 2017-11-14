@@ -35,6 +35,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
+  public static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
+  public static final String STATUS_REPORT_SENT = "Status report sent";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String ABOUT_NET_PRO_F = "About Netprof";
@@ -91,22 +93,28 @@ public class UserMenu {
     choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler()));
     choices.add(new LinkAndTitle("Send Report", event -> {
       new ModalInfoDialog("Status report being generated.", "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
+      sendReport();
+    }));
+    return choices;
+  }
 
-      lazyGetService().sendReport(new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
+  private void sendReport() {
+    lazyGetService().sendReport(new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        if (caught.getMessage().contains("504")) {
+          logger.info("OK send usage timed out...");
+        }
+        else {
           controller.handleNonFatalError("sending usage report", caught);
         }
+      }
 
-        @Override
-        public void onSuccess(Void result) {
-          new ModalInfoDialog("Status report sent", "Please check your email.");
-        }
-      });
-
-    }));
-   // choices.add(new LinkAndTitle("Show Report", "scoreServlet?report"));
-    return choices;
+      @Override
+      public void onSuccess(Void result) {
+        new ModalInfoDialog(STATUS_REPORT_SENT, PLEASE_CHECK_YOUR_EMAIL);
+      }
+    });
   }
 
   @NotNull

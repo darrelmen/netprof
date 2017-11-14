@@ -414,7 +414,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private String getRawAudioPath(String filePath, long unique) {
-    return filePath.replaceAll("\\=", "") + "_"+unique+".raw";
+    return filePath.replaceAll("\\=", "") + "_" + unique + ".raw";
   }
 
   private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {
@@ -612,7 +612,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones) {
-    String dict = "";
+    StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
     //String[] transcriptTokens = transcript.split(" ");
@@ -621,6 +621,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int numTokens = transcriptTokens.size();
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
     int index = 0;
+
+    if (numTokens > 50) logger.info("long transcript with " + numTokens + " num tokens " + transcript);
     for (String word : transcriptTokens) {
       String trim = word.trim();
       if (!trim.equals(word)) {
@@ -633,8 +635,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
 
+
           for (int i = 0; i < prons.size(); i++) {
-            dict += getPronStringForWord(word, prons.apply(i), justPhones);
+            dict.append(getPronStringForWord(word, prons.apply(i), justPhones));
           }
         } else {  // not in the dictionary, let's ask LTS
           if (getLTS() == null) {
@@ -658,14 +661,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                 if (ltsOutputOk(translitprocess)) {
                   logger.info("getPronunciationsFromDictOrLTS got pronunciation from transliteration");
                   for (String[] pron : translitprocess) {
-                    dict += getPronStringForWord(word, pron, false);
+                    dict.append(getPronStringForWord(word, pron, false));
                   }
                 } else {
                   logger.info("getPronunciationsFromDictOrLTS transliteration LTS failed");
                   logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
                   logger.info("getPronunciationsFromDictOrLTS attempting to fall back to default pronunciation");
                   if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
-                    dict += getDefaultPronStringForWord(word, translitprocess, justPhones);
+                    dict.append(getDefaultPronStringForWord(word, translitprocess, justPhones));
                   }
                 }
               } else {
@@ -686,14 +689,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                   dict += getUnkPron(word);
                 }*/
 
-
                 logger.info("using unk phone for " + word);
-                dict += getUnkPron(word);
-
+                dict.append(getUnkPron(word));
               }
             } else { // it's ok -use it
+              if (process.length > 50) logger.info("prons length " + process.length + " for " + transcript);
               for (String[] pron : process) {
-                dict += getPronStringForWord(word, pron, justPhones);
+                dict.append(getPronStringForWord(word, pron, justPhones));
               }
             }
           }
@@ -701,7 +703,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       index += 1;
     }
-    return dict;
+    return dict.toString();
   }
 
   /**
