@@ -1,7 +1,8 @@
-/**
+/*
+ *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2016 - 2017. Other request for this document shall
- * be referred to DLIFLC.
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
  * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
@@ -16,7 +17,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2016 - 2017 Massachusetts Institute of Technology.
+ * © 2015 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -25,6 +26,8 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 package mitll.langtest.server.database.security;
 
@@ -42,7 +45,7 @@ import java.io.IOException;
 import static org.apache.logging.log4j.web.WebLoggerContextUtils.getServletContext;
 
 /**
- * 
+ *
  * AttachSecurityFilter: A security filter that ensures a user is allowed
  * to access a particular file.
  *
@@ -51,90 +54,94 @@ import static org.apache.logging.log4j.web.WebLoggerContextUtils.getServletConte
  */
 
 public class AttachSecurityFilter implements Filter {
-  private DatabaseServices db;
+  private static final Logger log = LogManager.getLogger(AttachSecurityFilter.class);
+
   private static final String DATABASE_REFERENCE = "databaseReference";
 
-	private static final Logger log = LogManager.getLogger(AttachSecurityFilter.class);
+  private DatabaseServices db;
+
   private IUserSecurityManager securityManager;
   private ServletContext servletContext;
 
   public void init(FilterConfig filterConfig) throws ServletException {
     this.servletContext = filterConfig.getServletContext();
-    //findSharedDatabase(servletContext);
-	}
-	          
-	@Override
-	public void doFilter(final ServletRequest request,
-			final ServletResponse response, final FilterChain chain)
-					throws IOException, ServletException {
+  }
+
+  @Override
+  public void doFilter(final ServletRequest request,
+                       final ServletResponse response,
+                       final FilterChain chain)
+      throws IOException, ServletException {
     if (db == null) {
       findSharedDatabase(servletContext);
     }
-		final HttpServletRequest httpRequest = (HttpServletRequest) request;
-		try {
-      //int userIDFromSessionOrDB =
-          getUserIDFromSessionOrDB(httpRequest);
-   //   log.info("doFilter found session user " + userIDFromSessionOrDB);
+    final HttpServletRequest httpRequest = (HttpServletRequest) request;
+    try {
+      int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
+//      log.info("doFilter found session user " + userIDFromSessionOrDB);
+
+      // MUST do this - 
+      chain.doFilter(request, response);
     } catch (DominoSessionException dse) {
-	//	  log.warn("nope - no session " + dse);
+      log.warn("doFilter : nope - no session " + dse);
       handleAccessFailure(httpRequest, response);
     } catch (Exception e) {
-			if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
-				log.info("User reload during request {}.", httpRequest.getRequestURL());
-			} else {
-				log.error("Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
-			}
-		}
-	}
+      if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
+        log.info("User reload during request {}.", httpRequest.getRequestURL());
+      } else {
+        log.error("Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
+      }
+    }
+  }
 
   private void handleAccessFailure(final HttpServletRequest request,
-			final ServletResponse response) throws IOException, ServletException {
-		log.error("System access failed security filter! Request: {}", request.getRequestURI());
-		try {
-			response.setContentType("text/plain");
-			response.getWriter().write("{ \"" + Constants.SESSION_EXPIRED_CODE + "\": true}");
-		} catch (IOException e) {
-			log.error("Error Writing to ouput stream! Request: {}", request.getRequestURI(), e);
-		}
-	}
-	
-	@Override
-	public void destroy() {
-	}
+                                   final ServletResponse response) throws IOException, ServletException {
+    log.error("System access failed security filter! Request: {}", request.getRequestURI());
+    try {
+      response.setContentType("text/plain");
+      response.getWriter().write("{ \"" + Constants.SESSION_EXPIRED_CODE + "\": true}");
+    } catch (IOException e) {
+      log.error("Error Writing to ouput stream! Request: {}", request.getRequestURI(), e);
+    }
+  }
+
+  @Override
+  public void destroy() {
+  }
 
   protected int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
     return securityManager.getUserIDFromSession(httpRequest);
   }
 
-	/**
-	 * Find shared db and make the user security manager.
-	 */
-	private void findSharedDatabase(ServletContext servletContext) {
-		if (db == null) {
-			db = getDatabase(servletContext);
-			if (db == null) {
-				log.error("findSharedDatabase no database?");
-			} else {
-				securityManager = db.getUserSecurityManager();
-			}
-		}
-	}
+  /**
+   * Find shared db and make the user security manager.
+   */
+  private void findSharedDatabase(ServletContext servletContext) {
+    if (db == null) {
+      db = getDatabase(servletContext);
+      if (db == null) {
+        log.error("findSharedDatabase no database?");
+      } else {
+        securityManager = db.getUserSecurityManager();
+      }
+    }
+  }
 
-	/**
-	 * Find the shared db reference.
-	 *
-	 * @return
-	 */
-	private DatabaseImpl getDatabase(ServletContext servletContext) {
-		DatabaseImpl db = null;
+  /**
+   * Find the shared db reference.
+   *
+   * @return
+   */
+  private DatabaseImpl getDatabase(ServletContext servletContext) {
+    DatabaseImpl db = null;
 
-		Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
-		if (databaseReference != null) {
-			db = (DatabaseImpl) databaseReference;
-			log.debug("getDatabase : found existing database reference " + db + " under " +servletContext);
-		} else {
+    Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      log.debug("getDatabase : found existing database reference " + db + " under " + servletContext);
+    } else {
       log.warn("getDatabase : no existing db reference yet - config error?");
-		}
-		return db;
-	}
+    }
+    return db;
+  }
 }
