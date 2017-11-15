@@ -37,6 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -53,6 +54,12 @@ public interface IProjectManagement {
   void rememberProject(int id);
 
   ExerciseDAO<CommonExercise> setDependencies();
+
+  /**
+   * @see ProjectServiceImpl#delete
+   * @param projid
+   */
+  void forgetProject(int projid);
 
   void refreshProjects();
 

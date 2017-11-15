@@ -33,7 +33,6 @@
 package mitll.langtest.shared.project;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -57,6 +56,7 @@ public class SlimProject extends ProjectInfo {
    * @param created
    * @param port
    * @param modelsDir
+   * @param dominoID
    * @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
    */
   public SlimProject(int projectid,
@@ -75,9 +75,9 @@ public class SlimProject extends ProjectInfo {
                      String firstType,
                      String secondType,
                      boolean showOniOS,
-                     TreeMap<String, String> props) {
+                     int dominoID, TreeMap<String, String> props) {
     super(projectid, name, language, course, countryCode, status, displayOrder, created, host, port, modelsDir,
-        firstType, secondType, showOniOS);
+        firstType, secondType, showOniOS, dominoID);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
     this.props = props;

@@ -43,9 +43,14 @@ import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String COURSE = "Course";
-  public static final String DELETING_PLEASE_WAIT = "Deleting... please wait.";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final String COURSE = "Course";
+
+  /**
+   * @see #showDeleteDialog
+   */
+  private static final String DELETING_PLEASE_WAIT = "Deleting... please wait.";
 
   private static final String CHECK_AUDIO = "Check Audio";
 

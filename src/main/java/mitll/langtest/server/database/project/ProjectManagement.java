@@ -339,6 +339,11 @@ public class ProjectManagement implements IProjectManagement {
     setExerciseDAO(project);
   }
 
+  /**
+   *
+   * @param projid
+   */
+  @Override
   public void forgetProject(int projid) {
     idToProject.remove(projid);
   }
@@ -550,14 +555,6 @@ public class ProjectManagement implements IProjectManagement {
     return dbProjects;
   }
 
-/*  public Project getProjectForgiving(int projectid) {
-    Project project = idToProject.get(projectid);
-    if (project == null) {
-      populateProjects(false);
-    }
-    return idToProject.get(projectid);
-  }*/
-
   @Override
   public Collection<Project> getProjects() {
     return idToProject.values();
@@ -759,6 +756,7 @@ public class ProjectManagement implements IProjectManagement {
         project.first(),
         project.second(),
         isOnIOS(project),
+        project.dominoid(),
         info);
   }
 

@@ -80,7 +80,7 @@ public class AttachSecurityFilter implements Filter {
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
 //      log.info("doFilter found session user " + userIDFromSessionOrDB);
 
-      // MUST do this - 
+      // MUST do this -
       chain.doFilter(request, response);
     } catch (DominoSessionException dse) {
       log.warn("doFilter : nope - no session " + dse);

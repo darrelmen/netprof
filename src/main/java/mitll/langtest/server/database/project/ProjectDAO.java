@@ -300,23 +300,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * TODO: Consider keeping an update history.
-   *
-   * @param project
-   * @return
-   */
-/*  public boolean update(SlickProject project) {
-
-    String cc = new CreateProject().getCC(project.language());
-
-    int update = dao.update(project);
-    if (update == 0) {
-      logger.error("update : no project with id for " + project);
-    }
-    return update > 0;
-  }*/
-
-  /**
    * TODO : consider adding lts class
    * TODO : consider adding domino project id
    *

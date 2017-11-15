@@ -33,14 +33,11 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ProjectInfo implements HasID, IsSerializable, MutableProject {
@@ -60,6 +57,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   private String firstType = "";
   private String secondType = "";
   private boolean showOniOS = true;
+  private int dominoID;
 
   private Map<String, String> propertyValue = new HashMap<>();
 
@@ -83,7 +81,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
                      String modelsDir,
                      String first,
                      String secondType,
-                     boolean showOniOS) {
+                     boolean showOniOS, int dominoID) {
     this.language = language;
     this.id = projectid;
     this.name = name;
@@ -98,6 +96,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.firstType = first;
     this.secondType = secondType;
     this.showOniOS = showOniOS;
+    this.dominoID = dominoID;
   }
 
   public String getLanguage() {
@@ -209,17 +208,17 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   }
 
   /**
+   * @return
    * @see mitll.langtest.client.LangTest#createHostSpecificServices
    * @see mitll.langtest.client.project.ProjectChoices#checkAudio
-   * @return
    */
   public String getHost() {
     return host;
   }
 
   /**
-   * @see ProjectEditForm#updateProject
    * @param host
+   * @see ProjectEditForm#updateProject
    */
   public void setHost(String host) {
     this.host = host;
@@ -231,6 +230,10 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
 
   public boolean isShowOniOS() {
     return showOniOS;
+  }
+
+  public int getDominoID() {
+    return dominoID;
   }
 
   public String toString() {

@@ -176,7 +176,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return getProjectDAO().delete(id);
+      boolean delete = getProjectDAO().delete(id);
+      if (delete) {
+        db.getProjectManagement().forgetProject(id);
+      }
+      return delete;
     } else {
       throw getRestricted(DELETING_A_PROJECT);
     }
@@ -298,7 +302,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   @NotNull
   private DominoUpdateResponse getAnotherProjectResponse(int dominoid, int jsonDominoID, List<Project> existingBound) {
-    String name = existingBound.iterator().next().getProject().name();
+    SlickProject project = existingBound.iterator().next().getProject();
+    String name = project.name();
+
+    logger.info("getAnotherProjectResponse found existing (" +name+  ") project " + project);
+
     DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
     dominoUpdateResponse.setMessage(name);
     return dominoUpdateResponse;

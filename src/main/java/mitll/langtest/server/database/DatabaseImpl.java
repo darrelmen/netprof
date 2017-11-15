@@ -637,6 +637,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getUserListManager().createFavorites(userid, projectid);
   }
 
+  /**
+   * @see UserServiceImpl#forgetProject
+   * @param userid
+   */
   @Override
   public void forgetProject(int userid) {
     getUserProjectDAO().forget(userid);

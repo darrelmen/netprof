@@ -22,6 +22,7 @@ import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Logger;
@@ -30,12 +31,17 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String ID = "ID";
+  public static final String DOMINO_ID = "Domino ID";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final String HIERARCHY = "Hierarchy";
   private static final String COURSE = "Course";
   private static final String COURSE_OPTIONAL = "Course (optional)";
   private static final String HYDRA_HOST_PORT = "Hydra Host:Port";
+  /**
+   * @see #getFields
+   */
   private static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
 
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
@@ -64,7 +70,7 @@ public class ProjectEditForm extends UserDialog {
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
-  private boolean isNew=false;
+  private boolean isNew = false;
 
   /**
    * @param lifecycleSupport
@@ -105,7 +111,7 @@ public class ProjectEditForm extends UserDialog {
     services.getScoringServiceAsyncForHost(info.getHost()).isHydraRunning(info.getID(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        messageHelper.handleNonFatalError("Checking for hydra status",caught);
+        messageHelper.handleNonFatalError("Checking for hydra status", caught);
       }
 
       @Override
@@ -150,7 +156,7 @@ public class ProjectEditForm extends UserDialog {
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        messageHelper.handleNonFatalError("Updating project.",caught);
+        messageHelper.handleNonFatalError("Updating project.", caught);
       }
 
       @Override
@@ -187,20 +193,18 @@ public class ProjectEditForm extends UserDialog {
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, "Please enter a project name.");
       return false;
-    }
-    else  if (language.getValue().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE)) {
+    } else if (language.getValue().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE)) {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
-    }
-    else if (unit.getSafeText().isEmpty()) {
+    } else if (unit.getSafeText().isEmpty()) {
       markErrorNoGrabRight(unit, "Please enter the first hierarchy.");
       return false;
-    }
-    else {
+    } else {
       return true;
     }
   }
+
   /**
    * @see ProjectChoices#showNewProjectDialog
    */
@@ -221,7 +225,7 @@ public class ProjectEditForm extends UserDialog {
     projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        messageHelper.handleNonFatalError("Creating project.",caught);
+        messageHelper.handleNonFatalError("Creating project.", caught);
       }
 
       @Override
@@ -233,9 +237,19 @@ public class ProjectEditForm extends UserDialog {
 
   private Fieldset getFields(ProjectInfo info, boolean isNew) {
     Fieldset fieldset = new Fieldset();
-    if (info.getID() > 0) {
-      Heading id = new Heading(4, "ID", "" + info.getID());
-      fieldset.add(id);
+    int id1 = info.getID();
+    if (id1 > 0) {
+      Heading id = getHeading(ID, id1);
+      if (info.getDominoID() > 0) {
+        DivWidget hDiv = getHDiv(id);
+        hDiv.setWidth("100%");
+        Heading domino_id = getHeading(DOMINO_ID, info.getDominoID());
+        domino_id.getElement().getStyle().setMarginLeft(340, Style.Unit.PX);
+        hDiv.add(domino_id);
+        fieldset.add(hDiv);
+      } else {
+        fieldset.add(id);
+      }
     }
 
     {
@@ -293,6 +307,11 @@ public class ProjectEditForm extends UserDialog {
     return fieldset;
   }
 
+  @NotNull
+  private Heading getHeading(String text, int id1) {
+    return new Heading(4, text, "" + id1);
+  }
+
   private DivWidget addLifecycle(ProjectInfo info, Fieldset fieldset) {
     DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
 
@@ -345,7 +364,6 @@ public class ProjectEditForm extends UserDialog {
   private DivWidget getHDivLabel(String language) {
     Heading left = new Heading(5, language);
     left.setWidth("100px");
-    // left.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     return getHDiv(left);
   }
 
@@ -379,11 +397,11 @@ public class ProjectEditForm extends UserDialog {
     userField.box.addBlurHandler(event -> {
       String safeText = userField.getSafeText();
       if (!safeText.equalsIgnoreCase(info.getName())) {
-     //   logger.info("checking name " + safeText);
+        //   logger.info("checking name " + safeText);
         projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-            messageHelper.handleNonFatalError("Checking name.",caught);
+            messageHelper.handleNonFatalError("Checking name.", caught);
           }
 
           @Override
@@ -460,9 +478,9 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
-   * @see #getFields(ProjectInfo, boolean)
    * @param info
    * @return
+   * @see #getFields(ProjectInfo, boolean)
    */
   private Button getRecalcRefAudio(final ProjectInfo info) {
     final Button w = new Button("Align ref audio", IconType.STETHOSCOPE);
