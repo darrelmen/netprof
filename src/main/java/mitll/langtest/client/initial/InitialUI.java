@@ -58,6 +58,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.apache.xpath.operations.Div;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -107,7 +108,7 @@ public class InitialUI implements UILifecycle {
    * TODO : move breadcrumbs up into banner
    */
   private final Breadcrumbs breadcrumbs;
-  protected Panel contentRow;
+  protected DivWidget contentRow;
   private INavigation navigation;
   private Container verticalContainer;
   private final ProjectChoices choices;
@@ -157,14 +158,15 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel
    */
-  protected Panel makeFirstTwoRows(Container verticalContainer) {
+  protected DivWidget makeFirstTwoRows(Container verticalContainer) {
     // add header row
+  //  logger.info("makeFirstTwoRows ");
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
 //    rootPanel.add(makeHeaderRow2());
 //    headerRow.getElement().setId("headerRow");
 
-    Panel contentRow = new DivWidget();
+    DivWidget contentRow = new DivWidget();
     contentRow.getElement().setId("contentRow");
 
     verticalContainer.add(contentRow);
@@ -326,18 +328,20 @@ public class InitialUI implements UILifecycle {
    * @see #getBreadcrumbs()
    */
   private void addCrumbs(Breadcrumbs crumbs) {
-    if (userManager.getCurrent() != null) {
+    User current = userManager.getCurrent();
+    if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
         addBreadcrumbLevels(crumbs, startupInfo);
-      } else {
-        logger.info("addCrumbs no project startup info yet for " + userManager.getCurrent());
       }
-
+/*      else {
+        logger.info("addCrumbs no project startup info yet for " + current.getUserID());
+      }*/
       banner.checkProjectSelected();
-    } else {
-     // logger.warning("addCrumbs no current user");
     }
+/*    else {
+     // logger.warning("addCrumbs no current user");
+    }*/
   }
 
   /**
@@ -598,10 +602,10 @@ public class InitialUI implements UILifecycle {
    * @see UILifecycle#gotUser
    */
   protected void configureUIGivenUser(long userID) {
-    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
+   // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+     // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {

@@ -35,6 +35,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
 
   public static final String SHOW = "showStorage";
+  /**
+   * @see #getImage
+   */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
@@ -247,16 +250,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.addStyleName("subtitleNoRecordingForeground");
   }
 
-  private void showSection(String instance1) {
-    VIEWS choices = VIEWS.NONE;
-    try {
-      choices = VIEWS.valueOf(instance1.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.info("can't parse " + instance1);
 
-    }
-    navigation.showView(choices);
-  }
 
   private void getInfoMenu(UserMenu userMenu, Nav rnav) {
     Dropdown info = new Dropdown();
@@ -313,12 +307,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     showActive(learn);
   }
 
-  @NotNull
-  private NavLink getLink(ComplexWidget nav, String learn1) {
-    NavLink learn = new NavLink(learn1);
-    nameToLink.put(learn1, learn);
-    nav.add(learn);
-    return learn;
+  private void showSection(String instance1) {
+    VIEWS choices = VIEWS.NONE;
+    try {
+      choices = VIEWS.valueOf(instance1.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.info("can't parse " + instance1);
+
+    }
+    navigation.showView(choices);
   }
 
   /**
@@ -329,6 +326,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void showActive(NavLink learn) {
     for (NavLink link : nameToLink.values()) link.setActive(false);
     learn.setActive(true);
+  }
+
+  @NotNull
+  private NavLink getLink(ComplexWidget nav, String learn1) {
+    NavLink learn = new NavLink(learn1);
+    nameToLink.put(learn1, learn);
+    nav.add(learn);
+    return learn;
   }
 
   private Image getImage() {

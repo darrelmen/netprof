@@ -1313,6 +1313,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     int userID = getUserIDFromSessionOrDB();
     int projectID = getProjectIDFromUser(userID);
+    if (projectID == -1) {
+      logger.info("getFullExercises : no project for user " + userID);
+      return new ExerciseListWrapper<>();
+    }
     String language = getLanguage(projectID);
 
     long then = System.currentTimeMillis();

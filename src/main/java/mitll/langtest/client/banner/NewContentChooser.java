@@ -76,15 +76,17 @@ public class NewContentChooser implements INavigation {
     String currentView = getCurrentStoredView();
     VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
 
-    Set<User.Permission> permissions = new HashSet<>(controller.getPermissions());
+    List<User.Permission> requiredPerms = currentStoredView.getPerms();
 
-//    logger.info("user permissions " + permissions + " vs current view perms " + currentStoredView.getPerms());
-    permissions.retainAll(currentStoredView.getPerms());
+    Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
-//    logger.info("user permissions " + permissions + " overlap =  " + permissions);
+//    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+    userPerms.retainAll(requiredPerms);
 
-    if (permissions.isEmpty()) { // if no overlap, you don't have permission
-      logger.info("user permissions " + permissions + " falling back to learn view");
+//    logger.info("user userPerms " + userPerms + " overlap =  " + userPerms);
+
+    if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
+      logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
       currentStoredView = LEARN;
     }
 

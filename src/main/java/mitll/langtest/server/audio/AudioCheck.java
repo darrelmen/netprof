@@ -245,7 +245,7 @@ public class AudioCheck {
       int bufSize = WinSize * fsize;
       byte[] buf = new byte[bufSize];
       int countClipped = 0;
-      int cc = 0;
+     // int cc = 0;
 
       short max = 0;
       short nmax = 0;
@@ -262,7 +262,7 @@ public class AudioCheck {
               countClipped++;
        /*       logger.debug("at " + frameIndex + " s " + s + " i " + i + " value was " + tmp + " and r " + r);*/
             }
-            if (tmp > ct) cc++;
+       //     if (tmp > ct) cc++;
             if (tmp > max) max = tmp;
             if (tmp < nmax) nmax = tmp;
 

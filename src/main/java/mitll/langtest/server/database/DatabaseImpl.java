@@ -1499,7 +1499,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private String getLanguage(Project project) {
-    return project.getLanguage();
+    return project == null ? "Unknown" : project.getLanguage();
   }
 
   @Override

@@ -365,7 +365,7 @@ public class SignInForm extends UserDialog implements SignIn {
         markErrorBlur(userField, APPLICATION_PERMISSION, Placement.BOTTOM);
         signIn.setEnabled(true);
       } else {
-           logger.info("handleLoginResponse user is enabled... result " + result.getResultType());
+        //   logger.info("handleLoginResponse user is enabled... result " + result.getResultType());
         /**
          * {@link mitll.langtest.server.database.security.NPUserSecurityManager#getValidLogin}
          */

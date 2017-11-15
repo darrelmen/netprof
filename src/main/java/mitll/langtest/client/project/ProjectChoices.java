@@ -91,7 +91,10 @@ public class ProjectChoices {
   private final UserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
-  private Panel contentRow;
+  /**
+   * @see InitialUI#populateRootPanel
+   */
+  private DivWidget contentRow;
   //private static final boolean DEBUG = false;
 
   /**
@@ -119,12 +122,12 @@ public class ProjectChoices {
     if (parent == null) {
       showInitialChoices(level);
     } else {
-      contentRow.add(showProjectChoices(getVisibleProjects(parent.getChildren()), level));
+      addProjectChoices(level, parent.getChildren());
     }
   }
 
   private void showInitialChoices(int level) {
-    long then = System.currentTimeMillis();
+    final long then = System.currentTimeMillis();
 
     controller.getService().getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
@@ -132,7 +135,7 @@ public class ProjectChoices {
       }
 
       public void onSuccess(StartupInfo startupInfo) {
-        contentRow.add(showProjectChoices(getVisibleProjects(startupInfo.getProjects()), level));
+        addProjectChoices(level, startupInfo.getProjects());
       }
     });
   }
@@ -171,7 +174,15 @@ public class ProjectChoices {
     return filtered;
   }
 
+  /**
+   * @param project
+   * @see InitialUI#getLangBreadcrumb
+   */
   public void showProject(SlimProject project) {
+    int widgetCount = contentRow.getWidgetCount();
+    if (widgetCount == 2) {
+      logger.warning("showProject has " + widgetCount);
+    }
     contentRow.add(showProjectChoices(project.getChildren(), 1));
   }
 
@@ -334,18 +345,18 @@ public class ProjectChoices {
       status.setText("Checking " + remove.getName() + "...");
       controller.getAudioServiceAsyncForHost(remove.getHost())
           .checkAudio(remove.getID(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          status.setText("ERROR - couldn't check audio for " + remove.getName());
-          controller.handleNonFatalError("checking audio for project", caught);
-        }
+            @Override
+            public void onFailure(Throwable caught) {
+              status.setText("ERROR - couldn't check audio for " + remove.getName());
+              controller.handleNonFatalError("checking audio for project", caught);
+            }
 
-        @Override
-        public void onSuccess(Void result) {
-          status.setText(remove.getName() + " checked...");
-          checkAudio(projects, status);
-        }
-      });
+            @Override
+            public void onSuccess(Void result) {
+              status.setText(remove.getName() + " checked...");
+              checkAudio(projects, status);
+            }
+          });
     }
   }
 
@@ -454,8 +465,7 @@ public class ProjectChoices {
 
       if (isQC) {
         addPopover(projectForLang, button);
-      }
-      else {
+      } else {
         if (!projectForLang.getCourse().isEmpty()) {
           addPopoverUsual(projectForLang, button);
         }
@@ -677,10 +687,9 @@ public class ProjectChoices {
             DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
             if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
               projectForLang.getProps().putAll(result.getProps());
-            }
-            else {
-              String title = "" ;
-              String message = "" ;
+            } else {
+              String title = "";
+              String message = "";
 
               switch (status) {
                 case FAIL:
@@ -689,14 +698,14 @@ public class ProjectChoices {
                   break;
                 case WRONG_PROJECT:
                   title = "Wrong domino project";
-                   message = "Upload data is from domino project #" + result.getDominoID() +
+                  message = "Upload data is from domino project #" + result.getDominoID() +
                       " but this project is for #" + result.getCurrentDominoID() +
                       ".<br/>You probably want to make a new NetProF project and add it to there.";
                   break;
                 case ANOTHER_PROJECT:
                   title = "Another domino project";
-                   message = "Upload data is from domino project #" + result.getDominoID() +
-                      ", which is already associated with the " + result.getMessage() + " project."+
+                  message = "Upload data is from domino project #" + result.getDominoID() +
+                      ", which is already associated with the " + result.getMessage() + " project." +
                       "<br/>You probably want to add it to there.";
                   break;
               }
@@ -779,7 +788,18 @@ public class ProjectChoices {
       projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
 
       uiLifecycle.clearContent();
+      addProjectChoices(nest, children);
+    }
+  }
+
+  private void addProjectChoices(int nest, List<SlimProject> children) {
+    int widgetCount = contentRow.getWidgetCount();
+    // logger.info("addProjectChoices " + widgetCount);
+
+    if (widgetCount == 1) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
+    } else {
+      logger.warning("not adding project choices again...");
     }
   }
 
@@ -821,7 +841,7 @@ public class ProjectChoices {
    * @see #setProjectForUser
    */
   private void reallySetTheProject(int projectid) {
-    logger.info("setProjectForUser set project for " + projectid);
+   // logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
@@ -836,14 +856,14 @@ public class ProjectChoices {
           logger.warning("huh? no current user? ");
         } else {
           userNotification.setProjectStartupInfo(aUser);
-          logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
+     //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
           uiLifecycle.showInitialState();
         }
       }
     });
   }
 
-  public void setContentRow(Panel contentRow) {
+  public void setContentRow(DivWidget contentRow) {
     this.contentRow = contentRow;
   }
 }

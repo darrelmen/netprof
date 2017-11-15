@@ -1433,13 +1433,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
             @Override
             public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-              long now = System.currentTimeMillis();
-              int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-              if (now - then > 1000) {
-                logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
-              }
+              if (result.getExercises() != null) {
+                long now = System.currentTimeMillis();
+                int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+                if (now - then > 1000) {
+                  logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
+                }
 
-              getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
+                getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
+              }
             }
           });
     }
