@@ -190,16 +190,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   * @param uniqueID
-   * @param exerciseID
-   * @param actualPath
-   */
-/*  @Override
-  public void updateExerciseID(int uniqueID, int exerciseID, String actualPath) {
-    dao.updateExerciseID(uniqueID, exerciseID, actualPath);
-  }*/
-
-  /**
    * @param projid
    * @param installPath
    * @param language

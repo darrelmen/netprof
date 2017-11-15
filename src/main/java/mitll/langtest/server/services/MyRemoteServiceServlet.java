@@ -77,7 +77,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   protected DatabaseServices db;
   protected ServerProperties serverProps;
   /**
-   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    */
   protected IUserSecurityManager securityManager;
   protected PathHelper pathHelper;

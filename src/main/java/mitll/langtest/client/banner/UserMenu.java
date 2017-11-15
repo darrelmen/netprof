@@ -37,6 +37,10 @@ import java.util.logging.Logger;
 public class UserMenu {
   public static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   public static final String STATUS_REPORT_SENT = "Status report sent";
+  public static final String MANAGE_USERS = "Manage Users";
+  public static final String EVENTS = "Events";
+  public static final String DOWNLOAD_CONTEXT = "Download Context";
+  public static final String SEND_REPORT = "Send Report";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String ABOUT_NET_PRO_F = "About Netprof";
@@ -79,8 +83,9 @@ public class UserMenu {
    */
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
-    choices.add(new LinkAndTitle("Manage Users", props.getDominoURL()));
+    choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
+    addSendReport(choices);
     return choices;
   }
 
@@ -89,13 +94,16 @@ public class UserMenu {
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new LinkAndTitle("Events", new EventsClickHandler()));
-    choices.add(new LinkAndTitle("Download Context", new DownloadContentsClickHandler()));
-    choices.add(new LinkAndTitle("Send Report", event -> {
+    choices.add(new LinkAndTitle(EVENTS, new EventsClickHandler()));
+    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT, new DownloadContentsClickHandler()));
+    return choices;
+  }
+
+  private void addSendReport(List<LinkAndTitle> choices) {
+    choices.add(new LinkAndTitle(SEND_REPORT, event -> {
       new ModalInfoDialog("Status report being generated.", "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
       sendReport();
     }));
-    return choices;
   }
 
   private void sendReport() {
