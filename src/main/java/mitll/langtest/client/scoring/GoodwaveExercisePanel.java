@@ -154,7 +154,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @see #GoodwaveExercisePanel
    */
   private void addContent() {
-    //  final Panel center = new VerticalPanel();
     final Panel center = new DivWidget();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeftAndClear");
@@ -179,29 +178,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected abstract NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell, T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons);
-/*  {
-    NavigationHelper<CommonShell> widgets = new NavigationHelper<>(getLocalExercise(), controller, new PostAnswerProvider() {
-      @Override
-      public void postAnswers(ExerciseController controller, HasID completedExercise) {
-        nextWasPressed(listContainer, completedExercise);
-      }
-    },
-        listContainer,
-        true,
-        addKeyHandler,
-        false,
-        false);
-    widgets.addStyleName("topBarMargin");
-    return widgets;
-  }*/
-
   public void wasRevealed() {
   }
 
   protected abstract void makeScorePanel(T e, String instance);
-/*  {
-    //return null;
-  }*/
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
@@ -313,35 +293,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @see #getQuestionContent
    */
   protected abstract Widget getScoringAudioPanel(final T e);
-/*  {
-    String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
-    if (path != null) {
-      path = CompressedAudio.getPathNoSlashChange(path);
-    }
-    //else {
-//      logger.info("getScoringAudioPanel path is " +path +
-//          " for " + e.getAudioAttributes());
-    // }
-    contentAudio = getAudioPanel(path);
-    contentAudio.setScreenPortion(options.getScreenPortion());
-    return contentAudio;
-  }
-
-  private ASRScoringAudioPanel getAudioPanel(String path) {
-    ASRScoringAudioPanel audioPanel = makeFastAndSlowAudio(path);
-    audioPanel.getElement().setId("ASRScoringAudioPanel");
-    if (audioPanel.hasAudio()) {
-      Style style = audioPanel.getPlayButton().getElement().getStyle();
-      style.setMarginTop(10, Style.Unit.PX);
-      style.setMarginBottom(10, Style.Unit.PX);
-    }
-    return audioPanel;
-  }
-
-  private ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, options.getInstance());
-  }*/
 
   /**
    * @param exid

@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.answer.ActivityType;
 
@@ -298,13 +299,18 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper(ExerciseListRequest, Collection)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @return
    */
   public boolean isQC() {
     return QC;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#getMyListLayout
+   * @param QC
+   * @return
+   */
   public ExerciseListRequest setQC(boolean QC) {
     this.QC = QC;
     return this;

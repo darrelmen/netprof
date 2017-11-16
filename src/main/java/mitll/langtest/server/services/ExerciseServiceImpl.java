@@ -541,6 +541,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder(), request.isQC(), projID);
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
+
+      if (request.isQC()) { // add the context exercises
+      //  logger.info("adding context exercises...");
+        List<CommonExercise> withContext = new ArrayList<>();
+        exercises.forEach(commonExercise -> {
+          withContext.add(commonExercise);
+        //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
+          withContext.addAll(commonExercise.getDirectlyRelated());
+        });
+        exercises = withContext;
+      }
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises, request.getLimit() > -1);
 
@@ -586,18 +597,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
-/*
-  private void markDefects(List<CommonShell> exerciseShells) {
-    Collection<Integer> defectExercises = db.getStateManager().getDefectExercises();
-    //  int c = 0;
-    for (CommonShell shell : exerciseShells) {
-      if (defectExercises.contains(shell.getID())) {
-        shell.setState(STATE.DEFECT);
-        //    c++;
-      }
-    }
-  }
-*/
 
   /**
    * 0) Add annotations to fields on exercise
@@ -625,7 +624,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.debug("addAnnotationsAndAudio : (" + language + ") took " + (now - then) + " millis to add annotations to exercise " + oldID);
     }
     then = now;
-    attachAudio(firstExercise);
+    int i = attachAudio(firstExercise);
+    //logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
 
     if (DEBUG) {
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())
@@ -640,14 +640,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     then = now;
 
     if (isQC) {
-      //User userWhere = db.getUserDAO().getUserWhere(userID);
-      //if (userWhere != null && userWhere.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
       addPlayedMarkings(userID, firstExercise);
       now = System.currentTimeMillis();
       if (now - then > SLOW_MILLIS) {
         logger.debug("addAnnotationsAndAudio : (" + language + ") took " + (now - then) + " millis to add played markings to exercise " + oldID);
       }
-      //}
     }
 
     then = now;
@@ -681,8 +678,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param firstExercise
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
    */
-  private void attachAudio(CommonExercise firstExercise) {
-    db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
+  private int attachAudio(CommonExercise firstExercise) {
+   return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
   }
 
   private String getLanguage(CommonExercise firstExercise) {
@@ -776,10 +773,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               boolean predefExercises,
                                                                               int projectID,
                                                                               int userID
-                                                                              ) {
+  ) {
     Project project = db.getProject(projectID);
-    ExerciseTrie<T> fullTrie = (ExerciseTrie<T>) project.getFullTrie();
-    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, fullTrie, projectID,userID);
+    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, (ExerciseTrie<T>) project.getFullTrie(), projectID, userID);
   }
 
   /**
@@ -1141,10 +1137,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #makeExerciseListWrapper
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean includeContext) {
-    List<CommonShell> ids = new ArrayList<>();
-    for (T e : exercises) {
-      ids.add(e.getShell(includeContext));
-    }
+    List<CommonShell> ids = new ArrayList<>(exercises.size());
+    exercises.forEach(ex -> ids.add(ex.getShell(includeContext)));
     return ids;
   }
 

@@ -58,11 +58,11 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
     this.pageSize = pageSize;
   }
 
-  protected NPExerciseList(Panel currentExerciseVPanel,
+/*  protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseController controller,
                            String instance) {
     super(currentExerciseVPanel, controller, new ListOptions().setInstance(instance));
-  }
+  }*/
 
   @Override
   protected FacetContainer getSectionWidgetContainer() {

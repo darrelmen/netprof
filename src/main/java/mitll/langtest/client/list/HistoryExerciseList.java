@@ -313,7 +313,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    *
    * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
    */
-  public void reloadFromState() {
+/*  public void reloadFromState() {
     SelectionState selectionState = getSelectionState(getHistoryToken());
     String typeAheadText = getTypeAheadText();
 
@@ -328,7 +328,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         typeAheadText,
         -1,
         request);
-  }
+  }*/
 
   /**
    * @param selectionState
@@ -520,8 +520,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
     if (DEBUG) {
-      logger.info("loadExercisesUsingPrefix got " + typeToSection + " prefix " + prefix + " and made " + request +
-          "\n\tlast " + lastSuccessfulRequest);
+      logger.info("loadExercisesUsingPrefix got" +
+          "\ntype->section " + typeToSection +
+          "\nprefix        " + prefix +
+          "\nrequest       " + request +
+          "\n\tlast        " + lastSuccessfulRequest);
     }
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {

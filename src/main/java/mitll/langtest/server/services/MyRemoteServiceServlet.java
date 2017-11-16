@@ -285,8 +285,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
       String subject = "Server Exception on " + getHostName() + " at " + installPath;
       sendEmail(subject, getInfo(prefixedMessage));
 
-      logger.warn("logAndNotify : " + e, e);
-
+      if (e != null) {
+        logger.warn("logAndNotify : " + e, e);
+      }
       logger.error(getInfo(prefixedMessage), e);
     } else {
       logger.error("\n\nlogAndNotifyServerException : got " + e, e);

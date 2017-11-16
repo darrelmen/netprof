@@ -49,6 +49,7 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -94,16 +95,35 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
+
         return new NPExerciseList(currentExercisePanel, controller,
             new ListOptions()
                 .setInstance(instanceName)
-                .                setShowFirstNotCompleted(true)
-            .setActivityType(ActivityType.MARK_DEFECTS), -1) {
+                .setShowFirstNotCompleted(true)
+                .setActivityType(ActivityType.MARK_DEFECTS), -1) {
+          //Logger logger = Logger.getLogger("NPExerciseList_Defects");
           private CheckBox filterOnly, uninspectedOnly;
 
+          /**
+           * @see HistoryExerciseList#loadExercisesUsingPrefix
+           * @param typeToSection
+           * @param prefix
+           * @param onlyWithAudioAnno
+           * @param onlyUnrecorded
+           * @param onlyDefaultUser
+           * @param onlyUninspected
+           * @return
+           */
           @Override
           protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-            return super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected).setQC(true);
+            ExerciseListRequest exerciseListRequest = super
+                .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected)
+                .setQC(true);
+            return exerciseListRequest;
+          }
+
+          protected ExerciseListRequest getRequest(String prefix) {
+            return super.getRequest(prefix).setQC(true);
           }
 
           @Override
@@ -119,7 +139,6 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
 
             // row 3
             add(pagingContainer.getTableWithPager(new ListOptions()));
-         //   addEventHandler(instanceName, this);
           }
 
           /**
@@ -163,28 +182,6 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
       }
     };
   }
-
-  /**
-   * So if you fix a defect in the fix defects tab, want it to be reflected here in mark defects.
-   * For instance if you mark a defect here, and fix it there, coming back here, if you filter
-   * for uninspected, the item should not be there.
-   *
-   * @paramx instanceName
-   * @paramx container
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#afterValidForeignPhrase
-   */
-/*
-  private void addEventHandler(final String instanceName, HistoryExerciseList container) {
-    LangTest.EVENT_BUS.addHandler(DefectEvent.TYPE, authenticationEvent -> {
-      if (authenticationEvent.getSource().equals(instanceName)) {
-        //logger.info("skip self event from " + instanceName);
-      } else {
-        //    logger.info("---> got defect event " + instanceName);
-        container.reloadFromState();
-      }
-    });
-  }
-*/
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {

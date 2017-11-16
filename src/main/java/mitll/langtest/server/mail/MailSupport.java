@@ -64,7 +64,7 @@ public class MailSupport {
   /**
    * @see #email
    */
- // private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
+  // private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
   private static final int MAIL_PORT = 25;
   private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
@@ -83,9 +83,9 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail, boolean testEmail, String mailServer) {
     this.debugEmail = debugEmail;
-    this.testEmail  = testEmail;
-    this.mailServer =mailServer;
-    if (testEmail) logger.warn("\n\n\n--->using test email");
+    this.testEmail = testEmail;
+    this.mailServer = mailServer;
+    if (testEmail) logger.warn("--->using test email");
   }
 
   /**

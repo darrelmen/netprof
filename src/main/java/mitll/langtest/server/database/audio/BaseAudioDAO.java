@@ -253,7 +253,8 @@ public abstract class BaseAudioDAO extends DAO {
     long now = System.currentTimeMillis();
 
     if (now - then > WARN_DURATION)
-      logger.warn("attachAudioToExercise took " + (now - then) + " to get " + audioAttributes.size() + " attributes");
+      logger.warn("attachAudioToExercise took " + (now - then) +
+          " to get " + audioAttributes.size() + " attributes for ex #" + id);
 /*    if (DEBUG) {
       logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getOldID());
       for (AudioAttribute attribute : audioAttributes) {

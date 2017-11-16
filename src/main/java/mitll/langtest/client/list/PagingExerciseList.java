@@ -558,13 +558,15 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @param after
-   * @param es
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
+   * @paramx after
+   * @paramx es
+   * @seex mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
+/*
   public void addExerciseAfter(T after, T es) {
     pagingContainer.addExerciseAfter(after, es);
   }
+*/
 
   public T forgetExercise(int id) {
     T es = byID(id);

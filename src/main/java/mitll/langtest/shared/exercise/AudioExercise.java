@@ -109,16 +109,16 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @param s
+   * @paramz s
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @deprecated - try to avoid this
    */
-  public void setRefAudio(String s) {
+/*  public void setRefAudio(String s) {
     if (s != null && s.length() > 0 && !s.equals("null")) {
       AudioAttribute audioAttribute = new AudioAttribute(s);
       addAudio(audioAttribute);
     }
-  }
+  }*/
 
   public void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
@@ -128,13 +128,15 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @param ref
-   * @param user
-   * @see mitll.langtest.server.database.exercise.AttachAudio#addOldSchoolAudio
+   * @paramx ref
+   * @paramx user
+   * @seex mitll.langtest.server.database.exercise.AttachAudio#addOldSchoolAudio
    */
+/*
   public void addAudioForUser(String ref, MiniUser user) {
     addAudio(new AudioAttribute(ref, user));
   }
+*/
 
   public void clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
@@ -204,14 +206,14 @@ public class AudioExercise extends ExerciseShell {
     Optional<AudioAttribute> max = collect
         .stream()
         .filter(p -> p.isRegularSpeed() && isRegular || p.isSlow() && !isRegular)
-        .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
+        .max((o1, o2) -> -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp()));
 
     AudioAttribute audioAttribute = max.orElse(null);
 
     if (audioAttribute == null) {
       max = collect
           .stream()
-          .max((o1, o2) -> -1 * Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp()));
+          .max((o1, o2) -> -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp()));
       audioAttribute = max.orElse(null);
     }
 
@@ -342,9 +344,6 @@ public class AudioExercise extends ExerciseShell {
       if (attr.getUser() != null) {
         if (attr.getUser().getID() == userID) mine.add(attr);
       }
-//      else {
-//        System.err.println("getRecordingsBy : Can't find user for " + attr);
-//      }
     }
     return mine;
   }
@@ -383,9 +382,7 @@ public class AudioExercise extends ExerciseShell {
 
     for (AudioAttribute attribute : byGender) {
       if (!attribute.getAttributeKeys().contains(CONTEXT) || includeContext) {
-        List<AudioAttribute> audioAttributes1 = userToAudio.get(attribute.getUser());
-        if (audioAttributes1 == null)
-          userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<>());
+        List<AudioAttribute> audioAttributes1 = userToAudio.computeIfAbsent(attribute.getUser(), k -> new ArrayList<>());
         audioAttributes1.add(attribute);
       }
       //  else {
@@ -399,7 +396,7 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @return
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
+   * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
   public List<AudioAttribute> getDefaultUserAudio() {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
@@ -427,7 +424,7 @@ public class AudioExercise extends ExerciseShell {
    * @param preferredVoices if we find audio from preferred voices, we will use it, no matter how old it is
    * @param includeContext
    * @return singleton map not containing default user -
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
+   * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
   public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale,
                                                                 Collection<Integer> preferredVoices,

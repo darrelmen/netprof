@@ -91,11 +91,11 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   /**
-   * @param includeContext
+   * @param includeContextIGNORED
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
-  public CommonShell getShell(boolean includeContext) {
+  public CommonShell getShell(boolean includeContextIGNORED) {
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, "", "");
   }
 

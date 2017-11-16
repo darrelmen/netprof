@@ -100,7 +100,8 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     // logger.info("got " + e + " and " + e.getDominoID());
 //    int dominoID = e.getDominoID();
 //    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + getID(e) + "/" + e.getOldID());
+    String subtext = "" + getID(e) + (e.getOldID().isEmpty() ? "" : "/" + e.getOldID());
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, subtext);
     // w.getElement().setId("ItemHeading");
     return w;
   }
@@ -177,12 +178,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     }
     return builder.toString();
   }
-
-//  public InlineLabel showPopup(Map<String, String> unitToValue) {
-//    InlineLabel itemHeader = getLabel(exercise);
-//    showPopup(itemHeader, getUnitLessonForExercise2(exercise));
-//    return itemHeader;
-//  }
 
   public InlineLabel showPopup(T exercise) {
     InlineLabel itemHeader = getLabel(exercise);

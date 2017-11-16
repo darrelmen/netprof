@@ -81,6 +81,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
+  public static final String CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED = "Click to indicate item has been reviewed.";
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
@@ -157,7 +158,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     if (audioWasPlayed == null) {
       initAudioWasPlayed();
     }
-    // return null;
   }
 
   private void initAudioWasPlayed() {
@@ -216,14 +216,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     };
 
     nextTooltip = addTooltip(navHelper.getNext(), audioWasPlayed.size() == toResize.size() ?
-        "Click to indicate item has been reviewed." :
+        CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
     if (!getInstance().contains(REVIEW) && !getInstance().toLowerCase().contains(COMMENT.toLowerCase())) {
       approvedButton = addApprovedButton(listContainer, navHelper);
-//      if (controller.hasModel()) {
-//        addAttnLLButton(listContainer, navHelper);
-//      }
     }
     setApproveButtonState();
     return navHelper;
@@ -279,7 +276,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     markReviewed(completedExercise);
     boolean allCorrect = incorrectFields.isEmpty();
     int id = completedExercise.getID();
-    logger.info("markReviewed : mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size()  + " : " +incorrectFields);
+    logger.info("markReviewed : mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size() + " : " + incorrectFields);
     listContainer.setState(id, allCorrect ? STATE.APPROVED : STATE.DEFECT);
     listContainer.redraw();
     navigationHelper.clickNext(controller, completedExercise);
@@ -380,13 +377,24 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     for (RequiresResize rr : toResize) rr.onResize();
   }
 
-
+  /**
+   * @param e
+   * @return
+   * @see #getAudioPanel
+   */
   protected Widget getScoringAudioPanel(final T e) {
+    if (logger == null) logger = Logger.getLogger("QCNPFExercise");
+
     if (!e.hasRefAudio()) {
+      //    logger.info("no : audio attr on " + e.getID() + " " + e.getAudioAttributes());
       return addNoRefAudio(e);
     } else {
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true, false);
-      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false, false);
+      //  logger.info("yes : audio attr on " + e.getID() + " " + e.getAudioAttributes());
+      boolean context = e.isContext();
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true, context);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false, context);
+      //logger.info("malesMap : "+malesMap.size());
+      //logger.info("femalesMap : "+femalesMap.size());
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
@@ -441,7 +449,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
       List<AudioAttribute> audioAttributes = malesMap.get(user);
       for (AudioAttribute audio : audioAttributes) {
-        //   logger.info("addTabsForUsers for " + e.getOldID() + " got " + audio);
+        //    logger.info("addTabsForUsers for " + e.getID() + " got " + audio);
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio);
 
@@ -712,7 +720,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   }
 
   /**
-   *
    * @param e
    * @param field
    * @param label
@@ -752,7 +759,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     Panel row = new DivWidget();
     row.getElement().setId("QCNPFExercise_row_" + field);
 
-  //  row.addStyleName("trueInlineStyle");
+    //  row.addStyleName("trueInlineStyle");
     row.addStyleName("inlineFlex");
     qcCol.addStyleName("floatLeftAndClear");
     row.add(qcCol);
@@ -764,7 +771,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     Panel rowContainer = new FlowPanel();
     rowContainer.getElement().setId("QCNPFExercise_rowContainer_" + field);
     rowContainer.addStyleName("topFiveMargin");
-   // rowContainer.addStyleName("blockStyle");
+    // rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
 
@@ -863,7 +870,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     markReviewed(exercise);
 
     String instance = getInstance();
-  //  LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+    //  LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
     //}
   }
 
