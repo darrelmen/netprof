@@ -144,7 +144,7 @@ public class MessageHelper {
 
   private Modal handleError(String msg, Throwable throwable, DDialogType dType) {
     if (throwable instanceof DominoSessionException) {
-      log.warning("Logout for session: t=" + throwable);
+      log.warning("Logout for session (" + msg+ ") : t=" + throwable);
       parentHelper.logout();
     } else if (throwable instanceof RpcTokenException) {
       log.warning("Restoring session: t=" + throwable);

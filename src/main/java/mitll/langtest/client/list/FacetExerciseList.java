@@ -62,6 +62,7 @@ import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.services.ListServiceAsync;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -77,6 +78,8 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   public static final String ADDING_VISITOR = "adding visitor";
+  public static final String GETTING_LISTS_FOR_USER = "getting lists for user";
+  public static final String GETTING_TYPE_VALUES = "getting type->values";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final boolean DEBUG_STALE = false;
@@ -598,7 +601,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting lists for user", caught);
+        controller.handleNonFatalError(GETTING_LISTS_FOR_USER, caught);
       }
 
       @Override
@@ -1030,14 +1033,22 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getSectionWidgetContainer()
    */
   private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
+    boolean hasUser = controller.getUser() > 0;
+    if (!hasUser) return;
+
     List<Pair> pairs = getPairs(typeToSelection);
-//    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    logger.info("getTypeToValues request " + pairs + " list " + userListID + " has user " + hasUser);
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("getting type->values", caught);
+            if (caught instanceof DominoSessionException) {
+              logger.info("got " + caught);
+            }
+//            else {
+              controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
+  //          }
           }
 
           /**
@@ -1421,29 +1432,31 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       gotFullExercises(currentReq, alreadyFetched);
     } else {
       //  logger.info("reallyGetExercises make req.");
-      service.getFullExercises(currentReq, requested,
-          new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              logger.warning("getExercises got exception : " + caught);
-              logger.warning("getExercises got " + getExceptionAsString(caught));
-              dealWithRPCError(caught);
-              hidePrevNext();
-            }
-
-            @Override
-            public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-              if (result.getExercises() != null) {
-                long now = System.currentTimeMillis();
-                int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-                if (now - then > 1000) {
-                  logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
-                }
-
-                getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
+      if (controller.getUser() > 0) {
+        service.getFullExercises(currentReq, requested,
+            new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                logger.warning("getExercises got exception : " + caught);
+                logger.warning("getExercises got " + getExceptionAsString(caught));
+                dealWithRPCError(caught);
+                hidePrevNext();
               }
-            }
-          });
+
+              @Override
+              public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
+                if (result.getExercises() != null) {
+                  long now = System.currentTimeMillis();
+                  int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+                  if (now - then > 1000) {
+                    logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
+                  }
+
+                  getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
+                }
+              }
+            });
+      }
     }
   }
 

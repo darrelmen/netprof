@@ -71,7 +71,7 @@ public class UserManager {
   private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
   private final UserFeedback userFeedback;
-  private long userID = NO_USER_SET;
+  private int userID = NO_USER_SET;
   private String userChosenID = "";
 
   private final String appTitle;
@@ -141,9 +141,9 @@ public class UserManager {
   /**
    * Kick the user out to the login screen if they're not valid in any way.
    *
+   * @param result
    * @see #getPermissionsAndSetUser
    * @see #gotNewUser
-   * @param result
    */
   private void gotSessionUser(User result) {
     if (DEBUG) {
@@ -196,7 +196,7 @@ public class UserManager {
       String sid = getUserFromStorage();
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
-      return (int) userID;
+      return userID;
     }
   }
 
@@ -206,14 +206,12 @@ public class UserManager {
 
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String userIDCookie = getUserIDCookie();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(getUserIDCookie()) : NO_USER_SET_STRING;
   }
 
   void setPendingUserStorage(String pendingID) {
     if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.setItem(getUserPendingID(), pendingID);
+      Storage.getLocalStorageIfSupported().setItem(getUserPendingID(), pendingID);
     }
   }
 
@@ -232,7 +230,6 @@ public class UserManager {
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
-
   private String getUserPendingID() {
     return appTitle + ":" + USER_PENDING_ID;
   }
@@ -247,7 +244,7 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
       current = null;
-  //    logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
+      //    logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -261,7 +258,7 @@ public class UserManager {
    */
   void storeUser(User user) {
     if (Storage.isLocalStorageSupported()) {
-     // logger.info("storeUser : user now " + user);
+      // logger.info("storeUser : user now " + user);
       rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
@@ -271,8 +268,8 @@ public class UserManager {
   }
 
   /**
-   * @see #storeUser
    * @param user
+   * @see #storeUser
    */
   void rememberUser(User user) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();

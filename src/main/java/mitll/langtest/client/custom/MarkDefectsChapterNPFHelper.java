@@ -134,8 +134,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
             addTypeAhead(column);
 
             // row 2
-            add(filterOnly = getFilterCheckbox());
             add(uninspectedOnly = getUninspectedCheckbox());
+            add(filterOnly = getFilterCheckbox());
 
             // row 3
             add(pagingContainer.getTableWithPager(new ListOptions()));

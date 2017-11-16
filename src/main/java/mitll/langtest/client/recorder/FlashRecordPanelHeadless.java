@@ -322,9 +322,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   public boolean gotPermission() {
     boolean b = usingFlash() || usingWebRTC();
-    if (!b) {
+/*    if (!b) {
       logger.info("gotPermission permission received " + usingFlash() + " usingWebRTC " + usingWebRTC());
-    }
+    }*/
     return b;
   }
 

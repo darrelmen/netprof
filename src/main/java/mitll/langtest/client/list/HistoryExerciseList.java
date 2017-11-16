@@ -581,9 +581,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (DEBUG) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID + " for " + request);
     }
-    service.getExerciseIds(
-        request,
-        new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));
+    if (controller.getUser() > 0) {
+      service.getExerciseIds(
+          request,
+          new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));
+    }
   }
 
   /**

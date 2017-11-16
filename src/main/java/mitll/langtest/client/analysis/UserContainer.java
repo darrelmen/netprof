@@ -69,6 +69,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  public static final int MAX_LENGTH = 11;
+  public static final int TABLE_WIDTH = 600;
+  public static final String TRYING_TO_GET_STUDENTS = "trying to get students";
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final String FILTER_BY1 = "Filter by";
@@ -125,11 +128,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   protected int getMaxLengthId() {
-    return 11;
+    return MAX_LENGTH;
   }
-
   protected int getMaxTableWidth() {
-    return 600;
+    return TABLE_WIDTH;
   }
 
   @Override
@@ -138,7 +140,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.getMessageHelper().handleNonFatalError("trying to get students", caught);
+          controller.getMessageHelper().handleNonFatalError(TRYING_TO_GET_STUDENTS, caught);
         }
 
         @Override
@@ -157,23 +159,24 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.getMessageHelper().handleNonFatalError("trying to get students", caught);
+          controller.getMessageHelper().handleNonFatalError(TRYING_TO_GET_STUDENTS, caught);
         }
 
         @Override
         public void onSuccess(Set<Integer> result) {
           myStudents = result;
           mineOnly.setEnabled(!myStudents.isEmpty());
-          Panel tableWithPager = getTableWithPager(users);
-          leftSide.add(tableWithPager);
-          ((Panel) tableWithPager.getParent()).add(getButtons());
 
+//          Panel tableWithPager = getTableWithPager(users);
+//          leftSide.add(tableWithPager);
+//          ((Panel) tableWithPager.getParent()).add(getButtons());
+          getTableWithButtons(users, leftSide);
         }
       });
     }
   }
 
-  private void getTableWithButtons(List<UserInfo> filtered, DivWidget leftSide) {
+  private void getTableWithButtons(Collection<UserInfo> filtered, DivWidget leftSide) {
     Panel tableWithPager = getTableWithPager(filtered);
     leftSide.add(tableWithPager);
     ((Panel) tableWithPager.getParent()).add(getButtons());

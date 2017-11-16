@@ -150,7 +150,7 @@ public class UserMenu {
 
   @NotNull
   private LinkAndTitle getLogOut() {
-    return new LinkAndTitle(LOG_OUT, new LogoutClickHandler());
+    return new LinkAndTitle(LOG_OUT, event -> uiLifecycle.logout());
   }
 
 /*  private class UsersClickHandler implements ClickHandler {
@@ -236,11 +236,6 @@ public class UserMenu {
     }
   }
 
-  private class LogoutClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      uiLifecycle.logout();
-    }
-  }
 
   private void downloadFailedAlert() {
     Window.alert("Code download failed");

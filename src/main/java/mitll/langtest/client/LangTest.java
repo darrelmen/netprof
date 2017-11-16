@@ -971,9 +971,7 @@ public class LangTest implements
    * @return
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
-  public int getUser() {
-    return userManager.getUser();
-  }
+  public int getUser() { return userManager.getUser();  }
 
   public User getCurrent() {
     return userManager.getCurrent();

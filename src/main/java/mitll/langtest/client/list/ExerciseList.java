@@ -70,6 +70,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
+  public static final String GETTING_EXERCISE = "getting exercise";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>" +
@@ -425,7 +426,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     //  caught.printStackTrace();
     controller.logMessageOnServer("got exception " + caught.getMessage() + " : " + exceptionAsString, " RPCerror?", true);
 
-    controller.handleNonFatalError("getting exercise", caught);
+    controller.handleNonFatalError(GETTING_EXERCISE, caught);
   }
 
   /**
@@ -641,18 +642,21 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
 
-      service.getExercise(next.getID(), false, new AsyncCallback<U>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("getting exercise", caught);
-        }
+      if (controller.getUser() > 0) {
+        service.getExercise(next.getID(), false, new AsyncCallback<U>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError(GETTING_EXERCISE, caught);
+          }
 
-        @Override
-        public void onSuccess(U result) {
-          cachedNext = result;
-          //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + getInstance());
-        }
-      });
+          @Override
+          public void onSuccess(U result) {
+            cachedNext = result;
+            //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + getInstance());
+          }
+        });
+      }
+      // else no user
     }
   }
 

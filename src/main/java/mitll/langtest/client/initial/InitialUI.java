@@ -203,6 +203,8 @@ public class InitialUI implements UILifecycle {
   }
 
   public void logout() {
+    userManager.clearUser();
+
     banner.reset();
     breadcrumbs.clear();
     breadcrumbs.setVisible(false);
@@ -566,7 +568,7 @@ public class InitialUI implements UILifecycle {
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+     // logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();
