@@ -129,7 +129,7 @@ public class Report implements IReport {
   private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
   private static final int ALL_YEARS = -1;
   private static final String FOOTER = "</body></head></html>";
-  public static final boolean SEND_EACH_REPORT = false;
+  private static final boolean SEND_EACH_REPORT = false;
 
   /**
    * @see #getReportForProject
@@ -138,9 +138,8 @@ public class Report implements IReport {
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
-  //  private BufferedWriter csv;
   private final Map<Integer, Long> userToStart = new HashMap<>();
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private final Map<Integer, String> idToUser = new HashMap<>();
 
@@ -165,6 +164,8 @@ public class Report implements IReport {
       "newteacher"));
 
   private final List<ReportUser> users;
+  private final Set<Integer> allTeachers = new HashSet<>();
+  private final Set<Integer> allStudents = new HashSet<>();
   private final List<ReportUser> deviceUsers;
   private final String hostname;
   private final Map<Integer, Integer> userToProject;
@@ -189,6 +190,13 @@ public class Report implements IReport {
     this.eventDAO = eventDAO;
     this.audioDAO = audioDAO;
     this.users = users;
+
+    users.forEach(reportUser -> {
+      Kind userKind = reportUser.getUserKind();
+      if (userKind == Kind.STUDENT) allStudents.add(reportUser.getID());
+      if (userKind == Kind.TEACHER) allTeachers.add(reportUser.getID());
+    });
+
     this.deviceUsers = deviceUsers;
     this.hostname = hostname;
     this.userToProject = userToProject;
@@ -525,14 +533,17 @@ public class Report implements IReport {
           reportForYear.setYear(i);
           reportStats.add(reportForYear);
           addYear(dataArray, builder, i, allSlim, allDevicesSlim,
-              audioAttributes, results, resultsDevices, language, usersOnProject,
+              audioAttributes, results, resultsDevices, language,
+              usersOnProject,
               reportForYear);
         }
       } else {
         reportStats.add(stats);
         addYear(dataArray, builder, stats.getYear(), allSlim, allDevicesSlim,
             //exToAudio,
-            audioAttributes, results, resultsDevices, language, usersOnProject, stats);
+            audioAttributes, results, resultsDevices, language,
+            usersOnProject,
+            stats);
       }
       jsonObject.put("data", dataArray);
     }
@@ -580,7 +591,8 @@ public class Report implements IReport {
                        ReportStats reportStats) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>").append(i).append("</h1>");
-    builder.append(getReportForYear(forYear, i, allSlim, allDevicesSlim,
+    builder.append(getReportForYear(forYear,
+        i, allSlim, allDevicesSlim,
         audioAttributes, results, resultsDevices, language, usersForProject, reportStats));
     dataArray.add(forYear);
   }
@@ -602,21 +614,22 @@ public class Report implements IReport {
                                   Collection<UserTimeBase> audioAttributes,
                                   Collection<MonitorResult> results,
                                   Collection<MonitorResult> resultsDevices,
-                                  String language, Collection<Integer> usersForProject,
+                                  String language,
+                                  Collection<Integer> usersForProject,
                                   ReportStats reportStats) {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
-    //   logger.info(language + " : doing year " + year);
+    if (DEBUG) logger.info(language + " : doing year " + year);
 
     setUserStart(allSlim);
 
     StringBuilder builder = new StringBuilder();
-    Set<Integer> users = getUserIDs(jsonObject, year, usersForProject, builder);
+    Set<Integer> users = getUserIDs(jsonObject, year, usersForProject, builder, language);
 
     {
       JSONObject iPadUsers = new JSONObject();
-      getUsers(builder, getIOSUsers(usersForProject), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false);
+      getUsers(builder, getIOSUsers(usersForProject), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false, language);
       jsonObject.put(I_PAD_USERS, iPadUsers);
     }
 
@@ -630,8 +643,10 @@ public class Report implements IReport {
 
     events.addAll(eventsDevices);
 
-    addRecordings(jsonObject, year, results, builder, users, reportStats);
-    addDeviceRecordings(jsonObject, year, resultsDevices, builder, users, reportStats);
+    logger.info(language + " : doing year " + year + " got " + results.size() + " recordings");
+    addRecordings(jsonObject, year, results, builder, users, reportStats, language);
+
+    addDeviceRecordings(jsonObject, year, resultsDevices, builder, users, reportStats, language);
 
     Calendar calendar = getCalendarForYear(year);
 //    Date january1st = getJanuaryFirst(calendar, year);
@@ -664,20 +679,22 @@ public class Report implements IReport {
    * @param builder
    * @param users
    * @param reportStats
-   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @param language
+   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    */
-  private void addRecordings(JSONObject jsonObject, int year, Collection<MonitorResult> results, StringBuilder builder,
-                             Set<Integer> users, ReportStats reportStats) {
+  private void addRecordings(JSONObject jsonObject, int year,
+                             Collection<MonitorResult> results, StringBuilder builder,
+                             Set<Integer> users, ReportStats reportStats, String language) {
     JSONObject allRecordings = new JSONObject();
-    getResults(builder, users, allRecordings, year, results, reportStats);
+    getResults(builder, users, allRecordings, year, results, reportStats, language);
     jsonObject.put(ALL_RECORDINGS1, allRecordings);
   }
 
   private void addDeviceRecordings(JSONObject jsonObject, int year,
                                    Collection<MonitorResult> resultsDevices,
-                                   StringBuilder builder, Set<Integer> users, ReportStats reportStats) {
+                                   StringBuilder builder, Set<Integer> users, ReportStats reportStats, String language) {
     JSONObject deviceRecordings = new JSONObject();
-    getResultsDevices(builder, users, deviceRecordings, year, resultsDevices, reportStats);
+    getResultsDevices(builder, users, deviceRecordings, year, resultsDevices, reportStats, language);
     jsonObject.put(DEVICE_RECORDINGS1, deviceRecordings);
   }
 
@@ -705,13 +722,18 @@ public class Report implements IReport {
    * @param year
    * @param usersForProject
    * @param builder
+   * @param language
    * @return
-   * @see #getReport(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
    */
-  private Set<Integer> getUserIDs(JSONObject jsonObject, int year, Collection<Integer> usersForProject, StringBuilder builder) {
+  private Set<Integer> getUserIDs(JSONObject jsonObject,
+                                  int year,
+                                  Collection<Integer> usersForProject,
+                                  StringBuilder builder,
+                                  String language) {
     // all users
     JSONObject allUsers = new JSONObject();
-    Set<Integer> users = getUsers(builder, allUsers, year, usersForProject);
+    Set<Integer> users = getUsers(builder, allUsers, year, usersForProject, language);
     jsonObject.put(ALL_USERS, allUsers);
     return users;
   }
@@ -855,12 +877,19 @@ public class Report implements IReport {
   /**
    * @param builder
    * @param usersForProject
+   * @param language
    * @return
    * @see #getReport
    */
   private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year,
-                                Collection<Integer> usersForProject) {
-    return getUsers(builder, fixUserStarts(usersForProject), ALL_NEW_USERS, jsonObject, year, true);
+                                Collection<Integer> usersForProject, String language) {
+    return getUsers(
+        builder,
+        fixUserStarts(usersForProject),
+        ALL_NEW_USERS,
+        jsonObject,
+        year,
+        true, language);
   }
 
   private String getHostInfo() {
@@ -901,23 +930,28 @@ public class Report implements IReport {
     return forProject;
   }
 
-  private List<ReportUser> getValidUsers(List<ReportUser> all) {
+/*  private List<ReportUser> getValidUsers(List<ReportUser> all) {
     List<ReportUser> valid = new ArrayList<>();
     for (ReportUser u : all) if (!shouldSkipUser(u)) valid.add(u);
     return valid;
-  }
+  }*/
 
   /**
    * @param builder
    * @param users
    * @param users1
+   * @param language
    * @return set of valid users
    * @see IReport#doReport
    * @see #getUsers
    */
-  private Set<Integer> getUsers(StringBuilder builder, Collection<ReportUser> users, String users1, JSONObject jsonObject,
+  private Set<Integer> getUsers(StringBuilder builder,
+                                Collection<ReportUser> users,
+                                String users1,
+
+                                JSONObject jsonObject,
                                 int year,
-                                boolean reportTeachers) {
+                                boolean reportTeachers, String language) {
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
     int ytd = 0;
@@ -933,35 +967,27 @@ public class Report implements IReport {
     Map<Integer, Integer> tmonthToCount = tcounts.getMonthToCount();
     Map<Integer, Integer> tweekToCount = tcounts.getWeekToCount();
 
-    int numTeachers = 0;
+    //if (!users.isEmpty()) {
+    logger.info(language + " : " + users1 + " examining " + users.size() + " users - year " + year);
+    // }
+
     for (ReportUser user : users) {
-      boolean isStudent =
-//          (user.getAge() == 89 &&
-//              user.getUserID().isEmpty()) ||
-//              user.getAge() == 0 ||
-          user.getUserKind() == Kind.STUDENT;
+      Kind userKind = user.getUserKind();
+      boolean isStudent = userKind == Kind.STUDENT;
+      boolean isTeacher = userKind == Kind.TEACHER;
 
-      boolean isTeacher = user.getUserKind() == Kind.TEACHER;
-
-      if (isTeacher) isStudent = false;
-
-      boolean contains = false;
-      for (String ll : lincoln) {
-        if (user.getUserID().startsWith(ll)) {
-          contains = true;
-          break;
-        }
-      }
-      if (contains) isStudent = false;
+      if (isTeacher || isLincoln(user)) isStudent = false;
 
       if (shouldSkipUser(user)) {
-        if (SHOW_TEACHER_SKIPS) logger.warn("skipping ? " + user);
+        if (SHOW_TEACHER_SKIPS) logger.warn(language + " skipping a priori user " + getUserInfo(user));
         continue;
       }
+
       long userCreated = user.getTimestampMillis();
       boolean inYear = yearTimeRange.inYear(userCreated);
       if (isStudent) {
         students.add(user.getID());
+        //    logger.info(language + " student " + user.getID() + " " + user.getUserID());
         if (inYear) {
           ytd++;
           countByWeekAndMonth(calendar, monthToCount, weekToCount, userCreated);
@@ -971,12 +997,13 @@ public class Report implements IReport {
         //}
       } else {
         if (isTeacher) {
+//          logger.info(language + " teacher " + user.getID() + " " + user.getID());
           if (inYear) {
             tytd++;
             countByWeekAndMonth(calendar, tmonthToCount, tweekToCount, userCreated);
           }
         }
-        if (SHOW_TEACHER_SKIPS) logger.warn("skipping teacher " + user);
+        if (SHOW_TEACHER_SKIPS) logger.warn(language + " : skipping teacher " + getUserInfo(user));
       }
     }
     {
@@ -999,6 +1026,22 @@ public class Report implements IReport {
       builder.append(getSectionReport(tytd, tmonthToCount, tweekToCount, "New Teachers", jsonObject, year));
     }
     return students;
+  }
+
+  @NotNull
+  private String getUserInfo(ReportUser user) {
+    return user.getID() + " " + user.getUserID() + " " + user.getUserKind();
+  }
+
+  private boolean isLincoln(ReportUser user) {
+    boolean contains = false;
+    for (String ll : lincoln) {
+      if (user.getUserID().startsWith(ll)) {
+        contains = true;
+        break;
+      }
+    }
+    return contains;
   }
 
   private void countByWeekAndMonth(Calendar calendar, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount, long userCreated) {
@@ -1068,8 +1111,11 @@ public class Report implements IReport {
   }
 
   private boolean shouldSkipUser(ReportUser user) {
-    return user.getID() == 3 || user.getID() == 1 ||
-        lincoln.contains(user.getUserID()) || user.getUserID().startsWith(SKIP_USER);
+    return
+        user.getID() == 3 ||
+            user.getID() == 1 ||
+            lincoln.contains(user.getUserID()) ||
+            user.getUserID().startsWith(SKIP_USER);
   }
 
   /**
@@ -1364,22 +1410,23 @@ public class Report implements IReport {
   /**
    * @param builder
    * @param year
-   * @see #addRecordings
+   * @param language
+   * @see #addRecordings(JSONObject, int, Collection, StringBuilder, Set, ReportStats, String)
    */
   private void getResults(StringBuilder builder,
                           Set<Integer> students,
                           JSONObject jsonObject,
                           int year,
                           Collection<MonitorResult> results,
-                          ReportStats reportStats) {
-    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, reportStats);
+                          ReportStats reportStats, String language) {
+    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, reportStats, language);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
                                  JSONObject jsonObject, int year,
                                  Collection<MonitorResult> results,
-                                 ReportStats reportStats) {
-    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, reportStats);
+                                 ReportStats reportStats, String language) {
+    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, reportStats, language);
   }
 
   private void getResultsForSet(StringBuilder builder,
@@ -1388,8 +1435,8 @@ public class Report implements IReport {
                                 String recordings,
                                 JSONObject jsonObject,
                                 int year,
-                                ReportStats reportStats
-  ) {
+                                ReportStats reportStats,
+                                String language) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
@@ -1408,7 +1455,7 @@ public class Report implements IReport {
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
 
-    logger.info("Year  " + year + " Students num = " + students.size());
+    logger.info(language + " : Year " + year + " Students num = " + students.size());
 
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
@@ -1431,7 +1478,7 @@ public class Report implements IReport {
           if (result.isValid()) {
             if (!isRefAudioResult(result)) {
               int userid = result.getUserid();
-              if (students.contains(userid)) {
+              if (students.contains(userid) || allStudents.contains(userid)) {
                 if (isResultReallyValid(result, seen)) {
                   if (isValidUser(userid)) {
            /*         if (WRITE_RESULTS_TO_FILE) {
@@ -1453,7 +1500,13 @@ public class Report implements IReport {
                 }
               } else {
                 if (firstWeeks) logger.warn(w + " teacher score " + result);
-                skipped.add(userid);
+                boolean add = skipped.add(userid);
+                if (add) {
+                  if (DEBUG) logger.info(language + " skipping not a student " + userid);
+                  if (!allTeachers.contains(userid)) {
+                    logger.warn("hmm " + userid + "is not a teacher?");
+                  }
+                }
 
                 idToCount.put(userid, idToCount.getOrDefault(userid, 0) + 1);
                 Set<MonitorResult> orDefault = userToRecordings.getOrDefault(userid, new HashSet<>());

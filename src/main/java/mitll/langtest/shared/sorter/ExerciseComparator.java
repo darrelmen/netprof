@@ -71,7 +71,7 @@ public class ExerciseComparator {
       return -1;
     } else if (!english1.isEmpty() && english2.isEmpty()) {
       return +1;
-    } else if (english1.isEmpty() && english2.isEmpty()) {
+    } else if (english1.isEmpty()) {
       return compareByFL(o1, o2, searchTerm);
     } else if (english1.equalsIgnoreCase(searchTerm) && !english2.equalsIgnoreCase(searchTerm)) {
       return -1;

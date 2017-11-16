@@ -1615,7 +1615,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     IReport report = getReport();
 
     List<ReportStats> allReports = new ArrayList<>();
-    getProjects().forEach(project -> {
+    Collection<Project> projects = getProjects();
+    List<Project> copy = new ArrayList<>(projects);
+    copy.sort((o1, o2) -> o1.getProject().name().toLowerCase().compareTo(o2.getProject().name().toLowerCase()));
+
+    copy.forEach(project -> {
           try {
             jsons.add(report.writeReportToFile(new ReportStats(project.getProject(), year), pathHelper, allReports));
           } catch (IOException e) {

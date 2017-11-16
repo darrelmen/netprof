@@ -159,7 +159,7 @@ public class DominoExerciseDAO {
           ex.addUnitToValue(chapterName, displayValue);
         } else {
           if (!displayValue.trim().isEmpty()) {
-            logger.info("getExerciseFromVocabularyItem : for " + ex.getID() + " adding " + name + " = " + displayValue);
+//            logger.info("getExerciseFromVocabularyItem : for " + ex.getID() + " adding " + name + " = " + displayValue);
             ex.addAttribute(new ExerciseAttribute(name, displayValue));
           }
         }
