@@ -22,9 +22,9 @@ import java.util.*;
  */
 public class ReportToExcel {
   private static final Logger logger = LogManager.getLogger(ReportToExcel.class);
-  public static final String NET_PRO_F_HISTORICAL = "NetProF Historical";
-  public static final String NET_PRO_F_YTD = "NetProF-Vrt";
-  public static final String INCREASE = "INCREASE";
+  private static final String NET_PRO_F_HISTORICAL = "NetProF Historical";
+  private static final String NET_PRO_F_YTD = "NetProF-Vrt";
+  private static final String INCREASE = "INCREASE";
 
   protected final LogAndNotify logAndNotify;
 
@@ -247,6 +247,10 @@ public class ReportToExcel {
     XSSFCellStyle greenStyle = getDarkGreenStyle(workbook);
     XSSFCellStyle greenStyleWeeklyTotal = getDarkGreenStyle(workbook);
     setNumberFormat(workbook, greenStyleWeeklyTotal);
+
+    int prevMarginal = 0;
+
+//    int weekC=0;
     for (String week : weeks) {
       Row row = sheet.createRow(rownum++);
 
@@ -255,8 +259,6 @@ public class ReportToExcel {
       cell1.setCellValue(getWeek(week));
       cell1.setCellStyle(greenStyle);
       int marginalTotal = 0;
-
-      int prevMarginal = 0;
 
       // for every lang per week
       for (String lang : sortedLang) {
@@ -323,11 +325,17 @@ public class ReportToExcel {
     return rownum;
   }
 
-  private void doIncreaseRow(XSSFWorkbook workbook, Set<String> sortedLang, Map<String, Integer> langToLastWeek, int marginalDiff, Row row) {
+  private void doIncreaseRow(XSSFWorkbook workbook,
+                             Set<String> sortedLang,
+                             Map<String, Integer> langToLastWeek,
+                             int marginalDiff,
+                             Row row) {
     int col = 0;
 
     XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
     XSSFCellStyle yellowStyle = getYellowStyle(workbook);
+
+    logger.info("doIncreaseRow marginal "+ marginalDiff);
 
     {
       Cell cell = row.createCell(col++);
@@ -341,7 +349,7 @@ public class ReportToExcel {
         logger.error("no value for " + lang);
         value = 0;
       } else {
-        //logger.info("Got " + lang + " = " + value);
+        logger.info("Got " + lang + " = " + value);
       }
 
       {
