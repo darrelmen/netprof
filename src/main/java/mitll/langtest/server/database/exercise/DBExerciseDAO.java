@@ -77,6 +77,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   /**
    * so first look in the main id->ex map and then in the context->exercise map
+   *
    * @param id
    * @return
    */
@@ -86,12 +87,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       CommonExercise commonExercise = idToExercise.get(id);
 
       if (commonExercise == null) {
-        if (
-            id != userExerciseDAO.getUnknownExerciseID()) {
-          commonExercise= idToContextExercise.get(id);
-        }
-        if (commonExercise == null) {
-          logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises ");
+        if (id != userExerciseDAO.getUnknownExerciseID()) {
+          commonExercise = idToContextExercise.get(id);
+          if (commonExercise == null) {
+            logger.warn(this + " getExercise : couldn't find exercise " + id +
+                " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
+          }
         }
       }
       return commonExercise;

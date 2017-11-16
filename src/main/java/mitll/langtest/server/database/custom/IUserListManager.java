@@ -36,6 +36,7 @@ import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
+import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -44,7 +45,6 @@ import mitll.npdata.dao.DBConnection;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public interface IUserListManager   {
   @Deprecated
@@ -62,18 +62,31 @@ public interface IUserListManager   {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#rememberProject
    */
-  UserList createFavorites(int userid, int projid);
+  void createFavorites(int userid, int projid);
 
-  UserList<CommonShell> getCommentedList(Set<Integer> ids);
+  /**
+   * @see ListServiceImpl#getReviewList
+   * @param projID
+   * @return
+   */
+  UserList<CommonShell> getCommentedList(int projID);
 
-  UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonExercise> getCommentedListEx(int projID);
 
   @Deprecated
-  UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids);
+  UserList<CommonShell> getUserListByID(int id);
 
   UserList<CommonShell> getSimpleUserListByID(int id);
 
-  UserList<CommonExercise> getUserListByIDExercises(int id, int projid, Collection<String> typeOrder, Set<Integer> ids);
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises(int, int)
+   * @params id
+   * @paramx xprojid
+   * @paramx xtypeOrder
+   * @paramx ids
+   * @return
+   */
+ // UserList<CommonExercise> getUserListByIDExercises(int id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
@@ -104,7 +117,7 @@ public interface IUserListManager   {
 
   boolean deleteList(int id);
 
-  boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder);
+  boolean deleteItemFromList(int listid, int exid);
 
   Collection<Integer> getAudioAnnos();
 

@@ -36,6 +36,7 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
@@ -95,7 +96,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param properties
    * @param logAndNotify
    * @param db
-   * @see DatabaseImpl#setInstallPath
+   * @see DatabaseServices#setInstallPath
    */
   public ProjectManagement(PathHelper pathHelper,
                            ServerProperties properties,
@@ -506,6 +507,21 @@ public class ProjectManagement implements IProjectManagement {
 
   private boolean isAmas() {
     return serverProps.isAMAS();
+  }
+
+  /**
+   *
+   * @param name
+   * @return null if no match
+   */
+  @Override
+  public Project getProjectByName(String name) {
+    return idToProject
+        .values()
+        .stream()
+        .filter(project -> project.getProject().name().toLowerCase().equals(name.toLowerCase()))
+        .findFirst()
+        .orElseGet(null);
   }
 
   /**

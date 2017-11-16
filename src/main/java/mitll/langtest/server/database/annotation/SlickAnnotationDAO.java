@@ -127,10 +127,11 @@ public class SlickAnnotationDAO
   }
 
   @Override
-  public Set<Integer> getExercisesWithIncorrectAnnotations() {
-    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped();
+  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID) {
+    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped(projID);
 
-  //  logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
+    logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
+
     Integer prevExid = -1;
 
     Set<Integer> incorrect = new HashSet<>();
@@ -140,7 +141,7 @@ public class SlickAnnotationDAO
       Integer exid = tuple4._1();
       String field = tuple4._2();
       String status = tuple4._3();
-//      logger.info("Got " + tuple4);
+      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
       if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {

@@ -144,12 +144,13 @@ public class DownloadServlet extends DatabaseServlet {
               "\n\turi     " + requestURI +
               "\n\turl     " + request.getRequestURL() +
               "\n\tpath    " + request.getServletPath());
-
+/*
           // TODO : when could this happen?
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
             writeAllAudio(response, projid);
-          } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
+          } else*/
+            if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
 
             if (queryString.contains(LISTS)) {
               String s = queryString.split("Lists=\\[")[1];
@@ -461,6 +462,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @see #doGet
    * @deprecated not sure how this can be called
    */
+/*
   private void writeAllAudio(HttpServletResponse response, int projectid) {
     try {
       getDatabase().writeUserListAudio(response.getOutputStream(), projectid);
@@ -468,6 +470,7 @@ public class DownloadServlet extends DatabaseServlet {
       logger.error("Got " + e, e);
     }
   }
+*/
 
   /**
    * @param response

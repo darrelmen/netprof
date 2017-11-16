@@ -77,7 +77,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param id
    * @return
-   * @seex ListManager#deleteList
    */
   @Override
   public boolean deleteList(int id) throws DominoSessionException {
@@ -93,8 +92,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public boolean deleteItemFromList(int listid, int exid) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(getProjectIDFromUser(userIDFromSessionOrDB)));
+    getUserIDFromSessionOrDB();
+    return getUserListManager().deleteItemFromList(listid, exid);
   }
 
   /**
@@ -111,7 +110,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     getUserIDFromSessionOrDB();
     getUserListManager().removeVisitor(userListID, user);
   }
-
 
   /**
    * @param onlyCreated
@@ -138,27 +136,22 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.scoring.UserListSupport#getAddListLink
    */
   public void addItemToUserList(int userListID, int exID) throws DominoSessionException {
-    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectIDFromUser(), exID);
-    getUserListManager().addItemToList(userListID, "" + exID, customOrPredefExercise.getID());
+    if (db.getCustomOrPredefExercise(getProjectIDFromUser(), exID) == null) {
+      logger.error("can't find ex #" + exID);
+    }
+    else {
+      getUserListManager().addItemToList(userListID, "" + exID, exID);
+    }
   }
-
 
   @Override
   public UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
-      return getUserListManager().getCommentedList(db.getIDs(getProjectIDFromUser(userIDFromSessionOrDB)));
+      return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB));
     } else {
       throw getRestricted("getting review lists");
     }
-  }
-
-  /**
-   * @return
-   * @seex #newExercise
-   */
-  String getMediaDir() {
-    return serverProps.getMediaDir();
   }
 
   /**
@@ -337,18 +330,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }*/
 
   /**
-   * Can't check if it's valid if we don't have a model.
-   *
-   * @param foreign
-   * @param transliteration
-   * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
-   */
-/*  private boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
-    return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
-  }*/
-
-  /**
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
@@ -357,31 +338,4 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     getUserIDFromSessionOrDB();
     db.editItem(userExercise, keepAudio);
   }
-
-  /**
-   * @paramx id
-   * @paramx context
-   * @seez mitll.langtest.client.custom.userlist.ListOperations#attachMedia
-   */
-/*
-  public void updateContext(long id, String context) {
-    getUserListDAO().updateContext(id, context);
-  }
-
-  public void updateRichText(long id, String richText) {
-    getUserListDAO().updateRichText(id, richText);
-  }
-*/
-
-/*
-  private IUserListDAO getUserListDAO() {
-    return getUserListManager().getUserListDAO();
-  }
-*/
-
-/*
-  public void updateName(long id, String name) {
-    getUserListDAO().updateName(id, name);
-  }
-*/
 }

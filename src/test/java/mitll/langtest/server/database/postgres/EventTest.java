@@ -50,7 +50,7 @@ public class EventTest extends BaseTest {
 
   @Test
   public void testSpanishEventCopy() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     IEventDAO eventDAO = spanish.getEventDAO();
     List<Event> all = eventDAO.getAll();
@@ -58,26 +58,21 @@ public class EventTest extends BaseTest {
 
     List<SlickSlimEvent> spanish1 = eventDAO.getAllSlim();
     for (SlickSlimEvent event : spanish1.subList(0, getMin(spanish1))) logger.info("Got " + event);
-
    // List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
   //  for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
-
     eventDAO.addPlayedMarkings(1, spanish.getExercises(-1).iterator().next());
-
    // logger.info("Got " + eventDAO.getFirstSlim("spanish"));
     //  spanish.doReportForYear(new PathHelper("war"));
   }
 
-  int getMin(List<?> all) {
+  private int getMin(List<?> all) {
     return Math.min(all.size(), 10);
   }
 
   @Test
   public void testEvent() {
-    DatabaseImpl spanish = getDatabase("spanish");
-
+    DatabaseImpl spanish = getDatabase();
     IEventDAO eventDAO = spanish.getEventDAO();
-
     eventDAO.add(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device", -1), 0);
 //    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
   }

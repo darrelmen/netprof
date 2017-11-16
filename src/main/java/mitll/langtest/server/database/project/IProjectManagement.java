@@ -74,6 +74,7 @@ public interface IProjectManagement {
   List<CommonExercise> getExercises(int projectid);
 
   Project getProject(int projectid);
+  Project getProjectByName(String name);
 
   Collection<Project> getProjects();
 

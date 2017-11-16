@@ -398,7 +398,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private DatabaseImpl makeDatabaseImpl(ServerProperties serverProps) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, serverProps.getH2Database(), serverProps, pathHelper, true, this, false
+    return new DatabaseImpl(serverProps, pathHelper, this
     );
   }
 
@@ -412,7 +412,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.error("no database services created.");
     } else {
-      db.setInstallPath(pathHelper.getInstallPath(), "");
+      db.setInstallPath("");
     }
   }
 }

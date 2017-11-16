@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.apache.logging.log4j.*;
@@ -48,9 +49,10 @@ public class AnnoTest extends BaseTest {
 
   @Test
   public void testAnno() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl database = getDatabase();
 
-    IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
+    int projID = getProjID(database);
+    IAnnotationDAO annotationDAO = database.getAnnotationDAO();
 
     Collection<Integer> exids = annotationDAO.getAudioAnnos();
     int size = exids.size();
@@ -58,36 +60,43 @@ public class AnnoTest extends BaseTest {
     logger.info("got " + size + " first " + first);
     for (Integer exid : exids) logger.info("got " + exid);
 
-    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
-    AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
+    AnnotationDAO dao = new AnnotationDAO(database, new UserDAO(database));
 
     Collection<Integer> audioAnnos = dao.getAudioAnnos();
     logger.info("got " + audioAnnos.size() + " first " + audioAnnos.iterator().next());
     for (Integer exid : audioAnnos) logger.info("truth " + exid);
 
-    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID);
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
+  }
+
+  private int getProjID(DatabaseImpl database) {
+    Project spanish1 = database.getProjectManagement().getProjectByName("spanish");
+    return spanish1.getID();
   }
 
   @Test
   public void testAnno2() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
-    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
+    int projID = getProjID(spanish);
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID);
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
   }
 
   @Test
   public void testAnno3() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
+    int projID = getProjID(spanish);
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
     Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(1);
@@ -95,12 +104,12 @@ public class AnnoTest extends BaseTest {
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Map<String, ExerciseAnnotation> latestByExerciseID2 =  dao.getLatestByExerciseID(1);
+    Map<String, ExerciseAnnotation> latestByExerciseID2 = dao.getLatestByExerciseID(1);
     logger.info("incorrect truth: got " + latestByExerciseID2.size() + " first " + latestByExerciseID2);
   }
 
   @Test
   public void testAnswerDAO() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    getDatabase();
   }
 }

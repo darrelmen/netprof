@@ -9,7 +9,7 @@ import java.util.Set;
  * Created by go22670 on 3/8/17.
  */
 public interface ExerciseServices {
-  void reloadExercises(int projectid);
+  //void reloadExercises(int projectid);
 
   CommonExercise editItem(CommonExercise userExercise, boolean keepAudio);
 

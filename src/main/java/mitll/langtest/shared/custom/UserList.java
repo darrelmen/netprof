@@ -208,12 +208,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.id = uniqueID;
   }
 
-/*
-  public boolean contains(T userExercise) {
-    return getExercises().contains(userExercise);
-  }
-*/
-
   public boolean containsByID(int id) {
     for (T ex : getExercises()) {
       if (ex.getID() == id) return true;

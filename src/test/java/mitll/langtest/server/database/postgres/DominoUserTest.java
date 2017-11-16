@@ -61,13 +61,9 @@ public class DominoUserTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DominoUserTest.class);
   public static final int MAX = 200;
 
-
-
   @Test
   public void testListProjects() {
-    DatabaseImpl spanish = getDatabase("spanish");
-
-    IProjectDAO projectDAO = spanish.getProjectDAO();
+    IProjectDAO projectDAO = getDatabase().getProjectDAO();
     Collection<SlickProject> all = projectDAO.getAll();
     for (SlickProject project : all) {
       logger.info("Got " + project);

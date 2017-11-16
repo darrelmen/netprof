@@ -291,8 +291,8 @@ public class UserListManager implements IUserListManager {
    * @see ProjectServices#rememberUsersCurrentProject(int, int)
    */
   @Override
-  public UserList createFavorites(int userid, int projid) {
-    return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
+  public void createFavorites(int userid, int projid) {
+    createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
   }
 
   /**
@@ -301,196 +301,74 @@ public class UserListManager implements IUserListManager {
    * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    *
-   * @param ids
+   * @param projID
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
+   * @see mitll.langtest.server.services.ListServiceImpl#getReviewList
    */
   @Override
-  public UserList<CommonShell> getCommentedList(Set<Integer> ids) {
-    //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
-
-    Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
-    //logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
-    // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
-
-    // if it's on the defect list, remove it
-//    for (Integer exid : stateManager.getDefectExercises()) {
-//      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
-//    }
-    //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
-    incorrectAnnotations.retainAll(ids);
-    Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
-    //logger.debug("getCommentedList include " + include.size() + " included ");
-
-    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID);
-    reviewList.setUniqueID(COMMENT_MAGIC_ID);
-    return reviewList;
+  public UserList<CommonShell> getCommentedList(int projID) {
+    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
+    return getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
   }
 
-  /**
-   * @param typeOrder
-   * @param ids
-   * @return
-   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
-   */
-  @Override
-  public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder, Set<Integer> ids) {
-    //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
-
-    Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
-    //logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
-    // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
-
-    // if it's on the defect list, remove it
-//    for (Integer exid : stateManager.getDefectExercises()) {
-//      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
-//    }
-    logger.debug("getCommentedList After there are - idToCreator items ");
-
-    incorrectAnnotations.retainAll(ids);
-
-    Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
-    //logger.debug("getCommentedList include " + include.size() + " included ");
-
-    UserList<CommonExercise> reviewList = getReviewListEx(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID);
-    reviewList.setUniqueID(COMMENT_MAGIC_ID);
-    return reviewList;
-  }
-
-//  @Override
-//  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder, Set<Integer> ids) {
-//    Set<Integer> defectIds = stateManager.getAttentionIDs();
-//    defectIds.retainAll(ids);
-//    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-//    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
-//
-//    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
-//  }
-//
-//  @Override
-//  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder, Set<Integer> ids) {
-//    Set<Integer> defectIds = stateManager.getAttentionIDs();
-//    defectIds.retainAll(ids);
-//    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-//    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
-//
-//    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID);
-//  }
-/*
   @NotNull
-  private Set<Integer> getAttentionIDs() {
-    Map<Integer, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
-    //logger.debug("attention " + exerciseToState);
-
-    Set<Integer> defectIds = new HashSet<>();
-    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().getState().equals(STATE.ATTN_LL)) {
-        defectIds.add(pair.getKey());
-      }
-    }
-    return defectIds;
-  }*/
+  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
+    List<CommonExercise> defectExercises = new ArrayList<>();
+    incorrectAnnotations.forEach(id ->{
+      CommonExercise byExID = userExerciseDAO.getByExID(id);
+      if (byExID == null) logger.warn("can't find exercise " + id + " in project " +projID);
+      else defectExercises.add(byExID);
+    });
+    return defectExercises;
+  }
 
   /**
-   * TODO : probably a bad idea to do a massive where in ... ids.
-   *
-   * @param typeOrder used by sorter to sort first in unit & chapter order
-   * @param ids       only within this set
+   * @param projID
    * @return
-   * @seex mitll.langtest.server.services.ListServiceImpl#getReviewLists
-   * @see IUserListManager#getUserListByID
+   * @see IUserListManager#getUserListByIDExercises
    */
-/*
   @Override
-  public UserList<CommonShell> getDefectList(Collection<String> typeOrder, Set<Integer> ids) {
-    Set<Integer> defectIds = stateManager.getDefectIDs();
-    defectIds.retainAll(ids);
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
-
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
+  public UserList<CommonExercise> getCommentedListEx(int projID) {
+    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
+    return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
   }
-*/
-
-  /**
-   * @param ids
-   * @return
-   * @see IUserListManager#getUserListByIDExercises(int, int, Collection, Set)
-   */
-
-/*
-  @Override
-  public UserList<CommonExercise> getDefectListEx(Set<Integer> ids) {
-    Set<Integer> defectIds = stateManager.getDefectIDs();
-    defectIds.retainAll(ids);
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
-
-    return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID);
-  }
-*/
-
-/*  @NotNull
-  private Set<Integer> getDefectIDs() {
-    Set<Integer> defectIds = new HashSet<>();
-    Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
-    //logger.debug("\tgetDefectList exerciseToState=" + exerciseToState.size());
-
-    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
-      if (pair.getValue().getState().equals(STATE.DEFECT)) {
-        defectIds.add(pair.getKey());
-      }
-    }
-    return defectIds;
-  }*/
 
   /**
    * @param allKnown
    * @param name
    * @param description
-   * @param ids
    * @param userListID
    * @return
-   * @see IUserListManager#getAttentionList(Collection, Set)
-   * @see IUserListManager#getCommentedList(Set)
-   * @see IUserListManager#getDefectList(Collection, Set)
+   * @see IUserListManager#getCommentedList(int)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name,
                                               String description,
-                                              Collection<Integer> ids,
                                               int userListID) {
-    List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
-
-    // TODO : is the projid really needed here?
-    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
-    User qcUser = getQCUser();
-    UserList<CommonShell> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1, false);
-
-    List<CommonShell> copy = new ArrayList<>();
-    for (CommonShell orig : onList) copy.add(orig.getShell(false));
-
-    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size());// + " took " + (now - then) + " millis");
-    return getCommonUserList(userList, copy);
+    return getCommonUserList(getQCList(name, description, userListID), getShells(allKnown));
   }
 
-  private UserList<CommonExercise> getReviewListEx(Collection<CommonExercise> allKnown,
-                                                   String name, String description,
-                                                   Collection<Integer> ids,
-                                                   int userListID) {
-    List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
+  @NotNull
+  private UserList<CommonShell> getQCList(String name, String description, int userListID) {
+    User qcUser = getQCUser();
+    return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
+        false, System.currentTimeMillis(), "", "", -1, false);
+  }
 
-    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
+  @NotNull
+  private List<CommonShell> getShells(Collection<CommonExercise> allKnown) {
+    List<CommonShell> commonShells = new ArrayList<>(allKnown.size());
+    allKnown.forEach(commonExercise -> commonShells.add(commonExercise.getShell()));
+    return commonShells;
+  }
+
+  private UserList<CommonExercise> getReviewListEx(List<CommonExercise> allKnown,
+                                                   String name, String description,
+                                                   int userListID) {
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, System.currentTimeMillis(), "", "", -1, false);
-
-//    List<CommonShell> copy = new ArrayList<>();
-//    for (CommonShell orig : onList) copy.add(orig.getShell());
-
-    logger.debug("getReviewListEx '" + name + "' ids size = " + allKnown.size() + " yielded " + onList.size());// + " took " + (now - then) + " millis");
-    return getCommonUserList(userList, onList);
+    return getCommonUserList(userList, allKnown);
   }
 
   /**
@@ -536,7 +414,7 @@ public class UserListManager implements IUserListManager {
    * @param idToUserExercise
    * @param ids
    * @return
-   * @see #getReviewList(Collection, String, String, Collection, int)
+   * @see #getReviewedExercises
    */
   private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
     List<CommonExercise> onList = new ArrayList<>();
@@ -833,28 +711,21 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * TODO : consider how to ask for just annotations for a project, instead of getting all of them
+   * consider how to ask for just annotations for a project, instead of getting all of them
    * and then filtering for just those on the requested project
    *
    * @param id
-   * @param typeOrder
-   * @param ids
    * @return
    * @see
-   * @see #deleteItemFromList(int, int, Collection)
-   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
+   * @see IUserListManager#deleteItemFromList(int, int)
    */
   @Override
-  public UserList<CommonShell> getUserListByID(int id, Collection<String> typeOrder, Set<Integer> ids) {
+  public UserList<CommonShell> getUserListByID(int id) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
-    return
-        //  id == REVIEW_MAGIC_ID ? getDefectList(typeOrder, ids) :
-        id == COMMENT_MAGIC_ID ? getCommentedList(ids) :
-            //        id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder, ids) :
-            userListDAO.getWithExercises(id);
+    return userListDAO.getWithExercises(id);
   }
 
   @Override
@@ -877,7 +748,7 @@ public class UserListManager implements IUserListManager {
    * @return
    * @see UserListServices#getUserListByIDExercises
    */
-  @Override
+/*  @Override
   public UserList<CommonExercise> getUserListByIDExercises(int id,
                                                            int projid,
                                                            Collection<String> typeOrder,
@@ -887,10 +758,10 @@ public class UserListManager implements IUserListManager {
       return null;
     }
     return
-        id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, ids) :
+        id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, projid) :
             userListDAO.getWithExercisesEx(id);
 
-  }
+  }*/
 
   /**
    * @param userListID
@@ -1042,15 +913,14 @@ public class UserListManager implements IUserListManager {
   /**
    * @param listid
    * @param exid
-   * @param typeOrder
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#deleteItemFromList
    */
   @Override
-  public boolean deleteItemFromList(int listid, int exid, Collection<String> typeOrder) {
-    logger.debug("deleteItemFromList " + listid + " " + exid);
+  public boolean deleteItemFromList(int listid, int exid) {
+    logger.debug("deleteItemFromList " + listid + " ex = " + exid);
 
-    UserList<?> userListByID = getUserListByID(listid, typeOrder, Collections.emptySet());
+    UserList<?> userListByID = getUserListByID(listid);
     if (userListByID == null) {
       logger.warn("deleteItemFromList huh? no user list with id " + listid);
       return false;
@@ -1059,11 +929,6 @@ public class UserListManager implements IUserListManager {
     userListByID.remove(exid);
     return userListExerciseJoinDAO.remove(listid, exid);
   }
-
-//  @Override
-//  public void setPublicOnList(long userListID, boolean isPublic) {
-//    userListDAO.setPublicOnList(userListID, isPublic);
-//  }
 
   /**
    * @return
@@ -1088,16 +953,6 @@ public class UserListManager implements IUserListManager {
   public IUserListExerciseJoinDAO getUserListExerciseJoinDAO() {
     return userListExerciseJoinDAO;
   }
-
-/*  @Override
-  public IReviewedDAO getReviewedDAO() {
-    return reviewedDAO;
-  }
-
-  @Override
-  public IReviewedDAO getSecondStateDAO() {
-    return secondStateDAO;
-  }*/
 
   @Override
   public void createTables(DBConnection dbConnection, List<String> created) {

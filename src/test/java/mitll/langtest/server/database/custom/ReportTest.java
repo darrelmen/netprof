@@ -4,9 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import net.sf.json.JSONObject;
@@ -49,11 +47,11 @@ public class ReportTest {
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     Collection<CommonExercise> exercises = database.getExercises();
   }
 

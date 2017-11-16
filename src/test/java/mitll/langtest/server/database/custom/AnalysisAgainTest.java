@@ -31,9 +31,9 @@ public class AnalysisAgainTest {
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     String dbName = serverProps.getH2Database();
-    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     logger.debug("made " + database);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
   }
 

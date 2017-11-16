@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -179,11 +178,11 @@ public class AnalysisTest {
     String parent = file.getParent();
     logger.debug("config dir " + parent +" config     " + file.getName());
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    DatabaseImpl war = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
+    DatabaseImpl war = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     String media = parent + File.separator + "media";
     logger.debug("made " + war + " media " + media);
 
-    war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan());
+    war.setInstallPath(parent + File.separator + war.getServerProps().getLessonPlan());
     Collection<CommonExercise> exercises = war.getExercises();
     return war;
   }

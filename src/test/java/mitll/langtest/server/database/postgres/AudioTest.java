@@ -85,7 +85,7 @@ public class AudioTest extends BaseTest {
 
   @Test
   public void testReadAudio() {
-    DatabaseImpl spanish = getDatabase("spanish", true);
+    DatabaseImpl spanish = getH2Database("spanish");
 
     // TODO : replace with h2 user dao.
     IAudioDAO h2AudioDAO = new AudioDAO(spanish, spanish.getUserDAO());

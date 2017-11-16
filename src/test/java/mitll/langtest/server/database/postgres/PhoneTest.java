@@ -49,7 +49,7 @@ public class PhoneTest extends BaseTest {
 
   @Test
   public void testWorst() {
-    DatabaseImpl spanish = getDatabase("spanish");
+  //  DatabaseImpl spanish = getDatabase("spanish");
 
 /*    {
       IPhoneDAO dao = spanish.getPhoneDAO();

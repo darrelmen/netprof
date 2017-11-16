@@ -65,53 +65,21 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testRussianContext() {
-    DatabaseImpl russian = getDatabase("russian");
-    CommonExercise exercise = russian.getExercise(1, 2600);
+    DatabaseImpl russian = getDatabase();
+    CommonExercise exercise = russian.getProjectByName("russian").getRawExercises().iterator().next();
     String context = exercise.getContext();
     logger.info("got\n" + context);
   }
 
   @Test
-  public void testSpanishEventCopy() {
-    getDatabase("spanish");
-  }
-
-/*
-  @Test
-  public void testSpanishReport() {
-    DatabaseImpl spanish = getDatabase("spanish");
-    JSONObject jsonObject = spanish.doReportForYear(new PathHelper("war", spanish.getServerProps()), "", 2016);
-    logger.info("got\n" + jsonObject);
-  }
-*/
-
-  @Test
-  public void testMSA() {
-    DatabaseImpl msa = getDatabase("msa");
-    //JSONObject war = msa.doReportForYear(new PathHelper("war"));
-    ServerProperties serverProps = msa.getServerProps();
-    //AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, msa, null,"", serverProps.getLanguage());
-    //audioFileHelper.checkLTSOnForeignPhrase("test");
-    // logger.info("json:\n"+war);
-  }
-
-  @Test
   public void testUser() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
     User userByID = spanish.getUserDAO().getUserByID("Jesse.McDonald");
     logger.info("got " + userByID);
-
     String emailH = Md5Hash.getHash("jesse.mcdonald@dliflc.edu");
-
     logger.info("hash " + emailH);
   }
 
-  @Test
-  public void testDominoSpanish() {
-    DatabaseImpl russian = getDatabase("dominoSpanish");
-    Collection exercises = russian.getExercises(-1);
-    logger.info("First " + exercises.iterator().next());
-  }
 /*
 
   @Test
@@ -177,7 +145,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testRussian() {
-    DatabaseImpl russian = getDatabase("russian");
+    DatabaseImpl russian = getDatabase();
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
     CommonExercise exercise = russian.getExercise(1, 8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
@@ -192,7 +160,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testEnglish() {
-    DatabaseImpl russian = getDatabase("english");
+    DatabaseImpl russian = getDatabase();
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
     CommonExercise exercise = russian.getExercise(1, 2253);
     logger.info("got " + exercise);
@@ -204,12 +172,9 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testSpanish2() {
-    DatabaseImpl db = getDatabase("spanish");
-    AudioFileHelper audioFileHelper = getAudioFileHelper(db);
-
+    DatabaseImpl db = getDatabase();
     CommonExercise exercise = db.getExercise(1, 50264);
     logger.info("got " + exercise);
-
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
       logger.info("attr " + audioAttribute);

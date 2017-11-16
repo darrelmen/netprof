@@ -63,7 +63,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1138,7 +1137,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean includeContext) {
     List<CommonShell> ids = new ArrayList<>(exercises.size());
-    exercises.forEach(ex -> ids.add(ex.getShell(includeContext)));
+    exercises.forEach(ex -> ids.add(ex.getShell()));
     return ids;
   }
 

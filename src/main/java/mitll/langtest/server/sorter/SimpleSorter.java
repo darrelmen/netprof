@@ -36,7 +36,6 @@ import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

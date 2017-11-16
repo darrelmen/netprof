@@ -281,7 +281,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   @Override
-  public CommonShell getShell(boolean includeContextIGNORED) {
+  public CommonShell getShell() {
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, getContext(), getContextTranslation());
   }
 

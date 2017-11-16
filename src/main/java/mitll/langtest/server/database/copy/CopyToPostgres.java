@@ -35,6 +35,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.H2DatabaseImpl;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
@@ -74,8 +75,6 @@ import java.io.FileInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.COPY;
-import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.DROP;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.UNKNOWN;
 
 public class CopyToPostgres<T extends CommonShell> {
@@ -97,10 +96,6 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
   private static final String OPT_NETPROF = "/opt/netprof/import";
 
-/*  private void copySeveral(List<String> configs) {
-
-  }*/
-
   /**
    * @param config
    * @param optionalProperties
@@ -108,7 +103,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param displayOrder
    * @see #main
    */
-  private boolean copyOneConfigCommand(String config, String optionalProperties, String optionalName, int displayOrder) throws Exception {
+  private boolean copyOneConfigCommand(String config, String optionalProperties, String optionalName,
+                                       int displayOrder) throws Exception {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     DatabaseImpl databaseLight = null;
@@ -159,27 +155,17 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static DatabaseImpl getDatabase() {
-    File file = new File(NETPROF_PROPERTIES_FULL);
-    String name = file.getName();
-    String parent = file.getParentFile().getAbsolutePath();
-
     ServerProperties serverProps = getProps();
-
-    DatabaseImpl database
-        = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war", serverProps), false, null, false);
-    return database;
+    return new DatabaseImpl(getProps(), new PathHelper("war", serverProps), null);
   }
 
-  private static DatabaseImpl getSimpleDatabase() {
-    return new DatabaseImpl(getProps());
-  }
+  public static DatabaseImpl getSimpleDatabase() {  return new DatabaseImpl(getProps());  }
 
   private static ServerProperties getProps() {
     File file = new File(NETPROF_PROPERTIES_FULL);
-    String name = file.getName();
+    if (!file.exists()) logger.error("can't find " + file.getAbsolutePath());
     String parent = file.getParentFile().getAbsolutePath();
-    return new ServerProperties(parent, name);
+    return new ServerProperties(parent, file.getName());
   }
 
   /**
@@ -188,9 +174,6 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optPropsFile
    * @param installPath
    * @return
-   * @paramx host
-   * @paramx user
-   * @paramx pass
    * @see #copyOneConfigCommand
    */
   public static DatabaseImpl getDatabaseLight(String config,
@@ -225,10 +208,12 @@ public class CopyToPostgres<T extends CommonShell> {
     String parent = configFile.getParentFile().getAbsolutePath();
     String name = configFile.getName();
 
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
+    DatabaseImpl database = new H2DatabaseImpl(parent,
+        serverProps.getH2Database(),
+        serverProps,
         new PathHelper(installPath, serverProps), false, null, false);
 
-    database.setInstallPath(installPath,
+    database.setInstallPath(
         configFile.getParentFile().getAbsolutePath() + File.separator +
             database.getServerProps().getLessonPlan()
     );
@@ -561,7 +546,7 @@ public class CopyToPostgres<T extends CommonShell> {
     long then = System.currentTimeMillis();
     logger.info("copyPhone adding " + bulk.size());
     slickPhoneAO.addBulk(bulk);
-    logger.info("copyPhone added  " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis()-then) + " millis.");
+    logger.info("copyPhone added  " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis() - then) + " millis.");
   }
 
   private final Set<Long> missingRIDs = new HashSet<>();
@@ -726,7 +711,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<Result> results = resultDAO.getResults();
     logger.info("copyResult " + projid + " : copying " + results.size() + " results...");
 
-  //  int missing = 0;
+    //  int missing = 0;
     int missing2 = 0;
 
     logger.info("copyResult id->fl has " + idToFL.size() + " items");
@@ -754,14 +739,14 @@ public class CopyToPostgres<T extends CommonShell> {
       //else {
       String transcript = idToFL.get(realExID);
 
-      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript == null?"no transcript found":transcript);
+      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript == null ? "no transcript found" : transcript);
 //        if (e == null) {
 //          if (missing < 10 || true) logger.warn("missing exid ref " + result.getOldExID() + " so skipping " + result);
 //          missing++;
 //        } else {
-          bulk.add(e);
-          if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
-     //   }
+      bulk.add(e);
+      if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
+      //   }
       //}
 
     }
@@ -905,7 +890,6 @@ public class CopyToPostgres<T extends CommonShell> {
     String optDisplayOrder = arg.length > 3 ? arg[3] : null;
 
     String optName = getOptionalName(arg, optconfig, optDisplayOrder);
-    int displayOrder = getDisplayOrder(optDisplayOrder);
 
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
@@ -922,6 +906,7 @@ public class CopyToPostgres<T extends CommonShell> {
         }
         break;
       case COPY:
+        int displayOrder = getDisplayOrder(optDisplayOrder);
         logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);

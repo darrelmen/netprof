@@ -91,7 +91,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);
 
-  DatabaseImpl setInstallPath(String installPath, String lessonPlanFile);
+  DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
 

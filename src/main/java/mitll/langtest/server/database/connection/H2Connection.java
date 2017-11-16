@@ -69,7 +69,7 @@ public class H2Connection implements DatabaseConnection {
   /**
    *
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(ServerProperties, PathHelper, LogAndNotify)
    * @param configDir
    * @param dbName
    * @param mustAlreadyExist

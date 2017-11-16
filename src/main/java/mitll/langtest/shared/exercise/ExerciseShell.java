@@ -73,7 +73,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @param realID
    * @param cfl
    * @param cenglish
-   * @see CommonShell#getShell(boolean)
+   * @see CommonShell#getShell()
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
   ExerciseShell(String english,
@@ -95,7 +95,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
-  public CommonShell getShell(boolean includeContextIGNORED) {
+  public CommonShell getShell() {
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, "", "");
   }
 

@@ -34,7 +34,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
-import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -42,8 +41,6 @@ import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
-import mitll.langtest.server.database.connection.DatabaseConnection;
-import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -98,19 +95,18 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
-import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.CollationKey;
 import java.util.*;
 
@@ -135,16 +131,15 @@ import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAG
  */
 public class DatabaseImpl implements Database, DatabaseServices {
   private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
-  private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final int DAY = 24 * 60 * 60 * 1000;
 
   /**
-   * @see #getContextPractice
+   * @seex #getContextPractice
    */
-  private String installPath;
+//  private String installPath;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -168,25 +163,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private ContextPractice contextPractice;
 
-  /**
-   * Only for h2
-   */
-  @Deprecated
-  private DatabaseConnection connection = null;
+  protected  ServerProperties serverProps;
+  protected  LogAndNotify logAndNotify;
 
-  private final ServerProperties serverProps;
-  private final LogAndNotify logAndNotify;
+  private UserManagement userManagement = null;
 
-  private mitll.langtest.server.database.user.UserManagement userManagement = null;
-
-  /**
-   * Only for AMAS.
-   *
-   * @see #readAMASExercises(String, String, String, boolean)
-   */
-  private final String absConfigDir;
-  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
-  private PathHelper pathHelper;
+//  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  protected PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
 
@@ -194,115 +177,48 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
 
+  public DatabaseImpl() {}
+
   public DatabaseImpl(ServerProperties serverProps) {
     this.serverProps = serverProps;
     this.logAndNotify = null;
-    this.absConfigDir = "";
     setPostgresDBConnection();
   }
 
-  /**
-   * JUST FOR TESTING
-   *
-   * @param configDir
-   * @param relativeConfigDir
-   * @param dbName
-   * @param serverProps
-   * @param pathHelper
-   * @param mustAlreadyExist
-   * @param logAndNotify
-   */
-  public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    this(configDir, relativeConfigDir, dbName, serverProps, pathHelper, mustAlreadyExist, logAndNotify, false);
-  }
-
-  /**
-   * @param configDir
-   * @param relativeConfigDir
-   * @param dbName
-   * @param serverProps
-   * @param pathHelper
-   * @param mustAlreadyExist
-   * @param logAndNotify
-   * @param readOnly
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl
-   */
-  public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly) {
-    this(serverProps.useH2() ?
-            new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
-            null,
-        configDir, relativeConfigDir, dbName,
-        serverProps,
-        pathHelper, logAndNotify);
-  }
-
-  public DatabaseImpl(DatabaseConnection connection,
-                      String configDir,
-                      String relativeConfigDir,
-                      String dbName,
-                      ServerProperties serverProps,
+  public DatabaseImpl(ServerProperties serverProps,
                       PathHelper pathHelper,
                       LogAndNotify logAndNotify) {
-    long then;
-    long now;
-    this.connection = connection;
-    absConfigDir = configDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
 
-    if (!maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) {
-      then = System.currentTimeMillis();
+    connectToDatabases(pathHelper);
+  }
 
-      // first connect to postgres
+  protected void connectToDatabases(PathHelper pathHelper) {
+    long then = System.currentTimeMillis();
+    // first connect to postgres
 
-      setPostgresDBConnection();
-      logger.debug("initializeDAOs --- " + dbConnection);
+    setPostgresDBConnection();
+    logger.debug("initializeDAOs --- " + dbConnection);
 
-      // then connect to mongo
-      DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
+    // then connect to mongo
+    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
 
-      initializeDAOs(pathHelper, dominoUserDAO);
-      now = System.currentTimeMillis();
+    initializeDAOs(pathHelper, dominoUserDAO);
+    {
+      long now = System.currentTimeMillis();
 
       if (now - then > 300) {
         logger.info("DatabaseImpl : took " + (now - then) + " millis to initialize DAOs");
       }
-
-      this.pathHelper = pathHelper;
-
-      hasValidDB = true;
     }
+
+    hasValidDB = true;
   }
 
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();
-  }
-
-  /**
-   * Confusing...
-   *
-   * @param relativeConfigDir
-   * @param dbName
-   * @param serverProps
-   * @return true if we want an h2 connection and didn't get one
-   */
-  private boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
-    try {
-      Connection connection1 = getConnection();
-      if (connection1 == null && serverProps.useH2()) {
-        logger.warn("maybeGetH2Connection couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
-        return true;
-      } else {
-        closeConnection(connection1);  // TODO : ? why?
-      }
-    } catch (Exception e) {
-      logger.error("couldn't open connection to database, got " + e.getMessage(), e);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -321,10 +237,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-  private Connection getConnection() {
-    return getConnection(this.getClass().toString());
-  }
-
   /**
    * Slick db connection.
    */
@@ -333,7 +245,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * Create or alter tables as needed.
    *
-   * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
+   * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify)
    */
   private void initializeDAOs(PathHelper pathHelper, DominoUserDAOImpl dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
@@ -432,64 +344,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userDAO;
   }
 
-  @Override
-  public Connection getConnection(String who) {
-    if (connection == null) {
-      if (serverProps.useH2()) {
-        logger.warn("getConnection no connection created " + who + " use h2 property = " + serverProps.useH2());
-      }
-      return null;
-    } else {
-      return connection.getConnection(who);
-    }
-  }
-
   /**
-   * It seems like this isn't required?
-   *
-   * @param conn
-   * @throws SQLException
-   */
-  public void closeConnection(Connection conn) {
-    try {
-      if (connection != null) {
-        int before = connection.connectionsOpen();
-        if (conn != null && !conn.isClosed()) {
-          if (connection.usingCP()) {
-            conn.close();
-          }
-        }
-        //else {
-        //logger.warn("trying to close a null connection...");
-        // }
-        if (connection.connectionsOpen() > LOG_THRESHOLD) {
-          logger.debug("closeConnection : now " + connection.connectionsOpen() + " open vs before " + before);
-        }
-      }
-    } catch (SQLException e) {
-      logger.error("Got " + e, e);
-    }
-  }
-
-  /**
-   * @throws SQLException
-   * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
-   */
-  @Deprecated
-  public void closeConnection() throws SQLException {
-  }
-
-  /**
-   * @param installPath
-   * @param lessonPlanFile
+   * @param lessonPlanFileOnlyForImport
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   @Override
-  public DatabaseImpl setInstallPath(String installPath, String lessonPlanFile) {
-    logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
-    this.installPath = installPath;
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
+  //  logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
+    //this.installPath = installPath;
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
-    makeDAO(lessonPlanFile);
+    makeDAO(lessonPlanFileOnlyForImport);
     return this;
   }
 
@@ -638,8 +502,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see UserServiceImpl#forgetProject
    * @param userid
+   * @see UserServiceImpl#forgetProject
    */
   @Override
   public void forgetProject(int userid) {
@@ -677,19 +541,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @return
    */
+
   @Override
   public List<AmasExerciseImpl> getAMASExercises() {
-    return fileExerciseDAO.getRawExercises();
+    return null;
   }
 
   @Override
   public AmasExerciseImpl getAMASExercise(int id) {
-    return fileExerciseDAO.getExercise(id);
+    return null;
   }
 
   @Override
   public ISection<AmasExerciseImpl> getAMASSectionHelper() {
-    return fileExerciseDAO.getSectionHelper();
+    return null;
   }
 
   /**
@@ -700,25 +565,25 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * <p>
    * Special check for amas exercises...
    *
-   * @param lessonPlanFile only for import
-   * @see #setInstallPath(String, String)
+   * @param lessonPlanFileOnlyForImport only for import
+   * @see DatabaseServices#setInstallPath(String)
    */
-  private void makeDAO(String lessonPlanFile) {
-    // logger.info("makeDAO - " + lessonPlanFile);
+  private void makeDAO(String lessonPlanFileOnlyForImport) {
+    // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
     if (userManagement == null) {
       synchronized (this) {
-        boolean isURL = serverProps.getLessonPlan().startsWith("http");
+       // boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
         // int numExercises;
 
         if (amas) {
-//          logger.info("Got " + lessonPlanFile);
+//          logger.info("Got " + lessonPlanFileOnlyForImport);
           // TODO : get media directory from properties
           // TODO : get install path directory from properties
-          readAMASExercises(lessonPlanFile, "", "", isURL);
+         // readAMASExercises(lessonPlanFileOnlyForImport, "", "", isURL);
         } else {
-          //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
-          makeExerciseDAO(lessonPlanFile);
+          //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
+          makeExerciseDAO(lessonPlanFileOnlyForImport);
 
           if (!serverProps.useH2()) {
             //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
@@ -791,6 +656,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  public Project getProjectByName(String name) { return projectManagement.getProjectByName(name);}
+
   public Collection<Project> getProjects() {
     return projectManagement.getProjects();
   }
@@ -798,13 +665,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * A little dusty...
    *
-   * @param lessonPlanFile
-   * @param mediaDir
-   * @param installPath
-   * @param isURL
+   * @paramx lessonPlanFile
+   * @paramx mediaDir
+   * @paramx installPath
+   * @paramx isURL
    * @return
    */
-  private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
+/*  private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
     int numExercises;
 //    if (isURL) {
 //      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
@@ -815,8 +682,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     numExercises = fileExerciseDAO.getNumExercises();
 //    }
     return numExercises;
-  }
+  }*/
 
+/*
   @Override
   public void reloadExercises(int projectid) {
     ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
@@ -833,6 +701,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
   }
+*/
 
   /**
    * Dialog practice
@@ -1054,51 +923,26 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void preloadContextPractice() {
-    makeContextPractice(getServerProps().getDialogFile(), installPath);
+    makeContextPractice(getServerProps().getDialogFile(), "");
   }
+
+  @Override
+  public Connection getConnection(String who) { return null;  }
+
+  @Override
+  public void closeConnection(Connection connection) { }
 
   /**
    * @return
-   * @see LangTestDatabaseImpl#getContextPractice
+   * @seex LangTestDatabaseImpl#getContextPractice
    */
-  @Override
+/*  @Override
   public ContextPractice getContextPractice() {
     if (this.contextPractice == null) {
       makeContextPractice(getServerProps().getDialogFile(), installPath);
     }
     return this.contextPractice;
-  }
-
-  /**
-   * @param out
-   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
-   */
-/*
-  public void usersToXLSX(OutputStream out) {
-    userManagement.usersToXLSX(out);
-  }
-*/
-
-  /**
-   * TODOx : who calls this - reporting?
-   *
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#doGet
-   */
- /* public JSON usersToJSON() {
-    return userManagement.usersToJSON();
   }*/
-
-  /**
-   * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
-   *
-   * @return
-   */
-/*
-  public List<User> getUsers() {
-    return userManagement.getUsers();
-  }
-*/
   public void logEvent(String exid, String context, int userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     logEvent(UNKNOWN, "server", exid, context, userid, device);
@@ -1345,14 +1189,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     try {
-      if (connection != null) {
-        connection.contextDestroyed();
-      }
-    } catch (Exception e) {
-      logger.error("close got " + e, e);
-    }
-
-    try {
       logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
@@ -1515,17 +1351,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param out
    * @throws Exception
-   * @see DownloadServlet#writeAllAudio
+   * @seex DownloadServlet#writeAllAudio
    */
-  public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
+/*  public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
     new AudioExport(getServerProps()).writeZipJustOneAudio(
         out,
-        getSectionHelper(projectid),
         getExercises(projectid),
         installPath,
         getProject(projectid).getLanguage()
     );
-  }
+  }*/
 
   /**
    * For downloading a user list.
@@ -1619,7 +1454,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public UserList<CommonExercise> getUserListByIDExercises(int listid, int projectid) {
-    if (listid != COMMENT_MAGIC_ID) {
+    boolean isNormalList = listid != COMMENT_MAGIC_ID;
+    if (isNormalList) {
       Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExids(listid);
       UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
       List<CommonExercise> exercises = new ArrayList<>();
@@ -1630,10 +1466,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       list.setExercises(exercises);
       return list;
     } else {
-      return getUserListManager().getUserListByIDExercises(listid,
-          projectid,
-          getSectionHelper(projectid).getTypeOrder(),
-          listid < 0 ? getIDs(projectid) : Collections.emptySet());
+      return getUserListManager().getCommentedListEx(projectid);
     }
   }
 

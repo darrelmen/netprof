@@ -6,7 +6,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
@@ -53,11 +52,11 @@ public class JSONExportTest extends JsonExport {
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     String dbName = serverProps.getH2Database();
-    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
   }
 

@@ -293,7 +293,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public CommonShell getShell(boolean includeContext) {
+  public CommonShell getShell() {
     return null;
   }
 

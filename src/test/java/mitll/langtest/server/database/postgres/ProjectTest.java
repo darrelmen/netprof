@@ -51,13 +51,11 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -71,7 +69,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testProject() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
     IProjectDAO projectDAO = spanish.getProjectDAO();
     User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
 
@@ -88,7 +86,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testListProjects() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
     Collection<SlickProject> all = projectDAO.getAll();
@@ -157,7 +155,7 @@ public class ProjectTest extends BaseTest {
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
     spanish.populateProjects();
-    spanish.setInstallPath("", "");
+    spanish.setInstallPath("");
 
     Project project = spanish.getProject(2);
 
@@ -211,7 +209,7 @@ public class ProjectTest extends BaseTest {
 
     spanish.populateProjects();
 
-    spanish.setInstallPath("", "");
+    spanish.setInstallPath("");
 
     Project project = spanish.getProject(english);
 
@@ -409,7 +407,7 @@ public class ProjectTest extends BaseTest {
   }
 
   private void doDropRef(String croatian) {
-    DatabaseImpl andPopulate = getDatabase().setInstallPath("war", "");
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
     int projid = projectDAO.getByName(croatian);

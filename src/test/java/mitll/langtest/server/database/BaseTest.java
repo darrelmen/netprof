@@ -26,13 +26,12 @@ public class BaseTest {
   public static final String QUIZLET_PROPERTIES = "quizlet.properties";
   public static final String DOMINO_PROPERTIES = "domino.properties";
 
-  protected static DatabaseImpl getDatabase(String config) {
-    return getDatabase(config, false);
+  protected static DatabaseImpl getH2Database(String config) {
+    return getDatabase(config, true);
   }
 
   protected static DatabaseImpl getDatabase(String config, boolean useH2) {
-    String installPath = "war";
-    return getDatabase(installPath, config, useH2);
+    return getDatabase("war", config, useH2);
   }
 
   private static DatabaseImpl getDatabase(String installPath, String config, boolean useH2) {
@@ -41,12 +40,9 @@ public class BaseTest {
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(),
-        serverProps, new PathHelper(installPath, serverProps), false, null, false);
+    DatabaseImpl database = new DatabaseImpl(serverProps, new PathHelper(installPath, serverProps), null);
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
 
-    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan()
-    );
-    // database.setDependencies(mediaDir, installPath);
     return database;
   }
 
@@ -54,9 +50,8 @@ public class BaseTest {
     String installPath = "war";
     String s = QUIZLET_PROPERTIES;
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + s);
-    ServerProperties serverProps = getServerProperties(config, s);
     DatabaseImpl database = getDatabaseVeryLight(config, s, useH2);
-    database.setInstallPath(installPath,
+    database.setInstallPath(
         file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan());
     return database;
   }
@@ -78,11 +73,13 @@ public class BaseTest {
     return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war");
   }
 
+/*
   private static ServerProperties getServerProperties(String config, String propsFile) {
     // String s = "quizlet.properties";
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
     return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
   }
+*/
 
   protected static DatabaseImpl getDatabaseVeryLight(String config, String propsFile, boolean useH2) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
@@ -90,28 +87,24 @@ public class BaseTest {
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war", serverProps), false, null, false);
+    DatabaseImpl database = new DatabaseImpl(serverProps,
+        new PathHelper("war", serverProps), null);
     return database;
   }
 
   protected static DatabaseImpl getDatabase() {
     File file = new File("/opt/netprof/config/netprof.properties");
-    String name = file.getName();
-    String parent = file.getParentFile().getAbsolutePath();
-
     ServerProperties serverProps = getProps();
 
-    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war", serverProps), false, null, false);
+    DatabaseImpl database = new DatabaseImpl(serverProps,
+        new PathHelper("war", serverProps), null);
     return database;
   }
 
   protected static ServerProperties getProps() {
     File file = new File("/opt/netprof/config/netprof.properties");
-    String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
-    return new ServerProperties(parent, name);
+    return new ServerProperties(parent, file.getName());
   }
 
   void finish(Statement statement, ResultSet rs) throws SQLException {
@@ -152,10 +145,10 @@ public class BaseTest {
     String parent = file.getParent();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     DatabaseImpl database =
-        new DatabaseImpl(connection, parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), null);
+        new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     // logger.debug("made " + database);
 
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
     return database;
   }
@@ -176,6 +169,6 @@ public class BaseTest {
   }
 
   protected DatabaseImpl getAndPopulate() {
-    return getDatabase().setInstallPath("war", "").populateProjects();
+    return getDatabase().setInstallPath("").populateProjects();
   }
 }

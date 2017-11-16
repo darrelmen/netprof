@@ -47,13 +47,9 @@ public class UserTest extends BaseTest {
 
   @Test
   public void testAdmin() {
-    DatabaseImpl spanish = getDatabase("spanish");
-
-    IUserDAO dao = spanish.getUserDAO();
-
-    List<User> users = dao.getUsers();
+    DatabaseImpl spanish = getDatabase();
+    List<User> users = spanish.getUserDAO().getUsers();
     for (User user : users) if (user.isAdmin()) logger.info(user);
-
   }
 
   /**
@@ -61,12 +57,9 @@ public class UserTest extends BaseTest {
    */
   @Test
   public void testUser() {
-    DatabaseImpl spanish = getDatabase("spanish");
-
+    DatabaseImpl spanish = getDatabase();
     IUserDAO dao = spanish.getUserDAO();
-
     List<User> users = dao.getUsers();
-
     logger.info("got " + users);
 
     String userid = "userid";

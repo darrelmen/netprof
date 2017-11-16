@@ -129,15 +129,14 @@ public class AudioExport {
 
   /**
    * @param out
-   * @param sectionHelper
    * @param exercisesForSelectionState
    * @param audioDirectory
    * @param language
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
    */
+/*
   public void writeZipJustOneAudio(OutputStream out,
-                                   ISection<?> sectionHelper,
                                    Collection<? extends CommonExercise> exercisesForSelectionState,
                                    String audioDirectory,
                                    String language) throws Exception {
@@ -145,6 +144,7 @@ public class AudioExport {
     new ExerciseSorter().sortByEnglish(copy, "");
     writeToStreamJustOneAudio(copy, audioDirectory, out, language);
   }
+*/
 
   /**
    * @param sectionHelper
@@ -227,7 +227,7 @@ public class AudioExport {
                              AudioExportOptions options) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
-    String baseName = baseName(name, language1).replaceAll("\\,", "_");
+    String baseName = baseName(name, language1).replaceAll(",", "_");
     String overallName = baseName + options.getInfo();
     //overallName = overallName.replaceAll("\\,", "_");
 
@@ -269,19 +269,19 @@ public class AudioExport {
   }
 
   /**
-   * @param toWrite
-   * @param audioDirectory
-   * @param out
-   * @param language
+   * @paramx toWrite
+   * @paramx audioDirectory
+   * @paramx out
+   * @paramx language
    * @throws Exception
-   * @see #writeZipJustOneAudio
+   * @seex #writeZipJustOneAudio
    */
-  private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite,
+/*  private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite,
                                          String audioDirectory,
                                          OutputStream out,
                                          String language) throws Exception {
     writeFolderContentsSimple(new ZipOutputStream(out), toWrite, audioDirectory, language);
-  }
+  }*/
 
   private boolean isEnglish(String language1) {
     return language1.equalsIgnoreCase("English");
@@ -584,13 +584,14 @@ public class AudioExport {
   }
 
   /**
-   * @param zOut
-   * @param toWrite
-   * @param audioDirectory
-   * @param language
+   * @paramx zOut
+   * @paramx toWrite
+   * @paramx audioDirectory
+   * @paramx language
    * @throws Exception
-   * @see #writeToStreamJustOneAudio(Collection, String, OutputStream, String)
+   * @seex #writeToStreamJustOneAudio(Collection, String, OutputStream, String)
    */
+/*
   private void writeFolderContentsSimple(ZipOutputStream zOut,
                                          Collection<CommonExercise> toWrite,
                                          String audioDirectory,
@@ -626,6 +627,7 @@ public class AudioExport {
     //    logger.debug("took " + diff + " millis to export " + toWrite.size() + " items");
     // }
   }
+*/
 
 /*  private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, boolean regularSpeed) {
     AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), regularSpeed) : null;
@@ -686,8 +688,8 @@ public class AudioExport {
 
     String name = trim.equals("N/A") ? foreignLanguage : trim + (includeFL ? "_" + foreignLanguage : "");
     name = name.trim();
-    name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "").replaceAll("/", " or ").replaceAll("\\\\", " or ");
-    name = name.replaceAll("\\,", "_");
+    name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll(":", "").replaceAll("/", " or ").replaceAll("\\\\", " or ");
+    name = name.replaceAll(",", "_");
     return name;
   }
 
@@ -704,14 +706,14 @@ public class AudioExport {
    * @see #copyAudio(ZipOutputStream, Set, String, String, AudioConversion, AudioAttribute, int, TrackInfo)
    * @see #copyContextAudio
    */
-  private boolean copyAudio(ZipOutputStream zOut,
-                            Set<String> names,
-                            String parent,
-                            String speed,
-                            AudioConversion audioConversion,
-                            AudioAttribute attribute,
-                            int exid,
-                            TrackInfo trackInfo) throws IOException {
+  private void copyAudio(ZipOutputStream zOut,
+                         Set<String> names,
+                         String parent,
+                         String speed,
+                         AudioConversion audioConversion,
+                         AudioAttribute attribute,
+                         int exid,
+                         TrackInfo trackInfo) throws IOException {
     String s = ensureCompressedAudio(audioConversion, attribute, trackInfo);
 
     File mp3 = new File(s);
@@ -729,17 +731,14 @@ public class AudioExport {
       //logger.debug("copyContextAudio : mp3 name is " + name);
       if (add) {
         addZipEntry(zOut, mp3, name);
-        return true;
       } else {
         logger.info("skip duplicate " + name);
-        return false;
       }
     } else {
       String absolutePath = mp3.getAbsolutePath();
       if (!absolutePath.endsWith(AudioConversion.FILE_MISSING)) {
         logger.error("\tcopyAudio Didn't write " + absolutePath + " for " + exid);
       }
-      return false;
     }
   }
 
@@ -756,20 +755,20 @@ public class AudioExport {
   }
 
   /**
-   * @param zOut
-   * @param audioConversion
-   * @param audioDirectory
-   * @param audioRef
-   * @param trackInfo
+   * @paramx zOut
+   * @paramx audioConversion
+   * @paramx audioDirectory
+   * @paramx audioRef
+   * @paramx trackInfo
    * @return
    * @throws IOException
    * @see #writeFolderContentsSimple
    */
-  private void copyAudioSimple(ZipOutputStream zOut,
+/*  private void copyAudioSimple(ZipOutputStream zOut,
                                AudioConversion audioConversion,
                                String audioDirectory,
                                String audioRef,
-                               TrackInfo trackInfo) throws IOException {
+                               TrackInfo trackInfo) {
     String filePath = audioConversion.ensureWriteMP3(audioDirectory, audioRef, false, trackInfo);
     File mp3 = new File(filePath);
     if (mp3.exists()) {
@@ -783,7 +782,7 @@ public class AudioExport {
     } else {
       logger.warn("\tDidn't write " + mp3.getAbsolutePath());
     }
-  }
+  }*/
 
   private void addZipEntry(ZipOutputStream zOut, File mp3, String name) throws IOException {
     zOut.putNextEntry(new ZipEntry(name));

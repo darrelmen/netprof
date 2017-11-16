@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.exercise.Project;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
 
@@ -58,7 +59,9 @@ public class ReportAllTest extends BaseTest {
 
   @Test
   public void testMaleFemaleRefCoverageEgyptian() {
-    Map<String, Float> maleFemaleProgress = getDatabase("egyptian").getMaleFemaleProgress(-1);
+    DatabaseImpl database = getDatabase();
+    Project egyptian = database.getProjectByName("egyptian");
+    Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(egyptian.getID());
     logger.info(maleFemaleProgress.toString());
   }
 

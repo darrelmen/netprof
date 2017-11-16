@@ -49,16 +49,14 @@ public class UserExTest extends BaseTest {
 
   @Test
   public void testExercise() {
-    DatabaseImpl spanish = getDatabase("spanish");
-    CommonExercise next = spanish.getExercises().iterator().next();
+    CommonExercise next = getDatabase().getProjectByName("spanish").getRawExercises().iterator().next();
     logger.info("got " + next.getDirectlyRelated());
   }
 
   @Test
   public void testUserList() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
-    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
     IUserListManager userListManager = spanish.getUserListManager();
 
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, 1, true, false);
@@ -85,7 +83,7 @@ public class UserExTest extends BaseTest {
 
   @Test
   public void testUserListAgain() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     IUserListManager userListManager = spanish.getUserListManager();
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(270, 1, true, false);
@@ -100,7 +98,7 @@ public class UserExTest extends BaseTest {
 
   @Test
   public void testUserListAddVisitor() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     IUserListManager userListManager = spanish.getUserListManager();
 
@@ -137,7 +135,7 @@ public class UserExTest extends BaseTest {
 
   @Test
   public void testDelete() {
-    DatabaseImpl spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase();
 
     int user = 6;
 

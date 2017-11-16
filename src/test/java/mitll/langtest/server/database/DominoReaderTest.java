@@ -30,9 +30,9 @@ public class DominoReaderTest {
 
     logger.debug("config dir " + parent + " config     " + name);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war", serverProps), false, null, false);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
     // logger.debug("made " + database);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
   }
 
 //  public StartupInfo getProjectStartupInfo() {
