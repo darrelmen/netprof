@@ -956,7 +956,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       if (i >= 0) {
         for (; i < typeOrder.size(); i++) {
           String key = typeOrder.get(i);
-       //   logger.info("removing " +key);
+          //   logger.info("removing " +key);
           candidate.remove(key);
         }
       }
@@ -1003,18 +1003,21 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       String value = type.equalsIgnoreCase(LISTS) ? "" + newUserListID : key;
       candidate.put(type, value);
-      // logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+
+    //  logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
   }
 
   /**
+   * Remember to keep the search term, if there is any.
+   * 
    * @param candidate
    * @see #getChoiceHandler
    * @see #addRemoveClickHandler
    */
   private void setHistory(Map<String, String> candidate) {
-    setHistoryItem(getHistoryToken(candidate));
+    setHistoryItem(getHistoryToken(candidate)+keepSearchItem());
   }
 
   private int reqid = 0;
@@ -1047,8 +1050,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
               logger.info("got " + caught);
             }
 //            else {
-              controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
-  //          }
+            controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
+            //          }
           }
 
           /**
@@ -1196,6 +1199,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     };
   }
 
+  /**
+   *
+   * @param typeToSelection
+   * @return
+   */
   @NotNull
   private String getHistoryToken(Map<String, String> typeToSelection) {
     StringBuilder builder = new StringBuilder();
@@ -1204,9 +1212,23 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
     }
     builder.append(getProjectParam());
+
+   // keepSearchItem(builder);
+
     String s = builder.toString();
+
+
 //        logger.info("getHistoryToken token '" + s + "'");
     return s;
+  }
+
+  private String keepSearchItem() {
+    SelectionState selectionState = getSelectionState(getHistoryToken());
+    String search = selectionState.getSearch();
+    if (!search.isEmpty()) {
+      return selectionState.getSearchEntry();
+    }
+    else return "";
   }
 
   @NotNull

@@ -45,10 +45,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
+  public static final String POUND = "#";
   private final Logger logger = Logger.getLogger("SelectionState");
 
-  private static final String ITEM = "item";
-  private static final String SEARCH = "search";
+  public static final String ITEM = "item";
+  public static final String SEARCH = "search";
   public static final String PROJECT = "project";
 
   public static final String SECTION_SEPARATOR = "~";
@@ -90,8 +91,12 @@ public class SelectionState {
     return token
         .replaceAll("%3D", "=")
         .replaceAll("%3B", SECTION_SEPARATOR)
-        .replaceAll("%23", "#")
+        .replaceAll("%23", POUND)
         ;
+  }
+
+  String getSearchEntry() {
+    return SECTION_SEPARATOR + SEARCH + "=" + getSearch();
   }
 
   /**
@@ -175,7 +180,7 @@ public class SelectionState {
   }
 
   private boolean isMatch(String type, String toMatch) {
-    return type.equals("#" + toMatch) || type.equals(toMatch);
+    return type.equals(POUND + toMatch) || type.equals(toMatch);
   }
 
   private void addTypeToSelection(String type, Collection<String> section) {

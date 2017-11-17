@@ -83,11 +83,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   private void checkFocus(boolean hasFirstFocus) {
     if (hasFirstFocus) {
-      Scheduler.get().scheduleDeferred(new Command() {
-        public void execute() {
-          getTypeAhead().setFocus(true);
-        }
-      });
+      Scheduler.get().scheduleDeferred((Command) () -> getTypeAhead().setFocus(true));
     }
   }
 

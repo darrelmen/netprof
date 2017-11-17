@@ -122,8 +122,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id) :
-        "search=" + search) + SECTION_SEPARATOR +
-        sectionWidgetContainer.getHistoryToken() + SECTION_SEPARATOR +
+        getSearchTerm(search)) +
+
+        SECTION_SEPARATOR +
+        sectionWidgetContainer.getHistoryToken() +
+
+        SECTION_SEPARATOR +
         instanceSuffix;
 
     if (DEBUG_PUSH) logger.info("getHistoryTokenFromUIState '" + s + "'");
@@ -227,7 +231,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param search
    * @param exerciseID
-   * @seex PagingExerciseList#gotTypeAheadEvent
    * @see #loadExercise
    * @see #pushFirstSelection
    */
@@ -308,27 +311,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     History.newItem(historyToken);
   }
 
-  /**
-   * For when we want to reload the list, but not by pushing state onto the URL.
-   *
-   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
-   */
-/*  public void reloadFromState() {
-    SelectionState selectionState = getSelectionState(getHistoryToken());
-    String typeAheadText = getTypeAheadText();
-
-    ExerciseListRequest request =
-        getExerciseListRequest(selectionState.getTypeToSection(),
-            typeAheadText,
-            selectionState.isOnlyWithAudioDefects(),
-            selectionState.isOnlyUnrecorded(),
-            selectionState.isOnlyDefault(),
-            selectionState.isOnlyUninspected());
-    getExerciseIDs(selectionState.getTypeToSection(),
-        typeAheadText,
-        -1,
-        request);
-  }*/
 
   /**
    * @param selectionState

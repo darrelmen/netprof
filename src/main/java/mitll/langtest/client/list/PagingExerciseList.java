@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -148,7 +149,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected ExerciseListRequest getRequest(String prefix) {
-   // logger.info("isOnlyExamples " + isOnlyExamples());
+    // logger.info("isOnlyExamples " + isOnlyExamples());
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)
@@ -340,7 +341,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   private void alwaysSetTypeAhead(String t) {
     //if (getTypeAheadText().isEmpty()) {
-  //  logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
+    //  logger.info("alwaysSetTypeAhead Set type ahead to '" + t + "'");
     typeAhead.setText(t);
     //}
   }
@@ -454,14 +455,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     });
   }
 
-/*
-  private void showPopup(String toShow, String toShow2, Widget over) {
-    new PopupHelper().showPopup(toShow, toShow2, over);
-  }
-*/
-
   String getHistoryTokenFromUIState(String search, int id) {
-    return "search=" + search + SelectionState.SECTION_SEPARATOR + "item=" + id;
+    return
+        getSearchTerm(search) +
+            SelectionState.SECTION_SEPARATOR +
+            SelectionState.ITEM + "=" + id;
+  }
+
+  @NotNull
+  protected String getSearchTerm(String search) {
+    return SelectionState.SEARCH + "=" + search;
   }
 
   public void clear() {
@@ -567,7 +570,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.addExerciseAfter(after, es);
   }
 */
-
   public T forgetExercise(int id) {
     T es = byID(id);
     if (es != null) {
