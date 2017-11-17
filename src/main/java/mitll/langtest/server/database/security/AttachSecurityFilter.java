@@ -78,18 +78,18 @@ public class AttachSecurityFilter implements Filter {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     try {
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
-//      log.info("doFilter found session user " + userIDFromSessionOrDB);
+      log.info("doFilter : found session user " + userIDFromSessionOrDB + " req for : " + ((HttpServletRequest) request).getRequestURI());
 
       // MUST do this -
       chain.doFilter(request, response);
     } catch (DominoSessionException dse) {
-      log.warn("doFilter : nope - no session " + dse);
+      log.warn("doFilter : nope - no session " + dse.getMessage()+ " req for : " + ((HttpServletRequest) request).getRequestURI());
       handleAccessFailure(httpRequest, response);
     } catch (Exception e) {
       if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
-        log.info("User reload during request {}.", httpRequest.getRequestURL());
+        log.info("doFilter : User reload during request {}.", httpRequest.getRequestURL());
       } else {
-        log.error("Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
+        log.error("doFilter : Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
       }
     }
   }
