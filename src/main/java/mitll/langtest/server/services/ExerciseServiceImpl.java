@@ -37,6 +37,7 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.ISlimResult;
@@ -86,22 +87,28 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
-    List<Pair> typeToSelection = request.getTypeToSelection();
-
-    logger.info("getTypeToValues \n\trequest" + request + "\n\ttype->selection" + typeToSelection);
-    FilterResponse typeToValues = getSectionHelper().getTypeToValues(request);
-
-    int userListID = request.getUserListID();
-    UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
-
-    if (next != null) {  // echo it back
-      //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      typeToValues.getTypesToInclude().add(LISTS);
-      Set<MatchInfo> value = new HashSet<>();
-      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-      typeToValues.getTypeToValues().put(LISTS, value);
+    //List<Pair> typeToSelection = request.getTypeToSelection();
+    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
+    ISection<CommonExercise> sectionHelper = getSectionHelper();
+    if (sectionHelper == null) {
+      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+      return new FilterResponse();
     }
-    return typeToValues;
+    else {
+      FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
+
+      int userListID = request.getUserListID();
+      UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
+
+      if (next != null) {  // echo it back
+        //logger.info("\tgetTypeToValues " + request + " include list " + next);
+        typeToValues.getTypesToInclude().add(LISTS);
+        Set<MatchInfo> value = new HashSet<>();
+        value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
+        typeToValues.getTypeToValues().put(LISTS, value);
+      }
+      return typeToValues;
+    }
   }
 
   /**

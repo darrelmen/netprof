@@ -287,7 +287,7 @@ public class MailSupport {
       // OK try with test email
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon? ");
+        logger.info("couldn't send email - no mail daemon (" + mailServer + ") " + "? " + e);
       } else {
         logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }

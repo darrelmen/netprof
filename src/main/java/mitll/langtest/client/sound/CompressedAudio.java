@@ -67,7 +67,7 @@ public class CompressedAudio {
           //console.log("Can play ogg - ");
           return true;
       } else {
-          console.log("Can NOT play ogg - ");
+          //console.log("Can NOT play ogg - ");
           return false;
           // not-supported
       }

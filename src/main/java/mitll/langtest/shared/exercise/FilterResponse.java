@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,14 +47,16 @@ import java.util.Set;
  */
 public class FilterResponse implements IsSerializable {
   private Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-  private Set<String> typesToInclude;
+  private Set<String> typesToInclude = new HashSet<>();
   private int reqid;
   private int userListID;
 
   public FilterResponse() {
   }
 
-  public FilterResponse(int reqid, Map<String, Set<MatchInfo>> typeToValues, Set<String> typesToInclude,
+  public FilterResponse(int reqid,
+                        Map<String, Set<MatchInfo>> typeToValues,
+                        Set<String> typesToInclude,
                         int userListID) {
     this.reqid = reqid;
     this.typeToValues = typeToValues;
@@ -73,11 +76,11 @@ public class FilterResponse implements IsSerializable {
     return reqid;
   }
 
-  public String toString() {
-    return "response " + reqid + " " + typesToInclude + " " + typeToValues;
-  }
-
   public int getUserListID() {
     return userListID;
+  }
+
+  public String toString() {
+    return "response " + reqid + " " + typesToInclude + " " + typeToValues;
   }
 }

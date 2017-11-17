@@ -163,12 +163,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private ContextPractice contextPractice;
 
-  protected  ServerProperties serverProps;
-  protected  LogAndNotify logAndNotify;
+  protected ServerProperties serverProps;
+  protected LogAndNotify logAndNotify;
 
   private UserManagement userManagement = null;
 
-//  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  //  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   protected PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
@@ -177,7 +177,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
 
-  public DatabaseImpl() {}
+  public DatabaseImpl() {
+  }
 
   public DatabaseImpl(ServerProperties serverProps) {
     this.serverProps = serverProps;
@@ -350,7 +351,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-  //  logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
+    //  logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
     //this.installPath = installPath;
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
     makeDAO(lessonPlanFileOnlyForImport);
@@ -377,6 +378,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public ISection<CommonExercise> getSectionHelper(int projectid) {
+    if (projectid == -1) {
+      return null;
+    }
+
     if (isAmas()) {
       return new SectionHelper<>();
     }
@@ -385,8 +390,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     if (project == null) {
       logger.error("getSectionHelper huh? couldn't find project with id " + projectid);
+      return null;
+    } else {
+      return project.getSectionHelper();
     }
-    return project.getSectionHelper();
   }
 
   private boolean isAmas() {
@@ -572,7 +579,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
     if (userManagement == null) {
       synchronized (this) {
-       // boolean isURL = serverProps.getLessonPlan().startsWith("http");
+        // boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
         // int numExercises;
 
@@ -580,7 +587,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 //          logger.info("Got " + lessonPlanFileOnlyForImport);
           // TODO : get media directory from properties
           // TODO : get install path directory from properties
-         // readAMASExercises(lessonPlanFileOnlyForImport, "", "", isURL);
+          // readAMASExercises(lessonPlanFileOnlyForImport, "", "", isURL);
         } else {
           //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
           makeExerciseDAO(lessonPlanFileOnlyForImport);
@@ -656,7 +663,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  public Project getProjectByName(String name) { return projectManagement.getProjectByName(name);}
+  public Project getProjectByName(String name) {
+    return projectManagement.getProjectByName(name);
+  }
 
   public Collection<Project> getProjects() {
     return projectManagement.getProjects();
@@ -927,10 +936,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public Connection getConnection(String who) { return null;  }
+  public Connection getConnection(String who) {
+    return null;
+  }
 
   @Override
-  public void closeConnection(Connection connection) { }
+  public void closeConnection(Connection connection) {
+  }
 
   /**
    * @return

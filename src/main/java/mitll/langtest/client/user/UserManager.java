@@ -109,7 +109,7 @@ public class UserManager {
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
-        logger.info("user " + user + " and full info " + current);
+        logger.info("user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
       }
     } else {
       userNotification.showLogin();
@@ -122,8 +122,10 @@ public class UserManager {
    * @see #checkLogin
    */
   public void getPermissionsAndSetUser() {
-    if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " +
-        " asking server for info...");
+    if (DEBUG) {
+      logger.info("UserManager.getPermissionsAndSetUser asking server for info...");
+    }
+
     final long then = System.currentTimeMillis();
     userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
       @Override
