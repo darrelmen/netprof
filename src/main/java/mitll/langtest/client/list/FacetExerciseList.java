@@ -1011,7 +1011,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * Remember to keep the search term, if there is any.
-   * 
+   *
    * @param candidate
    * @see #getChoiceHandler
    * @see #addRemoveClickHandler

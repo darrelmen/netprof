@@ -37,7 +37,6 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String STRONG = "strong";
   private static final String END_STRONG = "</" + STRONG + ">";
   private static final String START_STRONG = "<" + STRONG + ">";
-  //public static final double THRESHOLD = 0.3;
 
   private boolean isJapanese = false;
 
@@ -51,7 +50,7 @@ public class ClickableWords<T extends CommonExercise> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-   private boolean showPhones = true;
+  private boolean showPhones = true;
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
@@ -72,7 +71,7 @@ public class ClickableWords<T extends CommonExercise> {
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
-      this.showPhones = showPhones;
+    this.showPhones = showPhones;
   }
 
   /**
@@ -456,7 +455,7 @@ public class ClickableWords<T extends CommonExercise> {
     }
 
     String removePunct = removePunct(html);
-  //  logger.info("makeClickableText text = '" + removePunct + "' original = '" + html + "'");
+    //  logger.info("makeClickableText text = '" + removePunct + "' original = '" + html + "'");
     boolean empty = removePunct.isEmpty();
     if (empty) {
       //  logger.info("makeClickableText for '" + html + "' not clickable");
@@ -507,15 +506,15 @@ public class ClickableWords<T extends CommonExercise> {
   }
 
   private void putTextInSearchBox(String html) {
-   // logger.info("putTextInSearchBox original " + html);
+    // logger.info("putTextInSearchBox original " + html);
     String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
     String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
-   // logger.info("putTextInSearchBox after    " + s2);
+    // logger.info("putTextInSearchBox after    " + s2);
     listContainer.searchBoxEntry(s2);
   }
 
   /**
-   * TODO : Not sure why we're doing this...
+   * Not sure why we're doing this... again...
    *
    * First is russian accent mark.
    * russian hyphen
@@ -531,7 +530,7 @@ public class ClickableWords<T extends CommonExercise> {
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
-       // .replaceAll("\\u00E9", "\\u0435")
+        // .replaceAll("\\u00E9", "\\u0435")
         .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013]", "");
   }
 }

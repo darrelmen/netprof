@@ -846,6 +846,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * right double quote
    * double quote
    *
+   * 2d = dash like in twenty-first
+   *
    * @param t
    * @return
    * @see #doOneToManyMatch
@@ -853,7 +855,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u002D\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
   }
 
   /**
