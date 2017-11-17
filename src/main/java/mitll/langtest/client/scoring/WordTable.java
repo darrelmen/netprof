@@ -149,14 +149,14 @@ public class WordTable {
 //    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : getWordToPhones(netPronImageTypeToEndTime).entrySet()) {
 //      builder.append(getColoredSpanForSegment(pair));
 //    }
-
     return getHTMLForWords(builder, words);
   }
 
   @NotNull
   private <T extends SlimSegment> String getHTMLForWords(StringBuilder builder, List<T> words) {
     if (words == null) {
-      logger.warning("no transcript?");
+   //   logger.warning("no transcript?");
+    // could happen for low score...
     } else {
       words
           .stream()

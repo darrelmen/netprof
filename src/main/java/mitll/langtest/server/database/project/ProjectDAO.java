@@ -364,10 +364,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
   }
 
-/*  public void updateProperty(SlickProjectProperty property) {
-    propertyDAO.update(property);
-  }*/
-
   @Override
   public int getByName(String name) {
     return dao.byName(name);

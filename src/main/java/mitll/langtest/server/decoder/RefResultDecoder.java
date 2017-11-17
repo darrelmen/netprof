@@ -944,7 +944,7 @@ public class RefResultDecoder {
             float dnr = attribute.getDnr();
             if (dnr < 0) dnr = audioCheck.getDNR(absoluteFile);
             if (dnr > audioCheck.getMinDNR()) {
-              audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec, defaultUser);
+              audioFileHelper.decodeOneAttribute(exercise, attribute, defaultUser);
               sleep(serverProps.getSleepBetweenDecodes());
               count++;
             } else {

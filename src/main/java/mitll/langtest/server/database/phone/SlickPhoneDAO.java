@@ -95,23 +95,36 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         slick.duration());
   }
 
+/*
   public void insert(SlickPhone word) {
     dao.insert(word);
   }
+*/
 
+  /**
+   *
+   * @param bulk
+   */
   public void addBulk(List<SlickPhone> bulk) {
     dao.addBulk(bulk);
   }
 
+  @Override
+  public void addBulkPhones(List<Phone> bulk) {
+    List<SlickPhone> sbulk = new ArrayList<>();
+    bulk.forEach(phone -> sbulk.add(toSlick(phone)));
+    dao.addBulk(sbulk);
+  }
+
   /**
-   * @param word
+   * @param aPhone
    * @return
    * @see RecordWordAndPhone#recordWordAndPhoneInfo(long, Map)
    */
-  @Override
-  public boolean addPhone(Phone word) {
-    return dao.insert(toSlick(word)) > 0;
-  }
+/*  @Override
+  public boolean addPhone(Phone aPhone) {
+    return dao.insert(toSlick(aPhone)) > 0;
+  }*/
 
   /**
    * @param userid

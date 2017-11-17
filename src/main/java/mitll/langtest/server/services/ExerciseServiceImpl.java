@@ -88,7 +88,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     //List<Pair> typeToSelection = request.getTypeToSelection();
-    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
+//    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);

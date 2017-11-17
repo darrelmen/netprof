@@ -92,13 +92,16 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     finish(database, connection, statement);
   }
 
+  @Override
+  public void addBulkPhones(List<Phone> bulk) {  }
+
   /**
    * <p>
    *
    * @param phone
-   * @see DatabaseImpl#recordWordAndPhoneInfo(long, Map)
+   * @see DatabaseImpl#recordWordAndPhoneInfo
    */
-  @Override
+ // @Override
   public boolean addPhone(Phone phone) {
     Connection connection = getConnection();
     boolean val = true;

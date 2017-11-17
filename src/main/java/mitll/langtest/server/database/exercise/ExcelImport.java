@@ -566,6 +566,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           "Translation".toLowerCase(),
           "Transliteration".toLowerCase(),
           "Correction".toLowerCase(),
+          "Corrections".toLowerCase(),
           "Comment".toLowerCase(),
           "Comments".toLowerCase()
       ));

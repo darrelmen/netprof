@@ -216,19 +216,19 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @param exid
    * @param context
    * @param userid
-   * @param hitID
    * @param device
+   * @param projID
    * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    */
   @Override
-  public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+  public void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {
 //    logger.debug("log event " + id + " " + widgetType + " exid "  +exid + " context " +context + " by user " + userid);
 
     try {
       if (db == null) {
         logger.error("no db set? " + id + " " + widgetType + " exid " + exid + " context " + context + " by user " + userid);
       } else {
-        db.logEvent(id, widgetType, exid, context, userid, device);
+        db.logEvent(id, widgetType, exid, context, userid, device, projID);
       }
     } catch (Exception e) {
       logger.error("got " + e, e);

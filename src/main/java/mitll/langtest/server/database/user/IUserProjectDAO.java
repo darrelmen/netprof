@@ -49,7 +49,7 @@ public interface IUserProjectDAO extends IDAO {
 
   /**
    * @param bulk
-   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding(int, IUserProjectDAO, List)
+   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
    */
   void addBulk(Collection<SlickUserProject> bulk);
 
@@ -59,6 +59,11 @@ public interface IUserProjectDAO extends IDAO {
    */
   void forget(int userid);
 
+  /**
+   *
+   * @param user
+   * @return -1 if has no project
+   */
   int mostRecentByUser(int user);
 
   Map<Integer, Integer> getUserToProject();

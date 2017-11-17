@@ -98,11 +98,11 @@ public interface LangTestDatabase extends RemoteService {
    * @param exid
    * @param context
    * @param userid
-   * @param hitID
    * @param device
+   * @param projID
    * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    */
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device);
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID);
 
   /**
    * @return

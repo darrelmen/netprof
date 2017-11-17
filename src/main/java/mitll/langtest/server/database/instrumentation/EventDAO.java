@@ -132,10 +132,10 @@ public class EventDAO extends DAO implements IEventDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#logEvent
+   * @see Database#logEvent
    */
   @Override
-  public boolean add(Event event, int projid) {
+  public boolean addToProject(Event event, int projid) {
     Connection connection = getConnection();
     boolean val = true;
     try {

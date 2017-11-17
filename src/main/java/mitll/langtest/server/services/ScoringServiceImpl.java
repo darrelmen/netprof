@@ -573,7 +573,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("getAlignment : huh? got zero length recording for " + identifier + " from " + device);
-      logEvent(identifier, device);
+      logEvent(identifier, device, -1);
     }
     return audioAnswer;
   }
@@ -612,9 +612,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void logEvent(String exid, String device) {
+  private void logEvent(String exid, String device, int projID) {
     try {
-      db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device);
+      db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device, projID);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

@@ -51,7 +51,7 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, boolean sendEmail, AsyncCallback<Void> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device, AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 

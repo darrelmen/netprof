@@ -46,6 +46,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -102,7 +103,6 @@ public class RecordWordAndPhone {
   /**
    * @param answerID
    * @param netPronImageTypeListMap
-   * @seex #putBackWordAndPhone
    * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
@@ -112,24 +112,31 @@ public class RecordWordAndPhone {
       int windex = 0;
       int pindex = 0;
 
+      List<Phone> toAdd = new ArrayList<>();
+
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
         if (keepEvent(event)) {
           long wid = wordDAO.addWord(new Word(answerID, event, windex++, segment.getScore()));
+
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
               if (keepEvent(pevent)) {
                 int duration = pseg.getDuration();
                 if (duration == 0) {
-                  logger.warn("zero duration for " +answerID + " wid " + wid  + " event " + pevent);
+                  logger.warn("zero duration for " + answerID + " wid " + wid + " event " + pevent);
                 }
-                phoneDAO.addPhone(new Phone(answerID, wid, pevent, pindex++, pseg.getScore(), duration));
+                Phone phone = new Phone(answerID, wid, pevent, pindex++, pseg.getScore(), duration);
+                toAdd.add(phone);
               }
             }
           }
         }
       }
+
+      logger.info("recordWordAndPhoneInfo for " + answerID+ " adding " + windex + " words and " + toAdd.size() + " phones");
+      phoneDAO.addBulkPhones(toAdd);
     }
   }
 

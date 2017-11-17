@@ -42,6 +42,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private Set<AudioAttribute> allPossible;
+  private int exid;
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -68,10 +69,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         "",
         null, exerciseController, exercise, false);
     this.includeContext = includeContext;
-    //   this.exercise = exercise;
-    //this.controller = exerciseController;
     this.listener = listener;
-
+    this.exid = exercise.getID();
     // getElement().setId("ChoicePlayAudioPanel");
     addButtons(null);
 
@@ -176,8 +175,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         if (isMale && isReg) toUse = mr;
         else if (isMale) genderFallback = mr;
         else fallback = mr;
-      }
-      else {
+      } else {
         //logger.info("no male reg in " +malesMap);
       }
     }
@@ -267,16 +265,25 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
-    // logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
+  //   logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
+
     doPause();
     listener.audioChanged(audioID, durationInMillis);
 
     playAudio(audioRef);
+
+    rememberAudioChoice(isMale, isReg);
+
+    Scheduler.get().scheduleDeferred(this::tellOtherPanels);
+
+    controller.logEvent("choicePlay", "Button", "" + exid,
+        "choose " + (isMale ? "Male" : "Female") + (isReg ? " Reg" : " Slow"));
+  }
+
+  private void rememberAudioChoice(boolean isMale, boolean isReg) {
     KeyStorage storage = controller.getStorage();
     storage.setBoolean(IS_MALE, isMale);
     storage.setBoolean(IS_REG, isReg);
-
-    Scheduler.get().scheduleDeferred(this::tellOtherPanels);
   }
 
   private void tellOtherPanels() {

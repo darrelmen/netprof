@@ -68,7 +68,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       ensureDefaultUsers();
     } catch (Exception e) {
       logger.error("UserDAO : got " + e, e);
-      database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);
+  //    database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN, projID);
     }
   }
 
@@ -176,7 +176,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       return newID;
     } catch (Exception ee) {
       logger.error("addUser Got " + ee, ee);
-      database.logEvent("unk", "adding user: " + ee.toString(), 0, device);
+   //   database.logEvent("unk", "adding user: " + ee.toString(), 0, device, projID);
     }
     return 0;
   }
@@ -224,7 +224,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN);
+      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN, -1);
     }
   }
 
@@ -383,7 +383,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
-      database.logEvent(id, "getIdForUserID: " + e.toString(), 0, UNKNOWN);
+      database.logEvent(id, "getIdForUserID: " + e.toString(), 0, UNKNOWN, -1);
     }
     return val;
   }
@@ -616,7 +616,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       return users;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
+      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN, -1);
     }
     return new HashSet<>();
   }
@@ -632,7 +632,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       return users;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
+      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN, -1);
     }
     return new ArrayList<>();
   }
@@ -830,7 +830,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN);
+      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN, -1);
     }
     return false;
   }

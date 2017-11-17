@@ -75,7 +75,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private static final int LANG_ID = 14;
 
-  private static final int IMPORT_PROJECT_ID =DatabaseImpl.IMPORT_PROJECT_ID;
+  private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
@@ -91,6 +91,7 @@ public class ProjectManagement implements IProjectManagement {
   private final Map<Integer, Project> idToProject = new HashMap<>();
   private FileUploadHelper fileUploadHelper;
   private final boolean debugOne;
+
   /**
    * @param pathHelper
    * @param properties
@@ -184,7 +185,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void configureProjects() {
     getProjects().forEach(project -> configureProject(project, false, false));
-    logger.info("FINISHED : configureProjects " +getProjects().size()+  " configured.");
+    logger.info("FINISHED : configureProjects " + getProjects().size() + " configured.");
     logMemory();
   }
 
@@ -194,7 +195,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Lazy - only configure project if it isn't already or forceReload is true
-   *
+   * <p>
    * only configured if we have a slick project for it... how could we not???
    *
    * @param project
@@ -218,7 +219,7 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
-    logger.info("configure START " +project.getID() +  "/" +getProjects().size()+  " : " + project.getLanguage());
+    logger.info("configure START " + project.getID() + "/" + getProjects().size() + " : " + project.getLanguage());
 
     project.clearPropCache();
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");
@@ -243,8 +244,7 @@ public class ProjectManagement implements IProjectManagement {
     } else {
       if (project.getStatus() == ProjectStatus.PRODUCTION) {
         logger.error("configureProject no exercises in project? " + project);
-      }
-      else {
+      } else {
         logger.warn("configureProject no exercises in project? " + project);
       }
     }
@@ -281,7 +281,7 @@ public class ProjectManagement implements IProjectManagement {
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
 
-      logger.info("configure END " +project.getID() +  " " + project.getLanguage() + " in " +(System.currentTimeMillis()-then) + " millis.");
+      logger.info("configure END " + project.getID() + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       return rawExercises.size();
     } else {
@@ -341,7 +341,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   *
    * @param projid
    */
   @Override
@@ -510,7 +509,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   *
    * @param name
    * @return null if no match
    */
@@ -536,25 +534,25 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("getProject not returning project for " + projectid);
       return null;//getFirstProject();
     } else {*/
-      Project project = idToProject.get(projectid);
+    Project project = idToProject.get(projectid);
 
-      if (project == null) {
-        Set<Integer> dbProjects = getNewProjects(idToProject.keySet());
+    if (project == null) {
+      Set<Integer> dbProjects = getNewProjects(idToProject.keySet());
 
-        if (!dbProjects.isEmpty()) {
-          project = lazyGetProject(projectid);
-        }
-
-        if (project == null && !idToProject.isEmpty()) {
-          //Project firstProject = getFirstProject();
-          logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-              ") ");//,
-          //new IllegalArgumentException());
-          return null;//firstProject;
-        }
+      if (!dbProjects.isEmpty()) {
+        project = lazyGetProject(projectid);
       }
-      return project;
-  //  }
+
+      if (project == null && !idToProject.isEmpty()) {
+        //Project firstProject = getFirstProject();
+        logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+            ") ");//,
+        //new IllegalArgumentException());
+        return null;//firstProject;
+      }
+    }
+    return project;
+    //  }
   }
 
   private Project lazyGetProject(int projectid) {
@@ -693,8 +691,7 @@ public class ProjectManagement implements IProjectManagement {
   public List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<String, List<SlickProject>> langToProject = getLangToProjects();
-
-    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
+//    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
     langToProject.values().forEach(slickProjects -> {
       List<SlickProject> production = getProductionProjects(slickProjects);
@@ -751,7 +748,7 @@ public class ProjectManagement implements IProjectManagement {
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());
       if (project.dominoid() > 0) {
-        info.put("Domino ID", ""+project.dominoid());
+        info.put("Domino ID", "" + project.dominoid());
       }
     }
 
@@ -778,7 +775,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private void addDateProps(SlickProject project, TreeMap<String, String> info) {
     DateFormat format = new SimpleDateFormat();
-    info.put(CREATED,  format.format(project.created()));
+    info.put(CREATED, format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
   }
 
@@ -826,7 +823,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public ImportInfo getImport(int projid) {
-    return  getFileUploadHelper().getExercises(projid);
+    return getFileUploadHelper().getExercises(projid);
   }
 
   @Override

@@ -402,7 +402,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String absolutePath = rawFile.getAbsolutePath();
     if (rawFile.exists()) {
       if (rawFile.delete()) {
-        logger.info("cleanUpRawFile : deleted " + absolutePath);
+//        logger.info("cleanUpRawFile : deleted " + absolutePath);
       } else {
         String mes = "cleanUpRawFile : huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);

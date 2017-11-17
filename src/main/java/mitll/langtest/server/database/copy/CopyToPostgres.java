@@ -519,7 +519,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickPhone> bulk = new ArrayList<>();
     int c = 0;
     int d = 0;
-    int added = 0;
+   // int added = 0;
     Set<Long> missingrids = new TreeSet<>();
     Set<Long> missingwids = new TreeSet<>();
     for (Phone phone : new PhoneDAO(db).getAll()) {

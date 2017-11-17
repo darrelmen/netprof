@@ -85,9 +85,9 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   IProjectManagement getProjectManagement();
 
 
-  void logEvent(String exid, String context, int userid, String device);
+  void logEvent(String exid, String context, int userid, String device, int projID);
 
-  boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device);
+  boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID);
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);
 

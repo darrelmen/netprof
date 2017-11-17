@@ -121,7 +121,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
    * @return true always - deal with possiblity it might fail???
    */
   @Override
-  public boolean add(Event event, int projid) {
+  public boolean addToProject(Event event, int projid) {
     eventDAOWrapper.add(getSlickEvent(event, projid, event.getExid(), event.getUserID()));
     return true;
   }

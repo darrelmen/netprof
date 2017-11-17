@@ -6,12 +6,15 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by go22670 on 3/29/16.
  */
 public interface IPhoneDAO<T>  extends IDAO {
-  boolean addPhone(T phone);
+  void addBulkPhones(List<Phone> bulk);
+
+  //boolean addPhone(T phone);
 
   /**
    * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport

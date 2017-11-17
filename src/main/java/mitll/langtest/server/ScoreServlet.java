@@ -716,9 +716,9 @@ public class ScoreServlet extends DatabaseServlet {
       //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
 
       if (widgetid == null) {
-        db.logEvent(exid == null ? "N/A" : exid, context, userid, device);
+        db.logEvent(exid == null ? "N/A" : exid, context, userid, device, -1);
       } else {
-        db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
+        db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device, -1);
       }
     }
   }
@@ -1037,7 +1037,6 @@ public class ScoreServlet extends DatabaseServlet {
         ServerProperties serverProps = db.getServerProps();
         this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
-
         jsonScoring = new JsonScoring(db);
       }
     }

@@ -459,21 +459,6 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * @param response
-   * @see #doGet
-   * @deprecated not sure how this can be called
-   */
-/*
-  private void writeAllAudio(HttpServletResponse response, int projectid) {
-    try {
-      getDatabase().writeUserListAudio(response.getOutputStream(), projectid);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
-  }
-*/
-
-  /**
-   * @param response
    * @param db
    * @param listid
    * @see #doGet(HttpServletRequest, HttpServletResponse)

@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.logging.Logger;
 
@@ -145,8 +146,10 @@ public class ButtonFactory implements EventLogger {
               browserInfo != null) {
             //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
 
-            service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), "", browserInfo,
-                new AsyncCallback<Void>() {
+            ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+            int projID = projectStartupInfo == null? -1:projectStartupInfo.getProjectid();
+            service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), browserInfo,
+                projID, new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
                     if (caught != null &&

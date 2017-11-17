@@ -11,7 +11,7 @@ import java.util.List;
  * Created by go22670 on 3/28/16.
  */
 public interface IEventDAO extends IDAO {
-  boolean add(Event event, int projid);
+  boolean addToProject(Event event, int projid);
 
   List<Event> getAll();
   List<Event> getAll(Integer projid);
@@ -25,5 +25,4 @@ public interface IEventDAO extends IDAO {
   Number getNumRows(int projid);
 
   void addPlayedMarkings(int userID, CommonExercise firstExercise);
-
 }

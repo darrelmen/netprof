@@ -94,7 +94,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -135,11 +134,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final int DAY = 24 * 60 * 60 * 1000;
-
-  /**
-   * @seex #getContextPractice
-   */
-//  private String installPath;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -867,16 +861,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @param typeToSection
-   * @param projectid
-   * @return
-   * @seex ScoreServlet#getRefInfo
-   */
-/*  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
-    return getJsonSupportForProject(projectid).getJsonRefResults(typeToSection);
-  }*/
-
-  /**
    * TODO : make sure that iOS app has same idea of current project as does website
    * For all the exercises in a chapter
    * <p>
@@ -955,9 +939,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     return this.contextPractice;
   }*/
-  public void logEvent(String exid, String context, int userid, String device) {
+  public void logEvent(String exid, String context, int userid, String device, int projID) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
-    logEvent(UNKNOWN, "server", exid, context, userid, device);
+    logEvent(UNKNOWN, "server", exid, context, userid, device, projID);
   }
 
   /**
@@ -967,11 +951,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param context
    * @param userid
    * @param device
+   * @param projID
    * @return
    * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   @Override
-  public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
+  public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {
     if (userid == -1) {
       if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
         return true;
@@ -981,20 +966,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
 
-    IProjectDAO projectDAO = getProjectDAO();
-    SlickProject next = userid != -1 ? projectDAO.mostRecentByUser(userid) : projectDAO.getFirst();
-    if (userid == -1) {
-      logger.warn("logEvent userid : " + userid + " using the first project! " + next);
+    if (projID == -1) {
+      projID = getUserProjectDAO().mostRecentByUser(userid);
+      if (projID == -1 && !getProjects().isEmpty()) {
+        projID = 1; // default project
+      }
     }
-    if (next == null) {
-      next = projectDAO.getFirst();
-    }
-    if (next == null) {
+
+    if (projID == -1) {
       logger.warn("no projects loaded yet ???");
       return false;
     } else {
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
-      return eventDAO != null && eventDAO.add(event, next.id());
+      return eventDAO != null && eventDAO.addToProject(event, projID);
     }
   }
 
@@ -1678,11 +1662,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   @Override
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+    long then = System.currentTimeMillis();
     recordWordAndPhone.recordWordAndPhoneInfo(answer, answerID);
+    long now = System.currentTimeMillis();
+    logger.info("recordWordAndPhoneInfo took " + (now-then) + " millis");
   }
 
   /**
-   * TODO : consider how to do context exercises better - they really aren't different than regular exercises...
+   * consider how to do context exercises better - they really aren't different than regular exercises...
    * Also, this can't handle multiple context sentences...
    *
    * @param projectid

@@ -65,6 +65,7 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) throws ServletException {
     this.servletContext = filterConfig.getServletContext();
+    log.info("found servlet context " +servletContext);
   }
 
   @Override
@@ -75,21 +76,32 @@ public class AttachSecurityFilter implements Filter {
     if (db == null) {
       findSharedDatabase(servletContext);
     }
-    final HttpServletRequest httpRequest = (HttpServletRequest) request;
-    try {
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
-      log.info("doFilter : found session user " + userIDFromSessionOrDB + " req for : " + ((HttpServletRequest) request).getRequestURI());
-
-      // MUST do this -
+    if (!(request instanceof HttpServletRequest)) {
+      log.info("doFilter : skipping " + request.toString() + " since not HttpServletReq");
       chain.doFilter(request, response);
-    } catch (DominoSessionException dse) {
-      log.warn("doFilter : nope - no session " + dse.getMessage()+ " req for : " + ((HttpServletRequest) request).getRequestURI());
-      handleAccessFailure(httpRequest, response);
-    } catch (Exception e) {
-      if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
-        log.info("doFilter : User reload during request {}.", httpRequest.getRequestURL());
-      } else {
-        log.error("doFilter : Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
+    }
+    else {
+      log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
+      log.info("doFilter : chain is " + chain);
+
+      final HttpServletRequest httpRequest = (HttpServletRequest) request;
+      try {
+        int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
+        log.info("doFilter : found session user " + userIDFromSessionOrDB);
+
+        // MUST do this -
+        chain.doFilter(request, response);
+        log.info("doFilter after chain doFilter " + httpRequest.getRequestURI());
+
+      } catch (DominoSessionException dse) {
+        log.warn("doFilter : nope - no session " + dse.getMessage() + " req for : " + ((HttpServletRequest) request).getRequestURI());
+        handleAccessFailure(httpRequest, response);
+      } catch (Exception e) {
+        if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
+          log.info("doFilter : User reload during request {}.", httpRequest.getRequestURL());
+        } else {
+          log.error("doFilter : Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
+        }
       }
     }
   }
@@ -107,9 +119,11 @@ public class AttachSecurityFilter implements Filter {
 
   @Override
   public void destroy() {
+    log.info("doFilter : destroy");
   }
 
   protected int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
+    if (securityManager == null) log.error("huh? no security manager?");
     return securityManager.getUserIDFromSession(httpRequest);
   }
 
@@ -123,6 +137,7 @@ public class AttachSecurityFilter implements Filter {
         log.error("findSharedDatabase no database?");
       } else {
         securityManager = db.getUserSecurityManager();
+        log.info("made security manager " +securityManager);
       }
     }
   }

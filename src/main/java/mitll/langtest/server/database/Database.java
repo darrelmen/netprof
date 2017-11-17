@@ -60,7 +60,7 @@ public interface Database extends AutoCloseable {
 
   void closeConnection(Connection connection);
 
-  void logEvent(String exid, String context, int userid, String device);
+  void logEvent(String exid, String context, int userid, String device, int projID);
 
   ServerProperties getServerProps();
 

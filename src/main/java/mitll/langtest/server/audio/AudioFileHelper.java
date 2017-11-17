@@ -435,9 +435,7 @@ public class AudioFileHelper implements AlignDecode {
         context.getReqid(),
         wavPath, file, validity);
 
-//    if (recordInResults) {
     recordInResults(context, recordingInfo, validity, answer);
-    //  }
     return answer;
   }
 
@@ -504,7 +502,9 @@ public class AudioFileHelper implements AlignDecode {
 
     int answerID = db.getAnswerDAO().addAnswer(info);
     answer.setResultID(answerID);
-    db.recordWordAndPhoneInfo(answer, answerID);
+
+    // do this db write later
+    new Thread(() -> db.recordWordAndPhoneInfo(answer, answerID)).start();
   }
 
   /**
@@ -512,11 +512,10 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercise
    * @param attribute
-   * @param doHydec
    * @param userID
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
-  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, boolean doHydec, int userID) {
+  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID) {
     if (isInDictOrLTS(exercise)) {
       String audioRef = attribute.getAudioRef();
       if (!audioRef.contains("context=")) {
@@ -687,7 +686,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @paramx wavPath
    * @paramx numAlignPhones
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean, int)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
@@ -955,7 +954,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean, int)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int)
    */
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
@@ -1205,11 +1204,8 @@ public class AudioFileHelper implements AlignDecode {
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-    ASR asrScoring = /*options.isUseOldSchool() || isOldSchoolService() ? oldschoolScoring :*/ getASRScoring();
 //    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
-
-    //  boolean isWebservice = isWebservice(asrScoring);
-    PretestScore pretestScore = asrScoring.scoreRepeat(
+    PretestScore pretestScore = getASRScoring().scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
 
@@ -1218,25 +1214,6 @@ public class AudioFileHelper implements AlignDecode {
         precalcScores,
         options.isUsePhoneToDisplay());
 
-/*    if (!pretestScore.isRanNormally() && isWebservice && USE_HYDEC_FALLBACK) {
-      logger.warn("getASRScoreForAudio Using hydec as fallback for " + (options.isDoFlashcard() ? " decoding " : " aligning ") + testAudioFile + " against '" +
-          sentence +
-          "'");
-      pretestScore = oldschoolScoring.scoreRepeat(
-          testAudioDir,
-          removeSuffix(testAudioName),
-          sentence,
-          lmSentences,
-          transliteration,
-
-          pathHelper.getImageOutDir(),
-          imageOptions,
-          options.isDoFlashcard(),
-          options.isCanUseCache(),
-          prefix,
-          precalcScores,
-          options.isUsePhoneToDisplay());
-    }*/
     pretestScore.setReqid(reqid);
 
     String json = new ScoreToJSON().asJson(pretestScore);

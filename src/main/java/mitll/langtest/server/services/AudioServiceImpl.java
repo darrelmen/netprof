@@ -213,7 +213,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     try {
       if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
         logger.warn("huh? got zero length recording " + user + " " + exerciseID);
-        logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
+        logEvent("audioRecording",
+            "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, device, projectID);
       } else {
         String path = audioAnswer.getPath();
         String actualPath = ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language);
@@ -463,9 +464,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return db.getUserDAO().getUserWhere(id);
   }
 
-  private void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+  private void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {
     try {
-      db.logEvent(id, widgetType, exid, context, userid, device);
+      db.logEvent(id, widgetType, exid, context, userid, device, projID);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

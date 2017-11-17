@@ -33,6 +33,8 @@
 package mitll.langtest.server.filter;
 
 import mitll.langtest.server.database.security.NPUserSecurityManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.*;
@@ -53,6 +55,9 @@ import java.util.UUID;
  * @since Feb 6, 2014 8:44:28 AM
  */
 public class ForceNocacheFilter implements Filter {
+  private static final Logger log = LogManager.getLogger(ForceNocacheFilter.class);
+
+boolean DEBUG=false;
   /**
    * The key to get/set the id of the user stored in the session
    *
@@ -67,6 +72,8 @@ public class ForceNocacheFilter implements Filter {
   public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+    if (DEBUG) log.info("ForceNocacheFilter : chain is " + chain);
 
     HttpSession session = httpRequest.getSession(false);
     String sessionId;
@@ -94,24 +101,29 @@ public class ForceNocacheFilter implements Filter {
     ThreadContext.put("hostName", request.getServerName());
 
     if (httpRequest.getRequestURI().contains(".nocache.")) {
-      Date now = new Date();
+      long now = System.currentTimeMillis();
       HttpServletResponse httpResponse = (HttpServletResponse) response;
-      httpResponse.setDateHeader("Date", now.getTime());
+      httpResponse.setDateHeader("Date", now);
       // one day old
-      httpResponse.setDateHeader("Expires", now.getTime() - 86400000L);
+      httpResponse.setDateHeader("Expires", now - 86400000L);
       httpResponse.setHeader("Pragma", "no-cache");
       httpResponse.setHeader("Cache-control", "no-cache, no-store, must-revalidate");
     }
 
+    if (DEBUG)   log.info("no cache before chain doFilter " + httpRequest.getRequestURI());
     chain.doFilter(request, response);
+    if (DEBUG)   log.info("no cache after  chain doFilter " + httpRequest.getRequestURI());
+
     ThreadContext.clearAll();
   }
 
   @Override
   public void destroy() {
+    if (DEBUG)  log.info("destroy ");
   }
 
   @Override
   public void init(FilterConfig arg0) throws ServletException {
+    log.info("init ");
   }
 }
