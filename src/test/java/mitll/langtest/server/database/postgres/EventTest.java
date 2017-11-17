@@ -35,7 +35,6 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickSlimEvent;
 
@@ -73,7 +72,7 @@ public class EventTest extends BaseTest {
   public void testEvent() {
     DatabaseImpl spanish = getDatabase();
     IEventDAO eventDAO = spanish.getEventDAO();
-    eventDAO.add(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device", -1), 0);
+    eventDAO.addToProject(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device", -1), 0);
 //    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
   }
 }

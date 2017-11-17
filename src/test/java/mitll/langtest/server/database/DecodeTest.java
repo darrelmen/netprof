@@ -8,7 +8,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.*;
 import org.junit.Test;
@@ -150,7 +149,7 @@ public class DecodeTest extends BaseTest {
     CommonExercise exercise = russian.getExercise(1, 8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
-      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false, -1);
+      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, -1);
   }
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
@@ -167,7 +166,7 @@ public class DecodeTest extends BaseTest {
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
-      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false, -1);
+      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, -1);
   }
 
   @Test
