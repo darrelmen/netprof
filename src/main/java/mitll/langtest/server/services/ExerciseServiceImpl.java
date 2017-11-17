@@ -573,8 +573,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     ExerciseListWrapper<T> exerciseListWrapper =
         new ExerciseListWrapper<>(request.getReqID(), exerciseShells1, firstExercise);
 
-    Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
-    exerciseListWrapper.setIdToScore(scores);
+    if (!request.isQC()) {
+      Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
+      exerciseListWrapper.setIdToScore(scores);
+    }
+
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
@@ -596,8 +599,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       case MARK_DEFECTS:
         db.getStateManager().markState(exerciseShells);
         break;
-      //   markDefects(exerciseShells);
-      //  break;
       default:
         break;
     }

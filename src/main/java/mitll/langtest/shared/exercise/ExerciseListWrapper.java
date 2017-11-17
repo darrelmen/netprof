@@ -47,7 +47,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   private List<T> exercises;
   private CommonExercise firstExercise;
   private Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise;
-  private Map<Integer,Float> idToScore;
+  private Map<Integer, Float> idToScore = new HashMap<>();
 
   public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
     this(reqID, ids, firstExercise, new HashMap<>());
@@ -97,8 +97,4 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public void setIdToScore(Map<Integer, Float> idToScore) {
     this.idToScore = idToScore;
   }
-
-/*  public Map<Integer, List<CorrectAndScore>> getHistories() {
-    return histories;
-  }*/
 }

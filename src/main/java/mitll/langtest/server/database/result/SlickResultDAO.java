@@ -39,6 +39,7 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -128,7 +129,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public SlickResult toSlick(Result shared,
                              int projid,
-                            // Map<String, Integer> exToInt,
+                             // Map<String, Integer> exToInt,
                              Integer realExID,
                              String transcript) {
 //    Integer realExID = exToInt.get(shared.getOldExID());
@@ -137,33 +138,33 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 //      return null;
 //    }
 //    else {
-      String model = shared.getModel();
-      if (model == null) model = "";
-      return new SlickResult(-1,
-          shared.getUserid(),
-          realExID,
-          new Timestamp(shared.getTimestamp()),
-          //shared.getQid(),
-          shared.getAudioType().toString(),
-          shared.getAnswer(),
-          shared.isValid(),
-          shared.getValidity(),
-          shared.getDurationInMillis(),
-          shared.getProcessDur(),
-          shared.getRoundTrip(),
-          shared.isCorrect(),
-          shared.getPronScore(),
-          checkNull(shared.getDeviceType()),
-          checkNull(shared.getDevice()),
-          checkNull(shared.getJsonScore()),
-          shared.isWithFlash(),
-          shared.getDynamicRange(),
-          //    getLanguage(),
-          transcript,
-          shared.getUniqueID(),
-          projid,
-          model
-      );
+    String model = shared.getModel();
+    if (model == null) model = "";
+    return new SlickResult(-1,
+        shared.getUserid(),
+        realExID,
+        new Timestamp(shared.getTimestamp()),
+        //shared.getQid(),
+        shared.getAudioType().toString(),
+        shared.getAnswer(),
+        shared.isValid(),
+        shared.getValidity(),
+        shared.getDurationInMillis(),
+        shared.getProcessDur(),
+        shared.getRoundTrip(),
+        shared.isCorrect(),
+        shared.getPronScore(),
+        checkNull(shared.getDeviceType()),
+        checkNull(shared.getDevice()),
+        checkNull(shared.getJsonScore()),
+        shared.isWithFlash(),
+        shared.getDynamicRange(),
+        //    getLanguage(),
+        transcript,
+        shared.getUniqueID(),
+        projid,
+        model
+    );
 //    }
   }
 
@@ -372,43 +373,55 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param <T>
    * @param userid
    * @param exercises
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    */
   @Override
   public <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises) {
-    List<Integer> collect = exercises
+
+    Set<Integer> idsToFind = exercises
         .stream()
         .map(HasID::getID)
-        .collect(Collectors.toList());
-    Map<Integer, SlickExerciseScore> correctAndScoresForReal = dao.exidAndScoreWhere(userid, collect);
+        .collect(Collectors.toSet());
+
+    Map<Integer, SlickExerciseScore> correctAndScoresForReal;
+    if (idsToFind.size() < 200 || true) {
+      long then = System.currentTimeMillis();
+      correctAndScoresForReal = dao.exidAndScoreWhere(userid, idsToFind);
+      long now = System.currentTimeMillis();
+      logger.info("took " + (now - then) + " millis to ask for " + idsToFind.size());
+    } else {
+      long then = System.currentTimeMillis();
+      correctAndScoresForReal = dao.exidAndScore(userid);
+      long now = System.currentTimeMillis();
+      logger.info("took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids");
+
+      logger.info("From " + correctAndScoresForReal.size());
+      Map<Integer, SlickExerciseScore> filtered = new HashMap<>(idsToFind.size());
+
+      correctAndScoresForReal.forEach((k, v) -> {
+        if (idsToFind.contains(k)) {
+          filtered.put(k, v);
+        }
+      });
+
+      logger.info("down to " + filtered.size() + " for " + idsToFind.size());
+      correctAndScoresForReal = filtered;
+    }
     logger.info("getScores : for user " + userid + " checking " + exercises.size() + " exercises, found " + correctAndScoresForReal.size() + " scores");
-//    setScores(exercises, correctAndScoresForReal);
-    return getScores(exercises, correctAndScoresForReal);
+     return getScores2(correctAndScoresForReal);
   }
-
-
-  /**
-   * Just ask db for all scores for the user.
-   *
-   * @param userid
-   * @param exercises
-   * @param <T>
-   */
-/*  @Override
-  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
-    setScores(exercises, dao.exidAndScore(userid));
-  }*/
 
   /**
    * Consider a cache here - this isn't going to change much
    * <p>
    * Set the score on the exercise - just a float.
    *
-   * @param exercises
    * @param correctAndScoresForReal
+   * @paramx exercises
    * @seex #addScoresForAll
    * @see #getScores
    */
-  private <T extends CommonShell> void setScores(Collection<T> exercises,
+/*  private <T extends CommonShell> void setScores(Collection<T> exercises,
                                                  Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     long then = System.currentTimeMillis();
     int c = 0;
@@ -427,7 +440,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           "\n\tand " + exercises.size() + " exercises, " +
           "\n\tcorrect & score " + correctAndScoresForReal.size());
     }
+  }*/
+  private <T extends HasID> Map<Integer, Float> getScores2(
+      Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+    Map<Integer, Float> idToScore = new HashMap<>();
+    correctAndScoresForReal.forEach((k, v) -> idToScore.put(k, v.pronscore()));
+    return idToScore;
   }
+
 
   private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
                                                           Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
@@ -543,7 +563,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getBestForUser
    */
-  public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) { return dao.perfForUser(userid, projid);  }
+  public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) {
+    return dao.perfForUser(userid, projid);
+  }
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfForUserOnList(userid, listid);
