@@ -221,9 +221,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   /**
    * @param projid
    * @return
-   * @see #update(int, ProjectInfo)
+   * @see #update
    */
-  private Map<String, String> getProps(int projid) {
+  public Map<String, String> getProps(int projid) {
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.getAllForProject(projid);
     Map<String, String> keyToValue = new HashMap<>();
     slickProjectProperties.forEach(slickProjectProperty -> keyToValue.put(slickProjectProperty.key(), slickProjectProperty.value()));

@@ -320,13 +320,20 @@ public class Project implements PronunciationLookup {
   public void clearPropCache() {
 //    logger.debug("clear project #" + getID());
     propCache.clear();
+    putAllProps();
+  }
+
+  private void putAllProps() {
+    propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
   private String getProp(String prop) {
     String s = propCache.get(prop);
     if (s == null) {
       IProjectDAO projectDAO = db.getProjectDAO();
-//      logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
+      putAllProps();
+
+      // logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
       String propValue = projectDAO.getPropValue(getID(), prop);
       propCache.put(prop, propValue);
       return propValue;
@@ -334,7 +341,6 @@ public class Project implements PronunciationLookup {
       return s;
     }
   }
-
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
   }

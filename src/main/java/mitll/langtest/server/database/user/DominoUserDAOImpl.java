@@ -1042,55 +1042,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return users;
   }
 
-/*
-  private List<DBUser> getAllByGender(boolean isMale) {
-    long then = System.currentTimeMillis();
-    logger.warn("getAll calling get all users");
-    Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
-
-    UserColumn col = new UserColumn("Gender", true, true, 20, ITableColumnEnum.Alignment.Left);
-    filterDetails.add(new FilterDetail<>(UserColumn.Email, MiniUser.Gender.Male.name(), FilterDetail.Operator.EQ));
-
-    getDbUsers();
-    List<DBUser> users = delegate.getUsers(-1, new FindOptions<>());
-    long now = System.currentTimeMillis();
-    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
-    return users;
-  }
-*/
-
-  /**
-   * @return
-   * @see UserServiceImpl#getKindToUser
-   * @deprecated
-   */
-/*  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
-    Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
-    for (DBUser s : getAll()) {
-      User.Kind key = getRole(s);//User.Kind.valueOf(s.kind());
-      Collection<MiniUser> miniUsers = kindToUsers.get(key);
-      if (miniUsers == null) kindToUsers.put(key, miniUsers = new ArrayList<>());
-      miniUsers.add(getMini(s));
-    }
-
-    for (Collection<MiniUser> perKind : kindToUsers.values()) {
-      Collections.sort((ArrayList<MiniUser>) perKind, (o1, o2) -> -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis()));
-    }
-
-    return kindToUsers;
-  }*/
-
-  /**
-   * gets ROLE from DBUser
-   *
-   * @return
-   * @paramx s
-   */
-/*
-  private User.Kind getRole(DBUser s) {
-    return getUserKind(s, new HashSet<>());
-  }
-*/
   @Override
   public MiniUser getMiniUser(int userid) {
     DBUser byID = lookupUser(userid);

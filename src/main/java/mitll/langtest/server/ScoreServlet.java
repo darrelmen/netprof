@@ -123,12 +123,24 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String EXERCISE_TEXT = "exerciseText";
   private static final String SUCCESS = "success";
   private static final String ERROR1 = "error";
+  public static final String HAS_USER = "hasUser";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
 
-  public enum Request {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
+  public enum GetRequest {
+    HASUSER,
+    PROJECTS,
+    NESTED_CHAPTERS,
+    CHAPTER_HISTORY,
+    //JSON_REPORT,
+    //EXPORT, REMOVE_REF_RESULT, REPORT,
+    PHONE_REPORT,
+    UNKNOWN
+  }
+
+  public enum PostRequest {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
 
   private final Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
@@ -155,16 +167,26 @@ public class ScoreServlet extends DatabaseServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
+      makeAudioFileHelper();
+
       ReportingServices reportingServices = getDatabase();
 
       String queryString = getQuery(request);
 
-      if (matchesRequest(queryString, PROJECTS)) {
+      GetRequest realRequest = getGetRequest(queryString);
+      logger.info("doGet query '" + queryString + "' = " + realRequest);
+      if (realRequest == GetRequest.PROJECTS) {
         reply(response, getProjects());
+        return;
+      } else if (realRequest == GetRequest.HASUSER) {
+        logger.info("doGet got doGet hasUser " + queryString);
+        JSONObject toReturn = new JSONObject();
+        checkUserAndLogin(request, toReturn);
+        reply(response, toReturn);
         return;
       }
 
-      checkSession(request);
+      int userID = checkSession(request);
 
       int projid = getProject(request);
 
@@ -195,13 +217,12 @@ public class ScoreServlet extends DatabaseServlet {
       long then = System.currentTimeMillis();
       configureResponse(response);
 
-      makeAudioFileHelper();
       JSONObject toReturn = new JSONObject();
       String jsonString = "";
       //toReturn.put(ERROR, "expecting request");
 
       try {
-         if (matchesRequest(queryString, NESTED_CHAPTERS)) {
+        if (realRequest == GetRequest.NESTED_CHAPTERS) {
           String[] split1 = queryString.split("&");
           if (split1.length == 2) {
             String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
@@ -235,9 +256,9 @@ public class ScoreServlet extends DatabaseServlet {
             }
             toReturn = nestedChapters;
           }
-        } else if (matchesRequest(queryString, "hasUser")) {
-          logger.info("got doGet hasUser " + queryString);
-          checkUserAndLogin(request, toReturn);
+//        } else if (matchesRequest(queryString, HAS_USER)) {
+//          logger.info("got doGet hasUser " + queryString);
+//          checkUserAndLogin(request, toReturn);
         } else if (userManagement.doGet(
             request,
             response,
@@ -245,32 +266,29 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn
         )) {
           logger.info("doGet " + language + " handled user command");
-        } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
+        } else if (realRequest == GetRequest.CHAPTER_HISTORY) {
           queryString = removePrefix(queryString, CHAPTER_HISTORY);
-          toReturn = getChapterHistory(queryString, toReturn, projid);
-//        } else if (matchesRequest(queryString, PROJECTS)) {
-//          queryString = removePrefix(queryString, PROJECTS);
-//          jsonString = getProjects();
-        } else if (matchesRequest(queryString, JSON_REPORT)) {
-          queryString = removePrefix(queryString, JSON_REPORT);
-          reportingServices.getReport(getYear(queryString), toReturn);
-        } else if (matchesRequest(queryString, EXPORT)) {
-          toReturn = getJSONForExercises(projid);
-        } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
-          toReturn = removeRefResult(queryString);
-        } else if (matchesRequest(queryString, REPORT)) {
-          queryString = removePrefix(queryString, REPORT);
-          int year = getYear(queryString);
-          configureResponseHTML(response, year);
-          reply(response, reportingServices.getReport(year, toReturn));
-          return;
-        } else if (matchesRequest(queryString, PHONE_REPORT)) {
+          toReturn = getChapterHistory(queryString, toReturn, projid, userID);
+//        } else if (realRequest ==  JSON_REPORT)) {
+//          queryString = removePrefix(queryString, JSON_REPORT);
+//          reportingServices.getReport(getYear(queryString), toReturn);
+//        } else if (matchesRequest(queryString, EXPORT)) {
+//          toReturn = getJSONForExercises(projid);
+////        } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
+////          toReturn = removeRefResult(queryString);
+//        } else if (matchesRequest(queryString, REPORT)) {
+//          queryString = removePrefix(queryString, REPORT);
+//          int year = getYear(queryString);
+//          configureResponseHTML(response, year);
+//          reply(response, reportingServices.getReport(year, toReturn));
+//          return;
+        } else if (realRequest == GetRequest.PHONE_REPORT) {
           queryString = removePrefix(queryString, PHONE_REPORT);
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
             toReturn.put(ERROR, "expecting at least two query parameters");
           } else {
-            toReturn = getPhoneReport(toReturn, split1, projid);
+            toReturn = getPhoneReport(toReturn, split1, projid, userID);
           }
         } else {
           toReturn.put(ERROR, "unknown req " + queryString);
@@ -286,6 +304,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
       }
       then = now;
+
       String respString = jsonString.isEmpty() ? toReturn.toString() : jsonString;
       now = System.currentTimeMillis();
       l = now - then;
@@ -316,9 +335,10 @@ public class ScoreServlet extends DatabaseServlet {
     return queryString;
   }
 
-  private void checkSession(HttpServletRequest request) throws DominoSessionException {
+  private int checkSession(HttpServletRequest request) throws DominoSessionException {
     int userIDFromSession = securityManager.getUserIDFromSession(request);
     logger.info("doGet user id from session is " + userIDFromSession);
+    return userIDFromSession;
   }
 
   private int getProjectID(String language) {
@@ -329,27 +349,16 @@ public class ScoreServlet extends DatabaseServlet {
     return db;
   }
 
-/*  private int getIntValue(String projid) {
-    int projectid = -1;
-    String s = projid.split("&")[0];
-    try {
-      projectid = Integer.parseInt(s);
-    } catch (NumberFormatException e) {
-      logger.error("getIntValue can't parse " + s);
-    }
-    return projectid;
-  }*/
-
   /**
    * TODO : put this back - need to add project as an argument
    * Worries about sql injection attack.
    * Remove ref result entry for an exercise, helpful if you want to clear the ref result for just one exercise
    *
-   * @param queryString
    * @return
+   * @paramx queryString
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject removeRefResult(String queryString) {
+ /* private JSONObject removeRefResult(String queryString) {
     String[] split = queryString.split("&");
     if (split.length != 3) {
       return getJsonResponse("Expecting exid and projid");
@@ -389,8 +398,7 @@ public class ScoreServlet extends DatabaseServlet {
         return jsonObject;
       }
     }
-  }
-
+  }*/
   @NotNull
   private JSONObject getJsonResponse(String message) {
     JSONObject jsonObject = new JSONObject();
@@ -409,7 +417,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param queryString
    * @return
    */
-  private int getYear(String queryString) {
+/*  private int getYear(String queryString) {
     String[] split1 = queryString.split("&");
     int year = -1;
     if (split1.length == 2) {
@@ -422,15 +430,14 @@ public class ScoreServlet extends DatabaseServlet {
     //   year = Calendar.getInstance().get(Calendar.YEAR);
     // }
     return year;
-  }
-
+  }*/
   private String removePrefix(String queryString, String prefix) {
     return queryString.substring(queryString.indexOf(prefix) + prefix.length());
   }
 
-  private boolean matchesRequest(String queryString, String expected) {
+/*  private boolean matchesRequest(String queryString, String expected) {
     return queryString.startsWith(expected) || queryString.startsWith(REQUEST1 + expected);
-  }
+  }*/
 
   /**
    * Check for a parameter to control what we send back
@@ -480,22 +487,20 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid) {
+  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid, int userid) {
     UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
-    String user = userAndSelection.getUser();
     Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
-    logger.debug("getPhoneReport : user " + user + " selection " + selection);
+    logger.debug("getPhoneReport : user " + userid + " selection " + selection + " proj " + projid);
     try {
       long then = System.currentTimeMillis();
-      int userid = Integer.parseInt(user);
 
       int projectID = projid != -1 ? projid : getMostRecentProjectByUser(userid);
       toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
       if (now - then > 5) {
         logger.debug("getPhoneReport :" +
-            "\n\tuser      " + user +
+            "\n\tuser      " + userid +
             "\n\tselection " + selection +
             "\n\tprojectID " + projectID +
             "\n\ttook      " + (now - then) + " millis");
@@ -507,12 +512,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private String getProjects() {
-    Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
-/*
-    logger.info("getProjects got " + productionProjects.size() + " projects");
-    for (Project project : productionProjects) logger.info(" project " + project);
-*/
-    return new ProjectExport().toJSON(productionProjects);
+    return new ProjectExport().toJSON(db.getProjectManagement().getProductionProjects());
   }
 
   /**
@@ -522,7 +522,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getChapterHistory(String queryString, JSONObject toReturn, int projectid) {
+  private JSONObject getChapterHistory(String queryString, JSONObject toReturn, int projectid, int userID) {
     logger.info("getChapterHistory for project " + projectid);
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
@@ -533,8 +533,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
-        int l = Integer.parseInt(userAndSelection.getUser());
-        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(projectid), projectid);
+        toReturn = db.getJsonScoreHistory(userID, selection, getExerciseSorter(projectid), projectid);
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
       }
@@ -549,7 +548,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param projectid
    * @return
    * @see #doGet
-   * @see #getChapterHistory(String, JSONObject, int)
+   * @see #getChapterHistory
    */
   private ExerciseSorter getExerciseSorter(int projectid) {
     Map<String, Integer> stringIntegerHashMap = new HashMap<>();
@@ -568,6 +567,10 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #(HttpServletRequest, HttpServletResponse)
    */
   private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) {
+    reply(response, jsonObject.toString());
+  }
+
+  private void reply(HttpServletResponse response, JSONObject jsonObject) {
     reply(response, jsonObject.toString());
   }
 
@@ -612,9 +615,9 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
-      Request realRequest = getRequest(requestType);
-      if (realRequest != Request.EVENT) {
-        logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+      PostRequest realRequest = getPostRequest(requestType);
+      if (realRequest != PostRequest.EVENT) {
+        logger.debug("doPost got request " + requestType + "/" + realRequest + " device " + deviceType + "/" + device);
       }
 
       switch (realRequest) {
@@ -641,7 +644,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } else {
       logger.info("doPost request type is null - assume align.");
-      jsonObject = getJsonForAudio(request, Request.ALIGN, deviceType, device);
+      jsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
     }
 
     writeJsonToOutput(response, jsonObject);
@@ -694,11 +697,37 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private Request getRequest(String requestType) {
-    for (Request request : Request.values()) {
-      if (requestType.toLowerCase().startsWith(request.toString().toLowerCase())) return request;
+  private PostRequest getPostRequest(String requestType) {
+    String s = requestType.toLowerCase();
+    for (PostRequest request : PostRequest.values()) {
+      if (s.startsWith(request.toString().toLowerCase())) return request;
     }
-    return Request.UNKNOWN;
+    return PostRequest.UNKNOWN;
+  }
+
+  private GetRequest getGetRequest(String requestType) {
+    String lcReq = requestType.toLowerCase();
+    if (lcReq.startsWith(REQUEST1)) {
+      lcReq = lcReq.substring(REQUEST1.length());
+    }
+
+    GetRequest matched = GetRequest.UNKNOWN;
+
+    for (GetRequest request : GetRequest.values()) {
+      String prefix = request.toString().toLowerCase();
+      if (lcReq.startsWith(prefix)) {
+        logger.info("getGetRequest lcReq '" + lcReq + "' vs '" + prefix + "'");
+        matched = request;
+        break;
+      } else {
+        logger.info("getGetRequest no match lcReq '" + lcReq + "' vs '" + prefix + "'");
+
+      }
+    }
+
+    logger.info("getGetRequest get req '" + lcReq + "' = " + matched);
+
+    return matched;
   }
 
   private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
@@ -835,7 +864,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private JSONObject getJsonForAudio(HttpServletRequest request,
-                                     Request requestType,
+                                     PostRequest requestType,
                                      String deviceType,
                                      String device) throws IOException {
     // check session
@@ -1067,23 +1096,25 @@ public class ScoreServlet extends DatabaseServlet {
 
   private static class UserAndSelection {
     private final String[] split1;
-    private String user;
+    //private String user;
     private Map<String, Collection<String>> selection;
 
     UserAndSelection(String... split1) {
       this.split1 = split1;
     }
 
+/*
     public String getUser() {
       return user;
     }
+*/
 
     public Map<String, Collection<String>> getSelection() {
       return selection;
     }
 
     UserAndSelection invoke() {
-      user = "";
+      // user = "";
       selection = new TreeMap<>();
       for (String param : split1) {
         //logger.debug("param '" +param+               "'");
@@ -1092,7 +1123,7 @@ public class ScoreServlet extends DatabaseServlet {
           String key = split[0];
           String value = split[1];
           if (key.equals(USER)) {
-            user = value;
+            //user = value;
           } else {
             selection.put(key, Collections.singleton(value));
           }

@@ -11,6 +11,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -73,7 +74,7 @@ public class JsonScoring {
                                            int projid,
                                            int exerciseID,
                                            int user,
-                                           ScoreServlet.Request request,
+                                           ScoreServlet.PostRequest request,
                                            String wavPath,
                                            File saveFile,
                                            String deviceType, String device,
@@ -88,7 +89,7 @@ public class JsonScoring {
       jsonForScore.put(VALID, "bad_exercise_id");
       return jsonForScore;
     }
-    boolean doFlashcard = request == ScoreServlet.Request.DECODE;
+    boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
     options.setDoFlashcard(doFlashcard);
     AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
         options);
@@ -273,7 +274,7 @@ public class JsonScoring {
   /**
    * @param wavFile
    * @param trackInfo
-   * @see mitll.langtest.server.ScoreServlet#ensureMP3Later
+   * @see  #ensureMP3Later
    */
   private void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
     File absolutePathToWav = new File(wavFile);
@@ -282,7 +283,7 @@ public class JsonScoring {
   }
 
   private String getUserID(int userid) {
-    User userWhere = db.getUserDAO().getUserWhere(userid);
+    MiniUser userWhere = db.getUserDAO().getMiniUser(userid);
     if (userWhere == null) logger.error("huh? can't find user by " + userid);
     return userWhere == null ? "" + userid : userWhere.getUserID();
   }

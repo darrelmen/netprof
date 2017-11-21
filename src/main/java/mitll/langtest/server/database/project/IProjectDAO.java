@@ -38,9 +38,11 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface IProjectDAO extends IDAO {
   String getPropValue(int projid, String key);
+  Map<String, String> getProps(int projid);
 
   int add(int userid, String name, String language, String course,
           String firstType, String secondType, String countryCode, int displayOrder, boolean isDev);
