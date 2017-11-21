@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -41,6 +42,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.scoring.ImageOptions;
 
 import java.text.CollationKey;
 import java.text.Collator;
@@ -49,14 +51,38 @@ import java.util.List;
 import java.util.Map;
 
 public interface IResultDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.database.Report#getEarliest
+   * @param projid
+   * @return
+   */
   long getFirstTime(int projid);
 
+  /**
+   * Just for export
+   * @return
+   */
   List<Result> getResults();
 
+  /**
+   * @see mitll.langtest.server.database.Report#getReportForProject(ReportStats, StringBuilder, boolean)
+   * @param projid
+   * @return
+   */
   Collection<MonitorResult> getResultsDevices(int projid);
 
+  /**
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
+   * @param id
+   * @return
+   */
   Result getResultByID(int id);
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResults
+   * @param projid
+   * @return
+   */
   List<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getMonitorResultsByID(int id);
@@ -71,7 +97,9 @@ public interface IResultDAO extends IDAO {
                                           Map<Integer, CollationKey> idToKey,
                                           String language);
 
-  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator,
+  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
+                                                                   int userid,
+                                                                   Collator collator,
                                                                    String language);
 
   Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,

@@ -361,8 +361,10 @@ public class AudioConversion extends AudioBase {
         logger.error("wav2raw : can't read the output file " + absolutePath);
       }
 
-      logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() +
-          " len " + (outputFile.length() / 1024) + "K");
+      if (DEBUG) {
+        logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() + " len " + (outputFile.length() / 1024) + "K");
+      }
+
       return outputFile.exists();
     } catch (Exception e) {
       logger.error("Got " + e, e);

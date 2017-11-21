@@ -131,7 +131,7 @@ public class UserManagement {
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @see #usersToXLSX
    */
-  public List<User> getUsers() {
+/*  public List<User> getUsers() {
     // TODO : this is really expensive - right now we reparse all the json when we get it out of the database.
     //Map<Integer, Float> userToRate = resultDAO.getSessions("").getUserToRate();
     List<User> users = null;
@@ -161,12 +161,12 @@ public class UserManagement {
 
           // TODO : put this back
 //          if (false) {
-   /*         boolean complete = size >= numExercises;
+   *//*         boolean complete = size >= numExercises;
             u.setComplete(complete);
-            u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));*/
+            u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));*//*
   //        }
-/*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
-            " vs total exercises " + total + " complete " + complete);*/
+*//*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
+            " vs total exercises " + total + " complete " + complete);*//*
         }
       }
     } catch (Exception e) {
@@ -174,7 +174,7 @@ public class UserManagement {
     }
 
     return users;
-  }
+  }*/
 
   /**
    * So multiple recordings for the same item are counted as 1.

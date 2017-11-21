@@ -1044,8 +1044,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param projid
    * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
+   * @see DownloadServlet#returnSpreadsheet
    */
   @Override
   public Collection<MonitorResult> getMonitorResults(int projid) {

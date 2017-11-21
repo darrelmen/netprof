@@ -34,6 +34,7 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -384,7 +385,7 @@ public abstract class BaseResultDAO extends DAO {
    * So multiple recordings for the same item are counted as 1.
    *
    * @return
-   * @seex #getUsers
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
   public UserToCount getUserToNumAnswers() {
     Map<Integer, Integer> idToCount = new HashMap<>();
@@ -405,10 +406,6 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   abstract Collection<UserAndTime> getUserAndTimes();
-
-/*
-  abstract List<CorrectAndScore> getAllCorrectAndScores(String language);
-*/
 
   /**
    * @param userID

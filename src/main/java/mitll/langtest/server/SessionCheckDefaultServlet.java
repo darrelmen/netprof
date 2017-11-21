@@ -45,6 +45,7 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,15 +64,35 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
     return securityManager.getUserIDFromSession(httpRequest);
   }
 
+  /**
+   * OK, let's also check to see if the person requesting the audio has the right to hear it.
+   *
+   * Students cannot hear audio made by other students.
+   *
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     try {
+      log.warn("doGet : req for : " + request.getRequestURI());
+
       if (db == null) {
         findSharedDatabase(getServletContext());
       }
 
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
+
       log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for : " + request.getRequestURI());
+
+      if (request.getRequestURI().startsWith("/answers")) {
+        // 1 who recorded the audio?
+        // 2 are you the same person? if so you get to hear it
+        // 3 if you are not the same, are you are teacher, then you can hear it
+        // 4 if you are a student sorry, you don't get to hear it
+      }
       super.doGet(request, response);
     } catch (DominoSessionException dse) {
       log.warn("doGet : nope - no session " + dse.getMessage() + " req for : " + request.getRequestURI());
@@ -127,5 +148,11 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
     } catch (IOException e) {
       log.error("Error Writing to ouput stream! Request: {}", request.getRequestURI(), e);
     }
+  }
+
+  @Override
+  public void init() throws UnavailableException {
+    super.init();
+    log.warn("init for servlet");
   }
 }

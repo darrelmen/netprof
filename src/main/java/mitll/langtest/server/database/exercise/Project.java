@@ -235,13 +235,15 @@ public class Project implements PronunciationLookup {
     List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
     //logger.info("build trie from " + rawExercises.size() + " exercises");
-    long then=System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
-    logger.info("for " + project.id() + " took " + (System.currentTimeMillis()-then) +  " millis to build trie for " + rawExercises.size() + " exercises");
+    logger.info("for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
 
-    then=System.currentTimeMillis();
-    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
-    logger.info("for " + project.id() + " took " + (System.currentTimeMillis()-then) +  " millis to build context trie for " + rawExercises.size() + " exercises");
+    new Thread(() -> {
+      long then1 = System.currentTimeMillis();
+      fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
+      logger.info("for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
+    }).start();
   }
 
   /**
@@ -315,7 +317,7 @@ public class Project implements PronunciationLookup {
     return getProp(ServerProperties.MODELS_DIR);
   }
 
- private Map<String, String> propCache = new HashMap<>();
+  private Map<String, String> propCache = new HashMap<>();
 
   public void clearPropCache() {
 //    logger.debug("clear project #" + getID());
@@ -341,6 +343,7 @@ public class Project implements PronunciationLookup {
       return s;
     }
   }
+
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
   }

@@ -38,8 +38,6 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -51,7 +49,6 @@ import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
 import mitll.npdata.dao.result.SlickExerciseScore;
-import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -286,14 +283,23 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return getMonitorResults(dao.byExID(id));
   }
 
+  /**
+   * @see BaseResultDAO#getUserToNumAnswers
+   * @return
+   */
   @Override
   public Collection<UserAndTime> getUserAndTimes() {
+    return null;
+/*
     List<SlickUserAndTime> tuple4s = dao.userAndTime();
     List<UserAndTime> userAndTimes = new ArrayList<>();
     for (SlickUserAndTime tuple : tuple4s) {
-      userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified()/*, tuple.qid()*/));
+      userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified()*/
+/*, tuple.qid()*//*
+));
     }
     return userAndTimes;
+*/
   }
 
   /**
@@ -348,24 +354,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   public int getNumResults(int projid) {
     return dao.numRowsForProject(projid);
   }
-
-  /**
-   * @seex BaseResultDAO#getCorrectAndScores(String)
-   * @param language
-   * @return
-   */
-/*  @Override
-  List<CorrectAndScore> getAllCorrectAndScores(String language) {
-    return getCorrectAndScores(dao.correctAndScore(), language);
-  }*/
-
-/*  private List<ExerciseIDAndScore> getExAndScore(Collection<SlickExerciseScore> slickCorrectAndScores) {
-    List<ExerciseIDAndScore> cs = new ArrayList<>();
-    for (SlickExerciseScore scs : slickCorrectAndScores) {
-      cs.add(new ExerciseIDAndScore(scs.exerciseid(),scs.modified(),scs.pronscore()));
-    }
-    return cs;
-  }*/
 
   /**
    * Scores for indicated exercises for user.

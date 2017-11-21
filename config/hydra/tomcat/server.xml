@@ -123,10 +123,12 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true">
 
-        <!-- we serve audio statically for now - ideally we would have filters like domino does -->
+        <!-- we serve audio using our own servlet -->
 
+<!--
         <Context docBase="/opt/netprof/bestAudio" path="/netprof/bestAudio" />
         <Context docBase="/opt/netprof/answers"   path="/netprof/answers" />
+-->
 
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->

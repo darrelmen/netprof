@@ -62,7 +62,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
-  private static boolean DEBUG = false;
+  private static boolean DEBUG = true;
 
   /**
    * Only made once but shared with servlets.
@@ -161,7 +161,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @return
    */
   public void setSessionUser(HttpSession session, User loggedInUser) {
-//    logger.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
+    log.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
     try {
       int id1 = loggedInUser.getID();
       session.setAttribute(USER_SESSION_ATT, id1);
@@ -184,11 +184,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   private void logSetSession(HttpSession session1, String sessionID) {
-    log.info("setSessionUser : Adding user to " + sessionID +
-        " lookup is " + getUserIDFromSession(session1) +
-        ", session.isNew=" + session1.isNew() +
-        ", created=" + session1.getCreationTime() +
-        ", " + getAttributesFromSession(session1));
+    log.info("setSessionUser : Adding user to " +
+        "\nsession        "  + sessionID +
+        "\nlookup user    " + getUserIDFromSession(session1) +
+        "\nsession.isNew= " + session1.isNew() +
+        "\ncreated        " + session1.getCreationTime() + " or " + (new Date( session1.getCreationTime()))+
+        "\nattributes     " + getAttributesFromSession(session1));
   }
 
 
@@ -483,7 +484,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long then = System.currentTimeMillis();
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
-    if (now - then > 20) log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    //if (now - then > 20)
+      log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
     return sessUser;
   }
 
