@@ -99,4 +99,6 @@ public interface IProjectManagement {
   FileUploadHelper getFileUploadHelper();
 
   ImportInfo getImport(int projid);
+
+  int getUserForFile(String requestURI);
 }

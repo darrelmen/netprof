@@ -171,7 +171,7 @@
 
 
     <servlet>
-        <servlet-name>DefaultServlet</servlet-name>
+        <servlet-name>MyDefaultServlet</servlet-name>
         <!--
                 <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
         -->
@@ -211,7 +211,7 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>DefaultServlet</servlet-name>
+        <servlet-name>MyDefaultServlet</servlet-name>
         <url-pattern>/bestAudio/*</url-pattern>
     </servlet-mapping>
 

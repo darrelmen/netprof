@@ -52,6 +52,8 @@ import mitll.npdata.dao.result.SlickExerciseScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.Tuple2;
+import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -543,6 +545,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
     return dao.perf(projid, minScore);
+  }
+
+  @Override
+  public Map<String,Integer> getStudentAnswers(int projid) {
+    List<Tuple2<String, Integer>> tuple2s = dao.studentAnswers(projid);
+    Map<String,Integer> pathToUser = new HashMap<>();
+    tuple2s.forEach(stringIntegerTuple2 -> pathToUser.put(stringIntegerTuple2._1, stringIntegerTuple2._2));
+    return pathToUser;
   }
 
   /**

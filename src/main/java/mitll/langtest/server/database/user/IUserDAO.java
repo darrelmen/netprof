@@ -217,6 +217,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   void close() throws Exception;
 
+  boolean isStudent(int userIDFromSessionOrDB);
+
   class ReportUsers {
     private List<ReportUser> allUsers;
     private List<ReportUser> deviceUsers;

@@ -451,6 +451,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
+  public Map<String, Integer> getStudentAnswers(int projid) {
+    return null;
+  }
+
+  @Override
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return null;
   }

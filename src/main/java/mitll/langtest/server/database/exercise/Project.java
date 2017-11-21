@@ -104,6 +104,8 @@ public class Project implements PronunciationLookup {
   private boolean isRTL;
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
+  private Map<String, Integer> fileToRecorder = new HashMap<>();
+
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
@@ -553,7 +555,34 @@ public class Project implements PronunciationLookup {
     return myProject;
   }
 
+  public Map<String, Integer> getFileToRecorder() {
+    return fileToRecorder;
+  }
+
+  public void setFileToRecorder(Map<String, Integer> fileToRecorder) {
+    this.fileToRecorder = fileToRecorder;
+  }
+
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public Integer getUserForFile(String requestURI) {
+    Integer integer = fileToRecorder.get(requestURI);
+    if (integer == null) {
+      logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
+//
+//      int max = 0;
+//      for (String file : fileToRecorder.keySet()) {
+//        if (max++ == 10) break;
+//
+//        logger.warn(file);
+//      }
+    }
+    return integer;
+  }
+
+  public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
+    fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
   }
 }

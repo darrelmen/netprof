@@ -426,7 +426,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         (int) resultID,
         testAudioFile,
         sentence, transliteration, imageOptions,
-        exerciseID, usePhonemeMap, precalcScores, audioFileHelper);
+        exerciseID, usePhonemeMap, precalcScores, audioFileHelper, projectID, userIDFromSessionOrDB);
   }
 
   /**
@@ -450,7 +450,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        int exerciseID,
                                        boolean usePhoneToDisplay,
                                        PrecalcScores precalcScores,
-                                       AudioFileHelper audioFileHelper) {
+                                       AudioFileHelper audioFileHelper,
+                                       int projID,
+                                       int userIDFromSessionOrDB) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -492,6 +494,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, true);
+      db.getProjectManagement().getProject(projID).addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
     }
     return asrScoreForAudio;
   }

@@ -99,6 +99,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public static final String NETPROF = DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
+  public static final String PO_M = "PoM";
+  public static final String ILR = "ILR";
 
   private IUserServiceDelegate delegate;
   private MyMongoUserServiceDelegate myDelegate;
@@ -194,6 +196,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (ignite != null) {
       ignite.close();
     }
+  }
+
+  @Override
+  public boolean isStudent(int userIDFromSessionOrDB) {
+    mitll.hlt.domino.shared.model.user.User dbUser = lookupUser(userIDFromSessionOrDB);
+    Kind userKind = getUserKind(dbUser, new HashSet<>());
+    return userKind == STUDENT;
   }
 
   private Ignite getIgnite() {
@@ -866,8 +875,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see #toUser
    */
   private boolean isAdmin(mitll.hlt.domino.shared.model.user.User dominoUser) {
-    Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
-    return isAdmin(roleAbbreviations);
+    return isAdmin(dominoUser.getRoleAbbreviations());
   }
 
   private boolean isAdmin(Set<String> roleAbbreviations) {
@@ -913,7 +921,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @NotNull
   private Kind getKindForRole(String firstRole) {
-    if (firstRole.equals("PoM")) firstRole = Kind.PROJECT_ADMIN.getRole();
+    if (firstRole.equals(PO_M)) firstRole = Kind.PROJECT_ADMIN.getRole();
     Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
       try {
@@ -923,7 +931,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       } catch (IllegalArgumentException e) {
         Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
-          if (!firstRole.startsWith("ILR")) {
+          if (!firstRole.startsWith(ILR)) {
             if (unknownRoles.contains(firstRole)) {
 
             } else {

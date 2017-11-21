@@ -120,6 +120,8 @@ public interface IResultDAO extends IDAO {
 
   int getDefaultResult();
 
+  Map<String,Integer> getStudentAnswers(int projid);
+
   Collection<Integer> getPracticedByUser(int userid, int projid);
 
   /**

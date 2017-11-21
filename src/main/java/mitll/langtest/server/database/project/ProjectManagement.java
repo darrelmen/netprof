@@ -219,7 +219,8 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
-    logger.info("configure START " + project.getID() + "/" + getProjects().size() + " : " + project.getLanguage());
+    int projectID = project.getID();
+    logger.info("configure START " + projectID + "/" + getProjects().size() + " : " + project.getLanguage());
 
     project.clearPropCache();
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");
@@ -274,6 +275,7 @@ public class ProjectManagement implements IProjectManagement {
       //for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
       project.setRTL(isRTL(rawExercises));
 
+      project.setFileToRecorder(db.getResultDAO().getStudentAnswers(projectID));
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
 //      project.setExToPhone(exToPhonePerProject);
@@ -281,13 +283,27 @@ public class ProjectManagement implements IProjectManagement {
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
 
-      logger.info("configure END " + project.getID() + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
+      logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
       return 0;
     }
+  }
+
+  @Override
+  public int getUserForFile(String requestURI) {
+    for (Project project : getProjects()) {
+      Integer userID = project.getUserForFile(requestURI);
+      if (userID != null) {
+        logger.info("user in " + project.getID() + " for " + requestURI + " is " + userID);
+        return userID;
+      }
+    };
+    logger.warn("couldn't find " + requestURI);
+
+    return -1;
   }
 
   /**

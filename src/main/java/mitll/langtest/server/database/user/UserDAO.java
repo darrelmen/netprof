@@ -908,6 +908,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public boolean isStudent(int userIDFromSessionOrDB) {
+    return false;
+  }
+
+  @Override
   public boolean forgotPassword(String user
       , String url
                                 //    ,                              String emailForLegacy

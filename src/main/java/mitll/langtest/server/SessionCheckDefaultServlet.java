@@ -50,8 +50,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.file.Files;
 
-public class SessionCheckDefaultServlet extends DefaultServlet {
+public class SessionCheckDefaultServlet extends HttpServlet {
   private static final Logger log = LogManager.getLogger(SessionCheckDefaultServlet.class);
 
   private static final String DATABASE_REFERENCE = "databaseReference";
@@ -66,7 +68,7 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
 
   /**
    * OK, let's also check to see if the person requesting the audio has the right to hear it.
-   *
+   * <p>
    * Students cannot hear audio made by other students.
    *
    * @param request
@@ -76,8 +78,9 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String requestURI = request.getRequestURI();
     try {
-      log.warn("doGet : req for : " + request.getRequestURI());
+      log.info("doGet : req for : " + requestURI);
 
       if (db == null) {
         findSharedDatabase(getServletContext());
@@ -85,17 +88,69 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
 
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
 
-      log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for : " + request.getRequestURI());
+      log.info("doGet : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
+      //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
 
-      if (request.getRequestURI().startsWith("/answers")) {
-        // 1 who recorded the audio?
-        // 2 are you the same person? if so you get to hear it
-        // 3 if you are not the same, are you are teacher, then you can hear it
-        // 4 if you are a student sorry, you don't get to hear it
+      String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
+      File file = new File("/opt/netprof/", filename);
+
+      log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
+
+      if (!file.exists()) {
+        filename = URLDecoder.decode(requestURI, "UTF-8");
+        file = new File("/opt/netprof", filename);
+        log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
       }
-      super.doGet(request, response);
+
+      if (file.exists()) {
+        if (requestURI.startsWith("/answers")) {
+          // 1 who recorded the audio?
+          String fileToFind = requestURI.substring(1);
+
+          String sub = requestURI.substring("/answers".length());
+          int answers = sub.indexOf("answers");
+          if (answers != -1) {
+            fileToFind = sub.substring(answers);
+            log.info("test now " + fileToFind);
+          }
+          fileToFind = fileToFind.length() > 4 ? fileToFind.substring(0, fileToFind.length() - 4) + ".wav" : fileToFind;
+          log.info("testing " + fileToFind);
+          int userForFile = db.getProjectManagement().getUserForFile(fileToFind);
+
+          if (userForFile == -1) {
+            log.warn("not sure who recorded this file " + requestURI);
+          } else {
+            if (userForFile == userIDFromSessionOrDB) {
+              // 2 are you the same person? if so you get to hear it
+              log.info("OK, it's your file.");
+            } else {
+              boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
+              if (student) {
+                // 4 if you are a student sorry, you don't get to hear it
+                reply(response, "not your file.");
+                return;
+              } else {
+                // 3 if you are not the same, are you are teacher, then you can hear it
+                log.info("OK, you're a teacher");
+              }
+            }
+          }
+          log.info("got answers " + requestURI);
+        }
+      }
+
+      if (file.exists()) {
+        response.setHeader("Content-Type", getServletContext().getMimeType(filename));
+        response.setHeader("Content-Length", String.valueOf(file.length()));
+        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
+
+        Files.copy(file.toPath(), response.getOutputStream());
+      } else {
+        String message = "Nope.";
+        reply(response, message);
+      }
     } catch (DominoSessionException dse) {
-      log.warn("doGet : nope - no session " + dse.getMessage() + " req for : " + request.getRequestURI());
+      log.warn("doGet : nope - no session " + dse.getMessage() + " req for : " + requestURI);
       handleAccessFailure(request, response);
     } catch (Exception e) {
       if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
@@ -103,6 +158,15 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
       } else {
         log.error("doGet : Unexpected exception during request {}.", request.getRequestURL(), e);
       }
+    }
+  }
+
+  private void reply(HttpServletResponse response, String message) {
+    try {
+      response.setContentType("text/plain");
+      response.getWriter().write(message);
+    } catch (IOException e) {
+      log.error("Error Writing to ouput stream! Request: {}", "", e);
     }
   }
 
@@ -116,7 +180,7 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
         log.error("findSharedDatabase no database?");
       } else {
         securityManager = db.getUserSecurityManager();
-        log.warn("got security manager " +securityManager);
+        log.warn("got security manager " + securityManager);
       }
     }
   }
@@ -141,18 +205,19 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
 
   private void handleAccessFailure(final HttpServletRequest request,
                                    final ServletResponse response) throws IOException, ServletException {
-    log.error("System access failed security filter! Request: {}", request.getRequestURI());
+    String requestURI = request.getRequestURI();
+    log.error("System access failed security filter! Request: {}", requestURI);
     try {
       response.setContentType("text/plain");
       response.getWriter().write("{ \"" + Constants.SESSION_EXPIRED_CODE + "\": true}");
     } catch (IOException e) {
-      log.error("Error Writing to ouput stream! Request: {}", request.getRequestURI(), e);
+      log.error("Error Writing to ouput stream! Request: {}", requestURI, e);
     }
   }
 
   @Override
   public void init() throws UnavailableException {
-    super.init();
-    log.warn("init for servlet");
+    //  super.init();
+    log.info("init for servlet");
   }
 }
