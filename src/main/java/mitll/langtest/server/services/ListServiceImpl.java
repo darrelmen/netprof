@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
@@ -144,6 +145,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
   }
 
+  /**
+   * @see NewContentChooser#getReviewList
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   @Override
   public UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();

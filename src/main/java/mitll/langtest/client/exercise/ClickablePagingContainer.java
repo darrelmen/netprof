@@ -141,13 +141,12 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
     if (visibleRange.getLength() == 1) {
       if (isEmpty()) {
-        logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
+       // logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
         return Collections.emptyList();
       } else {
         T currentSelection = getCurrentSelection();
         int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
-        logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
-        //ArrayList<Integer> integers = new ArrayList<>();
+       // logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
         List<Integer> visible = new ArrayList<>();
         visible.add(id);
         return visible;

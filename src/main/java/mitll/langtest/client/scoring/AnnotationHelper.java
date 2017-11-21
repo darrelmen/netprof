@@ -25,7 +25,8 @@ public class AnnotationHelper implements CommentAnnotator {
 
   /**
    * @param exid
-   * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+   * @param field
+   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    * @param commentToPost
    */
   public void addIncorrectComment(int exid, final String field, final String commentToPost) {
@@ -46,7 +47,7 @@ public class AnnotationHelper implements CommentAnnotator {
 
           @Override
           public void onSuccess(Void result) {
-//        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getOldID() +
+//logger.info("\t" +   " : onSuccess : posted to server " + getExercise().getOldID() +
 //            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
           }
         });

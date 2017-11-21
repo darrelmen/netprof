@@ -100,7 +100,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
-                .setActivityType(ActivityType.MARK_DEFECTS), -1) {
+                .setActivityType(ActivityType.MARK_DEFECTS),
+            -1) {
           //Logger logger = Logger.getLogger("NPExerciseList_Defects");
           private CheckBox filterOnly, uninspectedOnly;
 
@@ -118,7 +119,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
           protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
             ExerciseListRequest exerciseListRequest = super
                 .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected)
-                .setQC(true);
+                .setQC(true)
+                .setAddContext(true);
             return exerciseListRequest;
           }
 

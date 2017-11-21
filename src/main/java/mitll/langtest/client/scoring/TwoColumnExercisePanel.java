@@ -6,7 +6,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -1088,7 +1087,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         e.getAnnotation(FOREIGN_LANGUAGE),
         false,
         showInitially,
-        annotationHelper, isRTL, contentWidget);
+        annotationHelper, isRTL, contentWidget,e.getID());
 
     if (isRTL) {
       clickableWords.setDirection(flEntry);
@@ -1161,11 +1160,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper) {
+  private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
         FieldType.FL, altContextClickables = new ArrayList<>(), false);
 
-    CommentBox commentBox = getCommentBox(annotationHelper);
+    CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
         .getEntry(QCNPFExercise.ALTCONTEXT, contentWidget,
             exercise.getAnnotation(QCNPFExercise.ALTCONTEXT), showInitially, isRTL);
@@ -1262,7 +1261,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       altFLClickableRow = contentWidget;
 
       DivWidget flEntry = getCommentEntry(QCNPFExercise.ALTFL, e.getAnnotation(QCNPFExercise.ALTFL), false,
-          showInitially, annotationHelper, isRTL, contentWidget);
+          showInitially, annotationHelper, isRTL, contentWidget,e.getID());
 
       if (addTopMargin) {
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
@@ -1324,7 +1323,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       contextClickableRow = contentWidget;
 
-      CommentBox commentBox = getCommentBox(annotationHelper);
+      CommentBox commentBox = getCommentBox(annotationHelper,contextExercise.getID());
       ExerciseAnnotation annotation = contextExercise.getAnnotation(FOREIGN_LANGUAGE);
 
 /*      logger.info("context '" + context1 +
@@ -1349,7 +1348,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       if (choices == BOTH || choices == ALTFL) {
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
-          Widget altContext = getAltContext(altFL, altFL1, annotationHelper);
+          Widget altContext = getAltContext(altFL, altFL1, annotationHelper,contextExercise.getID());
           if (choices == BOTH) altContext.addStyleName("topFiveMargin");
           col.add(altContext);
         }
@@ -1461,7 +1460,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              CommentAnnotator annotationHelper,
                              boolean isRTL) {
     return getEntry(field, value, e.getAnnotation(field), fieldType, showInitially, clickables, addRightMargin,
-        annotationHelper, isRTL);
+        annotationHelper, isRTL, e.getID());
   }
 
   /**
@@ -1473,6 +1472,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param addRightMargin
    * @param annotationHelper
    * @param isRTL
+   * @param exid
    * @return
    * @paramx label
    * @see #getEntry
@@ -1485,12 +1485,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              List<IHighlightSegment> clickables,
                              boolean addRightMargin,
                              CommentAnnotator annotationHelper,
-                             boolean isRTL) {
+                             boolean isRTL, int exid) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, fieldType, clickables,
         fieldType != FieldType.FL, addRightMargin, isRTL);
     // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     return getCommentEntry(field, annotation, fieldType == FieldType.TRANSLIT, showInitially,
-        annotationHelper, isRTL, contentWidget);
+        annotationHelper, isRTL, contentWidget,exid);
   }
 
   private DivWidget getCommentEntry(String field,
@@ -1499,13 +1499,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                     boolean showInitially,
                                     CommentAnnotator annotationHelper,
                                     boolean isRTL,
-                                    DivWidget contentWidget) {
+                                    DivWidget contentWidget, int exid) {
     if (isTranslit && isRTL) {
       // logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
       contentWidget.addStyleName("floatRight");
     }
     return
-        getCommentBox(annotationHelper)
+        getCommentBox(annotationHelper,exid)
             .getEntry(field, contentWidget, annotation, showInitially, isRTL);
   }
 
@@ -1514,12 +1514,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @seex x#getEntry(String, String, String, ExerciseAnnotation)
    * @seex #makeFastAndSlowAudio(String)
    */
-  private CommentBox getCommentBox(CommentAnnotator annotationHelper) {
+  private CommentBox getCommentBox(CommentAnnotator annotationHelper, int exid) {
     if (logger == null) {
       logger = Logger.getLogger("TwoColumnExercisePanel");
     }
     T exercise = this.exercise;
-    CommentBox commentBox = new CommentBox(this.exercise.getID(), controller,
+    CommentBox commentBox = new CommentBox(exid, controller,
             annotationHelper, exercise.getMutableAnnotation(), true);
     comments.add(commentBox);
     return commentBox;

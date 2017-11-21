@@ -37,6 +37,7 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -554,8 +555,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder(), request.isQC(), projID);
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
-
-      if (request.isQC()) { // add the context exercises
+      if (request.shouldAddContext()) { // add the context exercises
       //  logger.info("adding context exercises...");
         List<CommonExercise> withContext = new ArrayList<>();
         exercises.forEach(commonExercise -> {
@@ -629,7 +629,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isFlashcardReq, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
 
+    logger.info("adding anno to " + firstExercise.getID() + " with " + firstExercise.getDirectlyRelated().size() + " context exercises");
     addAnnotations(firstExercise); // todo do this in a better way
+
     long now = System.currentTimeMillis();
     int oldID = firstExercise.getID();
     String language = getLanguage(projID);
@@ -685,7 +687,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
    */
   private void addAnnotations(CommonExercise byID) {
-    getUserListManager().addAnnotations(byID);
+    IUserListManager userListManager = db.getUserListManager();
+    userListManager.addAnnotations(byID);
+    byID.getDirectlyRelated().forEach(userListManager::addAnnotations);
   }
 
   /**

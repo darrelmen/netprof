@@ -41,6 +41,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -92,13 +93,16 @@ public class SessionCheckDefaultServlet extends HttpServlet {
       //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
 
       String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
-      File file = new File("/opt/netprof/", filename);
+      File file = new File(fixParent(requestURI), filename);
 
       log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
 
       if (!file.exists()) {
         filename = URLDecoder.decode(requestURI, "UTF-8");
-        file = new File("/opt/netprof", filename);
+
+        String parent = fixParent(requestURI);
+
+        file = new File(parent, filename);
         log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
       }
 
@@ -159,6 +163,19 @@ public class SessionCheckDefaultServlet extends HttpServlet {
         log.error("doGet : Unexpected exception during request {}.", request.getRequestURL(), e);
       }
     }
+  }
+
+  @NotNull
+  private String fixParent(String requestURI) {
+    String parent = "/opt/netprof";
+
+    if (requestURI.contains("bestAudio")) {
+      parent += "/bestAudio";
+    }
+    else if (requestURI.contains("answers")) {
+      parent += "/answers";
+    }
+    return parent;
   }
 
   private void reply(HttpServletResponse response, String message) {

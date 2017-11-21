@@ -69,6 +69,7 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean addFirst = true;
   private int limit = -1;
   private boolean QC = false;
+  private boolean addContext = false;
 
   public ExerciseListRequest() {
   }
@@ -196,7 +197,6 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   *
    * @return
    */
   public boolean isOnlyExamples() {
@@ -204,9 +204,9 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see PagingExerciseList#getRequest
    * @param onlyExamples
    * @return
+   * @see PagingExerciseList#getRequest
    */
   public ExerciseListRequest setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
@@ -299,20 +299,29 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    */
   public boolean isQC() {
     return QC;
   }
 
+  public boolean shouldAddContext() {
+    return addContext;
+  }
+
   /**
-   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#getMyListLayout
    * @param QC
    * @return
+   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#getMyListLayout
    */
   public ExerciseListRequest setQC(boolean QC) {
     this.QC = QC;
+    return this;
+  }
+
+  public ExerciseListRequest setAddContext(boolean QC) {
+    this.addContext = QC;
     return this;
   }
 

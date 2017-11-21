@@ -188,7 +188,7 @@ public class NPFHelper implements RequiresResize {
     copy.addAll(ul.getExercises());
 
     int id = toSelect == null ? -1 : toSelect.getID();
-    logger.info("rememberAndLoad " + copy.size() + " exercises for " + id);
+    logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
@@ -202,13 +202,6 @@ public class NPFHelper implements RequiresResize {
    */
   private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
     return new NPExerciseList(right, controller, listOptions, -1);
-/*    {
-      @Override
-      protected void onLastItem() {
-       // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
-        showListComplete();
-      }
-    };*/
   }
 
   /**

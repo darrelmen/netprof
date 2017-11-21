@@ -307,8 +307,13 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList<CommonShell> getCommentedList(int projID) {
-    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
-    return getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
+    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
+    logger.info("getCommented for "+ projID + " found " +exercisesWithIncorrectAnnotations.size());
+    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations);
+    logger.info("getCommented for "+ projID + " found " +defectExercises.size() + " exercises");
+    UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
+    logger.info("getCommented for "+ projID + " list has " +reviewList.getNumItems() + " exercises");
+    return reviewList;
   }
 
   @NotNull
@@ -378,24 +383,23 @@ public class UserListManager implements IUserListManager {
    * @param userList
    * @param copy
    * @return
+   * @see #getReviewList(Collection, String, String, int)
+   * @see #getReviewListEx(List, String, String, int)
    */
   @NotNull
   private <T extends CommonShell> UserList<T> getCommonUserList(UserList<T> userList, List<T> copy) {
     userList.setReview(true);
-
     new ExerciseSorter().getSorted(copy, false, false, "");
-
     userList.setExercises(copy);
     stateManager.markState(copy);
-    logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
+    logger.debug("getCommonUserList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
-
-  private List<CommonExercise> getReviewedExercises(Collection<CommonExercise> allKnown, Collection<Integer> ids) {
+ /* private List<CommonExercise> getReviewedExercises(Collection<CommonExercise> allKnown, Collection<Integer> ids) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
     return getReviewedUserExercises(idToEx, ids);
-  }
+  }*/
 
   /**
    * Need a bogus user for the list.
@@ -837,7 +841,7 @@ public class UserListManager implements IUserListManager {
     if (exercise != null) {
       MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-//      logger.info("AddAnnoations " +exercise.getID() + " got " + latestByExerciseID);
+      logger.info("addAnnotations to ex " +exercise.getID() + " got " + latestByExerciseID.size()+  " annos to fields " + latestByExerciseID.keySet());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
         mutableAnnotation.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
       }

@@ -155,8 +155,10 @@ public class NewContentChooser implements INavigation {
       @Override
       public void onSuccess(UserList<CommonShell> result) {
         List<CommonShell> exercises = result.getExercises();
+        logger.info("got back " + result.getNumItems() + " exercises");
         CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
-        Panel review = new ReviewItemHelper(controller).doNPF(result, "review", true, toSelect);
+        Panel review = new ReviewItemHelper(controller)
+            .doNPF(result, "review", true, toSelect);
         divWidget.add(review);
       }
     });

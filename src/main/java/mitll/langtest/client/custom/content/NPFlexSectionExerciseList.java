@@ -34,7 +34,6 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
@@ -46,10 +45,6 @@ import mitll.langtest.client.list.ListOptions;
  * @since 1/26/16.
  */
 public class NPFlexSectionExerciseList extends FacetExerciseList {
-  //private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList");
-  private static final String COMPLETE = "Complete";
-  private static final String LIST_COMPLETE = "List complete!";
-
   /**
    * @param topRow
    * @param currentExercisePanel
@@ -57,7 +52,6 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
    * @param listHeader
    * @param footer
    * @param numToShow
-   * @seex mitll.langtest.client.custom.Navigation#makePracticeHelper
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, DivWidget, DivWidget)
    */
   public NPFlexSectionExerciseList(ExerciseController controller,
@@ -70,15 +64,8 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
     super(topRow, currentExercisePanel, controller, listOptions, listHeader, numToShow);
   }
 
-/*  @Override
-  protected void onLastItem() {
-   // new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());
-    showListComplete();
-  }*/
-
   @Override
   protected void noSectionsGetExercises(long userID, int exerciseID) {
-    //logger.info("noSectionsGetExercies for " + userID + " " + getPrefix());
     simpleLoadExercises(getHistoryToken(), getPrefix(),exerciseID);
   }
 }

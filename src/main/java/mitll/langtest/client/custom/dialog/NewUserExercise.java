@@ -322,7 +322,7 @@ abstract class NewUserExercise extends BasicDialog {
     return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
-  protected FormField makeForeignLangRow(Panel container) {
+  private FormField makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
@@ -364,6 +364,8 @@ abstract class NewUserExercise extends BasicDialog {
     FormField formField = makeBoxAndAnnoArea(container, CONTEXT_LABEL, "", contextAnno);
 
     TextBoxBase box = formField.box;
+    box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
     box.setText(originalContext = newUserExercise.getContext());
     markPlaceholder(box, originalContext);
     addOnBlur(box, CONTEXT_BOX);

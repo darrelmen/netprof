@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainerFactory {
+  public static final String ADD_A_COMMENT = "Add a comment";
   private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final int ENTRY_VISIBLE_LENGTH = 70;
@@ -436,8 +437,7 @@ public class CommentBox extends PopupContainerFactory {
                                       final TextBox commentEntry) {
     styleCommentButton(commentButton);
 
-    Tooltip tooltip = addToolTip(commentButton, alreadyMarkedCorrect, comment);
-    configurePopupButton(commentButton, commentPopup, commentEntry, tooltip);
+    configurePopupButton(commentButton, commentPopup, commentEntry, addToolTip(commentButton, alreadyMarkedCorrect, comment));
 
     showQC(commentButton);
   }
@@ -483,6 +483,13 @@ public class CommentBox extends PopupContainerFactory {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
+  /**
+   * @see #commentComplete(ValueBoxBase, String, Widget, Widget)
+   * @param field
+   * @param commentButton
+   * @param clearButton
+   * @param comment
+   */
   private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
     String previous = fieldToComment.get(field);
     comment = normalize(comment);
@@ -490,9 +497,10 @@ public class CommentBox extends PopupContainerFactory {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.isEmpty();
 
-      logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
+      logger.info("commentComplete ex #" + exerciseID +
+          " field " + field + " comment '" + comment + "' correct = " + isCorrect);
 
-      //addToolTip(commentButton, isCorrect, comment);
+      addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
         commentAnnotator.addCorrectComment(exerciseID, field);
@@ -520,7 +528,7 @@ public class CommentBox extends PopupContainerFactory {
    * @return
    */
   private Tooltip addToolTip(Widget button, boolean isCorrect, String comment) {
-    String tip = isCorrect ? "Add a comment" : "\"" + comment + "\"";
+    String tip = isCorrect ? ADD_A_COMMENT : "\"" + comment + "\"";
     return addTooltip(button, tip);
   }
 

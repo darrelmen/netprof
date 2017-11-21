@@ -141,7 +141,7 @@ public class SlickAnnotationDAO
       Integer exid = tuple4._1();
       String field = tuple4._2();
       String status = tuple4._3();
-      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
+//      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
       if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {

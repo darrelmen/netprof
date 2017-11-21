@@ -41,9 +41,9 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public interface AnnotationExercise {
+public interface AnnotationExercise extends HasID {
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
+   * @see mitll.langtest.server.database.custom.UserListManager#duplicate
    * @return
    */
   Map<String, ExerciseAnnotation> getFieldToAnnotation();
