@@ -300,11 +300,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       } else {
         if (DEBUG) log.info("lookupUserFromSessionOrDB found current session - ");
       }
+
       if (sessUser != null) {
         setSessionUser(session, sessUser);
       } else {
         if (DEBUG) log.info("lookupUserFromSessionOrDB no user for session - " + session + " logged out?");
       }
+
+
     } else {
       if (DEBUG)
         log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
@@ -407,7 +410,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         }
         return i;
       } catch (DominoSessionException e) {
-        log.error("getUserIDFromSession : session exception : " + e);
+        log.warn("getUserIDFromSession : session exception : " + e);
         throw e;
       }
     } else {
@@ -459,7 +462,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @return null if there is no user for the session
    * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
-  private User lookupUserFromDBSession(HttpServletRequest request) {// throws DominoSessionException {
+  private User lookupUserFromDBSession(HttpServletRequest request) {
     String sid = request.getRequestedSessionId();
     int userForSession = userSessionDAO.getUserForSession(sid);
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);

@@ -135,6 +135,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   @Override
   public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException {
+    long then = System.currentTimeMillis();
     int projectID = getProjectIDFromUser();
 
     if (projectID == -1) { // not sure how this can happen now that we throw DominoSessionException
@@ -155,15 +156,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
-        return getExerciseWhenNoUnitChapter(request, projectID, userListByID);
+        ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
+        logger.info("1 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+        return exerciseWhenNoUnitChapter;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-          return getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
+          ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
+          logger.info("2 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+          return exerciseListWrapperForPrefix;
         } else {
-          return getExercisesForSelectionState(request, projectID);
+          ExerciseListWrapper<T> exercisesForSelectionState = getExercisesForSelectionState(request, projectID);
+          logger.info("3 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+          return exercisesForSelectionState;
         }
       }
     } catch (Exception e) {

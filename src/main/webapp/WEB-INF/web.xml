@@ -172,7 +172,10 @@
 
     <servlet>
         <servlet-name>DefaultServlet</servlet-name>
-        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+        <!--
+                <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+        -->
+        <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/bestAudio</param-value>
@@ -189,7 +192,10 @@
 
     <servlet>
         <servlet-name>DefaultServletAnswers</servlet-name>
+<!--
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+-->
+        <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/answers</param-value>
@@ -276,10 +282,12 @@
         <filter-class>mitll.langtest.server.filter.ForceNocacheFilter</filter-class>
     </filter>
 
+<!--
     <filter>
         <filter-name>attSecurityFilter</filter-name>
         <filter-class>mitll.langtest.server.database.security.AttachSecurityFilter</filter-class>
     </filter>
+-->
 
 
     <filter-mapping>
@@ -287,7 +295,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter-mapping>
+<!--    <filter-mapping>
         <filter-name>attSecurityFilter</filter-name>
         <url-pattern>/bestAudio/*</url-pattern>
     </filter-mapping>
@@ -295,7 +303,7 @@
     <filter-mapping>
         <filter-name>attSecurityFilter</filter-name>
         <url-pattern>/answers/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping>-->
 
     <!-- ==================================================================== -->
     <!-- END filters  														-->

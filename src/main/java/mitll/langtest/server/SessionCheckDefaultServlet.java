@@ -71,14 +71,14 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
       }
 
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
-      log.info("doGet : found session user " + userIDFromSessionOrDB);
+      log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for : " + request.getRequestURI());
       super.doGet(request, response);
     } catch (DominoSessionException dse) {
-      log.warn("doGet : nope - no session " + dse.getMessage() + " req for : " + ((HttpServletRequest) request).getRequestURI());
+      log.warn("doGet : nope - no session " + dse.getMessage() + " req for : " + request.getRequestURI());
       handleAccessFailure(request, response);
     } catch (Exception e) {
       if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
-        log.info("doGet : User reload during request {}.", request.getRequestURL());
+        log.warn("doGet : User reload during request {}.", request.getRequestURL());
       } else {
         log.error("doGet : Unexpected exception during request {}.", request.getRequestURL(), e);
       }
@@ -95,7 +95,7 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
         log.error("findSharedDatabase no database?");
       } else {
         securityManager = db.getUserSecurityManager();
-        log.info("made security manager " +securityManager);
+        log.warn("got security manager " +securityManager);
       }
     }
   }

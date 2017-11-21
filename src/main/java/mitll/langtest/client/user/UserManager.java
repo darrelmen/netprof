@@ -88,13 +88,18 @@ public class UserManager {
    */
   public UserManager(UserNotification lt,
                      UserFeedback userFeedback,
-                     UserServiceAsync userServiceAsync, PropertyHandler props) {
+                     UserServiceAsync userServiceAsync,
+                     PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
   }
 
+  /**
+   * @see SignInForm#gotLogin
+   * @return
+   */
   UserServiceAsync getUserService() {
     return userServiceAsync;
   }
