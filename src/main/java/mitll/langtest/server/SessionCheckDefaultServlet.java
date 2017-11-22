@@ -54,7 +54,7 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 
-public class SessionCheckDefaultServlet extends HttpServlet {
+public class SessionCheckDefaultServlet extends DefaultServlet {
   private static final Logger log = LogManager.getLogger(SessionCheckDefaultServlet.class);
 
   private static final String DATABASE_REFERENCE = "databaseReference";
@@ -62,7 +62,7 @@ public class SessionCheckDefaultServlet extends HttpServlet {
   private DatabaseServices db;
   private IUserSecurityManager securityManager;
 
-  protected int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
+  private int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
     if (securityManager == null) log.error("huh? no security manager?");
     return securityManager.getUserIDFromSession(httpRequest);
   }
@@ -141,11 +141,13 @@ public class SessionCheckDefaultServlet extends HttpServlet {
       }
 
       if (file.exists()) {
-        response.setHeader("Content-Type", getServletContext().getMimeType(filename));
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
+//        response.setHeader("Content-Type", getServletContext().getMimeType(filename));
+//        response.setHeader("Content-Length", String.valueOf(file.length()));
+//        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
+//
+//        Files.copy(file.toPath(), response.getOutputStream());
 
-        Files.copy(file.toPath(), response.getOutputStream());
+        super.doGet(request,response);
       } else {
         String message = "Nope.";
         reply(response, message);
@@ -253,7 +255,7 @@ public class SessionCheckDefaultServlet extends HttpServlet {
 
   @Override
   public void init() throws UnavailableException {
-    //  super.init();
+    super.init();
     log.info("init for servlet");
   }
 }

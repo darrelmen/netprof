@@ -164,6 +164,8 @@ dependencies {
     runtime group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
     compile group: 'org.apache.lucene', name: 'lucene-analyzers', version: '3.6.2'
+
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlets', version: '9.2.14.v20151106'
 }
 
 war {
