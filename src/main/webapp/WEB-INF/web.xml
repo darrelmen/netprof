@@ -37,6 +37,19 @@
         <url-pattern>/langtest/user-manager</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>openUserService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.OpenUserServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>openUserService</servlet-name>
+        <url-pattern>/langtest/open-user-manager</url-pattern>
+    </servlet-mapping>
+
+
     <!--
         <servlet>
             <servlet-name>monitoringService</servlet-name>
