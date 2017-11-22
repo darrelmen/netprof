@@ -307,12 +307,13 @@ public class AudioFileHelper implements AlignDecode {
     String relPath = pathHelper.getRelToAnswer(wavPath);
 
     File file = new File(wavPath);
+    String absolutePath = file.getAbsolutePath();
     logger.debug("writeAudioFile got req" +
         "\n\tex  " + exercise1 +
         "\n\tfor " + audioContext +
         "\n\trec " + recordingInfoInitial +
         "\n\tto  " + wavPath +
-        "\n\tand " + file.getAbsolutePath());
+        "\n\tand " + absolutePath);
 
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
@@ -321,7 +322,7 @@ public class AudioFileHelper implements AlignDecode {
 
     logger.debug("writeAudioFile writing" +
         " to" +
-        "\n\t" + file.getAbsolutePath() +
+        "\n\t" + absolutePath +
         "\n\tvalidity " + validity +
         "\n\ttranscript " + recordingInfoInitial.getTranscript());
 /*    long now = System.currentTimeMillis();
@@ -332,6 +333,12 @@ public class AudioFileHelper implements AlignDecode {
     }*/
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath());
+
+    // remember who recorded this audio file.
+    Project project = db.getProjectManagement().getProject(audioContext.getProjid());
+    int userid = audioContext.getUserid();
+    project.addAnswerToUser(relPath, userid);  //not needed
+    project.addAnswerToUser(absolutePath,       userid);
 
 //    logger.info("tr = " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
@@ -502,6 +509,8 @@ public class AudioFileHelper implements AlignDecode {
 
     int answerID = db.getAnswerDAO().addAnswer(info);
     answer.setResultID(answerID);
+
+
 
     // do this db write later
     new Thread(() -> db.recordWordAndPhoneInfo(answer, answerID)).start();

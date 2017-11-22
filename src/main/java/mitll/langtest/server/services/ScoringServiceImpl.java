@@ -422,11 +422,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         audioFileHelper
             .checkForWebservice(exerciseID, english, sentence, projectID, userIDFromSessionOrDB, absoluteAudioFile);
 
+    String absPath = absoluteAudioFile.getAbsolutePath();
     return getPretestScore(reqid,
         (int) resultID,
         testAudioFile,
         sentence, transliteration, imageOptions,
-        exerciseID, usePhonemeMap, precalcScores, audioFileHelper, projectID, userIDFromSessionOrDB);
+        exerciseID, usePhonemeMap, precalcScores, audioFileHelper, projectID, userIDFromSessionOrDB, absPath);
   }
 
   /**
@@ -439,6 +440,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param exerciseID
    * @param usePhoneToDisplay
    * @param precalcScores
+   * @param absPath
    * @return
    */
   private PretestScore getPretestScore(int reqid,
@@ -452,7 +454,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        PrecalcScores precalcScores,
                                        AudioFileHelper audioFileHelper,
                                        int projID,
-                                       int userIDFromSessionOrDB) {
+                                       int userIDFromSessionOrDB,
+                                       String absPath) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -494,7 +497,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, true);
-      db.getProjectManagement().getProject(projID).addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
+      Project project = db.getProjectManagement().getProject(projID);
+      project.addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
+      project.addAnswerToUser(absPath,       userIDFromSessionOrDB);
     }
     return asrScoreForAudio;
   }

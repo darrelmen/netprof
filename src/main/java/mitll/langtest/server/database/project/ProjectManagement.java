@@ -184,8 +184,10 @@ public class ProjectManagement implements IProjectManagement {
    * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
    */
   private void configureProjects() {
+    long then = System.currentTimeMillis();
     getProjects().forEach(project -> configureProject(project, false, false));
-    logger.info("FINISHED : configureProjects " + getProjects().size() + " configured.");
+    long now = System.currentTimeMillis();
+    logger.info("FINISHED : configureProjects " + getProjects().size() + " configured in " + ((now-then)/1000) + " seconds.");
     logMemory();
   }
 

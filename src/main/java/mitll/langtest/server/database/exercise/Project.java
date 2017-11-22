@@ -570,19 +570,14 @@ public class Project implements PronunciationLookup {
   public Integer getUserForFile(String requestURI) {
     Integer integer = fileToRecorder.get(requestURI);
     if (integer == null) {
-      logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
-//
-//      int max = 0;
-//      for (String file : fileToRecorder.keySet()) {
-//        if (max++ == 10) break;
-//
-//        logger.warn(file);
-//      }
+ //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
+
     }
     return integer;
   }
 
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
+    logger.info("addAnswerToUser project " + getProject().id()+  " now has " + fileToRecorder.size());
   }
 }
