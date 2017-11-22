@@ -200,9 +200,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public boolean isStudent(int userIDFromSessionOrDB) {
-    mitll.hlt.domino.shared.model.user.User dbUser = lookupUser(userIDFromSessionOrDB);
-    Kind userKind = getUserKind(dbUser, new HashSet<>());
-    return userKind == STUDENT;
+    User user = getByID(userIDFromSessionOrDB);
+    boolean b = user.isStudent() && user.getPermissions().isEmpty();
+    if (b) logger.info("isStudent " + userIDFromSessionOrDB);
+    else logger.debug("not a student "  +userIDFromSessionOrDB);
+    return b;
   }
 
   private Ignite getIgnite() {
