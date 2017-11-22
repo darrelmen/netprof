@@ -107,19 +107,11 @@ public class SessionCheckDefaultServlet extends HttpServlet {
       }
 
       if (file.exists()) {
-        if (requestURI.startsWith("/answers")) {
+        if (requestURI.contains("/answers")) {
           // 1 who recorded the audio?
           String fileToFind = requestURI.substring(1);
 
-          String sub = requestURI.substring("/answers".length());
-          int answers = sub.indexOf("answers");
-          if (answers != -1) {
-            fileToFind = sub.substring(answers);
-            log.info("test now " + fileToFind);
-          }
-          fileToFind = fileToFind.length() > 4 ? fileToFind.substring(0, fileToFind.length() - 4) + ".wav" : fileToFind;
-          log.info("testing " + fileToFind);
-          int userForFile = db.getProjectManagement().getUserForFile(fileToFind);
+          int userForFile = getUserForFile(requestURI, fileToFind);
 
           if (userForFile == -1) {
             log.warn("not sure who recorded this file " + requestURI);
@@ -163,6 +155,25 @@ public class SessionCheckDefaultServlet extends HttpServlet {
         log.error("doGet : Unexpected exception during request {}.", request.getRequestURL(), e);
       }
     }
+  }
+
+  private int getUserForFile(String requestURI, String fileToFind) {
+    log.info("checking owner of " +fileToFind);
+
+    fileToFind = requestURI.startsWith("answers")? requestURI.substring("answers".length()):requestURI;
+
+
+    fileToFind  = fileToFind.startsWith("netprof")?fileToFind.substring("netprof".length()):fileToFind;
+    log.info("checking now " +fileToFind);
+
+    int answers = fileToFind.indexOf("answers");
+    if (answers != -1) {
+      fileToFind = fileToFind.substring(answers);
+      log.info("test now " + fileToFind);
+    }
+    fileToFind = fileToFind.length() > 4 ? fileToFind.substring(0, fileToFind.length() - 4) + ".wav" : fileToFind;
+    log.info("testing " + fileToFind);
+    return db.getProjectManagement().getUserForFile(fileToFind);
   }
 
   @NotNull

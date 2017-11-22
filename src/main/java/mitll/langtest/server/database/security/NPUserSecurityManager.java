@@ -163,6 +163,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   public void setSessionUser(HttpSession session, User loggedInUser) {
     log.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
     try {
+      long then =System.currentTimeMillis();
       int id1 = loggedInUser.getID();
       session.setAttribute(USER_SESSION_ATT, id1);
       String sessionID = session.getId();
@@ -178,6 +179,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       logSetSession(session, sessionID);
 
       userDAO.getDatabase().setStartupInfo(loggedInUser);
+      long now =System.currentTimeMillis();
+      log.info("took " + (now-then) + " to add session to db");
     } catch (Exception e) {
       log.error("got " + e, e);
     }
@@ -344,6 +347,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    */
   private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
+    long then =System.currentTimeMillis();
     HttpSession session = request != null ? getCurrentSession(request) : null;
     if (session != null) {
       Integer uidI = getUserIDFromSession(session);
@@ -376,6 +380,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       log.info("Lookup user from session returning null for null session. Request SID={}",
           request.getRequestedSessionId());
     }
+    long now =System.currentTimeMillis();
+
+    log.info("took " + (now-then) + " to lookup user from session");
+
     return sessUser;
   }
 
@@ -464,6 +472,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
   private User lookupUserFromDBSession(HttpServletRequest request) {
+    long then =System.currentTimeMillis();
     String sid = request.getRequestedSessionId();
     int userForSession = userSessionDAO.getUserForSession(sid);
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);
@@ -471,7 +480,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
     } else {
-      return userDAO.getByID(userForSession);
+      User byID = userDAO.getByID(userForSession);
+      long now =System.currentTimeMillis();
+      log.warn("lookupUserFromDBSession took " + (now - then) + " millis to get user ");
+      return byID;
     }
   }
 

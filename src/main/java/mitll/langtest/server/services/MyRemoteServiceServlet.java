@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -63,8 +64,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 @SuppressWarnings("serial")
-public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
+public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
   private static final Logger logger = LogManager.getLogger(MyRemoteServiceServlet.class);
+  private static final String XSRF_COOKIE_NAME = "JSESSIONID";
 
   /**
    *
@@ -87,6 +89,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   @Deprecated
   protected AudioFileHelper audioFileHelper;
+
+  public MyRemoteServiceServlet() {
+    super(XSRF_COOKIE_NAME);
+  }
 
   @Override
   public void init() {

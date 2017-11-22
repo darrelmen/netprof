@@ -38,10 +38,10 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -83,7 +83,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see
    */
   private String relativeConfigDir;
-  private String configDir;
   private String startupMessage = "";
 
   /**
@@ -223,7 +222,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {
 //    logger.debug("log event " + id + " " + widgetType + " exid "  +exid + " context " +context + " by user " + userid);
-
     try {
       if (db == null) {
         logger.error("no db set? " + id + " " + widgetType + " exid " + exid + " context " + context + " by user " + userid);
@@ -258,7 +256,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public Map<String, Float> getMaleFemaleProgress() throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 //    if (hasRecordPerm(userIDFromSessionOrDB)) {
-      return db.getMaleFemaleProgress(getProjectIDFromUser(userIDFromSessionOrDB));
+    return db.getMaleFemaleProgress(getProjectIDFromUser(userIDFromSessionOrDB));
 //    } else {
 //      throw getRestricted("getting recording progress");
 //    }
@@ -367,7 +365,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     logger.info("readProperties : configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    this.configDir = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
+    //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
     //logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
@@ -397,9 +395,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 */
 
   private DatabaseImpl makeDatabaseImpl(ServerProperties serverProps) {
-    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(serverProps, pathHelper, this
-    );
+    return new DatabaseImpl(serverProps, pathHelper, this);
   }
 
   /**

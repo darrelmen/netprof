@@ -36,6 +36,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -69,6 +70,7 @@ public class UserManager {
   private static final String USER_PENDING_ID = "userPendingID";
 
   private final UserServiceAsync userServiceAsync;
+  private final OpenUserServiceAsync openUserService;
   private final UserNotification userNotification;
   private final UserFeedback userFeedback;
   private int userID = NO_USER_SET;
@@ -89,9 +91,11 @@ public class UserManager {
   public UserManager(UserNotification lt,
                      UserFeedback userFeedback,
                      UserServiceAsync userServiceAsync,
+                     OpenUserServiceAsync openUserService,
                      PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
+    this.openUserService = openUserService;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
   }
@@ -140,6 +144,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
+        logger.info("took " + (System.currentTimeMillis()-then)  + " to get current user.");
         gotSessionUser(result);
       }
     });
@@ -327,4 +332,8 @@ public class UserManager {
   public Collection<User.Permission> getPermissions() {
     return current.getPermissions();
   }
+
+//  public OpenUserServiceAsync getOpenUserService() {
+//    return openUserService;
+//  }
 }

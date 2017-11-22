@@ -48,6 +48,7 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("serial")
 public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
+  public static final String MARK_STATE = "mark state";
 
   /**
    * @param exerciseID
@@ -89,7 +90,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectIDFromUser, exid);
       getUserListManager().markState(customOrPredefExercise, state, getUserIDFromSessionOrDB());
     } else {
-      throw getRestricted("mark state");
+      throw getRestricted(MARK_STATE);
     }
   }
 
@@ -155,7 +156,6 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
         logger.error(getLanguage() + " : couldn't find exercise " + exid);
         logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
       } else {
-
         // TODO : consider putting this back???
         //   byID.getAudioAttributes().clear();
 //      logger.debug("re-attach " + attr + " given isMale " + isMale);

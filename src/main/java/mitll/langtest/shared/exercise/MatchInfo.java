@@ -4,7 +4,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -16,6 +15,7 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   private int userListID;
   private boolean italic = false;
   private String tooltip = "";
+  private static final String PREFIX = ">";
 
   private ItemSorter itemSorter = new ItemSorter();
 
@@ -68,6 +68,18 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   public int compareTo(@NotNull MatchInfo o) {
     return itemSorter.compare(value, o.getValue());
   }
+
+/*  private int maybeCompareInts(String o1, String o2) {
+    int first  = Integer.parseInt(dropGreater(o1));
+    int second = Integer.parseInt(dropGreater(o2));
+    return Integer.compare(first, second);
+  }
+
+  private String dropGreater(String item) {
+    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
+    return item;
+  }*/
+
 
   public int getUserListID() {
     return userListID;

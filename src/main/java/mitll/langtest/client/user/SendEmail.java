@@ -75,7 +75,7 @@ class SendEmail extends UserDialog {
   private void onSendReset(final String userID) {
     sendEmail.setEnabled(false);
     //  final String userID = userField.box.getText();
-    service.resetPassword(userID,
+    openUserService.resetPassword(userID,
         new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {

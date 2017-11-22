@@ -259,7 +259,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     private final String selectionID;
     private final String searchIfAny;
     private final int exerciseID;
-
+    long then = System.currentTimeMillis();
     private final ExerciseListRequest request;
 
     /**
@@ -283,6 +283,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
+      logger.info("took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
+
       showFinishedGettingExercises();
       if (DEBUG) {
         List<T> exercises = result.getExercises();

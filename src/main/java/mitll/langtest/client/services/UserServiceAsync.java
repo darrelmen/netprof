@@ -35,20 +35,14 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.ChoosePasswordResult;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-
-import java.util.List;
 
 public interface UserServiceAsync {
   /**
-   * @param userId
-   * @param attemptedFreeTextPassword
    * @param async
+   * @see UserManager#getPermissionsAndSetUser
    */
-  void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
+  void getUserFromSession(AsyncCallback<User> async);
 
   /**
    * @param currentHashedPassword
@@ -60,9 +54,6 @@ public interface UserServiceAsync {
                                  String newHashedPassword,
                                  AsyncCallback<Boolean> async);
 
-  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<ChoosePasswordResult> async);
-
-  void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
 
   /**
    * No real need to pass this in
@@ -71,30 +62,4 @@ public interface UserServiceAsync {
    */
   void logout(AsyncCallback<Void> async);
 
-  void addUser(
-      SignUpUser user,
-      String url,
-      AsyncCallback<LoginResult> async);
-
-  void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
-
-  void setProject(int projectid, AsyncCallback<User> async);
-
-  void forgetProject(AsyncCallback<Void> async);
-
-  void isKnownUser(String id, AsyncCallback<Boolean> async);
-  void isValidUser(String id, AsyncCallback<Boolean> async);
-
-  /**
-   * @param async
-   * @see UserManager#getPermissionsAndSetUser
-   */
-  void getUserFromSession(AsyncCallback<User> async);
-
-  /**
-   * No user session needed.
-   * @param id
-   * @param async
-   */
-  void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 }

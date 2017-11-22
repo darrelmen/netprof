@@ -49,7 +49,6 @@ import mitll.langtest.shared.scoring.ImageOptions;
  */
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
-
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
    * @param base64EncodedString encoded audio bytes

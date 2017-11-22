@@ -44,21 +44,13 @@ import java.util.List;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
+
   /**
    *
    * @return
    * @see UserManager#getPermissionsAndSetUser
    */
   User getUserFromSession() throws DominoSessionException;
-
-  /**
-   * OPEN call - this is how we get a session.
-   * @param userId
-   * @param attemptedFreeTextPassword
-   * @return
-   * @see SignInForm#gotLogin
-   */
-  LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
   void logout() throws DominoSessionException;
 
@@ -70,62 +62,5 @@ public interface UserService extends RemoteService {
    */
   boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
 
-  /**
-   * Open call. No session - creates a session.
-   * @param userId
-   * @param userKey
-   * @param newPassword
-   * @return
-   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
-   */
-  ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword);
 
-  /**
-   * Open call - no session.
-   * @param userid
-   * @return
-   * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
-   */
-  boolean resetPassword(String userid);
-
-  /**
-   * Open call - no session.
-   * @param emailH
-   * @param email
-   * @return
-   * @see UserPassLogin#getForgotUser
-   */
-  boolean forgotUsername(String emailH, String email);
-
-  /**
-   * No session created - we need to do set password via email first.
-   * @param user
-   * @param url
-   * @return
-   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
-   */
-  LoginResult addUser(SignUpUser user, String url);
-
-  /**
-   * @param id
-   * @return
-   * @see SignInForm#tryLogin
-   */
-//  User getUserByID(String id);
-
-  boolean isKnownUser(String id);
-  boolean isKnownUserWithEmail(String id);
-  boolean isValidUser(String id);
-
-  /**
-   * @param projectid
-   * @return
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
-   */
-  User setProject(int projectid);
-
-  /**
-   * @see InitialUI#chooseProjectAgain
-   */
-  void forgetProject();
 }

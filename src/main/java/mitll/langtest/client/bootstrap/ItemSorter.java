@@ -33,6 +33,9 @@
 package mitll.langtest.client.bootstrap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -70,12 +73,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
     }
 
     if (isInt) {
-      Collections.sort(items, new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-          return compareInts(o1, o2);
-        }
-      });
+      items.sort(this::compareInts);
     } else {
       sortWithCompoundKeys(items);
     }
@@ -85,13 +83,25 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   @Override
   public int compare(String o1, String o2) {
     try {
-      return compareInts(o1, o2);
+      if (o1.length() > 0 && o2.length() > 0) {
+        boolean isDig1 = Character.isDigit(o1.charAt(0));
+       // boolean isDig2 = Character.isDigit(o2.charAt(0));
+        if (isDig1 && Character.isDigit(o2.charAt(0))) {
+          return compareInts(o1,o2);
+        }
+        else {
+          return compoundCompare(o1, o2);
+        }
+      }
+      else {
+        return compoundCompare(o1, o2);
+      }
     } catch (Exception e) {
       return compoundCompare(o1, o2);
     }
   }
 
-  int compoundCompare(String o1, String o2) {
+  private int compoundCompare(String o1, String o2) {
     boolean firstHasSep = o1.contains("-");
     boolean secondHasSep = o2.contains("-");
     String left1 = o1;
@@ -141,7 +151,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   private int compareInts(String o1, String o2) {
     int first = Integer.parseInt(dropGreater(o1));
     int second = Integer.parseInt(dropGreater(o2));
-    return first < second ? -1 : first > second ? +1 : 0;
+    return Integer.compare(first, second);
   }
 
   private String dropGreater(String item) {
@@ -154,12 +164,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
    * @see #getSortedItems(java.util.Collection)
    */
   private void sortWithCompoundKeys(List<String> items) {
-    Collections.sort(items, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        return compoundCompare(o1, o2);
-      }
-    });
+    items.sort(this::compoundCompare);
   }
 
   private int getIntCompare(String first, String second) {
@@ -169,7 +174,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       try {
         int r1 = Integer.parseInt(first);
         int r2 = Integer.parseInt(second);
-        return r1 < r2 ? -1 : r1 > r2 ? +1 : 0;
+        return Integer.compare(r1, r2);
       } catch (NumberFormatException e) {
         return first.compareToIgnoreCase(second);
       }

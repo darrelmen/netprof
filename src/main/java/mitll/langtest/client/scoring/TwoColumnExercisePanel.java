@@ -1186,8 +1186,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private DivWidget getItemWidget(T e) {
     InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.showPopup(e);
-    //showPopup(itemHeader, commonExerciseUnitChapterItemHelper.getUnitLessonForExercise2(e));
-    itemHeader.addStyleName("floatRight");
+     itemHeader.addStyleName("floatRight");
     DivWidget itemContainer = new DivWidget();
     itemContainer.add(itemHeader);
     itemContainer.addStyleName("floatRight");
@@ -1222,7 +1221,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
-    //  logger.info("exercise " + e.getID() + " " + e.getScores().size() + " scores");
     return new SimpleRecordAudioPanel<>(new BusyPanel() {
       @Override
       public boolean isBusy() {

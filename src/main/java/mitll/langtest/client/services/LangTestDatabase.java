@@ -63,7 +63,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    * @see LangTest#onModuleLoad
    */
-  StartupInfo getStartupInfo()  ;
+  StartupInfo getStartupInfo();
 
   /**
    * Only recorders can call this.

@@ -36,114 +36,14 @@ import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.server.mail.EmailHelper;
-import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.List;
-
-import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.AlreadySet;
-import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.NotExists;
-import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.Success;
-import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
-
-  /**
-   * If successful, establishes a session.
-   * <p>
-   * TODO record additional session info in database.
-   *
-   * @param userId
-   * @param attemptedFreeTextPassword
-   * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
-   */
-  public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
-    try {
-      HttpServletRequest request = getThreadLocalRequest();
-      String remoteAddr = getRemoteAddr(request);
-      String userAgent = request.getHeader("User-Agent");
-
-      // ensure a session is created.
-      HttpSession session = createSession();
-      logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-      logAndNotifyServerException(e);
-      return new LoginResult(Failed);
-    }
-  }
-
-  private String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-    if (remoteAddr == null || remoteAddr.isEmpty()) {
-      remoteAddr = request.getRemoteAddr();
-    }
-    return remoteAddr;
-  }
-
-  private User getUserByID(String id) {
-    return db.getUserDAO().getUserByID(id);
-  }
-
-  /**
-   * This call is open - you do not need a session.
-   * It's called from the sign in form.
-   *
-   * @param id
-   * @return
-   */
-  @Override
-  public boolean isKnownUser(String id) {
-    boolean knownUser = db.getUserDAO().isKnownUser(id);
-    if (!knownUser) {
-      String normalized = normalizeSpaces(id);
-      if (!normalized.equals(id)) {
-        knownUser = db.getUserDAO().isKnownUser(normalized);
-      }
-    }
-    return knownUser;
-  }
-
-  @Override
-  public boolean isValidUser(String id) {
-    User userByID = getUserDealWithSpaces(id);
-    return userByID != null && userByID.isValid();
-  }
-
-  @Override
-  public boolean isKnownUserWithEmail(String id) {
-    User userByID = getUserDealWithSpaces(id);
-    return userByID != null && userByID.hasValidEmail();
-  }
-
-  @Nullable
-  private User getUserDealWithSpaces(String id) {
-    User userByID = db.getUserDAO().getUserByID(id);
-    if (userByID == null) {
-      String normalized = normalizeSpaces(id);
-      if (!normalized.equals(id)) {
-        userByID = db.getUserDAO().getUserByID(normalized);
-      }
-    }
-    return userByID;
-  }
-
-  private String normalizeSpaces(String trim) {
-    return trim.replaceAll("\\s+", "_");
-  }
 
   /**
    * @see InitialUI#logout
@@ -158,130 +58,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       logger.info("logout : logging out " + userID);
       securityManager.logoutUser(getThreadLocalRequest(), userID, true);
     }
-  }
-
-  /**
-   * Updates existing user if they are missing info.
-   * <p>
-   * If user exists already with complete info, then someone is already using this userid
-   * <p>
-   * I don't think we want to mess with the session until they've logged in with a password!
-   *
-   * @param url
-   * @return null if existing user
-   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
-   */
-  @Override
-  public LoginResult addUser(SignUpUser user, String url) {
-    User userByID = getUserByID(user.getUserID());
-
-    if (userByID != null) {
-      LoginResult.ResultType resultType = LoginResult.ResultType.Exists;
-      if (!userByID.isValid()) {
-        //logger.info("addUser user " + userByID + " resultType.");
-    //  } else {
-        userByID.setEmail(user.getEmail());
-        userByID.setFirst(user.getFirst());
-        userByID.setLast(user.getLast());
-        userByID.setMale(user.isMale());
-        userByID.setRealGender(user.isMale() ? MiniUser.Gender.Male : MiniUser.Gender.Female);
-        userByID.setAffiliation(user.getAffiliation());
-        logger.info("addUser user " + userByID + " updating.");
-        db.getUserDAO().update(userByID);
-        resultType = LoginResult.ResultType.Updated;
-      }
-      return new LoginResult(userByID, resultType);
-    } else {
-      User newUser = db.getUserManagement().addUser(getThreadLocalRequest(), user);
-
-      if (newUser == null) {
-        logger.error("addUser somehow couldn't add " + user.getUserID());
-        return new LoginResult(null, LoginResult.ResultType.Failed);
-      } else {
-        return new LoginResult(newUser, LoginResult.ResultType.Added);
-      }
-    }
-  }
-
-  private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), new PathHelper(getServletContext(), serverProps));
-  }
-
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
-  }
-
-  /**
-   * @return
-   * @seex UserTable#showUsers(UserServiceAsync)
-   */
-/*
-  public List<User> getUsers() {
-    return db.getUserManagement().getUsers();
-  }
-*/
-
-  /**
-   * @param user
-   * @return true if there's a user with this email
-   * @see mitll.langtest.client.user.SignInForm#getForgotPassword
-   * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
-   */
-  public boolean resetPassword(String user) {
-    return db.getUserDAO().forgotPassword(user, getBaseURL());
-  }
-
-  /**
-   * Also creates a session.
-   *
-   * @param userId
-   * @param userKey
-   * @param newPassword
-   * @return
-   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
-   */
-  @Override
-  public ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword) {
-    //long startMS = System.currentTimeMillis();
-    logger.info("changePasswordWithToken - userId '" + userId + "' key " + userKey + " pass length " + newPassword.length());
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
-
-    User userByID = getUserByID(userId);
-    if (result) {
-      if (userByID != null) {
-        HttpSession currentSession = getCurrentSession();
-        if (currentSession == null) currentSession = createSession();
-        securityManager.setSessionUser(currentSession, userByID);
-      }
-      return new ChoosePasswordResult(userByID, userByID == null ? NotExists : Success);
-    } else {
-      //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
-      return new ChoosePasswordResult(null, userByID == null ? NotExists : AlreadySet);
-    }
-  }
-
-  /**
-   * true = create a new session
-   *
-   * @return
-   * @see UserServiceImpl#changePasswordWithToken(String, String, String)
-   * @see UserServiceImpl#loginUser
-   */
-  private HttpSession createSession() {
-    return getThreadLocalRequest().getSession(true);
-  }
-
-  /**
-   * false = don't create the session
-   *
-   * @return
-   */
-  private HttpSession getCurrentSession() {
-    return getThreadLocalRequest().getSession(false);
-  }
-
-  private String getBaseURL() {
-    return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }
 
   /**
@@ -301,48 +77,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   }
 
-  /**
-   * @param emailH
-   * @param email
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
-   */
-  @Override
-  public boolean forgotUsername(String emailH, String email) {
-    String userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
-    getEmailHelper().getUserNameEmail(email, getBaseURL(), userChosenIDIfValid);
-    return userChosenIDIfValid != null;
-  }
-
-  /**
-   * @param projectid
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
-   */
-  public User setProject(int projectid) {
-    try {
-      User sessionUser = getSessionUser();
-      if (sessionUser != null) { // when could this be null?
-        logger.info("setProject set project (" + projectid + ") for " + sessionUser);
-        db.getProjectManagement().configureProjectByID(projectid);
-        db.rememberUsersCurrentProject(sessionUser.getID(), projectid);
-        db.setStartupInfo(sessionUser, projectid);
-      }
-      return sessionUser;
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-      return null;
-    }
-  }
-
-  @Override
-  public void forgetProject() {
-    try {
-      User sessionUser = getSessionUser();
-      if (sessionUser != null) {
-        db.forgetProject(sessionUser.getID());
-      }
-    } catch (DominoSessionException e) {
-      logger.error("got  " + e, e);
-    }
+  private String getBaseURL() {
+    return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }
 }

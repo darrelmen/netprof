@@ -286,8 +286,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   * @see BaseResultDAO#getUserToNumAnswers
    * @return
+   * @see BaseResultDAO#getUserToNumAnswers
    */
   @Override
   public Collection<UserAndTime> getUserAndTimes() {
@@ -367,7 +367,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   @Override
   public <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises) {
-
     Set<Integer> idsToFind = exercises
         .stream()
         .map(HasID::getID)
@@ -378,14 +377,15 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       long then = System.currentTimeMillis();
       correctAndScoresForReal = dao.exidAndScoreWhere(userid, idsToFind);
       long now = System.currentTimeMillis();
-      logger.info("took " + (now - then) + " millis to ask for " + idsToFind.size());
-    } else {
+      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises");
+    }
+ /*   else {
       long then = System.currentTimeMillis();
       correctAndScoresForReal = dao.exidAndScore(userid);
       long now = System.currentTimeMillis();
-      logger.info("took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids");
+      logger.info("getScores took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids");
 
-      logger.info("From " + correctAndScoresForReal.size());
+      logger.info("getScores From " + correctAndScoresForReal.size());
       Map<Integer, SlickExerciseScore> filtered = new HashMap<>(idsToFind.size());
 
       correctAndScoresForReal.forEach((k, v) -> {
@@ -394,11 +394,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         }
       });
 
-      logger.info("down to " + filtered.size() + " for " + idsToFind.size());
+      logger.info("getScores down to " + filtered.size() + " for " + idsToFind.size());
       correctAndScoresForReal = filtered;
-    }
+    }*/
+
     logger.info("getScores : for user " + userid + " checking " + exercises.size() + " exercises, found " + correctAndScoresForReal.size() + " scores");
-     return getScores2(correctAndScoresForReal);
+    return getScores2(correctAndScoresForReal);
   }
 
   /**
@@ -548,9 +549,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<String,Integer> getStudentAnswers(int projid) {
+  public Map<String, Integer> getStudentAnswers(int projid) {
     List<Tuple2<String, Integer>> tuple2s = dao.studentAnswers(projid);
-    Map<String,Integer> pathToUser = new HashMap<>();
+    Map<String, Integer> pathToUser = new HashMap<>();
     tuple2s.forEach(stringIntegerTuple2 -> pathToUser.put(stringIntegerTuple2._1, stringIntegerTuple2._2));
     return pathToUser;
   }

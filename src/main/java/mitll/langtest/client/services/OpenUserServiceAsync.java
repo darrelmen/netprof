@@ -32,30 +32,46 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.analysis.*;
-import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonShell;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.domino.user.ChangePasswordView;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.user.ChoosePasswordResult;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
-import java.util.Collection;
-import java.util.List;
+public interface OpenUserServiceAsync {
+  /**
+   * @param userId
+   * @param attemptedFreeTextPassword
+   * @param async
+   */
+  void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
-@RemoteServiceRelativePath("analysis-manager")
-public interface AnalysisService extends RemoteService {
-  Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
+  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<ChoosePasswordResult> async);
+
+  void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
+
+  void addUser(
+      SignUpUser user,
+      String url,
+      AsyncCallback<LoginResult> async);
+
+  void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
+
+  void setProject(int projectid, AsyncCallback<User> async);
+
+  void forgetProject(AsyncCallback<Void> async);
+
+  void isKnownUser(String id, AsyncCallback<Boolean> async);
+
+  void isValidUser(String id, AsyncCallback<Boolean> async);
 
   /**
-   * TODO : why do we have to do this at all???
+   * No user session needed.
    *
-   * @param ids
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
+   * @param id
+   * @param async
    */
-  List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException;
-
-  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) throws DominoSessionException, RestrictedOperationException;
-
-  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException, RestrictedOperationException;
+  void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 }

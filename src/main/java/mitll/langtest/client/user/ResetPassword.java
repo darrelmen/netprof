@@ -205,7 +205,7 @@ public class ResetPassword extends UserDialog {
       enterKeyButtonHelper.removeKeyHandler();
       String safeText = userIDForm.getSafeText();
       if (safeText.length() == OLD_NETPROF_LEN) safeText += "_"; // legacy user ids can be 4 but domino requires length 5
-      service.changePasswordWithToken(safeText, token, newPassword,
+      openUserService.changePasswordWithToken(safeText, token, newPassword,
           new AsyncCallback<ChoosePasswordResult>() {
             @Override
             public void onFailure(Throwable caught) {

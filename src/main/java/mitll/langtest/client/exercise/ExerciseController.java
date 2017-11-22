@@ -40,6 +40,7 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -125,4 +126,5 @@ public interface ExerciseController extends Services, ExceptionSupport {
   MessageHelper getMessageHelper();
 
   void handleNonFatalError(String message, Throwable throwable);
+
 }

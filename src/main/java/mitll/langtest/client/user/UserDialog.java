@@ -44,6 +44,8 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.services.OpenUserService;
+import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.User;
@@ -77,6 +79,7 @@ public abstract class UserDialog extends BasicDialog {
   private KeyPressHelper enterKeyButtonHelper;
 
   protected final UserServiceAsync service = GWT.create(UserService.class);
+  protected final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
 
   /**
    * @param props

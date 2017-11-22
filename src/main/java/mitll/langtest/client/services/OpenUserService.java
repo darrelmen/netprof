@@ -34,28 +34,73 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.analysis.*;
-import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.user.*;
+import mitll.langtest.shared.user.ChoosePasswordResult;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
-import java.util.Collection;
-import java.util.List;
-
-@RemoteServiceRelativePath("analysis-manager")
-public interface AnalysisService extends RemoteService {
-  Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
+@RemoteServiceRelativePath("open-user-manager")
+public interface OpenUserService extends RemoteService {
+  /**
+   * OPEN call - this is how we get a session.
+   * @param userId
+   * @param attemptedFreeTextPassword
+   * @return
+   * @see SignInForm#gotLogin
+   */
+  LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
   /**
-   * TODO : why do we have to do this at all???
-   *
-   * @param ids
+   * Open call. No session - creates a session.
+   * @param userId
+   * @param userKey
+   * @param newPassword
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
+   * @see ResetPassword#onChangePassword
    */
-  List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException;
+  ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword);
 
-  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) throws DominoSessionException, RestrictedOperationException;
+  /**
+   * Open call - no session.
+   * @param userid
+   * @return
+   * @see SendResetPassword#onChangePassword
+   */
+  boolean resetPassword(String userid);
 
-  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException, RestrictedOperationException;
+  /**
+   * Open call - no session.
+   * @param emailH
+   * @param email
+   * @return
+   * @see UserPassLogin#getForgotUser
+   */
+  boolean forgotUsername(String emailH, String email);
+
+  /**
+   * No session created - we need to do set password via email first.
+   * @param user
+   * @param url
+   * @return
+   * @see SignUpForm#gotSignUp
+   */
+  LoginResult addUser(SignUpUser user, String url);
+
+  boolean isKnownUser(String id);
+  boolean isKnownUserWithEmail(String id);
+  boolean isValidUser(String id);
+
+  /**
+   * @param projectid
+   * @return
+   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
+   */
+  User setProject(int projectid);
+
+  /**
+   * @see InitialUI#chooseProjectAgain
+   */
+  void forgetProject();
 }

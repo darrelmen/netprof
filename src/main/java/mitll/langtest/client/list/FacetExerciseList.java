@@ -597,6 +597,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     final Map<String, Set<MatchInfo>> finalTypeToValues = typeToValues;
+    final long then = System.currentTimeMillis();
 
     listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
@@ -606,6 +607,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
+        logger.info("took " + (System.currentTimeMillis()-then)  + " to get lists for user.");
+
         finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
         Widget favorites = liForDimensionForType.getWidget(0);
@@ -1041,6 +1044,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     List<Pair> pairs = getPairs(typeToSelection);
     logger.info("getTypeToValues request " + pairs + " list " + userListID + " has user " + hasUser);
+    final long then = System.currentTimeMillis();
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
         new AsyncCallback<FilterResponse>() {
@@ -1060,6 +1064,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
+            logger.info("took " + (System.currentTimeMillis()-then)  + " to get type to values.");
+
             changeSelection(response.getTypesToInclude(), typeToSelection);
             setTypeToSelection(typeToSelection);
             addFacetsForReal(response.getTypeToValues(), typeOrderContainer);

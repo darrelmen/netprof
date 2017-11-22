@@ -319,7 +319,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
             }
 
             sendUsernameEmail.setEnabled(false);
-            service.forgotUsername(Md5Hash.getHash(text), text, new AsyncCallback<Boolean>() {
+            openUserService.forgotUsername(Md5Hash.getHash(text), text, new AsyncCallback<Boolean>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendUsernameEmail.setEnabled(true);

@@ -162,7 +162,7 @@ public class SendResetPassword extends UserDialog {
       String safeText = userIDForm.getSafeText();
 
       if (safeText.length() == 4) safeText += "_"; // legacy user ids can be 4 but domino requires length 5
-      service.resetPassword(safeText, new AsyncCallback<Boolean>() {
+      openUserService.resetPassword(safeText, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);

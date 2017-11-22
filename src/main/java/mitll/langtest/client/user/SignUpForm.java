@@ -345,7 +345,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       //    logger.info("\tonUserIDBlur checking " + text);
 
       if (hasSpaces(text)) {
-        service.isKnownUser(normalizeSpaces(text), new AsyncCallback<Boolean>() {
+        openUserService.isKnownUser(normalizeSpaces(text), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\tgot FAILURE on userExists " + text);
@@ -368,7 +368,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reallyOnUserIDBlur(String uidVal) {
-    service.isKnownUser(uidVal, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(uidVal, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + uidVal);
@@ -485,7 +485,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpClickHandler
    */
   private void signUpNewOrAddInfoToOld(final String userID) {
-    service.isKnownUser(signUpUser.getSafeText(), new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(signUpUser.getSafeText(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -539,7 +539,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
-    service.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
@@ -560,7 +560,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpacesLong(String userID) {
     String testUserID = normalizeSpaces(userID);
-    service.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
@@ -667,10 +667,9 @@ public class SignUpForm extends UserDialog implements SignUp {
         lastName.getSafeText(),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
-    logger.info("OK sending " + newUser);
-    logger.info("OK sending " + newUser.getAffiliation());
+    logger.info("OK sending " + newUser + " " + newUser.getAffiliation());
 
-    service.addUser(
+    openUserService.addUser(
         newUser,
         Window.Location.getHref(),
         new AsyncCallback<LoginResult>() {

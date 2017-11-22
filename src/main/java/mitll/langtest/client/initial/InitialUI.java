@@ -416,7 +416,7 @@ public class InitialUI implements UILifecycle {
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
       //logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
-      controller.getUserService().forgetProject(new AsyncCallback<Void>() {
+      controller.getOpenUserService().forgetProject(new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
           controller.handleNonFatalError("forgetting project for user", throwable);

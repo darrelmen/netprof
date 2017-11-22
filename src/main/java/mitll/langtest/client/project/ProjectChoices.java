@@ -93,7 +93,7 @@ public class ProjectChoices {
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
-  private final UserServiceAsync userService;
+  private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   /**
@@ -113,7 +113,7 @@ public class ProjectChoices {
     this.controller = langTest;
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
-    userService = langTest.getUserService();
+    userService = langTest.getOpenUserService();
   }
 
   /**

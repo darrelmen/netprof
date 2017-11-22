@@ -250,6 +250,7 @@ public class LangTest implements
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
@@ -607,7 +608,7 @@ public class LangTest implements
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, this, userService, props);
+    userManager = new UserManager(this, this, userService, openUserService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
@@ -812,7 +813,7 @@ public class LangTest implements
 //    logger.info("setProjectForUser set project for " + projectid);
     initialUI.clearContent();
 
-    userService.setProject(projectid, new AsyncCallback<User>() {
+    openUserService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
         messageHelper.handleNonFatalError("setting project for user", throwable);
@@ -971,7 +972,9 @@ public class LangTest implements
    * @return
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
-  public int getUser() { return userManager.getUser();  }
+  public int getUser() {
+    return userManager.getUser();
+  }
 
   public User getCurrent() {
     return userManager.getCurrent();
@@ -1196,5 +1199,9 @@ public class LangTest implements
 
   public void handleNonFatalError(String message, Throwable throwable) {
     messageHelper.handleNonFatalError(message, throwable);
+  }
+
+  public OpenUserServiceAsync getOpenUserService() {
+    return openUserService;
   }
 }

@@ -564,6 +564,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID + " for " + request);
     }
     if (controller.getUser() > 0) {
+      final long then = System.currentTimeMillis();
+
       service.getExerciseIds(
           request,
           new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));

@@ -253,10 +253,15 @@ public class SignInForm extends UserDialog implements SignIn {
 
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
-    service.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+
+    logger.warning("checking using "+ openUserService);
+
+    logger.warning("checking using "+ openUserService.getClass());
+
+    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        logger.warning("\tgot FAILURE on userExists " + testUserID);
+        logger.warning("\tgot FAILURE on checkLegacyUserWithSpaces isKnownUser " + testUserID);
       }
 
       @Override
@@ -273,10 +278,14 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void checkUserExists(String text) {
-    service.isKnownUser(text, new AsyncCallback<Boolean>() {
+    logger.warning("checkUserExists checking using "+ openUserService);
+
+    logger.warning("checkUserExists checking using "+ openUserService.getClass());
+
+    openUserService.isKnownUser(text, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        logger.warning("\tgot FAILURE on userExists " + text);
+        logger.warning("\tgot FAILURE on checkUserExists isKnownUser " + text);
       }
 
       @Override
@@ -293,10 +302,10 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void checkUserValid(String text) {
-    service.isValidUser(text, new AsyncCallback<Boolean>() {
+    openUserService.isValidUser(text, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        logger.warning("\tgot FAILURE on userExists " + text);
+        logger.warning("\tgot FAILURE on checkUserValid userExists " + text);
       }
 
       @Override
@@ -333,7 +342,7 @@ public class SignInForm extends UserDialog implements SignIn {
     final String fUser = user;
 
     signIn.setEnabled(false);
-    userManager.getUserService().loginUser(user, freeTextPassword,
+    openUserService.loginUser(user, freeTextPassword,
         new AsyncCallback<LoginResult>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -480,10 +489,10 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void sendEmailIfExists(Anchor forgotPassword, String safeText) {
-    service.isKnownUserWithEmail(safeText, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUserWithEmail(safeText, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-        logger.warning("\tgot FAILURE on userExists ");
+        logger.warning("\tgot FAILURE on sendEmailIfExists ");
       }
 
       @Override
