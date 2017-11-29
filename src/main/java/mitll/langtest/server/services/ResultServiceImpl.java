@@ -111,7 +111,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       return db.getResultDAO().getNumResults(getProjectIDFromUser());
     } else {
-      logger.info("user " + userIDFromSessionOrDB + " only has " + getPermissions(userIDFromSessionOrDB));
+      logger.info("getNumResults : user " + userIDFromSessionOrDB + " only has " + getPermissions(userIDFromSessionOrDB));
       throw getRestricted("getting number of results");
     }
   }

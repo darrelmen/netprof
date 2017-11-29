@@ -44,7 +44,11 @@ import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
@@ -131,7 +135,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param session
    * @param loggedInUser
    * @return
-   * @see UserServiceImpl#loginUser
+   * @see NPUserSecurityManager#getLoginResult
    */
   @NotNull
   private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
@@ -154,7 +158,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * Adds startup info to user...
+   * Adds startup info to user... when would this be needed outside of login?
    *
    * @param session
    * @param loggedInUser
@@ -163,35 +167,39 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   public void setSessionUser(HttpSession session, User loggedInUser) {
     log.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
     try {
-      long then =System.currentTimeMillis();
-      int id1 = loggedInUser.getID();
-      session.setAttribute(USER_SESSION_ATT, id1);
-      String sessionID = session.getId();
+      long then = System.currentTimeMillis();
+      setSessionUserAndRemember(session, loggedInUser.getID());
 
-      userSessionDAO.add(
-          new SlickUserSession(-1,
-              id1,
-              sessionID,
-              "",
-              "",
-              new Timestamp(System.currentTimeMillis())));
-
-      logSetSession(session, sessionID);
-
+      // why do this?
       userDAO.getDatabase().setStartupInfo(loggedInUser);
-      long now =System.currentTimeMillis();
-      log.info("took " + (now-then) + " to add session to db");
+      long now = System.currentTimeMillis();
+      log.info("took " + (now - then) + " to add session to db");
     } catch (Exception e) {
       log.error("got " + e, e);
     }
   }
 
+  private void setSessionUserAndRemember(HttpSession session, int id1) {
+    session.setAttribute(USER_SESSION_ATT, id1);
+    String sessionID = session.getId();
+
+    userSessionDAO.add(
+        new SlickUserSession(-1,
+            id1,
+            sessionID,
+            "",
+            "",
+            new Timestamp(System.currentTimeMillis())));
+
+    logSetSession(session, sessionID);
+  }
+
   private void logSetSession(HttpSession session1, String sessionID) {
     log.info("setSessionUser : Adding user to " +
-        "\nsession        "  + sessionID +
+        "\nsession        " + sessionID +
         "\nlookup user    " + getUserIDFromSession(session1) +
         "\nsession.isNew= " + session1.isNew() +
-        "\ncreated        " + session1.getCreationTime() + " or " + (new Date( session1.getCreationTime()))+
+        "\ncreated        " + session1.getCreationTime() + " or " + (new Date(session1.getCreationTime())) +
         "\nattributes     " + getAttributesFromSession(session1));
   }
 
@@ -238,7 +246,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         () -> elapsedMS(startMS));
   }
 
-  private HttpSession getCurrentSession(HttpServletRequest request) {   return request.getSession(false);  }
+  private HttpSession getCurrentSession(HttpServletRequest request) {
+    return request.getSession(false);
+  }
 
   private static long elapsedMS(long startMS) {
     return System.currentTimeMillis() - startMS;
@@ -256,6 +266,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return getLoggedInUser(request, "", false);
   }
 
+  @Override
+  public int getLoggedInUserID(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
+    return getLoggedInUserLight(request, "", false);
+  }
+
+
   /**
    * Get the currently logged in user.
    *
@@ -271,6 +287,17 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       throwException(opName, user, null);
     }
     return user;
+  }
+
+  private Integer getLoggedInUserLight(HttpServletRequest request,
+                                       String opName,
+                                       boolean throwOnFail)
+      throws RestrictedOperationException, DominoSessionException {
+    int userID = lookupUserIDFromSessionOrDB(request, throwOnFail);
+    if (userID == -1 && throwOnFail) {
+      throwException(opName, userID, null);
+    }
+    return userID;
   }
 
   /**
@@ -292,25 +319,15 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     User sessUser = lookupUserFromHttpSession(request);
     if (sessUser == null) {
       sessUser = lookupUserFromDBSession(request);
-      HttpSession session = request.getSession(false);
-      if (session == null) {
-        if (DEBUG) log.info("lookupUserFromSessionOrDB note - no current session - ");
-        try {
-          session = request.getSession();
-          if (DEBUG) log.info("lookupUserFromSessionOrDB note - made session - ");
-        } catch (Exception e) {
-          log.error("got " + e, e);
-        }
-      } else {
-        if (DEBUG) log.info("lookupUserFromSessionOrDB found current session - ");
-      }
-
       if (sessUser != null) {
+        HttpSession session = getCurrentOrNewSession(request);
+
+        // why???
         setSessionUser(session, sessUser);
       } else {
-        if (DEBUG) log.info("lookupUserFromSessionOrDB no user for session - " + session + " logged out?");
+        if (DEBUG)
+          log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
       }
-
 
     } else {
       if (DEBUG)
@@ -326,6 +343,57 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       throw new DominoSessionException("Could not look up user!");
     }
     return sessUser;
+  }
+
+  private int lookupUserIDFromSessionOrDB(HttpServletRequest request, boolean throwOnFail)
+      throws DominoSessionException {
+    if (request == null) {
+      log.warn("lookupUserFromSessionOrDB huh? no request???");
+      return -1;
+    }
+    Integer sessUserID = lookupUserIDFromHttpSession(request);
+    if (sessUserID == null) {
+      String sid = request.getRequestedSessionId();
+      // OK look in the database - we're on one of the hydra machines which has a different tomcat?
+      sessUserID = sid == null ? -1 : userSessionDAO.getUserForSession(sid);
+
+      if (sessUserID != -1) {
+        setSessionUserAndRemember(getCurrentOrNewSession(request), sessUserID);
+      } else {
+        if (DEBUG) log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
+      }
+
+    } else {
+      if (DEBUG)
+        log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUserID, request.getRequestedSessionId());
+    }
+
+    //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
+    if (sessUserID == -1 && throwOnFail) {
+      log.warn("About to fail due to missing user in session! SID: {}",
+          request.getRequestedSessionId()
+          //, new Throwable()
+      );
+      throw new DominoSessionException("Could not look up user!");
+    }
+    return sessUserID;
+  }
+
+  @Nullable
+  private HttpSession getCurrentOrNewSession(HttpServletRequest request) {
+    HttpSession session = request.getSession(false);
+    if (session == null) {
+      if (DEBUG) log.info("lookupUserFromSessionOrDB note - no current session - ");
+      try {
+        session = request.getSession();
+        if (DEBUG) log.info("lookupUserFromSessionOrDB note - made session - ");
+      } catch (Exception e) {
+        log.error("got " + e, e);
+      }
+    } else {
+      if (DEBUG) log.info("lookupUserFromSessionOrDB found current session - ");
+    }
+    return session;
   }
 
   public String getRemoteAddr(HttpServletRequest request) {
@@ -347,10 +415,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    */
   private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
-    long then =System.currentTimeMillis();
+    long then = System.currentTimeMillis();
+
     HttpSession session = request != null ? getCurrentSession(request) : null;
+
     if (session != null) {
-      Integer uidI = getUserIDFromSession(session);
+      int uidI = getUserIDFromSession(session);
       log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
               //"SID={} " +
               "Request SID={}, Session Created={}, isNew={}, result={}",
@@ -358,7 +428,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
           request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
 
-      if (uidI != null && uidI > 0) {
+      if (uidI > 0) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
           log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
@@ -372,19 +442,37 @@ public class NPUserSecurityManager implements IUserSecurityManager {
               request.getSession().getCreationTime(),
               request.getSession().isNew(),
               uidI);
-
-          sessUser = userDAO.getByID(uidI);
+          //    sessUser = userDAO.getByID(uidI);
         }
       }
     } else if (request != null) {
-      log.info("Lookup user from session returning null for null session. Request SID={}",
-          request.getRequestedSessionId());
+      log.info("Lookup user from session returning null for null session. Request SID={}", request.getRequestedSessionId());
     }
-    long now =System.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
-    log.info("took " + (now-then) + " to lookup user from session");
+    log.info("took " + (now - then) + " to lookup user from session");
 
     return sessUser;
+  }
+
+  private Integer lookupUserIDFromHttpSession(HttpServletRequest request) {
+    //long then = System.currentTimeMillis();
+    HttpSession session = request != null ? getCurrentSession(request) : null;
+
+    if (session != null) {
+      Integer uidI = getUserIDFromSession(session);
+      log.info("lookupUserIDFromHttpSession Lookup user from HTTP session. " +
+              //"SID={} " +
+              "Request SID={}, Session Created={}, isNew={}, result={}",
+          //session.getID(),
+          request.getRequestedSessionId(),
+          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+      return uidI;
+    } else if (request != null) {
+      log.info("lookupUserIDFromHttpSession Lookup user from session returning null for null session. Request SID={}", request.getRequestedSessionId());
+    }
+
+    return null;
   }
 
   /**
@@ -428,6 +516,33 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
+  //  @Override
+  public int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
+    if (userIDFromSession == -1) {
+      // it's not in the current session - can we recover it?
+      try {
+
+        User sessionUser = getLoggedInUser(threadLocalRequest, "", true);
+
+        int i = (sessionUser == null) ? -1 : sessionUser.getID();
+        if (i == -1) { // this shouldn't happen if we throw on bad sessions
+          log.error("getUserIDFromSession huh? couldn't get user from session or database?");
+        }
+
+        return i;
+
+      } catch (DominoSessionException e) {
+        log.warn("getUserIDFromSession : session exception : " + e);
+        throw e;
+      }
+    } else {
+//      log.info("getUserIDFromSession found user id from session = " + userIDFromSession);
+      return userIDFromSession;
+    }
+  }
+
+
   /**
    * Get the userid from the session.
    *
@@ -455,8 +570,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    *
    * @param session
    * @return
+   * @see mitll.langtest.server.filter.ForceNocacheFilter#doFilter
    */
-  private Integer getUserIDFromSession(HttpSession session) {
+  private int getUserIDFromSession(HttpSession session) {
     Object attribute = session.getAttribute(USER_SESSION_ATT);
     if (attribute == null) {
       log.warn("getUserIDFromSession huh? no attribute " + USER_SESSION_ATT + " on session?");
@@ -472,16 +588,16 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see #lookupUserFromSessionOrDB(HttpServletRequest, boolean)
    */
   private User lookupUserFromDBSession(HttpServletRequest request) {
-    long then =System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     String sid = request.getRequestedSessionId();
-    int userForSession = userSessionDAO.getUserForSession(sid);
+    int userForSession = sid == null ? -1 : userSessionDAO.getUserForSession(sid);
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);
     if (userForSession == -1 && sid != null) {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
       return null;
     } else {
       User byID = userDAO.getByID(userForSession);
-      long now =System.currentTimeMillis();
+      long now = System.currentTimeMillis();
       log.warn("lookupUserFromDBSession took " + (now - then) + " millis to get user ");
       return byID;
     }
@@ -497,7 +613,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
     //if (now - then > 20)
-      log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
     return sessUser;
   }
 
@@ -506,6 +622,13 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     RestrictedOperationException ex = new RestrictedOperationException(opName, true);
     String uname = (cUser != null) ? cUser.toString() : "null";
     log.error("Access check failed! User={}, Checking={}, op={}", uname, checkDesc, opName);
+    throw ex;
+  }
+
+  private void throwException(String opName, int cUserID, String checkDesc)
+      throws RestrictedOperationException {
+    RestrictedOperationException ex = new RestrictedOperationException(opName, true);
+    log.error("Access check failed! User={}, Checking={}, op={}", cUserID, checkDesc, opName);
     throw ex;
   }
 }

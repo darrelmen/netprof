@@ -77,6 +77,11 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     dao.add(user);
   }
 
+  /**
+   *
+   * @param sesssion
+   * @return -1 if not in the database
+   */
   @Override
   public int getUserForSession(String sesssion) {
     Collection<Integer> userForSession = dao.getUserForSession(sesssion);

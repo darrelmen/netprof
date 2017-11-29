@@ -57,7 +57,8 @@ import java.util.UUID;
 public class ForceNocacheFilter implements Filter {
   private static final Logger log = LogManager.getLogger(ForceNocacheFilter.class);
 
-boolean DEBUG=false;
+  private boolean DEBUG = false;
+
   /**
    * The key to get/set the id of the user stored in the session
    *
@@ -110,16 +111,16 @@ boolean DEBUG=false;
       httpResponse.setHeader("Cache-control", "no-cache, no-store, must-revalidate");
     }
 
-    if (DEBUG)   log.info("no cache before chain doFilter " + httpRequest.getRequestURI());
+    if (DEBUG) log.info("no cache before chain doFilter " + httpRequest.getRequestURI());
     chain.doFilter(request, response);
-    if (DEBUG)   log.info("no cache after  chain doFilter " + httpRequest.getRequestURI());
+    if (DEBUG) log.info("no cache after  chain doFilter " + httpRequest.getRequestURI());
 
     ThreadContext.clearAll();
   }
 
   @Override
   public void destroy() {
-    if (DEBUG)  log.info("destroy ");
+    if (DEBUG) log.info("destroy ");
   }
 
   @Override

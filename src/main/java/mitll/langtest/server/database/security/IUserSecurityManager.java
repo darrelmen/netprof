@@ -33,6 +33,8 @@ public interface IUserSecurityManager {
    */
   User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
 
+  int getLoggedInUserID(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
+
   void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions);
 
   LoginResult getLoginResult(String userId,

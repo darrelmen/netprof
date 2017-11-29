@@ -52,11 +52,21 @@ public class H2DatabaseImpl extends DatabaseImpl {
    */
   @Deprecated
   private DatabaseConnection connection = null;
-
+/*
   public H2DatabaseImpl(ServerProperties serverProps) {
     super(serverProps);
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
+   * @param configDir
+   * @param dbName
+   * @param serverProps
+   * @param pathHelper
+   * @param mustAlreadyExist
+   * @param logAndNotify
+   * @param readOnly
+   */
   public H2DatabaseImpl(String configDir,
                         String dbName,
                         ServerProperties serverProps,
@@ -68,36 +78,9 @@ public class H2DatabaseImpl extends DatabaseImpl {
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
     this.connection = new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly);
-    connectToDatabases(pathHelper);
+    connectToDatabases(pathHelper,null);
   }
 
-  /**
-   * Confusing...
-   *
-   * @return true if we want an h2 connection and didn't get one
-   * @paramx serverProps
-   */
-/*
-  private boolean maybeGetH2Connection(ServerProperties serverProps) {
-    try {
-      Connection connection1 = getConnection();
-      if (connection1 == null && serverProps.useH2()) {
-        logger.warn("maybeGetH2Connection couldn't open connection to database ");
-        return true;
-      } else {
-        closeConnection(connection1);  // TODO : ? why?
-      }
-    } catch (Exception e) {
-      logger.error("couldn't open connection to database, got " + e.getMessage(), e);
-      return true;
-    }
-    return false;
-  }
-*/
-
-/*  private Connection getConnection() {
-    return getConnection(this.getClass().toString());
-  }*/
   @Override
   public Connection getConnection(String who) {
     if (connection == null) {

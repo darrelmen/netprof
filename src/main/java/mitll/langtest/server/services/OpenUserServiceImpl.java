@@ -254,7 +254,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }
 
-
   /**
    * @param emailH
    * @param email
@@ -291,9 +290,9 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   @Override
   public void forgetProject() {
     try {
-      User sessionUser = getSessionUser();
-      if (sessionUser != null) {
-        db.forgetProject(sessionUser.getID());
+      int sessionUserID = getSessionUserID();
+      if (sessionUserID != -1) {
+        db.forgetProject(sessionUserID);
       }
     } catch (DominoSessionException e) {
       logger.error("got  " + e, e);

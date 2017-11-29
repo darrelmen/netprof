@@ -197,11 +197,11 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private int getProjectIDFromUser(HttpServletRequest request) throws DominoSessionException {
     logger.info("doGet no project id on session, let's try the security manager");
-    User loggedInUser = securityManager.getLoggedInUser(request);
+    int loggedInUser = securityManager.getLoggedInUserID(request);
     int projid = -1;
-    if (loggedInUser != null) {
-      logger.debug("doGet found session user " + loggedInUser.getUserID());
-      projid = getMostRecentProjectByUser(loggedInUser.getID());
+    if (loggedInUser != -1) {
+      logger.debug("doGet found session user " + loggedInUser);
+      projid = getMostRecentProjectByUser(loggedInUser);
     } else {
       logger.warn("doGet couldn't find user via request...");
     }

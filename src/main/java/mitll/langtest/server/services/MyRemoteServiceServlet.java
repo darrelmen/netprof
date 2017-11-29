@@ -249,6 +249,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    */
   User getSessionUser() throws DominoSessionException {return securityManager.getLoggedInUser(getThreadLocalRequest());}
+  int getSessionUserID() throws DominoSessionException {return securityManager.getLoggedInUserID(getThreadLocalRequest());}
 
   /**
    * This is safe!

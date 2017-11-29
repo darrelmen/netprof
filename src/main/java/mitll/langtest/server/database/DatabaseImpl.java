@@ -42,6 +42,7 @@ import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
+import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.StateManager;
@@ -100,6 +101,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -174,23 +176,34 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public DatabaseImpl() {
   }
 
+  /**
+   * @see CopyToPostgres#getSimpleDatabase
+   * @param serverProps
+   */
   public DatabaseImpl(ServerProperties serverProps) {
     this.serverProps = serverProps;
     this.logAndNotify = null;
     setPostgresDBConnection();
   }
 
+  /**
+   * @see LangTestDatabaseImpl#makeDatabaseImpl
+   * @param serverProps
+   * @param pathHelper
+   * @param logAndNotify
+   * @param servletContext
+   */
   public DatabaseImpl(ServerProperties serverProps,
                       PathHelper pathHelper,
-                      LogAndNotify logAndNotify) {
+                      LogAndNotify logAndNotify, ServletContext servletContext) {
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
 
-    connectToDatabases(pathHelper);
+    connectToDatabases(pathHelper,servletContext);
   }
 
-  protected void connectToDatabases(PathHelper pathHelper) {
+  void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
     // first connect to postgres
 
@@ -198,7 +211,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.debug("initializeDAOs --- " + dbConnection);
 
     // then connect to mongo
-    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this);
+    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
     initializeDAOs(pathHelper, dominoUserDAO);
     {
@@ -240,7 +253,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * Create or alter tables as needed.
    *
-   * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify)
+   * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify, ServletContext)
    */
   private void initializeDAOs(PathHelper pathHelper, DominoUserDAOImpl dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
@@ -345,8 +358,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-    //  logger.debug("setInstallPath got install path " + installPath);// + " media " + mediaDir);
-    //this.installPath = installPath;
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
     makeDAO(lessonPlanFileOnlyForImport);
     return this;

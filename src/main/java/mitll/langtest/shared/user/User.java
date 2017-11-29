@@ -113,6 +113,10 @@ public class User extends MiniUser implements ReportUser {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
+   * @return
+   */
   public boolean isHasAppPermission() {
     return hasAppPermission;
   }
@@ -416,6 +420,10 @@ public class User extends MiniUser implements ReportUser {
     return userKind;
   }
 
+  /**
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
+   * @return
+   */
   public boolean isEnabled() {
     return enabled;
   }

@@ -66,6 +66,8 @@ import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 
+import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
+
 /**
  * Supports all the database interactions.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -355,7 +357,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * Note that this will only ever be called once.
    *
    * @param servletContext
-   * @see #init()
+   * @see #init
    */
   private ServerProperties readProperties(ServletContext servletContext) {
     ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
@@ -369,6 +371,15 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     //logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
+      Object attribute = servletContext.getAttribute(USER_SVC);
+
+      if (attribute != null) {
+        logger.info("got " + attribute + " : " + attribute.getClass());
+      }
+      else {
+        logger.warn("no servlet context... ");
+      }
+
       db = makeDatabaseImpl(serverProps);
       // logger.info("readProperties made database " + db);
       securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
@@ -394,8 +405,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 */
 
+  /**
+   * @see #readProperties
+   * @param serverProps
+   * @return
+   */
   private DatabaseImpl makeDatabaseImpl(ServerProperties serverProps) {
-    return new DatabaseImpl(serverProps, pathHelper, this);
+    return new DatabaseImpl(serverProps, pathHelper, this, null);
   }
 
   /**

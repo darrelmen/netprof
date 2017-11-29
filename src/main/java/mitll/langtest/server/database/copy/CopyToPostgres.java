@@ -156,7 +156,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private static DatabaseImpl getDatabase() {
     ServerProperties serverProps = getProps();
-    return new DatabaseImpl(getProps(), new PathHelper("war", serverProps), null);
+    return new DatabaseImpl(getProps(), new PathHelper("war", serverProps), null, null);
   }
 
   public static DatabaseImpl getSimpleDatabase() {  return new DatabaseImpl(getProps());  }
