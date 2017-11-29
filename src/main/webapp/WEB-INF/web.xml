@@ -11,6 +11,12 @@
         <welcome-file>LangTest.html</welcome-file>
     </welcome-file-list>
 
+    <context-param>
+        <param-name>domino.cfg.home</param-name>
+        <param-value>/opt/netprof/config/</param-value>
+    </context-param>
+
+
     <!-- ==================================================================== -->
     <!-- Start RPC mappings                                                   -->
     <!-- ==================================================================== -->
@@ -321,5 +327,14 @@
     <!-- ==================================================================== -->
     <!-- END filters  														-->
     <!-- ==================================================================== -->
+
+    <!-- initialize core data services - Mongo connection pool, etc -->
+    <listener>
+        <listener-class>mitll.hlt.domino.server.ServerInitializationManager</listener-class>
+        <init-param>
+            <param-name>pathInfoOnly</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </listener>
 
 </web-app>
