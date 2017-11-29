@@ -165,8 +165,8 @@ dependencies {
 
     // last one actually in kws-bugs -- why???
 
-    runtime group: 'org.eclipse.jetty', name: 'jetty-servlets', version: '9.3.8.v20160314'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlets', version: '9.3.8.v20160314'
+    runtime group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.8.v20160314'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.8.v20160314'
 }
 
 war {
