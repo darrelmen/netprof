@@ -336,7 +336,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private int checkSession(HttpServletRequest request) throws DominoSessionException {
-    int userIDFromSession = securityManager.getUserIDFromSession(request);
+    int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
     logger.info("doGet user id from session is " + userIDFromSession);
     return userIDFromSession;
   }

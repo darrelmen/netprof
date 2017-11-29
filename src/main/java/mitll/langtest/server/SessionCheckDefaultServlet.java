@@ -54,6 +54,10 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 
+/**
+ * Nope - this doesn't work in TOMCAT!
+ * @deprecated
+ */
 public class SessionCheckDefaultServlet extends DefaultServlet {
   private static final Logger log = LogManager.getLogger(SessionCheckDefaultServlet.class);
 
@@ -64,7 +68,7 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
 
   private int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
     if (securityManager == null) log.error("huh? no security manager?");
-    return securityManager.getUserIDFromSession(httpRequest);
+    return securityManager.getUserIDFromSessionLight(httpRequest);
   }
 
   /**
@@ -87,67 +91,16 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
         findSharedDatabase(getServletContext());
       }
 
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
+      boolean isValid = isValidRequest(request, response);
 
-      log.info("doGet : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
-      //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
-
-      String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
-      File file = new File(fixParent(requestURI), filename);
-
-      log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
-
-      if (!file.exists()) {
-        filename = URLDecoder.decode(requestURI, "UTF-8");
-
-        String parent = fixParent(requestURI);
-
-        file = new File(parent, filename);
-        log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
-      }
-
-      if (file.exists()) {
-        if (requestURI.contains("/answers")) {
-          // 1 who recorded the audio?
-          String fileToFind = requestURI.substring(1);
-
-          int userForFile = getUserForFile(requestURI, fileToFind);
-
-          if (userForFile == -1) {
-            log.warn("now trying " + file.getAbsolutePath());
-             userForFile = getUserForWavFile(file.getAbsolutePath());
-          }
-
-          if (userForFile == -1) {
-            log.warn("not sure who recorded this file " + requestURI);
-          } else {
-            if (userForFile == userIDFromSessionOrDB) {
-              // 2 are you the same person? if so you get to hear it
-              log.info("OK, it's your file.");
-            } else {
-              boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
-              if (student) {
-                // 4 if you are a student sorry, you don't get to hear it
-                reply(response, "not your file.");
-                return;
-              } else {
-                // 3 if you are not the same, are you are teacher, then you can hear it
-                log.info("OK, you're a teacher");
-              }
-            }
-          }
-          log.info("got answers " + requestURI);
-        }
-      }
-
-      if (file.exists()) {
+      if (isValid) {
 //        response.setHeader("Content-Type", getServletContext().getMimeType(filename));
 //        response.setHeader("Content-Length", String.valueOf(file.length()));
 //        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
 //
 //        Files.copy(file.toPath(), response.getOutputStream());
 
-        super.doGet(request,response);
+        super.doGet(request, response);
       } else {
         String message = "Nope.";
         reply(response, message);
@@ -162,6 +115,71 @@ public class SessionCheckDefaultServlet extends DefaultServlet {
         log.error("doGet : Unexpected exception during request {}.", request.getRequestURL(), e);
       }
     }
+  }
+
+  @NotNull
+  private boolean isValidRequest(HttpServletRequest request, HttpServletResponse response) throws DominoSessionException, UnsupportedEncodingException {
+    String requestURI = request.getRequestURI();
+    boolean valid = true;
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
+
+    log.info("doGet : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
+    //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
+
+    File file = getFileFromRequest(request, requestURI);
+
+    if (valid = file.exists()) {
+      if (requestURI.contains("/answers")) {
+        // 1 who recorded the audio?
+        int userForFile = getUserForFile(requestURI, file);
+
+        if (userForFile == -1) {
+          log.warn("not sure who recorded this file " + requestURI);
+        } else {
+          if (userForFile == userIDFromSessionOrDB) {
+            // 2 are you the same person? if so you get to hear it
+            log.info("OK, it's your file.");
+          } else {
+            boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
+            if (student) {
+              // 4 if you are a student sorry, you don't get to hear it
+              reply(response, "not your file.");
+              valid = false;
+            } else {
+              // 3 if you are not the same, are you are teacher, then you can hear it
+              log.info("OK, you're a teacher");
+            }
+          }
+        }
+        log.info("got answers " + requestURI);
+      }
+    }
+    return valid;
+  }
+
+  private int getUserForFile(String requestURI, File file) {
+    int userForFile = getUserForFile(requestURI, requestURI.substring(1));
+    if (userForFile == -1) {
+      log.warn("now trying " + file.getAbsolutePath());
+      userForFile = getUserForWavFile(file.getAbsolutePath());
+    }
+    return userForFile;
+  }
+
+  @NotNull
+  private File getFileFromRequest(HttpServletRequest request, String requestURI) throws UnsupportedEncodingException {
+    String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
+    File file = new File(fixParent(requestURI), filename);
+
+    log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
+
+    if (!file.exists()) {
+      filename = URLDecoder.decode(requestURI, "UTF-8");
+      String parent = fixParent(requestURI);
+      file = new File(parent, filename);
+      log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
+    }
+    return file;
   }
 
   private int getUserForFile(String requestURI, String fileToFind) {

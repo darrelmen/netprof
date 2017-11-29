@@ -110,7 +110,7 @@ public class SecureXSRFPServiceServlet extends XsrfProtectedServiceServlet {
 
   protected int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws mitll.langtest.shared.common.DominoSessionException {
     if (securityManager == null) log.error("huh? no security manager?");
-    return securityManager.getUserIDFromSession(httpRequest);
+    return securityManager.getUserIDFromSessionLight(httpRequest);
   }
 
   /**

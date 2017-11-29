@@ -37,10 +37,15 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.common.DominoSessionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import static org.apache.logging.log4j.web.WebLoggerContextUtils.getServletContext;
 
@@ -63,9 +68,11 @@ public class AttachSecurityFilter implements Filter {
   private IUserSecurityManager securityManager;
   private ServletContext servletContext;
 
+  private static final boolean DEBUG = true;
+
   public void init(FilterConfig filterConfig) throws ServletException {
     this.servletContext = filterConfig.getServletContext();
-    log.info("found servlet context " +servletContext);
+    if (DEBUG) log.info("found servlet context " +servletContext);
   }
 
   @Override
@@ -77,22 +84,23 @@ public class AttachSecurityFilter implements Filter {
       findSharedDatabase(servletContext);
     }
     if (!(request instanceof HttpServletRequest)) {
-      log.info("doFilter : skipping " + request.toString() + " since not HttpServletReq");
+      if (DEBUG) log.info("doFilter : skipping " + request.toString() + " since not HttpServletReq");
       chain.doFilter(request, response);
     }
     else {
-      log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
-      log.info("doFilter : chain is " + chain);
+      if (DEBUG)     log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
+      if (DEBUG) log.info("doFilter : chain is " + chain);
+
 
       final HttpServletRequest httpRequest = (HttpServletRequest) request;
       try {
-        int userIDFromSessionOrDB = getUserIDFromSessionOrDB(httpRequest);
-        log.info("doFilter : found session user " + userIDFromSessionOrDB);
+        boolean isValid = isValidRequest(((HttpServletRequest) request));
 
+        if (!isValid) throw new DominoSessionException("not allowed");
         // MUST do this -
         chain.doFilter(request, response);
-        log.info("doFilter after chain doFilter " + httpRequest.getRequestURI());
 
+        if (DEBUG) log.info("doFilter after chain doFilter " + httpRequest.getRequestURI());
       } catch (DominoSessionException dse) {
         log.warn("doFilter : nope - no session " + dse.getMessage() + " req for : " + ((HttpServletRequest) request).getRequestURI());
         handleAccessFailure(httpRequest, response);
@@ -104,6 +112,105 @@ public class AttachSecurityFilter implements Filter {
         }
       }
     }
+  }
+
+  @NotNull
+  private boolean isValidRequest(HttpServletRequest request) throws DominoSessionException, UnsupportedEncodingException {
+    String requestURI = request.getRequestURI();
+    boolean valid = true;
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
+
+    if (DEBUG) log.info("isValidRequest : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
+    //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
+
+    File file = getFileFromRequest(request, requestURI);
+
+    if (file.exists()) {
+      if (requestURI.contains("/answers")) {
+//        if (DEBUG) log.info("isValidRequest got answers " + requestURI);
+        // 1 who recorded the audio?
+        int userForFile = getUserForFile(requestURI, file);
+
+        if (userForFile == -1) {
+          log.warn("isValidRequest not sure who recorded this file " + requestURI);
+        } else {
+          if (userForFile == userIDFromSessionOrDB) {
+            // 2 are you the same person? if so you get to hear it
+            if (DEBUG) log.info("isValidRequest OK, it's your file.");
+          } else {
+            boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
+            if (student) {
+              // 4 if you are a student sorry, you don't get to hear it
+              log.warn("isValidRequest nope - student " + userIDFromSessionOrDB+ " did not create the file, user #" + userForFile + " did.");
+              valid = false;
+            } else {
+              // 3 if you are not the same, are you are teacher, then you can hear it
+              if (DEBUG) log.info("isValidRequest OK, you're a teacher");
+            }
+          }
+        }
+      }
+    }
+    return valid;
+  }
+
+  private int getUserForFile(String requestURI, File file) {
+    int userForFile = getUserForFile(requestURI, requestURI.substring(1));
+    if (userForFile == -1) {
+      log.warn("getUserForFile now trying " + file.getAbsolutePath());
+      userForFile = getUserForWavFile(file.getAbsolutePath());
+    }
+    return userForFile;
+  }
+
+  @NotNull
+  private File getFileFromRequest(HttpServletRequest request, String requestURI) throws UnsupportedEncodingException {
+    String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
+    File file = new File(fixParent(requestURI), filename);
+
+    if (DEBUG) log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
+
+    if (!file.exists()) {
+      filename = URLDecoder.decode(requestURI, "UTF-8");
+      String parent = fixParent(requestURI);
+      file = new File(parent, filename);
+      if (DEBUG)  log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
+    }
+    return file;
+  }
+
+  private int getUserForFile(String requestURI, String fileToFind) {
+    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
+
+    fileToFind = requestURI.startsWith("answers") ? requestURI.substring("answers".length()) : requestURI;
+    fileToFind = fileToFind.startsWith("netprof") ? fileToFind.substring("netprof".length()) : fileToFind;
+    if (DEBUG) log.info("getUserForFile checking now " + fileToFind);
+
+    int answers = fileToFind.indexOf("answers");
+    if (answers != -1) {
+      fileToFind = fileToFind.substring(answers);
+      if (DEBUG) log.info("getUserForFile test now " + fileToFind);
+    }
+    int userForFile = getUserForWavFile(fileToFind);
+    return userForFile;
+  }
+
+  private int getUserForWavFile(String fileToFind) {
+    fileToFind = fileToFind.length() > 4 ? fileToFind.substring(0, fileToFind.length() - 4) + ".wav" : fileToFind;
+    if (DEBUG) log.info("testing '" + fileToFind + "'");
+    return db.getProjectManagement().getUserForFile(fileToFind);
+  }
+
+  @NotNull
+  private String fixParent(String requestURI) {
+    String parent = "/opt/netprof";
+
+    if (requestURI.contains("bestAudio")) {
+      parent += "/bestAudio";
+    } else if (requestURI.contains("answers")) {
+      parent += "/answers";
+    }
+    return parent;
   }
 
   private void handleAccessFailure(final HttpServletRequest request,
@@ -119,12 +226,12 @@ public class AttachSecurityFilter implements Filter {
 
   @Override
   public void destroy() {
-    log.info("doFilter : destroy");
+
   }
 
   protected int getUserIDFromSessionOrDB(HttpServletRequest httpRequest) throws DominoSessionException {
     if (securityManager == null) log.error("huh? no security manager?");
-    return securityManager.getUserIDFromSession(httpRequest);
+    return securityManager.getUserIDFromSessionLight(httpRequest);
   }
 
   /**

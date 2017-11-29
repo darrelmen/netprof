@@ -191,10 +191,10 @@
 
     <servlet>
         <servlet-name>MyDefaultServlet</servlet-name>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
         <!--
-                <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+                <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
         -->
-        <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/bestAudio</param-value>
@@ -211,10 +211,10 @@
 
     <servlet>
         <servlet-name>DefaultServletAnswers</servlet-name>
-<!--
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
--->
-        <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
+        <!--
+                <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
+        -->
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/answers</param-value>
@@ -301,20 +301,17 @@
         <filter-class>mitll.langtest.server.filter.ForceNocacheFilter</filter-class>
     </filter>
 
-<!--
     <filter>
         <filter-name>attSecurityFilter</filter-name>
         <filter-class>mitll.langtest.server.database.security.AttachSecurityFilter</filter-class>
     </filter>
--->
-
 
     <filter-mapping>
         <filter-name>forceNocacheFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-<!--    <filter-mapping>
+    <filter-mapping>
         <filter-name>attSecurityFilter</filter-name>
         <url-pattern>/bestAudio/*</url-pattern>
     </filter-mapping>
@@ -322,7 +319,7 @@
     <filter-mapping>
         <filter-name>attSecurityFilter</filter-name>
         <url-pattern>/answers/*</url-pattern>
-    </filter-mapping>-->
+    </filter-mapping>
 
     <!-- ==================================================================== -->
     <!-- END filters  														-->
@@ -331,10 +328,6 @@
     <!-- initialize core data services - Mongo connection pool, etc -->
     <listener>
         <listener-class>mitll.hlt.domino.server.ServerInitializationManager</listener-class>
-        <init-param>
-            <param-name>pathInfoOnly</param-name>
-            <param-value>true</param-value>
-        </init-param>
     </listener>
 
 </web-app>

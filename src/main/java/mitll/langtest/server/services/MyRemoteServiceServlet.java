@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -43,10 +42,10 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
@@ -219,12 +218,12 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    */
   protected int getUserIDFromSessionOrDB() throws DominoSessionException {
-    return securityManager.getUserIDFromSession(getThreadLocalRequest());
+    return securityManager.getUserIDFromSessionLight(getThreadLocalRequest());
   }
 
   /**
    * Add startup info to user.
-   *
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    * @return
    */
   public User getUserFromSession() throws DominoSessionException {

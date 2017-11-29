@@ -259,7 +259,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @return
    * @throws RestrictedOperationException
    * @throws DominoSessionException
-   * @see MyRemoteServiceServlet#getUserFromSession
+   * @see MyRemoteServiceServlet#getSessionUser
    */
   @Override
   public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
@@ -517,21 +517,19 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   //  @Override
+  @Override
   public int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException {
     int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it?
       try {
+        int sessionUserID = getLoggedInUserLight(threadLocalRequest, "", true);
 
-        User sessionUser = getLoggedInUser(threadLocalRequest, "", true);
-
-        int i = (sessionUser == null) ? -1 : sessionUser.getID();
-        if (i == -1) { // this shouldn't happen if we throw on bad sessions
+        if (sessionUserID == -1) { // this shouldn't happen if we throw on bad sessions
           log.error("getUserIDFromSession huh? couldn't get user from session or database?");
         }
 
-        return i;
-
+        return sessionUserID;
       } catch (DominoSessionException e) {
         log.warn("getUserIDFromSession : session exception : " + e);
         throw e;

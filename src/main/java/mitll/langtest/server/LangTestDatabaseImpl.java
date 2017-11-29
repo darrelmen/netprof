@@ -167,7 +167,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see UserMenu#getProjectSpecificChoices
    */
   public void sendReport() throws DominoSessionException, RestrictedOperationException {
-    int userIDFromSession = securityManager.getUserIDFromSession(getThreadLocalRequest());
+    int userIDFromSession = securityManager.getUserIDFromSessionLight(getThreadLocalRequest());
 
     User byID = db.getUserDAO().getByID(userIDFromSession);
     if (byID == null) {

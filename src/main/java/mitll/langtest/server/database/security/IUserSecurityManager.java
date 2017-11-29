@@ -20,7 +20,15 @@ public interface IUserSecurityManager {
    */
   String USER_SESSION_ATT = "user-db-id";
 
+  /**
+   * @deprecated
+   * @param threadLocalRequest
+   * @return
+   * @throws DominoSessionException
+   */
   int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException;
+
+  int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException;
 
   int getUserIDFromRequest(HttpServletRequest request);
 
