@@ -116,10 +116,10 @@ public class ImportCourseExamples {
   //  copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }*/
 
-  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
+/*  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");
-    return new DatabaseImpl(serverProps, null, null);
-  }
+    return new DatabaseImpl(serverProps, null, null, servletContext);
+  }*/
 
 /*
   private static void copyUser(DatabaseImpl npfRussian, Map<Integer, User> userMap, Map<Integer, Integer> oldToNew, int userid) {

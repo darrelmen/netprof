@@ -43,6 +43,7 @@ import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.exercise.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
@@ -433,6 +434,22 @@ public class ProjectTest extends BaseTest {
     project.getSectionHelper().report();
     ;
     // logger.info("project " + project.getAudioFileHelper().isHydraAvailableCheckNow());
+    andPopulate.close();
+  }
+
+  @Test
+  public void testCheckOwner() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    IProjectManagement projectManagement = andPopulate.getProjectManagement();
+    int userForFile = projectManagement.getUserForFile("answers/spanish/answers/plan/1945/0/subject-83/answer_1474213851511.mp3");
+    logger.info("got " + userForFile);
+
+    userForFile = projectManagement.getUserForFile("answers/spanish/answers/plan/1945/0/subject-83/answer_1474213851511.wav");
+    logger.info("got " + userForFile);
+
+    userForFile = projectManagement.getUserForFile("answers/plan/1945/0/subject-83/answer_1474213851511.wav");
+    logger.info("got " + userForFile);
+
     andPopulate.close();
   }
 

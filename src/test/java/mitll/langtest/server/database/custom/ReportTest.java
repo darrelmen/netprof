@@ -36,18 +36,17 @@ public class ReportTest {
 
   @BeforeClass
   public static void setup() {
-    String config = "spanish";//"mandarin";
-    getDatabase(config, "npfSpanish");
+    getDatabase("spanish");
   }
 
-  private static void getDatabase(String config, String dbName) {
+  private static void getDatabase(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);

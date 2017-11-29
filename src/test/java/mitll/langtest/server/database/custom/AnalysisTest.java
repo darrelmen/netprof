@@ -178,7 +178,7 @@ public class AnalysisTest {
     String parent = file.getParent();
     logger.debug("config dir " + parent +" config     " + file.getName());
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    DatabaseImpl war = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
+    DatabaseImpl war = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     String media = parent + File.separator + "media";
     logger.debug("made " + war + " media " + media);
 

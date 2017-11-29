@@ -46,7 +46,7 @@ public class UserListManagerTest {
     logger.debug("config     " + file.getName());
     dbName = "npfSpanish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
@@ -54,7 +54,7 @@ public class UserListManagerTest {
     Collection<CommonExercise> exercises = database.getExercises();
   }
 
-  private static AudioFileHelper audioFileHelper;
+//  private static AudioFileHelper audioFileHelper;
 /*
   private static AudioFileHelper getAudioFileHelper(PathHelper pathHelper) {
     if (audioFileHelper == null) {

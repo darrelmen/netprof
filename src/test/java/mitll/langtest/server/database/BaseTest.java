@@ -2,7 +2,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 
 import java.io.*;
@@ -14,6 +13,7 @@ import java.util.Date;
 
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import org.apache.logging.log4j.*;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -23,7 +23,7 @@ import org.apache.logging.log4j.*;
  */
 public class BaseTest {
   private static final Logger logger = LogManager.getLogger(BaseTest.class);
-  public static final String QUIZLET_PROPERTIES = "quizlet.properties";
+  private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   public static final String DOMINO_PROPERTIES = "domino.properties";
 
   protected static DatabaseImpl getH2Database(String config) {
@@ -40,7 +40,7 @@ public class BaseTest {
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
-    DatabaseImpl database = new DatabaseImpl(serverProps, new PathHelper(installPath, serverProps), null);
+    DatabaseImpl database = new DatabaseImpl(serverProps, new PathHelper(installPath, serverProps), null, null);
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
 
     return database;
@@ -87,18 +87,18 @@ public class BaseTest {
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
+    return getDatabase(serverProps);
+  }
+
+  @NotNull
+  private static DatabaseImpl getDatabase(ServerProperties serverProps) {
     DatabaseImpl database = new DatabaseImpl(serverProps,
-        new PathHelper("war", serverProps), null);
+        new PathHelper("war", serverProps), null, null);
     return database;
   }
 
   protected static DatabaseImpl getDatabase() {
-    File file = new File("/opt/netprof/config/netprof.properties");
-    ServerProperties serverProps = getProps();
-
-    DatabaseImpl database = new DatabaseImpl(serverProps,
-        new PathHelper("war", serverProps), null);
-    return database;
+    return getDatabase(getProps());
   }
 
   protected static ServerProperties getProps() {
@@ -133,21 +133,16 @@ public class BaseTest {
   }
 
   /**
-   * @param connection
    * @param config
-   * @param dbName
    * @return
    * @see ReportAllTest#testReports()
    * @see ReportAllTest#testYTD()
    */
-  protected static DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
+  protected static DatabaseImpl getDatabase(String config) {
     File file = getPropertiesFile(config);
     String parent = file.getParent();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    DatabaseImpl database =
-        new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
-    // logger.debug("made " + database);
-
+    DatabaseImpl database = getDatabase(serverProps);
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     database.getExercises(-1);
     return database;

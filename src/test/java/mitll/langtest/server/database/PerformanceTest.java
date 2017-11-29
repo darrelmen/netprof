@@ -67,7 +67,7 @@ public class PerformanceTest extends BaseTest {
       String path = "../dbs/" + "npfSpanish";//.replaceAll(".h2.db", "");
 
       H2Connection connection = getH2Connection(path);
-      DatabaseImpl database = getDatabase(connection, "spanish", path);
+      DatabaseImpl database = getDatabase("spanish");
 
 //      UserPerformance performance = database.getAnalysis(-1).getPerformanceForUser(id, 1);
 //      writer = getWriter("RawUserPerformance");
@@ -195,7 +195,7 @@ public class PerformanceTest extends BaseTest {
     String path = "../dbs/" + "npfSpanish";//.replaceAll(".h2.db", "");
 
     H2Connection connection = getH2Connection(path);
-    DatabaseImpl database = getDatabase(connection, "spanish", path);
+    DatabaseImpl database = getDatabase("spanish");
     int id = 71;
     //int id = 535;   // tiffany
     AnalysisReport performanceReportForUser = database.getAnalysis(-1).getPerformanceReportForUser(id, 1, -1);
@@ -435,7 +435,7 @@ public class PerformanceTest extends BaseTest {
     String path = "../dbs/" + "npfClassroomEgyptian";//.replaceAll(".h2.db", "");
     String urdu = "egyptian";
 
-    DatabaseImpl database = getDatabase(getH2Connection(path), urdu, path);
+    DatabaseImpl database = getDatabase(urdu);
     IAnalysis analysis = database.getAnalysis(-1);
 
     List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
@@ -453,7 +453,7 @@ public class PerformanceTest extends BaseTest {
 
   public DatabaseImpl getSpanishDatabase() {
     String path = "../dbs/" + "npfSpanish";//.replaceAll(".h2.db", "");
-    return getDatabase(getH2Connection(path), "spanish", path);
+    return getDatabase("spanish");
   }
 
 /*  @Test

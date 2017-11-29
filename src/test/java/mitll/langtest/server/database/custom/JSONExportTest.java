@@ -51,8 +51,7 @@ public class JSONExportTest extends JsonExport {
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    String dbName = serverProps.getH2Database();
-    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null);
+    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);

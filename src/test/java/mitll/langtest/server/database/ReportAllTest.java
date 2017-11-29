@@ -43,7 +43,7 @@ public class ReportAllTest extends BaseTest {
       String config = configs.get(i++);
 
       H2Connection connection = getH2Connection("war/config/sudanese/" + db);
-      DatabaseImpl database = getDatabase(connection, config, db);
+      DatabaseImpl database = getDatabase(config);
       Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(-1);
 
       logger.info(maleFemaleProgress.toString());
@@ -73,7 +73,7 @@ public class ReportAllTest extends BaseTest {
       String config = configs.get(i++);
 
       H2Connection connection = getH2Connection("war/config/russian/" + db);
-      DatabaseImpl database = getDatabase(connection, config, db);
+      DatabaseImpl database = getDatabase(config);
       Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(-1);
 
       logger.info(maleFemaleProgress.toString());
@@ -106,7 +106,7 @@ public class ReportAllTest extends BaseTest {
 
       H2Connection connection = getH2Connection("war/config/english/" + db);
 
-      DatabaseImpl database = getDatabase(connection, config, db);
+      DatabaseImpl database = getDatabase(config);
       database.doReportForYear(2015);
 
       try {
@@ -154,7 +154,7 @@ public class ReportAllTest extends BaseTest {
 
       H2Connection connection = getH2(db);
 
-      DatabaseImpl database = getDatabase(connection, config, db);
+      DatabaseImpl database = getDatabase(config);
       database.doReportForYear(2016);
 
       try {
@@ -200,7 +200,7 @@ public class ReportAllTest extends BaseTest {
 
       H2Connection connection = getH2(db);
 
-      DatabaseImpl database = getDatabase(connection, config, db);
+      DatabaseImpl database = getDatabase(config);
       int activeUsersYTD = 0;//database.getReport(config).getActiveUsersYTD();
       logger.info(config + "," + activeUsersYTD);
       configToUsers.put(config, activeUsersYTD);
