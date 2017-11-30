@@ -61,39 +61,35 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
    */
   public List<String> getSortedItems(Collection<String> sections) {
     List<String> items = new ArrayList<>(sections);
-    boolean isInt = true;
-    for (String item : items) {
-      try {
-        item = dropGreater(item);
-        Integer.parseInt(item);
-      } catch (NumberFormatException e) {
-        isInt = false;
-        break;
-      }
-    }
 
-    if (isInt) {
+    if (areAllInt(items)) {
       items.sort(this::compareInts);
     } else {
       sortWithCompoundKeys(items);
     }
+
     return items;
+  }
+
+  private boolean areAllInt(List<String> items) {
+    boolean isInt = true;
+    for (String item : items) {
+      isInt = checkIsInt(dropGreater(item));
+      if (!isInt) break;
+    }
+    return isInt;
   }
 
   @Override
   public int compare(String o1, String o2) {
     try {
       if (o1.length() > 0 && o2.length() > 0) {
-        boolean isDig1 = Character.isDigit(o1.charAt(0));
-       // boolean isDig2 = Character.isDigit(o2.charAt(0));
-        if (isDig1 && Character.isDigit(o2.charAt(0))) {
-          return compareInts(o1,o2);
-        }
-        else {
+        if (checkIsInt(o1) && checkIsInt(o2)) {
+          return compareInts(o1, o2);
+        } else {
           return compoundCompare(o1, o2);
         }
-      }
-      else {
+      } else {
         return compoundCompare(o1, o2);
       }
     } catch (Exception e) {
@@ -113,7 +109,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       String[] first = o1.split("-");
       left1 = first[0];
       if (first.length == 1) {
-        System.err.println("huh? couldn't split " + o1);
+//        System.err.println("huh? couldn't split " + o1);
         right1 = "";
       } else {
         right1 = first[1];
@@ -172,12 +168,27 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       return first.compareToIgnoreCase(second);
     } else {
       try {
-        int r1 = Integer.parseInt(first);
-        int r2 = Integer.parseInt(second);
-        return Integer.compare(r1, r2);
+        if (checkIsInt(first) && checkIsInt(second)) {
+          int r1 = Integer.parseInt(first);
+          int r2 = Integer.parseInt(second);
+          return Integer.compare(r1, r2);
+        }
+        else {
+          return first.compareToIgnoreCase(second);
+        }
       } catch (NumberFormatException e) {
         return first.compareToIgnoreCase(second);
       }
     }
+  }
+
+  private boolean checkIsInt(String o1) {
+    boolean isInt = true;
+    for (int i = 0; i < o1.length() && isInt; i++) {
+      if (!Character.isDigit(o1.charAt(i))) {
+        isInt = false;
+      }
+    }
+    return isInt;
   }
 }

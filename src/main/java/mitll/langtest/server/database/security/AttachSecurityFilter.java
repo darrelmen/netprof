@@ -143,7 +143,7 @@ public class AttachSecurityFilter implements Filter {
       if (userForFile == -1) {
         userForFile = getUserForFileTryHarder(request, requestURI, testPath);
         //else {
-       // }
+        // }
       }
 
       valid = isAllowedToGet(userIDFromSessionOrDB, userForFile);
@@ -252,13 +252,24 @@ public class AttachSecurityFilter implements Filter {
     fileToFind = removeNetprof(fileToFind);
     if (DEBUG) log.info("getUserForFile user for " + fileToFind);
 
+    fileToFind = removeAnswers(fileToFind);
+
+    return getUserForWavFile(fileToFind);
+  }
+
+  @NotNull
+  private String removeAnswers(String fileToFind) {
     int answers = fileToFind.indexOf(ANSWERS);
     if (answers != -1) {
       fileToFind = fileToFind.substring(answers);
+
+      answers = fileToFind.indexOf(ANSWERS);
+      if (answers != -1) {
+        fileToFind = fileToFind.substring(answers);
+      }
       if (DEBUG) log.info("getUserForFile test " + fileToFind);
     }
-
-    return getUserForWavFile(fileToFind);
+    return fileToFind;
   }
 
   @NotNull

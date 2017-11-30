@@ -213,16 +213,17 @@ public class SelectionState {
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
         if (selectedItems != null) {
-          List<String> sorted = new ArrayList<>();
-          for (String selectedItem : selectedItems) {
-            sorted.add(selectedItem);
-          }
-          Collections.sort(sorted);
           StringBuilder status2 = new StringBuilder();
+
+          List<String> sorted = new ArrayList<>();
+          sorted.addAll(selectedItems);
+          Collections.sort(sorted);
+
           String sep = sorted.size() == 2 ? " and " : ", ";
           for (String item : sorted) {
             status2.append(item).append(sep);
           }
+
           String s = status2.toString();
           if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
           String statusForType = type + " " + s;
