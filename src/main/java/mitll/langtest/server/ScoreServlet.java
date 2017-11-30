@@ -72,12 +72,12 @@ import java.util.*;
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
-  private static final String REQUEST = "request";
+  public static final String REQUEST = "request";
 
   /**
    *
    */
-  private static final String NESTED_CHAPTERS = "nestedChapters";
+ // private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String ROUND_TRIP1 = "roundTrip";
   /**
@@ -87,10 +87,10 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @see #getProjects
    */
-  private static final String PROJECTS = "projects";
+  //private static final String PROJECTS = "projects";
 
   private static final String ERROR = "ERROR";
-  private static final String USER = "user";
+  public static final String USER = "user";
 
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
@@ -104,18 +104,18 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String VERSION = "version";
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
-  private static final String REQUEST1 = "request=";
+  private static final String REQUEST1 = REQUEST + "=";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
-  private static final String YEAR = "year";
+//  private static final String YEAR = "year";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private static final String JSON_REPORT = "jsonReport";
-  private static final String REPORT = "report";
+//  private static final String JSON_REPORT = "jsonReport";
+//  private static final String REPORT = "report";
   private static final String VERSION_NOW = "1.0";
-  private static final String EXPORT = "export";
-  private static final String REMOVE_REF_RESULT = "removeRefResult";
+//  private static final String EXPORT = "export";
+//  private static final String REMOVE_REF_RESULT = "removeRefResult";
   private static final String RESULT_ID = "resultID";
   private static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
@@ -123,7 +123,15 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String EXERCISE_TEXT = "exerciseText";
   private static final String SUCCESS = "success";
   private static final String ERROR1 = "error";
-  public static final String HAS_USER = "hasUser";
+  //public static final String HAS_USER = "hasUser";
+  public static final String NO_SESSION = "no session";
+
+  public static final String PASS = "pass";
+  public static final String PROJID = "projid";
+  public static final String USERID = "userid";
+  public static final String ENGLISH = "english";
+  public static final String LANGUAGE = "language";
+  public static final String FULL = "full";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -192,7 +200,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       // language overrides user id mapping...
       {
-        String language = request.getHeader("language");
+        String language = request.getHeader(LANGUAGE);
         if (language != null) {
           projid = getProjectID(language);
           if (projid == -1) projid = getProject(request);
@@ -201,7 +209,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       // ok can't figure it out from language, check header.
       if (projid == -1) {
-        projid = request.getIntHeader("projid");
+        projid = request.getIntHeader(PROJID);
         logger.warn("doGet got project id from url header " + projid);
       }
 
@@ -317,7 +325,7 @@ public class ScoreServlet extends DatabaseServlet {
       reply(response, respString);
     } catch (DominoSessionException e) {
       logger.warn("doGet Got " + e);
-      reply(response, "no session");
+      reply(response, NO_SESSION);
     } catch (Exception e) {
       logger.error("doGet Got " + e, e);
       db.logAndNotify(e);
@@ -666,11 +674,12 @@ public class ScoreServlet extends DatabaseServlet {
   private void checkUserAndLogin(HttpServletRequest request, JSONObject jsonObject) {
     userManagement.tryToLogin(
         jsonObject,
-        request.getHeader("pass"),
         request,
         securityManager,
-        request.getIntHeader("projid"),
-        request.getHeader("userid")
+
+        request.getIntHeader(PROJID),
+        request.getHeader(USERID),
+        request.getHeader(PASS)
     );
   }
 
@@ -873,7 +882,7 @@ public class ScoreServlet extends DatabaseServlet {
     } catch (DominoSessionException dse) {
       logger.info("got " + dse);
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put("message", "no session");
+      jsonObject.put("message", NO_SESSION);
       return jsonObject;
     }
 
@@ -894,7 +903,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     logger.debug("getJsonForAudio got projid from session " + projid);
     if (projid == -1) {
-      projid = request.getIntHeader("projid");
+      projid = request.getIntHeader(PROJID);
       logger.debug("getJsonForAudio got projid from request " + projid);
     }
 
@@ -906,7 +915,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     String user = request.getHeader(USER);
     int userid = userManagement.getUserFromParam(user);
-    String fullJSONFormat = request.getHeader("full");
+    String fullJSONFormat = request.getHeader(FULL);
 
     logger.debug("getJsonForAudio got" +
         "\n\trequest  " + requestType +
@@ -972,7 +981,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudio
    */
   private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
-    String exerciseText = request.getHeader("english");
+    String exerciseText = request.getHeader(ENGLISH);
     if (exerciseText == null) exerciseText = "";
     if (projid > 0) {
       Project project1 = getProject(projid);

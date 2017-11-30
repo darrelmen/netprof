@@ -41,13 +41,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-
-import static org.apache.logging.log4j.web.WebLoggerContextUtils.getServletContext;
 
 /**
  * AttachSecurityFilter: A security filter that ensures a user is allowed
@@ -61,6 +58,13 @@ public class AttachSecurityFilter implements Filter {
   private static final Logger log = LogManager.getLogger(AttachSecurityFilter.class);
 
   private static final String DATABASE_REFERENCE = "databaseReference";
+  private static final String ANSWERS = "answers";
+  private static final String SLASH_ANSWERS = "/" + ANSWERS;
+  private static final String NETPROF = "netprof";
+  private static final String OPT = "/opt";
+  private static final String BEST_AUDIO = "bestAudio";
+  private static final String WAV = ".wav";
+  private static final int WAV_LEN = WAV.length();
 
   private DatabaseServices db;
 
@@ -87,18 +91,17 @@ public class AttachSecurityFilter implements Filter {
       chain.doFilter(request, response);
     } else {
       if (DEBUG) log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
-      if (DEBUG) log.info("doFilter : chain is " + chain);
-
+//      if (DEBUG) log.info("doFilter : chain is " + chain);
 
       final HttpServletRequest httpRequest = (HttpServletRequest) request;
       try {
-        boolean isValid = isValidRequest(((HttpServletRequest) request));
-
-        if (!isValid) throw new DominoSessionException("not allowed");
+        if (!isValidRequest(httpRequest)) {
+          throw new DominoSessionException("not allowed");
+        }
         // MUST do this -
         chain.doFilter(request, response);
 
-        if (DEBUG) log.info("doFilter after chain doFilter " + httpRequest.getRequestURI());
+        // if (DEBUG) log.info("doFilter after chain doFilter " + httpRequest.getRequestURI());
       } catch (DominoSessionException dse) {
         log.warn("doFilter : nope - no session " + dse.getMessage() + " req for : " + ((HttpServletRequest) request).getRequestURI());
         handleAccessFailure(httpRequest, response);
@@ -124,50 +127,69 @@ public class AttachSecurityFilter implements Filter {
   @NotNull
   private boolean isValidRequest(HttpServletRequest request) throws DominoSessionException, UnsupportedEncodingException {
     String requestURI = request.getRequestURI();
+    if (requestURI.isEmpty()) return false; // protect substring(1)
+
     boolean valid = true;
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB(request);
 
-    if (DEBUG) log.info("isValidRequest : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
+    if (DEBUG)
+      log.info("isValidRequest : found session user " + userIDFromSessionOrDB + " req for '" + requestURI + "'");
     //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
 
-    if (requestURI.contains("/answers")) {
-      File file = getFileFromRequest(request, requestURI);
+    if (requestURI.contains(SLASH_ANSWERS)) {
+      String testPath = removeNetprof(requestURI.substring(1));
+      int userForFile = getUserForWavFile(testPath);
 
-      if (file.exists()) {
-//        if (DEBUG) log.info("isValidRequest got answers " + requestURI);
-        // 1 who recorded the audio?
-        int userForFile = getUserForFile(requestURI, file);
-
-        if (userForFile == -1) {
-          log.warn("isValidRequest not sure who recorded this file " + requestURI);
-        } else {
-          if (userForFile == userIDFromSessionOrDB) {
-            // 2 are you the same person? if so you get to hear it
-            if (DEBUG) log.info("isValidRequest OK, it's your file.");
-          } else {
-            boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
-            if (student) {
-              // 4 if you are a student sorry, you don't get to hear it
-              log.warn("isValidRequest nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
-              valid = false;
-            } else {
-              // 3 if you are not the same, are you are teacher, then you can hear it
-              if (DEBUG) log.info("isValidRequest OK, you're a teacher");
-            }
-          }
-        }
+      if (userForFile == -1) {
+        userForFile = getUserForFileTryHarder(request, requestURI, testPath);
+        //else {
+       // }
       }
+
+      valid = isAllowedToGet(userIDFromSessionOrDB, userForFile);
+
+      //      } else {
+//        log.warn("isValidRequest couldn't find file for " + requestURI);
+//      }
     }
     return valid;
   }
 
-  private int getUserForFile(String requestURI, File file) {
-    int userForFile = getUserForFile(requestURI, requestURI.substring(1));
+  private int getUserForFileTryHarder(HttpServletRequest request, String requestURI, String testPath) throws UnsupportedEncodingException {
+    int userForFile;
+    if (DEBUG) log.info("isValidRequest got answers " + requestURI + " couldn't find user for " + testPath);
+    File file = getFileFromRequest(request, requestURI);
+
+    if (!file.exists()) {
+      log.warn("isValidRequest couldn't find file for " + requestURI);
+    }
+    if (DEBUG) log.info("isValidRequest got answers " + requestURI);
+    // 1 who recorded the audio?
+    userForFile = getUserForFile(requestURI, file);
+
     if (userForFile == -1) {
-      log.warn("getUserForFile now trying " + file.getAbsolutePath());
-      userForFile = getUserForWavFile(file.getAbsolutePath());
+      log.warn("isValidRequest not sure who recorded this file " + requestURI);
+      //valid = false;
     }
     return userForFile;
+  }
+
+  private boolean isAllowedToGet(int userIDFromSessionOrDB, int userForFile) {
+    if (userForFile == userIDFromSessionOrDB) {
+      // 2 are you the same person? if so you get to hear it
+      if (DEBUG) log.info("isAllowedToGet OK, it's your file.");
+      return true;
+    } else {
+      if (db.getUserDAO().isStudent(userIDFromSessionOrDB)) {
+        // 4 if you are a student sorry, you don't get to hear it
+        log.warn("isAllowedToGet nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
+        return false;
+      } else {
+        // 3 if you are not the same, are you are teacher, then you can hear it
+        if (DEBUG) log.info("isAllowedToGet OK, you're a teacher or higher");
+        return true;
+      }
+    }
   }
 
   @NotNull
@@ -178,55 +200,79 @@ public class AttachSecurityFilter implements Filter {
       pathInfo = requestURI;
     }
     String filename = pathInfo.isEmpty() ? "" : URLDecoder.decode(pathInfo.substring(1), "UTF-8");
-    String parent1 = fixParent(requestURI);
 
-    if (DEBUG) log.info("getFileFromRequest parent1 " + parent1 + " for " + requestURI);
+    File file = new File(OPT, filename);
 
-    File file = new File(parent1, filename);
+    if (file.exists()) {
+      return file;
+    } else {
+      String parent1 = fixParent(requestURI);
 
-    if (DEBUG) log.info("getFileFromRequest file now " + file.getAbsolutePath() + " exists " + file.exists());
+      if (DEBUG) log.info("getFileFromRequest parent1 " + parent1 + " for " + requestURI);
 
-    if (!file.exists()) {
-      filename = URLDecoder.decode(requestURI, "UTF-8");
-      String parent = fixParent(requestURI);
-      file = new File(parent, filename);
-      if (DEBUG) log.info("getFileFromRequest file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
+      file = new File(parent1, filename);
+
+      if (DEBUG) log.info("getFileFromRequest file now " + file.getAbsolutePath() + " exists " + file.exists());
+
+      if (!file.exists()) {
+        filename = URLDecoder.decode(requestURI, "UTF-8");
+        String parent = fixParent(requestURI);
+        file = new File(parent, filename);
+        if (DEBUG) log.info("getFileFromRequest file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
+      }
+      return file;
     }
-    return file;
-  }
-
-  private int getUserForFile(String requestURI, String fileToFind) {
-    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
-
-    fileToFind = requestURI.startsWith("answers") ? requestURI.substring("answers".length()) : requestURI;
-    fileToFind = fileToFind.startsWith("netprof") ? fileToFind.substring("netprof".length()) : fileToFind;
-    if (DEBUG) log.info("getUserForFile checking now " + fileToFind);
-
-    int answers = fileToFind.indexOf("answers");
-    if (answers != -1) {
-      fileToFind = fileToFind.substring(answers);
-      if (DEBUG) log.info("getUserForFile test now " + fileToFind);
-    }
-    int userForFile = getUserForWavFile(fileToFind);
-    return userForFile;
-  }
-
-  private int getUserForWavFile(String fileToFind) {
-    fileToFind = fileToFind.length() > 4 ? fileToFind.substring(0, fileToFind.length() - 4) + ".wav" : fileToFind;
-    if (DEBUG) log.info("testing '" + fileToFind + "'");
-    return db.getProjectManagement().getUserForFile(fileToFind);
   }
 
   @NotNull
   private String fixParent(String requestURI) {
-    String parent = "/opt/netprof";
+    String parent = OPT + "/" + NETPROF;
 
-    if (requestURI.contains("bestAudio")) {
-      parent += "/bestAudio";
-    } else if (requestURI.contains("answers")) {
-      parent += "/answers";
+    if (requestURI.contains(BEST_AUDIO)) {
+      parent += "/" + BEST_AUDIO;
+    } else if (requestURI.contains(ANSWERS)) {
+      parent += SLASH_ANSWERS;
     }
     return parent;
+  }
+
+  private int getUserForFile(String requestURI, File file) {
+    int userForFile = getUserForFile(requestURI, requestURI.substring(1));
+    if (userForFile == -1) {
+      String absolutePath = file.getAbsolutePath();
+      log.info("getUserForFile now trying full path " + absolutePath);
+      userForFile = getUserForWavFile(absolutePath);
+    }
+    return userForFile;
+  }
+
+  private int getUserForFile(String requestURI, String fileToFind) {
+//    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
+    fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
+    fileToFind = removeNetprof(fileToFind);
+    if (DEBUG) log.info("getUserForFile user for " + fileToFind);
+
+    int answers = fileToFind.indexOf(ANSWERS);
+    if (answers != -1) {
+      fileToFind = fileToFind.substring(answers);
+      if (DEBUG) log.info("getUserForFile test " + fileToFind);
+    }
+
+    return getUserForWavFile(fileToFind);
+  }
+
+  @NotNull
+  private String removeNetprof(String fileToFind) {
+    return fileToFind.startsWith(NETPROF) ? fileToFind.substring(NETPROF.length()) : fileToFind;
+  }
+
+  private int getUserForWavFile(String fileToFind) {
+    fileToFind = fileToFind.length() > WAV_LEN ? fileToFind.substring(0, fileToFind.length() - WAV_LEN) + WAV : fileToFind;
+    int userForFile = db.getProjectManagement().getUserForFile(fileToFind);
+    if (DEBUG) {
+      log.info("getUserForWavFile : testing '" + fileToFind + "' found user #" + userForFile);
+    }
+    return userForFile;
   }
 
   private void handleAccessFailure(final HttpServletRequest request,

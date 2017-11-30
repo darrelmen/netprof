@@ -34,6 +34,7 @@ package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.result.ISlimResult;
@@ -57,10 +58,11 @@ import java.util.stream.Collectors;
 public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickRefResultDAO.class);
   private static final int WARN_THRESHOLD = 50;
+  private static final String WORDS = "{\"words\":[]}";
 
   private final RefResultDAOWrapper dao;
 
-  public SlickRefResultDAO(Database database, DBConnection dbConnection, boolean dropTable) {
+  public SlickRefResultDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new RefResultDAOWrapper(dbConnection);
   }
@@ -74,10 +76,16 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.dao().name();
   }
 
+/*
   public void insert(SlickRefResult word) {
     dao.insert(word);
   }
+*/
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyRefResult
+   * @param bulk
+   */
   public void addBulk(List<SlickRefResult> bulk) {
     dao.addBulk(bulk);
   }
@@ -86,10 +94,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getNumRows() == 0;
   }
 
-  @Override
+/*  @Override
   public boolean removeForExercise(int exid) {
     return dao.deleteByExID(exid) > 0;
-  }
+  }*/
 
   /**
    * @param userID
@@ -110,15 +118,12 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   @Override
   public long addAnswer(int userID, int projid, int exid, int audioid,
-
-                        //String audioFile,
                         long durationInMillis, boolean correct,
                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput,
                         DecodeAlignOutput alignOutputOld, DecodeAlignOutput decodeOutputOld,
                         boolean isMale, String speed, String model) {
     SlickRefResult insert = dao.insert(toSlick(userID, projid, exid,
         audioid,
-        //audioFile,
         durationInMillis, correct,
         alignOutput, decodeOutput, isMale, speed, model));
     return insert.id();
@@ -126,7 +131,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
   private SlickRefResult toSlick(int userID, int projid, int exid,
                                  int audioid,
-                                 //  String audioFile,
                                  long durationInMillis, boolean correct,
                                  DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale,
                                  String speed, String model) {
@@ -207,7 +211,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return new ExerciseToPhone().getExerciseToPhoneForProject(getJsonResultsForProject(projid));
   }
 
-  public Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {
+  private Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {
     return dao.getAllSlimForProject(projid);
   }
 
@@ -225,8 +229,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
       return fromSlickToSlim(slickRefResults.iterator().next());
     }
   }
-
-  private static final String WORDS = "{\"words\":[]}";
 
   private Result fromSlick(SlickRefResult slickRef) {
     float pronScore = slickRef.pronscore();
@@ -285,6 +287,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getNumRows();
   }
 
+  /**
+   * @see RefResultDecoder#writeRefDecode
+   * @param projid
+   */
   @Override
   public void deleteForProject(int projid) {
     dao.deleteForProject(projid);

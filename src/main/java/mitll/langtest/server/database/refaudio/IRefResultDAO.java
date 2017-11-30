@@ -38,6 +38,7 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,8 +46,25 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IRefResultDAO extends IDAO {
-  boolean removeForExercise(int exid);
+ // boolean removeForExercise(int exid);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
+   * @param userID
+   * @param projid
+   * @param exid
+   * @param audioID
+   * @param durationInMillis
+   * @param correct
+   * @param alignOutput
+   * @param decodeOutput
+   * @param alignOutputOld
+   * @param decodeOutputOld
+   * @param isMale
+   * @param speed
+   * @param model
+   * @return
+   */
   long addAnswer(int userID,
                  int projid,
                  int exid,
@@ -90,5 +108,4 @@ public interface IRefResultDAO extends IDAO {
   List<Integer> getAllAudioIDsForProject(int projid);
 
   void deleteForProject(int projid);
-
 }

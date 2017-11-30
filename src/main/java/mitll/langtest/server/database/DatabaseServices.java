@@ -113,7 +113,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   void recordWordAndPhoneInfo(AudioAnswer answer, long answerID);
 
-  long addRefAnswer(int userID,
+/*  long addRefAnswer(int userID,
                     int projid,
                     int exerciseID,
                     int audioid, long durationInMillis,
@@ -126,7 +126,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
                     boolean isMale,
                     String speed,
-                    String model);
+                    String model);*/
 
   ServerProperties getServerProps();
 

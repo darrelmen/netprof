@@ -34,10 +34,7 @@ package mitll.langtest.server.audio;
 
 import corpus.HTKDictionary;
 import mitll.langtest.client.result.AudioTag;
-import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
@@ -58,6 +55,7 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -84,6 +82,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false);
+  public static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -209,7 +208,7 @@ public class AudioFileHelper implements AlignDecode {
           }
 
           long then = System.currentTimeMillis();
-          logger.warn("checkLTSAndCountPhones took " + (then-now) + " millis to examine " + exercises.size() + " exercises.");
+          logger.warn("checkLTSAndCountPhones took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
 
           if (!safe.isEmpty() || !unsafe.isEmpty()) {
             logger.info("checkLTSAndCountPhones marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
@@ -218,7 +217,7 @@ public class AudioFileHelper implements AlignDecode {
           project.getExerciseDAO().markSafeUnsafe(safe, unsafe);
           long now2 = System.currentTimeMillis();
 
-          logger.warn("checkLTSAndCountPhones took " + (now2-then) + " millis to mark exercises safe/unsafe to decode.");
+          logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
           if (count > 0) {
             logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
           }
@@ -338,7 +337,7 @@ public class AudioFileHelper implements AlignDecode {
     Project project = db.getProjectManagement().getProject(audioContext.getProjid());
     int userid = audioContext.getUserid();
     project.addAnswerToUser(relPath, userid);  //not needed
-    project.addAnswerToUser(absolutePath,       userid);
+    project.addAnswerToUser(absolutePath, userid);
 
 //    logger.info("tr = " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
@@ -509,7 +508,6 @@ public class AudioFileHelper implements AlignDecode {
 
     int answerID = db.getAnswerDAO().addAnswer(info);
     answer.setResultID(answerID);
-
 
 
     // do this db write later
@@ -695,12 +693,12 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @paramx wavPath
    * @paramx numAlignPhones
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int)
+   * @seex #decodeOneAttribute(CommonExercise, AudioAttribute, int)
+   * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
                                          int audioid,
-                                         // File file,
                                          long duration,
                                          DecodeAlignOutput alignOutput,
                                          DecodeAlignOutput decodeOutput,
@@ -714,7 +712,7 @@ public class AudioFileHelper implements AlignDecode {
     // logger.debug("validity dur " + validity.durationInMillis);
 
     if (alignOutput.isValid()) {
-      db.addRefAnswer(user, exercise1.getProjectID(), exercise1.getID(),
+      db.getRefResultDAO().addAnswer(user, exercise1.getProjectID(), exercise1.getID(),
           audioid,
           validity.durationInMillis,
 
@@ -1047,8 +1045,7 @@ public class AudioFileHelper implements AlignDecode {
       */
       if (theFile.exists()) {
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, serverProps.getHydraHost());
-        if (precalcScores != null) return precalcScores;
-        return null;
+        return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
         return null;
       }
@@ -1058,6 +1055,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * This is for testing from your laptop.
+   *
    * @param english
    * @param foreignLanguage
    * @param userid
@@ -1072,28 +1071,57 @@ public class AudioFileHelper implements AlignDecode {
                                       int userid,
                                       File theFile,
                                       String hydraHost) {
-    HTTPClient httpClient = new HTTPClient(hydraHost + "scoreServlet");
-    httpClient.addRequestProperty("request", "align");
-//    httpClient.addRequestProperty("exercise", "" + exid);
-    httpClient.addRequestProperty("english", english);
+    if (session == null) {
+      session = getSession(hydraHost, project.getID());
+    }
+    HTTPClient httpClient = getHttpClient(hydraHost);
+    httpClient.addRequestProperty( ScoreServlet.REQUEST, ScoreServlet.PostRequest.ALIGN.toString());
+    httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
     httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
     // USE THE LANGUAGE INSTEAD
-    //  httpClient.addRequestProperty("projid", "-1");//  + projid);
-    httpClient.addRequestProperty("language", getLanguage());
-    httpClient.addRequestProperty("user", "" + userid);
-    httpClient.addRequestProperty("full", "full");  // full json returned
+    httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
+    httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
+    httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
+
+    if (session != null) {
+      logger.info("adding " + session);
+      httpClient.addRequestProperty("Cookie", session);
+    }
 
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage + "'");
-      String trim = new SLFFile().cleanToken(foreignLanguage).trim();
-      logger.info("getProxyScore dict " + asrScoring.createHydraDict(trim, ""));
+      //String trim = new SLFFile().cleanToken(foreignLanguage).trim();
+      //logger.info("getProxyScore dict     " + asrScoring.createHydraDict(trim, ""));
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
-      return new PrecalcScores(serverProps, json);
+      return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps) : new PrecalcScores(serverProps, json);
     } catch (IOException e) {
       logger.error("checkForWebservice got " + e);
     }
     return null;
+  }
+
+  @NotNull
+  private HTTPClient getHttpClient(String hydraHost) {
+    return new HTTPClient(hydraHost + "scoreServlet");
+  }
+
+  private String session = null;
+
+  private String getSession(String hydraHost, int projID) {
+    try {
+      HTTPClient httpClient = getHttpClient(hydraHost);
+      httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.GetRequest.HASUSER.toString());
+      httpClient.addRequestProperty(ScoreServlet.PROJID, "" + projID);
+      httpClient.addRequestProperty(ScoreServlet.USERID, "demo_");
+      httpClient.addRequestProperty(ScoreServlet.PASS, "demo");
+      String json = httpClient.sendAndReceiveCookie("");
+      logger.info("getSession response " + json);
+      return json;
+    } catch (IOException e) {
+      logger.warn("Got " + e, e);
+    }
+    return "";
   }
 
   /**
@@ -1443,6 +1471,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * If a language is in development and has no model, there will be no dictionary...?
+   *
    * @return
    */
   public boolean hasDict() {

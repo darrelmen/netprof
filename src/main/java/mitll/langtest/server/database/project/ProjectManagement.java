@@ -303,7 +303,8 @@ public class ProjectManagement implements IProjectManagement {
         return userID;
       }
     };
-    logger.warn("getUserForFile couldn't find " + requestURI);
+
+    logger.info("getUserForFile couldn't find recorder of " + requestURI);
 
     return -1;
   }

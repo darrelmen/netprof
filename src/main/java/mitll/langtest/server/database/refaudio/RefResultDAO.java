@@ -98,7 +98,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   /**
    * @param database
    * @param dropTable
-   * @see DatabaseImpl#initializeDAOs(PathHelper)
+   * @see DatabaseImpl#initializeDAOs
    */
   public RefResultDAO(Database database, boolean dropTable) {
     super(database);
@@ -106,22 +106,22 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     currentModel = database.getServerProps().getCurrentModel();
   }
 
-  @Override
+/*  @Override
   public boolean removeForExercise(int exid) {
     return remove(REFRESULT, EXID, ""+exid, true);
-  }
+  }*/
 
   private List<Result> cachedResultsForQuery = null;
 
   /**
    * @param userID
    * @param projid
-   *@param exid
-   * @paramx audioFile
+   * @param exid
    * @param correct
    * @param isMale
    * @param speed
-   * @param model       @return id of new row in result table
+   * @param model   @return id of new row in result table
+   * @paramx audioFile
    * @see DatabaseServices#addRefAnswer
    */
   @Override
@@ -143,7 +143,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, ""+ exid, "", durationInMillis, correct,
+      long newid = addAnswerToTable(connection, userID, "" + exid, "", durationInMillis, correct,
           alignOutput,
           decodeOutput,
 
@@ -591,7 +591,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
     //now = System.currentTimeMillis();
 
- //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + childCount + " invalid decode results, skipped " + skipped);
+    //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + childCount + " invalid decode results, skipped " + skipped);
     finish(connection, statement, rs, sql);
 
     return results;

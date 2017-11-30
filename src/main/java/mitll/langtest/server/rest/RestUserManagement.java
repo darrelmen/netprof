@@ -34,6 +34,7 @@ package mitll.langtest.server.rest;
 
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.IUserSecurityManager;
@@ -121,6 +122,12 @@ public class RestUserManagement {
   protected String configDir;
   private PathHelper pathHelper;
 
+  /**
+   * @see ScoreServlet#makeAudioFileHelper
+   * @param db
+   * @param serverProps
+   * @param pathHelper
+   */
   public RestUserManagement(DatabaseImpl db,
                             ServerProperties serverProps,
                             PathHelper pathHelper) {
@@ -229,13 +236,14 @@ public class RestUserManagement {
   }
 
    public void tryToLogin(JSONObject toReturn,
-                         String freeTextPassword,
-                         HttpServletRequest request,
-                         IUserSecurityManager securityManager,
-                         int projid,
-                         String user//,
+                          HttpServletRequest request,
+                          IUserSecurityManager securityManager,
+                          int projid,
+                          String user,
+                          String freeTextPassword
+                          //,
 //                          String passwordH
-  ) {
+   ) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
     logger.debug("tryToLogin user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);

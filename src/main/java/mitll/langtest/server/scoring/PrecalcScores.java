@@ -56,7 +56,12 @@ public class PrecalcScores {
   private Scores scores;
   private JsonObject jsonObject;
   private boolean isValid;
+  private boolean didRunNormally = false;
   private final ParseResultJson parseResultJson;
+
+  public PrecalcScores(ServerProperties serverProperties) {
+    this.parseResultJson = new ParseResultJson(serverProperties);
+  }
 
   /**
    * TODO : use this with webservice scoring too
@@ -70,9 +75,8 @@ public class PrecalcScores {
     this.parseResultJson = new ParseResultJson(serverProperties);
     this.precalcResult = precalcResult;
 
-    boolean valid = isValidPrecalc();
-
-    if (valid) {
+    this.didRunNormally = true;
+    if (isValidPrecalc()) {
       parseJSON(precalcResult, usePhoneToDisplay, precalcResult.getPronScore());
 //      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
     } else {
@@ -82,6 +86,7 @@ public class PrecalcScores {
 
   public PrecalcScores(ServerProperties serverProperties, String json) {
     this.parseResultJson = new ParseResultJson(serverProperties);
+    this.didRunNormally = true;
     parseJSON(false, -100, json);
   }
 
@@ -209,4 +214,12 @@ public class PrecalcScores {
   public String toString() {
     return "isvalid " + isValid() + " scores " + scores;
   }
+
+  public boolean isDidRunNormally() {
+    return didRunNormally;
+  }
+
+//  public void setDidRunNormally(boolean didRunNormally) {
+//    this.didRunNormally = didRunNormally;
+//  }
 }

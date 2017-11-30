@@ -265,7 +265,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 
-    refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
+    refresultDAO = new SlickRefResultDAO(this, dbConnection);
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
@@ -1161,10 +1161,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param correct
    * @param isMale
    * @param speed
-   * @param model            @return
+   * @param model
+   * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
-  @Override
+/*  @Override
   public long addRefAnswer(int userID,
                            int projid,
                            int exerciseID,
@@ -1183,7 +1184,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
         isMale, speed, model);
-  }
+  }*/
 
   /**
    * @see LangTestDatabaseImpl#destroy()

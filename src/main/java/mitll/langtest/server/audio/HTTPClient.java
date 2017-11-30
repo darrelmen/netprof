@@ -57,6 +57,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * closes and reopens the connection after every call to sendAndReceive()
@@ -242,6 +243,12 @@ public class HTTPClient {
     return receive(this.httpConn, getReader(this.httpConn));
   }
 
+  private String receiveCookie() throws IOException {
+    String s = receiveCookie(this.httpConn);
+    this.httpConn.getInputStream().close();
+    return s;
+  }
+
   private String receive(HttpURLConnection httpConn) throws IOException {
     return receive(httpConn, getReader(httpConn));
   }
@@ -252,6 +259,15 @@ public class HTTPClient {
 
   private String receive(HttpURLConnection httpConn, BufferedReader reader) throws IOException {
     int code = httpConn.getResponseCode();
+//
+//    List<String> strings = httpConn.getHeaderFields().get("Set-Cookie");
+//
+//    if (strings == null) {
+//      logger.info("no header fields for cookie, got " + httpConn.getHeaderFields());
+//    } else {
+//      for (String s : strings) logger.info("cookie receive " + s);
+//    }
+
     if (code == 200) {
       StringBuilder builder = new StringBuilder();
       String current;
@@ -264,6 +280,17 @@ public class HTTPClient {
     } else {
       logger.error("Reading " + httpConn.getURL() + " received HTTP Code of: " + code + ".");
       return "";
+    }
+  }
+
+  private String receiveCookie(HttpURLConnection httpConn) throws IOException {
+    List<String> strings = httpConn.getHeaderFields().get("Set-Cookie");
+    if (strings == null) {
+      logger.info("no header fields for cookie, got " + httpConn.getHeaderFields());
+      return null;
+    } else {
+      for (String s : strings) logger.info("cookie receive " + s);
+      return (strings.isEmpty() ? null : strings.iterator().next());
     }
   }
 
@@ -292,13 +319,42 @@ public class HTTPClient {
       //logger.info("receive END   " + input.length());
       return receive;
     } catch (ConnectException ce) {
-      logError(input,ce,"receiving");
+      logError(input, ce, "receiving");
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive receiving from " + input + " got " + e, e);
       throw e;
     }
   }
+
+  public String sendAndReceiveCookie(String input) throws IOException {
+    try {
+      //logger.info("sending START " + input.length());
+      send(input);
+      //logger.info("sending END   " + input.length());
+    } catch (ConnectException ce) {
+      String sending = "sending";
+      logError(input, ce, sending);
+      return "";
+    } catch (IOException e) {
+      logger.error("sendAndReceive sending " + input + " got " + e, e);
+      throw e;
+    }
+
+    try {
+      //logger.info("receive START " + input.length());
+      String receive = receiveCookie();
+      //logger.info("receive END   " + input.length());
+      return receive;
+    } catch (ConnectException ce) {
+      logError(input, ce, "receiving");
+      return "";
+    } catch (IOException e) {
+      logger.error("sendAndReceive receiving from " + input + " got " + e, e);
+      throw e;
+    }
+  }
+
 
   private void logError(String input, ConnectException ce, String sending) {
     logger.error("sendAndReceive " + sending +
