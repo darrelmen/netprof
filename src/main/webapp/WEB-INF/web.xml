@@ -189,12 +189,11 @@
     </servlet-mapping>
 
 
+
+<!--
     <servlet>
         <servlet-name>MyDefaultServlet</servlet-name>
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-        <!--
-                <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
-        -->
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/bestAudio</param-value>
@@ -212,9 +211,6 @@
     <servlet>
         <servlet-name>DefaultServletAnswers</servlet-name>
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-        <!--
-                <servlet-class>mitll.langtest.server.SessionCheckDefaultServlet</servlet-class>
-        -->
         <init-param>
             <param-name>resourceBase</param-name>
             <param-value>/opt/netprof/answers</param-value>
@@ -238,6 +234,7 @@
         <servlet-name>DefaultServletAnswers</servlet-name>
         <url-pattern>/answers/*</url-pattern>
     </servlet-mapping>
+        -->
 
 
     <!-- ==================================================================== -->

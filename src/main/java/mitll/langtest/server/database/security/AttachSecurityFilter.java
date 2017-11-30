@@ -50,7 +50,6 @@ import java.net.URLDecoder;
 import static org.apache.logging.log4j.web.WebLoggerContextUtils.getServletContext;
 
 /**
- *
  * AttachSecurityFilter: A security filter that ensures a user is allowed
  * to access a particular file.
  *
@@ -72,7 +71,7 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) throws ServletException {
     this.servletContext = filterConfig.getServletContext();
-    if (DEBUG) log.info("found servlet context " +servletContext);
+    if (DEBUG) log.info("found servlet context " + servletContext);
   }
 
   @Override
@@ -86,9 +85,8 @@ public class AttachSecurityFilter implements Filter {
     if (!(request instanceof HttpServletRequest)) {
       if (DEBUG) log.info("doFilter : skipping " + request.toString() + " since not HttpServletReq");
       chain.doFilter(request, response);
-    }
-    else {
-      if (DEBUG)     log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
+    } else {
+      if (DEBUG) log.info("doFilter : req for " + ((HttpServletRequest) request).getRequestURI());
       if (DEBUG) log.info("doFilter : chain is " + chain);
 
 
@@ -105,15 +103,24 @@ public class AttachSecurityFilter implements Filter {
         log.warn("doFilter : nope - no session " + dse.getMessage() + " req for : " + ((HttpServletRequest) request).getRequestURI());
         handleAccessFailure(httpRequest, response);
       } catch (Exception e) {
+        StringBuffer requestURL = httpRequest.getRequestURL();
         if (e.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
-          log.info("doFilter : User reload during request {}.", httpRequest.getRequestURL());
+          log.info("doFilter : User reload during request {}.", requestURL);
         } else {
-          log.error("doFilter : Unexpected exception during request {}.", httpRequest.getRequestURL(), e);
+          log.error("doFilter : Unexpected exception during request {}.", requestURL, e);
         }
       }
     }
   }
 
+  /**
+   * Any student audio undergoes more thorough checking...
+   *
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   * @throws UnsupportedEncodingException
+   */
   @NotNull
   private boolean isValidRequest(HttpServletRequest request) throws DominoSessionException, UnsupportedEncodingException {
     String requestURI = request.getRequestURI();
@@ -123,10 +130,10 @@ public class AttachSecurityFilter implements Filter {
     if (DEBUG) log.info("isValidRequest : found session user " + userIDFromSessionOrDB + " req for : " + requestURI);
     //   log.warn("doGet : found session user " + userIDFromSessionOrDB + " req for path : " + request.getPathInfo());
 
-    File file = getFileFromRequest(request, requestURI);
+    if (requestURI.contains("/answers")) {
+      File file = getFileFromRequest(request, requestURI);
 
-    if (file.exists()) {
-      if (requestURI.contains("/answers")) {
+      if (file.exists()) {
 //        if (DEBUG) log.info("isValidRequest got answers " + requestURI);
         // 1 who recorded the audio?
         int userForFile = getUserForFile(requestURI, file);
@@ -141,7 +148,7 @@ public class AttachSecurityFilter implements Filter {
             boolean student = db.getUserDAO().isStudent(userIDFromSessionOrDB);
             if (student) {
               // 4 if you are a student sorry, you don't get to hear it
-              log.warn("isValidRequest nope - student " + userIDFromSessionOrDB+ " did not create the file, user #" + userForFile + " did.");
+              log.warn("isValidRequest nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
               valid = false;
             } else {
               // 3 if you are not the same, are you are teacher, then you can hear it
@@ -165,16 +172,25 @@ public class AttachSecurityFilter implements Filter {
 
   @NotNull
   private File getFileFromRequest(HttpServletRequest request, String requestURI) throws UnsupportedEncodingException {
-    String filename = URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
-    File file = new File(fixParent(requestURI), filename);
+    String pathInfo = request.getPathInfo();
+    if (pathInfo == null) {
+      log.warn("getFileFromRequest no path info for " + request);
+      pathInfo = requestURI;
+    }
+    String filename = pathInfo.isEmpty() ? "" : URLDecoder.decode(pathInfo.substring(1), "UTF-8");
+    String parent1 = fixParent(requestURI);
 
-    if (DEBUG) log.info("file now " + file.getAbsolutePath() + " exists " + file.exists());
+    if (DEBUG) log.info("getFileFromRequest parent1 " + parent1 + " for " + requestURI);
+
+    File file = new File(parent1, filename);
+
+    if (DEBUG) log.info("getFileFromRequest file now " + file.getAbsolutePath() + " exists " + file.exists());
 
     if (!file.exists()) {
       filename = URLDecoder.decode(requestURI, "UTF-8");
       String parent = fixParent(requestURI);
       file = new File(parent, filename);
-      if (DEBUG)  log.info("file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
+      if (DEBUG) log.info("getFileFromRequest file 2 now " + file.getAbsolutePath() + " exists " + file.exists());
     }
     return file;
   }
@@ -244,7 +260,7 @@ public class AttachSecurityFilter implements Filter {
         log.error("findSharedDatabase no database?");
       } else {
         securityManager = db.getUserSecurityManager();
-        log.info("made security manager " +securityManager);
+        log.info("made security manager " + securityManager);
       }
     }
   }
