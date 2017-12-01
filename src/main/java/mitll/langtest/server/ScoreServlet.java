@@ -719,12 +719,14 @@ public class ScoreServlet extends DatabaseServlet {
     if (lcReq.startsWith(REQUEST1)) {
       lcReq = lcReq.substring(REQUEST1.length());
     }
+ //   lcReq = lcReq.replaceAll("-","");
 
     GetRequest matched = GetRequest.UNKNOWN;
 
     for (GetRequest request : GetRequest.values()) {
       String prefix = request.toString().toLowerCase();
-      if (lcReq.startsWith(prefix)) {
+
+      if (lcReq.startsWith(prefix) || lcReq.startsWith(prefix.replaceAll("_",""))) {
         logger.info("getGetRequest lcReq '" + lcReq + "' vs '" + prefix + "'");
         matched = request;
         break;
