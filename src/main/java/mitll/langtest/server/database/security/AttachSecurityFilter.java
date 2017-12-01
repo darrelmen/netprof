@@ -75,7 +75,7 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) throws ServletException {
     this.servletContext = filterConfig.getServletContext();
-    if (DEBUG) log.info("found servlet context " + servletContext);
+//    if (DEBUG) log.info("found servlet context " + servletContext);
   }
 
   @Override
@@ -160,9 +160,9 @@ public class AttachSecurityFilter implements Filter {
     if (DEBUG) log.info("isValidRequest got answers " + requestURI + " couldn't find user for " + testPath);
     File file = getFileFromRequest(request, requestURI);
 
-    if (!file.exists()) {
-      log.warn("isValidRequest couldn't find file for " + requestURI);
-    }
+//    if (!file.exists()) {
+//      log.warn("isValidRequest couldn't find file for " + requestURI);
+//    }
     if (DEBUG) log.info("isValidRequest got answers " + requestURI);
     // 1 who recorded the audio?
     userForFile = getUserForFile(requestURI, file);
@@ -196,7 +196,7 @@ public class AttachSecurityFilter implements Filter {
   private File getFileFromRequest(HttpServletRequest request, String requestURI) throws UnsupportedEncodingException {
     String pathInfo = request.getPathInfo();
     if (pathInfo == null) {
-      log.warn("getFileFromRequest no path info for " + request);
+//      log.warn("getFileFromRequest no path info for " + request);
       pathInfo = requestURI;
     }
     String filename = pathInfo.isEmpty() ? "" : URLDecoder.decode(pathInfo.substring(1), "UTF-8");
@@ -204,6 +204,7 @@ public class AttachSecurityFilter implements Filter {
     File file = new File(OPT, filename);
 
     if (file.exists()) {
+      if (DEBUG) log.info("getFileFromRequest OK found " + file.getAbsolutePath());
       return file;
     } else {
       String parent1 = fixParent(requestURI);
@@ -261,7 +262,7 @@ public class AttachSecurityFilter implements Filter {
   private String removeAnswers(String fileToFind) {
     int answers = fileToFind.indexOf(ANSWERS);
     if (answers != -1) {
-      fileToFind = fileToFind.substring(answers);
+      fileToFind = fileToFind.substring(answers+ANSWERS.length());
 
       answers = fileToFind.indexOf(ANSWERS);
       if (answers != -1) {
@@ -271,6 +272,7 @@ public class AttachSecurityFilter implements Filter {
     }
     return fileToFind;
   }
+
 
   @NotNull
   private String removeNetprof(String fileToFind) {
