@@ -4,6 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.exercise.Project;
 import org.apache.logging.log4j.*;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.*;
@@ -34,6 +35,28 @@ public class ReportAllTest extends BaseTest {
   }
 */
 
+  @Test
+  public void testTrunc() {
+    String test = "/answers/spanish/answers/plan/1945/0/subject-83/answer_1474213851511.wav";
+    System.out.println(removeAnswers(test));
+  }
+
+  private static final String ANSWERS = "answers";
+
+  @NotNull
+  private String removeAnswers(String fileToFind) {
+    int answers = fileToFind.indexOf(ANSWERS);
+    if (answers != -1) {
+      fileToFind = fileToFind.substring(answers+ANSWERS.length());
+
+      answers = fileToFind.indexOf(ANSWERS);
+      if (answers != -1) {
+        fileToFind = fileToFind.substring(answers);
+      }
+      logger.info("getUserForFile test " + fileToFind);
+    }
+    return fileToFind;
+  }
 
   @Test
   public void testMaleFemaleRefCoverageSudanese() {

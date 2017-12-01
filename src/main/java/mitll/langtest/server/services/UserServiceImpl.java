@@ -41,6 +41,10 @@ import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * These calls require a session.
+ *
+ */
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);

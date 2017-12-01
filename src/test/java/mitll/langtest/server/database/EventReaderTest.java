@@ -31,7 +31,7 @@ public class EventReaderTest {
     ServerProperties serverProps = new ServerProperties(parent, name);
     database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     // logger.debug("made " + database);
-    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan(), null);
   }
 
 //  public StartupInfo getProjectStartupInfo() {

@@ -32,11 +32,19 @@
 
 package mitll.langtest.server.services;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import mitll.hlt.domino.server.data.ProjectServiceDelegate;
+import mitll.hlt.domino.server.data.SimpleDominoContext;
+import mitll.hlt.domino.server.util.DBProperties;
+import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ImportInfo;
+import mitll.langtest.server.database.exercise.ImportProjectInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -53,6 +61,8 @@ import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
@@ -61,6 +71,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.include;
+import static mitll.hlt.domino.server.ServerInitializationManager.JSON_SERIALIZER;
+import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
+import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.FAIL;
@@ -73,9 +88,63 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   private static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
+  public static final String ID = "_id";
+  public static final String NAME = "name";
+  public static final String LANGUAGE_NAME = "languageName";
+  public static final String CREATE_TIME = "createTime";
+  private Mongo pool;
+  private JSONSerializer serializer;
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
+  }
+
+  @Override
+  public void init() {
+    super.init();
+
+    pool = (Mongo) getServletContext().getAttribute(MONGO_ATT_NAME);
+
+    if (pool == null) {
+      pool = Mongo.createPool(new DBProperties(db.getServerProps().getProps()));
+    }
+//    serializer = (JSONSerializer) getServletContext().getAttribute(JSON_SERIALIZER);
+//
+//    SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
+//    simpleDominoContext.init(getServletContext());
+//    ProjectServiceDelegate projectDelegate = simpleDominoContext.getProjectDelegate();
+//
+//    logger.info("got project delegate " + projectDelegate);
+
+    getVocabProjects();
+  }
+
+  private List<ImportProjectInfo> getVocabProjects() {
+    Bson query = eq("content.skill", "Vocabulary");
+    MongoCollection<Document> projects = pool
+        .getMongoCollection("projects");
+
+    FindIterable<Document> projection = projects
+        .find(query)
+        .projection(include(ID, "creatorId", NAME, LANGUAGE_NAME, CREATE_TIME));
+
+    List<ImportProjectInfo> imported = new ArrayList<>();
+
+    for (Document project : projection) {
+      logger.info("Got " + project);
+      imported.add(new ImportProjectInfo(
+          project.getInteger(ID),
+          project.getInteger("creatorId"),
+          project.getString(NAME),
+          project.getString(LANGUAGE_NAME),
+          project.getDate(CREATE_TIME).getTime()
+      ));
+    }
+
+    logger.info("Got " + imported);
+
+    return imported;
+
   }
 
   /**
@@ -84,12 +153,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   @Override
-  public boolean exists(int projectid)  throws DominoSessionException  {
-   // if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return getProjectDAO().exists(projectid);
-  //  } else {
-   //   throw getRestricted("project exists");
-   // }
+  public boolean exists(int projectid)
+  //    throws DominoSessionException
+  {
+    // if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    return getProjectDAO().exists(projectid);
+    //  } else {
+    //   throw getRestricted("project exists");
+    // }
   }
 
   /**
@@ -101,8 +172,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
       return getProjectDAO().getByName(name) != -1;
-    }
-    else {
+    } else {
       throw getRestricted("exists by name");
     }
   }
@@ -189,12 +259,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   /**
    * Adding exercises to a project!
    * Copies any existing audio for the language (from a production project) that has matching transcripts.
-   *
+   * <p>
    * I.e. if there's already a recording of "dog" in another english project, just reuse that recording for your
    * new "dog" vocabulary item.  Good for projects that are subsets (or collages?) of existing content.
-   *
+   * <p>
    * Does some sanity checking - the exercises come from a domino project:
-   *
+   * <p>
    * 1) Is the project an existing project and is it associated with the domino project for this bundle of exercises?
    * 2) Is the project a new project (and hence has no domino id yet) and is there already another project bound
    * to this exercise bundle's domino project?
@@ -266,14 +336,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           updateProjectIfSomethingChanged(jsonDominoID, newEx, updateEx, project.getProject());
 
           // todo : shoudl we configure project if it didn't change?
-          int i = db.getProjectManagement().configureProject(project, false,true);
+          int i = db.getProjectManagement().configureProject(project, false, true);
           return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
         }
       } else {
         return new DominoUpdateResponse(FAIL, -1, -1, new HashMap<>());
       }
-    }
-    else {
+    } else {
       throw getRestricted("adding pending exercises");
     }
   }
@@ -305,7 +374,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     SlickProject project = existingBound.iterator().next().getProject();
     String name = project.name();
 
-    logger.info("getAnotherProjectResponse found existing (" +name+  ") project " + project);
+    logger.info("getAnotherProjectResponse found existing (" + name + ") project " + project);
 
     DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
     dominoUpdateResponse.setMessage(name);

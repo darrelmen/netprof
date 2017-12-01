@@ -158,7 +158,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
 
-    if (pool != null) {
+    //if (pool != null) {
       serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
       Mailer mailer = new Mailer(new MailerProperties(props));
@@ -189,9 +189,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
 
       doAfterGetDelegate();
-    } else {
-      logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
-    }
+    //} else {
+    //  logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
+   // }
   }
 
   private void doAfterGetDelegate() {
@@ -588,9 +588,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             userAgent,
             sessionID);
 
-    if (loggedInUser == null) {
+/*    if (loggedInUser == null) {
       myDelegate.isMatch(encodedCurrPass, attemptedTxtPass);
-    }
+    }*/
     return getUser(loggedInUser);
   }
 
@@ -1317,5 +1317,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       return clientUserDetail1 != null;
     }
+  }
+
+  /**
+   * @see #getUserCredentials(String)
+   */
+  public Mongo getPool() {
+    return pool;
   }
 }

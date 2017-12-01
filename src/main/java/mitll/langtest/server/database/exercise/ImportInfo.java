@@ -1,13 +1,14 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.CommonExercise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
 
 public class ImportInfo {
   private final Date createTime;
-//  private final Date modifiedTime;
+  //  private final Date modifiedTime;
   private final List<CommonExercise> exercises;
 
   private final String language;
@@ -16,27 +17,45 @@ public class ImportInfo {
   private final int dominoID;
 
   /**
-   *
-   * @param exportTime
-   * @paramx updateTime consider using this somehow
-   * @param exercises
-   * @param language
-   * @param lang
    * @param dominoID
+   * @param language
+   * @paramx lang
+   * @param exportTime
+   * @param exercises
+   * @paramx updateTime consider using this somehow
    * @see #readExercises
    */
-  public ImportInfo(Date exportTime,
-                    //   Date updateTime,
-                    List<CommonExercise> exercises,
+  private ImportInfo(int dominoID,
                     String language,
-                    mitll.langtest.shared.project.Language lang,
-                    int dominoID) {
+
+                    Date exportTime,
+                    //   Date updateTime,
+                    List<CommonExercise> exercises) {
     this.createTime = exportTime;
-   // this.modifiedTime = updateTime;
+    // this.modifiedTime = updateTime;
     this.exercises = exercises;
     this.language = language;
-    this.lang = lang;
+    this.lang = getLanguage(language);
     this.dominoID = dominoID;
+  }
+
+   ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
+    this(
+        importProjectInfo.getDominoProjectID(),
+        importProjectInfo.getLanguage(),
+        importProjectInfo.getCreateDate(),
+        exercises);
+  }
+
+  @NotNull
+  private mitll.langtest.shared.project.Language getLanguage(String languageName) {
+    mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
+    try {
+      lang = mitll.langtest.shared.project.Language.valueOf(languageName);
+//        logger.info("Got " + languageName + " " + lang);
+    } catch (IllegalArgumentException e) {
+    }
+    return lang;
   }
 
   private Date getExportTime() {

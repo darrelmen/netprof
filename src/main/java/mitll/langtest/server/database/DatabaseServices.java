@@ -33,7 +33,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.contextPractice.ContextServices;
 import mitll.langtest.server.database.custom.IStateManager;
@@ -54,6 +53,7 @@ import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 
+import javax.servlet.ServletContext;
 import java.text.CollationKey;
 import java.util.Collection;
 import java.util.List;
@@ -91,7 +91,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);
 
-  DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport);
+  DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
 

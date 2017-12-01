@@ -43,7 +43,7 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
-  boolean exists(int projectid) throws DominoSessionException;
+  boolean exists(int projectid)  ;
 
   /**
    * @see mitll.langtest.client.project.ProjectEditForm#checkNameOnBlur

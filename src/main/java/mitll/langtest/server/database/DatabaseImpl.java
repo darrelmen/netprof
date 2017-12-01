@@ -177,8 +177,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see CopyToPostgres#getSimpleDatabase
    * @param serverProps
+   * @see CopyToPostgres#getSimpleDatabase
    */
   public DatabaseImpl(ServerProperties serverProps) {
     this.serverProps = serverProps;
@@ -187,11 +187,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see LangTestDatabaseImpl#makeDatabaseImpl
    * @param serverProps
    * @param pathHelper
    * @param logAndNotify
    * @param servletContext
+   * @see LangTestDatabaseImpl#makeDatabaseImpl
    */
   public DatabaseImpl(ServerProperties serverProps,
                       PathHelper pathHelper,
@@ -200,7 +200,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
 
-    connectToDatabases(pathHelper,servletContext);
+    connectToDatabases(pathHelper, servletContext);
   }
 
   void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
@@ -208,11 +208,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // first connect to postgres
 
     setPostgresDBConnection();
-    logger.debug("initializeDAOs --- " + dbConnection);
+//    logger.debug("initializeDAOs --- " + dbConnection);
 
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
+
+    // simpleDominoContext.getProjectDelegate().getProjectIDNamePairs()
     initializeDAOs(pathHelper, dominoUserDAO);
     {
       long now = System.currentTimeMillis();
@@ -225,9 +227,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     hasValidDB = true;
   }
 
-  private String getOldLanguage(ServerProperties serverProps) {
-    return serverProps.getLanguage();
-  }
 
   /**
    * @seex CopyToPostgres#createProjectIfNotExists
@@ -354,13 +353,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @param lessonPlanFileOnlyForImport
+   * @param servletContext
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   @Override
-  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-    this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext) {
+    this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this, servletContext);
     makeDAO(lessonPlanFileOnlyForImport);
     return this;
+  }
+
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
+    return setInstallPath(lessonPlanFileOnlyForImport, null);
   }
 
   /**
@@ -578,7 +582,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Special check for amas exercises...
    *
    * @param lessonPlanFileOnlyForImport only for import
-   * @see DatabaseServices#setInstallPath(String)
+   * @see DatabaseServices#setInstallPath(String, ServletContext)
    */
   private void makeDAO(String lessonPlanFileOnlyForImport) {
     // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
@@ -1356,6 +1360,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getOldLanguage(getServerProps());
   }
 
+  private String getOldLanguage(ServerProperties serverProps) {
+    return serverProps.getLanguage();
+  }
+
   /**
    * @param out
    * @throws Exception
@@ -1677,7 +1685,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     long then = System.currentTimeMillis();
     recordWordAndPhone.recordWordAndPhoneInfo(answer, answerID);
     long now = System.currentTimeMillis();
-    logger.info("recordWordAndPhoneInfo took " + (now-then) + " millis");
+    logger.info("recordWordAndPhoneInfo took " + (now - then) + " millis");
   }
 
   /**

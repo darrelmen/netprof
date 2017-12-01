@@ -215,8 +215,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     database.setInstallPath(
         configFile.getParentFile().getAbsolutePath() + File.separator +
-            database.getServerProps().getLessonPlan()
-    );
+            database.getServerProps().getLessonPlan(),
+        null);
 
     return database;
   }

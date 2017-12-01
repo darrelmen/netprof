@@ -69,6 +69,13 @@ public class ProjectTest extends BaseTest {
   public static final int PROJECTID = 9;
 
   @Test
+  public void testProjectInfo() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.setInstallPath("");
+    spanish.getProjectManagement().getVocabProjects();
+  }
+
+    @Test
   public void testProject() {
     DatabaseImpl spanish = getDatabase();
     IProjectDAO projectDAO = spanish.getProjectDAO();

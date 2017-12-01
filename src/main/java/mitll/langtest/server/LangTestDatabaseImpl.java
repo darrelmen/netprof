@@ -97,7 +97,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
-      setInstallPath(db);
+      setInstallPath(db,servletContext);
 
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
@@ -417,14 +417,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * @param db
    * @return
-   * @see LangTestDatabaseImpl#init()
+   * @see LangTestDatabaseImpl#init
    */
-  private void setInstallPath(DatabaseServices db) {
+  private void setInstallPath(DatabaseServices db, ServletContext servletContext) {
     // logger.debug("setInstallPath " + installPath);
     if (db == null) {
       logger.error("no database services created.");
     } else {
-      db.setInstallPath("");
+      db.setInstallPath("", servletContext);
     }
   }
 }

@@ -36,6 +36,7 @@ import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ImportInfo;
+import mitll.langtest.server.database.exercise.ImportProjectInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -106,4 +107,6 @@ public interface IProjectManagement {
    * @return
    */
   int getUserForFile(String requestURI);
+
+  List<ImportProjectInfo> getVocabProjects();
 }
