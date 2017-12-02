@@ -6,8 +6,11 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
@@ -19,21 +22,28 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
+import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String DOMINO_PROJECT = "Domino";
+  public static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
+  private final Logger logger = Logger.getLogger("ProjectEditForm");
+
   public static final String ID = "ID";
   public static final String DOMINO_ID = "Domino ID";
-  private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final String HIERARCHY = "Hierarchy";
   private static final String COURSE = "Course";
@@ -48,6 +58,7 @@ public class ProjectEditForm extends UserDialog {
   private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
 
   private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language.";
+  private static final String PLEASE_SELECT_A_DOMINO = "Please select a domino project.";
   private static final String NAME = "Name";
   private static final String PROJECT_NAME = "Project Name";
   private static final String FIRST_TYPE_HINT = "(e.g. Unit)";
@@ -67,10 +78,11 @@ public class ProjectEditForm extends UserDialog {
   private HTML feedback;
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
   private ListBox language;
+  private ListBox dominoProjects;
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
-  private boolean isNew = false;
+//  private boolean isNew = false;
 
   /**
    * @param lifecycleSupport
@@ -91,7 +103,6 @@ public class ProjectEditForm extends UserDialog {
    */
   Widget getForm(ProjectInfo info, boolean isNew) {
     this.info = info;
-    this.isNew = isNew;
     return getFields(info, isNew);
   }
 
@@ -135,12 +146,17 @@ public class ProjectEditForm extends UserDialog {
    * @see ProjectChoices#showEditDialog
    */
   void updateProject() {
-    info.setName(nameField.getSafeText());
     info.setLanguage(language.getSelectedValue());
-    info.setCourse(course.getSafeText());
-    info.setStatus(ProjectStatus.valueOf(statusBox.getValue()));
+    DominoProject id = dominoToProject.get(dominoProjects.getSelectedValue());
 
-    info.setModelsDir(model.getSafeText());
+    if (id != null) {
+      info.setDominoID(id.getDominoID());
+    }
+
+    setCommonFields();
+
+
+    info.setStatus(ProjectStatus.valueOf(statusBox.getValue()));
 
     info.setHost(hydraHost.getSafeText());
     try {
@@ -148,8 +164,6 @@ public class ProjectEditForm extends UserDialog {
     } catch (NumberFormatException e) {
     }
 
-    info.setFirstType(unit.getSafeText());
-    info.setSecondType(chapter.getSafeText());
     info.setShowOniOS(showOniOSBox.getValue());
     //   logger.info("updateProject now " + info);
 
@@ -164,6 +178,18 @@ public class ProjectEditForm extends UserDialog {
         lifecycleSupport.refreshStartupInfo(true);
       }
     });
+  }
+
+  private void setCommonFields() {
+    info.setName(nameField.getSafeText());
+    info.setCourse(course.getSafeText());
+    info.setFirstType(unit.getSafeText());
+    info.setSecondType(chapter.getSafeText());
+    info.setModelsDir(model.getSafeText());
+    try {
+      info.setPort(Integer.parseInt(hydraPort.getSafeText()));
+    } catch (NumberFormatException e) {
+    }
   }
 
   @Nullable
@@ -198,7 +224,8 @@ public class ProjectEditForm extends UserDialog {
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
     } else if (unit.getSafeText().isEmpty()) {
-      markErrorNoGrabRight(unit, "Please enter the first hierarchy.");
+      markErrorNoGrabRight(unit, PLEASE_ENTER_THE_FIRST_HIERARCHY);
+      logger.info("got invalid unit");
       return false;
     } else {
       return true;
@@ -209,8 +236,17 @@ public class ProjectEditForm extends UserDialog {
    * @see ProjectChoices#showNewProjectDialog
    */
   void newProject() {
-    info.setName(nameField.getSafeText());
     info.setLanguage(language.getValue());
+
+    DominoProject id = dominoToProject.get(dominoProjects.getValue());
+
+    if (id != null) {
+      info.setDominoID(id.getDominoID());
+    }
+
+
+    logger.info("domino id is "+info.getDominoID());
+/*    info.setName(nameField.getSafeText());
     info.setCourse(course.getSafeText());
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
@@ -220,7 +256,8 @@ public class ProjectEditForm extends UserDialog {
       info.setPort(Integer.parseInt(hydraPort.getSafeText()));
     } catch (NumberFormatException e) {
 
-    }
+    }*/
+    setCommonFields();
 
     projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
       @Override
@@ -260,6 +297,9 @@ public class ProjectEditForm extends UserDialog {
 
     addLanguage(info, fieldset, isNew);
 
+    if (isNew) {
+      addDominoProject(info, fieldset, isNew);
+    }
     {
       course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
       course.setText(info.getCourse());
@@ -272,6 +312,8 @@ public class ProjectEditForm extends UserDialog {
 
       chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 150, 40);
       chapter.setText(info.getSecondType());
+
+      if (isNew) typesRow.setVisible(false);
     }
 
     DivWidget widgets = addLifecycle(info, fieldset);
@@ -330,6 +372,8 @@ public class ProjectEditForm extends UserDialog {
     return lifecycle;
   }
 
+  Map<String, DominoProject> dominoToProject = new HashMap<>();
+
   /**
    * @param info
    * @param fieldset
@@ -337,22 +381,115 @@ public class ProjectEditForm extends UserDialog {
    * @see #getFields
    */
   private void addLanguage(ProjectInfo info, Fieldset fieldset, boolean isNew) {
-    // fieldset.add(new Heading(5, "Language"));
-    DivWidget name = getHDivLabel(fieldset, "Language");
+    String language = "Language";
+    DivWidget name = getHDivLabel(fieldset, language);
     name.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    // language = getName(fieldset, info.getLanguage(), "Language");
+
     this.language = new ListBox();
+    final ListBox outer = this.language;
+    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(outer.getSelectedValue(), new AsyncCallback<List<DominoProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(List<DominoProject> result) {
+        dominoProjects.clear();
+
+        result.forEach(dominoProject -> {
+          String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+          dominoProjects.addItem(item);
+          dominoToProject.put(item, dominoProject);
+
+        });
+
+        Scheduler.get().scheduleDeferred(() -> {
+          if (result.size() == 1) {
+            setUnitAndChapter("", result.iterator().next());
+          }
+        });
+      }
+    }));
+    this.language.addStyleName("leftTenMargin");
+
     name.add(this.language);
-    int i = 0;
+
     if (isNew) {
       this.language.addItem(PLEASE_SELECT_A_LANGUAGE);
+
     }
+    int i = 0;
+
     for (Language value : Language.values()) {
       this.language.addItem(value.toDisplay());
-      if (info.getLanguage().equalsIgnoreCase(value.toString())) this.language.setItemSelected(i, true);
+      if (info.getLanguage().equalsIgnoreCase(value.toString())) {
+        this.language.setItemSelected(i, true);
+      }
       i++;
     }
-    this.language.addStyleName("leftTenMargin");
+  }
+
+  private void addDominoProject(ProjectInfo info, Fieldset fieldset, boolean isNew) {
+    String language = DOMINO_PROJECT;
+    DivWidget name = getHDivLabel(fieldset, language);
+    name.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+
+    this.dominoProjects = new ListBox();
+    this.dominoProjects.addStyleName("leftTenMargin");
+    // ListBox outer = dominoProjects;
+    name.add(this.dominoProjects);
+
+    if (isNew) {
+      this.dominoProjects.addItem(PLEASE_SELECT_A_DOMINO);
+    }
+    dominoProjects.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        String selectedValue = dominoProjects.getSelectedValue();
+        DominoProject dominoProject = dominoToProject.get(selectedValue);
+        setUnitAndChapter(selectedValue, dominoProject);
+      }
+    });
+/*    else {
+      projectServiceAsync.getDominoForLanguage(info.getLanguage(), new AsyncCallback<List<DominoProject>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(List<DominoProject> result) {
+          dominoProjects.clear();
+
+          result.forEach(dominoProject -> {
+            String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+            dominoProjects.addItem(item);
+            dominoToID.put(item, dominoProject.getDominoID());
+            outer.setItemSelected(dominoToID.size() - 1, true);
+          });
+        }
+      });
+    }*/
+
+ /*
+    for (Language value : Language.values()) {
+      this.dominoProjects.addItem(value.toDisplay());
+      if (info.getLanguage().equalsIgnoreCase(value.toString())) this.language.setItemSelected(i, true);
+      i++;
+    }*/
+  }
+
+  private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
+    if (dominoProject != null) {
+      logger.info("got " + dominoProject);
+      unit.setText(dominoProject.getFirstType());
+      chapter.setText(dominoProject.getSecondType());
+
+      logger.info("set unit " + dominoProject.getFirstType());
+    } else {
+      logger.info("no domino project for " + selectedValue);
+    }
   }
 
   private DivWidget getHDivLabel(Fieldset fieldset, String name1) {
@@ -407,7 +544,7 @@ public class ProjectEditForm extends UserDialog {
           @Override
           public void onSuccess(Boolean result) {
             if (result) {
-              markErrorNoGrab(userField, "Project with this name already exists.");
+              markErrorNoGrabRight(userField, "Project with this name already exists.");
             }
           }
         });

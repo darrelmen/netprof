@@ -95,6 +95,21 @@ public class DominoExerciseDAO {
     return null;
   }
 
+  public ImportInfo readExercises(int projid,
+                                  ImportProjectInfo projectInfo, List<ImportDoc> importDocs) {
+    List<CommonExercise> exercises =
+        getCommonExercises(
+            projid,
+            projectInfo.getCreatorID(),
+            projectInfo.getUnitName(),
+            projectInfo.getChapterName(),
+
+            importDocs
+        );
+
+    return new ImportInfo(projectInfo, exercises);
+  }
+
   private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
     JsonReader reader = file == null ?
         Json.createReader(inputStream) :
@@ -121,6 +136,7 @@ public class DominoExerciseDAO {
 
   /**
    * Get the unit and chapter from the workflow
+   *
    * @param readObj
    * @return
    */
@@ -163,6 +179,7 @@ public class DominoExerciseDAO {
 
   /**
    * Get the language from the content descriptor.
+   *
    * @param pd
    * @return
    */
@@ -177,6 +194,7 @@ public class DominoExerciseDAO {
 
   /**
    * Get the creator from the project descriptor
+   *
    * @param importUser
    * @param pd
    * @return
@@ -205,6 +223,16 @@ public class DominoExerciseDAO {
   }
 
   @NotNull
+  private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName, List<ImportDoc> docArr) {
+    List<CommonExercise> exercises = new ArrayList<>();
+    docArr.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
+        creator, unitName, chapterName, docObj.getDocID(), docObj.getTimestamp(),
+        docObj.getVocabularyItem()
+    )));
+    return exercises;
+  }
+
+  @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid, int creator, String unitName, String chapterName, JsonValue docObj) {
     SimpleHeadDocumentRevision shDoc = getSimpleHeadDocumentRevision(docObj);
 
@@ -213,6 +241,12 @@ public class DominoExerciseDAO {
     int docID = shDoc.getId();
     long time = shDoc.getCreateDate().getTime();
 
+    return getExerciseFromVocab(projid, creator, unitName, chapterName, docID, time, vocabularyItem);
+  }
+
+  private Exercise getExerciseFromVocab(int projid, int creator,
+                                        String unitName, String chapterName,
+                                        int docID, long time, VocabularyItem vocabularyItem) {
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());

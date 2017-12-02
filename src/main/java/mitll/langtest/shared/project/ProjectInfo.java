@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.project;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
@@ -40,9 +39,8 @@ import mitll.langtest.shared.exercise.HasID;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProjectInfo implements HasID, IsSerializable, MutableProject {
+public class ProjectInfo extends DominoProject implements HasID, MutableProject {
   private int id = -1;
-  private String name = "";
   private String language = "";
   private String course = "";
   private String countryCode = "";
@@ -54,10 +52,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
   private String host = Project.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
   private String modelsDir = "";
-  private String firstType = "";
-  private String secondType = "";
   private boolean showOniOS = true;
-  private int dominoID;
 
   private Map<String, String> propertyValue = new HashMap<>();
 
@@ -82,9 +77,9 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
                      String first,
                      String secondType,
                      boolean showOniOS, int dominoID) {
+    super(dominoID,name, first, secondType);
     this.language = language;
     this.id = projectid;
-    this.name = name;
     this.course = course;
     this.created = created;
     this.status = status;
@@ -93,10 +88,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     this.host = host;
     this.port = port;
     this.modelsDir = modelsDir;
-    this.firstType = first;
-    this.secondType = secondType;
     this.showOniOS = showOniOS;
-    this.dominoID = dominoID;
   }
 
   public String getLanguage() {
@@ -112,14 +104,10 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     if (o instanceof ProjectInfo) {
       ProjectInfo otherProject = (ProjectInfo) o;
       ProjectInfo thisProject = this;
-      return thisProject.name.compareTo(otherProject.name);
+      return thisProject.getName().compareTo(otherProject.getName());
     } else {
       return 1;
     }
-  }
-
-  public String getName() {
-    return name;
   }
 
   public long getCreated() {
@@ -179,18 +167,6 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     return propertyValue.remove(key);
   }
 
-  public String getFirstType() {
-    return firstType;
-  }
-
-  public String getSecondType() {
-    return secondType;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public void setCourse(String course) {
     this.course = course;
   }
@@ -232,11 +208,7 @@ public class ProjectInfo implements HasID, IsSerializable, MutableProject {
     return showOniOS;
   }
 
-  public int getDominoID() {
-    return dominoID;
-  }
-
   public String toString() {
-    return getName() + " " + getStatus() + " lang " + language + "@" + host + ":" + port + " types: " + firstType + ", " + secondType;
+    return getName() + " " + getStatus() + " lang " + language + "@" + host + ":" + port + " types: " + getFirstType() + ", " + getSecondType();
   }
 }

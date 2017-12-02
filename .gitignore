@@ -25,3 +25,4 @@ war/bestAudio
 /.gradle/
 /build/
 /bin/
+out

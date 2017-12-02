@@ -19,18 +19,18 @@ public class ImportInfo {
   /**
    * @param dominoID
    * @param language
-   * @paramx lang
    * @param exportTime
    * @param exercises
+   * @paramx lang
    * @paramx updateTime consider using this somehow
    * @see #readExercises
    */
   private ImportInfo(int dominoID,
-                    String language,
+                     String language,
 
-                    Date exportTime,
-                    //   Date updateTime,
-                    List<CommonExercise> exercises) {
+                     Date exportTime,
+                     //   Date updateTime,
+                     List<CommonExercise> exercises) {
     this.createTime = exportTime;
     // this.modifiedTime = updateTime;
     this.exercises = exercises;
@@ -39,7 +39,7 @@ public class ImportInfo {
     this.dominoID = dominoID;
   }
 
-   ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
+  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),

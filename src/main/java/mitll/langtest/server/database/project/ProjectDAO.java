@@ -87,7 +87,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
           ProjectType.DEFAULT,
           ProjectStatus.RETIRED,
           "", "", "",
-          0);
+          0, -1);
       defaultProject = getDefaultProject();
       return defaultProject == null ? -1 : defaultProject.id();
     } else {
@@ -266,14 +266,15 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param countryCode
    * @param displayOrder
    * @param isDev
+   * @param dominoID
    * @return
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
    */
   public int add(int userid, String name, String language, String course,
-                 String firstType, String secondType, String countryCode, int displayOrder, boolean isDev) {
+                 String firstType, String secondType, String countryCode, int displayOrder, boolean isDev, int dominoID) {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
         isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
-        firstType, secondType, countryCode, displayOrder);
+        firstType, secondType, countryCode, displayOrder, dominoID);
   }
 
 
@@ -313,6 +314,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param firstType
    * @param secondType
    * @param countryCode
+   * @param dominoID
    * @return
    * @see #ensureDefaultProject
    */
@@ -327,7 +329,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
                  String firstType,
                  String secondType,
                  String countryCode,
-                 int displayOrder) {
+                 int displayOrder,
+                 int dominoID) {
     Timestamp created = new Timestamp(modified);
     return dao.insert(new SlickProject(
         -1,
@@ -343,7 +346,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         secondType,
         countryCode,
         "",
-        -1,
+        dominoID,
         displayOrder));
   }
 

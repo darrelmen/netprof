@@ -38,6 +38,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import mitll.hlt.domino.server.util.DBProperties;
 import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
+import mitll.hlt.domino.shared.model.document.VocabularyItem;
 import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.*;
@@ -63,6 +65,7 @@ import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.ServletContext;
 import java.text.DateFormat;
@@ -882,8 +885,26 @@ public class ProjectManagement implements IProjectManagement {
     return fileUploadHelper;
   }
 
+  @Override
+  public ImportInfo getImportFromDomino(int projID, int dominoID) {
+    List<ImportProjectInfo> matches = getImportProjectInfos(eq("_id", dominoID));
+
+    if (matches.isEmpty()) {
+      return null;
+    } else {
+      ImportProjectInfo next = matches.iterator().next();
+      DominoExerciseDAO dominoExerciseDAO = new DominoExerciseDAO(serializer);
+      return dominoExerciseDAO.readExercises(projID, next, getDocs(dominoID));
+    }
+  }
+
   public List<ImportProjectInfo> getVocabProjects() {
     Bson query = eq("content.skill", "Vocabulary");
+    return getImportProjectInfos(query);
+  }
+
+  @NotNull
+  private List<ImportProjectInfo> getImportProjectInfos(Bson query) {
     MongoCollection<Document> projects = pool
         .getMongoCollection("projects");
 
@@ -931,12 +952,48 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
-
-    logger.info("Got " + imported);
+//    logger.info("Got " + imported);
     imported.forEach(proj -> logger.info(proj));
 
     return imported;
   }
 
-  
+  @Override
+  public List<ImportDoc> getDocs(int dominoID) {
+    List<ImportDoc> docs = new ArrayList<>();
+    FindIterable<Document> documents =
+        pool.getMongoCollection("document_heads").find(eq("projId", dominoID));
+
+    for (Document doc : documents) {
+      //logger.info("got doc " + doc);
+      String s = doc.toJson();
+
+      Integer id1 = doc.getInteger("_id");
+
+      Object docContent = doc.get("docContent");
+      Document docContent1 = (Document) docContent;
+
+      //logger.info("got vocab " + docContent1);
+      String s1 = docContent1.toJson();
+
+      SimpleHeadDocumentRevision deserialize = serializer.deserialize(SimpleHeadDocumentRevision.class, s);
+      // SimpleHeadDocumentRevision deserialize = serializer.deserialize(SimpleHeadDocumentRevision.class, s);
+      //int id = deserialize.getId();
+      //logger.info("Got doc id " + id1);
+      //logger.info("Got SimpleHeadDocumentRevision " + deserialize);
+
+      // deserialize.getDocument();
+      VocabularyItem vocabularyItem = serializer.deserialize(VocabularyItem.class, s1);
+
+      //logger.info("sub vocabularyItem " + vocabularyItem);
+      //logger.info("sub meta data  " + vocabularyItem.getMetadataFields());
+      //logger.info("sub components  " + vocabularyItem.getComponents());
+
+      Date updateTime = deserialize.getUpdateTime();
+      docs.add(new ImportDoc(id1, updateTime.getTime(), vocabularyItem));
+
+      //break;
+    }
+    return docs;
+  }
 }

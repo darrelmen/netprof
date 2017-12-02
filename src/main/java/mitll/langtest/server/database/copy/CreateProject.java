@@ -98,7 +98,7 @@ public class CreateProject {
             isDev,
             displayOrder,
             firstType,
-            secondType);
+            secondType, -1);
 
     addProjectProperties(db, projectDAO, projectID);
     addDefaultHostProperty(language, projectDAO, projectID);
@@ -143,8 +143,8 @@ public class CreateProject {
           true,
           info.getDisplayOrder(),
           info.getFirstType(),
-          info.getSecondType()
-      );
+          info.getSecondType(),
+          info.getDominoID());
 
       projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
           "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
@@ -182,7 +182,7 @@ public class CreateProject {
                          String language,
                          String course,
                          String countryCode,
-                         boolean isDev, int displayOrder, String firstType, String secondType) {
+                         boolean isDev, int displayOrder, String firstType, String secondType, int dominoID) {
     return projectDAO.add(
         beforeLoginUser,
         name,
@@ -192,7 +192,8 @@ public class CreateProject {
         secondType,
         countryCode,
         displayOrder,
-        isDev);
+        isDev,
+        dominoID);
   }
 
   private String getOldLanguage(DatabaseImpl db) {

@@ -144,11 +144,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     //logger.info("service content type " + contentType + " multi " + isMultipart);
     if (isMultipart) {
       logger.debug("isMultipart : Request " + request.getQueryString() + " path " + request.getPathInfo());
-      FileUploadHelper.UploadInfo site = db.getProjectManagement().getFileUploadHelper().gotFile(request);
-      if (site == null) {
+      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
+      if (uploadInfo == null) {
         super.service(request, response);
       } else {
-        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, site);
+        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, uploadInfo);
       }
     } else {
       super.service(request, response);

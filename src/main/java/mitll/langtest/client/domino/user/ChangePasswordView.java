@@ -155,11 +155,7 @@ public class ChangePasswordView extends Composite {
 
   @Override
   protected void onLoad() {
-    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-      public void execute() {
-        ((Focusable) getFirstDecoratedField().getPrimaryControl()).setFocus(true);
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> ((Focusable) getFirstDecoratedField().getPrimaryControl()).setFocus(true));
   }
 
   public void showModal() {

@@ -57,7 +57,7 @@ public class ProjectChoices {
   /**
    *
    */
-  private static final String IMPORT_DATA_INTO = "Import data into ";
+  //private static final String IMPORT_DATA_INTO = "Import data into ";
 
   /**
    * @see #showNewProjectDialog
@@ -596,6 +596,8 @@ public class ProjectChoices {
       DivWidget importButtonContainer = getImportButtonContainer(projectForLang);
       importButtonContainer.addStyleName("leftFiveMargin");
       horiz2.add(importButtonContainer);
+      importButtonContainer.setVisible(projectForLang.getDominoID() > 0);
+
     }
 
     {
@@ -642,6 +644,7 @@ public class ProjectChoices {
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.UPLOAD);
+    //  w.addClickHandler(event -> showImportDialog(projectForLang));
     w.addClickHandler(event -> showImportDialog(projectForLang));
     return w;
   }
@@ -678,9 +681,9 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang) {
-    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-      @Override
-      public boolean gotYes() {
+//    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
+//      @Override
+//      public boolean gotYes() {
         projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -692,6 +695,8 @@ public class ProjectChoices {
             DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
             if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
               projectForLang.getProps().putAll(result.getProps());
+              new ModalInfoDialog("Success", "Sync with domino complete!");
+
             } else {
               String title = "";
               String message = "";
@@ -714,24 +719,16 @@ public class ProjectChoices {
                       "<br/>You probably want to add it to there.";
                   break;
               }
-              new ModalInfoDialog(title,
-                  message);
+              new ModalInfoDialog(title, message);
             }
           }
         });
-        return true;
-      }
-
-      @Override
-      public void gotNo() {
-      }
-    };
-
+/*
     new DialogHelper(true).show(
         IMPORT_DATA_INTO + projectForLang.getName(),
         new FileUploader().getForm(projectForLang.getID()),
         listener,
-        550);
+        550);*/
   }
 
   private void showDeleteDialog(SlimProject projectForLang, Heading label) {
@@ -846,7 +843,7 @@ public class ProjectChoices {
    * @see #setProjectForUser
    */
   private void reallySetTheProject(int projectid) {
-   // logger.info("setProjectForUser set project for " + projectid);
+    // logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
@@ -861,7 +858,7 @@ public class ProjectChoices {
           logger.warning("huh? no current user? ");
         } else {
           userNotification.setProjectStartupInfo(aUser);
-     //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
+          //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
           uiLifecycle.showInitialState();
         }
       }

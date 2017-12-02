@@ -37,8 +37,10 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
+import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
 
+import java.util.List;
 import java.util.Map;
 
 @RemoteServiceRelativePath("project-manager")
@@ -55,4 +57,6 @@ public interface ProjectService extends RemoteService {
   boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
   DominoUpdateResponse addPending(int id) throws DominoSessionException, RestrictedOperationException;
+
+  List<DominoProject> getDominoForLanguage(String lang)throws DominoSessionException,RestrictedOperationException;
 }

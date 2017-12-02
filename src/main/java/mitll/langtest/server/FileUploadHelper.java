@@ -1,6 +1,7 @@
 package mitll.langtest.server;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.exercise.ImportInfo;
@@ -13,6 +14,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.logging.log4j.LogManager;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,15 +35,20 @@ public class FileUploadHelper {
 
   private final DominoExerciseDAO dominoExerciseDAO;
 
+  /**
+   * @param db
+   * @param dominoExerciseDAO
+   * @see mitll.langtest.server.database.project.ProjectManagement#ProjectManagement(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl, ServletContext)
+   */
   public FileUploadHelper(DatabaseServices db, DominoExerciseDAO dominoExerciseDAO) {
     this.db = db;
     this.dominoExerciseDAO = dominoExerciseDAO;
   }
 
   /**
-   * @see LangTestDatabaseImpl#service
    * @param request
    * @return
+   * @see LangTestDatabaseImpl#service
    */
   UploadInfo gotFile(HttpServletRequest request) {
     FileItemFactory factory = new DiskFileItemFactory();
@@ -54,38 +61,38 @@ public class FileUploadHelper {
 
       DiskFileItem rememberedFileItem = null;
 
-      UploadInfo UploadInfo = new UploadInfo();
+      UploadInfo uploadInfo = new UploadInfo();
       for (FileItem item : items) {
         if (!item.isFormField() && UPLOAD_FORM_NAME.equals(item.getFieldName())) {
           rememberedFileItem = (DiskFileItem) item;
         } else {
-          readFormItemAndStoreInUploadInfo(UploadInfo, item);
+          readFormItemAndStoreInUploadInfo(uploadInfo, item);
         }
       }
 
       if (rememberedFileItem != null) {
         logger.info("gotFile " + rememberedFileItem);
-        readExercises(UploadInfo, rememberedFileItem);
+        readExercises(uploadInfo, rememberedFileItem);
       }
 
-      UploadInfo.setValid(rememberedFileItem != null);
+      uploadInfo.setValid(rememberedFileItem != null);
 
-      return UploadInfo;
+      return uploadInfo;
     } catch (Exception e) {
       logger.error("Got " + e, e);
       return new UploadInfo();
     }
   }
 
-  private void readFormItemAndStoreInUploadInfo(UploadInfo UploadInfo, FileItem item) {
+  private void readFormItemAndStoreInUploadInfo(UploadInfo uploadInfo, FileItem item) {
     //logger.info("from http request, got " + item);
     String name = item.getFieldName();
     if (name != null) {
       if (name.toLowerCase().endsWith("projectid")) {
 //        logger.info("-------------> got UploadInfoid <----------------\n\n");
-        UploadInfo.id = Integer.parseInt(item.getString().trim());
-      //  logger.info("------------->  UploadInfoid " + UploadInfo.id + "  <----------------");
-       // return true;
+        uploadInfo.id = Integer.parseInt(item.getString().trim());
+        //  logger.info("------------->  UploadInfoid " + uploadInfo.id + "  <----------------");
+        // return true;
       } else {
         logger.info("Got " + item);
       }
@@ -117,13 +124,17 @@ public class FileUploadHelper {
     public int getId() {
       return id;
     }
+
+    public void setProjectID(int projectID) {
+      this.id = projectID;
+    }
   }
 
   /**
-   * @see #gotFile
    * @param UploadInfo
    * @param item
    * @throws IOException
+   * @see #gotFile
    */
   private void readExercises(UploadInfo UploadInfo, FileItem item) throws IOException {
     logger.info("readExercises upload " + item);
@@ -132,6 +143,7 @@ public class FileUploadHelper {
 
   /**
    * NO : Technically we can still load excel, but it's turned off in the UI.
+   *
    * @param UploadInfo
    * @param fileName
    * @param inputStream
@@ -139,13 +151,12 @@ public class FileUploadHelper {
   private void readExercisesPopulateUploadInfo(UploadInfo UploadInfo, String fileName, InputStream inputStream) {
     if (fileName.endsWith(".json")) {
       readJSON(UploadInfo, inputStream);
-    }
-    else {
+    } else {
       logger.warn("somehow got a non-json file " + fileName);
     }
     //else {
     //  readExcel(UploadInfo, fileName, inputStream);
-   // }
+    // }
   }
 
 /*  private void readExcel(UploadInfo UploadInfo, String fileName, InputStream inputStream) {
@@ -162,13 +173,24 @@ public class FileUploadHelper {
     rememberExercises(UploadInfo, id, excelImport.readExercises(inputStream));
   }*/
 
-  private void readJSON(UploadInfo UploadInfo, InputStream inputStream) {
-    int id = UploadInfo.id;
-    Project project = db.getProject(id);
+  private void readJSON(UploadInfo uploadInfo, InputStream inputStream) {
+    int projectID = uploadInfo.getId();
+
+//    Project project = db.getProject(projectID);
     ImportInfo info =
-        dominoExerciseDAO.readExercises(null, inputStream, project.getID(), db.getUserDAO().getImportUser());
+        dominoExerciseDAO.readExercises(null, inputStream,
+            //   project.getID(),
+            projectID,
+            db.getUserDAO().getImportUser());
 //    logger.info("Got " +info);
-    rememberExercises(UploadInfo, id, info);
+    rememberExercises(uploadInfo, projectID, info);
+  }
+
+  public void rememberExercises(int projectID, ImportInfo info) {
+    UploadInfo uploadInfo = new UploadInfo();
+    uploadInfo.setProjectID(projectID);
+    uploadInfo.setValid(true);
+    rememberExercises(uploadInfo, projectID, info);
   }
 
 /*  @NotNull
@@ -187,7 +209,7 @@ public class FileUploadHelper {
    * @throws IOException
    * @see LangTestDatabaseImpl#service
    */
-   void doUploadInfoResponse(HttpServletResponse response, UploadInfo UploadInfo) throws IOException {
+  void doUploadInfoResponse(HttpServletResponse response, UploadInfo UploadInfo) throws IOException {
     response.setContentType("text/plain");
     if (!UploadInfo.isValid()) {
       response.getWriter().write("Name in use or invalid.");
@@ -197,12 +219,12 @@ public class FileUploadHelper {
   }
 
   /**
-   * @see #readJSON(UploadInfo, InputStream)
-   * @param UploadInfo
+   * @param uploadInfo
    * @param id
    * @param info
+   * @see #readJSON(UploadInfo, InputStream)
    */
-  private void rememberExercises(UploadInfo UploadInfo, int id, ImportInfo info) {
+  private void rememberExercises(UploadInfo uploadInfo, int id, ImportInfo info) {
     List<CommonExercise> exercises = info.getExercises();
     logger.info("rememberExercises Read " + exercises.size());
 //    exercises.forEach(exercise->logger.info("ex  "+exercise.getID() + " " + exercise.getDirectlyRelated()));
@@ -210,15 +232,15 @@ public class FileUploadHelper {
       logger.warn("rememberExercises Read zero? " + exercises.size());
     } else {
       idToExercises.put(id, info);
-      UploadInfo.setNum(exercises.size());
-      logger.info("rememberExercises UploadInfo " + id + " : " + idToExercises.get(id).getExercises().size());
+      uploadInfo.setNum(exercises.size());
+      logger.info("rememberExercises uploadInfo " + id + " : " + idToExercises.get(id).getExercises().size());
     }
   }
 
   /**
-   * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    * @param projid
    * @return
+   * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    */
   public ImportInfo getExercises(int projid) {
     return idToExercises.get(projid);
