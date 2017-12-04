@@ -43,9 +43,11 @@ public enum Language implements IsSerializable {
   Language(boolean isRTL) {
     this.isRTL = isRTL;
   }
-  Language(boolean isRTL, int fontSize) {
+
+/*  Language(boolean isRTL, int fontSize) {
     this(isRTL); this.fontSize = fontSize;
-  }
+  }*/
+
   Language( int fontSize) {
     this(false); this.fontSize = fontSize;
   }

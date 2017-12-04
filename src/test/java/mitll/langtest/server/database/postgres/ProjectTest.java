@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -40,6 +41,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
+import mitll.langtest.server.database.exercise.ImportDoc;
 import mitll.langtest.server.database.exercise.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -73,6 +75,20 @@ public class ProjectTest extends BaseTest {
     DatabaseImpl spanish = getDatabase();
     spanish.setInstallPath("");
     spanish.getProjectManagement().getVocabProjects();
+    List<ImportDoc> docs = spanish.getProjectManagement().getDocs(707);
+    docs.forEach(doc->logger.info("got "+doc));
+  }
+
+  @Test
+  public void testImport() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.setInstallPath("");
+    IProjectManagement projectManagement = spanish.getProjectManagement();
+    ImportInfo importFromDomino = projectManagement.getImportFromDomino(5, 707);
+    FileUploadHelper fileUploadHelper = projectManagement.getFileUploadHelper();
+    fileUploadHelper.rememberExercises(5,importFromDomino);
+    ImportInfo exercises = fileUploadHelper.getExercises(5);
+    logger.info("Got " + exercises);
   }
 
     @Test
@@ -89,7 +105,7 @@ public class ProjectTest extends BaseTest {
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
-        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
+        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0, -1);
   }
 
   @Test

@@ -226,7 +226,7 @@ public class CreateProject {
         new Pair("mandarin", "cn"),
         new Pair("msa", "al"),
         new Pair("pashto", "af"),
-        new Pair("portuguese", "pt"),
+        new Pair("portuguese", "br"),
         new Pair("russian", "ru"),
         new Pair("serbian", "rs"),
         new Pair("sorani", "ku"),
