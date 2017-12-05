@@ -913,6 +913,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public DBUser getDominoAdminUser() {
+    return null;
+  }
+
+  @Override
   public boolean forgotPassword(String user
       , String url
                                 //    ,                              String emailForLegacy

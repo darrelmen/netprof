@@ -50,12 +50,8 @@ import java.sql.*;
 public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   private static final Logger logger = LogManager.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
-  private final IResultDAO resultDAO;
 
-  public AnswerDAO(Database database, IResultDAO resultDAO) {
-    super(database);
-    this.resultDAO = resultDAO;
-  }
+  public AnswerDAO(Database database) { super(database);  }
 
   /**
    * @param answerInfo
@@ -168,8 +164,6 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
     long newID = -1;
     synchronized (this) {
-      long then = System.currentTimeMillis();
-//      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
       PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
           ResultDAO.RESULTS +
           "(" +

@@ -34,13 +34,25 @@ package mitll.langtest.server.database.project;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
+import mitll.hlt.domino.server.data.DocumentServiceDelegate;
+import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
+import mitll.hlt.domino.server.data.ProjectServiceDelegate;
+import mitll.hlt.domino.server.data.SimpleDominoContext;
 import mitll.hlt.domino.server.util.DBProperties;
 import mitll.hlt.domino.server.util.Mongo;
-import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
+import mitll.hlt.domino.shared.common.FilterDetail;
+import mitll.hlt.domino.shared.common.FindOptions;
+import mitll.hlt.domino.shared.model.HeadDocumentRevision;
+import mitll.hlt.domino.shared.model.document.DocumentColumn;
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
+import mitll.hlt.domino.shared.model.metadata.MetadataList;
+import mitll.hlt.domino.shared.model.metadata.MetadataSpecification;
+import mitll.hlt.domino.shared.model.project.ClientPMProject;
+import mitll.hlt.domino.shared.model.project.ProjectColumn;
+import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
+import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -62,20 +74,14 @@ import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.ServletContext;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.ServerInitializationManager.JSON_SERIALIZER;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -107,6 +113,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
+  private final IProjectWorkflowDAO workflowDelegate;
   private FileUploadHelper fileUploadHelper;
   private final boolean debugOne;
 
@@ -114,8 +121,10 @@ public class ProjectManagement implements IProjectManagement {
   public static final String NAME = "name";
   public static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
-  private Mongo pool;
-  private JSONSerializer serializer;
+//  private Mongo pool;
+//  private JSONSerializer serializer;
+
+  private ProjectServiceDelegate projectDelegate;
 
   /**
    * @param pathHelper
@@ -137,14 +146,22 @@ public class ProjectManagement implements IProjectManagement {
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
 
-    pool = servletContext != null ? (Mongo) servletContext.getAttribute(MONGO_ATT_NAME) : null;
-    serializer = servletContext != null ? (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER) : null;
+//    pool = servletContext != null ? (Mongo) servletContext.getAttribute(MONGO_ATT_NAME) : null;
+//    serializer = servletContext != null ? (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER) : null;
+//
+//    if (pool == null) {
+//      pool = Mongo.createPool(new DBProperties(db.getServerProps().getProps()));
+//      serializer = Mongo.makeSerializer();
+//    }
 
-    if (pool == null) {
-      pool = Mongo.createPool(new DBProperties(db.getServerProps().getProps()));
-      serializer = Mongo.makeSerializer();
-    }
+    SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
+    simpleDominoContext.init(servletContext);
+    projectDelegate = simpleDominoContext.getProjectDelegate();
+    workflowDelegate = simpleDominoContext.getWorkflowDAO();
+    documentDelegate = simpleDominoContext.getDocumentDelegate();
   }
+
+  private DocumentServiceDelegate documentDelegate;
 
   /**
    * @see DatabaseImpl#populateProjects
@@ -887,22 +904,22 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID) {
-    List<ImportProjectInfo> matches = getImportProjectInfos(eq("_id", dominoID));
+    List<ImportProjectInfo> matches = getImportProjectInfos();
 
     if (matches.isEmpty()) {
       return null;
     } else {
       ImportProjectInfo next = matches.iterator().next();
-      DominoExerciseDAO dominoExerciseDAO = new DominoExerciseDAO(serializer);
+      DominoExerciseDAO dominoExerciseDAO = new DominoExerciseDAO();
       return dominoExerciseDAO.readExercises(projID, next, getDocs(dominoID));
     }
   }
 
   public List<ImportProjectInfo> getVocabProjects() {
-    Bson query = eq("content.skill", "Vocabulary");
-    return getImportProjectInfos(query);
+    return getImportProjectInfos();
   }
 
+/*
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfos(Bson query) {
     MongoCollection<Document> projects = pool
@@ -938,6 +955,7 @@ public class ProjectManagement implements IProjectManagement {
           ((Document) content).getString(LANGUAGE_NAME),
           now.getTime()
       );
+
       imported.add(creatorId);
 
       FindIterable<Document> documents = pool.getMongoCollection("project_workflows").find(eq("projId", dominoID));
@@ -957,8 +975,87 @@ public class ProjectManagement implements IProjectManagement {
 
     return imported;
   }
+*/
+
+  @NotNull
+  private List<ImportProjectInfo> getImportProjectInfos() {
+    FindOptions<ProjectColumn> options = new FindOptions<>();
+    options.addFilter(new FilterDetail<>(ProjectColumn.Skill, "Vocabulary", FilterDetail.Operator.EQ));
+
+    List<ProjectDescriptor> projects1 = projectDelegate.getProjects(db.getUserDAO().getDominoAdminUser(),
+        null,
+        options,
+        false, false, false
+    );
+
+    List<ImportProjectInfo> imported = new ArrayList<>();
+
+    for (ProjectDescriptor project : projects1) {
+      logger.info("Got " + project);
+
+      Date now = project.getCreateTime();
+
+      int documentDBID = project.getCreator().getDocumentDBID();
+
+      project.getContent().getLanguageName();
+
+      int id = project.getId();
+      ImportProjectInfo creatorId = new ImportProjectInfo(
+          id,
+          documentDBID,
+          project.getName(),
+          project.getContent().getLanguageName(),
+          now.getTime()
+      );
+
+      imported.add(creatorId);
+
+      ProjectWorkflow forProject = workflowDelegate.getForProject(id);
+
+      if (forProject == null) {
+        logger.warn("no workflow for project " + id);
+      } else {
+        List<TaskSpecification> taskSpecs = forProject.getTaskSpecs();
+
+        for (TaskSpecification specification : taskSpecs) {
+          Collection<MetadataList> metadataLists = specification.getMetadataLists();
+
+          for (MetadataList list : metadataLists) {
+            logger.info("got " + list);
+
+            List<MetadataSpecification> list1 = list.getList();
+            for (MetadataSpecification specification1 : list1) {
+              if (specification1.getDBName().equalsIgnoreCase("v-unit")) {
+                creatorId.setUnitName(specification1.getLongName());
+              } else if (specification1.getDBName().equalsIgnoreCase("v-chapter")) {
+                creatorId.setChapterName(specification1.getLongName());
+              }
+            }
+          }
+        }
+      }
+/*
+      FindIterable<Document> documents = pool.getMongoCollection("project_workflows").find(eq("projId", dominoID));
+
+// OK go to json
+      for (Document doc : documents) {
+        String s = doc.toJson();
+        ProjectWorkflow deserialize = serializer.deserialize(ProjectWorkflow.class, s);
+        ImportProjectInfo importProjectInfoFromWorkflow = dominoExerciseDAO.getImportProjectInfoFromWorkflow(deserialize);
+        creatorId.setUnitName(importProjectInfoFromWorkflow.getUnitName());
+        creatorId.setChapterName(importProjectInfoFromWorkflow.getChapterName());
+      }
+*/
+    }
+
+//    logger.info("Got " + imported);
+    imported.forEach(proj -> logger.info("from service  " + proj));
+
+    return imported;
+  }
 
   @Override
+/*
   public List<ImportDoc> getDocs(int dominoID) {
     List<ImportDoc> docs = new ArrayList<>();
     FindIterable<Document> documents =
@@ -993,6 +1090,29 @@ public class ProjectManagement implements IProjectManagement {
       docs.add(new ImportDoc(id1, updateTime.getTime(), vocabularyItem));
 
       //break;
+    }
+
+    List<ImportDoc> docs2 = getDocs2(dominoID);
+
+    docs2.forEach(importDoc -> logger.info("service "+ importDoc));
+    return docs;
+  }
+*/
+
+  public List<ImportDoc> getDocs(int dominoID) {
+    DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
+    FindOptions<ProjectColumn> options = new FindOptions<>();
+    options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
+    List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
+
+    List<ImportDoc> docs = new ArrayList<>();
+    ClientPMProject next = projectDescriptor.iterator().next();
+    List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, new FindOptions<DocumentColumn>());
+
+    for (HeadDocumentRevision doc : documents1) {
+      Integer id1 = doc.getId();
+      VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
+      docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
     }
     return docs;
   }

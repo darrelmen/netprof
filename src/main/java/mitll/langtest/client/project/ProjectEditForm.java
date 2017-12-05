@@ -297,9 +297,9 @@ public class ProjectEditForm extends UserDialog {
 
     addLanguage(info, fieldset, isNew);
 
-    if (isNew) {
+   // if (isNew) {
       addDominoProject(info, fieldset, isNew);
-    }
+    //}
     {
       course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
       course.setText(info.getCourse());

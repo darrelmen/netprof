@@ -219,6 +219,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   boolean isStudent(int userIDFromSessionOrDB);
 
+  DBUser getDominoAdminUser();
+
   class ReportUsers {
     private List<ReportUser> allUsers;
     private List<ReportUser> deviceUsers;

@@ -1325,4 +1325,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public Mongo getPool() {
     return pool;
   }
+
+  @Override
+  public DBUser getDominoAdminUser() {
+    return dominoAdminUser;
+  }
 }

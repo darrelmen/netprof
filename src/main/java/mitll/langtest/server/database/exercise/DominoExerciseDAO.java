@@ -17,6 +17,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import javax.json.*;
@@ -50,6 +51,9 @@ public class DominoExerciseDAO {
 
   private final JSONSerializer ser;
 
+  public DominoExerciseDAO() {
+    ser = null;
+   }
   /**
    * @param serializer
    */
@@ -147,6 +151,11 @@ public class DominoExerciseDAO {
     return getImportProjectInfoFromWorkflow(pw);
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#getImportProjectInfos
+   * @param pw
+   * @return
+   */
   @NotNull
   public ImportProjectInfo getImportProjectInfoFromWorkflow(ProjectWorkflow pw) {
     TaskSpecification taskSpec = pw.getTaskSpec(EDIT);
