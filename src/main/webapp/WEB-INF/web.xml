@@ -16,6 +16,13 @@
         <param-value>/opt/netprof/config/</param-value>
     </context-param>
 
+    <!--
+        <context-param>
+            <param-name>domino.cfg.file</param-name>
+            <param-value>/opt/netprof/config/netprof.properties</param-value>
+        </context-param>
+    -->
+
 
     <!-- ==================================================================== -->
     <!-- Start RPC mappings                                                   -->
@@ -321,10 +328,6 @@
 
     <!-- initialize core data services - Mongo connection pool, etc -->
     <listener>
-
-<!--
-            <listener-class>mitll.hlt.domino.server.ServerInitializationManager</listener-class>
--->
         <listener-class>mitll.hlt.domino.server.configuration.DominoServerInitializationManager</listener-class>
     </listener>
 

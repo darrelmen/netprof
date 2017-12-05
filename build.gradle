@@ -73,8 +73,16 @@ dependencies {
 
    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 
-    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
+//    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
+
     compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
+
+    //mymodule 'mitll.hlt:domino:2.7-SNAPSHOT'
+   // compile('mitll.hlt:domino:domino' + dominoVers + "@jar") { changing = true; }
+
+//    compile ('mitll.hlt:domino:2.7-SNAPSHOT:domino@jar')
+
+    //compile configurations.mymodule.filter { it.name == 'domino.jar' }
 
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
 

@@ -568,8 +568,8 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
-    if (rawExercises.isEmpty() || rawExercises.size() < 100) {
-      logger.warn("getExercises for " + projectid +
+    if (rawExercises.isEmpty()) {
+      logger.warn("getExercises for project id " + projectid +
           " no exercises in '" + serverProps.getLessonPlan() + "' = " + rawExercises.size());
     }
     return rawExercises;
@@ -904,17 +904,19 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID) {
-    List<ImportProjectInfo> matches = getImportProjectInfos();
+    List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
 
     if (matches.isEmpty()) {
       return null;
     } else {
-      ImportProjectInfo next = matches.iterator().next();
-      DominoExerciseDAO dominoExerciseDAO = new DominoExerciseDAO();
-      return dominoExerciseDAO.readExercises(projID, next, getDocs(dominoID));
+      return new DominoExerciseDAO().readExercises(projID, matches.iterator().next(), getDocs(dominoID));
     }
   }
 
+  /**
+   *
+   * @return
+   */
   public List<ImportProjectInfo> getVocabProjects() {
     return getImportProjectInfos();
   }
@@ -977,11 +979,28 @@ public class ProjectManagement implements IProjectManagement {
   }
 */
 
+  /**
+   * @see #getImportFromDomino
+   * @see #getVocabProjects
+   * @return
+   */
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfos() {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Skill, "Vocabulary", FilterDetail.Operator.EQ));
 
+    return getImportProjectInfos(options);
+  }
+
+  @NotNull
+  private List<ImportProjectInfo> getImportProjectInfosByID(int id) {
+    FindOptions<ProjectColumn> options = new FindOptions<>();
+    options.addFilter(new FilterDetail<>(ProjectColumn.Id, ""+id, FilterDetail.Operator.EQ));
+    return getImportProjectInfos(options);
+  }
+
+  @NotNull
+  private List<ImportProjectInfo> getImportProjectInfos(FindOptions<ProjectColumn> options) {
     List<ProjectDescriptor> projects1 = projectDelegate.getProjects(db.getUserDAO().getDominoAdminUser(),
         null,
         options,
@@ -1021,7 +1040,7 @@ public class ProjectManagement implements IProjectManagement {
           Collection<MetadataList> metadataLists = specification.getMetadataLists();
 
           for (MetadataList list : metadataLists) {
-            logger.info("got " + list);
+//            logger.info("got " + list);
 
             List<MetadataSpecification> list1 = list.getList();
             for (MetadataSpecification specification1 : list1) {
@@ -1034,22 +1053,7 @@ public class ProjectManagement implements IProjectManagement {
           }
         }
       }
-/*
-      FindIterable<Document> documents = pool.getMongoCollection("project_workflows").find(eq("projId", dominoID));
-
-// OK go to json
-      for (Document doc : documents) {
-        String s = doc.toJson();
-        ProjectWorkflow deserialize = serializer.deserialize(ProjectWorkflow.class, s);
-        ImportProjectInfo importProjectInfoFromWorkflow = dominoExerciseDAO.getImportProjectInfoFromWorkflow(deserialize);
-        creatorId.setUnitName(importProjectInfoFromWorkflow.getUnitName());
-        creatorId.setChapterName(importProjectInfoFromWorkflow.getChapterName());
-      }
-*/
     }
-
-//    logger.info("Got " + imported);
-    imported.forEach(proj -> logger.info("from service  " + proj));
 
     return imported;
   }

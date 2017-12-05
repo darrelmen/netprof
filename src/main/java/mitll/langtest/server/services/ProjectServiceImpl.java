@@ -271,7 +271,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       ImportInfo info = db.getProjectManagement().getImportFromDomino(projectid, dominoid);
       int jsonDominoID = info.getDominoID();
       if (dominoid != -1 && dominoid != jsonDominoID) {
-        logger.warn("addPending - json domino id = " + dominoid + " vs " + jsonDominoID);
+        logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
         return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
       } else {
         if (dominoid == -1) {
@@ -340,9 +340,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+
       List<ImportProjectInfo> collect = db.getProjectManagement().getVocabProjects()
           .stream()
-          .filter(importProjectInfo -> importProjectInfo.getLanguage().toLowerCase().equals(lang.toLowerCase())).collect(Collectors.toList());
+          .filter(importProjectInfo -> importProjectInfo.getLanguage().toLowerCase().equals(lang.toLowerCase()))
+          .collect(Collectors.toList());
 
       List<DominoProject> dominoProjects = new ArrayList<>();
       collect
@@ -356,8 +358,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     } else {
       throw getRestricted("getting domino projects");
     }
-
-//    return new ArrayList<DominoProject>();
   }
 
   private void updateProjectIfSomethingChanged(int jsonDominoID,

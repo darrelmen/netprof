@@ -66,6 +66,7 @@ import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 
+import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 
 /**
@@ -79,7 +80,7 @@ import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
-  public static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
+  private static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
 
   /**
    * @see
@@ -94,10 +95,16 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public void init() {
     try {
       ServletContext servletContext = getServletContext();
+      String property = System.getProperty(CONFIG_HOME_ATTR_NM);
+      logger.info("\n\n\n\n--->prop for domino = '" + property + "'");
+
+      if (property == null) {
+        System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
+      }
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
-      setInstallPath(db,servletContext);
+      setInstallPath(db, servletContext);
 
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
@@ -375,8 +382,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
       if (attribute != null) {
         logger.info("got " + attribute + " : " + attribute.getClass());
-      }
-      else {
+      } else {
         logger.warn("no servlet context... ");
       }
 
@@ -406,12 +412,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 */
 
   /**
-   * @see #readProperties
    * @param serverProps
    * @return
+   * @see #readProperties
    */
   private DatabaseImpl makeDatabaseImpl(ServerProperties serverProps) {
-    return new DatabaseImpl(serverProps, pathHelper, this, null);
+    return new DatabaseImpl(serverProps, pathHelper, this, getServletContext());
   }
 
   /**

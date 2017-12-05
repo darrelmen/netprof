@@ -145,6 +145,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
       doAfterGetDelegate();
     } else {
+      if (servletContext != null) {
+        Enumeration<String> attributeNames = servletContext.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+          logger.info("no user service " + servletContext.getAttributeNames());
+        }
+      }
       usedDominoResources = false;
       try {
         connectToMongo(database, database.getServerProps().getProps());

@@ -195,7 +195,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   public DatabaseImpl(ServerProperties serverProps,
                       PathHelper pathHelper,
-                      LogAndNotify logAndNotify, ServletContext servletContext) {
+                      LogAndNotify logAndNotify,
+                      ServletContext servletContext) {
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
     this.pathHelper = pathHelper;
@@ -203,12 +204,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
     connectToDatabases(pathHelper, servletContext);
   }
 
+  /**
+   * @see #DatabaseImpl
+   * @param pathHelper
+   * @param servletContext
+   */
   void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
     // first connect to postgres
 
     setPostgresDBConnection();
-//    logger.debug("initializeDAOs --- " + dbConnection);
+    logger.debug("initializeDAOs --- " + servletContext);
 
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
