@@ -43,7 +43,7 @@ import java.util.Map;
  * @since 3/20/2014.
  */
 public interface CommonExercise extends CommonAudioExercise, ScoredExercise, HasUnitChapter {
-  @Deprecated String getOldID();
+  String getOldID();
 
   int getDominoID();
 

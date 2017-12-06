@@ -66,7 +66,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
-  private static boolean DEBUG = true;
+  private static boolean DEBUG = false;
 
   /**
    * Only made once but shared with servlets.
@@ -173,7 +173,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       // why do this?
       userDAO.getDatabase().setStartupInfo(loggedInUser);
       long now = System.currentTimeMillis();
-      log.info("took " + (now - then) + " to add session to db");
+      if (now-then>40) {
+        log.info("took " + (now - then) + " to add session to db");
+      }
     } catch (Exception e) {
       log.error("got " + e, e);
     }

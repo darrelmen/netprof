@@ -106,9 +106,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   @Override
-  public boolean easyUpdate(SlickProject changed) {
-    return dao.update(changed) > 0;
-  }
+  public boolean easyUpdate(SlickProject changed) {  return dao.update(changed) > 0;  }
 
   /**
    * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...

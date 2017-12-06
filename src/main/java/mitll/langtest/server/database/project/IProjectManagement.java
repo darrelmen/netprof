@@ -32,8 +32,6 @@
 
 package mitll.langtest.server.database.project;
 
-import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.VocabularyItem;
 import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.*;
@@ -107,9 +105,16 @@ public interface IProjectManagement {
    */
   int getUserForFile(String requestURI);
 
-  ImportInfo getImportFromDomino(int projID, int dominoID);
+  /**
+   *
+   * @param projID
+   * @param dominoID
+   * @param since
+   * @return
+   */
+  ImportInfo getImportFromDomino(int projID, int dominoID, long since);
 
   List<ImportProjectInfo> getVocabProjects();
 
-  List<ImportDoc> getDocs(int dominoID);
+//  List<ImportDoc> getDocs(int dominoID, long since);
 }

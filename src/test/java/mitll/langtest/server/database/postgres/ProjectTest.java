@@ -70,21 +70,21 @@ public class ProjectTest extends BaseTest {
   public static final int MAX = 200;
   public static final int PROJECTID = 9;
 
-  @Test
+/*  @Test
   public void testProjectInfo() {
     DatabaseImpl spanish = getDatabase();
     spanish.setInstallPath("");
     spanish.getProjectManagement().getVocabProjects();
-    List<ImportDoc> docs = spanish.getProjectManagement().getDocs(707);
+    List<ImportDoc> docs = spanish.getProjectManagement().getDocs(707, System.currentTimeMillis());
     docs.forEach(doc->logger.info("got "+doc));
-  }
+  }*/
 
   @Test
   public void testImport() {
     DatabaseImpl spanish = getDatabase();
     spanish.setInstallPath("");
     IProjectManagement projectManagement = spanish.getProjectManagement();
-    ImportInfo importFromDomino = projectManagement.getImportFromDomino(5, 707);
+    ImportInfo importFromDomino = projectManagement.getImportFromDomino(5, 707, 0);
     FileUploadHelper fileUploadHelper = projectManagement.getFileUploadHelper();
     fileUploadHelper.rememberExercises(5,importFromDomino);
     ImportInfo exercises = fileUploadHelper.getExercises(5);

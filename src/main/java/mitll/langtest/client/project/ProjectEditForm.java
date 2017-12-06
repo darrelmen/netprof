@@ -312,10 +312,13 @@ public class ProjectEditForm extends UserDialog {
 
     {
       DivWidget typesRow = getHDivLabel(fieldset, HIERARCHY);
-      unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 150, 40);
+
+      unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 150, 40, false);
       unit.setText(info.getFirstType());
 
-      chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 150, 40);
+      // TODO : make these not editable
+
+      chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 150, 40, false);
       chapter.setText(info.getSecondType());
 
       if (isNew) typesRow.setVisible(false);
@@ -327,7 +330,7 @@ public class ProjectEditForm extends UserDialog {
     {
       DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT);
 
-      hydraHost = getName(hDivLabel, info.getHost(), HYDRA_HOST_OPTIONAL, 100, 30);
+      hydraHost = getName(hDivLabel, info.getHost(), HYDRA_HOST_OPTIONAL, 100, 30, true);
       hydraHost.setText(info.getHost());
 
       hydraPort = getHydraPort(hDivLabel, info.getPort());
@@ -522,16 +525,18 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private FormField getName(HasWidgets fieldset, String currentName, String hint) {
-    return getName(fieldset, currentName, hint, 200, 50);
+    return getName(fieldset, currentName, hint, 200, 50, true);
   }
 
-  private FormField getName(HasWidgets fieldset, String currentName, String hint, int width, int maxLength) {
+  private FormField getName(HasWidgets fieldset, String currentName, String hint, int width, int maxLength, boolean isEnabled) {
     FormField userField =
         addControlFormFieldWithPlaceholder(fieldset, false, 3, maxLength, hint);
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("name");
     userField.box.setWidth(width + "px");
+
+    userField.box.setEnabled(isEnabled);
 
     if (currentName != null && !currentName.isEmpty()) {
       userField.box.setText(currentName);

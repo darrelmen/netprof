@@ -21,7 +21,7 @@ public class ImportInfo {
    * @param importProjectInfo
    * @param exercises
    */
-  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
+  ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),
@@ -66,22 +66,9 @@ public class ImportInfo {
   private Date getExportTime() {
     return createTime;
   }
-
   public List<CommonExercise> getExercises() {
     return exercises;
   }
-
-/*
-  public String getLanguage() {
-    return language;
-  }
-*/
-
-/*
-  public mitll.langtest.shared.project.Language getLang() {
-    return lang;
-  }
-*/
 
   /**
    * @return
@@ -89,12 +76,6 @@ public class ImportInfo {
   public int getDominoID() {
     return dominoID;
   }
-
-/*
-  public Date getModifiedTime() {
-    return modifiedTime;
-  }
-*/
 
   public String toString() {
     return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() + " num " + getExercises().size();

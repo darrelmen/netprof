@@ -38,8 +38,6 @@ import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
-import mitll.hlt.domino.server.util.DBProperties;
-import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
@@ -53,7 +51,6 @@ import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
 import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
 import mitll.hlt.domino.shared.model.user.DBUser;
-import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
@@ -82,8 +79,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.hlt.domino.server.ServerInitializationManager.JSON_SERIALIZER;
-import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
 public class ProjectManagement implements IProjectManagement {
@@ -105,6 +100,7 @@ public class ProjectManagement implements IProjectManagement {
   public static final String NUM_ITEMS = "Num Items";
   public static final String CREATOR_ID = "creatorId";
   public static final String DOMINO_ID = "Domino ID";
+  public static final String VOCABULARY = "Vocabulary";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -670,7 +666,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param userWhere
    * @param projid
    * @see DatabaseImpl#setStartupInfo
-   * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
+   * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
@@ -906,18 +902,23 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public ImportInfo getImportFromDomino(int projID, int dominoID) {
+  public ImportInfo getImportFromDomino(int projID, int dominoID, long since) {
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
 
     if (matches.isEmpty()) {
       return null;
     } else {
-      return new DominoExerciseDAO().readExercises(projID, matches.iterator().next(), getDocs(dominoID));
+      DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
+      ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
+
+      return new DominoExerciseDAO()
+          .readExercises(projID, matches.iterator().next(),
+              getChangedDocs(since, dominoAdminUser, next)
+          );
     }
   }
 
   /**
-   *
    * @return
    */
   public List<ImportProjectInfo> getVocabProjects() {
@@ -983,22 +984,21 @@ public class ProjectManagement implements IProjectManagement {
 */
 
   /**
-   * @see #getImportFromDomino
-   * @see #getVocabProjects
    * @return
+   * @see IProjectManagement#getImportFromDomino
+   * @see #getVocabProjects
    */
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfos() {
     FindOptions<ProjectColumn> options = new FindOptions<>();
-    options.addFilter(new FilterDetail<>(ProjectColumn.Skill, "Vocabulary", FilterDetail.Operator.EQ));
-
+    options.addFilter(new FilterDetail<>(ProjectColumn.Skill, VOCABULARY, FilterDetail.Operator.EQ));
     return getImportProjectInfos(options);
   }
 
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfosByID(int id) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
-    options.addFilter(new FilterDetail<>(ProjectColumn.Id, ""+id, FilterDetail.Operator.EQ));
+    options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + id, FilterDetail.Operator.EQ));
     return getImportProjectInfos(options);
   }
 
@@ -1060,7 +1060,7 @@ public class ProjectManagement implements IProjectManagement {
     return imported;
   }
 
-  @Override
+  //@Override
 /*
   public List<ImportDoc> getDocs(int dominoID) {
     List<ImportDoc> docs = new ArrayList<>();
@@ -1105,21 +1105,92 @@ public class ProjectManagement implements IProjectManagement {
   }
 */
 
-  public List<ImportDoc> getDocs(int dominoID) {
-    DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
+  /**
+   * @see #getImportFromDomino
+   */
+//  private ChangedAndDeleted getDocs(int dominoID, long since) {
+//    DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
+//    ClientPMProject next = getClientPMProject(dominoID, db.getUserDAO().getDominoAdminUser());
+//    return getChangedDocs(since, dominoAdminUser, next);
+//  }
+  private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
     List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
 
-    List<ImportDoc> docs = new ArrayList<>();
-    ClientPMProject next = projectDescriptor.iterator().next();
-    List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, new FindOptions<DocumentColumn>());
+    return projectDescriptor.iterator().next();
+  }
 
+  @NotNull
+  private ChangedAndDeleted getChangedDocs(long since, DBUser dominoAdminUser, ClientPMProject next) {
+    long then = System.currentTimeMillis();
+
+    FindOptions<DocumentColumn> options1 = getSince(since);
+
+    List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
+
+    List<ImportDoc> docs = new ArrayList<>();
+    List<ImportDoc> deleted = new ArrayList<>();
     for (HeadDocumentRevision doc : documents1) {
       Integer id1 = doc.getId();
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
       docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
     }
+    long now = System.currentTimeMillis();
+
+    logger.info("getDocs : took " + (now - then) + " to get " + docs.size());
+
+    return new ChangedAndDeleted(docs, deleted);
+  }
+
+  public class ChangedAndDeleted {
+    private List<ImportDoc> changed;
+    private List<ImportDoc> deleted;
+
+    public ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted) {
+      this.changed = changed;
+      this.deleted = deleted;
+    }
+
+    public List<ImportDoc> getChanged() {
+      return changed;
+    }
+
+    public List<ImportDoc> getDeleted() {
+      return deleted;
+    }
+  }
+
+  /*@NotNull
+  private List<ImportDoc> getDeletedDocs(long since, DBUser dominoAdminUser, ClientPMProject next) {
+    long then = System.currentTimeMillis();
+
+    FindOptions<DocumentColumn> options1 = getSince(since);
+    options1.addFilter(new FilterDetail<>());
+
+    List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
+
+    List<ImportDoc> docs = new ArrayList<>();
+    for (HeadDocumentRevision doc : documents1) {
+      Integer id1 = doc.getId();
+      VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
+      docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
+    }
+    long now = System.currentTimeMillis();
+
+    logger.info("getDocs : took " + (now - then) + " to get " + docs.size());
+
     return docs;
+  }
+*/
+
+  @NotNull
+  private FindOptions<DocumentColumn> getSince(long since) {
+    FindOptions<DocumentColumn> options1 = new FindOptions<>();
+
+    SimpleDateFormat original = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    String format = original.format(new Date(since));
+    options1.addFilter(new FilterDetail<>(DocumentColumn.RevisionTime, format, FilterDetail.Operator.GT));
+    return options1;
   }
 }

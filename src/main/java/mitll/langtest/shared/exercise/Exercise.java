@@ -56,7 +56,7 @@ import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
  */
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
-  @Deprecated
+
   protected String oldid = "";
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores = new ArrayList<>();
@@ -534,9 +534,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, List)
+   * @see IUserExerciseDAO#add
    */
-  @Deprecated
+
   public void setOldID(String id) {
     this.oldid = id;
   }
@@ -583,6 +583,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return dominoID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#getExerciseFromVocabularyItem(int, int, int, String, String, String, String)
+   * @param dominoID
+   */
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
+  }
+
   public long getLastChecked() {
     return safeToDecodeLastChecked;
   }
@@ -593,10 +601,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public void setPredef(boolean isPredef) {
     this.isPredef = isPredef;
-  }
-
-  public void setDominoID(int dominoID) {
-    this.dominoID = dominoID;
   }
 
   @Override

@@ -11,13 +11,14 @@ import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
 import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.copy.VocabFactory;
+import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import javax.json.*;
@@ -53,7 +54,8 @@ public class DominoExerciseDAO {
 
   public DominoExerciseDAO() {
     ser = null;
-   }
+  }
+
   /**
    * @param serializer
    */
@@ -100,8 +102,17 @@ public class DominoExerciseDAO {
     return null;
   }
 
+  /**
+   * @param projid
+   * @param projectInfo
+   * @param importDocs
+   * @return
+   * @see IProjectManagement#getImportFromDomino
+   */
   public ImportInfo readExercises(int projid,
-                                  ImportProjectInfo projectInfo, List<ImportDoc> importDocs) {
+                                  ImportProjectInfo projectInfo,
+                                  ProjectManagement.ChangedAndDeleted importDocs
+  ) {
     List<CommonExercise> exercises =
         getCommonExercises(
             projid,
@@ -153,9 +164,9 @@ public class DominoExerciseDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#getImportProjectInfos
    * @param pw
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#getImportProjectInfos
    */
   @NotNull
   public ImportProjectInfo getImportProjectInfoFromWorkflow(ProjectWorkflow pw) {
@@ -168,6 +179,7 @@ public class DominoExerciseDAO {
       unitName = metadata.getShortName();
       MetadataSpecification metadata2 = metadataList.getMetadata(V_CHAPTER);
       chapterName = metadata2.getShortName();
+
 
       if (!unitName.isEmpty()) break;
     }
@@ -214,17 +226,6 @@ public class DominoExerciseDAO {
     return creator1 != null ? creator1.getDocumentDBID() : importUser;
   }
 
-/*  @NotNull
-  private mitll.langtest.shared.project.Language getLanguage(String languageName) {
-    mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
-    try {
-      lang = mitll.langtest.shared.project.Language.valueOf(languageName);
-//        logger.info("Got " + languageName + " " + lang);
-    } catch (IllegalArgumentException e) {
-    }
-    return lang;
-  }*/
-
   @NotNull
   private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName, JsonArray docArr) {
     List<CommonExercise> exercises = new ArrayList<>();
@@ -232,10 +233,23 @@ public class DominoExerciseDAO {
     return exercises;
   }
 
+  /**
+   * @see #readExercises(int, ImportProjectInfo, ProjectManagement.ChangedAndDeleted)
+   * @param projid
+   * @param creator
+   * @param unitName
+   * @param chapterName
+   * @param changedAndDeleted
+   * @return
+   */
   @NotNull
-  private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName, List<ImportDoc> docArr) {
+  private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName,
+                                                  ProjectManagement.ChangedAndDeleted changedAndDeleted
+  ) {
     List<CommonExercise> exercises = new ArrayList<>();
-    docArr.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
+
+    List<ImportDoc> changed = changedAndDeleted.getChanged();
+    changed.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
         creator, unitName, chapterName, docObj.getDocID(), docObj.getTimestamp(),
         docObj.getVocabularyItem()
     )));
@@ -256,7 +270,9 @@ public class DominoExerciseDAO {
 
   private Exercise getExerciseFromVocab(int projid, int creator,
                                         String unitName, String chapterName,
-                                        int docID, long time, VocabularyItem vocabularyItem) {
+                                        int docID,
+                                        long time,
+                                        VocabularyItem vocabularyItem) {
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
@@ -272,10 +288,15 @@ public class DominoExerciseDAO {
       String name = field.getName();
       String displayValue = field.getDisplayValue();
 
-      if (name.startsWith(PREFIX) && !name.equals(V_NP_ID)) {
+      boolean isNPID = name.equals(V_NP_ID);
+      if (name.startsWith(PREFIX) && !isNPID) {
         name = name.substring(2);
 
         addAttribute(unitName, chapterName, name, displayValue, ex);
+      }
+
+      if (isNPID) {
+        ex.setOldID(displayValue);
       }
     }
   }
@@ -358,7 +379,7 @@ public class DominoExerciseDAO {
 
   /**
    * @param projid
-   * @param oldid
+   * @param dominoID
    * @param creatorID
    * @param termVal
    * @param alternateFormVal
@@ -369,7 +390,7 @@ public class DominoExerciseDAO {
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
-                                                 int oldid,
+                                                 int dominoID,
                                                  int creatorID,
                                                  String termVal,
                                                  String alternateFormVal,
@@ -377,7 +398,7 @@ public class DominoExerciseDAO {
                                                  String meaning) {
     String trim = termVal.trim();
     Exercise exercise = new Exercise(-1,
-        "" + oldid,
+        "" + dominoID,
         creatorID,
         meaning.trim(),
         trim,
@@ -392,7 +413,7 @@ public class DominoExerciseDAO {
         0
     );
     exercise.setPredef(true);
-    exercise.setDominoID(oldid);
+    exercise.setDominoID(dominoID);
     return exercise;
   }
 }
