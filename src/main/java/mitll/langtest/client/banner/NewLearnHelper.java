@@ -23,8 +23,6 @@ import java.util.Map;
  * Created by go22670 on 4/5/17.
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private NPFlexSectionExerciseList facetExerciseList;
-
   NewLearnHelper(ExerciseController controller) {
     super(controller);
   }
@@ -50,7 +48,6 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  DivWidget footer) {
         NPFlexSectionExerciseList widgets = new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
             new ListOptions(instanceName), listHeader, footer, FacetExerciseList.FIRST_PAGE_SIZE);
-        facetExerciseList = widgets;
         return widgets;
       }
     };

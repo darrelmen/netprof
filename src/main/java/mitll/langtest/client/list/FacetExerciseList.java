@@ -102,7 +102,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private static final String PAGE_SIZE_HEADER = "View";
 
-  public static final int FIRST_PAGE_SIZE = 5;
+  /**
+   * Smaller on a laptop.
+   */
+  public static final int FIRST_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 
@@ -607,7 +610,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        logger.info("took " + (System.currentTimeMillis()-then)  + " to get lists for user.");
+        logger.info("took " + (System.currentTimeMillis() - then) + " to get lists for user.");
 
         finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
@@ -1007,7 +1010,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       String value = type.equalsIgnoreCase(LISTS) ? "" + newUserListID : key;
       candidate.put(type, value);
 
-    //  logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+      //  logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
   }
@@ -1020,7 +1023,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #addRemoveClickHandler
    */
   private void setHistory(Map<String, String> candidate) {
-    setHistoryItem(getHistoryToken(candidate)+keepSearchItem());
+    setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
   private int reqid = 0;
@@ -1064,7 +1067,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
-            logger.info("took " + (System.currentTimeMillis()-then)  + " to get type to values.");
+            logger.info("took " + (System.currentTimeMillis() - then) + " to get type to values.");
 
             changeSelection(response.getTypesToInclude(), typeToSelection);
             setTypeToSelection(typeToSelection);
@@ -1206,7 +1209,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   *
    * @param typeToSelection
    * @return
    */
@@ -1219,7 +1221,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
     builder.append(getProjectParam());
 
-   // keepSearchItem(builder);
+    // keepSearchItem(builder);
 
     String s = builder.toString();
 
@@ -1233,8 +1235,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     String search = selectionState.getSearch();
     if (!search.isEmpty()) {
       return selectionState.getSearchEntry();
-    }
-    else return "";
+    } else return "";
   }
 
   @NotNull
