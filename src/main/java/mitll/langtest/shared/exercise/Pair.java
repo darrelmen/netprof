@@ -20,7 +20,6 @@ public class Pair implements IsSerializable {
   public String getProperty() {
     return property;
   }
-
   public String getValue() {
     return value;
   }

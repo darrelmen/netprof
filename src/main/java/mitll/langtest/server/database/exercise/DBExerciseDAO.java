@@ -224,10 +224,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
 
-/*    logger.info("attach context " + allNonContextExercises.size());
+    logger.info("attach context " + allNonContextExercises.size());
     logger.info("related        " + related.size());
     logger.info("idToContext    " + idToContext.size());
-    logger.info("idToEx         " + idToEx.size());*/
+    logger.info("idToEx         " + idToEx.size());// + " : " + idToEx.keySet());
 
     for (SlickRelatedExercise relatedExercise : related) {
       CommonExercise root = idToEx.get(relatedExercise.exid());
@@ -239,10 +239,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         } else if (c++ < 2) {
           logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
         }
-      } else if (c++ < SPEW_THRESH) {
-        CommonExercise next = allNonContextExercises.isEmpty()?null: allNonContextExercises.iterator().next();
-        logger.warn("2 " + prefix +
-            " didn't attach " + relatedExercise + "" +
+      } else if (c++ < SPEW_THRESH || c % 100 == 0) {
+        CommonExercise next = allNonContextExercises.isEmpty() ? null : allNonContextExercises.iterator().next();
+        logger.warn("attachContextExercises " + prefix + " exid " + relatedExercise.exid() + " context id " + relatedExercise.contextexid() +
+            // " didn't attach " + relatedExercise + "" +
             " for, e.g. " + next);
       }
     }
@@ -330,9 +330,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
-    for (CommonExercise ex : allExercises) {
-      idToEx.put(ex.getID(), ex);
-    }
+    allExercises.forEach(commonExercise -> idToEx.put(commonExercise.getID(), commonExercise));
     return idToEx;
   }
 

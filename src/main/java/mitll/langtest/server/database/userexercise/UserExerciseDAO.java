@@ -430,6 +430,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
+  public List<SlickExercise> getDeletedFor(int projid) {
+    return null;
+  }
+
+  @Override
   public Collection<CommonExercise> getAllUserExercises(int projid) {
     return getCommonExercises(GET_ALL_SQL);
   }

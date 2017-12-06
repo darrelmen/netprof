@@ -951,6 +951,11 @@ public class SlickUserExerciseDAO
         true);
   }
 
+  @Override
+  public List<SlickExercise> getDeletedFor(int projid) {
+    return dao.getAllPredefDeletedByProject(projid);
+  }
+
   @NotNull
   private List<String> getBaseTypeOrder(Project project) {
     List<String> typeOrder = new ArrayList<>();
@@ -1007,7 +1012,6 @@ public class SlickUserExerciseDAO
    * @param userExercise
    * @param isContext
    * @param typeOrder
-   * @seex UserListManager#editItem
    * @see mitll.langtest.server.services.ProjectServiceImpl#doUpdate
    */
   @Override
@@ -1273,9 +1277,8 @@ public class SlickUserExerciseDAO
     attributeJoinDAOWrapper.removeBulk(joins);
   }
 
-  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
-    return dao.getLegacyToExercise(projectid);
-  }
+  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) { return dao.getLegacyToExercise(projectid);  }
+  public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) { return dao.getLegacyToDeletedExercise(projectid);  }
 
   @Override
   public int getUnknownExerciseID() {

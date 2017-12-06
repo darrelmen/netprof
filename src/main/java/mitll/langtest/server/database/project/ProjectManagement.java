@@ -1013,8 +1013,7 @@ public class ProjectManagement implements IProjectManagement {
     List<ImportProjectInfo> imported = new ArrayList<>();
 
     for (ProjectDescriptor project : projects1) {
-      logger.info("Got " + project);
-
+//      logger.info("Got " + project);
       Date now = project.getCreateTime();
 
       int documentDBID = project.getCreator().getDocumentDBID();

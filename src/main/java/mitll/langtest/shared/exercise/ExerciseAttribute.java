@@ -38,7 +38,7 @@ import java.util.Arrays;
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
- * TODO : should we send this at all?
+ * TODO :redundant with Pair
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 12/12/13
@@ -53,13 +53,17 @@ public class ExerciseAttribute extends Pair {
     super(status, value);
   }
 
+/*
   public void setProperty(String property) {
     this.property = property;
   }
+*/
 
+/*
   public void setValue(String value) {
     this.value = value;
   }
+*/
 
   @Override
   public int hashCode() {
@@ -70,7 +74,7 @@ public class ExerciseAttribute extends Pair {
     if (!(other instanceof ExerciseAttribute)) return false;
     else {
       ExerciseAttribute ea = (ExerciseAttribute) other;
-      return property.equals(ea.property) && value.equals(ea.property);
+      return property.equals(ea.property) && value.equals(ea.value);
     }
   }
 }
