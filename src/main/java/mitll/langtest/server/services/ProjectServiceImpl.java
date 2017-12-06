@@ -207,7 +207,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       if (newProject.getModelsDir().isEmpty()) {
         setDefaultsIfMissing(newProject);
       }
-      return new CreateProject().createProject(db, db, newProject);
+      return new CreateProject(db.getServerProps().getHydra2Languages()).createProject(db, db, newProject);
     } else {
       throw getRestricted(CREATING_PROJECT);
     }
@@ -262,14 +262,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-//      ImportInfo info = db.getProjectManagement().getImport(projectid);
+//      ImportInfo importFromDomino = db.getProjectManagement().getImport(projectid);
 
-//      if (info != null) {
+//      if (importFromDomino != null) {
       Project project = db.getProject(projectid);
 
       int dominoid = project.getProject().dominoid();
-      ImportInfo info = db.getProjectManagement().getImportFromDomino(projectid, dominoid);
-      int jsonDominoID = info.getDominoID();
+      ImportInfo importFromDomino = db.getProjectManagement().getImportFromDomino(projectid, dominoid);
+      int jsonDominoID = importFromDomino.getDominoID();
       if (dominoid != -1 && dominoid != jsonDominoID) {
         logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
         return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
@@ -283,24 +283,54 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
         SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
+        // so on update we have three sets of exercises -
+
+        //  new exercises we haven't seen before,
+        //  ones we have which might have changed and would then need to be updated
+        //  ones that are current but not in domino and have been deleted
+
         List<CommonExercise> newEx = new ArrayList<>();
         List<CommonExercise> updateEx = new ArrayList<>();
 
         Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+        Set<Integer> deleteEx = legacyToEx.values().stream().map(SlickExercise::id).distinct().collect(Collectors.toSet());
 
+        logger.info("existing items " + deleteEx);
         logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
         {
           Set<Integer> current = legacyToEx.keySet();
 
-          for (Map.Entry<Integer, CommonExercise> pair : getDominoIDToExercise(info.getExercises()).entrySet()) {
-            Integer dominoID = pair.getKey();
-            CommonExercise importEx = pair.getValue();
+          Map<Integer, CommonExercise> dominoIDToExercise = getDominoIDToExercise(importFromDomino.getExercises());
 
-            if (current.contains(dominoID)) {
-              updateEx.add(importEx);
-              importEx.getMutable().setID(legacyToEx.get(dominoID).id());
-            } else {
-              newEx.add(importEx);
+          logger.info("importing " +dominoIDToExercise.size() + " exercises");
+
+          for (Map.Entry<Integer, CommonExercise> pair : dominoIDToExercise.entrySet()) {
+            Integer dominoID = pair.getKey();
+            SlickExercise slickExercise = legacyToEx.get(dominoID);
+
+            if (slickExercise != null) {
+              int exID = slickExercise.id();
+              deleteEx.remove(exID);
+
+              CommonExercise importEx = pair.getValue();
+
+              importEx.getDirectlyRelated().forEach(commonExercise -> {
+                int exID2 = legacyToEx.get(commonExercise.getDominoID()).id();
+                if (!deleteEx.remove(exID2)) {
+                  logger.error("couldn't remove " + exID2 + " / domino id ");
+                } else {
+                  logger.info("keep context ex  " + commonExercise.getID() + " '" + commonExercise.getEnglish() + "' = '" + commonExercise.getForeignLanguage() + "'");
+                }
+              });
+              if (current.contains(dominoID)) {
+                updateEx.add(importEx);
+                importEx.getMutable().setID(exID);
+              } else {
+                newEx.add(importEx);
+              }
+            }
+            else {
+              newEx.add(pair.getValue());
             }
           }
         }
@@ -308,15 +338,26 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         {
           Collection<String> typeOrder2 = project.getTypeOrder();
 
-          new ExerciseCopy().addExercises(getImportUser(),
+          // add new
+          logger.info("addPending adding  " + newEx.size() + " new exercises");
+          new ExerciseCopy().addExercises(
+              getImportUser(),
               projectid,
               new HashMap<>(),
-              slickUEDAO, newEx, typeOrder2, new HashMap<>());
+              slickUEDAO,
+              newEx,
+              typeOrder2,
+              new HashMap<>());
 
           // now update...
           // update the exercises...
           logger.info("addPending updating  " + updateEx.size() + " exercises");
-          doUpdate(projectid, getImportUser(), slickUEDAO, updateEx, typeOrder2);
+          doUpdate(projectid, getImportUser(), slickUEDAO, updateEx, typeOrder2, legacyToEx);
+
+          if (!deleteEx.isEmpty()) {
+            logger.info("deleting " + deleteEx.size() + " exercises");
+            db.getUserExerciseDAO().deleteByExID(deleteEx);
+          }
         }
 
         copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
@@ -327,12 +368,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         int i = db.getProjectManagement().configureProject(project, false, true);
         return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
       }
-    }
-// else {
-//      return new DominoUpdateResponse(FAIL, -1, -1, new HashMap<>());
-//    }
-
-    else {
+    } else {
       throw getRestricted("adding pending exercises");
     }
   }
@@ -768,24 +804,27 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
+   * Worry a lot about making sure the exercise attributes are consistent -
+   * <p>
+   * removing stale ones, adding new ones, fixing join table.
+   *
    * @param projectid
    * @param importUser
    * @param slickUEDAO
    * @param updateEx
    * @param typeOrder2
+   * @see #addPending
    */
   private void doUpdate(int projectid,
                         int importUser,
                         SlickUserExerciseDAO slickUEDAO,
                         List<CommonExercise> updateEx,
-                        Collection<String> typeOrder2) {
+                        Collection<String> typeOrder2,
+                        Map<Integer, SlickExercise> legacyToEx) {
     int failed = 0;
 
     Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getIDToPair(projectid);
-    Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
-    for (Map.Entry<Integer, ExerciseAttribute> pair : allByProject.entrySet()) {
-      attrToID.put(pair.getValue(), pair.getKey());
-    }
+    Map<ExerciseAttribute, Integer> attrToID = getAttributeToID(allByProject);
 
     Collection<ExerciseAttribute> allKnownAttributes = new HashSet<>(allByProject.values());
 
@@ -800,8 +839,20 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     List<SlickExerciseAttributeJoin> newJoins = new ArrayList<>();
     List<SlickExerciseAttributeJoin> removeJoins = new ArrayList<>();
 
+    Iterator<String> iterator = typeOrder2.iterator();
+    String first = iterator.hasNext() ? iterator.next() : "";
+    String second = iterator.hasNext() ? iterator.next() : "";
+
     for (CommonExercise toUpdate : updateEx) {
-      if (!slickUEDAO.update(toUpdate, false, typeOrder2)) {
+      SlickExercise currentExercise = legacyToEx.get(toUpdate.getDominoID());
+
+      boolean changed = changed(currentExercise, toUpdate, first, second);
+      if (!changed) {
+        logger.info("Exercise " + currentExercise.id() + " " + currentExercise.english() + " has not changed");
+      }
+
+      if (changed &&
+          !slickUEDAO.update(toUpdate, false, typeOrder2)) {
         logger.warn("doUpdate update failed to update " + toUpdate);
         failed++;
       }
@@ -810,19 +861,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       int updateExerciseID = toUpdate.getID();
       Collection<SlickExerciseAttributeJoin> currentAttributesOnThisExercise = exToAttrs.get(updateExerciseID);
 
-      List<ExerciseAttribute> newAttributes = new ArrayList<>();
       // import attributes are either known or unknown...
       // after reading in the exercise, it has a set of attributes, some of which may already be in the database...
       List<ExerciseAttribute> updateAttributes = toUpdate.getAttributes();
       logger.info("doUpdate exercise " + toUpdate.getID() + " has " + updateAttributes.size() + " attributes");
-      for (ExerciseAttribute updateAttr : updateAttributes) {
-        logger.info("doUpdate examine " + updateExerciseID + " : " + updateAttr);
-        if (allKnownAttributes.contains(updateAttr)) {
-          //  knownAttributes.add(updateAttr);
-        } else {
-          newAttributes.add(updateAttr);
-        }
-      }
+
+      List<ExerciseAttribute> newAttributes = getNewAttributes(allKnownAttributes, updateAttributes);
 
       // first, figure out which are new attributes (no join yet) and store them so we can join/reference to them
       // store and remember the new ones
@@ -831,13 +875,19 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       // for join set, some are on there already, some need to be added, some need to be removed
 
-      Set<Integer> attributeIDsOnExercise = updateAttributes.stream().map(attrToID::get).collect(Collectors.toCollection(HashSet::new));
+      Set<Integer> attributeIDsOnExercise = updateAttributes
+          .stream()
+          .map(attrToID::get)
+          .collect(Collectors.toCollection(HashSet::new));
 
       if (currentAttributesOnThisExercise == null) { // none on there yet, add all
         makeNewAttrJoins(importUser, modified, newJoins, updateExerciseID, attributeIDsOnExercise);
       } else {
         // figure out new set
-        Set<Integer> currentSet = currentAttributesOnThisExercise.stream().map(SlickExerciseAttributeJoin::attrid).collect(Collectors.toCollection(HashSet::new));
+        Set<Integer> currentSet = currentAttributesOnThisExercise
+            .stream()
+            .map(SlickExerciseAttributeJoin::attrid)
+            .collect(Collectors.toCollection(HashSet::new));
 
         Set<Integer> newIDs = new HashSet<>(attributeIDsOnExercise);
         newIDs.removeAll(currentSet);
@@ -852,14 +902,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         logger.info("doUpdate db set " + currentSet);
         logger.info("doUpdate attributeIDsOnExercise " + attributeIDsOnExercise);
         currentSet.removeAll(attributeIDsOnExercise);
-        logger.info("doUpdate after - items to remove " + currentSet);
 
-        // only remove ones that stale - not on there...
-        for (SlickExerciseAttributeJoin current : currentAttributesOnThisExercise) {
-          if (currentSet.contains(current.attrid())) {
-            removeJoins.add(current);
-            logger.info("doUpdate removing " + current);
-          }
+        if (!currentSet.isEmpty()) {
+          logger.info("doUpdate after - items to remove " + currentSet);
+          // only remove ones that stale - not on there...
+          addRemoveJoins(removeJoins, currentAttributesOnThisExercise, currentSet);
         }
       }
 
@@ -867,11 +914,59 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       // compare new attributes to known...
     }
 
-    logger.info("doUpdate now " + newJoins.size() + " and remove " + removeJoins.size());
+    logger.info("doUpdate now " + newJoins.size() + " attributes and remove " + removeJoins.size());
     slickUEDAO.addBulkAttributeJoins(newJoins);
     slickUEDAO.removeBulkAttributeJoins(removeJoins);
     if (failed > 0)
       logger.warn("\n\n\n\ndoUpdate somehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
+  }
+
+  private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
+    String currentUnit = toUpdate.getUnitToValue().get(first);
+    String currentChapter = toUpdate.getUnitToValue().get(second);
+    return
+        !currentExercise.english().equals(toUpdate.getEnglish()) ||
+            !currentExercise.foreignlanguage().equals(toUpdate.getForeignLanguage()) ||
+            !currentExercise.meaning().equals(toUpdate.getMeaning()) ||
+            !currentExercise.altfl().equals(toUpdate.getAltFL()) ||
+            !currentExercise.transliteration().equals(toUpdate.getTransliteration()) ||
+            (currentUnit != null && !currentExercise.unit().equals(currentUnit)) ||
+            (currentChapter != null && !currentExercise.lesson().equals(currentChapter))
+        ;
+  }
+
+  private void addRemoveJoins(List<SlickExerciseAttributeJoin> removeJoins, Collection<SlickExerciseAttributeJoin> currentAttributesOnThisExercise, Set<Integer> currentSet) {
+    for (SlickExerciseAttributeJoin current : currentAttributesOnThisExercise) {
+      if (currentSet.contains(current.attrid())) {
+        removeJoins.add(current);
+        logger.info("doUpdate removing " + current);
+      }
+    }
+  }
+
+  @NotNull
+  private List<ExerciseAttribute> getNewAttributes(Collection<ExerciseAttribute> allKnownAttributes,
+                                                   //         int updateExerciseID,
+                                                   List<ExerciseAttribute> updateAttributes) {
+    List<ExerciseAttribute> newAttributes = new ArrayList<>();
+    for (ExerciseAttribute updateAttr : updateAttributes) {
+      //logger.info("doUpdate examine " + updateExerciseID + " : " + updateAttr);
+      if (allKnownAttributes.contains(updateAttr)) {
+        //  knownAttributes.add(updateAttr);
+      } else {
+        newAttributes.add(updateAttr);
+      }
+    }
+    return newAttributes;
+  }
+
+  @NotNull
+  private Map<ExerciseAttribute, Integer> getAttributeToID(Map<Integer, ExerciseAttribute> allByProject) {
+    Map<ExerciseAttribute, Integer> attrToID = new HashMap<>();
+    for (Map.Entry<Integer, ExerciseAttribute> pair : allByProject.entrySet()) {
+      attrToID.put(pair.getValue(), pair.getKey());
+    }
+    return attrToID;
   }
 
   private void makeNewAttrJoins(int importUser,

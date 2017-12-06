@@ -290,6 +290,8 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
+   * Paul said to do this:
+   *
    * sox audio-in audio-out silence 1 0.01 -90d gain -3 highpass 80.0
    *
    * @param pathToAudioFile

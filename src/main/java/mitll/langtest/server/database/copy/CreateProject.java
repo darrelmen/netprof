@@ -20,7 +20,11 @@ import static mitll.langtest.server.ServerProperties.H2_HOST;
 public class CreateProject {
   private static final Logger logger = LogManager.getLogger(CreateProject.class);
   public static final String MODEL_PROPERTY_TYPE = "model";
+  private final Set<String> h2Languages;
 
+  public CreateProject(Set<String> h2Languages) {
+    this.h2Languages = h2Languages;
+  }
   /**
    * JUST FOR IMPORT FROM LEGACY h2 database language.
    *
@@ -169,7 +173,7 @@ public class CreateProject {
   }
 
   private void addDefaultHostProperty(String language, IProjectDAO projectDAO, int projectID) {
-    if (ServerProperties.H2_LANGAUGES.contains(language.toLowerCase())) {
+    if (h2Languages.contains(language.toLowerCase())) {
       String h2Host = H2_HOST;
       logger.info("createProject: setting hydra host to " + h2Host);
       projectDAO.addProperty(projectID, Project.WEBSERVICE_HOST, h2Host, MODEL_PROPERTY_TYPE, "");

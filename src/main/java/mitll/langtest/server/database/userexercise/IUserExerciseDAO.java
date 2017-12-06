@@ -82,6 +82,8 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids);
 
+  void deleteByExID(Collection<Integer> exids);
+
   boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);

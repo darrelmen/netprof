@@ -53,12 +53,12 @@ public class ExerciseAttribute extends Pair {
     super(status, value);
   }
 
-  public void setValue(String value) {
-    this.value = value;
-  }
-
   public void setProperty(String property) {
     this.property = property;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
   }
 
   @Override

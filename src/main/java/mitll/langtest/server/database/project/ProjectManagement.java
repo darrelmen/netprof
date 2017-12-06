@@ -104,6 +104,7 @@ public class ProjectManagement implements IProjectManagement {
   public static final String MODIFIED = "Modified";
   public static final String NUM_ITEMS = "Num Items";
   public static final String CREATOR_ID = "creatorId";
+  public static final String DOMINO_ID = "Domino ID";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -818,8 +819,10 @@ public class ProjectManagement implements IProjectManagement {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());
+//      logger.info("got " + exercises.size() + " ex for project #" + project.id());
+      //info.put("# context", "" + exercises.size());
       if (project.dominoid() > 0) {
-        info.put("Domino ID", "" + project.dominoid());
+        info.put(DOMINO_ID, "" + project.dominoid());
       }
     }
 

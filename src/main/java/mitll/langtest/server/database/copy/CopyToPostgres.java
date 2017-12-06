@@ -119,7 +119,7 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tmodel" + databaseLight.getServerProps().getCurrentModel());
 
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      copyToPostgres.copyOneConfig(databaseLight, new CreateProject().getCC(language), nameToUse, displayOrder, !hasModel);
+      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, !hasModel);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -129,6 +129,11 @@ public class CopyToPostgres<T extends CommonShell> {
         databaseLight.close();
       }
     }
+  }
+
+  @NotNull
+  private CreateProject getCreateProject(DatabaseImpl databaseLight) {
+    return new CreateProject(databaseLight.getServerProps().getHydra2Languages());
   }
 
   private void dropOneConfig(String config) {
@@ -359,7 +364,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                        int displayOrder,
                                        boolean isDev,
                                        Collection<String> typeOrder) {
-    return new CreateProject()
+    return getCreateProject(db)
         .createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder);
   }
 

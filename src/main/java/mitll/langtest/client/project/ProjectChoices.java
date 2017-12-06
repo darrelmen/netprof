@@ -508,7 +508,7 @@ public class ProjectChoices {
   }
 
   private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
-    Set<String> typeOrder = new HashSet<>(Arrays.asList(COURSE));
+    Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
         new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
@@ -643,9 +643,12 @@ public class ProjectChoices {
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
-    w.setIcon(IconType.UPLOAD);
+    w.setIcon(IconType.EXCHANGE);
     //  w.addClickHandler(event -> showImportDialog(projectForLang));
-    w.addClickHandler(event -> showImportDialog(projectForLang));
+    w.addClickHandler(event -> {
+      w.setEnabled(false);
+      showImportDialog(projectForLang, w);
+    });
     return w;
   }
 
@@ -663,7 +666,6 @@ public class ProjectChoices {
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
-
         projectEditForm.updateProject();
         showProjectStatus(projectForLang, label);
         return true;
@@ -680,49 +682,52 @@ public class ProjectChoices {
         550);
   }
 
-  private void showImportDialog(SlimProject projectForLang) {
+  private void showImportDialog(SlimProject projectForLang, Button button) {
 //    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
 //      @Override
 //      public boolean gotYes() {
-        projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("add pending exercises to project", caught);
+    projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+        button.setEnabled(true);
+        controller.handleNonFatalError("add pending exercises to project", caught);
+      }
+
+      @Override
+      public void onSuccess(DominoUpdateResponse result) {
+        button.setEnabled(true);
+        DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
+        if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
+          projectForLang.getProps().putAll(result.getProps());
+          new ModalInfoDialog("Success", "Sync with domino complete!");
+
+        } else {
+          String title = "";
+          String message = "";
+
+          switch (status) {
+            case FAIL:
+              title = "Import failed";
+              message = "Server error importing items - please report.";
+              break;
+            case WRONG_PROJECT:
+              title = "Wrong domino project";
+              message = "Upload data is from domino project #" + result.getDominoID() +
+                  " but this project is for #" + result.getCurrentDominoID() +
+                  ".<br/>You probably want to make a new NetProF project and add it to there.";
+              break;
+            case ANOTHER_PROJECT:
+              title = "Another domino project";
+              message = "Upload data is from domino project #" + result.getDominoID() +
+                  ", which is already associated with the " + result.getMessage() + " project." +
+                  "<br/>You probably want to add it to there.";
+              break;
           }
-
-          @Override
-          public void onSuccess(DominoUpdateResponse result) {
-            DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
-            if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
-              projectForLang.getProps().putAll(result.getProps());
-              new ModalInfoDialog("Success", "Sync with domino complete!");
-
-            } else {
-              String title = "";
-              String message = "";
-
-              switch (status) {
-                case FAIL:
-                  title = "Import failed";
-                  message = "Server error importing items - please report.";
-                  break;
-                case WRONG_PROJECT:
-                  title = "Wrong domino project";
-                  message = "Upload data is from domino project #" + result.getDominoID() +
-                      " but this project is for #" + result.getCurrentDominoID() +
-                      ".<br/>You probably want to make a new NetProF project and add it to there.";
-                  break;
-                case ANOTHER_PROJECT:
-                  title = "Another domino project";
-                  message = "Upload data is from domino project #" + result.getDominoID() +
-                      ", which is already associated with the " + result.getMessage() + " project." +
-                      "<br/>You probably want to add it to there.";
-                  break;
-              }
-              new ModalInfoDialog(title, message);
-            }
-          }
-        });
+          new ModalInfoDialog(title, message);
+        }
+      }
+    });
 /*
     new DialogHelper(true).show(
         IMPORT_DATA_INTO + projectForLang.getName(),

@@ -17,6 +17,19 @@ public class ImportInfo {
   private final int dominoID;
 
   /**
+   *
+   * @param importProjectInfo
+   * @param exercises
+   */
+  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
+    this(
+        importProjectInfo.getDominoProjectID(),
+        importProjectInfo.getLanguage(),
+        importProjectInfo.getCreateDate(),
+        exercises);
+  }
+
+  /**
    * @param dominoID
    * @param language
    * @param exportTime
@@ -37,14 +50,6 @@ public class ImportInfo {
     this.language = language;
     this.lang = getLanguage(language);
     this.dominoID = dominoID;
-  }
-
-  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
-    this(
-        importProjectInfo.getDominoProjectID(),
-        importProjectInfo.getLanguage(),
-        importProjectInfo.getCreateDate(),
-        exercises);
   }
 
   @NotNull

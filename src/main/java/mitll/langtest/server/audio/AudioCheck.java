@@ -33,6 +33,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +43,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Checks for two things -- is the audio long enough ({@link #MinRecordLength} and is
@@ -68,7 +70,7 @@ public class AudioCheck {
 
   private static final short clippedThreshold = 32704; // 32768-64
   private static final short clippedThresholdMinus = -32704; // 32768-64
-  private static final short ct = 32112;
+  //private static final short ct = 32112;
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
@@ -81,6 +83,11 @@ public class AudioCheck {
   private final float FORGIVING_MIN_DNR = 18F;
   boolean trimAudio;
 
+  /**
+   *
+   * @param trimAudio
+   * @param minDynamicRange
+   */
   public AudioCheck(boolean trimAudio, int minDynamicRange) {
     //  this.props = props;
     this.trimAudio = trimAudio;
@@ -185,12 +192,21 @@ public class AudioCheck {
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
 
+/*
   public boolean hasValidDynamicRange(File file) {
     return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;
   }
+*/
 
+  /**
+   * @see #addDynamicRange
+   * @see #getDNR
+   * @param file
+   * @return
+   */
   private DynamicRange.RMSInfo getDynamicRange(File file) {
-    String highPassFilterFile = new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE).getHighPassFilterFile(file.getAbsolutePath());
+    String highPassFilterFile = new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE)
+        .getHighPassFilterFile(file.getAbsolutePath());
     if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
     else {
       File highPass = new File(highPassFilterFile);
@@ -329,6 +345,10 @@ public class AudioCheck {
     return INVALID_AUDIO;
   }
 
+  /**
+   * @see mitll.langtest.server.decoder.RefResultDecoder#decodeOneExercise
+   * @return
+   */
   public float getMinDNR() {
     return FORGIVING_MIN_DNR;
   }

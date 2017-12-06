@@ -308,12 +308,12 @@ public class PostgresTest extends BaseTest {
     CopyToPostgres cp = new CopyToPostgres();
     try {
       for (Info config : infos) {
-        String cc = new CreateProject().getCC(config.language);
-        long then = System.currentTimeMillis();
-        logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
-
         //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
         DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
+
+        String cc = new CreateProject(databaseLight.getServerProps().getHydra2Languages()).getCC(config.language);
+        long then = System.currentTimeMillis();
+        logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
         logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
 

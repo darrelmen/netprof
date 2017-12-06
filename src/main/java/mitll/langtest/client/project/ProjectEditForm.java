@@ -6,11 +6,8 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,9 +35,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
+  private final Logger logger = Logger.getLogger("ProjectEditForm");
+
   public static final String DOMINO_PROJECT = "Domino";
   public static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
-  private final Logger logger = Logger.getLogger("ProjectEditForm");
+  public static final String PLEASE_WAIT = "Please wait...";
+  public static final String ALIGN_REF_AUDIO = "Align ref audio";
+  public static final String CHECK_AUDIO = "Check Audio";
 
   public static final String ID = "ID";
   public static final String DOMINO_ID = "Domino ID";
@@ -82,7 +84,6 @@ public class ProjectEditForm extends UserDialog {
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
-//  private boolean isNew = false;
 
   /**
    * @param lifecycleSupport
@@ -151,6 +152,10 @@ public class ProjectEditForm extends UserDialog {
 
     if (id != null) {
       info.setDominoID(id.getDominoID());
+      logger.info(" project domino id now " +id.getDominoID());
+    }
+    else {
+      logger.info("no project for " +dominoProjects.getSelectedValue());
     }
 
     setCommonFields();
@@ -217,7 +222,7 @@ public class ProjectEditForm extends UserDialog {
 
   boolean isValid() {
     if (nameField.getSafeText().isEmpty()) {
-      markErrorNoGrabRight(nameField, "Please enter a project name.");
+      markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
       return false;
     } else if (language.getValue().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE)) {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
@@ -245,7 +250,7 @@ public class ProjectEditForm extends UserDialog {
     }
 
 
-    logger.info("domino id is "+info.getDominoID());
+    logger.info("domino id is " + info.getDominoID());
 /*    info.setName(nameField.getSafeText());
     info.setCourse(course.getSafeText());
     info.setFirstType(unit.getSafeText());
@@ -297,8 +302,8 @@ public class ProjectEditForm extends UserDialog {
 
     addLanguage(info, fieldset, isNew);
 
-   // if (isNew) {
-      addDominoProject(info, fieldset, isNew);
+    // if (isNew) {
+    addDominoProject(info, fieldset, isNew);
     //}
     {
       course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
@@ -372,7 +377,7 @@ public class ProjectEditForm extends UserDialog {
     return lifecycle;
   }
 
-  Map<String, DominoProject> dominoToProject = new HashMap<>();
+  private Map<String, DominoProject> dominoToProject = new HashMap<>();
 
   /**
    * @param info
@@ -437,21 +442,18 @@ public class ProjectEditForm extends UserDialog {
 
     this.dominoProjects = new ListBox();
     this.dominoProjects.addStyleName("leftTenMargin");
-    // ListBox outer = dominoProjects;
+
+    ListBox outer = dominoProjects;
     name.add(this.dominoProjects);
+
+    dominoProjects.addChangeHandler(event -> {
+      String selectedValue = dominoProjects.getSelectedValue();
+      setUnitAndChapter(selectedValue, dominoToProject.get(selectedValue));
+    });
 
     if (isNew) {
       this.dominoProjects.addItem(PLEASE_SELECT_A_DOMINO);
-    }
-    dominoProjects.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        String selectedValue = dominoProjects.getSelectedValue();
-        DominoProject dominoProject = dominoToProject.get(selectedValue);
-        setUnitAndChapter(selectedValue, dominoProject);
-      }
-    });
-/*    else {
+    } else {
       projectServiceAsync.getDominoForLanguage(info.getLanguage(), new AsyncCallback<List<DominoProject>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -465,12 +467,20 @@ public class ProjectEditForm extends UserDialog {
           result.forEach(dominoProject -> {
             String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
             dominoProjects.addItem(item);
-            dominoToID.put(item, dominoProject.getDominoID());
-            outer.setItemSelected(dominoToID.size() - 1, true);
+            dominoToProject.put(item, dominoProject);
+            if (info.getDominoID() == dominoProject.getDominoID()) {
+              outer.setItemSelected(dominoProjects.getItemCount() - 1, true);
+            }
           });
+
+          if (dominoToProject.size() == 1) {
+            if (info.getDominoID() == -1) {
+
+            }
+          }
         }
       });
-    }*/
+    }
 
  /*
     for (Language value : Language.values()) {
@@ -587,15 +597,17 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private Button getCheckAudio(final ProjectInfo info) {
-    Button w = new Button("Check Audio", IconType.STETHOSCOPE);
-    w.addClickHandler(event -> {
-      w.setEnabled(false);
-      feedback.setText("Please wait...");
-      // logger.info("check audio for " + info);
-      checkAudio(info, w);
-    });
+    Button w = new Button(CHECK_AUDIO, IconType.STETHOSCOPE);
+    w.addClickHandler(event -> clickCheckAudio(info, w));
     w.addStyleName("bottomFiveMargin");
     return w;
+  }
+
+  private void clickCheckAudio(ProjectInfo info, Button w) {
+    w.setEnabled(false);
+    feedback.setText(PLEASE_WAIT);
+    // logger.info("check audio for " + info);
+    checkAudio(info, w);
   }
 
   private void checkAudio(ProjectInfo info, Button w) {
@@ -620,18 +632,20 @@ public class ProjectEditForm extends UserDialog {
    * @see #getFields(ProjectInfo, boolean)
    */
   private Button getRecalcRefAudio(final ProjectInfo info) {
-    final Button w = new Button("Align ref audio", IconType.STETHOSCOPE);
+    final Button w = new Button(ALIGN_REF_AUDIO, IconType.STETHOSCOPE);
 
-    w.addClickHandler(event -> {
-      w.setEnabled(false);
-      feedback.setText("Please wait...");
-      recalcRefAudio(info, w);
-    });
+    w.addClickHandler(event -> clickRecalc(info, w));
 
     w.addStyleName("leftFiveMargin");
     w.addStyleName("bottomFiveMargin");
 
     return w;
+  }
+
+  private void clickRecalc(ProjectInfo info, Button w) {
+    w.setEnabled(false);
+    feedback.setText(PLEASE_WAIT);
+    recalcRefAudio(info, w);
   }
 
   private void recalcRefAudio(ProjectInfo info, Button w) {

@@ -70,6 +70,7 @@ public class DominoExerciseDAO {
    * @param importUser  who is doing the importing - marked as the creator of the exercises
    * @return
    * @see mitll.langtest.server.FileUploadHelper#readJSON
+   * @deprecated
    */
   public ImportInfo readExercises(String file, InputStream inputStream, int projid, int importUser) {
     try {

@@ -485,6 +485,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return getCommonExercises(sql);
   }
 
+  @Override
+  public void deleteByExID(Collection<Integer> exids) {
+
+  }
+
   private String getIds(Collection<Integer> exids) {
     StringBuilder builder = new StringBuilder();
     for (Integer id : exids) builder.append("'" + id + "'").append(",");

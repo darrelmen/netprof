@@ -3,8 +3,8 @@ package mitll.langtest.shared.project;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class DominoProject implements IsSerializable {
-  protected String firstType = "";
-  protected String secondType = "";
+  String firstType = "";
+  String secondType = "";
   private String name = "";
   private int dominoID;
 

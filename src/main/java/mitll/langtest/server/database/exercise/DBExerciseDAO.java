@@ -144,7 +144,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * Does join with related exercise table - maybe better way to do this in scala side?
    *
    * @return
-   * @see #getRawExercises()
+   * @see #getRawExercises
    */
   @Override
   List<CommonExercise> readExercises() {

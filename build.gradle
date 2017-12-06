@@ -75,7 +75,13 @@ dependencies {
 
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
 
-    compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
+    //compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
+
+    compile('mitll.hlt:domino:' + dominoVers) {
+        changing = true
+        transitive = true
+        artifact { name = 'domino'; type = 'jar'; extension='jar'}
+    }
 
     //mymodule 'mitll.hlt:domino:2.7-SNAPSHOT'
    // compile('mitll.hlt:domino:domino' + dominoVers + "@jar") { changing = true; }

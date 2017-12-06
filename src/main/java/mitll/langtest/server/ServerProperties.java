@@ -82,7 +82,13 @@ public class ServerProperties {
    * JkMount /netprof/answers/korean/* h2
    * JkMount /netprof/audioimages/korean/* h2
    */
-  public static final Set<String> H2_LANGAUGES = new HashSet<>(Arrays.asList("korean", "levantine", "msa", "russian"));
+  // public static final Set<String> H2_LANGAUGES = new HashSet<>(Arrays.asList("korean", "levantine", "msa", "russian"));
+
+  /**
+   * Languages on the hydra2 server.
+   */
+  private static final String HYDRA_2_LANGUAGES = "hydra2Languages";
+  private static final String HYDRA_2_LANGUAGES_DEFAULT = "korean,levantine,msa,russian";
 
   /**
    * Going forward we might have more hydra hosts to handle more load, or a different partition of languages.
@@ -94,11 +100,15 @@ public class ServerProperties {
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";
-/*
+
+  /*
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
 */
 
+  /**
+   * Mira stuff... mostly kinda dead
+   */
   @Deprecated
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
   @Deprecated
@@ -109,6 +119,11 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   @Deprecated
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+  public static final String MAIL_SERVER = "mail.server";
+  public static final String SERVER_NAME = "SERVER_NAME";
+  public static final String DEBUG_ONE_PROJECT = "debugOneProject";
+  @Deprecated
+  private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_H_2 = "useH2";
@@ -118,6 +133,7 @@ public class ServerProperties {
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
+
   /**
    * @see #useProperties
    */
@@ -127,13 +143,13 @@ public class ServerProperties {
   private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
   private static final String RELEASE_DATE = "releaseDate";
-  public static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
-
-  @Deprecated
-  private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
-
+  private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
   private static final String NP_SERVER = "netprof.ll.mit.edu";
+
+  /**
+   * For development, from a laptop.
+   */
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
@@ -165,7 +181,7 @@ public class ServerProperties {
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
-  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
@@ -197,6 +213,8 @@ public class ServerProperties {
   private boolean quietAudioOK;
 
   /**
+   * TODO : revisit
+   *
    * @deprecated - need preferred voices per project...
    */
   private final Set<Integer> preferredVoices = new HashSet<>();
@@ -406,6 +424,7 @@ public class ServerProperties {
 
   /**
    * Choose a server to do work, like generate the weekly report.
+   *
    * @return
    */
   public boolean isFirstHydra() {
@@ -617,11 +636,11 @@ public class ServerProperties {
    *
    * @return
    */
-  @Deprecated
+ /* @Deprecated
   public boolean shouldDropRefResult() {
     return getDefaultFalse("dropRefResultTable");
   }
-
+*/
 
   public Map<String, String> getPhoneToDisplay() {
     return phoneToDisplay;
@@ -640,7 +659,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see DatabaseImpl#getContextPractice()
+   * @see DatabaseImpl#getContextPractice
    * @deprecated
    */
   public String getDialogFile() {
@@ -768,6 +787,11 @@ public class ServerProperties {
     return props.getProperty("miraFlavor", getLanguage().toLowerCase() + "-amas3");
   }
 
+  /**
+   * H2 database NOT hydra2
+   *
+   * @return
+   */
   public boolean useH2() {
     return getDefaultFalse(USE_H_2);
   }
@@ -782,7 +806,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO(IAudioDAO, int)
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    */
   public boolean doAudioFileExistsCheck() {
     return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS);
@@ -791,8 +815,9 @@ public class ServerProperties {
   public boolean doAudioChecksInProduction() {
     return getDefaultTrue(DO_AUDIO_CHECKS_IN_PRODUCTION);
   }
+
   public boolean debugOneProject() {
-    return getDefaultFalse("debugOneProject");
+    return getDefaultFalse(DEBUG_ONE_PROJECT);
   }
 
   public int getSleepBetweenDecodes() {
@@ -852,10 +877,11 @@ public class ServerProperties {
    * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
    */
   public String getNPServer() {
-    return props.getProperty("SERVER_NAME", NP_SERVER);
+    return props.getProperty(SERVER_NAME, NP_SERVER);
   }
+
   public String getMailServer() {
-    return props.getProperty("mail.server", LLMAIL_LL_MIT_EDU);
+    return props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU);
   }
 
   /**
@@ -896,5 +922,8 @@ public class ServerProperties {
     return getPropertyMap(uiprops);
   }
 
-
+  public Set<String> getHydra2Languages() {
+    String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT);
+    return new HashSet<>(Arrays.asList(property.split(",")));
+  }
 }

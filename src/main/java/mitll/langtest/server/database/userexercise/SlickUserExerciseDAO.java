@@ -996,9 +996,10 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
-    return getUserExercises(dao.byIDs(exids));
-  }
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids) { return getUserExercises(dao.byIDs(exids));  }
+
+
+  public void deleteByExID(Collection<Integer> exids) {  dao.deleteByIDs(exids);  }
 
   /**
    * TODOx : Why so complicated?

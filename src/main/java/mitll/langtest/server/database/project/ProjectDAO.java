@@ -128,7 +128,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     String countryCode = projectInfo.getCountryCode();
 
-    String ccFromLang = new CreateProject().getCC(projectInfo.getLanguage());
+    String ccFromLang = new CreateProject(database.getServerProps().getHydra2Languages()).getCC(projectInfo.getLanguage());
     if (!ccFromLang.equals(countryCode)) {
       logger.warn("update : setting country code to " + countryCode +
           " to be consistent with the language " + projectInfo.getLanguage());
@@ -149,7 +149,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         projectInfo.getSecondType(),
         countryCode,
         project.ltsClass(),
-        project.dominoid(),
+        projectInfo.getDominoID(),
         projectInfo.getDisplayOrder()
     );
     boolean didChange = easyUpdate(changed);
