@@ -240,8 +240,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
         }
       } else if (c++ < SPEW_THRESH) {
-        logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
-            " for, e.g. " + allNonContextExercises.iterator().next());
+        CommonExercise next = allNonContextExercises.isEmpty()?null: allNonContextExercises.iterator().next();
+        logger.warn("2 " + prefix +
+            " didn't attach " + relatedExercise + "" +
+            " for, e.g. " + next);
       }
     }
 //    logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);

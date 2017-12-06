@@ -295,7 +295,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
         Set<Integer> deleteEx = legacyToEx.values().stream().map(SlickExercise::id).distinct().collect(Collectors.toSet());
 
-        logger.info("existing items " + deleteEx);
+//        logger.info("existing items " + deleteEx);
         logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
         {
           Set<Integer> current = legacyToEx.keySet();
@@ -319,7 +319,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                 if (!deleteEx.remove(exID2)) {
                   logger.error("couldn't remove " + exID2 + " / domino id ");
                 } else {
-                  logger.info("keep context ex  " + commonExercise.getID() + " '" + commonExercise.getEnglish() + "' = '" + commonExercise.getForeignLanguage() + "'");
+  //                logger.info("keep context ex  " + commonExercise.getID() + " '" + commonExercise.getEnglish() + "' = '" + commonExercise.getForeignLanguage() + "'");
                 }
               });
               if (current.contains(dominoID)) {
