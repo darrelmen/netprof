@@ -137,6 +137,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     SlickProject changed = new SlickProject(projid,
         userid,
         created,
+        created,
         now,
         projectInfo.getName(),
         projectInfo.getLanguage(),
@@ -333,6 +334,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.insert(new SlickProject(
         -1,
         userid,
+        created,
         created,
         created,
         name,

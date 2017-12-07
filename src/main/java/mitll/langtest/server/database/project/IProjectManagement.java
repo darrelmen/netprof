@@ -112,7 +112,7 @@ public interface IProjectManagement {
    * @param since
    * @return
    */
-  ImportInfo getImportFromDomino(int projID, int dominoID, long since);
+  ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC);
 
   List<ImportProjectInfo> getVocabProjects();
 

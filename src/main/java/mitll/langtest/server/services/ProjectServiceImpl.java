@@ -61,6 +61,9 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -80,6 +83,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
   public static final boolean DEBUG = false;
+  public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 //  private Mongo pool;
 //  private JSONSerializer serializer;
 
@@ -264,17 +268,17 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
     long requestTime = System.currentTimeMillis();
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-//      ImportInfo importFromDomino = db.getProjectManagement().getImport(projectid);
-
-//      if (importFromDomino != null) {
       Project project = db.getProject(projectid);
-
       int dominoid = project.getProject().dominoid();
-      Timestamp modified = project.getProject().modified();
-      long since = modified.getTime();
-      logger.info("addPending getting changes since " + new Date(modified.getTime()));
+      Timestamp modified = project.getProject().lastimport();
 
-      ImportInfo importFromDomino = db.getProjectManagement().getImportFromDomino(projectid, dominoid, since);
+      ZonedDateTime zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
+
+      String sinceInUTC = zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
+
+      logger.info("addPending getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
+
+      ImportInfo importFromDomino = db.getProjectManagement().getImportFromDomino(projectid, dominoid, sinceInUTC);
       int jsonDominoID = importFromDomino.getDominoID();
       if (dominoid != -1 && dominoid != jsonDominoID) {
         logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
@@ -463,7 +467,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       project1.updateDominoID(jsonDominoID);
     }
 
-    project1.updateModified(requestTime);
+    project1.updateLastImport(requestTime);
     getProjectDAO().easyUpdate(project1);
     logger.info("update modified time for project #" + project1.id());
   }

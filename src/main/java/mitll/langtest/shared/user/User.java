@@ -89,13 +89,9 @@ public class User extends MiniUser implements ReportUser {
    */
   public static Collection<Permission> getInitialPermsForRole(Kind role) {
     switch (role) {
-      case STUDENT:
-        return Collections.emptyList();
-      case TEACHER:
-        return Collections.singletonList(TEACHER_PERM);
-      case AUDIO_RECORDER:
-        return Collections.singleton(
-            RECORD_AUDIO);
+      case STUDENT: return Collections.emptyList();
+      case TEACHER: return Collections.singletonList(TEACHER_PERM);
+      case AUDIO_RECORDER: return Collections.singleton(RECORD_AUDIO);
       case QAQC:
       case CONTENT_DEVELOPER:
         return Arrays.asList(

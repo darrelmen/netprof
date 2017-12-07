@@ -74,6 +74,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -118,8 +119,6 @@ public class ProjectManagement implements IProjectManagement {
   public static final String NAME = "name";
   public static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
-//  private Mongo pool;
-//  private JSONSerializer serializer;
 
   private ProjectServiceDelegate projectDelegate;
 
@@ -142,14 +141,6 @@ public class ProjectManagement implements IProjectManagement {
     this.debugOne = properties.debugOneProject();
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
-
-//    pool = servletContext != null ? (Mongo) servletContext.getAttribute(MONGO_ATT_NAME) : null;
-//    serializer = servletContext != null ? (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER) : null;
-//
-//    if (pool == null) {
-//      pool = Mongo.createPool(new DBProperties(db.getServerProps().getProps()));
-//      serializer = Mongo.makeSerializer();
-//    }
 
     SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
     simpleDominoContext.init(servletContext);
@@ -279,6 +270,9 @@ public class ProjectManagement implements IProjectManagement {
     if (slickProject == null) {
       logger.info("configureProject : note : no project for " + project);
     }
+
+    Timestamp lastimport = slickProject.lastimport();
+    logger.info("last import " + lastimport);
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
@@ -902,7 +896,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public ImportInfo getImportFromDomino(int projID, int dominoID, long since) {
+  public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
 
     if (matches.isEmpty()) {
@@ -913,7 +907,7 @@ public class ProjectManagement implements IProjectManagement {
 
       return new DominoExerciseDAO()
           .readExercises(projID, matches.iterator().next(),
-              getChangedDocs(since, dominoAdminUser, next)
+              getChangedDocs(sinceInUTC, dominoAdminUser, next)
           );
     }
   }
@@ -1122,10 +1116,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @NotNull
-  private ChangedAndDeleted getChangedDocs(long since, DBUser dominoAdminUser, ClientPMProject next) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
     long then = System.currentTimeMillis();
 
-    FindOptions<DocumentColumn> options1 = getSince(since);
+    FindOptions<DocumentColumn> options1 = getSince(sinceInUTC);
 
     List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
 
@@ -1185,12 +1179,9 @@ public class ProjectManagement implements IProjectManagement {
 */
 
   @NotNull
-  private FindOptions<DocumentColumn> getSince(long since) {
+  private FindOptions<DocumentColumn> getSince(String sinceInUTC) {
     FindOptions<DocumentColumn> options1 = new FindOptions<>();
-
-    SimpleDateFormat original = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    String format = original.format(new Date(since));
-    options1.addFilter(new FilterDetail<>(DocumentColumn.RevisionTime, format, FilterDetail.Operator.GT));
+    options1.addFilter(new FilterDetail<>(DocumentColumn.RevisionTime, sinceInUTC, FilterDetail.Operator.GT));
     return options1;
   }
 }

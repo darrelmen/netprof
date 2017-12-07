@@ -78,18 +78,18 @@ public class ProjectTest extends BaseTest {
     List<ImportDoc> docs = spanish.getProjectManagement().getDocs(707, System.currentTimeMillis());
     docs.forEach(doc->logger.info("got "+doc));
   }*/
-
-  @Test
-  public void testImport() {
-    DatabaseImpl spanish = getDatabase();
-    spanish.setInstallPath("");
-    IProjectManagement projectManagement = spanish.getProjectManagement();
-    ImportInfo importFromDomino = projectManagement.getImportFromDomino(5, 707, 0);
-    FileUploadHelper fileUploadHelper = projectManagement.getFileUploadHelper();
-    fileUploadHelper.rememberExercises(5,importFromDomino);
-    ImportInfo exercises = fileUploadHelper.getExercises(5);
-    logger.info("Got " + exercises);
-  }
+//
+//  @Test
+//  public void testImport() {
+//    DatabaseImpl spanish = getDatabase();
+//    spanish.setInstallPath("");
+//    IProjectManagement projectManagement = spanish.getProjectManagement();
+//    ImportInfo importFromDomino = projectManagement.getImportFromDomino(5, 707, "now");
+//    FileUploadHelper fileUploadHelper = projectManagement.getFileUploadHelper();
+//    fileUploadHelper.rememberExercises(5,importFromDomino);
+//    ImportInfo exercises = fileUploadHelper.getExercises(5);
+//    logger.info("Got " + exercises);
+//  }
 
     @Test
   public void testProject() {

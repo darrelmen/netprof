@@ -157,11 +157,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
+/*
       exerciseToPhoneForProject.forEach((k, v) -> {
         if (v.getNumPhones() < 1) {
           logger.warn("1 ex #" + k + " has no phones?");
         }
       });
+      */
 
 /*      logger.info("readExercises" +
           "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
