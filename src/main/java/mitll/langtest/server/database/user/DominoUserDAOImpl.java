@@ -944,7 +944,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
       Kind kind = getKindForRole(role);
-      logger.info(" has " + role + " -> " + kind + " ");
+//      logger.info(" has " + role + " -> " + kind + " ");
       seen.add(kind);
       Collection<User.Permission> initialPermsForRole = User.getInitialPermsForRole(kind);
       permissionSet.addAll(initialPermsForRole);

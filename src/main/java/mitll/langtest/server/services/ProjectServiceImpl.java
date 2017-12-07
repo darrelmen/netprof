@@ -269,11 +269,21 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     long requestTime = System.currentTimeMillis();
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
       Project project = db.getProject(projectid);
+
+
       int dominoid = project.getProject().dominoid();
       Timestamp modified = project.getProject().lastimport();
+      ZonedDateTime zdt;
 
-      ZonedDateTime zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
+      if (project.getRawExercises().isEmpty()) {
+        Date fiveYearsAgo = new Date(System.currentTimeMillis() - (5L * 365L * 24L * 60L * 60L * 1000L));
 
+        logger.info("Start from "+ fiveYearsAgo);
+
+        zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), ZoneId.of("UTC"));
+      } else {
+        zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
+      }
       String sinceInUTC = zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
 
       logger.info("addPending getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
@@ -307,19 +317,20 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         Map<String, SlickExercise> oldIDToExer = new HashMap<>();
         legacyToEx.values().forEach(slickExercise -> {
           oldIDToExer.put(slickExercise.exid(), slickExercise);
+//          logger.info("\t old id " + slickExercise.exid() + " = " + slickExercise);
         });
 
    /*     Map<Integer, SlickExercise> legacyToDeletedEx = slickUEDAO.getLegacyToDeletedEx(projectid);
-
         Map<String,SlickExercise> oldIDToExerDeleted = new HashMap<>();
         legacyToDeletedEx.values().forEach(slickExercise -> {
           oldIDToExerDeleted.put(slickExercise.exid(),slickExercise);
         });
-
         Set<Integer> deleteEx = legacyToEx.values().stream().map(SlickExercise::id).distinct().collect(Collectors.toSet());
 */
 //        logger.info("existing items " + deleteEx);
         logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
+//        legacyToEx.forEach((k, v) -> logger.info("\t" + k + " = " + v));
+
         {
           Set<Integer> current = legacyToEx.keySet();
           Set<String> oldIDs = oldIDToExer.keySet();
@@ -339,9 +350,18 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             CommonExercise importEx = pair.getValue();
             String npID = importEx.getOldID();
 
+            logger.info("import domino id " + dominoID);
+            logger.info("import npID      '" + npID + "'");
+            logger.info("import importEx  " + importEx.getEnglish() + " " + importEx.getForeignLanguage());
+
             SlickExercise currentKnownExercise = legacyToEx.get(dominoID);
-            if (currentKnownExercise == null) {
+            if (currentKnownExercise == null && !npID.isEmpty()) {
+              logger.info("\tcan't find ex by domino id " + dominoID);
+
               currentKnownExercise = oldIDToExer.get(npID);
+              if (currentKnownExercise != null) {
+                logger.info("\tfound ex by netprof id " + npID);
+              }
             }
 
             if (currentKnownExercise != null) {
@@ -376,7 +396,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                 newEx.add(importEx);
               }
             } else {
-              logger.info("found new ex for domino id " + dominoID);
+              logger.info("found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage());
               newEx.add(importEx);
 
               /*SlickExercise prevDeleted = legacyToDeletedEx.get(dominoID);
@@ -397,7 +417,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
           if (!newEx.isEmpty()) {
             // add new
-            logger.info("addPending adding  " + newEx.size() + " new exercises");
+            logger.info("addPending adding " + newEx.size() + " new exercises");
+
             new ExerciseCopy().addExercises(
                 getImportUser(),
                 projectid,
@@ -421,7 +442,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           }*/
         }
 
-        copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid));
+        copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid).getOldToNew());
 
         updateProjectIfSomethingChanged(jsonDominoID, newEx, importUpdateEx, project.getProject(), requestTime);
 
@@ -920,7 +941,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       boolean newImport = currentExercise == null;
       if (newImport) {
         currentExercise = oldIDToExer.get(toUpdate.getOldID());
-        logger.info("Exercise #" + currentExercise.id() + " " + currentExercise.english() + " is a new import!");
+        logger.info("Exercise #" + currentExercise.id() + " with domino id " + toUpdate.getDominoID() + " : " + currentExercise.english() + " is a new import!");
       }
 
       boolean changed = newImport || changed(currentExercise, toUpdate, first, second) || bringBack.contains(toUpdate);
@@ -1014,6 +1035,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
     String currentUnit = toUpdate.getUnitToValue().get(first);
     String currentChapter = toUpdate.getUnitToValue().get(second);
+
+
     return
         !currentExercise.english().equals(toUpdate.getEnglish()) ||
             !currentExercise.foreignlanguage().equals(toUpdate.getForeignLanguage()) ||

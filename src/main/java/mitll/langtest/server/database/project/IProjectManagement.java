@@ -109,7 +109,7 @@ public interface IProjectManagement {
    *
    * @param projID
    * @param dominoID
-   * @param since
+   * @param sinceInUTC
    * @return
    */
   ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC);

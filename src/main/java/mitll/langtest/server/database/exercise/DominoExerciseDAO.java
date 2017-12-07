@@ -268,11 +268,14 @@ public class DominoExerciseDAO {
     return getExerciseFromVocab(projid, creator, unitName, chapterName, docID, time, vocabularyItem);
   }
 
-  private Exercise getExerciseFromVocab(int projid, int creator,
+  private Exercise getExerciseFromVocab(int projid,
+                                        int creator,
                                         String unitName, String chapterName,
                                         int docID,
                                         long time,
                                         VocabularyItem vocabularyItem) {
+    logger.info("ex for doc " + docID + " term " + vocabularyItem.getTerm());
+
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
@@ -295,8 +298,9 @@ public class DominoExerciseDAO {
         addAttribute(unitName, chapterName, name, displayValue, ex);
       }
 
-      if (isNPID) {
+      if (isNPID && !displayValue.isEmpty()) {
         ex.setOldID(displayValue);
+
       }
     }
   }
@@ -308,7 +312,7 @@ public class DominoExerciseDAO {
       ex.addUnitToValue(chapterName, displayValue);
     } else {
       if (!displayValue.trim().isEmpty()) {
-//            logger.info("getExerciseFromVocabularyItem : for " + ex.getID() + " adding " + name + " = " + displayValue);
+//            logger.info("addAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
         ex.addAttribute(new ExerciseAttribute(name, displayValue));
       }
     }
@@ -323,8 +327,8 @@ public class DominoExerciseDAO {
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
       int compid = docID * 10 + sample.getNum();
-//      logger.info("context import id " + compid);
       String sentenceVal = sample.getSentenceVal();
+      logger.info("addContextSentences : context import id " + compid + " "+ sentenceVal);
       if (!sentenceVal.trim().isEmpty()) {
         Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
 
@@ -412,6 +416,7 @@ public class DominoExerciseDAO {
         false,
         0
     );
+    logger.info("made new ex " + exercise.getDominoID() + " " + exercise.getOldID() + " ex " + exercise.getID() + " ex " + exercise.getEnglish());
     exercise.setPredef(true);
     exercise.setDominoID(dominoID);
     return exercise;

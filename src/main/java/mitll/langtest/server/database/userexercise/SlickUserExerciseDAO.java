@@ -292,7 +292,6 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   *
    * @param slick
    * @return
    */
@@ -303,7 +302,7 @@ public class SlickUserExerciseDAO
     Collection<String> typeOrder = isDefault ? Collections.emptyList() : userDAO.getDatabase().getTypeOrder(slick.projid());
 
     if (typeOrder == null || typeOrder.isEmpty()) {
-      logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "")+slick);
+      logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
     }
 
     Iterator<String> iterator = typeOrder != null ? typeOrder.iterator() : null;
@@ -1001,10 +1000,14 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getByExID(Collection<Integer> exids) { return getUserExercises(dao.byIDs(exids));  }
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
+    return getUserExercises(dao.byIDs(exids));
+  }
 
 
-  public void deleteByExID(Collection<Integer> exids) {  dao.deleteByIDs(exids);  }
+  public void deleteByExID(Collection<Integer> exids) {
+    dao.deleteByIDs(exids);
+  }
 
   /**
    * TODOx : Why so complicated?
@@ -1182,15 +1185,19 @@ public class SlickUserExerciseDAO
    * @return
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes
    */
-  public Map<String, Integer> getOldToNew(int projectid) {
+  public BothMaps getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
+    Map<Integer, Integer> dominoToNew = new HashMap<>();
 
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
 
     addToMap(oldToNew, allPredefByProject);
+    addToDominoMap(dominoToNew, allPredefByProject);
 
     List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);
+
     addToMap(oldToNew, allContextPredefByProject);
+    addToDominoMap(dominoToNew, allContextPredefByProject);
 
     logger.info("getOldToNew found for" +
         "\n\tproject #" + projectid +
@@ -1198,12 +1205,44 @@ public class SlickUserExerciseDAO
         "\n\t" + allContextPredefByProject.size() + " context predef exercises," +
         "\n\t" + oldToNew.size() + " old->new mappings");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
-    return oldToNew;
+    return new BothMaps(oldToNew,dominoToNew);
+  }
+
+  public class BothMaps {
+
+    private Map<String, Integer> oldToNew;
+    private Map<Integer, Integer> dominoToNew;
+
+    public BothMaps(Map<String, Integer> oldToNew, Map<Integer, Integer> dominoToNew) {
+      this.oldToNew = oldToNew;
+      this.dominoToNew = dominoToNew;
+    }
+
+    public Map<String, Integer> getOldToNew() {
+      return oldToNew;
+    }
+
+    public Map<Integer, Integer> getDominoToNew() {
+      return dominoToNew;
+    }
   }
 
   private void addToMap(Map<String, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
     for (SlickExercise exercise : allPredefByProject) {
-      Integer before = oldToNew.put(exercise.exid(), exercise.id());
+      String exid = exercise.exid();
+
+      if (!exid.isEmpty()) {
+        Integer before = oldToNew.put(exid, exercise.id());
+        if (before != null)
+          logger.warn("huh? corruption : already saw an exercise with id before " +before +
+              " '" + exid + "' replace with " + exercise);
+      }
+    }
+  }
+
+  private void addToDominoMap(Map<Integer, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
+    for (SlickExercise exercise : allPredefByProject) {
+      Integer before = oldToNew.put(exercise.legacyid(), exercise.id());
       if (before != null)
         logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
     }
@@ -1217,8 +1256,7 @@ public class SlickUserExerciseDAO
   public Map<Integer, String> getIDToFL(int projid) {
     return dao.getIDToFL(projid);
   }
-
-  private List<Integer> range = new ArrayList<>();
+//  private List<Integer> range = new ArrayList<>();
 
   /**
    * TODO : Nobody calls this just now. Maybe later.
@@ -1277,8 +1315,13 @@ public class SlickUserExerciseDAO
     attributeJoinDAOWrapper.removeBulk(joins);
   }
 
-  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) { return dao.getLegacyToExercise(projectid);  }
-  public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) { return dao.getLegacyToDeletedExercise(projectid);  }
+  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
+    return dao.getLegacyToExercise(projectid);
+  }
+
+  public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
+    return dao.getLegacyToDeletedExercise(projectid);
+  }
 
   @Override
   public int getUnknownExerciseID() {

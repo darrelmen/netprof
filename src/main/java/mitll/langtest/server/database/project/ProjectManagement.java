@@ -1129,6 +1129,7 @@ public class ProjectManagement implements IProjectManagement {
       Integer id1 = doc.getId();
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
       docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
+      logger.info("\t found changed " +vocabularyItem);
     }
     long now = System.currentTimeMillis();
 
