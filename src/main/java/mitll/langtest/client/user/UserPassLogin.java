@@ -133,7 +133,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       String language = slimProject.getLanguage();
       if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
         if (!seen.contains(language)) {
-
           ccs.add(new Pair(slimProject.getCountryCode(), language.substring(0, 1).toUpperCase() + language.substring(1)));
           seen.add(language);
         }

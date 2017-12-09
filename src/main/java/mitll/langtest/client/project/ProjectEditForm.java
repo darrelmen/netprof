@@ -35,17 +35,17 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  public static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
+  private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
-  public static final String DOMINO_PROJECT = "Domino";
-  public static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
-  public static final String PLEASE_WAIT = "Please wait...";
-  public static final String ALIGN_REF_AUDIO = "Align ref audio";
-  public static final String CHECK_AUDIO = "Check Audio";
+  private static final String DOMINO_PROJECT = "Domino";
+  private static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
+  private static final String PLEASE_WAIT = "Please wait...";
+  private static final String ALIGN_REF_AUDIO = "Align ref audio";
+  private static final String CHECK_AUDIO = "Check Audio";
 
-  public static final String ID = "ID";
-  public static final String DOMINO_ID = "Domino ID";
+  private static final String ID = "ID";
+  private static final String DOMINO_ID = "Domino ID";
 
   private static final String HIERARCHY = "Hierarchy";
   private static final String COURSE = "Course";
@@ -164,10 +164,7 @@ public class ProjectEditForm extends UserDialog {
     info.setStatus(ProjectStatus.valueOf(statusBox.getValue()));
 
     info.setHost(hydraHost.getSafeText());
-    try {
-      info.setPort(Integer.parseInt(hydraPort.getSafeText()));
-    } catch (NumberFormatException e) {
-    }
+    setPort();
 
     info.setShowOniOS(showOniOSBox.getValue());
     //   logger.info("updateProject now " + info);
@@ -185,16 +182,20 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
+  private void setPort() {
+    try {
+      info.setPort(Integer.parseInt(hydraPort.getSafeText()));
+    } catch (NumberFormatException e) {
+    }
+  }
+
   private void setCommonFields() {
     info.setName(nameField.getSafeText());
     info.setCourse(course.getSafeText());
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
     info.setModelsDir(model.getSafeText());
-    try {
-      info.setPort(Integer.parseInt(hydraPort.getSafeText()));
-    } catch (NumberFormatException e) {
-    }
+    setPort();
   }
 
   @Nullable
@@ -380,7 +381,7 @@ public class ProjectEditForm extends UserDialog {
     return lifecycle;
   }
 
-  private Map<String, DominoProject> dominoToProject = new HashMap<>();
+  private final Map<String, DominoProject> dominoToProject = new HashMap<>();
 
   /**
    * @param info
@@ -476,21 +477,14 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
-          if (dominoToProject.size() == 1) {
+      /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
 
             }
-          }
+          }*/
         }
       });
     }
-
- /*
-    for (Language value : Language.values()) {
-      this.dominoProjects.addItem(value.toDisplay());
-      if (info.getLanguage().equalsIgnoreCase(value.toString())) this.language.setItemSelected(i, true);
-      i++;
-    }*/
   }
 
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
@@ -673,8 +667,11 @@ public class ProjectEditForm extends UserDialog {
     ListBox affBox = new ListBox();
     affBox.getElement().setId("Status_Box");
     affBox.addStyleName("leftTenMargin");
+
     for (ProjectStatus status : ProjectStatus.values()) {
-      affBox.addItem(status.name());
+      if (status.shouldShow()) {
+        affBox.addItem(status.name());
+      }
     }
 
     return affBox;

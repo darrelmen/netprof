@@ -45,6 +45,7 @@ import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -105,8 +106,17 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return !dao.byID(projid).isEmpty();
   }
 
+  /**
+   * Don't update the project properties...
+   *
+   * @param changed
+   * @return
+   * @see mitll.langtest.server.services.ProjectServiceImpl#updateProjectIfSomethingChanged(int, Collection, Collection, SlickProject, long)
+   */
   @Override
-  public boolean easyUpdate(SlickProject changed) {  return dao.update(changed) > 0;  }
+  public boolean easyUpdate(SlickProject changed) {
+    return dao.update(changed) > 0;
+  }
 
   /**
    * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...
@@ -115,15 +125,76 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param projectInfo
    * @return
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @see mitll.langtest.client.project.ProjectEditForm#updateProject
    */
   @Override
   public boolean update(int userid, ProjectInfo projectInfo) {
     int projid = projectInfo.getID();
     Project currentProject = database.getProject(projid);
 
-    Timestamp created = new Timestamp(projectInfo.getCreated());
-    Timestamp now = new Timestamp(System.currentTimeMillis());
+    SlickProject changed = new SlickProject(
+        projid,
+        userid,
+        new Timestamp(projectInfo.getCreated()),   // created
+        new Timestamp(System.currentTimeMillis()), // modified - now!
+        new Timestamp(projectInfo.getLastImport()),// last import - maintain it
+        projectInfo.getName(),
+        projectInfo.getLanguage(),
+        projectInfo.getCourse(),
+        currentProject.getProject().kind(),
+        projectInfo.getStatus().toString(),
+        projectInfo.getFirstType(),
+        projectInfo.getSecondType(),
+        getCountryCode(projectInfo),
+        currentProject.getProject().ltsClass(),
+        projectInfo.getDominoID(),
+        projectInfo.getDisplayOrder()
+    );
 
+    boolean didUpdate = easyUpdate(changed);
+    if (!didUpdate) logger.error("couldn't update " + changed);
+    boolean didChange = didUpdate || updateProperties(projectInfo);
+
+    if (didChange) {
+      currentProject.clearPropCache();
+      logger.info("update for " + projid);
+    } else {
+      logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
+    }
+
+    return didChange;
+  }
+
+  private boolean updateProperties(ProjectInfo projectInfo) {
+    int projid = projectInfo.getID();
+//    Map<String, String> props = getProps(projid);
+
+    boolean didChange = addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
+
+//    String currentHost = props.get(WEBSERVICE_HOST);
+//    didChange |= currentHost == null || !currentHost.equalsIgnoreCase(newHost);
+
+    //String newPort = "" + projectInfo.getPort();
+    didChange |= addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
+
+//    String currentHostPort = props.get(WEBSERVICE_HOST_PORT);
+//    didChange |= currentHostPort == null || !currentHostPort.equalsIgnoreCase(newPort);
+
+    //String newModels = projectInfo.getModelsDir();
+    didChange |= addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
+
+//    String currentModels = props.get(MODELS_DIR);
+//    didChange |= currentModels == null || !currentModels.equalsIgnoreCase(newModels);
+
+//    String showOnIOS = projectInfo.isShowOniOS() ? "true" : "false";
+    didChange |= addOrUpdateProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS() ? "true" : "false");
+//    String currentShowOnIOS = props.get(SHOW_ON_IOS);
+//    didChange |= currentShowOnIOS == null || !currentShowOnIOS.equalsIgnoreCase(showOnIOS);
+    return didChange;
+  }
+
+  @NotNull
+  private String getCountryCode(ProjectInfo projectInfo) {
     String countryCode = projectInfo.getCountryCode();
 
     String ccFromLang = new CreateProject(database.getServerProps().getHydra2Languages()).getCC(projectInfo.getLanguage());
@@ -132,81 +203,30 @@ public class ProjectDAO extends DAO implements IProjectDAO {
           " to be consistent with the language " + projectInfo.getLanguage());
       countryCode = ccFromLang;
     }
-
-    SlickProject project = currentProject.getProject();
-    SlickProject changed = new SlickProject(projid,
-        userid,
-        created,
-        created,
-        now,
-        projectInfo.getName(),
-        projectInfo.getLanguage(),
-        projectInfo.getCourse(),
-        project.kind(),
-        projectInfo.getStatus().toString(),
-        projectInfo.getFirstType(),
-        projectInfo.getSecondType(),
-        countryCode,
-        project.ltsClass(),
-        projectInfo.getDominoID(),
-        projectInfo.getDisplayOrder()
-    );
-    boolean didChange = easyUpdate(changed);
-
-    if (!didChange) {
-      logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
-    } else {
-      currentProject.clearPropCache();
-    }
-
-    Map<String, String> props = getProps(projid);
-
-    String newHost = projectInfo.getHost();
-    addOrUpdateProperty(projid, WEBSERVICE_HOST, newHost);
-
-    String currentHost = props.get(WEBSERVICE_HOST);
-    didChange |= currentHost == null || !currentHost.equalsIgnoreCase(newHost);
-
-    String newPort = "" + projectInfo.getPort();
-    addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, newPort);
-
-    String currentHostPort = props.get(WEBSERVICE_HOST_PORT);
-    didChange |= currentHostPort == null || !currentHostPort.equalsIgnoreCase(newPort);
-
-    String newModels = projectInfo.getModelsDir();
-    addOrUpdateProperty(projid, MODELS_DIR, newModels);
-    String currentModels = props.get(MODELS_DIR);
-    didChange |= currentModels == null || !currentModels.equalsIgnoreCase(newModels);
-
-    String showOnIOS = projectInfo.isShowOniOS() ? "true" : "false";
-    addOrUpdateProperty(projid, SHOW_ON_IOS, showOnIOS);
-    String currentShowOnIOS = props.get(SHOW_ON_IOS);
-    didChange |= currentShowOnIOS == null || !currentShowOnIOS.equalsIgnoreCase(showOnIOS);
-
-    logger.info("update for " + projid + " did change " + didChange);
-
-    return didChange;
+    return countryCode;
   }
 
-  private void addOrUpdateProperty(int projid, String key, String newValue) {
+  private boolean addOrUpdateProperty(int projid, String key, String newValue) {
     logger.info("addOrUpdateProperty project " + projid + " : " + key + "=" + newValue);
 
     ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);
     if (slickProjectProperties.isEmpty()) {
-      propertyDAO.add(projid, System.currentTimeMillis(),
-          key, newValue, CreateProject.MODEL_PROPERTY_TYPE, "");
+      propertyDAO.add(projid, System.currentTimeMillis(), key, newValue, CreateProject.MODEL_PROPERTY_TYPE, "");
+      return true;
     } else {
       if (slickProjectProperties.size() > 1)
         logger.error("addOrUpdateProperty got back " + slickProjectProperties.size() + " properties for " + key);
-      SlickProjectProperty next = slickProjectProperties.iterator().next();
-      String currentValue = next.value();
 
-      if (!currentValue.equals(newValue)) {
-        logger.info("addOrUpdateProperty before " + next);
+      SlickProjectProperty next = slickProjectProperties.iterator().next();
+
+      if (next.value().equals(newValue)) {
+        return false;
+      } else {
+        // logger.info("addOrUpdateProperty before " + next);
         SlickProjectProperty copy = propertyDAO.getCopy(next, key, newValue);
-        logger.info("addOrUpdateProperty after  " + next);
-        propertyDAO.update(copy);
+        //logger.info("addOrUpdateProperty after  " + next);
+        return propertyDAO.update(copy);
       }
     }
   }
@@ -224,9 +244,25 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    */
   public Map<String, String> getProps(int projid) {
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.getAllForProject(projid);
-    Map<String, String> keyToValue = new HashMap<>();
+    Map<String, String> keyToValue = new HashMap<>(slickProjectProperties.size());
     slickProjectProperties.forEach(slickProjectProperty -> keyToValue.put(slickProjectProperty.key(), slickProjectProperty.value()));
     return keyToValue;
+  }
+
+  public ProjectPropertyDAO getProjectPropertyDAO() {
+    return propertyDAO;
+  }
+
+  /**
+   * @param project
+   * @param key
+   * @param value
+   * @param propertyType
+   * @param parent
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   */
+  public void addProperty(int project, String key, String value, String propertyType, String parent) {
+    propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
   }
 
   /**
@@ -240,10 +276,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     } else {
       return aDefault.iterator().next();
     }
-  }
-
-  public ProjectPropertyDAO getProjectPropertyDAO() {
-    return propertyDAO;
   }
 
   public void createTable() {
@@ -287,12 +319,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   /**
    * Really does delete it - could take a long time if a big project.
-   *
+   * <p>
    * Mainly called from drop.sh or tests
    * In general we want to retire projects when we don't want them visible.
    *
    * @param id
-   * @seex PostgresTest#testDeleteEnglish
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#dropOneConfig
    */
   public boolean delete(int id) {
     // logger.info("delete project #" + id);
@@ -353,18 +385,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   @Override
   public Collection<SlickProject> getAll() {
     return dao.getAll();
-  }
-
-  /**
-   * @param project
-   * @param key
-   * @param value
-   * @param propertyType
-   * @param parent
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject
-   */
-  public void addProperty(int project, String key, String value, String propertyType, String parent) {
-    propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
   }
 
   @Override

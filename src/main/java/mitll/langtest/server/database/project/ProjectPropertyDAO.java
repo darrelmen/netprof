@@ -104,14 +104,19 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
         false);
   }
 
-  public void update(SlickProjectProperty property) {
-    dao.update(property);
+  /**
+   *
+   * @param property
+   * @return true if actually updated the property
+   */
+  public boolean update(SlickProjectProperty property) {
+    int update = dao.update(property); // num rows
+    return update>0;
   }
 
   public Collection<SlickProjectProperty> getAll() {
     return dao.getAll();
   }
-
   public Collection<SlickProjectProperty> getAllForProject(int projid) {
     return dao.getAllForProject(projid);
   }

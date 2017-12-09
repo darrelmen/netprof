@@ -50,6 +50,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
@@ -238,11 +239,13 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      boolean delete = getProjectDAO().delete(id);
-      if (delete) {
+     // boolean delete = getProjectDAO().delete(id);
+      markDeleted(id);
+      //if (delete) {
         db.getProjectManagement().forgetProject(id);
-      }
-      return delete;
+     // }
+     // return delete;
+      return true;
     } else {
       throw getRestricted(DELETING_A_PROJECT);
     }
@@ -478,7 +481,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
-
+  /**
+   * @see #addPending
+   * @param jsonDominoID
+   * @param newEx
+   * @param updateEx
+   * @param project1
+   * @param requestTime
+   */
   private void updateProjectIfSomethingChanged(int jsonDominoID,
                                                Collection<CommonExercise> newEx,
                                                Collection<CommonExercise> updateEx,
@@ -491,6 +501,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     project1.updateLastImport(requestTime);
     getProjectDAO().easyUpdate(project1);
     logger.info("update modified time for project #" + project1.id());
+  }
+
+  private void markDeleted(int projectid) {
+    Project project = db.getProject(projectid);
+    SlickProject slickProject = project.getProject();
+    slickProject.updateStatus(ProjectStatus.DELETED.toString());
+
+    getProjectDAO().easyUpdate(slickProject);
   }
 
   @NotNull

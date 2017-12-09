@@ -54,6 +54,7 @@ public class SlimProject extends ProjectInfo {
    * @param hasModel
    * @param isRTL
    * @param created
+   * @param lastImport
    * @param port
    * @param modelsDir
    * @param dominoID
@@ -68,15 +69,16 @@ public class SlimProject extends ProjectInfo {
                      int displayOrder,
 
                      boolean hasModel,
-                     boolean isRTL, long created,
-                     String host,
+                     boolean isRTL,
+                     long created,
+                     long lastImport, String host,
                      int port,
                      String modelsDir,
                      String firstType,
                      String secondType,
                      boolean showOniOS,
                      int dominoID, TreeMap<String, String> props) {
-    super(projectid, name, language, course, countryCode, status, displayOrder, created, host, port, modelsDir,
+    super(projectid, name, language, course, countryCode, status, displayOrder, created, lastImport, host, port, modelsDir,
         firstType, secondType, showOniOS, dominoID);
     this.hasModel = hasModel;
     this.isRTL = isRTL;

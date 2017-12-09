@@ -75,7 +75,19 @@ public interface IProjectDAO extends IDAO {
 
   boolean exists(int projid);
 
+  /**
+   * @see ProjectDAO#update
+   * @param changed
+   * @return
+   */
   boolean easyUpdate(SlickProject changed);
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @see mitll.langtest.client.project.ProjectEditForm#updateProject
+   * @param userid
+   * @param projectInfo
+   * @return
+   */
   boolean update(int userid, ProjectInfo projectInfo);
 }

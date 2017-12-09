@@ -163,10 +163,12 @@ public class ProjectChoices {
     //  logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord + " permissions " + permissions);
 
     for (SlimProject project : projects) {
-      if (project.getStatus() == ProjectStatus.PRODUCTION) {
+      ProjectStatus status = project.getStatus();
+
+      if (status == ProjectStatus.PRODUCTION) {
         filtered.add(project);
       } else {
-        if (project.getStatus() == ProjectStatus.RETIRED) {
+        if (status == ProjectStatus.RETIRED) {
           boolean admin = controller.getUserManager().isAdmin();
           if (admin) {
             filtered.add(project);

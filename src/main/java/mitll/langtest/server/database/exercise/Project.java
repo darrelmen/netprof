@@ -166,9 +166,9 @@ public class Project implements PronunciationLookup {
     return project;
   }
 
-  public boolean isRetired() {
-    return project != null && ProjectStatus.valueOf(project.status()) == ProjectStatus.RETIRED;
-  }
+  private Set<ProjectStatus> toSkip = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, ProjectStatus.DELETED));
+
+  public boolean isRetired() { return project != null && toSkip.contains(ProjectStatus.valueOf(project.status()));  }
 
   /**
    * If we can't get the type order out of the section helper... find it from the project
@@ -321,29 +321,36 @@ public class Project implements PronunciationLookup {
 
   private Map<String, String> propCache = new HashMap<>();
 
+  /**
+   * Re populate cache really.
+   */
   public void clearPropCache() {
 //    logger.debug("clear project #" + getID());
     propCache.clear();
     putAllProps();
   }
 
-  private void putAllProps() {
-    propCache.putAll(db.getProjectDAO().getProps(getID()));
-  }
-
+  /**
+   * Latchy
+   * @param prop
+   * @return
+   */
   private String getProp(String prop) {
     String s = propCache.get(prop);
     if (s == null) {
-      IProjectDAO projectDAO = db.getProjectDAO();
       putAllProps();
 
       // logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
-      String propValue = projectDAO.getPropValue(getID(), prop);
+      String propValue = db.getProjectDAO().getPropValue(getID(), prop);
       propCache.put(prop, propValue);
       return propValue;
     } else {
       return s;
     }
+  }
+
+  private void putAllProps() {
+    propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
   public CommonExercise getExerciseByID(int id) {
@@ -570,7 +577,7 @@ public class Project implements PronunciationLookup {
   public Integer getUserForFile(String requestURI) {
     Integer integer = fileToRecorder.get(requestURI);
     if (integer == null) {
- //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
+      //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
 
     }
     return integer;
@@ -578,6 +585,6 @@ public class Project implements PronunciationLookup {
 
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
-    logger.info("addAnswerToUser project " + getProject().id()+  " now has " + fileToRecorder.size());
+    logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
   }
 }

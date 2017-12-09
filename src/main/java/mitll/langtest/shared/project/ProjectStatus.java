@@ -38,5 +38,20 @@ public enum ProjectStatus implements IsSerializable {
   PRODUCTION,
   DEVELOPMENT,
   EVALUATION,
-  RETIRED
+  RETIRED,
+  DELETED(false);
+
+  private boolean show;
+
+  ProjectStatus() {
+    this.show = true;
+  }
+
+  ProjectStatus(boolean show) {
+    this.show = show;
+  }
+
+  public boolean shouldShow() {
+    return show;
+  }
 }

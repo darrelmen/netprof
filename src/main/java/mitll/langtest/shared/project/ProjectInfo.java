@@ -48,6 +48,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private int displayOrder = 0;
 
   private long created = 0;
+  private long lastImport = 0;
 
   private String host = Project.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
@@ -61,6 +62,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
+   * @see SlimProject#SlimProject
    */
   public ProjectInfo(int projectid,
                      String name,
@@ -71,17 +73,19 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      int displayOrder,
 
                      long created,
-                     String host,
+                     long lastImport, String host,
                      int port,
                      String modelsDir,
                      String first,
                      String secondType,
-                     boolean showOniOS, int dominoID) {
+                     boolean showOniOS,
+                     int dominoID) {
     super(dominoID,name, first, secondType);
     this.language = language;
     this.id = projectid;
     this.course = course;
     this.created = created;
+    this.lastImport = lastImport;
     this.status = status;
     this.displayOrder = displayOrder;
     this.countryCode = countryCode;
@@ -211,5 +215,9 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   public String toString() {
     return getName() + " " + getStatus() + " lang " + language + "@" + host + ":" + port +
         " types: " + getFirstType() + ", " + getSecondType() + "\ndomino "+ getDominoID();
+  }
+
+  public long getLastImport() {
+    return lastImport;
   }
 }

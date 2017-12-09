@@ -81,6 +81,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
+import static mitll.langtest.shared.project.ProjectStatus.DELETED;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -155,9 +156,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see DatabaseImpl#populateProjects
    */
   @Override
-  public void populateProjects() {
-    populateProjects(pathHelper, serverProps, logAndNotify, db);
-  }
+  public void populateProjects() {  populateProjects(pathHelper, serverProps, logAndNotify, db);  }
 
   /**
    * @param id
@@ -165,7 +164,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   public void rememberProject(int id) {
     SlickProject found = null;
-    for (SlickProject slickProject : projectDAO.getAll()) {
+    for (SlickProject slickProject : getAllProjects()) {
       if (slickProject.id() == id) {
         found = slickProject;
         break;
@@ -185,20 +184,25 @@ public class ProjectManagement implements IProjectManagement {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
-    Collection<SlickProject> all = projectDAO.getAll();
+   // Collection<SlickProject> all = projectDAO.getAll();
 //    if (!all.isEmpty()) {
 //      logger.info("populateProjects : found " + all.size() + " projects");
 //    }
-    for (SlickProject slickProject : all) {
-      if (!idToProject.containsKey(slickProject.id())) {
-        if (debugOne) {
-          if (slickProject.id() == LANG_ID ||
-              slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
-              ) {
+    for (SlickProject slickProject : getAllProjects()) {
+      if(slickProject.status().equalsIgnoreCase(DELETED.toString())) {
+        logger.info("skip deleted " + slickProject.id() + " " + slickProject.name());
+      }
+      else {
+        if (!idToProject.containsKey(slickProject.id())) {
+          if (debugOne) {
+            if (slickProject.id() == LANG_ID ||
+                slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
+                ) {
+              rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
+            }
+          } else {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
-        } else {
-          rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
         }
       }
     }
@@ -214,6 +218,14 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     configureProjects();
+  }
+
+  /**
+   *
+   * @return
+   */
+  private Collection<SlickProject> getAllProjects() {
+    return projectDAO.getAll();
   }
 
   /**
@@ -430,7 +442,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @NotNull
   private Map<Integer, SlickProject> getIdToProjectMapFromDB() {
-    Collection<SlickProject> all = projectDAO.getAll();
+    Collection<SlickProject> all = getAllProjects();
     Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
     for (SlickProject project : all) idToSlickProject.put(project.id(), project);
     return idToSlickProject;
@@ -472,7 +484,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private Project getProjectOrFirst(int projectid) {
     boolean getFirst = projectid == -1;
-    if (getFirst) logger.warn("returning first project for " + projectid);
+    if (getFirst) logger.warn("getProjectOrFirst returning first project for " + projectid);
     return getFirst ? getFirstProject() : getProject(projectid);
   }
 
@@ -599,9 +611,7 @@ public class ProjectManagement implements IProjectManagement {
     Project project = idToProject.get(projectid);
 
     if (project == null) {
-      Set<Integer> dbProjects = getNewProjects(idToProject.keySet());
-
-      if (!dbProjects.isEmpty()) {
+      if (anyNewProjectsAdded()) {
         project = lazyGetProject(projectid);
       }
 
@@ -617,16 +627,25 @@ public class ProjectManagement implements IProjectManagement {
     //  }
   }
 
+  private boolean anyNewProjectsAdded() {
+    return !getNewProjects(idToProject.keySet()).isEmpty();
+  }
+
   private Project lazyGetProject(int projectid) {
-    logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-        ") - refreshing projects", new Exception());
+    logger.warn("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+        ") - refreshing projects");
     populateProjects();
     return idToProject.get(projectid);
   }
 
+  /**
+   * @see #getProject(int)
+   * @param knownProjects
+   * @return
+   */
   @NotNull
   private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
-    Set<Integer> dbProjects = projectDAO.getAll().stream().map(SlickProject::id).collect(Collectors.toSet());
+    Set<Integer> dbProjects = getAllProjects().stream().map(SlickProject::id).collect(Collectors.toSet());
     dbProjects.removeAll(knownProjects);
     return dbProjects;
   }
@@ -826,7 +845,10 @@ public class ProjectManagement implements IProjectManagement {
 
         hasModel(project),
         isRTL,
+
         project.created().getTime(),
+        project.lastimport().getTime(),
+
         getHostOrDefault(project),
         getPort(project),
         getProp(project.id(), ServerProperties.MODELS_DIR),
