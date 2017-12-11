@@ -886,6 +886,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * Expects something like:
    * <p>
    * copy english
+   * copy english -isEval optName
+   * 0    1       2       3
    * copy pashto pashto1
    * drop pashto
    * dropAll destroy
@@ -900,6 +902,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     String firstArg = arg[0];
     ACTION action = getAction(firstArg);
+    logger.info("action = " + action);
 
     String config = arg[1];
 
@@ -914,6 +917,8 @@ public class CopyToPostgres<T extends CommonShell> {
         optconfig = secondArg;
       }
     }
+    int displayOrder = 0;
+
     String optDisplayOrder = null;
     if (arg.length > 3) {
       String third = arg[3];
@@ -922,6 +927,8 @@ public class CopyToPostgres<T extends CommonShell> {
       }
       else {
         optDisplayOrder = third;
+        displayOrder = getDisplayOrder(optDisplayOrder);
+        if (displayOrder == -1) optDisplayOrder =null;
       }
     }
     String optName = getOptionalName(arg, optconfig, optDisplayOrder);
@@ -941,8 +948,9 @@ public class CopyToPostgres<T extends CommonShell> {
         }
         break;
       case COPY:
-        int displayOrder = getDisplayOrder(optDisplayOrder);
-        logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
+        logger.info("copying " +
+            "\nconfig    '" + config + "' " +
+            "\noptconfig '" + optconfig + "' '" + optName + "' order " + displayOrder);
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder, isEval);
           if (!b) {
@@ -1025,7 +1033,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static int getDisplayOrder(String optDisplayOrder) {
-    int displayOrder = 0;
+    int displayOrder = -1;
     try {
       displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
     } catch (NumberFormatException e) {
@@ -1034,6 +1042,14 @@ public class CopyToPostgres<T extends CommonShell> {
     return displayOrder;
   }
 
+  /**
+   * copy english -isEval english brightened
+   * 0    1        2      3       4
+   * @param arg
+   * @param optconfig
+   * @param optDisplayOrder
+   * @return
+   */
   @NotNull
   private static String getOptionalName(String[] arg, String optconfig, String optDisplayOrder) {
     StringBuilder builder = new StringBuilder();
