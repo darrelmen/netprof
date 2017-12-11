@@ -912,8 +912,7 @@ public class CopyToPostgres<T extends CommonShell> {
       String secondArg = arg[2];
       if (isEval(secondArg)) {
         isEval = true;
-      }
-      else {
+      } else {
         optconfig = secondArg;
       }
     }
@@ -924,11 +923,10 @@ public class CopyToPostgres<T extends CommonShell> {
       String third = arg[3];
       if (isEval(third)) {
         isEval = true;
-      }
-      else {
+      } else {
         optDisplayOrder = third;
         displayOrder = getDisplayOrder(optDisplayOrder);
-        if (displayOrder == -1) optDisplayOrder =null;
+        if (displayOrder == -1) optDisplayOrder = null;
       }
     }
     String optName = getOptionalName(arg, optconfig, optDisplayOrder);
@@ -950,7 +948,11 @@ public class CopyToPostgres<T extends CommonShell> {
       case COPY:
         logger.info("copying " +
             "\nconfig    '" + config + "' " +
-            "\noptconfig '" + optconfig + "' '" + optName + "' order " + displayOrder);
+            "\noptconfig '" + optconfig + "' " +
+            "\nname      '" + optName + "'" +
+            "\norder     " + displayOrder +
+            "\neval " + isEval
+        );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder, isEval);
           if (!b) {
@@ -1045,6 +1047,7 @@ public class CopyToPostgres<T extends CommonShell> {
   /**
    * copy english -isEval english brightened
    * 0    1        2      3       4
+   *
    * @param arg
    * @param optconfig
    * @param optDisplayOrder

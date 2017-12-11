@@ -165,39 +165,39 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     pool = Mongo.createPool(new DBProperties(props));
 
     //if (pool != null) {
-      serializer = Mongo.makeSerializer();
+    serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
-      Mailer mailer = new Mailer(new MailerProperties(props));
-      props.setProperty(CACHE_ENABLED_PROP, "" + USE_DOMINO_CACHE);
-      ServerProperties dominoProps =
-          new ServerProperties(props, "1.0", "demo", "0", "now");
+    Mailer mailer = new Mailer(new MailerProperties(props));
+    props.setProperty(CACHE_ENABLED_PROP, "" + USE_DOMINO_CACHE);
+    ServerProperties dominoProps =
+        new ServerProperties(props, "1.0", "demo", "0", "now");
 
-      dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, database.getServerProps().getAppTitle());
-      //String appName = dominoProps.getAppName();
-      //     logger.info("DominoUserDAOImpl app name is " + appName);
+    dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, database.getServerProps().getAppTitle());
+    //String appName = dominoProps.getAppName();
+    //     logger.info("DominoUserDAOImpl app name is " + appName);
 
-      ignite = null;
-      if (/*dominoProps.isCacheEnabled() ||*/ USE_DOMINO_IGNITE) {
-        ignite = getIgnite();
-        if (ignite != null) {
-          ignite.configuration().setGridLogger(new Slf4jLogger());
-        }
-
-        //logger.debug("DominoUserDAOImpl cache - ignite!");
-        // newContext.setAttribute(IGNITE, ignite);
-      } else {
-        logger.debug("DominoUserDAOImpl no cache");
+    ignite = null;
+    if (/*dominoProps.isCacheEnabled() ||*/ USE_DOMINO_IGNITE) {
+      ignite = getIgnite();
+      if (ignite != null) {
+        ignite.configuration().setGridLogger(new Slf4jLogger());
       }
-      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
-      logger.debug("made" +
-          "\ndelegate " + delegate.getClass() +
-          "\nignite = " + ignite +
-          "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
 
-      doAfterGetDelegate();
+      //logger.debug("DominoUserDAOImpl cache - ignite!");
+      // newContext.setAttribute(IGNITE, ignite);
+    } else {
+      logger.debug("DominoUserDAOImpl no cache");
+    }
+    delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
+    logger.debug("made" +
+        "\ndelegate " + delegate.getClass() +
+        "\nignite = " + ignite +
+        "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
+
+    doAfterGetDelegate();
     //} else {
     //  logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
-   // }
+    // }
   }
 
   private void doAfterGetDelegate() {
@@ -605,15 +605,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * Remember pair of user password and encoded password and their match result to speed up this call.
    *
+   * remember password for user id
+   *
    * @param userID
    * @param encodedPassword
+   * @param userIDToPass
    * @return
    * @seex #getUserIfMatch
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers
    */
-  public boolean isMatchingPassword(String userID, String encodedPassword) {
+  public boolean isMatchingPassword(String userID, String encodedPassword, Map<String, String> userIDToPass) {
 //  logger.info("isMatchingPassword '" + id + "' and dominoPassword hash '" + encodedPassword.length() + "'");
-    String dominoPassword = getUserCredentials(userID);
+    String dominoPassword = userIDToPass.get(userID);
+    if (dominoPassword == null) {
+      userIDToPass.put(userID, dominoPassword = getUserCredentials(userID));
+    }
 
     long then = System.currentTimeMillis();
 
@@ -638,13 +644,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 //    }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
       if (diff > 100) {
-        logger.warn("getUserIfMatch match in of " + dominoPassword + " vs encoded " + encodedPassword.length() +
+        logger.warn("isMatchingPassword match in of " + dominoPassword + " vs encoded " + encodedPassword.length() +
             " match " + match + " took " + diff + " millis");
       }
 
       return true;
     } else {
-      logger.warn("getUserIfMatch no match in db " + dominoPassword + " vs encoded " + encodedPassword.length() + " took " + diff);
+      logger.warn("isMatchingPassword no match in db " + dominoPassword + " vs encoded " + encodedPassword.length() + " took " + diff);
       return false;
     }
   }
@@ -1227,9 +1233,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       setGender(toUpdate, dbUser);
 
       updateUser(dbUser);
-
-      User byID = getByID(toUpdate.getID());
-      logger.info("after update\n" + byID);
+//      User byID = getByID(toUpdate.getID());
+//      logger.info("after update\n" + byID);
     } else {
       logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n" + toUpdate);
     }
@@ -1258,7 +1263,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getEmail().isEmpty()) logger.error("updateUser empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
-    else if (updateUser.getAffiliation().isEmpty()) logger.warn("updateUser empty affiliation for " + updateUser);
+    else if (updateUser.getAffiliation().isEmpty()) {
+      logger.warn("updateUser empty affiliation for " + updateUser);
+    }
 
     ClientUserDetail clientUserDetail1 = getClientUserDetail(updateUser);
 

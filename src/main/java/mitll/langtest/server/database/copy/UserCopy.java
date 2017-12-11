@@ -173,6 +173,7 @@ public class UserCopy {
     return matcher.find();
   }
 
+  Map<String,String> userIDToPass=new HashMap<>();
   /**
    * Checks the password for the import user to see if it's the same as the current one in mongo.
    * <p>
@@ -205,7 +206,7 @@ public class UserCopy {
     int importID = toImport.getID();
     String importUserID = toImport.getUserID();
 
-    boolean didPasswordMatch = dominoUserDAO.isMatchingPassword(importUserID, passwordHash);
+    boolean didPasswordMatch = dominoUserDAO.isMatchingPassword(importUserID, passwordHash, userIDToPass);
     boolean differentGender = isDifferentGender(toImport, dominoUser);
     boolean doesGenderMatter = doesGenderMatter(toImport.getPermissions());
     boolean makeCollisionAnyway = differentGender && doesGenderMatter;

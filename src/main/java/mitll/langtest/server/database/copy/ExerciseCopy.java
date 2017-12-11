@@ -206,7 +206,7 @@ public class ExerciseCopy {
       if (oldID == null) logger.error("addContextExercises : huh? old id is null for " + ex);
       Integer id = exToInt.get(oldID);
 
-      logger.info("exToInt '" +oldID + "' => " +id + " vs ex id " + ex.getID());
+//      logger.info("exToInt '" +oldID + "' => " +id + " vs ex id " + ex.getID());
       if (id == null) {
         logger.error("addContextExercises can't find " + oldID + " in map of " + exToInt.size());
         missing.add(oldID);
@@ -232,7 +232,7 @@ public class ExerciseCopy {
     if (!missing.isEmpty()) logger.error("huh? couldn't find " + missing.size() + " exercises : " + missing);
 
     slickUEDAO.addBulkRelated(pairs);
-    logger.info("addContextExercises imported " + n + " predef exercises and " + ct + " context exercises, parent->child " +parentToChild);
+    logger.info("addContextExercises imported " + n + " predef exercises and " + ct + " context exercises, parent->child size " +parentToChild.size());
 
     return parentToChild;
   }
