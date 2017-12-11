@@ -40,7 +40,6 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
@@ -321,7 +320,7 @@ public class PostgresTest extends BaseTest {
           ISection<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
           sectionHelper.report();
         } else {
-          cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
+          cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev(), false);
           databaseLight.close();
         }
 

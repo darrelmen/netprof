@@ -106,18 +106,18 @@ public abstract class BaseAudioDAO extends DAO {
    * TODO : Seems really expensive - avoid doing this if we can.
    *
    * @param projid
+   * @param hasProjectSpecificAudio
    * @return
-   * @seex ExerciseDAO#setAudioDAO
-   * @seex mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio
+
    * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
-   * @see DatabaseImpl#attachAllAudio
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
-  public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
+  public Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
     //logger.info("getExToAudio - for project #" + projid);
-    Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid);
+    Collection<AudioAttribute> attributesByProject = getAudioAttributesByProjectThatHaveBeenChecked(projid, hasProjectSpecificAudio);
     logger.info("getExToAudio - for " + projid + " got " + attributesByProject.size());
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
@@ -148,7 +148,7 @@ public abstract class BaseAudioDAO extends DAO {
     return exToAudio;
   }
 
-  public abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
+  public abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
   /**
    * @param exercises
@@ -177,8 +177,11 @@ public abstract class BaseAudioDAO extends DAO {
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(id);
       boolean doDEBUG = /*id == 25921 ||*/ DEBUG_ATTACH;
 
-      if (audioAttributes != null) {
+      if (audioAttributes == null) {
+        if (doDEBUG) logger.info("attachAudioToExercises no audio for " + id);
+      } else {
         boolean attachedAll = attachAudio(exercise, audioAttributes, language);
+
         if (doDEBUG) {
           logger.info("attachAudioToExercises for" +
               "\n\tex        # " + id +
@@ -188,8 +191,6 @@ public abstract class BaseAudioDAO extends DAO {
             logger.info("\tattachAudioToExercises for ex " + id + " attach " + audioAttribute);
           }
         }
-      } else {
-        if (doDEBUG) logger.info("attachAudioToExercises no audio for " + id);
       }
 
       addContextAudio(language, audioAttributesForExercises, exercise);
@@ -804,9 +805,10 @@ public abstract class BaseAudioDAO extends DAO {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
     ServerProperties serverProps = database.getServerProps();
+    boolean hasProjectSpecificAudio = database.getProject(projid).hasProjectSpecificAudio();
     float dnr = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDNR(new File(attr.getActualPath()));
     addOrUpdateUser(new AudioInfo(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
-        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender())
+        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender(), hasProjectSpecificAudio)
     );
   }
 

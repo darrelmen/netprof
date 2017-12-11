@@ -89,6 +89,7 @@ public class Project implements PronunciationLookup {
    */
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   public static final String SHOW_ON_IOS = "showOniOS";
+  public static final String AUDIO_PER_PROJECT = "audioPerProject";
 
   private SlickProject project;
   private ExerciseDAO<CommonExercise> exerciseDAO;
@@ -137,6 +138,10 @@ public class Project implements PronunciationLookup {
     this.pathHelper = pathHelper;
   }
 
+  public int getID() {
+    return project == null ? -1 : project.id();
+  }
+
   public void setProject(SlickProject project) {
     this.project = project;
   }
@@ -148,7 +153,6 @@ public class Project implements PronunciationLookup {
   public boolean isEnglish() {
     return getLanguage().equalsIgnoreCase("english");
   }
-
 
   private SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
@@ -301,11 +305,11 @@ public class Project implements PronunciationLookup {
     try {
       int ip = Integer.parseInt(prop);
       if (ip == 1) {
-        logger.error("No webservice host port found.");
+        logger.error("getWebservicePort No webservice host port found.");
       }
       return ip;
     } catch (NumberFormatException e) {
-      logger.error("for " + this + " couldn't parse prop for " + WEBSERVICE_HOST_PORT);
+      logger.error("getWebservicePort for " + this + " couldn't parse prop for " + WEBSERVICE_HOST_PORT);
       return -1;
     }
   }
@@ -319,6 +323,7 @@ public class Project implements PronunciationLookup {
     return getProp(ServerProperties.MODELS_DIR);
   }
 
+  public boolean hasProjectSpecificAudio() { return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase("true");}
   private Map<String, String> propCache = new HashMap<>();
 
   /**
@@ -341,7 +346,7 @@ public class Project implements PronunciationLookup {
       putAllProps();
 
       // logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
-      String propValue = db.getProjectDAO().getPropValue(getID(), prop);
+      String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
       propCache.put(prop, propValue);
       return propValue;
     } else {
@@ -349,10 +354,7 @@ public class Project implements PronunciationLookup {
     }
   }
 
-  private void putAllProps() {
-    propCache.putAll(db.getProjectDAO().getProps(getID()));
-  }
-
+  private void putAllProps() {  propCache.putAll(db.getProjectDAO().getProps(getID()));  }
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
   }
@@ -531,9 +533,6 @@ public class Project implements PronunciationLookup {
     isRTL = RTL;
   }
 
-  public int getID() {
-    return project == null ? -1 : project.id();
-  }
 
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);
@@ -543,6 +542,10 @@ public class Project implements PronunciationLookup {
     return audioToAlignment;
   }
 
+  /**
+   * So if you're on hydra2, you only handle certain languages...
+   * @return true if this server handles this project.
+   */
   public boolean isMyProject() {
     String hostName = serverProps.getHostName();
 
@@ -570,21 +573,20 @@ public class Project implements PronunciationLookup {
     this.fileToRecorder = fileToRecorder;
   }
 
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
-
   public Integer getUserForFile(String requestURI) {
     Integer integer = fileToRecorder.get(requestURI);
-    if (integer == null) {
+//    if (integer == null) {
       //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
-
-    }
+  //  }
     return integer;
   }
 
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
-    logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
+    //logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

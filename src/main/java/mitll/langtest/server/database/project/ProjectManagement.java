@@ -112,7 +112,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
-  private final IProjectWorkflowDAO workflowDelegate;
+
   private FileUploadHelper fileUploadHelper;
   private final boolean debugOne;
 
@@ -122,6 +122,9 @@ public class ProjectManagement implements IProjectManagement {
   public static final String CREATE_TIME = "createTime";
 
   private ProjectServiceDelegate projectDelegate;
+  private final IProjectWorkflowDAO workflowDelegate;
+  private DocumentServiceDelegate documentDelegate;
+
 
   /**
    * @param pathHelper
@@ -143,20 +146,26 @@ public class ProjectManagement implements IProjectManagement {
     fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
 
-    SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
-    simpleDominoContext.init(servletContext);
-    projectDelegate = simpleDominoContext.getProjectDelegate();
-    workflowDelegate = simpleDominoContext.getWorkflowDAO();
-    documentDelegate = simpleDominoContext.getDocumentDelegate();
+    if (servletContext == null) {
+      logger.warn("no servlet context, no domino delegates");
+      workflowDelegate = null;
+    } else {
+      SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
+      simpleDominoContext.init(servletContext);
+      projectDelegate = simpleDominoContext.getProjectDelegate();
+      workflowDelegate = simpleDominoContext.getWorkflowDAO();
+      documentDelegate = simpleDominoContext.getDocumentDelegate();
+    }
   }
 
-  private DocumentServiceDelegate documentDelegate;
 
   /**
    * @see DatabaseImpl#populateProjects
    */
   @Override
-  public void populateProjects() {  populateProjects(pathHelper, serverProps, logAndNotify, db);  }
+  public void populateProjects() {
+    populateProjects(pathHelper, serverProps, logAndNotify, db);
+  }
 
   /**
    * @param id
@@ -184,15 +193,14 @@ public class ProjectManagement implements IProjectManagement {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
-   // Collection<SlickProject> all = projectDAO.getAll();
+    // Collection<SlickProject> all = projectDAO.getAll();
 //    if (!all.isEmpty()) {
 //      logger.info("populateProjects : found " + all.size() + " projects");
 //    }
     for (SlickProject slickProject : getAllProjects()) {
-      if(slickProject.status().equalsIgnoreCase(DELETED.toString())) {
+      if (slickProject.status().equalsIgnoreCase(DELETED.toString())) {
         logger.info("skip deleted " + slickProject.id() + " " + slickProject.name());
-      }
-      else {
+      } else {
         if (!idToProject.containsKey(slickProject.id())) {
           if (debugOne) {
             if (slickProject.id() == LANG_ID ||
@@ -221,7 +229,6 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   *
    * @return
    */
   private Collection<SlickProject> getAllProjects() {
@@ -639,9 +646,9 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @see #getProject(int)
    * @param knownProjects
    * @return
+   * @see #getProject(int)
    */
   @NotNull
   private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
@@ -1151,7 +1158,7 @@ public class ProjectManagement implements IProjectManagement {
       Integer id1 = doc.getId();
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
       docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
-      logger.info("\t found changed " +vocabularyItem);
+      logger.info("\t found changed " + vocabularyItem);
     }
     long now = System.currentTimeMillis();
 

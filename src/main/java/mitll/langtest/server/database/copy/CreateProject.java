@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
+import static mitll.langtest.server.database.exercise.Project.AUDIO_PER_PROJECT;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -33,6 +34,7 @@ public class CreateProject {
    * @param course
    * @param isDev
    * @param typeOrder
+   * @param isEval
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
@@ -42,7 +44,8 @@ public class CreateProject {
                                       String course,
                                       int displayOrder,
                                       boolean isDev,
-                                      Collection<String> typeOrder) {
+                                      Collection<String> typeOrder,
+                                      boolean isEval) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
@@ -53,7 +56,7 @@ public class CreateProject {
       logger.info("createProjectIfNotExists checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, isDev, typeOrder);
+      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, isDev, typeOrder, isEval);
       db.rememberProject(byName);
     } else {
       logger.info("createProjectIfNotExists found project " + byName + " for language '" + oldLanguage + "'");
@@ -73,6 +76,7 @@ public class CreateProject {
    * @param displayOrder
    * @param isDev
    * @param typeOrder
+   * @param isEval
    * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db,
@@ -82,7 +86,7 @@ public class CreateProject {
                             String course,
                             int displayOrder,
                             boolean isDev,
-                            Collection<String> typeOrder) {
+                            Collection<String> typeOrder, boolean isEval) {
     Iterator<String> iterator = typeOrder.iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -105,6 +109,9 @@ public class CreateProject {
             secondType, -1);
 
     addProjectProperties(db, projectDAO, projectID);
+    if (isEval) {
+      projectDAO.addProperty(projectID, AUDIO_PER_PROJECT, Boolean.TRUE.toString(), "", "");
+    }
     addDefaultHostProperty(language, projectDAO, projectID);
     logger.info("createProject : created project " + projectID);
     return projectID;

@@ -132,7 +132,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean addToAudioTable,
                                     boolean allowAlternates) throws DominoSessionException {
     int projectID = getProjectIDFromUser();
-    AudioFileHelper audioFileHelper = getAudioFileHelper(db.getProject(projectID));
+    Project project = db.getProject(projectID);
+    boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
+    AudioFileHelper audioFileHelper = getAudioFileHelper(project);
 
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
@@ -196,11 +198,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int user = audioContext.getUserid();
 
     if (addToAudioTable && audioAnswer.isValid()) {
-      User byID = db.getUserDAO().getByID(user);
-
-      MiniUser.Gender realGender = byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
-      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, realGender));
-
+      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
 //      commonExercise.clearAudio();
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
@@ -232,6 +230,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     return audioAnswer;
+  }
+
+  private MiniUser.Gender getGender(int user) {
+    User byID = db.getUserDAO().getByID(user);
+    return byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
   }
 
   /**
@@ -484,7 +487,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param exercise1   for which exercise - how could this be null?
    * @param exerciseID  perhaps sometimes we want to override the exercise id?
    * @param audioAnswer holds the path of the temporary recorded file
-   * @param realGender
+   * @param hasProjectSpecificAudio
+   * @paramx realGender
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see #writeAudioFile
    */
@@ -493,7 +497,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                          CommonExercise exercise1,
                                          int exerciseID,
                                          AudioAnswer audioAnswer,
-                                         MiniUser.Gender realGender) {
+                                         boolean hasProjectSpecificAudio) {
     boolean noExistingExercise = exercise1 == null;
     int idToUse = noExistingExercise ? exerciseID : exercise1.getID();
     int projid = noExistingExercise ? -1 : exercise1.getProjectID();
@@ -519,9 +523,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     AudioAttribute audioAttribute = null;
     try {
+      MiniUser.Gender realGender = getGender(user);
+
       AudioInfo info = new AudioInfo(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
           audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange(), audioAnswer.getResultID(),
-          realGender);
+          realGender, hasProjectSpecificAudio);
 
       audioAttribute = db.getAudioDAO().addOrUpdate(info);
 

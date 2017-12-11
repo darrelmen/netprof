@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
@@ -56,9 +57,9 @@ public interface IAudioDAO extends IDAO {
    */
   AudioAttribute addOrUpdate(AudioInfo info);
 
-  Map<Integer, List<AudioAttribute>> getExToAudio(int projectid);
+  Map<Integer, List<AudioAttribute>> getExToAudio(int projectid, boolean hasProjectSpecificAudio);
 
-  Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid);
+  Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
   List<SlickAudio> getAll(int projid);
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
@@ -142,7 +143,13 @@ public interface IAudioDAO extends IDAO {
 
   Map<String,Integer> getPairs(int projid);
 
-  AudioAttribute getByID(int audioID);
+  /**
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper(int, Integer, AudioFileHelper, int)
+   * @param audioID
+   * @param hasProjectSpecificAudio
+   * @return
+   */
+  AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio);
 
   void addBulk(List<SlickAudio> copies);
 

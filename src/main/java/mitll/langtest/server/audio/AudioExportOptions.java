@@ -10,8 +10,14 @@ public class AudioExportOptions {
   private boolean allContext = false;
   private boolean isUserList = false;
   private boolean skip = false;
+  private boolean hasProjectSpecificAudio = false;
 
-  public AudioExportOptions() {
+  /**
+   * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
+   * @param hasProjectSpecificAudio
+   */
+  public AudioExportOptions(boolean hasProjectSpecificAudio) {
+    this.hasProjectSpecificAudio=hasProjectSpecificAudio;
   }
 
   public void setJustMale(boolean justMale) {
@@ -53,6 +59,7 @@ public class AudioExportOptions {
     this.isUserList = userList;
   }
 
+
   public boolean isAllContext() {
     return allContext;
   }
@@ -63,6 +70,14 @@ public class AudioExportOptions {
    */
   public void setAllContext(boolean justContext) {
     this.allContext = justContext;
+  }
+
+  public boolean isHasProjectSpecificAudio() {
+    return hasProjectSpecificAudio;
+  }
+
+  public void setHasProjectSpecificAudio(boolean hasProjectSpecificAudio) {
+    this.hasProjectSpecificAudio = hasProjectSpecificAudio;
   }
 
   public String toString() {

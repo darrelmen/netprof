@@ -338,10 +338,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
     //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
-      log.warn("About to fail due to missing user in session! SID: {}",
+/*      log.warn("About to fail due to missing user in session! SID: {}",
           request.getRequestedSessionId()
           //, new Throwable()
-      );
+      );*/
       throw new DominoSessionException("Could not look up user!");
     }
     return sessUser;
@@ -557,7 +557,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     } else {
       HttpSession session = getCurrentSession(request);
       if (session == null) {
-        log.info("getUserIDFromRequest no current session for request " + request);
+        log.info("getUserIDFromRequest no current session for request " + request.getRequestURI());
         return -1;
       } else {
         return getUserIDFromSession(session);

@@ -71,9 +71,10 @@ public class AttachSecurityFilter implements Filter {
   private IUserSecurityManager securityManager;
   private ServletContext servletContext;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_RESPONSE = true;
 
-  public void init(FilterConfig filterConfig) throws ServletException {
+  public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
 //    if (DEBUG) log.info("found servlet context " + servletContext);
   }
@@ -142,12 +143,9 @@ public class AttachSecurityFilter implements Filter {
 
       if (userForFile == -1) {
         userForFile = getUserForFileTryHarder(request, requestURI, testPath);
-        //else {
-        // }
       }
 
       valid = isAllowedToGet(userIDFromSessionOrDB, userForFile);
-
       //      } else {
 //        log.warn("isValidRequest couldn't find file for " + requestURI);
 //      }
@@ -163,13 +161,12 @@ public class AttachSecurityFilter implements Filter {
 //    if (!file.exists()) {
 //      log.warn("isValidRequest couldn't find file for " + requestURI);
 //    }
-    if (DEBUG) log.info("isValidRequest got answers " + requestURI);
+//    if (DEBUG) log.info("isValidRequest got answers " + requestURI);
     // 1 who recorded the audio?
     userForFile = getUserForFile(requestURI, file);
 
     if (userForFile == -1) {
       log.warn("isValidRequest not sure who recorded this file " + requestURI);
-      //valid = false;
     }
     return userForFile;
   }
@@ -177,7 +174,7 @@ public class AttachSecurityFilter implements Filter {
   private boolean isAllowedToGet(int userIDFromSessionOrDB, int userForFile) {
     if (userForFile == userIDFromSessionOrDB) {
       // 2 are you the same person? if so you get to hear it
-      if (DEBUG) log.info("isAllowedToGet OK, it's your file.");
+      if (DEBUG_RESPONSE) log.info("isAllowedToGet OK, it's your file.");
       return true;
     } else {
       if (db.getUserDAO().isStudent(userIDFromSessionOrDB)) {
@@ -186,7 +183,7 @@ public class AttachSecurityFilter implements Filter {
         return false;
       } else {
         // 3 if you are not the same, are you are teacher, then you can hear it
-        if (DEBUG) log.info("isAllowedToGet OK, you're a teacher or higher");
+        if (DEBUG_RESPONSE) log.info("isAllowedToGet OK, you're a teacher or higher");
         return true;
       }
     }
@@ -288,8 +285,12 @@ public class AttachSecurityFilter implements Filter {
     return userForFile;
   }
 
-  private void handleAccessFailure(final HttpServletRequest request,
-                                   final ServletResponse response) throws IOException, ServletException {
+  /**
+   * @see #doFilter
+   * @param request
+   * @param response
+   */
+  private void handleAccessFailure(final HttpServletRequest request, final ServletResponse response)   {
     log.error("System access failed security filter! Request: {}", request.getRequestURI());
     try {
       response.setContentType("text/plain");

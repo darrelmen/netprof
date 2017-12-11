@@ -240,7 +240,7 @@ public class AudioExport {
           isEnglish(language1),
           getCountryCode(language1),
           options,
-          language1);
+          language1, options.isHasProjectSpecificAudio());
     } else {
       logger.info("writeToStream skip audio export.");
     }
@@ -269,11 +269,11 @@ public class AudioExport {
   }
 
   /**
+   * @throws Exception
    * @paramx toWrite
    * @paramx audioDirectory
    * @paramx out
    * @paramx language
-   * @throws Exception
    * @seex #writeZipJustOneAudio
    */
 /*  private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite,
@@ -282,7 +282,6 @@ public class AudioExport {
                                          String language) throws Exception {
     writeFolderContentsSimple(new ZipOutputStream(out), toWrite, audioDirectory, language);
   }*/
-
   private boolean isEnglish(String language1) {
     return language1.equalsIgnoreCase("English");
   }
@@ -295,6 +294,7 @@ public class AudioExport {
    * @param isEnglish
    * @param options
    * @param language
+   * @param hasProjectSpecificAudio
    * @throws Exception
    * @see #writeToStream
    */
@@ -305,7 +305,7 @@ public class AudioExport {
                                    boolean isEnglish,
                                    String countryCode,
                                    AudioExportOptions options,
-                                   String language) throws Exception {
+                                   String language, boolean hasProjectSpecificAudio) throws Exception {
     //int c = 0;
     long then = System.currentTimeMillis();
 
@@ -321,7 +321,7 @@ public class AudioExport {
     Map<MiniUser, Integer> femaleToCount = new HashMap<>();
 
     // attach audio
-    int numAttach = attachAudio(toWrite, audioDAO, language);
+    int numAttach = attachAudio(toWrite, audioDAO, language, hasProjectSpecificAudio);
 
     boolean justContext = options.isJustContext() || options.isAllContext();
     if (!justContext) {
@@ -436,7 +436,7 @@ public class AudioExport {
    * @param audioAttribute
    * @param language
    * @throws IOException
-   * @see #writeFolderContents(ZipOutputStream, Collection, IAudioDAO, String, boolean, String, AudioExportOptions, String)
+   * @see #writeFolderContents(ZipOutputStream, Collection, IAudioDAO, String, boolean, String, AudioExportOptions, String, boolean)
    */
   private void copyAudioForExercise(ZipOutputStream zOut,
                                     String overallName,
@@ -471,11 +471,19 @@ public class AudioExport {
     return someAudio;
   }
 
-  private int attachAudio(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String language) {
+  /**
+   * @param toWrite
+   * @param audioDAO
+   * @param language
+   * @return
+   * @see #writeFolderContents
+   */
+  private int attachAudio(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String language, boolean hasProjectSpecificAudio) {
     int numAttach = 0;
     if (!toWrite.isEmpty()) {
       int projectID = toWrite.iterator().next().getProjectID();
-      Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
+
+      Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID, hasProjectSpecificAudio);
       for (CommonExercise ex : toWrite) {
         Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
         if (audioAttributes != null) {
@@ -755,14 +763,14 @@ public class AudioExport {
   }
 
   /**
+   * @return
+   * @throws IOException
    * @paramx zOut
    * @paramx audioConversion
    * @paramx audioDirectory
    * @paramx audioRef
    * @paramx trackInfo
-   * @return
-   * @throws IOException
-   * @see #writeFolderContentsSimple
+   * @seex #writeFolderContentsSimple
    */
 /*  private void copyAudioSimple(ZipOutputStream zOut,
                                AudioConversion audioConversion,
@@ -783,7 +791,6 @@ public class AudioExport {
       logger.warn("\tDidn't write " + mp3.getAbsolutePath());
     }
   }*/
-
   private void addZipEntry(ZipOutputStream zOut, File mp3, String name) throws IOException {
     zOut.putNextEntry(new ZipEntry(name));
     FileUtils.copyFile(mp3, zOut);

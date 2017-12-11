@@ -36,6 +36,7 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,6 +55,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private int port = -1;
   private String modelsDir = "";
   private boolean showOniOS = true;
+  private boolean audioPerProject = false;
 
   private Map<String, String> propertyValue = new HashMap<>();
 
@@ -204,20 +206,28 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.host = host;
   }
 
+  public boolean isShowOniOS() {   return showOniOS;  }
+
   public void setShowOniOS(Boolean showOniOS) {
     this.showOniOS = showOniOS;
   }
 
-  public boolean isShowOniOS() {
-    return showOniOS;
+  public long getLastImport() {   return lastImport;  }
+
+  public boolean isAudioPerProject() {
+    return audioPerProject;
+  }
+
+  public void setAudioPerProject(boolean audioPerProject) {
+    this.audioPerProject = audioPerProject;
   }
 
   public String toString() {
-    return getName() + " " + getStatus() + " lang " + language + "@" + host + ":" + port +
-        " types: " + getFirstType() + ", " + getSecondType() + "\ndomino "+ getDominoID();
-  }
-
-  public long getLastImport() {
-    return lastImport;
+    return getName() + " " + getStatus() +
+        "\nlang      " + language + "@" + host + ":" + port +
+        "\ntypes     [" + getFirstType() + ", " + getSecondType() + "]"+
+        "\ndomino    " + getDominoID()+
+        "\nown audio " + audioPerProject+
+        "\nimported  " + new Date(lastImport);
   }
 }

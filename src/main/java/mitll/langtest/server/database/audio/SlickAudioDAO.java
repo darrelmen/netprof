@@ -96,15 +96,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * @param projid
+   * @param hasProjectSpecificAudio
    * @return
    * @see BaseAudioDAO#getExToAudio
    */
   @Override
-  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
+  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio) {
     List<SlickAudio> all = getAll(projid);
-    logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid +
-        " found " + all.size() + " that has been checked to exist.");
-    return toAudioAttribute(all);
+    logger.info("getAudioAttributesByProjectThatHaveBeenChecked " + projid + " found " + all.size() + " that has been checked to exist.");
+    return toAudioAttribute(all, hasProjectSpecificAudio);
   }
 
   public List<SlickAudio> getAll(int projid) {
@@ -165,7 +165,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
             info.getDnr(),
             info.getResultID(),
             miniUser.getRealGenderInt()),
-        miniUser);
+        miniUser,
+        info.isHasProjectSpecificAudio());
   }
 
   /**
@@ -242,9 +243,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
-    for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
-      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
-    }
+    byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
+//    for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
+//      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
+//    }
     if (copy.size() != exids.size()) {
       logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
           copy.size());
@@ -254,7 +256,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Do this differently
-   *
+   * <p>
    * TODO : the audio is already marked with a gender - we don't have to ask about the users.
    *
    * @param projid
@@ -292,7 +294,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //        logger.info("male   user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForMales.addAll(exIDs);
       } else {
-  //      logger.info("female user " + userID +  " = " + exIDs.size());
+        //      logger.info("female user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
@@ -473,10 +475,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    */
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
-    List<AudioAttribute> copy = new ArrayList<>();
+    List<AudioAttribute> copy = new ArrayList<>(all.size());
+    boolean hasProjectSpecificAudio = false;
+
+    if (!all.isEmpty()) {
+      int projid = all.iterator().next().projid();
+      hasProjectSpecificAudio = database.getProject(projid).hasProjectSpecificAudio();
+    }
 
     for (SlickAudio slickAudio : all) {
-      AudioAttribute audioAttribute = getAudioAttribute(slickAudio, idToMini);
+      AudioAttribute audioAttribute = getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio);
       if (audioAttribute.getDnr() == Float.NEGATIVE_INFINITY) {
         logger.info("toAudioAttributes : Skip bogus " + audioAttribute);
       } else {
@@ -493,10 +501,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param s
    * @param miniUser
+   * @param isAudioPerProject
    * @return
    * @see #toAudioAttribute
    */
-  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser) {
+  private AudioAttribute toAudioAttribute(SlickAudio s, MiniUser miniUser, boolean isAudioPerProject) {
     if (miniUser == null && spew++ < 20) {
       logger.error("toAudioAttribute : no user for " + s.userid());
     }
@@ -508,11 +517,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     int gender = s.gender();
     MiniUser.Gender realGender = gender == 0 ? Male : gender == 1 ? MiniUser.Gender.Female : MiniUser.Gender.Unspecified;
+    String audioref = s.audioref();
+
+    if (isAudioPerProject) {
+      audioref = "project_" + s.projid() + File.separator + audioref;
+    }
     return new AudioAttribute(
         s.id(),
         s.userid(),
         s.exid(),
-        s.audioref(),
+        audioref,
         s.modified().getTime(),
         s.duration(),
         AudioType.valueOf(audiotype.toUpperCase()),
@@ -610,24 +624,26 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * @param all
+   * @param hasProjectSpecificAudio
    * @return
-   * @paramx idToMini
-   * @see #getAudioAttributesByProjectThatHaveBeenChecked(int)
+
+   * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int, boolean)
    */
-  private List<AudioAttribute> toAudioAttribute(Collection<SlickAudio> all) {
-    List<AudioAttribute> copy = new ArrayList<>();
+  private List<AudioAttribute> toAudioAttribute(Collection<SlickAudio> all, boolean hasProjectSpecificAudio) {
+    List<AudioAttribute> copy = new ArrayList<>(all.size());
     if (all.isEmpty()) {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
 //    logger.info("toAudioAttribute " + all.size());
     Map<Integer, MiniUser> idToMini = new HashMap<>();
-    for (SlickAudio s : all) {
-      copy.add(getAudioAttribute(s, idToMini));
-    }
+    all.forEach(slickAudio -> copy.add(getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio)));
+//    for (SlickAudio s : all) {
+//      copy.add(getAudioAttribute(s, idToMini, hasProjectSpecificAudio));
+//    }
     return copy;
   }
 
-  private AudioAttribute getAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
+  private AudioAttribute getAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini, boolean hasProjectSpecificAudio) {
     int userid = s.userid();
 
     //  int before =idToMini.size();
@@ -635,7 +651,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     //  int after =idToMini.size();
     //  if (after>before) logger.info("getAudioAttribute id->mini now "+ after);
     //      logger.info("got " + s);
-    return toAudioAttribute(s, miniUser);
+    return toAudioAttribute(s, miniUser, hasProjectSpecificAudio);
   }
 
   public void addBulk(List<SlickAudio> bulk) {
@@ -761,8 +777,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return genderForUser;
   }
 
-  public AudioAttribute getByID(int audioID) {
+  public AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio) {
     Collection<SlickAudio> byID = dao.getByID(audioID);
-    return byID.isEmpty() ? null : toAudioAttribute(byID).iterator().next();
+    return byID.isEmpty() ? null : toAudioAttribute(byID, hasProjectSpecificAudio).iterator().next();
   }
 }

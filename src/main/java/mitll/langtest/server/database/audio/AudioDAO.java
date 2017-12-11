@@ -217,12 +217,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * Pulls the list of audio recordings out of the database.
    *
    * @param projid here ignored, since in old world there are no project ids
+   * @param hasProjectSpecificAudio
    * @return
    * @see #getExToAudio
    * @see Report#getReport
    */
   @Override
-  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid) {
+  public Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio) {
     try {
       return getResultsSQL(SELECT_ALL + " WHERE " + DEFECT + "=false");
     } catch (Exception ee) {
@@ -523,7 +524,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param sql
    * @return
    * @throws SQLException
-   * @see #getAudioAttributesByProjectThatHaveBeenChecked
+   * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked
    * @see BaseAudioDAO#getAudioAttributesForExercise(int)
    */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
@@ -892,7 +893,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public AudioAttribute getByID(int audioID) {
+  public AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio) {
     return null;
   }
 

@@ -84,6 +84,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
+  public static final String IS_EVAL = "-isEval";
 
   enum ACTION {
     COPY, DROP, DROPALL, UNKNOWN;
@@ -101,10 +102,14 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optionalProperties
    * @param optionalName
    * @param displayOrder
+   * @param isEval
    * @see #main
    */
-  private boolean copyOneConfigCommand(String config, String optionalProperties, String optionalName,
-                                       int displayOrder) throws Exception {
+  private boolean copyOneConfigCommand(String config,
+                                       String optionalProperties,
+                                       String optionalName,
+                                       int displayOrder,
+                                       boolean isEval) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     DatabaseImpl databaseLight = null;
@@ -116,10 +121,11 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("copyOneConfigCommand :" +
           "\n\tloading  " + language +
           "\n\thasModel " + hasModel +
-          "\n\tmodel" + databaseLight.getServerProps().getCurrentModel());
+          "\n\tisEval   " + isEval +
+          "\n\tmodel    " + databaseLight.getServerProps().getCurrentModel());
 
       String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, !hasModel);
+      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, !hasModel, isEval);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -164,7 +170,9 @@ public class CopyToPostgres<T extends CommonShell> {
     return new DatabaseImpl(getProps(), new PathHelper("war", serverProps), null, null);
   }
 
-  public static DatabaseImpl getSimpleDatabase() {  return new DatabaseImpl(getProps());  }
+  public static DatabaseImpl getSimpleDatabase() {
+    return new DatabaseImpl(getProps());
+  }
 
   private static ServerProperties getProps() {
     File file = new File(NETPROF_PROPERTIES_FULL);
@@ -265,9 +273,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc      country code
    * @param optName non-default name (not language) - null OK
    * @param isDev   i.e. not production
+   * @param isEval
    * @see #copyOneConfigCommand
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev, boolean isEval) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
@@ -276,7 +285,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\ttype order is         " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
-    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder);  // TODO : course?
+    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder, isEval);  // TODO : course?
 
     logger.info("copyOneConfig" +
         "\n\tproject #" + projectID +
@@ -305,7 +314,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
       // add the audio table
-      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID);
+      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, isEval);
       // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
       // copy ref results
@@ -363,9 +372,9 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optName,
                                        int displayOrder,
                                        boolean isDev,
-                                       Collection<String> typeOrder) {
+                                       Collection<String> typeOrder, boolean isEval) {
     return getCreateProject(db)
-        .createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder);
+        .createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder, isEval);
   }
 
   /**
@@ -375,7 +384,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param idToFL
    * @param typeOrder
    * @return map of parent exercise to context sentence
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
@@ -407,17 +416,19 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
+   * @param isEval
    * @see #copyOneConfig
    */
   private Map<String, Integer> copyAudio(DatabaseImpl db,
                                          Map<Integer, Integer> oldToNewUser,
                                          Map<String, Integer> exToID,
                                          Map<String, Integer> parentExToChild,
-                                         int projid) {
+                                         int projid,
+                                         boolean isEval) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
-    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProjectThatHaveBeenChecked(projid);
+    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProjectThatHaveBeenChecked(projid, false);
     logger.info("copyAudio h2 audio  " + audioAttributes.size());
     int missing = 0;
     int skippedMissingUser = 0;
@@ -467,7 +478,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param att
    * @param oldexid
    * @return
-   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int)
+   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int, boolean)
    */
   private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
     Integer id = exToID.get(oldexid);
@@ -524,7 +535,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickPhone> bulk = new ArrayList<>();
     int c = 0;
     int d = 0;
-   // int added = 0;
+    // int added = 0;
     Set<Long> missingrids = new TreeSet<>();
     Set<Long> missingwids = new TreeSet<>();
     for (Phone phone : new PhoneDAO(db).getAll()) {
@@ -560,7 +571,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewResult
    * @param slickWordDAO
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
    */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
     int c = 0;
@@ -812,7 +823,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
    */
   private void copyRefResult(DatabaseImpl db,
                              Map<Integer, Integer> oldToNewUser,
@@ -891,16 +902,35 @@ public class CopyToPostgres<T extends CommonShell> {
     ACTION action = getAction(firstArg);
 
     String config = arg[1];
-    String optconfig = arg.length > 2 ? arg[2] : null;
-    String optDisplayOrder = arg.length > 3 ? arg[3] : null;
 
+    String optconfig = null;
+    boolean isEval = false;
+    if (arg.length > 2) {
+      String secondArg = arg[2];
+      if (isEval(secondArg)) {
+        isEval = true;
+      }
+      else {
+        optconfig = secondArg;
+      }
+    }
+    String optDisplayOrder = null;
+    if (arg.length > 3) {
+      String third = arg[3];
+      if (isEval(third)) {
+        isEval = true;
+      }
+      else {
+        optDisplayOrder = third;
+      }
+    }
     String optName = getOptionalName(arg, optconfig, optDisplayOrder);
 
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     switch (action) {
       case UNKNOWN:
-        logger.warn("not sure what to do with action " + firstArg);
+        logger.error("not sure what to do with action " + firstArg);
         break;
       case DROP:
         logger.info("drop " + config);
@@ -914,7 +944,7 @@ public class CopyToPostgres<T extends CommonShell> {
         int displayOrder = getDisplayOrder(optDisplayOrder);
         logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder, isEval);
           if (!b) {
             System.exit(1);
           }
@@ -946,6 +976,10 @@ public class CopyToPostgres<T extends CommonShell> {
       default:
         usage();
     }
+  }
+
+  private static boolean isEval(String secondArg) {
+    return secondArg.equalsIgnoreCase(IS_EVAL);
   }
 
   /**
@@ -1007,7 +1041,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (arg.length > 3) {
       name = Arrays.asList(arg);
-      name = name.subList(optconfig == null ? 2 : optDisplayOrder == null ? 3 : 4, name.size());
+
+      name = name.subList(optconfig == null && !name.get(2).equalsIgnoreCase(IS_EVAL) ? 2 : optDisplayOrder == null ? 3 : 4, name.size());
     }
 
     for (String n : name) builder.append(n).append(" ");

@@ -197,11 +197,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @NotNull
   private List<Integer> getAllAudioIDs(int projectID) {
-    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projectID);
-    List<Integer> audioIDs = new ArrayList<>();
-    for (List<AudioAttribute> values : exToAudio.values()) {
-      audioIDs.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
-    }
+    boolean hasProjectSpecificAudio = db.getProject(projectID).hasProjectSpecificAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projectID,hasProjectSpecificAudio);
+    List<Integer> audioIDs = new ArrayList<>(exToAudio.size());
+    exToAudio.values().forEach(audioAttributes -> audioIDs.addAll(audioAttributes
+        .stream()
+        .map(AudioAttribute::getUniqueID)
+        .collect(Collectors.toList())));
+//    for (List<AudioAttribute> values : exToAudio.values()) {
+//      audioIDs.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
+//    }
     return audioIDs;
   }
 
@@ -212,8 +217,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @NotNull
   private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
-    Map<Integer, ISlimResult> audioToResult = new HashMap<>();
-    for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
+    Map<Integer, ISlimResult> audioToResult = new HashMap<>(jsonResultsForProject.size());
+    jsonResultsForProject.forEach(iSlimResult -> audioToResult.put(iSlimResult.getAudioID(), iSlimResult));
+    //for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
     return audioToResult;
   }
 
@@ -322,7 +328,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                 Integer audioID,
                                                 AudioFileHelper audioFileHelper,
                                                 int userIDFromSession) {
-    AudioAttribute byID = db.getAudioDAO().getByID(audioID);
+    AudioAttribute byID = db.getAudioDAO().getByID(audioID, db.getProject(projid).hasProjectSpecificAudio());
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 

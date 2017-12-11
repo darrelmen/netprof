@@ -165,31 +165,19 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return didChange;
   }
 
+  /**
+   * @param projectInfo
+   * @return
+   * @see #update(int, ProjectInfo)
+   */
   private boolean updateProperties(ProjectInfo projectInfo) {
     int projid = projectInfo.getID();
-//    Map<String, String> props = getProps(projid);
 
     boolean didChange = addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
-
-//    String currentHost = props.get(WEBSERVICE_HOST);
-//    didChange |= currentHost == null || !currentHost.equalsIgnoreCase(newHost);
-
-    //String newPort = "" + projectInfo.getPort();
     didChange |= addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
-
-//    String currentHostPort = props.get(WEBSERVICE_HOST_PORT);
-//    didChange |= currentHostPort == null || !currentHostPort.equalsIgnoreCase(newPort);
-
-    //String newModels = projectInfo.getModelsDir();
     didChange |= addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
-
-//    String currentModels = props.get(MODELS_DIR);
-//    didChange |= currentModels == null || !currentModels.equalsIgnoreCase(newModels);
-
-//    String showOnIOS = projectInfo.isShowOniOS() ? "true" : "false";
-    didChange |= addOrUpdateProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS() ? "true" : "false");
-//    String currentShowOnIOS = props.get(SHOW_ON_IOS);
-//    didChange |= currentShowOnIOS == null || !currentShowOnIOS.equalsIgnoreCase(showOnIOS);
+    didChange |= addOrUpdateBooleanProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS());
+    didChange |= addOrUpdateBooleanProperty(projid, AUDIO_PER_PROJECT, projectInfo.isAudioPerProject());
     return didChange;
   }
 
@@ -199,11 +187,15 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     String ccFromLang = new CreateProject(database.getServerProps().getHydra2Languages()).getCC(projectInfo.getLanguage());
     if (!ccFromLang.equals(countryCode)) {
-      logger.warn("update : setting country code to " + countryCode +
-          " to be consistent with the language " + projectInfo.getLanguage());
+      logger.warn("getCountryCode : setting country code to " + countryCode +
+          " to be consistent with the language " + projectInfo.getLanguage() + " = " + ccFromLang);
       countryCode = ccFromLang;
     }
     return countryCode;
+  }
+
+  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
+    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
   }
 
   private boolean addOrUpdateProperty(int projid, String key, String newValue) {

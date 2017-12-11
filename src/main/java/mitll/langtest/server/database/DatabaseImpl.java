@@ -1362,9 +1362,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   @Override
   @Deprecated
-  public String getLanguage() {
-    return getOldLanguage(getServerProps());
-  }
+  public String getLanguage() {    return getOldLanguage(getServerProps());  }
 
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();

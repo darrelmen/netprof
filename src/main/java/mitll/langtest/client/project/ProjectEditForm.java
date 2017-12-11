@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  */
 public class ProjectEditForm extends UserDialog {
   private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
+  public static final String SHOW_ON_I_OS = "Show On iOS";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final String DOMINO_PROJECT = "Domino";
@@ -368,8 +369,7 @@ public class ProjectEditForm extends UserDialog {
 
     lifecycle.add(statusBox = getBox());
     {
-      showOniOSBox = new CheckBox("Show On iOS");
-//      logger.info("show on iOS " + info.isShowOniOS());
+      showOniOSBox = new CheckBox(SHOW_ON_I_OS);
       showOniOSBox.setValue(info.isShowOniOS());
       lifecycle.add(showOniOSBox);
       showOniOSBox.addStyleName("leftTenMargin");

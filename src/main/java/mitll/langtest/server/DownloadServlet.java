@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -76,7 +77,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
- // private static final String USERS = "users";
+  // private static final String USERS = "users";
   private static final String RESULTS = "results";
   private static final String EVENTS = "events";
   private static final String REQUEST = "request";
@@ -113,7 +114,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     DatabaseImpl db = getDatabase();
 
     if (db != null) {
@@ -131,34 +132,29 @@ public class DownloadServlet extends DatabaseServlet {
           return;
         }
         //       logger.info("doGet : current session found projid " + project1);
-        String language = getDatabase().getProject(projid).getLanguage();
+        Project project = getDatabase().getProject(projid);
+        boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
+        String language = project.getLanguage();
 
         String requestURI = request.getRequestURI();
         if (requestURI.toLowerCase().contains(AUDIO)) {
-          String pathInfo = request.getPathInfo();
           String queryString = request.getQueryString();
 
           logger.debug("doGet :" +
               "\n\tRequest " + queryString +
-              "\n\tpath    " + pathInfo +
+              "\n\tpath    " + request.getPathInfo() +
               "\n\turi     " + requestURI +
               "\n\turl     " + request.getRequestURL() +
               "\n\tpath    " + request.getServletPath());
-/*
-          // TODO : when could this happen?
-          if (queryString == null) {
-            setHeader(response, "allAudio.zip");
-            writeAllAudio(response, projid);
-          } else*/
-            if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
 
+          if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
             if (queryString.contains(LISTS)) {
               String s = queryString.split("Lists=\\[")[1];
               String[] split = s.split(("\\]"));
               String listid = split[0];
               if (!listid.isEmpty()) {
                 String[] splitArgs = split[1].split("&");
-                writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
+                writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
               }
             } else {
               String[] split = queryString.split("list=");
@@ -167,7 +163,7 @@ public class DownloadServlet extends DatabaseServlet {
                 String[] splitArgs = split[1].split("&");
                 String listid = splitArgs[0];
                 if (!listid.isEmpty()) {
-                  writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
+                  writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
                 }
               }
             }
@@ -218,11 +214,12 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * @param splitArgs
+   * @param hasProjectSpecificAudio
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private AudioExportOptions getAudioExportOptions(String[] splitArgs) {
-    AudioExportOptions options = new AudioExportOptions();
+  private AudioExportOptions getAudioExportOptions(String[] splitArgs, boolean hasProjectSpecificAudio) {
+    AudioExportOptions options = new AudioExportOptions(hasProjectSpecificAudio);
     for (String arg : splitArgs) {
       logger.info("getAudioExportOptions arg " + arg);
 
@@ -258,7 +255,7 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
+    AudioExportOptions audioExportOptions = getAudioExportOptions(split1, db.getProject(projid).hasProjectSpecificAudio());
 
     audioExportOptions.setSkip(typeToSection.isEmpty() && !audioExportOptions.isAllContext());
     String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
@@ -303,7 +300,7 @@ public class DownloadServlet extends DatabaseServlet {
                              String language,
                              AudioExportOptions audioExportOptions) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
-    name = name.replaceAll("\\,", "_");
+    name = name.replaceAll(",", "_");
 
     name += audioExportOptions.getInfo();
     name = language + "_" + name;

@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.user;
 
 import com.mongodb.MongoTimeoutException;
-import com.mongodb.client.MongoCollection;
 import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
@@ -44,6 +43,7 @@ import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
@@ -1021,7 +1021,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    *
    * @return
    * @see Analysis#getUserInfos
-   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int)
+   * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int, boolean)
    */
   @Override
   public synchronized Map<Integer, MiniUser> getMiniUsers() {
