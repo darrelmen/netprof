@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
@@ -94,8 +95,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
-    }
-    else {
+    } else {
       FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
 
       int userListID = request.getUserListID();
@@ -158,7 +158,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
-        logger.info("1 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+        logger.info("1 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
         return exerciseWhenNoUnitChapter;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
@@ -166,11 +166,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
           ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
-          logger.info("2 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+          logger.info("2 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
           return exerciseListWrapperForPrefix;
         } else {
           ExerciseListWrapper<T> exercisesForSelectionState = getExercisesForSelectionState(request, projectID);
-          logger.info("3 req  " + request + " took " + (System.currentTimeMillis()-then) + " millis");
+          logger.info("3 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
           return exercisesForSelectionState;
         }
       }
@@ -556,11 +556,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
-      //  logger.info("adding context exercises...");
+        //  logger.info("adding context exercises...");
         List<CommonExercise> withContext = new ArrayList<>();
         exercises.forEach(commonExercise -> {
           withContext.add(commonExercise);
-        //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
+          //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
           withContext.addAll(commonExercise.getDirectlyRelated());
         });
         exercises = withContext;
@@ -697,7 +697,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
    */
   private int attachAudio(CommonExercise firstExercise) {
-   return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
+    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
   }
 
   private String getLanguage(CommonExercise firstExercise) {
@@ -1298,8 +1298,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //  }
     checkPerformance(projectID, exid, then2);
 
-/*    if (byID != null) {
-*//*
+    /*    if (byID != null) {
+     *//*
       logger.debug("returning (" + language + ") exercise " + byID.getOldID() + " : " + byID);
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
         logger.info("\thas " + audioAttribute);
@@ -1349,6 +1349,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
+
+    if (getProject(projectID).hasProjectSpecificAudio()) {
+      new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(toAddAudioTo, language);
+    }
     now = System.currentTimeMillis();
 
     if (now - then > 50)

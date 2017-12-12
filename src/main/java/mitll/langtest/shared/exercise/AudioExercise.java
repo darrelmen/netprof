@@ -183,16 +183,17 @@ public class AudioExercise extends ExerciseShell {
     return !audioAttributes.isEmpty();
   }
 
-  public Collection<AudioAttribute> getAudioAttributes() {
-    return audioAttributes.values();
-  }
-
-  public boolean hasAudio(boolean vocab) {
+  public boolean hasAudioNonContext(boolean vocab) {
     return getAudioAttributes()
         .stream()
-        .filter(audioAttribute -> (vocab == !audioAttribute.isContextAudio()))
-        .count() > 0;
+        .anyMatch(audioAttribute -> (vocab == !audioAttribute.isContextAudio()));
   }
+
+  /**
+   *
+   * @return
+   */
+  public Collection<AudioAttribute> getAudioAttributes() {    return audioAttributes.values();  }
 
   /**
    * @param isMale

@@ -106,7 +106,7 @@ public interface IProjectManagement {
   int getUserForFile(String requestURI);
 
   /**
-   *
+   * @see ProjectServiceImpl#addPending
    * @param projID
    * @param dominoID
    * @param sinceInUTC
@@ -115,6 +115,4 @@ public interface IProjectManagement {
   ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC);
 
   List<ImportProjectInfo> getVocabProjects();
-
-//  List<ImportDoc> getDocs(int dominoID, long since);
 }

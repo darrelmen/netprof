@@ -219,7 +219,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    */
   protected void addWidgets(String playButtonSuffix, String recordButtonTitle) {
 //    logger.info("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +
-//        " suffix = " + playButtonSuffix + " has audio " + hasAudio());
+//        " suffix = " + playButtonSuffix + " has audio " + hasAudioNonContext());
 
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);

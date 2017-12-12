@@ -47,7 +47,12 @@ import java.util.Map;
 public interface AudioRefExercise {
   boolean hasRefAudio();
 
-  boolean hasAudio(boolean vocab);
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
+   * @param vocab
+   * @return
+   */
+  boolean hasAudioNonContext(boolean vocab);
 
   String getRefAudio();
 

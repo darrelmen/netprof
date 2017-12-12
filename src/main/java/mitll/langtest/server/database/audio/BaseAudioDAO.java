@@ -73,9 +73,6 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String FEMALE_FAST = "femaleFast";
   public static final String FEMALE_SLOW = "femaleSlow";
 
-  //public static final String MALE_CONTEXT = "maleContext";
-  //public static final String FEMALE_CONTEXT = "femaleContext";
-
   public static final String CMALE_FAST = "cmaleFast";
   public static final String CMALE_SLOW = "cmaleSlow";
   public static final String CFEMALE_FAST = "cfemaleFast";
@@ -109,7 +106,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param hasProjectSpecificAudio
    * @return
 
-   * @see AudioExport#attachAudio(Collection, IAudioDAO, String)
+   * @see AudioExport#attachAudio
    * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
@@ -306,7 +303,7 @@ public abstract class BaseAudioDAO extends DAO {
   public boolean attachAudio(CommonExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
-    String installPath = database.getServerProps().getMediaDir();
+    String mediaDir = database.getServerProps().getMediaDir();
     //List<AudioAttribute> defaultAudio = new ArrayList<>();
     // Set<String> audioPaths = new HashSet<>();
     boolean allSucceeded = true;
@@ -319,7 +316,7 @@ public abstract class BaseAudioDAO extends DAO {
 //        defaultAudio.add(attr);
 //      } else {
       // audioPaths.add(attr.getAudioRef());
-      boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
+      boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, attr, language);
       if (!didIt) {
         if (doDebug && allSucceeded) {
           String foreignLanguage = attr.isContextAudio() && firstExercise.hasContext() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
@@ -349,7 +346,7 @@ public abstract class BaseAudioDAO extends DAO {
 
 /*    for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
+        boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, attr, language);
         if (!didIt) {
           if (doDebug && allSucceeded) {
             logger.info("attachAudio not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
@@ -394,14 +391,14 @@ public abstract class BaseAudioDAO extends DAO {
    * TODO : not sure what to do if we have multiple context sentences...
    *
    * @param firstExercise
-   * @param installPath
+   * @param mediaDir
    * @param attr
    * @param language
    * @return
    * @see #attachAudio
    */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
-                                        String installPath,
+                                        String mediaDir,
                                         AudioAttribute attr,
                                         String language) {
     Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
@@ -433,15 +430,21 @@ public abstract class BaseAudioDAO extends DAO {
         // or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
 
         String lang = language.toLowerCase();
-        String prefix = installPath + File.separator + lang;
+        String prefix = mediaDir + File.separator + lang;
         String relPrefix = prefix.substring(netProfDurLength);
         if (!audioRef.contains(lang)) {
-          if (DEBUG_ATTACH_PATH) logger.info("audioref " + audioRef + " does not contain '" + prefix +
-              "' before " + attr.getAudioRef());
+          if (DEBUG_ATTACH_PATH) {
+            logger.info("attachAudioAndFixPath audioref " + audioRef + " does not contain '" + prefix +
+                "' before " + attr.getAudioRef());
+          }
           attr.setAudioRef(relPrefix + File.separator + audioRef);
-          if (DEBUG_ATTACH_PATH) logger.info("after " + attr.getAudioRef());
+          if (DEBUG_ATTACH_PATH) {
+            logger.info("attachAudioAndFixPath : after " + attr.getAudioRef());
+          }
         }
-        if (DEBUG_ATTACH_PATH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        if (DEBUG_ATTACH_PATH) {
+          logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        }
       }
       return true;
     } else {
@@ -465,6 +468,13 @@ public abstract class BaseAudioDAO extends DAO {
     return isMatchExToAudio(attr, dir.getForeignLanguage());
   }
 
+  /**
+   * Todo : check if language is arabic before doing normArabic.
+   *
+   * @param attr
+   * @param foreignLanguage
+   * @return
+   */
   private boolean isMatchExToAudio(AudioAttribute attr, String foreignLanguage) {
     String transcript = attr.getTranscript();
 

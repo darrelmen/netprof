@@ -85,6 +85,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public static final String CREATE_TIME = "createTime";
   public static final boolean DEBUG = false;
   public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  public static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
 //  private Mongo pool;
 //  private JSONSerializer serializer;
 
@@ -239,12 +240,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-     // boolean delete = getProjectDAO().delete(id);
+      // boolean delete = getProjectDAO().delete(id);
       markDeleted(id);
       //if (delete) {
-        db.getProjectManagement().forgetProject(id);
-     // }
-     // return delete;
+      db.getProjectManagement().forgetProject(id);
+      // }
+      // return delete;
       return true;
     } else {
       throw getRestricted(DELETING_A_PROJECT);
@@ -273,31 +274,20 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
       Project project = db.getProject(projectid);
 
-
-      int dominoid = project.getProject().dominoid();
       Timestamp modified = project.getProject().lastimport();
-      ZonedDateTime zdt;
 
-      if (project.getRawExercises().isEmpty()) {
-        Date fiveYearsAgo = new Date(System.currentTimeMillis() - (5L * 365L * 24L * 60L * 60L * 1000L));
-
-        logger.info("Start from "+ fiveYearsAgo);
-
-        zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), ZoneId.of("UTC"));
-      } else {
-        zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
-      }
-      String sinceInUTC = zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
+      String sinceInUTC = getModifiedTimestamp(project, modified);
 
       logger.info("addPending getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
 
+      int dominoid = project.getProject().dominoid();
       ImportInfo importFromDomino = db.getProjectManagement().getImportFromDomino(projectid, dominoid, sinceInUTC);
       int jsonDominoID = importFromDomino.getDominoID();
       if (dominoid != -1 && dominoid != jsonDominoID) {
         logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
         return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
       } else {
-        if (dominoid == -1) {
+        if (dominoid == -1) {  // relevant? possible?
           List<Project> existingBound = getProjectForDominoID(jsonDominoID);
           if (!existingBound.isEmpty()) {
             return getAnotherProjectResponse(dominoid, jsonDominoID, existingBound);
@@ -306,7 +296,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
         SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
-        // so on update we have three sets of exercises -
+        // so on update we have three sets of exercises - Add, change, delete
         //  new exercises we haven't seen before,
         //  ones we have which might have changed and would then need to be updated
         //  ones that are current but not in domino and have been deleted
@@ -315,10 +305,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         List<CommonExercise> importUpdateEx = new ArrayList<>();
         Set<CommonExercise> bringBack = new HashSet<>();
 
-        Map<Integer, SlickExercise> legacyToEx = slickUEDAO.getLegacyToEx(projectid);
+        Map<Integer, SlickExercise> dominoToEx = slickUEDAO.getLegacyToEx(projectid);
 
         Map<String, SlickExercise> oldIDToExer = new HashMap<>();
-        legacyToEx.values().forEach(slickExercise -> {
+        dominoToEx.values().forEach(slickExercise -> {
           oldIDToExer.put(slickExercise.exid(), slickExercise);
 //          logger.info("\t old id " + slickExercise.exid() + " = " + slickExercise);
         });
@@ -328,14 +318,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         legacyToDeletedEx.values().forEach(slickExercise -> {
           oldIDToExerDeleted.put(slickExercise.exid(),slickExercise);
         });
-        Set<Integer> deleteEx = legacyToEx.values().stream().map(SlickExercise::id).distinct().collect(Collectors.toSet());
+        Set<Integer> deleteEx = dominoToEx.values().stream().map(SlickExercise::id).distinct().collect(Collectors.toSet());
 */
 //        logger.info("existing items " + deleteEx);
-        logger.info("addPending found " + legacyToEx.size() + " current exercises for " + projectid);
-//        legacyToEx.forEach((k, v) -> logger.info("\t" + k + " = " + v));
+        logger.info("addPending found " + dominoToEx.size() + " current exercises for " + projectid);
+//        dominoToEx.forEach((k, v) -> logger.info("\t" + k + " = " + v));
 
         {
-          Set<Integer> current = legacyToEx.keySet();
+          Set<Integer> currentIDs = dominoToEx.keySet();
           Set<String> oldIDs = oldIDToExer.keySet();
 
           Map<Integer, CommonExercise> dominoIDToExercise = getDominoIDToExercise(importFromDomino.getExercises());
@@ -343,21 +333,19 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           logger.info("importing " + dominoIDToExercise.size() + " exercises");
 
           // three piles:
-          // current exercises for the project that are not in the import should be deleted
-          // import exercises not in the current set are new and need to be added
+          // currentIDs exercises for the project that are not in the import should be deleted
+          // import exercises not in the currentIDs set are new and need to be added
           // matching exercises need to be checked to see if they have changed
           // * but previously deleted exercises can be brought back
 
-          for (Map.Entry<Integer, CommonExercise> pair : dominoIDToExercise.entrySet()) {
-            Integer dominoID = pair.getKey();
-            CommonExercise importEx = pair.getValue();
+          dominoIDToExercise.forEach((dominoID, importEx) -> {
             String npID = importEx.getOldID();
 
             logger.info("import domino id " + dominoID);
             logger.info("import npID      '" + npID + "'");
             logger.info("import importEx  " + importEx.getEnglish() + " " + importEx.getForeignLanguage());
 
-            SlickExercise currentKnownExercise = legacyToEx.get(dominoID);
+            SlickExercise currentKnownExercise = dominoToEx.get(dominoID);
             if (currentKnownExercise == null && !npID.isEmpty()) {
               logger.info("\tcan't find ex by domino id " + dominoID);
 
@@ -374,7 +362,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
               deleteEx.remove(exID); // don't delete this one
 
               importEx.getDirectlyRelated().forEach(contextEx -> {
-                SlickExercise slickExercise1 = legacyToEx.get(contextEx.getDominoID());
+                SlickExercise slickExercise1 = dominoToEx.get(contextEx.getDominoID());
 
                 if (slickExercise1 == null) {
                   logger.warn("no context ex known for domino id " + contextEx.getDominoID());
@@ -390,7 +378,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
               });
               */
 
-              if (current.contains(dominoID) || oldIDs.contains(npID)) {
+              if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
                 importUpdateEx.add(importEx);
                 MutableExercise mutable = importEx.getMutable();
                 mutable.setID(exID);
@@ -412,7 +400,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
                 bringBack.add(importEx);
               }*/
             }
-          }
+          });
         }
 
         {
@@ -436,7 +424,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             // now update...
             // update the exercises...
             logger.info("addPending updating  " + importUpdateEx.size() + " exercises");
-            doUpdate(projectid, getImportUser(), slickUEDAO, importUpdateEx, typeOrder2, legacyToEx, oldIDToExer, bringBack);
+            doUpdate(projectid, getImportUser(), slickUEDAO, importUpdateEx, typeOrder2, dominoToEx, oldIDToExer, bringBack);
           }
 /*
           if (!deleteEx.isEmpty()) {
@@ -445,7 +433,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           }*/
         }
 
-        copyAudio(projectid, newEx, slickUEDAO.getOldToNew(projectid).getOldToNew());
+        Map<String, Integer> oldToNew = slickUEDAO.getOldToNew(projectid).getOldToNew();
+        copyAudio(projectid, newEx, oldToNew);
+        copyAudio(projectid, importUpdateEx, oldToNew);
 
         updateProjectIfSomethingChanged(jsonDominoID, newEx, importUpdateEx, project.getProject(), requestTime);
 
@@ -456,6 +446,30 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     } else {
       throw getRestricted("adding pending exercises");
     }
+  }
+
+  /**
+   * If the project is empty, go to the beginning of time, more or less.
+   * So if you make a project in domino, then in netprof, will pick up everything in domino.
+   *
+   * @param project
+   * @param modified
+   * @return
+   */
+  @NotNull
+  private String getModifiedTimestamp(Project project, Timestamp modified) {
+    ZonedDateTime zdt;
+
+    if (project.getRawExercises().isEmpty()) {
+      Date fiveYearsAgo = new Date(System.currentTimeMillis() - FIVE_YEARS);
+
+      logger.info("Start from " + fiveYearsAgo);
+
+      zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), ZoneId.of("UTC"));
+    } else {
+      zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
+    }
+    return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
   }
 
   @Override
@@ -482,12 +496,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see #addPending
    * @param jsonDominoID
    * @param newEx
    * @param updateEx
    * @param project1
    * @param requestTime
+   * @see #addPending
    */
   private void updateProjectIfSomethingChanged(int jsonDominoID,
                                                Collection<CommonExercise> newEx,
@@ -553,10 +567,17 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return importUser;
   }
 
+  // add context exercises too.
   @NotNull
   private Map<Integer, CommonExercise> getDominoIDToExercise(Collection<CommonExercise> toImport) {
     Map<Integer, CommonExercise> dominoToEx = new HashMap<>();
     toImport.forEach(ex -> dominoToEx.put(ex.getDominoID(), ex));
+    logger.info("getDominoIDToExercise importing " + toImport.size() + " vocab items");
+    toImport.forEach(ex ->
+        ex.getDirectlyRelated().forEach(commonExercise -> dominoToEx.put(commonExercise.getDominoID(), commonExercise))
+    );
+    logger.info("getDominoIDToExercise importing " + toImport.size() + " vocab items + context exercises...");
+
     return dominoToEx;
   }
 
@@ -581,21 +602,16 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(match.getID());
         logger.info("copyAudio for project " + match.getID() + "/" + match.getProject().name() +
             " got " + transcriptToAudio.size() + " candidates");
-        getSlickAudios(projectid, newEx, exToInt, transcriptToAudio,
-            transcriptToAudioMatch, transcriptToContextAudioMatch);
+        getSlickAudios(projectid,
+            newEx,
+            exToInt,
+            transcriptToAudio,
+            transcriptToAudioMatch,
+            transcriptToContextAudioMatch);
       }
 
       if (!matches.isEmpty()) {
-        List<SlickAudio> copies = new ArrayList<>();
-
-        for (AudioMatches m : transcriptToAudioMatch.values()) {
-//          logger.info("copyAudio got transcript match " + m);
-          m.deposit(copies);
-        }
-        for (AudioMatches m : transcriptToContextAudioMatch.values()) {
-          logger.info("copyAudio got context match " + m);
-          m.deposit(copies);
-        }
+        List<SlickAudio> copies = getSlickAudios(transcriptToAudioMatch, transcriptToContextAudioMatch);
         logger.info("CopyAudio :" +
             "\n\tcopying " + transcriptToAudioMatch.size() + "/" + transcriptToContextAudioMatch.size() +
             "audio " + copies.size() +
@@ -611,6 +627,21 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+  @NotNull
+  private List<SlickAudio> getSlickAudios(Map<String, AudioMatches> transcriptToAudioMatch, Map<String, AudioMatches> transcriptToContextAudioMatch) {
+    List<SlickAudio> copies = new ArrayList<>();
+
+    for (AudioMatches m : transcriptToAudioMatch.values()) {
+//          logger.info("copyAudio got transcript match " + m);
+      m.deposit(copies);
+    }
+    for (AudioMatches m : transcriptToContextAudioMatch.values()) {
+      logger.info("copyAudio got context match " + m);
+      m.deposit(copies);
+    }
+    return copies;
+  }
+
   private static class AudioMatches {
     private SlickAudio mr = null;
     private SlickAudio ms = null;
@@ -620,7 +651,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
     /**
      * @param candidate
-     * @see #copyMatchingAudio(int, AudioMatches, int, List)
+     * @see #copyMatchingAudio(int, int, List, AudioMatches)
      */
     public void add(SlickAudio candidate) {
       //   int gender = candidate.gender();
@@ -780,8 +811,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       if (exid == null) {
         logger.error("getSlickAudios : huh? can't find " + oldID + " in " + exToInt.size());
       } else {
-        vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
-        contextCounts.add(addAudioForContext(projectid, exToInt, transcriptToAudio, transcriptToContextMatches, ex));
+        if (ex.getAudioAttributes().isEmpty()) {
+          vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
+        }
+        contextCounts.add(addAudioForContext(projectid, exToInt, transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
     }
     logger.info("getSlickAudio  : vocab " + vocab + " contextCounts " + contextCounts);
@@ -808,7 +841,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
     if (audioAttributes != null) {
       AudioMatches audioMatches = transcriptToMatches.computeIfAbsent(fl, k -> new AudioMatches());
-      copyMatchingAudio(projectid, audioMatches, exid, audioAttributes);
+      copyMatchingAudio(projectid, exid, audioAttributes, audioMatches);
       match++;
     } else {
       // logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
@@ -822,32 +855,43 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     return new MatchInfo(match, nomatch);
   }
 
+  /**
+   * What about delete - we need to remove audio who transcripts no longer match.
+   *
+   * @param projectid
+   * @param exToInt
+   * @param transcriptToAudio
+   * @param transcriptToContextMatches
+   * @param contextExercises
+   * @return
+   */
   private MatchInfo addAudioForContext(int projectid,
                                        Map<String, Integer> exToInt,
                                        Map<String, List<SlickAudio>> transcriptToAudio,
                                        Map<String, AudioMatches> transcriptToContextMatches,
-                                       CommonExercise ex) {
+                                       Collection<CommonExercise> contextExercises) {
     int match = 0;
     int nomatch = 0;
-    for (CommonExercise context : ex.getDirectlyRelated()) {
-      String cfl = context.getForeignLanguage();
-      List<SlickAudio> audioAttributes = transcriptToAudio.get(cfl);
-      if (audioAttributes != null) {
-        AudioMatches audioMatches = transcriptToContextMatches.computeIfAbsent(cfl, k -> new AudioMatches());
-        String coldID = context.getOldID();
-        Integer cexid = exToInt.get(coldID);
+    for (CommonExercise context : contextExercises) {
+      if (context.getAudioAttributes().isEmpty()) {
+        String cfl = context.getForeignLanguage();
+        List<SlickAudio> audioAttributes = transcriptToAudio.get(cfl);
+        if (audioAttributes != null) {
+          AudioMatches audioMatches = transcriptToContextMatches.computeIfAbsent(cfl, k -> new AudioMatches());
+          String coldID = context.getOldID();
+          Integer cexid = exToInt.get(coldID);
 
-        logger.info("getSlickAudios context exercise old " + coldID + " -> " + cexid);
+          logger.info("getSlickAudios context exercise old " + coldID + " -> " + cexid);
 
-        copyMatchingAudio(projectid, audioMatches, cexid, audioAttributes);
-        match++;
-      } else {
-        logger.info("getSlickAudios context no match " + ex.getEnglish() + " '" + cfl + "'");
-        nomatch++;
+          copyMatchingAudio(projectid, cexid, audioAttributes, audioMatches);
+          match++;
+        } else {
+          logger.info("getSlickAudios context no match " + context.getEnglish() + " = '" + cfl + "'");
+          nomatch++;
+        }
       }
     }
-    MatchInfo second = new MatchInfo(match, nomatch);
-    return second;
+    return new MatchInfo(match, nomatch);
   }
 
   private static class MatchInfo {
@@ -881,10 +925,19 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+  /**
+   * Add to matches from input audio attributes
+   *
+   * @param projectid
+   * @param exid
+   * @param audioAttributes
+   * @param matches
+   */
   private void copyMatchingAudio(int projectid,
-                                 AudioMatches matches,
                                  int exid,
-                                 List<SlickAudio> audioAttributes) {
+                                 List<SlickAudio> audioAttributes,
+
+                                 AudioMatches matches) {
     if (exid == -1)
       logger.error("copyMatchingAudio huh? exid -1 for project " + projectid + " " + audioAttributes.size());
     for (SlickAudio audio : audioAttributes) {

@@ -99,12 +99,6 @@ public interface IAudioDAO extends IDAO {
 
   Set<Integer> getWithContext(int userid, int projid);
 
-/*  Map<String, Float> getRecordedReport(int projid,
-                                       float total,
-                                       float totalContext,
-                                       Set<Integer> exerciseIDs,
-                                       Map<Integer, String> exToTranscript,
-                                       Map<Integer, String> exToContextTranscript);*/
 
   /**
    * @param userid
