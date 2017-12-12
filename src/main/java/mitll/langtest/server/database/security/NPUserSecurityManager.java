@@ -557,7 +557,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     } else {
       HttpSession session = getCurrentSession(request);
       if (session == null) {
-        log.info("getUserIDFromRequest no current session for request " + request.getRequestURI());
+//        log.info("getUserIDFromRequest no current session for request " + request.getRequestURI());
         return -1;
       } else {
         return getUserIDFromSession(session);

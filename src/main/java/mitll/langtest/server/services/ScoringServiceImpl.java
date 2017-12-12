@@ -40,6 +40,7 @@ import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
@@ -63,6 +64,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
@@ -233,6 +235,20 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
     //logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+    Project project = getProject(projid);
+
+    if (project.hasProjectSpecificAudio()) {
+      List<CommonExercise> exercisesForAudio =
+          audioIDMap
+              .values()
+              .stream()
+              .map(iSlimResult -> db.getExercise(projid, iSlimResult.getExID()))
+              .collect(Collectors.toList());
+
+      logger.info("ensure compressed audio for " + exercisesForAudio.size() + " exercises");
+      new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(exercisesForAudio, getLanguage(project));
+    }
+
     logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
     return recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());

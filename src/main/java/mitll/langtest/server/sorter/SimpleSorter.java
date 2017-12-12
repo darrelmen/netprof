@@ -48,13 +48,9 @@ import java.util.List;
  * @since 10/9/15.
  */
 public class SimpleSorter extends ExerciseComparator {
- // protected final Collection<String> typeOrder;
   private  boolean sortByEnglishOnly;
 
-  SimpleSorter(boolean sortByEnglishOnly) {
-   // this.typeOrder = typeOrder;
-    this.sortByEnglishOnly = sortByEnglishOnly;
-  }
+  SimpleSorter(boolean sortByEnglishOnly) {  this.sortByEnglishOnly = sortByEnglishOnly;  }
 
   /**
    * what if the item has no unit/chapter info?
@@ -68,10 +64,10 @@ public class SimpleSorter extends ExerciseComparator {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
   public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
-    if (sortByEnglishOnly) {//typeOrder.isEmpty()) {
+    if (sortByEnglishOnly) {
       sortByEnglish(toSort, searchTerm);
     } else {
-      Collections.sort(toSort, (Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));
+      toSort.sort((Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));
     }
   }
 
@@ -84,6 +80,6 @@ public class SimpleSorter extends ExerciseComparator {
    * @see AudioExport#writeZipJustOneAudio
    */
   public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells, String searchTerm) {
-    Collections.sort(exerciseShells, (o1, o2) -> compareByEnglish(o1, o2, searchTerm));
+    exerciseShells.sort((o1, o2) -> compareByEnglish(o1, o2, searchTerm));
   }
 }

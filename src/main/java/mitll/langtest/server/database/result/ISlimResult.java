@@ -8,4 +8,5 @@ public interface ISlimResult {
   String getJsonScore();
   boolean isValid();
   int getAudioID();
+  int getExID();
 }

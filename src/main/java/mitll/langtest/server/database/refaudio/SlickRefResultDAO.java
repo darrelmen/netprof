@@ -34,7 +34,6 @@ package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.result.ISlimResult;
@@ -197,8 +196,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getAllSlimForProject(projid).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
 
-  public Collection<ISlimResult> getAllSlimForProjectIn(int projid,
-                                                        Set<Integer> audioIDs) {
+  public Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs) {
     return dao.getAllSlimIn(projid, audioIDs).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
 
@@ -279,7 +277,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
       logger.info("fromSlickToSlim : slickRef " + slickRef + " not valid " + alignScore + " score " + scoreJson);
     }
 
-    return new SlimResult(slickRef.audioid(), validAlignJSON, scoreJson, alignScore);
+    return new SlimResult(slickRef.exid(), slickRef.audioid(), validAlignJSON, scoreJson, alignScore);
   }
 
   @Override
