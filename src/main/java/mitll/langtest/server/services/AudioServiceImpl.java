@@ -32,9 +32,7 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.client.services.AudioService;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
@@ -56,11 +54,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -234,9 +227,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   /**
    * Kick off a thread to do this... so we can return.
    */
-  public void ensureAllAudio() {
+ /* public void ensureAllAudio() {
     new Thread(() -> db.getProjects().forEach(project -> checkAudio(project.getID()))).start();
-  }
+  }*/
 
   /**
    * @param projectid
@@ -254,7 +247,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           " - took " + (now - then) + " millis to check audio");
     }
 
-    ensureAudioHelper.ensureAudio(projectid);
+    new Thread(() -> ensureAudioHelper.ensureAudio(projectid)).start();
   }
 
   private void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {

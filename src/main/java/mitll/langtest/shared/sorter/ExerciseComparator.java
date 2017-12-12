@@ -73,9 +73,9 @@ public class ExerciseComparator {
       return +1;
     } else if (english1.isEmpty()) {
       return compareByFL(o1, o2, searchTerm);
-    } else if (english1.equalsIgnoreCase(searchTerm) && !english2.equalsIgnoreCase(searchTerm)) {
+    } else if (!searchTerm.isEmpty() && english1.equalsIgnoreCase(searchTerm) && !english2.equalsIgnoreCase(searchTerm)) {
       return -1;
-    } else if (!english1.equalsIgnoreCase(searchTerm) && english2.equalsIgnoreCase(searchTerm)) {
+    } else if (!searchTerm.isEmpty() && !english1.equalsIgnoreCase(searchTerm) && english2.equalsIgnoreCase(searchTerm)) {
       return +1;
     } else {
       int i = compareStrings(english1, english2);

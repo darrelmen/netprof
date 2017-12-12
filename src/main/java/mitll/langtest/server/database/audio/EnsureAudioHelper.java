@@ -142,12 +142,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
           if (c < 10) {
 //            logger.info("checkAudio exercise.g. ensure audio for " + audioAttribute + " on " + exercise);
           }
+
           try {
-            if (ensureCompressedAudio(
-                audioAttribute.getUserid(),
+            if (!ensureCompressed(
                 exercise,
-                audioAttribute.getAudioRef(),
-                audioAttribute.getAudioType(),
+                audioAttribute,
                 language).equalsIgnoreCase(FILE_MISSING)) success++;
 
             if (c % 1000 == 0) {
@@ -157,6 +156,16 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
             logger.warn("ensureCompressedAudio Got " + e1 + " for exercise " + exercise.getID() + " : " + audioAttribute.getAudioRef());
           }
         }
+
+        exercise.getDirectlyRelated().forEach(exercise1 -> exercise1.getAudioAttributes().forEach(audioAttribute -> {
+          ensureCompressed(
+              exercise,
+              audioAttribute,
+              language);
+//          if (c % 1000 == 0) {
+//            logger.debug("ensureCompressedAudio checked " + c + ", success = " + success + " e.g. " + audioAttribute);
+//          }
+        }));
       }
     }
     long now = System.currentTimeMillis();
@@ -165,6 +174,15 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
           exercises.size() + " exercises, " +
           success + " files successful");
     }
+  }
+
+  private String ensureCompressed(CommonExercise exercise, AudioAttribute audioAttribute, String language) {
+    return ensureCompressedAudio(
+        audioAttribute.getUserid(),
+        exercise,
+        audioAttribute.getAudioRef(),
+        audioAttribute.getAudioType(),
+        language);
   }
 
   /**

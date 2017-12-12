@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -53,19 +52,34 @@ public interface AudioServiceAsync {
 
                       AsyncCallback<AudioAnswer> async);
 
+  /**
+   * @see mitll.langtest.client.LangTest#getImage(int, String, String, String, int, int, String, String, AsyncCallback)
+   * @param reqid
+   * @param audioFile
+   * @param imageType
+   * @param imageOptions
+   * @param exerciseID
+   * @param language
+   * @param async
+   */
   void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
                             String language,
                             AsyncCallback<ImageResponse> async);
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio
+   * @see mitll.langtest.client.project.ProjectEditForm#checkAudio
    * @param projectid
    * @param async
    */
   void checkAudio(int projectid, AsyncCallback<Void> async);
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
+   * @param id
+   * @param asyncCallback
+   */
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
 
-  void ensureAllAudio(AsyncCallback<Void> async);
+//  void ensureAllAudio(AsyncCallback<Void> async);
 }

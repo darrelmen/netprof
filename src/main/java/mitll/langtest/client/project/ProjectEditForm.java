@@ -1,3 +1,35 @@
+/*
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
+ */
+
 package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.*;
@@ -10,6 +42,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -35,9 +68,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
-  public static final String SHOW_ON_I_OS = "Show On iOS";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
+
+
+  private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
+  private static final String SHOW_ON_I_OS = "Show On iOS";
+  private static final String STATUS_BOX = "Status_Box";
 
   private static final String DOMINO_PROJECT = "Domino";
   private static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
@@ -352,7 +388,7 @@ public class ProjectEditForm extends UserDialog {
     {
       feedback = new HTML();
       feedback.addStyleName("topFiveMargin");
-      feedback.addStyleName("bottomFiveMargin");
+      addBottomMargin(feedback);
       fieldset.add(feedback);
     }
 
@@ -598,19 +634,22 @@ public class ProjectEditForm extends UserDialog {
   private Button getCheckAudio(final ProjectInfo info) {
     Button w = new Button(CHECK_AUDIO, IconType.STETHOSCOPE);
     w.addClickHandler(event -> clickCheckAudio(info, w));
-    w.addStyleName("bottomFiveMargin");
+    addBottomMargin(w);
     return w;
   }
 
   private void clickCheckAudio(ProjectInfo info, Button w) {
     w.setEnabled(false);
     feedback.setText(PLEASE_WAIT);
-    // logger.info("check audio for " + info);
     checkAudio(info, w);
   }
 
   private void checkAudio(ProjectInfo info, Button w) {
-    services.getAudioServiceAsyncForHost(info.getHost()).checkAudio(info.getID(), new AsyncCallback<Void>() {
+  //  feedback.setText("Checking audio and making mp3's...");
+
+    services
+        .getAudioServiceAsyncForHost(info.getHost())
+        .checkAudio(info.getID(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         w.setEnabled(true);
@@ -620,7 +659,7 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Void result) {
         w.setEnabled(true);
-        feedback.setText("Audio check complete.");
+        feedback.setText("Checking audio and making mp3's...");
       }
     });
   }
@@ -636,9 +675,13 @@ public class ProjectEditForm extends UserDialog {
     w.addClickHandler(event -> clickRecalc(info, w));
 
     w.addStyleName("leftFiveMargin");
-    w.addStyleName("bottomFiveMargin");
+    addBottomMargin(w);
 
     return w;
+  }
+
+  private void addBottomMargin(UIObject w) {
+    w.addStyleName("bottomFiveMargin");
   }
 
   private void clickRecalc(ProjectInfo info, Button w) {
@@ -665,7 +708,7 @@ public class ProjectEditForm extends UserDialog {
 
   private ListBox getBox() {
     ListBox affBox = new ListBox();
-    affBox.getElement().setId("Status_Box");
+    affBox.getElement().setId(STATUS_BOX);
     affBox.addStyleName("leftTenMargin");
 
     for (ProjectStatus status : ProjectStatus.values()) {

@@ -1349,10 +1349,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
-
-    if (getProject(projectID).hasProjectSpecificAudio()) {
-      new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(toAddAudioTo, language);
-    }
     now = System.currentTimeMillis();
 
     if (now - then > 50)
