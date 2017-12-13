@@ -42,6 +42,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.list.DisplayMenu.SHOW_PHONES;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,7 +55,7 @@ import java.util.logging.Logger;
  */
 public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   private final Logger logger = Logger.getLogger("ExercisePanelFactory");
-  private static final String SHOW_PHONES = "showPhones";
+//  private static final String SHOW_PHONES = "showPhones";
 
   protected final ExerciseController controller;
   protected ListInterface<T, U> exerciseList;

@@ -110,9 +110,16 @@ public class RecordButton extends Button {
     this.propertyHandler = propertyHandler;
     this.doClickAndHold = doClickAndHold;
     this.autoStopDelay = delay;
-    setType(ButtonType.PRIMARY);
+    setType(ButtonType.DANGER);
     setIcon(IconType.MICROPHONE);
     setupRecordButton();
+
+    /**
+     * <button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-heart"></i>
+       </button>
+
+     */
+
     getElement().setId("record_button");
   }
 

@@ -22,12 +22,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/18/17.
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
-class DisplayMenu {
+public class DisplayMenu {
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
   private static final String SHOW_SOUNDS = "Show Sounds";
 
-  private static final String SHOW_PHONES = "showPhones";
+  public static final String SHOW_PHONES = "showPhones";
   private static final IconType CHECK = IconType.CHECK;
   private static final String SHOW = "showStorage";
   private final KeyStorage storage;
@@ -72,18 +72,15 @@ class DisplayMenu {
       phoneChoice.setIcon(CHECK);
     }
 
-    phoneChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (getPhonesDisplay() == PhonesChoices.SHOW) {
-          phoneChoice.setIcon(null);
-          storePhoneChoices(PhonesChoices.HIDE.toString());
-        } else {
-          phoneChoice.setIcon(CHECK);
-          storePhoneChoices(PhonesChoices.SHOW.toString());
-        }
-        fireShowEvent();
+    phoneChoice.addClickHandler(event -> {
+      if (getPhonesDisplay() == PhonesChoices.SHOW) {
+        phoneChoice.setIcon(null);
+        storePhoneChoices(PhonesChoices.HIDE.toString());
+      } else {
+        phoneChoice.setIcon(CHECK);
+        storePhoneChoices(PhonesChoices.SHOW.toString());
       }
+      fireShowEvent();
     });
     return phoneChoice;
   }
@@ -147,10 +144,7 @@ class DisplayMenu {
   private void storeShowChoices(String toStore) {
     storage.storeValue(SHOW, toStore);
   }
-  private void storePhoneChoices(String toStore) {
-    storage.storeValue(SHOW_PHONES, toStore);
-  }
-
+  private void storePhoneChoices(String toStore) {   storage.storeValue(SHOW_PHONES, toStore);  }
   private void fireShowEvent() {
     LangTest.EVENT_BUS.fireEvent(new ShowEvent());
   }

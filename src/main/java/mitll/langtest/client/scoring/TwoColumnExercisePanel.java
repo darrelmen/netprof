@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
 import static mitll.langtest.client.qc.QCNPFExercise.FOREIGN_LANGUAGE;
-import static mitll.langtest.client.scoring.PhonesChoices.HIDE;
 import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 import static mitll.langtest.client.scoring.ShowChoices.*;
 
@@ -39,6 +38,9 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
  * Created by go22670 on 3/23/17.
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
+  public static final String SHOW_COMMENTS = "Show Comments";
+  public static final String HIDE_COMMENTS = "Hide Comments";
+  public static final String N_A = "N/A";
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String LEFT_WIDTH = "60%";
@@ -83,6 +85,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private DivWidget flClickableRow, altFLClickableRow;
 
   private ShowChoices choices;
+  /**
+   *
+   */
   private PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
@@ -128,7 +133,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-      clickableWords = new ClickableWords<>(listContainer, exercise, controller.getLanguage(), fontSize, phonesChoices == SHOW);
+      clickableWords = new ClickableWords<>(listContainer, exercise, controller.getLanguage(), fontSize, shouldShowPhones());
       this.isRTL = clickableWords.isRTL(exercise);
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -361,13 +366,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-    if (phonesChoices == SHOW) {
+   // if (shouldShowPhones()) {
       if (alignmentOutputFromAudio != null) {
         alignments.put(id, alignmentOutputFromAudio);
       }
 //      AlignmentOutput alignmentOutput = alignmentOutputFromAudio == null ? alignments.get(id) : alignmentOutputFromAudio;
       audioChanged(id, duration);
-    }
+   // }
   }
 
   /**
@@ -377,9 +382,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void audioChanged(int id, long duration) {
-    if (phonesChoices == SHOW) {
+  //  if (shouldShowPhones()) {
       showAlignment(id, duration, alignments.get(id));
-    }
+   // }
   }
 
   private int currentAudioDisplayed = -1;
@@ -573,7 +578,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             } else {
               //    logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
 
-              current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
+              if (shouldShowPhones()) {
+                current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
+              }
+
               segmentToWord.put(wordSegment, current); // only one for now...
               clickableRow.add(current.asWidget());
 
@@ -581,7 +589,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               //    clickableRow.add(new InlineHTML(" "));
 
               if (!isRTL) {
-                current.asWidget().addStyleName("floatLeft");
+                addFloatLeft(current);
               }
 
               clickablesIterator.next(); // OK, we've done this clickable
@@ -598,7 +606,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
 
           if (!isRTL) {
-            value1.asWidget().addStyleName("floatLeft");
+            addFloatLeft(value1);
           }
           segmentToWord.put(wordSegment, value1);
           clickableRow.add(value1.asWidget());
@@ -621,6 +629,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 //      if (!isRTL) w1.addStyleName("floatLeft");
 //      clickableRow.add(w1);
     }
+  }
+
+  private void addFloatLeft(IHighlightSegment current) {
+    current.asWidget().addStyleName("floatLeft");
   }
 
   private void doOneToOneMatch(List<TranscriptSegment> phones,
@@ -706,7 +718,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           "\n\tsegment       " + lcSegment + //" length " + segmentLength +
           "\n\tvs clickable '" + fragment1 + "'");
 
-    boolean showPhones = phonesChoices == PhonesChoices.SHOW;
+    boolean showPhones =shouldShowPhones();
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {  // easy match -
       if (showPhones) {
@@ -715,13 +727,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       return clickable;
     } else {
-      Collection<IHighlightSegment> bulk = showPhones ? getMatchingSegments(clickables, clickable, lcSegment) : Collections.EMPTY_LIST;
+      Collection<IHighlightSegment> bulk =  getMatchingSegments(clickables, clickable, lcSegment);// : Collections.EMPTY_LIST;
 
       if (bulk.isEmpty()) {
         return null;
       } else { // all clickables match this segment
         AllHighlight allHighlight = new AllHighlight(bulk);
-        allHighlight.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
+        if (showPhones)  allHighlight.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
 
         if (DEBUG)
           logger.info("matchSegmentToWidgetForAudio create composite from " + bulk.size() + " = " + allHighlight);
@@ -926,7 +938,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     card.add(rowWidget);
 
     DivWidget lr = getHorizDiv();
-    lr.addStyleName("floatLeft");
+    addFloatLeft(lr);
     lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
 
     if (hasEnglish) lr.add(getEnglishWidget(e, english));
@@ -981,7 +993,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @NotNull
   private NavLink getShowComments() {
-    NavLink widget = new NavLink("Show Comments");
+    NavLink widget = new NavLink(SHOW_COMMENTS);
     widget.addClickHandler(event -> {
       for (CommentBox box : comments) {
         if (showingComments) {
@@ -992,9 +1004,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
       showingComments = !showingComments;
       if (showingComments) {
-        widget.setText("Hide Comments");
+        widget.setText(HIDE_COMMENTS);
       } else {
-        widget.setText("Show Comments");
+        widget.setText(SHOW_COMMENTS);
       }
     });
     return widget;
@@ -1014,6 +1026,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     flContainer.getElement().setId("flWidget");
 
     DivWidget recordButtonContainer = new DivWidget();
+    recordButtonContainer.addStyleName("recordingRowStyle");
     recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
     flContainer.add(recordButtonContainer);
 
@@ -1092,7 +1105,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (isRTL) {
       clickableWords.setDirection(flEntry);
     } else {
-      flEntry.addStyleName("floatLeft");
+      addFloatLeft(flEntry);
     }
     flEntry.setWidth("100%");
     return flEntry;
@@ -1249,12 +1262,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private Widget addAltFL(T e, boolean addTopMargin) {
     String altFL = e.getAltFL().trim();
-    if (!altFL.isEmpty() && !altFL.equals("N/A") && !e.getForeignLanguage().trim().equals(altFL)) {
+    if (!altFL.isEmpty() && !altFL.equals(N_A) && !e.getForeignLanguage().trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
 
       DivWidget contentWidget = clickableWords.getClickableWords(altFL,
           FieldType.FL,
-          altflClickables, false, phonesChoices == HIDE, isRTL);
+          altflClickables,
+          false,
+          //true,
+          !shouldShowPhones(),
+          isRTL);
 
       altFLClickableRow = contentWidget;
 
@@ -1265,7 +1282,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
       }
       if (!isRTL) {
-        flEntry.addStyleName("floatLeft");
+        addFloatLeft(flEntry);
       } else {
         clickableWords.setDirection(flEntry);
       }
@@ -1275,22 +1292,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     } else return null;
   }
 
+  private void addFloatLeft(DivWidget flEntry) {  flEntry.addStyleName("floatLeft");  }
+
   private Widget addTransliteration(T e) {
     String translitSentence = e.getTransliteration();
-    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
+    if (!translitSentence.isEmpty() && !translitSentence.equals(N_A)) {
       return getEntry(e, QCNPFExercise.TRANSLITERATION, translitSentence, FieldType.TRANSLIT,
           showInitially, new ArrayList<>(), true, annotationHelper, false);
     }
     return null;
   }
 
-  private boolean isMeaningValid(T e) {
-    String meaning = e.getMeaning();
-    return isValid(meaning);
-  }
+  private boolean isMeaningValid(T e) {  return isValid(e.getMeaning());  }
 
   private boolean isValid(String meaning) {
-    return meaning != null && !meaning.trim().isEmpty() && !meaning.equals("N/A");
+    return meaning != null && !meaning.trim().isEmpty() && !meaning.equals(N_A);
   }
 
   private final List<CommentBox> comments = new ArrayList<>();
@@ -1401,7 +1417,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void contextAudioChanged(int id, long duration) {
-    if (phonesChoices == SHOW) {
+   // if (shouldShowPhones()) {
+
       AlignmentOutput alignmentOutput = alignments.get(id);
       if (alignmentOutput != null) {
         if (DEBUG) {
@@ -1416,8 +1433,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       } else {
         //logger.warning("contextAudioChanged : no alignment output for " + id);
       }
-    }
+
+    //}
   }
+
+  private boolean shouldShowPhones() {  return phonesChoices == SHOW;  }
 
   private Widget addContextTranslation(AnnotationExercise e,
                                        String contextTranslation,

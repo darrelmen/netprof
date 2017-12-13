@@ -106,7 +106,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;
-    getElement().setId("PostAudioRecordButton");
+   // getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
     style.setMarginBottom(1, Style.Unit.PX);
@@ -114,7 +114,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
-    setType(ButtonType.SUCCESS);
   }
 
   public void setExerciseID(int exercise) {
@@ -169,7 +168,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
-    logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
+//    logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 
     controller.getAudioService().writeAudioFile(
         base64EncodedWavFile,

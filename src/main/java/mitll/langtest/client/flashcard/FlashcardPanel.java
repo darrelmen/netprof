@@ -88,7 +88,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
-  private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip.</i>";
+  private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip. Space to record.</i>";
 
   static final String ON = "On";
   static final String OFF = "Off";

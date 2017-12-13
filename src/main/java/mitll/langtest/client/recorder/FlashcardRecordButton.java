@@ -63,19 +63,19 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
-
   private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
-  private static final String PROMPT2 = "Click/space and hold to record";
-  private static final String SPACE_BAR = PROMPT2;
-
-
-  private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
-  private static final String PROMPT = "Click and hold to record";
+  //private static final String PROMPT2 = "Press and hold";//"Click/space and hold to record";
+  /**
+   * @see #initRecordButton
+   */
+  private static final String SPACE_BAR = "Press and hold";
+  private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to start recording, release to stop.";
+  private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
-  private static final boolean WARN_NOT_A_SPACE = false;
+  //private static final boolean WARN_NOT_A_SPACE = false;
 
-  private boolean warnUserWhenNotSpace = true;
+  private boolean warnUserWhenNotSpace;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
   private final Tooltip tooltip;
@@ -266,7 +266,7 @@ public class FlashcardRecordButton extends RecordButton {
   public void initRecordButton() {
     super.initRecordButton();
     setText(addKeyBinding ? SPACE_BAR : getPrompt());
-    setType(ButtonType.PRIMARY);
+    setType(ButtonType.DANGER);
   }
 
   protected String getPrompt() {

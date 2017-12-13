@@ -480,13 +480,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
         @Override
         public void songLoaded(double duration) {
           if (DEBUG) logger.info("playAudio - songLoaded " + path + " this " + this);
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-              if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
-              doClick();
-            }
-          });
+          Scheduler.get().scheduleDeferred(() -> doClick());
         }
+        // if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
 
         @Override
         public void songFinished() {
@@ -499,6 +495,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   /**
    * Remember to convert the path (which might be .wav) to a browser dependent format - IE can't do ogg, only mp3.
+   *
    * @param path
    */
   public void loadAudio(String path) {
