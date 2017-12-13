@@ -48,7 +48,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    *
    */
   private DivWidget scoreFeedback;
-  private boolean hasScoreHistory = false;
+  private boolean hasScoreHistory;
   private final ListInterface<CommonShell, T> listContainer;
   private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
@@ -151,9 +151,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @see TwoColumnExercisePanel#makeFirstRow
    */
-  PostAudioRecordButton getPostAudioRecordButton() {
-    return postAudioRecordButton;
-  }
+  PostAudioRecordButton getPostAudioRecordButton() {  return postAudioRecordButton;  }
 
   /**
    * @return
@@ -239,6 +237,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   public void gotShortDurationRecording() {
     waitCursorHelper.showFinished();
     playAudioPanel.hideRecord();
+    setVisible(true);
+    scoreHistory.setVisible(true);
   }
 
   @Override

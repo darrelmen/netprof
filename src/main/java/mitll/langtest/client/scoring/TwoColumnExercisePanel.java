@@ -1032,9 +1032,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
-    } else {
-      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
+    //else {
+      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    //}
 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.setWidth("100%");

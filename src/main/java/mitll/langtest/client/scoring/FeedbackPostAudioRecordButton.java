@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * @see AudioPanel#makePlayAudioPanel(Widget, String, String, mitll.langtest.shared.exercise.AudioRefExercise)
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
-  private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
+  //private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
 
   private static final String STOP = "Stop";
 
@@ -56,12 +56,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     }
     return b;
   }
-
-/*  @Override
-  protected void postAudioFile(String base64EncodedWavFile) {
-    super.postAudioFile(base64EncodedWavFile);
-    simpleRecordAudioPanel.postAudioFile();
-  }*/
 
   @Override
   protected AudioType getAudioType() {

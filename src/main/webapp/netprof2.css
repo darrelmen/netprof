@@ -1930,7 +1930,7 @@ h1, h2, h3, h4, h5, h6 {
  For a round button for recording.
  */
 .recordingRowStyle .btn-large {
-    padding: 14px 18px;
+    padding: 11px 16px;
     border-radius: 27px;
 }
 
