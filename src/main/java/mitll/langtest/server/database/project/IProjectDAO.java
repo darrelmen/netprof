@@ -45,7 +45,7 @@ public interface IProjectDAO extends IDAO {
   Map<String, String> getProps(int projid);
 
   int add(int userid, String name, String language, String course,
-          String firstType, String secondType, String countryCode, int displayOrder, boolean isDev, int dominoID);
+          String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID);
 
   int add(int userid, long modified, String name, String language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder, int dominoID);

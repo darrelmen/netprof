@@ -163,7 +163,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     if (userExerciseDAO != null) {
       Collection<Integer> removes = removeExercises();
       if (!removes.isEmpty())
-      logger.info("remove these (" + removes.size() + ") " + removes);
+        logger.info("remove these (" + removes.size() + ") " + removes);
       addOverlays(removes);
     }
 
@@ -325,7 +325,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @return old exercises
    * @see DatabaseImpl#editItem
    */
-  public CommonExercise addOverlay(CommonExercise userExercise) {
+  private CommonExercise addOverlay(CommonExercise userExercise) {
     int idOfNewExercise = userExercise.getID();
     CommonExercise currentExercise = getExerciseOld(userExercise.getOldID());
 
@@ -422,8 +422,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       if (commonExercise == null) {
         if (id != userExerciseDAO.getUnknownExerciseID()) {
 
-        if (warns++ < MAX_WARNS)
-          logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
+          if (warns++ < MAX_WARNS)
+            logger.warn(this + " getExercise : couldn't find exercise " + id + " in " + idToExercise.size() + " exercises (" + warns + " warned)");
         }
       }
       return commonExercise;
@@ -431,9 +431,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-   * @see #addOverlay(CommonExercise)
    * @param id
    * @return
+   * @see #addOverlay(CommonExercise)
    */
   private CommonExercise getExerciseOld(String id) {
     synchronized (idToExercise) {
@@ -441,7 +441,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       if (commonExercise == null) {
         if (warns++ < MAX_WARNS) {
           logger.warn(this + " couldn't find exercise '" + id + "' in " + oldidToExercise.size() + " exercises (" + warns + " warned)");
-       //   logger.warn(" : " + oldidToExercise.keySet());
+          //   logger.warn(" : " + oldidToExercise.keySet());
         }
       }
       return commonExercise;

@@ -25,6 +25,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
+  public static final String MP3 = ".mp3";
   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   public static final String OGG = ".ogg";
@@ -172,7 +173,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #useResult(AudioAnswer)
    */
   private void setDownloadHref() {
-    String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
+    String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, MP3) : audioPath;
     playAudioPanel.setDownloadHref(audioPathToUse, exercise.getID(), getUser(), controller.getHost());
   }
 

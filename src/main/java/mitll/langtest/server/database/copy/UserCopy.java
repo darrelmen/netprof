@@ -275,14 +275,15 @@ public class UserCopy {
    */
   private void checkMatchingGender(IUserDAO dominoUserDAO, User toImport, DBUser dominoUser) {
     MiniUser.Gender realGender = toImport.getRealGender();
-    if (dominoUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Unspecified &&
+    mitll.hlt.domino.shared.model.user.User.Gender initialGender = dominoUser.getGender();
+    if (initialGender == mitll.hlt.domino.shared.model.user.User.Gender.Unspecified &&
         realGender != MiniUser.Gender.Unspecified) {
       dominoUser.setGender(realGender == MiniUser.Gender.Male ? mitll.hlt.domino.shared.model.user.User.Gender.Male :
           realGender == MiniUser.Gender.Female ? mitll.hlt.domino.shared.model.user.User.Gender.Female : mitll.hlt.domino.shared.model.user.User.Gender.Unspecified);
       dominoUserDAO.updateUser(dominoUser);
-      logger.info("checkMatchingGender : update gender for " + dominoUser + " now " + dominoUser.getGender());
+      logger.info("checkMatchingGender : update initialGender for " + dominoUser + " now " + dominoUser.getGender() + " import " + realGender + " initial " + initialGender);
     } else {
-/*      logger.info("checkMatchingGender : no change - gender for " + dominoUser.getUserId() +
+/*      logger.info("checkMatchingGender : no change - initialGender for " + dominoUser.getUserId() +
           " is " + dominoUser.getGender() + " vs " + realGender);*/
     }
   }

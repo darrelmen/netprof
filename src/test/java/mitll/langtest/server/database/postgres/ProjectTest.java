@@ -221,6 +221,56 @@ public class ProjectTest extends BaseTest {
     }*/
   }
 
+
+  @Test
+  public void testOneEditNeighbors2() {
+    DatabaseImpl spanish = getDatabase();
+    IUserDAO userDAO = spanish.getUserDAO();
+    logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
+
+    spanish.populateProjects();
+    spanish.setInstallPath("");
+
+    Project project = spanish.getProject(2);
+
+    List<CommonExercise> rawExercises = project.getRawExercises();
+
+    int i = 0;
+
+    // TODO : get the exercisePhoneInfo somehow...
+
+    for (CommonExercise exercise : rawExercises) {
+      ExercisePhoneInfo exercisePhoneInfo = null;//project.getExToPhone().get(exercise.getID());
+      if (exercisePhoneInfo != null) {
+        Map<String, ExerciseToPhone.Info> wordToInfo = Collections.emptyMap();//exercisePhoneInfo.getWordToInfo();
+        logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() + " " + wordToInfo);
+
+        if (wordToInfo != null) {
+          for (Map.Entry<String, ExerciseToPhone.Info> pair : wordToInfo.entrySet()) {
+            String pron = pair.getKey();
+            ExerciseToPhone.Info value = pair.getValue();
+            Map<String, Integer> pronToCount = value.getPronToCount();
+            logger.info("\t" + pron + " = " + value.getPronToInfo());// + " (" +pronToCount.get(pron)+ ")");
+            logger.info("\t" + pron + " = " + pronToCount);
+          }
+        }
+
+        if (i++ > MAX) break;
+      }
+    }
+
+/*    List<String> tests = Arrays.asList("l", "la", "las", "s", "se", "seg", "ak");
+    for (String test : tests) {
+      Collection<CommonExercise> matches = phoneTrie.getMatches(test);
+      logger.info("for " + test + " got " + matches.size());
+      int i = 0;
+      for (CommonExercise exercise : matches) {
+        logger.info("found " + test + " : " + exercise.getForeignLanguage());
+        if (i++ > 10) break;
+      }
+    }*/
+  }
+
   @Test
   public void testAgain() {
     DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);

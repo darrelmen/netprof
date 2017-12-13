@@ -1248,6 +1248,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     dbUser.setGender(gender);
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.UserCopy#checkMatchingGender
+   * @param updateUser
+   * @return
+   */
   @Override
   public SResult<ClientUserDetail> updateUser(DBUser updateUser) {
     if (updateUser.getFirstName() == null) updateUser.setFirstName("");
@@ -1272,19 +1277,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     {
       String affiliation = clientUserDetail1.getAffiliation();
       if (affiliation == null || affiliation.isEmpty()) {
-        logger.warn("client user " + affiliation + " for " + clientUserDetail1);
+        logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
       }
     }
 
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.updateUser(adminUser, clientUserDetail1);
+
+/*
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+
     if (clientUserDetail != null) {
       String affiliation = clientUserDetail.getAffiliation();
       if (affiliation == null || affiliation.isEmpty()) {
         logger.warn("after " + affiliation + " for " + clientUserDetail);
       }
     }
-    logger.info("after " + clientUserDetailSResult);
+    logger.info("after " + clientUserDetailSResult);*/
 
     return clientUserDetailSResult;
   }

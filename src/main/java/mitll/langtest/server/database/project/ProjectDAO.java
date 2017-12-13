@@ -294,9 +294,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
    */
   public int add(int userid, String name, String language, String course,
-                 String firstType, String secondType, String countryCode, int displayOrder, boolean isDev, int dominoID) {
+                 String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID) {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
-        isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
+        //isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
+
+       status,
         firstType, secondType, countryCode, displayOrder, dominoID);
   }
 

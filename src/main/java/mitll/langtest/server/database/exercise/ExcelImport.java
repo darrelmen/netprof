@@ -973,10 +973,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     }
   }
 
+/*
   @Override
   public Map<Integer, String> getIDToFL(int projid) {
     return null;
   }
+*/
 
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {

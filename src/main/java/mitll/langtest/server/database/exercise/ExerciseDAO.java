@@ -39,8 +39,10 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExercisePhone;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +67,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @Deprecated - do we still need this with domino content management?
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    */
-  CommonExercise addOverlay(CommonExercise userExercise);
+  //CommonExercise addOverlay(CommonExercise userExercise);
 
   /**
    * @param userExerciseDAO
@@ -78,11 +80,20 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        IAudioDAO audioDAO,
                        int projid,
                        Database database, boolean isMyProject);
-
-  Map<Integer, String> getIDToFL(int projid);
+ // Map<Integer, String> getIDToFL(int projid);
 
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
+   * @param id
+   * @param count
+   */
   void updatePhones(int id, int count);
+
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+   * @param pairs
+   */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
 }

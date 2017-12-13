@@ -131,13 +131,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     hydecScore.setJson(score.getJson());
     addScore(hydecScore);
   }
-
+/*
   @Override
   public void gotScore(CorrectAndScore hydecScore) {
     showChart(controller.getHost());
     addPlayer();
     addScore(hydecScore);
-  }
+  }*/
 
   /**
    * @param hydecScore

@@ -136,9 +136,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   protected void addOverlays(Collection<Integer> removes) {
   }
 
-  public Map<Integer, String> getIDToFL(int projid) {
+/*  public Map<Integer, String> getIDToFL(int projid) {
     return userExerciseDAO.getIDToFL(projid);
-  }
+  }*/
 
   /**
    * Does join with related exercise table - maybe better way to do this in scala side?

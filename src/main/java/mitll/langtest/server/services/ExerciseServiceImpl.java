@@ -1351,7 +1351,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
     now = System.currentTimeMillis();
 
-    if (now - then > 50)
+    if (now - then > 10)
       logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
     then = System.currentTimeMillis();

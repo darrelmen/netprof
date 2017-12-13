@@ -41,8 +41,6 @@ import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.instrumentation.EventDAO;
-import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
@@ -65,7 +63,9 @@ import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.*;
+import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -73,22 +73,37 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.UNKNOWN;
+import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
+import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
 
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
+
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
-  private static final boolean COPY_EVENTS = true;
+//  private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
-  public static final String IS_EVAL = "-isEval";
 
   enum ACTION {
-    COPY, DROP, DROPALL, UNKNOWN;
+    COPY("c"), DROP("d"), DROPALL("a"), UNKNOWN("u");
 
+    private String value;
+
+    ACTION(String value) { this.value = value;}
+    String getValue() { return value;}
+    public String toLower() {
+      return name().toLowerCase();
+    }
+  }
+
+  enum OPTIONS {
+    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o");
+    private String value;
+
+    OPTIONS(String value) { this.value = value;}
+    String getValue() { return value;}
     public String toLower() {
       return name().toLowerCase();
     }
@@ -124,8 +139,13 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tisEval   " + isEval +
           "\n\tmodel    " + databaseLight.getServerProps().getCurrentModel());
 
-      String nameToUse = optionalName.isEmpty() ? language : optionalName;
-      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, !hasModel, isEval);
+      String nameToUse = optionalName == null ? language : optionalName;
+
+      ProjectStatus status = ProjectStatus.PRODUCTION;
+      if (!hasModel) status = ProjectStatus.DEVELOPMENT;
+      else if (isEval) status = ProjectStatus.EVALUATION;
+
+      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, status);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -208,9 +228,7 @@ public class CopyToPostgres<T extends CommonShell> {
       return null;
     }
 
-    ServerProperties serverProps2 = getServerProperties("", NETPROF_PROPERTIES, "/opt/netprof");
-
-    readProps(serverProps, serverProps2);
+    readProps(serverProps, getServerProperties("", NETPROF_PROPERTIES, "/opt/netprof"));
 
     if (useLocal) {
       serverProps.setLocalPostgres();
@@ -272,11 +290,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db      to read from
    * @param cc      country code
    * @param optName non-default name (not language) - null OK
-   * @param isDev   i.e. not production
-   * @param isEval
+   * @param status  i.e. not production
    * @see #copyOneConfigCommand
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev, boolean isEval) throws Exception {
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, ProjectStatus status) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
@@ -285,7 +302,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\ttype order is         " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
-    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev, typeOrder, isEval);  // TODO : course?
+    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, status);  // TODO : course?
 
     logger.info("copyOneConfig" +
         "\n\tproject #" + projectID +
@@ -314,7 +331,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
       // add the audio table
-      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, isEval);
+      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, status == ProjectStatus.EVALUATION);
       // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
       // copy ref results
@@ -357,7 +374,7 @@ public class CopyToPostgres<T extends CommonShell> {
     return oldToNewWordID;
   }
 
-  private void copyEvents(DatabaseImpl db, int projectID, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
+/*  private void copyEvents(DatabaseImpl db, int projectID, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
     if (COPY_EVENTS) {
       {
         int defectDetector = db.getUserDAO().getDefectDetector();
@@ -365,16 +382,16 @@ public class CopyToPostgres<T extends CommonShell> {
         ((SlickEventImpl) db.getEventDAO()).copyTableOnlyOnce(other, projectID, oldToNewUser, exToID);
       }
     }
-  }
+  }*/
 
   private int createProjectIfNotExists(DatabaseImpl db,
                                        String cc,
                                        String optName,
                                        int displayOrder,
-                                       boolean isDev,
-                                       Collection<String> typeOrder, boolean isEval) {
+                                       Collection<String> typeOrder,
+                                       ProjectStatus status) {
     return getCreateProject(db)
-        .createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev, typeOrder, isEval);
+        .createProjectIfNotExists(db, cc, optName, "", displayOrder, typeOrder, status);
   }
 
   /**
@@ -384,7 +401,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param idToFL
    * @param typeOrder
    * @return map of parent exercise to context sentence
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
+   * @see #copyOneConfig
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
@@ -571,7 +588,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewResult
    * @param slickWordDAO
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
+   * @see #copyOneConfig
    */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
     int c = 0;
@@ -823,7 +840,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
-   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
+   * @see #copyOneConfig
    */
   private void copyRefResult(DatabaseImpl db,
                              Map<Integer, Integer> oldToNewUser,
@@ -892,50 +909,73 @@ public class CopyToPostgres<T extends CommonShell> {
    * drop pashto
    * dropAll destroy
    *
-   * @param arg
+   * @param args
    */
-  public static void main(String[] arg) {
-    if (arg.length < 2) {
-      usage();
+  public static void main(String[] args) {
+    Options options = getOptions();
+
+    CommandLineParser parser = new GnuParser();
+    HelpFormatter formatter = new HelpFormatter();
+    CommandLine cmd;
+
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      logger.error(e.getMessage());
+      formatter.printHelp("copy", options);
+
+      System.exit(1);
       return;
     }
 
-    String firstArg = arg[0];
-    ACTION action = getAction(firstArg);
-    logger.info("action = " + action);
-
-    String config = arg[1];
-
-    String optconfig = null;
+    ACTION action = UNKNOWN;
+    String config = null;
+    String dropConfirm = null;
+    String optName = null;
+    String optConfigValue = null;
+    int displayOrderValue = 0;
     boolean isEval = false;
-    if (arg.length > 2) {
-      String secondArg = arg[2];
-      if (isEval(secondArg)) {
-        isEval = true;
-      } else {
-        optconfig = secondArg;
-      }
+    if (cmd.hasOption("c")) {
+      action = COPY;
+      config = cmd.getOptionValue(COPY.toLower());
+    } else if (cmd.hasOption(DROP.toLower())) {
+      action = DROP;
+      config = cmd.getOptionValue(COPY.toLower());
+    } else if (cmd.hasOption(DROPALL.toLower())) {
+      action = DROPALL;
+      dropConfirm = cmd.getOptionValue(DROPALL.toLower());
     }
-    int displayOrder = 0;
 
-    String optDisplayOrder = null;
-    if (arg.length > 3) {
-      String third = arg[3];
-      if (isEval(third)) {
-        isEval = true;
-      } else {
-        optDisplayOrder = third;
-        displayOrder = getDisplayOrder(optDisplayOrder);
-        if (displayOrder == -1) optDisplayOrder = null;
+    if (cmd.hasOption(NAME.toLower())) {
+      optName = cmd.getOptionValue(NAME.toLower());
+    }
+    if (cmd.hasOption(OPTCONFIG.toLower())) {
+      optConfigValue = cmd.getOptionValue(OPTCONFIG.toLower());
+    }
+
+    if (cmd.hasOption(ORDER.toLower())) {
+      String optionValue = "";
+      try {
+        optionValue = cmd.getOptionValue(ORDER.toLower());
+        displayOrderValue = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        logger.error("couldn't parse " +ORDER + " = " + optionValue);
+        formatter.printHelp("copy", options);
+        return;
       }
     }
-    String optName = getOptionalName(arg, optconfig, optDisplayOrder);
+
+    if (cmd.hasOption(EVAL.toLower())) {
+      isEval = true;
+    }
+    logger.info("action = " + action);
 
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     switch (action) {
       case UNKNOWN:
-        logger.error("not sure what to do with action " + firstArg);
+//        logger.error("not sure what to do with action ");
+        formatter.printHelp("copy", options);
         break;
       case DROP:
         logger.info("drop " + config);
@@ -948,13 +988,13 @@ public class CopyToPostgres<T extends CommonShell> {
       case COPY:
         logger.info("copying " +
             "\nconfig    '" + config + "' " +
-            "\noptconfig '" + optconfig + "' " +
+            "\noptconfig '" + optConfigValue + "' " +
             "\nname      '" + optName + "'" +
-            "\norder     " + displayOrder +
+            "\norder     " + displayOrderValue +
             "\neval " + isEval
         );
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optconfig, optName, displayOrder, isEval);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval);
           if (!b) {
             System.exit(1);
           }
@@ -974,22 +1014,51 @@ public class CopyToPostgres<T extends CommonShell> {
         break;*/
       case DROPALL:
         logger.warn("really be sure that this is only during development and not during production!");
-        if (arg.length == 2) {
-          String s = arg[1];
-          if (s.equals("destroy")) {
-            doDropAll();
-          } else {
-            logger.info("please check with Gordon or Ray or somebody like that before doing this.");
-          }
+        if (dropConfirm.equals("destroy")) {
+          doDropAll();
+        } else {
+          logger.info("please check with Gordon or Ray or somebody like that before doing this.");
         }
         break;
       default:
-        usage();
+        formatter.printHelp("copy", options);
     }
   }
 
-  private static boolean isEval(String secondArg) {
-    return secondArg.equalsIgnoreCase(IS_EVAL);
+  @NotNull
+  private static Options getOptions() {
+    Options options = new Options();
+
+    Option copy = new Option(COPY.getValue(), COPY.toLower(), true, "copy this config or language into netprof");
+    copy.setRequired(false);
+    options.addOption(copy);
+
+    Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this config from netprof database");
+    drop.setRequired(false);
+    options.addOption(drop);
+
+    Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
+    dropAll.setRequired(false);
+    options.addOption(dropAll);
+
+
+    Option optConfig = new Option(OPTCONFIG.getValue(), OPTCONFIG.toLower(), true, "optional properties file within config directory (e.g. for pashto)");
+    optConfig.setRequired(false);
+    options.addOption(optConfig);
+
+    Option name = new Option(NAME.getValue(), NAME.toLower(), true, "optional name for the project (different from config)");
+    name.setRequired(false);
+    options.addOption(name);
+
+    Option eval = new Option(EVAL.getValue(), EVAL.toLower(), false, "mark the imported project as at the eval step and use project specific audio");
+    eval.setRequired(false);
+    options.addOption(eval);
+
+
+    Option displayOrder = new Option(ORDER.getValue(), ORDER.toLower(), true, "display order among projects of the same language");
+    displayOrder.setRequired(false);
+    options.addOption(displayOrder);
+    return options;
   }
 
   /**
@@ -1014,62 +1083,5 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.error("Got " + e, e);
       }
     }
-  }
-
-  @NotNull
-  private static ACTION getAction(String firstArg) {
-    ACTION action = ACTION.UNKNOWN;
-    try {
-      action = ACTION.valueOf(firstArg.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.info("expecting an action: \n{}", CopyToPostgres::getValues);
-    }
-    return action;
-  }
-
-  private static String getValues() {
-    return Arrays.stream(ACTION.values())
-        .filter(p -> p != UNKNOWN)
-        .map(ACTION::toLower)
-        .collect(Collectors.joining(" or "));
-  }
-
-  private static int getDisplayOrder(String optDisplayOrder) {
-    int displayOrder = -1;
-    try {
-      displayOrder = optDisplayOrder == null ? 0 : Integer.parseInt(optDisplayOrder);
-    } catch (NumberFormatException e) {
-      logger.error("couldn't parse display order " + optDisplayOrder);
-    }
-    return displayOrder;
-  }
-
-  /**
-   * copy english -isEval english brightened
-   * 0    1        2      3       4
-   *
-   * @param arg
-   * @param optconfig
-   * @param optDisplayOrder
-   * @return
-   */
-  @NotNull
-  private static String getOptionalName(String[] arg, String optconfig, String optDisplayOrder) {
-    StringBuilder builder = new StringBuilder();
-    List<String> name = Collections.emptyList();
-
-    if (arg.length > 3) {
-      name = Arrays.asList(arg);
-
-      name = name.subList(optconfig == null && !name.get(2).equalsIgnoreCase(IS_EVAL) ? 2 : optDisplayOrder == null ? 3 : 4, name.size());
-    }
-
-    for (String n : name) builder.append(n).append(" ");
-    return builder.toString().trim();
-  }
-
-  private static void usage() {
-    logger.error("Usage : expecting either " + getValues() + " followed by config, e.g. copy spanish OR if dropAll the special safety word.");
-    logger.error("Usage : optional arguments are display order and name, e.g. copy pashto2 pashtoQuizlet2.properties 1 Pashto Elementary");
   }
 }

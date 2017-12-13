@@ -72,9 +72,7 @@ dependencies {
     def dominoVers = '2.7-SNAPSHOT'
 
    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
-
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
-
     //compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
 
     compile('mitll.hlt:domino:' + dominoVers) {
@@ -82,13 +80,6 @@ dependencies {
         transitive = true
         artifact { name = 'domino'; type = 'jar'; extension='jar'}
     }
-
-    //mymodule 'mitll.hlt:domino:2.7-SNAPSHOT'
-   // compile('mitll.hlt:domino:domino' + dominoVers + "@jar") { changing = true; }
-
-//    compile ('mitll.hlt:domino:2.7-SNAPSHOT:domino@jar')
-
-    //compile configurations.mymodule.filter { it.name == 'domino.jar' }
 
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
@@ -190,9 +181,7 @@ dependencies {
 
     compile group: 'org.apache.lucene', name: 'lucene-analyzers', version: '3.6.2'
 
-    // last one actually in kws-bugs -- why???
-//    runtime group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.8.v20160314'
-//    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.8.v20160314'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
 
 war {

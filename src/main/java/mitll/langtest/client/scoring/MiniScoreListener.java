@@ -9,6 +9,10 @@ import java.util.List;
  * Created by go22670 on 1/27/17.
  */
 public interface MiniScoreListener {
+  /**
+   * @see SimpleRecordAudioPanel#getScoreHistory
+   * @param host
+   */
   void showChart(String host);
 
   /**
@@ -17,7 +21,7 @@ public interface MiniScoreListener {
    * @param path
    */
   void gotScore(PretestScore score, String path);
-  void gotScore(CorrectAndScore hydecScore);
+  //void gotScore(CorrectAndScore hydecScore);
 
   /**
    * @see MiniScoreListener#gotScore(PretestScore, String)

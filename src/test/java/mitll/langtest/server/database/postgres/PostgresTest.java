@@ -224,7 +224,9 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testMSA() {  copyProd("msa");  }
+  public void testMSA() {
+    copyProd("msa");
+  }
 
   @Test
   public void testTagalog() {
@@ -304,14 +306,29 @@ public class PostgresTest extends BaseTest {
   }
 
   private void testCopy(List<Info> infos) {
-    CopyToPostgres cp = new CopyToPostgres();
+
+    //CopyToPostgres cp = new CopyToPostgres();
     try {
       for (Info config : infos) {
-        //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+        String[] args = new String[6];
+        int i = 0;
+
+        args[i++] = "-c";
+        args[i++] = config.language;
+
+        args[i++] = "-n";
+        args[i++] = config.name;
+
+        args[i++] = "-o";
+        args[i++] = "" + config.displayOrder;
+
+        long then = System.currentTimeMillis();
+
+        CopyToPostgres.main(args);
+/*        //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
         DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
 
         String cc = new CreateProject(databaseLight.getServerProps().getHydra2Languages()).getCC(config.language);
-        long then = System.currentTimeMillis();
         logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
         logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
@@ -320,12 +337,12 @@ public class PostgresTest extends BaseTest {
           ISection<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
           sectionHelper.report();
         } else {
-          cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev(), false);
+          new CopyToPostgres<>().copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev(), false);
           databaseLight.close();
-        }
+        }*/
 
         long now = System.currentTimeMillis();
-        logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
+        logger.info("\n\n\n-------- FINISHED copy " + config + " " + config + " in " + ((now - then) / 1000) + " seconds");
         log();
       }
     } catch (Exception e) {
@@ -356,7 +373,7 @@ public class PostgresTest extends BaseTest {
       this(language, language, null, 0, false);
     }
 
-     Info(String language, String name, String props, int displayOrder, boolean isDev) {
+    Info(String language, String name, String props, int displayOrder, boolean isDev) {
       this.language = language;
       this.name = name;
       this.props = props;
@@ -372,9 +389,9 @@ public class PostgresTest extends BaseTest {
       return isDev;
     }
 
-    Info setDev(boolean dev) {
+    void setDev(boolean dev) {
       isDev = dev;
-      return this;
+      //  return this;
     }
   }
 
@@ -599,5 +616,7 @@ public class PostgresTest extends BaseTest {
     for (SlickProject project : all) logger.info("project" + project);
   }
 
-  private static DBConnection getConnection() {  return new DBConnection(getProps().getDBConfig());  }
+  private static DBConnection getConnection() {
+    return new DBConnection(getProps().getDBConfig());
+  }
 }

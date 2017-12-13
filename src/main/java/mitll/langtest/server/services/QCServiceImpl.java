@@ -168,7 +168,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
         logger.debug("markGender 1 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on " + addr);
       }
 */
-        db.getExerciseDAO(getProjectIDFromUser()).addOverlay(byID);
+    //    db.getExerciseDAO(getProjectIDFromUser()).addOverlay(byID);
 
 /*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
       String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());

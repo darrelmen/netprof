@@ -97,9 +97,7 @@ public class BaseTest {
     return database;
   }
 
-  protected static DatabaseImpl getDatabase() {
-    return getDatabase(getProps());
-  }
+  protected static DatabaseImpl getDatabase() {  return getDatabase(getProps());  }
 
   protected static ServerProperties getProps() {
     File file = new File("/opt/netprof/config/netprof.properties");
