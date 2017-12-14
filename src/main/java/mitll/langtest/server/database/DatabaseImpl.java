@@ -672,9 +672,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return null;
     } else {
-      return
-          //serverProps.useH2() ? null:
-          projectManagement.getProject(projectid);
+      return projectManagement.getProject(projectid);
     }
   }
 

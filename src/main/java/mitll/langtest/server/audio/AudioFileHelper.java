@@ -147,11 +147,11 @@ public class AudioFileHelper implements AlignDecode {
    * @see Project#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationsFromDictOrLTS(transcript, transliteration, true);
+    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true);
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
-    return webserviceScoring.getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
+    return webserviceScoring.getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
   }
 
   /**

@@ -89,21 +89,21 @@ public abstract class Scoring {
 
 //  private static final double KEEP_THRESHOLD = 0.3;
 
-  static final int FOREGROUND_VOCAB_LIMIT = 100;
-  static final int VOCAB_SIZE_LIMIT = 200;
+//  static final int FOREGROUND_VOCAB_LIMIT = 100;
+//  static final int VOCAB_SIZE_LIMIT = 200;
 
   /**
    * @see SLFFile#createSimpleSLFFile(Collection, String, float)
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  protected SmallVocabDecoder svDecoderHelper = null;
+//  protected SmallVocabDecoder svDecoderHelper = null;
   private final CheckLTS checkLTSHelper;
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
-  final HTKDictionary htkDictionary;
+// private final HTKDictionary htkDictionary;
   final boolean isMandarin;
 
   /**
@@ -126,11 +126,14 @@ public abstract class Scoring {
     this.deployPath = deployPath;
     this.props = props;
     this.logAndNotify = langTestDatabase;
-    this.htkDictionary = htkDictionary;
+  //  this.htkDictionary = htkDictionary;
   //  lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     String language = project.getLanguage();
     this.languageProperty = language;
-    isMandarin = language.equalsIgnoreCase(MANDARIN);
+    isMandarin =
+        language.equalsIgnoreCase(MANDARIN) ||
+            language.equalsIgnoreCase("Japanese") ||
+            language.equalsIgnoreCase("Korean");
  //   if (isMandarin) logger.warn("using mandarin segmentation.");
     try {
 //      logger.debug("\n" + this + " : Factory for " + languageProperty);
@@ -139,7 +142,7 @@ public abstract class Scoring {
       ltsFactory = null;
       logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
     }
-    makeDecoder();
+    //makeDecoder();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel());
   }
 
@@ -344,7 +347,7 @@ public abstract class Scoring {
     }
   }
 
-  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
     return
         new ParseResultJson(props)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
@@ -425,11 +428,11 @@ public abstract class Scoring {
    * @see #Scoring
    */
 
-  private void makeDecoder() {
+/*  private void makeDecoder() {
     if (svDecoderHelper == null && htkDictionary != null) {
       svDecoderHelper = new SmallVocabDecoder(htkDictionary);
     }
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
@@ -469,9 +472,10 @@ public abstract class Scoring {
     return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
   }
 
-  public SmallVocabDecoder getSmallVocabDecoder() {
-    return svDecoderHelper;
-  }
+  public abstract SmallVocabDecoder getSmallVocabDecoder();
+//  {
+//    return svDecoderHelper;
+//  }
 
   public Collator getCollator() {
     return ltsFactory.getCollator();

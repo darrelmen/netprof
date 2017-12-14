@@ -90,8 +90,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   private List<UserList<CommonShell>> fromSlick(Collection<SlickUserExerciseList> all) {
-    List<UserList<CommonShell>> copy = new ArrayList<>();
-    for (SlickUserExerciseList list : all) copy.add(fromSlick(list));
+    List<UserList<CommonShell>> copy = new ArrayList<>(all.size());
+    all.forEach(slickUserExerciseList -> copy.add(fromSlick(slickUserExerciseList)));
     return copy;
   }
 
@@ -217,12 +217,18 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see IUserListManager#getListsForUser(int, int, boolean, boolean)
    */
   @Override
-  public List<UserList<CommonShell>> getAllByUser(long userid, int projectID) {
-    List<UserList<CommonShell>> userExerciseLists = fromSlick(getByUser((int) userid, projectID));
+  public List<UserList<CommonShell>> getAllByUser(int userid, int projectID) {
+    long then = System.currentTimeMillis();
+    List<UserList<CommonShell>> userExerciseLists = fromSlick(getByUser( userid, projectID));
+    long now = System.currentTimeMillis();
 
-    for (UserList<CommonShell> ul : userExerciseLists) {
-      populateList(ul);
-    }
+    logger.info("getAllByUser took " +(now-then) + " to get " + userExerciseLists.size());
+
+    then = now;
+    userExerciseLists.forEach(this::populateList);
+     now = System.currentTimeMillis();
+
+    logger.info("getAllByUser took " +(now-then) + " to populate " + userExerciseLists.size());
 
     return userExerciseLists;
   }
@@ -232,7 +238,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * Why would we need to copy the exercise as in UserListDAO?
    *
    * @param where
-   * @see IUserListDAO#getAllByUser(long, int)
+   * @see IUserListDAO#getAllByUser(int, int)
    * @see #getWithExercises(int)
    * @see #populateLists(Collection, long)
    */

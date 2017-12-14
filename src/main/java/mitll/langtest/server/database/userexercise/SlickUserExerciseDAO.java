@@ -691,8 +691,8 @@ public class SlickUserExerciseDAO
    */
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
 //    logger.info("getUserExercises for " + all.size()+ " exercises");
-    List<CommonExercise> copy = new ArrayList<>();
-    for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
+    List<CommonExercise> copy = new ArrayList<>(all.size());
+    all.forEach(slickExercise -> copy.add(fromSlick(slickExercise)));
     //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
     return copy;
   }
@@ -841,8 +841,7 @@ public class SlickUserExerciseDAO
   @Override
   public List<CommonShell> getOnList(int listID) {
     List<CommonExercise> userExercises = getCommonExercises(listID);
-    List<CommonShell> userExercises2 = new ArrayList<>();
-    userExercises2.addAll(userExercises);
+    List<CommonShell> userExercises2 = new ArrayList<>(userExercises);
     return userExercises2;
   }
 
@@ -853,9 +852,10 @@ public class SlickUserExerciseDAO
    * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    */
   public List<CommonExercise> getCommonExercises(int listID) {
-
-
+    long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
+    long now = System.currentTimeMillis();
+    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for " + listID );
     return getUserExercises(onList);
   }
 

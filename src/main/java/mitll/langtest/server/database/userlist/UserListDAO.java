@@ -226,7 +226,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see UserListManager#getListsForUser
    */
   @Override
-  public List<UserList<CommonShell>> getAllByUser(long userid, int projectID) {
+  public List<UserList<CommonShell>> getAllByUser(int userid, int projectID) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
           CREATORID + "=" + userid +
@@ -477,7 +477,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param where
    * @see #getUserLists(String, long)
    * @see IUserListDAO#getWithExercises(int)
-   * @see IUserListDAO#getAllByUser(long, int)
+   * @see IUserListDAO#getAllByUser(int, int)
    */
   private void populateList(UserList<CommonShell> where) {
     where.setExercises(userExerciseDAO.getOnList(where.getID()));

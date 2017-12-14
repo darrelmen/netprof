@@ -78,7 +78,7 @@ public interface IUserListDAO extends IDAO {
    */
   int getCount();
 
-  List<UserList<CommonShell>> getAllByUser(long userid, int projectID);
+  List<UserList<CommonShell>> getAllByUser(int userid, int projectID);
 
   List<UserList<CommonShell>> getAllPublic(long userid, int projectID);
 

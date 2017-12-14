@@ -35,6 +35,7 @@ package mitll.langtest.server.scoring;
 import corpus.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
@@ -55,24 +56,24 @@ public class SmallVocabDecoder {
 
   /**
    * @see #getTrimmed(String)
-   *
    * @see mitll.langtest.server.audio.SLFFile#cleanToken(String)
-   *
+   * <p>
    * remove latin capital letter i with dot above - 0130
    */
   public static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
-  public static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char ZERO = '0';
   private HTKDictionary htkDictionary;
 
-  public SmallVocabDecoder() {
-  }
+  public SmallVocabDecoder() {}
 
   /**
    * @param htkDictionary
-   * @see ASRWebserviceScoring#makeDecoder
+   * @see PronunciationLookup#makeDecoder
    */
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
     this.htkDictionary = htkDictionary;
+    //logger.info("dict now " + htkDictionary);
   }
 
   /**
@@ -99,8 +100,8 @@ public class SmallVocabDecoder {
 
     final CharacterIterator it = new StringCharacterIterator(s);
     for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-      if (c >= '0' && c <= '9') {
-        int offset = c - '0';
+      if (c >= ZERO && c <= '9') {
+        int offset = c - ZERO;
         int full = FULL_WIDTH_ZERO + offset;
         builder.append(Character.valueOf((char) full).toString());
       } else {
@@ -114,47 +115,53 @@ public class SmallVocabDecoder {
    * @param sentences
    * @param vocabSizeLimit
    * @return
-   * @see ASRWebserviceScoring#getUniqueTokensInLM
+   * @see PronunciationLookup#getUniqueTokensInLM
    */
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
-    for (String sentence : sentences) {
+    sentences.forEach(sent -> getTokens(sent).forEach(token -> {
+      Integer c = sc.get(token);
+      sc.put(token, (c == null) ? 1 : c + 1);
+    }));
+
+/*    for (String sentence : sentences) {
       for (String token : getTokens(sentence)) {
         //  if (isValid(scoring, token)) {
         Integer c = sc.get(token);
         sc.put(token, (c == null) ? 1 : c + 1);
-     /*   } else {
+     *//*   } else {
           logger.warn("getSimpleVocab : skipping '" + token + "' which is not in dictionary.");
-        }*/
+        }*//*
       }
-    }
+    }*/
 
     // sort by frequency
-    List<String> vocab = new ArrayList<String>(sc.keySet());
-    Collections.sort(vocab, new Comparator<String>() {
-      public int compare(String s, String s2) {
-        Integer first = sc.get(s);
-        Integer second = sc.get(s2);
-        return first < second ? +1 : first > second ? -1 : 0;
-      }
-    });
+    List<String> vocab = sortedByFreq(sc);
 
     // take top n most frequent
-    List<String> all = new ArrayList<String>(); // copy list b/c sublist not serializable ???
     if (vocab.size() > vocabSizeLimit)
       logger.warn("truncating vocab size from " + vocab.size() + " to " + vocabSizeLimit);
-    all.addAll(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
-    return all;
+    return new ArrayList<>(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
+  }
+
+  @NotNull
+  private List<String> sortedByFreq(Map<String, Integer> sc) {
+    List<String> vocab = new ArrayList<>(sc.keySet());
+    vocab.sort((s, s2) -> -1 * Integer.compare(sc.get(s), sc.get(s2)));
+    //return first < second ? +1 : first > second ? -1 : 0;
+    // });
+    return vocab;
   }
 
   public String getSegmented(String longPhrase) {
     Collection<String> tokens = getTokens(longPhrase);
     StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(segmentation(token.trim()));
-      builder.append(" ");
-    }
+    tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
+//    for (String token : tokens) {
+//      builder.append(segmentation(token.trim()));
+//      builder.append(" ");
+//    }
     return builder.toString();
   }
 
@@ -263,7 +270,7 @@ public class SmallVocabDecoder {
       boolean b = (apply != null) && apply.nonEmpty();
       return b;
     } catch (Exception e) {
-      logger.error("isDict - " + token + " got " + e);
+      logger.error("isDict for '" + token + "', dict " + (htkDictionary != null) + " got " + e, e);
       return false;
     }
   }

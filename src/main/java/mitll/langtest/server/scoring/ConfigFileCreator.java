@@ -204,9 +204,7 @@ public class ConfigFileCreator {
     return tmpDir.replaceAll("\\\\", "\\\\\\\\");
   }
 
-  private String getProp(String var, String defaultValue) {
-    return properties.containsKey(var) ? properties.get(var) : defaultValue;
-  }
+  private String getProp(String var, String defaultValue) {   return properties.getOrDefault(var, defaultValue);  }
 
 /*
   private String getProp(String var) {

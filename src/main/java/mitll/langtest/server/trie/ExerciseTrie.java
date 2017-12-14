@@ -121,8 +121,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     {
       String meaning = exercise.getMeaning().trim();
       if (!meaning.isEmpty()) {
-        String trimmed = getTrimmed(meaning);
-        smallVocabDecoder.getTokens(trimmed).forEach(token -> addEntry(exercise, token));
+        smallVocabDecoder
+            .getTokens(getTrimmed(meaning))
+            .forEach(token -> addEntry(exercise, token));
       }
     }
   }

@@ -54,8 +54,6 @@ public interface AlignDecode {
    * @param lmSentences
    * @param precalcScores
    * @return
-   * @paramx canUseCache
-   * @paramx useOldSchool true if should use hydec and not hydra service
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   PretestScore getASRScoreForAudio(File testAudioFile,

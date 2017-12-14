@@ -119,13 +119,20 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    try {
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-      return getUserListManager().getListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-      return Collections.emptyList();
-    }
+    // try {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    long then = System.currentTimeMillis();
+    Collection<UserList<CommonShell>> listsForUser = getUserListManager()
+        .getListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    return listsForUser;
+    // } catch (Exception e) {
+    //  logger.error("Got " + e, e);
+    // return Collections.emptyList();
+    // }
   }
 
   /**
@@ -139,17 +146,16 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public void addItemToUserList(int userListID, int exID) throws DominoSessionException {
     if (db.getCustomOrPredefExercise(getProjectIDFromUser(), exID) == null) {
       logger.error("can't find ex #" + exID);
-    }
-    else {
+    } else {
       getUserListManager().addItemToList(userListID, "" + exID, exID);
     }
   }
 
   /**
-   * @see NewContentChooser#getReviewList
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see NewContentChooser#getReviewList
    */
   @Override
   public UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException {

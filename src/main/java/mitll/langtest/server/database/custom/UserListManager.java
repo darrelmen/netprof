@@ -234,8 +234,11 @@ public class UserListManager implements IUserListManager {
     Set<Integer> ids = new HashSet<>();
 
     if (listsICreated) {
+      long then = System.currentTimeMillis();
       listsForUser = userListDAO.getAllByUser(userid, projid);
-//      logger.info("found " + listsForUser.size() + " created by " + userid);
+      long now = System.currentTimeMillis();
+
+      logger.info("getListsForUser took " + (now - then) +          " found " + listsForUser.size() + " created by " + userid);
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -249,8 +252,10 @@ public class UserListManager implements IUserListManager {
     if (visitedLists) {
       //Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
       //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getAllPublicNotMine(userid, projid);
+      long then = System.currentTimeMillis();
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
-      //    logger.info("found " + listsForUser1.size() + " visited by " + userid);
+      long now = System.currentTimeMillis();
+      logger.info("getListsForUser took " + (now - then) + "found " + listsForUser1.size() + " visited by " + userid);
 
       for (UserList<CommonShell> userList : listsForUser1) {
         if (!ids.contains(userList.getID())) {
@@ -308,20 +313,20 @@ public class UserListManager implements IUserListManager {
   @Override
   public UserList<CommonShell> getCommentedList(int projID) {
     Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
-    logger.info("getCommented for "+ projID + " found " +exercisesWithIncorrectAnnotations.size());
+    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size());
     List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations);
-    logger.info("getCommented for "+ projID + " found " +defectExercises.size() + " exercises");
+    logger.info("getCommented for " + projID + " found " + defectExercises.size() + " exercises");
     UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
-    logger.info("getCommented for "+ projID + " list has " +reviewList.getNumItems() + " exercises");
+    logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
     return reviewList;
   }
 
   @NotNull
   private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
     List<CommonExercise> defectExercises = new ArrayList<>();
-    incorrectAnnotations.forEach(id ->{
+    incorrectAnnotations.forEach(id -> {
       CommonExercise byExID = userExerciseDAO.getByExID(id);
-      if (byExID == null) logger.warn("can't find exercise " + id + " in project " +projID);
+      if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
       else defectExercises.add(byExID);
     });
     return defectExercises;

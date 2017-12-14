@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -40,6 +41,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * Defines interface to audio file helper.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -55,7 +58,7 @@ public interface ASR {
 
   SmallVocabDecoder getSmallVocabDecoder();
 
-  String createHydraDict(String transcript, String transliteration);
+  //String createHydraDict(String transcript, String transliteration);
 
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
@@ -86,6 +89,10 @@ public interface ASR {
                            PrecalcScores precalcScores,
                            boolean usePhoneToDisplay);
 
+  /**
+   * @see AudioFileHelper#isHydraAvailable
+   * @return
+   */
   boolean isAvailable();
 
 }

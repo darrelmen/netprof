@@ -62,8 +62,8 @@ public class ParseResultJson {
   private static final String S = "s";
   private static final String P = "p";
   private static final String PHONES = "phones";
-  public static final String WORDS = "words";
-  public static final String W = "w";
+  private static final String WORDS = "words";
+  private static final String W = "w";
   private final ServerProperties props;
 
   /**
@@ -157,7 +157,7 @@ public class ParseResultJson {
     return imageTypeMapMap;
   }
 
-  Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
+  private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
 
 
   /**

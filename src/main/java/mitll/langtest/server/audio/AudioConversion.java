@@ -592,8 +592,7 @@ public class AudioConversion extends AudioBase {
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) {
-          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?",
-              new Exception());//,
+          logger.error("convertToMP3FileAndCheck huh? source file " + pathToAudioFile + " doesn't exist?");//,
           //new Exception("can't find " + pathToAudioFile));
         }
       } else {

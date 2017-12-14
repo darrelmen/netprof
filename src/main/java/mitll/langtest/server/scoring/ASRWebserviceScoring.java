@@ -79,12 +79,13 @@ import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DE
  */
 public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
-  private static final int FOREGROUND_VOCAB_LIMIT = 100;
-  private static final int VOCAB_SIZE_LIMIT = 200;
+  // private static final int FOREGROUND_VOCAB_LIMIT = 100;
+  // private static final int VOCAB_SIZE_LIMIT = 200;
   private static final String DCODR = "dcodr";
-  private static final String UNK = "+UNK+";
+  // private static final String UNK = "+UNK+";
+
   private static final String SEMI = ";";
-  public static final String SIL = "sil";
+  private static final String SIL = "sil";
   public static final int MAX_FROM_ANY_TOKEN = 10;
 
   private final SLFFile slfFile = new SLFFile();
@@ -113,6 +114,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private boolean available = false;
   private final Project project;
+  private final IPronunciationLookup pronunciationLookup;
 
   /**
    * @param deployPath
@@ -134,10 +136,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
     int port = getWebservicePort();
 
+    logger.info("Dict is "+ htkDictionary);
+
+    this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
     if (port != -1) {
       setAvailable();
     }
   }
+
+  @Override
+  public SmallVocabDecoder getSmallVocabDecoder() {  return getPronunciationLookup().getSmallVocabDecoder();  }
 
   private int getWebservicePort() {
     return project.getWebservicePort();
@@ -508,14 +516,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   ////////////////////////////////
   ////////////////////////////////
 
-  private boolean ltsOutputOk(String[][] process) {
+/*  private boolean ltsOutputOk(String[][] process) {
     return !(
         process == null ||
             process.length == 0 ||
             process[0].length == 0 ||
             process[0][0].length() == 0 ||
             (StringUtils.join(process[0], "-")).contains("#"));
-  }
+  }*/
 
   /**
    * TODO : Some phrases seem to break lts process?
@@ -528,6 +536,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return the dictionary for dcodr
    * @see #runHydra
    */
+/*
   @Override
   public String createHydraDict(String transcript, String transliteration) {
     if (getLTS() == null) {
@@ -538,18 +547,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         = "[";
     String pronunciations = getPronunciationsFromDictOrLTS(transcript, transliteration, false);
 
+*/
 /*    logger.info("createHydraDict" +
         "\n\ttranscript     " + transcript +
         "\n\tpronunciations " + pronunciations
-    );*/
+    );*//*
+
 
     dict += pronunciations;
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
     return dict;
   }
+*/
 
-  private final Set<String> seen = new HashSet<>();
+//  private final Set<String> seen = new HashSet<>();
 
   /**
    * TODO : Why this method here too? Duplicate?
@@ -560,49 +572,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see AudioFileHelper#getNumPhonesFromDictionary
    */
-  public int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration) {
-    //  String[] translitTokens = transliteration.toLowerCase().split(" ");
-    String[] transcriptTokens = transcript.split(" ");
-    //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
-
-    int total = 0;
-    for (String word : transcriptTokens) {
-      boolean easyMatch;
-      if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
-        scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
-
-        int numForThisWord = 0;
-        for (int i = 0; i < prons.size(); i++) {
-          String[] apply = prons.apply(i);
-          numForThisWord = Math.max(numForThisWord, apply.length);
-/*
-          StringBuilder builder = new StringBuilder();
-          for (String s:apply) builder.append(s).append("-");
-          logger.info("\t" +word + " = " + builder);
-*/
-        }
-        total += numForThisWord;
-
-//        logger.info(transcript + " token "+ word + " num " + numForThisWord + " total " + total);
-      } else {
-        String word1 = word.toLowerCase();
-        String[][] process = getLTS().process(word1);
-
-        if (ltsOutputOk(process)) {
-          int max = 0;
-          for (String[] pc : process) {
-//            int c = 0;
-//            for (String p : pc) {
-//              if (!p.contains("#")) c++;
-//            }
-            max = Math.max(max, pc.length);
-          }
-          total += max;
-        }
-      }
-    }
-    return total;
-  }
+/*  public int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration) {
+    return pronunciationLookup.getNumPhonesFromDictionaryOrLTS(transcript,transliteration);
+  }*/
 
   /**
    * @param transcript
@@ -611,101 +583,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
-  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones) {
-    StringBuilder dict = new StringBuilder();
-    String[] translitTokens = transliteration.toLowerCase().split(" ");
-
-    //String[] transcriptTokens = transcript.split(" ");
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
-
-    int numTokens = transcriptTokens.size();
-    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
-    int index = 0;
-
-    if (numTokens > 50) logger.info("long transcript with " + numTokens + " num tokens " + transcript);
-    for (String word : transcriptTokens) {
-      String trim = word.trim();
-      if (!trim.equals(word)) {
-        logger.warn("getPronunciationsFromDictOrLTS trim is different '" + trim + "' != '" + word + "'");
-        word = trim;
-      }
-      if (!word.equals(" ") && !word.isEmpty()) {
-        boolean easyMatch;
-
-        if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
-          scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
-
-          for (int i = 0; i < prons.size(); i++) {
-            dict.append(getPronStringForWord(word, prons.apply(i), justPhones));
-          }
-        } else {  // not in the dictionary, let's ask LTS
-          if (getLTS() == null) {
-            logger.warn("getPronunciationsFromDictOrLTS " + this + " " + languageProperty + " : LTS is null???");
-          } else {
-            String word1 = word.toLowerCase();
-            String[][] process = getLTS().process(word1);
-            if (!ltsOutputOk(process)) {
-              String key = transcript + "-" + transliteration;
-              if (canUseTransliteration) {
-                //              logger.info("trying transliteration LTS");
-                if (!seen.contains(key)) {
-                  logger.warn("getPronunciationsFromDictOrLTS (transliteration) couldn't get letter to sound map from " +
-                      getLTS() + " for " + word1 + " in " + transcript);
-                }
-
-                String[][] translitprocess = (numTokens == 1) ?
-                    getLTS().process(StringUtils.join(translitTokens, "")) :
-                    getLTS().process(translitTokens[index]);
-
-                if (ltsOutputOk(translitprocess)) {
-                  logger.info("getPronunciationsFromDictOrLTS got pronunciation from transliteration");
-                  for (String[] pron : translitprocess) {
-                    dict.append(getPronStringForWord(word, pron, false));
-                  }
-                } else {
-                  logger.info("getPronunciationsFromDictOrLTS transliteration LTS failed");
-                  logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + getLTS() + " for " + word1 + " in " + transcript);
-                  logger.info("getPronunciationsFromDictOrLTS attempting to fall back to default pronunciation");
-                  if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
-                    dict.append(getDefaultPronStringForWord(word, translitprocess, justPhones));
-                  }
-                }
-              } else {
-//                logger.info("can't use transliteration");
-                if (!seen.contains(key)) {
-                  logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + getLTS() + " for '" + word1 + "' in " + transcript);
-                }
-
-                seen.add(key);
-//                logger.info("attempting to fall back to default pronunciation");
-
-                // THIS is going to be the "a" pron...
-           /*     if (process != null && process.length > 0) {
-                  dict += getDefaultPronStringForWord(word, process, justPhones);
-                }
-                else {
-                  logger.info("using unk phone for " +word);
-                  dict += getUnkPron(word);
-                }*/
-
-                logger.info("using unk phone for " + word);
-                dict.append(getUnkPron(word));
-              }
-            } else { // it's ok -use it
-              if (process.length > 50) logger.info("prons length " + process.length + " for " + word + " in " + transcript);
-              int max = MAX_FROM_ANY_TOKEN;
-              for (String[] pron : process) {
-                if (max-- == 0) break;
-                dict.append(getPronStringForWord(word, pron, justPhones));
-              }
-            }
-          }
-        }
-      }
-      index += 1;
-    }
-    return dict.toString();
-  }
+/*  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones) {
+    return pronunciationLookup.getPronunciationsFromDictOrLTS(transcript,transliteration,justPhones);
+  }*/
 
   /**
    * TODO : (3/20/16) sp breaks wsdcodr when sent directly
@@ -716,10 +596,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param justPhones
    * @return
    */
+/*
   private String getPronStringForWord(String word, String[] apply, boolean justPhones) {
     String s = listToSpaceSepSequence(apply);
     return justPhones ? s + " " : word + "," + s + " sp" + SEMI;
   }
+*/
 
   /**
    * last resort, if we can't even use the transliteration to get some kind of pronunciation
@@ -730,6 +612,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #getPronunciationsFromDictOrLTS
    */
+/*
   private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
     for (String[] pc : apply) {
       String result = getPhones(pc);
@@ -756,9 +639,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private String listToSpaceSepSequence(String[] pron) {
     StringBuilder builder = new StringBuilder();
-    for (String p : pron) builder.append(p).append(" ");
+    for (String p : pron) {
+      builder.append(p).append(" ");
+    }
     return builder.toString().trim();
   }
+*/
 
   /**
    * @param audioPath
@@ -782,11 +668,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String cleaned = slfFile.cleanToken(transcript).trim();
 //    logger.info("cleaned    " + cleaned);
     if (isMandarin) {
-      cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + svDecoderHelper.getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
+      cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +
+          pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
     }
 
     // generate dictionary
-    String hydraDict = createHydraDict(cleaned, transliteration);
+    String hydraDict = pronunciationLookup.createHydraDict(cleaned, transliteration);
     String smallLM = "[" +
         (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
         "]";
@@ -806,7 +693,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             hydraDict + ":" +
             smallLM + ":" +
             "xxx,0," + end + "," +
-            "[<s>" + getCleanedTranscript(cleaned, SEMI) + "</s>]";
+            "[<s>" + pronunciationLookup.getCleanedTranscript(cleaned) + "</s>]";
 
     long then = System.currentTimeMillis();
 
@@ -854,7 +741,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return new HTTPClient(getWebserviceIP(), getWebservicePort(), DCODR);
   }
 
-  private String getCleanedTranscript(String cleaned, String sep) {
+ /* private String getCleanedTranscript(String cleaned, String sep) {
     String s = cleaned.replaceAll("\\p{Z}", sep);
     String transcriptCleaned = sep + s.trim();
 
@@ -865,7 +752,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String after = transcriptCleaned.replaceAll(";;", sep);
 
     return after;
-  }
+  }*/
 
   private String getFailureMessage(String audioPath, String transcript, Collection<String> lmSentences, boolean decode) {
     String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;
@@ -917,8 +804,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see AlignDecode#getASRScoreForAudio(File, Collection, String, DecoderOptions, PrecalcScores)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
-    return getUniqueTokensInLM(lmSentences, backgroundVocab);
+    return pronunciationLookup.getUsedTokens(lmSentences, background);
   }
 
   /**
@@ -933,7 +819,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #getUsedTokens
    */
-  private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
+/*  private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
     String sentence;
     Set<String> backSet = new HashSet<>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<>(backgroundVocab);
@@ -949,7 +835,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     sentence = builder.toString();
     return sentence;
-  }
+  }*/
 
   /**
    * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
@@ -959,6 +845,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @param eventAndFileInfo
    * @return
+   * @see #getPretestScore
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
@@ -972,14 +859,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
+      typeToEvents.getValue().values().forEach(value -> endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score)));
+  /*    for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
         endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
-      }
+      }*/
     }
 
     return typeToEndTimes;
@@ -1023,5 +908,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       return phoneToScore;
     }
+  }
+
+  public IPronunciationLookup getPronunciationLookup() {
+    return pronunciationLookup;
   }
 }
