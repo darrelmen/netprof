@@ -34,7 +34,6 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.server.audio.SLFFile;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,7 +140,7 @@ class CheckLTS {
       int i = 0;
       for (String token : tokens) {
         String trim = token.trim();
-        if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
+        if (token.equalsIgnoreCase(ASR.UNKNOWN_MODEL))
           return oov;
 
         if (isMandarin) {
@@ -324,7 +323,7 @@ class CheckLTS {
     }
 
     for (String token : tokens) {
-      if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
+      if (token.equalsIgnoreCase(ASR.UNKNOWN_MODEL))
         return new PhoneInfo(firstPron, uphones);
       // either lts can handle it or the dictionary can...
 

@@ -33,6 +33,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.scoring.ASR;
+import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -118,7 +120,7 @@ public class ScoreToJSON {
 
           for (TranscriptSegment segment : words) {
             String event = segment.getEvent();
-            if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
+            if (!event.equals(ASR.UNKNOWN_MODEL) && !event.equals("sil")) {
               JSONObject wordJson = new JSONObject();
               String wid = Integer.toString(windex++);
               wordJson.put("id", wid);
@@ -132,7 +134,7 @@ public class ScoreToJSON {
               for (TranscriptSegment pseg : phones) {
                 if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
                   String pevent = pseg.getEvent();
-                  if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+                  if (!pevent.equals(ASR.UNKNOWN_MODEL) && !pevent.equals("sil")) {
                     JSONObject phoneJson = new JSONObject();
                     phoneJson.put("id", Integer.toString(pindex++));
                     phoneJson.put("p", pevent);

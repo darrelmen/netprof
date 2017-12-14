@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -106,7 +107,7 @@ public class DecodeAlignOutput {
       if (phones != null) {
         for (TranscriptSegment pseg : phones) {
           String pevent = pseg.getEvent();
-          if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+          if (!pevent.equals(ASR.UNKNOWN_MODEL) && !pevent.equals("sil")) {
             c++;
           }
         }

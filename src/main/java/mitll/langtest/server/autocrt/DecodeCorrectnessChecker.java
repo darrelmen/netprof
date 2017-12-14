@@ -34,7 +34,7 @@ package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
-import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -63,19 +63,24 @@ import java.util.*;
  */
 public class DecodeCorrectnessChecker {
   private static final Logger logger = LogManager.getLogger(DecodeCorrectnessChecker.class);
+
+  public static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
+
   private final AlignDecode alignDecode;
   private final double minPronScore;
-  private final SmallVocabDecoder svd = new SmallVocabDecoder();
-  private static final boolean DEBUG = false;
+  private final SmallVocabDecoder svd;
+  private static final boolean DEBUG = true;
 
   /**
    * @param alignDecode
    * @param minPronScore
-   * @see AudioFileHelper#makeDecodeCorrectnessChecker()
+   * @param smallVocabDecoder
+   * @see AudioFileHelper#makeDecodeCorrectnessChecker
    */
-  public DecodeCorrectnessChecker(AlignDecode alignDecode, double minPronScore) {
+  public DecodeCorrectnessChecker(AlignDecode alignDecode, double minPronScore, SmallVocabDecoder smallVocabDecoder) {
     this.alignDecode = alignDecode;
     this.minPronScore = minPronScore;
+    this.svd = smallVocabDecoder;
   }
 
   /**
@@ -95,7 +100,14 @@ public class DecodeCorrectnessChecker {
                                      DecoderOptions decoderOptions,
                                      PrecalcScores precalcScores) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
-    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores);
+
+    boolean b = language.equalsIgnoreCase("mandarin") ||
+        language.equalsIgnoreCase("japanese") ||
+        language.equalsIgnoreCase("korean");
+
+    logger.info("is mandarin (" + language + ")" + b);
+
+    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
@@ -137,6 +149,7 @@ public class DecodeCorrectnessChecker {
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
    * @param precalcScores
+   * @param isMandarinEtAl
    * @return PretestScore word/phone alignment with scores
    * @see #getDecodeScore
    */
@@ -145,7 +158,7 @@ public class DecodeCorrectnessChecker {
                                       AudioAnswer answer,
                                       DecoderOptions decoderOptions,
 
-                                      PrecalcScores precalcScores) {
+                                      PrecalcScores precalcScores, boolean isMandarinEtAl) {
     List<String> lmSentences = removePunct(possibleSentences);
 //    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
     //making the transliteration empty as I don't think it is useful here
@@ -158,10 +171,10 @@ public class DecodeCorrectnessChecker {
 
     //    logger.debug("recoSentence is " + recoSentence + " (" + recoSentence.length() + ")");
 
-    boolean isCorrect = isCorrect(possibleSentences, recoSentence);
+    boolean isCorrect = isCorrect(possibleSentences, recoSentence, isMandarinEtAl);
 
     if (!isCorrect) {
-      logger.debug("recoSentence (not correct) is " + recoSentence + " (" + recoSentence.length() + ")");
+      logger.debug("recoSentence (not correct) is '" + recoSentence + "' length = (" + recoSentence.length() + ")");
     }
 
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
@@ -177,17 +190,25 @@ public class DecodeCorrectnessChecker {
    *
    * @param answerSentences
    * @param recoSentence
+   * @param isMandarinEtAl
    * @return
    */
-  private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-    if (DEBUG) logger.debug("isCorrect - expected '" + answerSentences + "' vs heard '" + recoSentence + "'");
+  private boolean isCorrect(Collection<String> answerSentences, String recoSentence, boolean isMandarinEtAl) {
+    if (DEBUG)
+      logger.debug("isCorrect - expected  '" + answerSentences + "' vs heard '" + recoSentence + "' = " + isMandarinEtAl);
 
-    List<String> recoTokens = svd.getTokens(recoSentence);
+    List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence);
     for (String answer : answerSentences) {
-      String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
-      if (DEBUG) logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
+      String converted = answer
+          .replaceAll("-", " ")
+          .replaceAll("\\.\\.\\.", " ")
+          .replaceAll("\\.", "")
+          .replaceAll(":", "")
+          .toLowerCase();
 
-      List<String> answerTokens = svd.getTokens(converted);
+      if (DEBUG && !converted.equalsIgnoreCase(answer)) logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
+
+      List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted);
       if (answerTokens.size() == recoTokens.size()) {
         boolean same = true;
         for (int i = 0; i < answerTokens.size() && same; i++) {
@@ -239,7 +260,7 @@ public class DecodeCorrectnessChecker {
    * @return
    */
   private String getPhraseToDecode(String rawRefSentence, String language) {
-    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
+    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
         svd.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
   }
@@ -268,6 +289,10 @@ public class DecodeCorrectnessChecker {
    * @return
    */
   private String removePunct(String t) {
-    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll(",", " ").replaceAll("\\p{P}", "");
+    return t
+        .replaceAll("\\.\\.\\.", " ")
+        .replaceAll("/", " ")
+        .replaceAll(",", " ")
+        .replaceAll("\\p{P}", "");
   }
 }

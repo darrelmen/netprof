@@ -993,7 +993,7 @@ public class AudioFileHelper implements AlignDecode {
     List<String> unk = new ArrayList<>();
 
     if (isMacOrWin() || useOldSchoolServiceOnly || options.isUseOldSchool()) {  // i.e. NOT using cool new jcodr webservice
-      unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
+      unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
@@ -1466,7 +1466,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #AudioFileHelper
    */
   private void makeDecodeCorrectnessChecker() {
-    decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore());
+    decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore(), getSmallVocabDecoder());
   }
 
   /**

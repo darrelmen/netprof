@@ -32,10 +32,9 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -51,11 +50,13 @@ import static mitll.langtest.server.scoring.SmallVocabDecoder.REMOVE_ME;
  * @since 1/17/14.
  * Writes an HTK SLF file similar to : <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">Example</a>
  * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
+ *
+ *
  */
 public class SLFFile {
-  private static final Logger logger = LogManager.getLogger(SLFFile.class);
+ // private static final Logger logger = LogManager.getLogger(SLFFile.class);
 
-  public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
+  private static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
   private static final String ENCODING = "UTF8";
 
   // private static final String LINK_WEIGHT = "-1.00";

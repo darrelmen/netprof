@@ -37,13 +37,10 @@ import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.DecoderOptions;
-import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.autocrt.export.ExerciseExport;
 import mitll.langtest.server.autocrt.export.ResponseAndGrade;
 import mitll.langtest.server.database.export.Export;
-import mitll.langtest.server.scoring.AlignDecode;
-import mitll.langtest.server.scoring.InDictFilter;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -224,7 +221,7 @@ public class AutoCRT {
     String exerciseID = exercise.getOldID();
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
-    boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
+    boolean matchedUnknown = recoSentence.equals(ASR.UNKNOWN_MODEL);
 
     if (asrScoreForAudio.isRanNormally()) {
       logger.info("markCorrectnessOnAnswer:" + //(now - then) + " millis to get score "+
@@ -456,7 +453,7 @@ public class AutoCRT {
    * @return
   /*   *//*
   private String getPhraseToDecode(String rawRefSentence, String language) {
-    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
+    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(ASRWebserviceScoring.UNKNOWN_MODEL) ?
         Scoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
   }*/

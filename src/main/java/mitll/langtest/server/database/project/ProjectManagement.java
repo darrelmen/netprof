@@ -290,8 +290,8 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("configureProject : note : no project for " + project);
     }
 
-    Timestamp lastimport = slickProject.lastimport();
-    logger.info("last import " + lastimport);
+//    Timestamp lastimport = slickProject.lastimport();
+//    logger.info("last import " + lastimport);
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 

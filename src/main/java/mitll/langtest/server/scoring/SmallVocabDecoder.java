@@ -65,7 +65,8 @@ public class SmallVocabDecoder {
   private static final char ZERO = '0';
   private HTKDictionary htkDictionary;
 
-  public SmallVocabDecoder() {}
+  public SmallVocabDecoder() {
+  }
 
   /**
    * @param htkDictionary
@@ -73,7 +74,7 @@ public class SmallVocabDecoder {
    */
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
     this.htkDictionary = htkDictionary;
-    //logger.info("dict now " + htkDictionary);
+    //logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict"));
   }
 
   /**
@@ -165,7 +166,7 @@ public class SmallVocabDecoder {
     return builder.toString();
   }
 
-  public Collection<String> getTokensAllLanguages(boolean isMandarin, String fl) {
+  public List<String> getTokensAllLanguages(boolean isMandarin, String fl) {
     return isMandarin ? getMandarinTokens(fl) : getTokens(fl);
   }
 
@@ -195,8 +196,16 @@ public class SmallVocabDecoder {
     return all;
   }
 
-  public Collection<String> getMandarinTokens(String foreignLanguage) {
-    return getTokens(segmentation(foreignLanguage));
+  /**
+   * @param foreignLanguage
+   * @return
+   */
+  public List<String> getMandarinTokens(String foreignLanguage) {
+    String segmentation = segmentation(foreignLanguage);
+    logger.info("getMandarinTokens '" + foreignLanguage +
+        "' = '" + segmentation +
+        "'");
+    return getTokens(segmentation);
   }
 
   /**
@@ -238,29 +247,34 @@ public class SmallVocabDecoder {
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in
+
+  /**
+   * @param phrase
+   * @return
+   * @see #getMandarinTokens(String)
+   */
   String segmentation(String phrase) {
     String s = longest_prefix(phrase, 0);
-    if (s.trim().isEmpty()) {
-      return phrase;
-    } else {
-      return s;
-    }
+    return (s.trim().isEmpty()) ? phrase : s;
   }
 
   private String longest_prefix(String phrase, int i) {
     if (i == phrase.length())
       return "";
     String prefix = phrase.substring(0, phrase.length() - i);
-    if (inDict(prefix)) {
-      if (i == 0)
+    if (inDict(prefix.trim())) {
+      if (i == 0) {
+       // logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
         return phrase;
+      }
+
       String rest = longest_prefix(phrase.substring(phrase.length() - i, phrase.length()), 0);
-      if (rest.length() > 0)
+      if (rest.length() > 0) {
         return prefix + " " + rest;
+      }
+    } else {
+ //     logger.debug("longest_prefix : dict doesn't contain " + prefix);
     }
-    //else {
-    //logger.debug("dict doesn't contain " + prefix);
-    //}
     return longest_prefix(phrase, i + 1);
   }
 
@@ -268,6 +282,9 @@ public class SmallVocabDecoder {
     try {
       scala.collection.immutable.List<?> apply = htkDictionary.apply(token);
       boolean b = (apply != null) && apply.nonEmpty();
+   //   if (!b) {
+   //     logger.debug("inDict token '" +token + "' not in " +htkDictionary.size());
+   //   }
       return b;
     } catch (Exception e) {
       logger.error("isDict for '" + token + "', dict " + (htkDictionary != null) + " got " + e, e);

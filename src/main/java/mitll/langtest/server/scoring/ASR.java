@@ -48,6 +48,8 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public interface ASR {
+  String UNKNOWN_MODEL = "UNKNOWNMODEL";
+
   Collator getCollator();
 
   boolean isDictEmpty();

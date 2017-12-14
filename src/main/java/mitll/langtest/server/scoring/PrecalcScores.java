@@ -37,7 +37,6 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 
@@ -115,7 +114,7 @@ public class PrecalcScores {
       return false;
     } else {
       Map<String, Float> wordsMap = eventScores.get(Scores.WORDS);
-      return !wordsMap.isEmpty() && !wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
+      return !wordsMap.isEmpty() && !wordsMap.containsKey(ASR.UNKNOWN_MODEL);
     }
 //    boolean avp = eventScores.isEmpty() ||
 //        (wordsMap.isEmpty() &&
@@ -123,8 +122,8 @@ public class PrecalcScores {
 //                (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect()))
 //        );
 //
-////    boolean onlyUnknown = wordsMap != null && wordsMap.size() == 1 && wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
-//    return !avp && !wordsMap.containsKey(SLFFile.UNKNOWN_MODEL);
+////    boolean onlyUnknown = wordsMap != null && wordsMap.size() == 1 && wordsMap.containsKey(ASRWebserviceScoring.UNKNOWN_MODEL);
+//    return !avp && !wordsMap.containsKey(ASRWebserviceScoring.UNKNOWN_MODEL);
   }
 
   /**

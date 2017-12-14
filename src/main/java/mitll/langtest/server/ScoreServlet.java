@@ -898,7 +898,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.info("getJsonForAudio got exercise id " + realExID);
       }
     } catch (NumberFormatException e) {
-      logger.info("couldn't parse " + request.getHeader(EXERCISE));
+      logger.info("couldn't parse exercise request header = '" + request.getHeader(EXERCISE) + "'");
     }
     int reqid = getReqID(request);
     int projid = getProject(request);

@@ -178,9 +178,16 @@ public class AttachSecurityFilter implements Filter {
       return true;
     } else {
       if (db.getUserDAO().isStudent(userIDFromSessionOrDB)) {
-        // 4 if you are a student sorry, you don't get to hear it
-        log.warn("isAllowedToGet nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
-        return false;
+        if (userForFile == -1) {
+          // 5 we somehow couldn't figure out who had recorded the file initially - perhaps an old Japanese file?
+          log.warn("isAllowedToGet OK : you are a student " + userIDFromSessionOrDB + ", who did not create the file, but an unknown user #" + userForFile + " did so we'll allow it.");
+          return true;
+        }
+        else {
+          // 4 if you are a student sorry, you don't get to hear it
+          log.warn("isAllowedToGet nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
+          return false;
+        }
       } else {
         // 3 if you are not the same, are you are teacher, then you can hear it
         if (DEBUG_RESPONSE) log.info("isAllowedToGet OK, you're a teacher or higher");

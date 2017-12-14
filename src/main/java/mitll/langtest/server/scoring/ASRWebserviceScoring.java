@@ -47,7 +47,6 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -79,6 +78,8 @@ import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DE
  */
 public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
+
+
   // private static final int FOREGROUND_VOCAB_LIMIT = 100;
   // private static final int VOCAB_SIZE_LIMIT = 200;
   private static final String DCODR = "dcodr";
@@ -136,7 +137,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
     int port = getWebservicePort();
 
-    logger.info("Dict is "+ htkDictionary);
+   // logger.info("Dict is "+ htkDictionary);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
     if (port != -1) {
@@ -668,7 +669,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String cleaned = slfFile.cleanToken(transcript).trim();
 //    logger.info("cleaned    " + cleaned);
     if (isMandarin) {
-      cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +
+      cleaned = (decode ?  UNKNOWN_MODEL + " " : "") +
           pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
     }
 

@@ -672,6 +672,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return null;
     } else {
+      if (projectManagement == null) {
+        setInstallPath("",null);
+      }
       return projectManagement.getProject(projectid);
     }
   }

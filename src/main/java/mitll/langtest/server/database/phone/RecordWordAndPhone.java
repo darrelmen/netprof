@@ -33,11 +33,11 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.Word;
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -141,6 +141,6 @@ public class RecordWordAndPhone {
   }
 
   private boolean keepEvent(String event) {
-    return !event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL);
+    return !event.equals(ASR.UNKNOWN_MODEL) && !event.equals(SIL);
   }
 }
