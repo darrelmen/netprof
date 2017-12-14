@@ -15,12 +15,12 @@ do
 done
 
 echo pashto1
-./copy.sh pashto1 quizlet.properties 0 Pasho Elementary > pashto1.log
+./copy.sh pashto1 -n Elementary > pashto1.log
 
 echo pashto2
-./copy.sh pashto2 quizlet.properties 1 Pasho Intermediate > pashto2.log
+./copy.sh pashto2 -o 1 Intermediate > pashto2.log
 
 echo pashto3
-./copy.sh pashto3 quizlet.properties 2 Pasho Advanced > pashto3.log
+./copy.sh pashto3 -o 2 Advanced > pashto3.log
 
 date
