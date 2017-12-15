@@ -1,4 +1,4 @@
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.domino;
 
 import java.util.Date;
 

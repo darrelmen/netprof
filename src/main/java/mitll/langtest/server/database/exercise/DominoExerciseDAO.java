@@ -12,7 +12,10 @@ import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.domino.DominoImport;
+import mitll.langtest.server.domino.ImportDoc;
+import mitll.langtest.server.domino.ImportInfo;
+import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -111,7 +114,7 @@ public class DominoExerciseDAO {
    */
   public ImportInfo readExercises(int projid,
                                   ImportProjectInfo projectInfo,
-                                  ProjectManagement.ChangedAndDeleted importDocs
+                                  DominoImport.ChangedAndDeleted importDocs
   ) {
     List<CommonExercise> exercises =
         getCommonExercises(
@@ -234,7 +237,7 @@ public class DominoExerciseDAO {
   }
 
   /**
-   * @see #readExercises(int, ImportProjectInfo, ProjectManagement.ChangedAndDeleted)
+   * @see #readExercises
    * @param projid
    * @param creator
    * @param unitName
@@ -244,7 +247,7 @@ public class DominoExerciseDAO {
    */
   @NotNull
   private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName,
-                                                  ProjectManagement.ChangedAndDeleted changedAndDeleted
+                                                  DominoImport.ChangedAndDeleted changedAndDeleted
   ) {
     List<CommonExercise> exercises = new ArrayList<>();
 

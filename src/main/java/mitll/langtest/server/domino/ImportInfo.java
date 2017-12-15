@@ -1,8 +1,9 @@
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.domino;
 
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -20,8 +21,9 @@ public class ImportInfo {
    *
    * @param importProjectInfo
    * @param exercises
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted)
    */
-  ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
+  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),

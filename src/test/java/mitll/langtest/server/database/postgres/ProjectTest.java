@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -41,8 +40,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
-import mitll.langtest.server.database.exercise.ImportDoc;
-import mitll.langtest.server.database.exercise.ImportInfo;
+import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -91,7 +89,35 @@ public class ProjectTest extends BaseTest {
 //    logger.info("Got " + exercises);
 //  }
 
-    @Test
+
+  @Test
+  public void testSegmentation() {
+    DatabaseImpl spanish = getDatabase();
+    Project project = spanish.getProject(3);
+
+    String fl = "そして, 何を飲みましたか";
+
+    String s = removePunct(fl);
+    List<String> tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, fl);
+
+    tokensAllLanguages.forEach(token->logger.info("got " + token));
+
+   tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, s);
+
+    tokensAllLanguages.forEach(token->logger.info("got " + token));
+
+  }
+
+  private String removePunct(String t) {
+    return t
+        .replaceAll("\\.\\.\\.", " ")
+        .replaceAll("/", " ")
+        .replaceAll(",", " ")
+        .replaceAll("\\p{P}", "");
+  }
+
+
+  @Test
   public void testProject() {
     DatabaseImpl spanish = getDatabase();
     IProjectDAO projectDAO = spanish.getProjectDAO();

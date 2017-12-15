@@ -81,7 +81,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
-//  private static final boolean COPY_EVENTS = true;
+  //  private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
@@ -91,26 +91,39 @@ public class CopyToPostgres<T extends CommonShell> {
 
     private String value;
 
-    ACTION(String value) { this.value = value;}
-    String getValue() { return value;}
+    ACTION(String value) {
+      this.value = value;
+    }
+
+    String getValue() {
+      return value;
+    }
+
     public String toLower() {
       return name().toLowerCase();
     }
   }
 
   enum OPTIONS {
-    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o");
+    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s");
     private String value;
 
-    OPTIONS(String value) { this.value = value;}
-    String getValue() { return value;}
+    OPTIONS(String value) {
+      this.value = value;
+    }
+
+    String getValue() {
+      return value;
+    }
+
     public String toLower() {
       return name().toLowerCase();
     }
   }
 
-  private static final String NETPROF_PROPERTIES_FULL = "/opt/netprof/config/netprof.properties";
-  private static final String OPT_NETPROF = "/opt/netprof/import";
+  public static final String OPT_NETPROF_ROOT = "/opt/netprof";
+  private static final String NETPROF_PROPERTIES_FULL = OPT_NETPROF_ROOT + File.separator + "config/netprof.properties";
+  private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
   /**
    * @param config
@@ -118,13 +131,14 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optionalName
    * @param displayOrder
    * @param isEval
+   * @param skipRefResult
    * @see #main
    */
   private boolean copyOneConfigCommand(String config,
                                        String optionalProperties,
                                        String optionalName,
                                        int displayOrder,
-                                       boolean isEval) {
+                                       boolean isEval, boolean skipRefResult) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     DatabaseImpl databaseLight = null;
@@ -145,7 +159,7 @@ public class CopyToPostgres<T extends CommonShell> {
       if (!hasModel) status = ProjectStatus.DEVELOPMENT;
       else if (isEval) status = ProjectStatus.EVALUATION;
 
-      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, status);
+      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, status, skipRefResult);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -228,7 +242,7 @@ public class CopyToPostgres<T extends CommonShell> {
       return null;
     }
 
-    readProps(serverProps, getServerProperties("", NETPROF_PROPERTIES, "/opt/netprof"));
+    readProps(serverProps, getServerProperties("", NETPROF_PROPERTIES, OPT_NETPROF_ROOT));
 
     if (useLocal) {
       serverProps.setLocalPostgres();
@@ -287,13 +301,15 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @param db      to read from
-   * @param cc      country code
-   * @param optName non-default name (not language) - null OK
-   * @param status  i.e. not production
+   * @param db            to read from
+   * @param cc            country code
+   * @param optName       non-default name (not language) - null OK
+   * @param status        i.e. not production
+   * @param skipRefResult
    * @see #copyOneConfigCommand
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, ProjectStatus status) throws Exception {
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, ProjectStatus status,
+                            boolean skipRefResult) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
@@ -335,7 +351,9 @@ public class CopyToPostgres<T extends CommonShell> {
       // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
       // copy ref results
-      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
+      if (!skipRefResult) {
+        copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
+      }
 
       // add event table - why events on an old UI?
       // copyEvents(db, projectID, oldToNewUser, exToID);
@@ -848,9 +866,8 @@ public class CopyToPostgres<T extends CommonShell> {
                              Map<String, Integer> pathToAudioID,
                              int projid) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
-    RefResultDAO originalDAO = new RefResultDAO(db, false);
-    List<SlickRefResult> bulk = new ArrayList<>();
-    Collection<Result> toImport = originalDAO.getResults();
+     List<SlickRefResult> bulk = new ArrayList<>();
+    Collection<Result> toImport = new RefResultDAO(db, false).getResults();
     logger.info("copyRefResult for project " + projid + " found " + toImport.size() + " original ref results.");
     logger.info("copyRefResult found " + oldToNewUser.size() + " oldToNewUser entries.");
     logger.info("copyRefResult found " + exToID.size() + " ex to id entries.");
@@ -870,19 +887,7 @@ public class CopyToPostgres<T extends CommonShell> {
           result.setExid(exid);
           String answer = result.getAnswer();
 //          logger.info("for " + exid+ " result id " +result.getID() +" got " + answer);
-          String[] bestAudios = answer.split("bestAudio");
-
-          Integer audioID = null;
-
-          if (bestAudios.length == 2) {
-            String bestAudio = bestAudios[1];
-            bestAudio = "bestAudio" + bestAudio;
-            audioID = pathToAudioID.get(bestAudio);
-            //   if (audioID == null) logger.warn("copyRefResult : can't find '" + bestAudio + "'");
-          } else {
-            audioID = pathToAudioID.get(answer);
-            logger.info("path " + answer + " audio id " + audioID);
-          }
+          Integer audioID = getAudioID(pathToAudioID, answer);
 
           if (audioID == null) {
             logger.warn("copyRefResult : can't find audio from audio table at '" + answer + "'");
@@ -893,10 +898,32 @@ public class CopyToPostgres<T extends CommonShell> {
         } else missing++;
       }
     }
+    logger.info("copyRefResult START : copying " + bulk.size() + " ref result. Currently has " + dao.getNumResults());
+
+    long then = System.currentTimeMillis();
     dao.addBulk(bulk);
+    long now = System.currentTimeMillis();
+    long diff = (now - then) / 1000;
     if (missing > 0) logger.warn("copyRefResult missing " + missing + " due to missing ex id fk");
 
-    logger.info("copyRefResult added " + bulk.size() + " and now has " + dao.getNumResults());
+    logger.info("copyRefResult END   : added " + bulk.size() + " and now has " + dao.getNumResults() + " took " + diff + " seconds");
+  }
+
+  private Integer getAudioID(Map<String, Integer> pathToAudioID, String answer) {
+    String[] bestAudios = answer.split("bestAudio");
+
+    Integer audioID = null;
+
+    if (bestAudios.length == 2) {
+      String bestAudio = bestAudios[1];
+      bestAudio = "bestAudio" + bestAudio;
+      audioID = pathToAudioID.get(bestAudio);
+      //   if (audioID == null) logger.warn("copyRefResult : can't find '" + bestAudio + "'");
+    } else {
+      audioID = pathToAudioID.get(answer);
+      logger.info("path " + answer + " audio id " + audioID);
+    }
+    return audioID;
   }
 
   /**
@@ -934,8 +961,8 @@ public class CopyToPostgres<T extends CommonShell> {
     String optName = null;
     String optConfigValue = null;
     int displayOrderValue = 0;
-    boolean isEval = false;
-    if (cmd.hasOption("c")) {
+    boolean isEval, skipRefResult;
+    if (cmd.hasOption(COPY.toLower())) {
       action = COPY;
       config = cmd.getOptionValue(COPY.toLower());
     } else if (cmd.hasOption(DROP.toLower())) {
@@ -959,15 +986,14 @@ public class CopyToPostgres<T extends CommonShell> {
         optionValue = cmd.getOptionValue(ORDER.toLower());
         displayOrderValue = Integer.parseInt(optionValue);
       } catch (NumberFormatException e) {
-        logger.error("couldn't parse " +ORDER + " = " + optionValue);
+        logger.error("couldn't parse " + ORDER + " = " + optionValue);
         formatter.printHelp("copy", options);
         return;
       }
     }
 
-    if (cmd.hasOption(EVAL.toLower())) {
-      isEval = true;
-    }
+    isEval = cmd.hasOption(EVAL.toLower());
+    skipRefResult = cmd.hasOption(SKIPREFRESULT.toLower());
     logger.info("action = " + action);
 
     CopyToPostgres copyToPostgres = new CopyToPostgres();
@@ -994,7 +1020,7 @@ public class CopyToPostgres<T extends CommonShell> {
             "\neval " + isEval
         );
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult);
           if (!b) {
             System.exit(1);
           }
@@ -1055,9 +1081,16 @@ public class CopyToPostgres<T extends CommonShell> {
     options.addOption(eval);
 
 
-    Option displayOrder = new Option(ORDER.getValue(), ORDER.toLower(), true, "display order among projects of the same language");
-    displayOrder.setRequired(false);
-    options.addOption(displayOrder);
+    {
+      Option displayOrder = new Option(ORDER.getValue(), ORDER.toLower(), true, "display order among projects of the same language");
+      displayOrder.setRequired(false);
+      options.addOption(displayOrder);
+    }
+    {
+      Option skip = new Option(SKIPREFRESULT.getValue(), SKIPREFRESULT.toLower(), false, "skip loading ref result table (if you want to recalculate reference audio alignment)");
+      skip.setRequired(false);
+      options.addOption(skip);
+    }
     return options;
   }
 

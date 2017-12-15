@@ -1,6 +1,8 @@
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.domino;
 
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
+import mitll.hlt.domino.shared.model.project.ClientPMProject;
+import mitll.hlt.domino.shared.model.user.DBUser;
 
 import java.util.Date;
 
@@ -9,6 +11,12 @@ public class ImportDoc {
   private long timestamp;
   private VocabularyItem vocabularyItem;
 
+  /**
+   * @see DominoImport#getChangedDocs(String, DBUser, ClientPMProject)
+   * @param docID
+   * @param timestamp
+   * @param item
+   */
   public ImportDoc(int docID, long timestamp, VocabularyItem item){
     this.docID = docID;
     this.timestamp = timestamp;

@@ -82,8 +82,8 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 */
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyRefResult
    * @param bulk
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyRefResult
    */
   public void addBulk(List<SlickRefResult> bulk) {
     dao.addBulk(bulk);
@@ -151,7 +151,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   public SlickRefResult toSlick(int projid, Result result, int audioID) {
-    DecodeAlignOutput alignOutput = result.getAlignOutput();
+    DecodeAlignOutput alignOutput  = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
     String model = result.getModel();
     if (model == null) model = "";
@@ -161,7 +161,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
         result.getExerciseID(),
         audioID,
         new Timestamp(result.getTimestamp()),
-        //  result.getAnswer(),
         result.getDurationInMillis(),
         result.isCorrect(),
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
@@ -262,10 +261,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   /**
-   * @see #getAllSlimForProject
-   * @see #getResult
    * @param slickRef
    * @return
+   * @see #getAllSlimForProject
+   * @see #getResult
    */
   private SlimResult fromSlickToSlim(SlickRefResultJson slickRef) {
     String scoreJson = slickRef.scorejson();
@@ -286,8 +285,8 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   /**
-   * @see RefResultDecoder#writeRefDecode
    * @param projid
+   * @see RefResultDecoder#writeRefDecode
    */
   @Override
   public void deleteForProject(int projid) {

@@ -38,19 +38,6 @@ import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
-import mitll.hlt.domino.shared.common.FilterDetail;
-import mitll.hlt.domino.shared.common.FindOptions;
-import mitll.hlt.domino.shared.model.HeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.DocumentColumn;
-import mitll.hlt.domino.shared.model.document.VocabularyItem;
-import mitll.hlt.domino.shared.model.metadata.MetadataList;
-import mitll.hlt.domino.shared.model.metadata.MetadataSpecification;
-import mitll.hlt.domino.shared.model.project.ClientPMProject;
-import mitll.hlt.domino.shared.model.project.ProjectColumn;
-import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
-import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
-import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
@@ -60,6 +47,10 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.domino.DominoImport;
+import mitll.langtest.server.domino.IDominoImport;
+import mitll.langtest.server.domino.ImportInfo;
+import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -74,7 +65,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -125,7 +115,7 @@ public class ProjectManagement implements IProjectManagement {
   private final IProjectWorkflowDAO workflowDelegate;
   private DocumentServiceDelegate documentDelegate;
 
-
+  IDominoImport dominoImport;
   /**
    * @param pathHelper
    * @param properties
@@ -156,6 +146,8 @@ public class ProjectManagement implements IProjectManagement {
       workflowDelegate = simpleDominoContext.getWorkflowDAO();
       documentDelegate = simpleDominoContext.getDocumentDelegate();
     }
+
+    dominoImport = new DominoImport(projectDelegate,workflowDelegate,documentDelegate);
   }
 
 
@@ -926,6 +918,8 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
+    return dominoImport.getImportFromDomino(projID,dominoID,sinceInUTC,db.getUserDAO().getDominoAdminUser());
+/*
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
 
     if (matches.isEmpty()) {
@@ -939,13 +933,14 @@ public class ProjectManagement implements IProjectManagement {
               getChangedDocs(sinceInUTC, dominoAdminUser, next)
           );
     }
+*/
   }
 
   /**
    * @return
    */
   public List<ImportProjectInfo> getVocabProjects() {
-    return getImportProjectInfos();
+    return dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());
   }
 
 /*
@@ -1011,7 +1006,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see IProjectManagement#getImportFromDomino
    * @see #getVocabProjects
    */
-  @NotNull
+ /* @NotNull
   private List<ImportProjectInfo> getImportProjectInfos() {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Skill, VOCABULARY, FilterDetail.Operator.EQ));
@@ -1081,7 +1076,7 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     return imported;
-  }
+  }*/
 
   //@Override
 /*
@@ -1136,15 +1131,15 @@ public class ProjectManagement implements IProjectManagement {
 //    ClientPMProject next = getClientPMProject(dominoID, db.getUserDAO().getDominoAdminUser());
 //    return getChangedDocs(since, dominoAdminUser, next);
 //  }
-  private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
+ /* private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
     List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
 
     return projectDescriptor.iterator().next();
-  }
+  }*/
 
-  @NotNull
+/*  @NotNull
   private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
     long then = System.currentTimeMillis();
 
@@ -1165,9 +1160,9 @@ public class ProjectManagement implements IProjectManagement {
     logger.info("getDocs : took " + (now - then) + " to get " + docs.size());
 
     return new ChangedAndDeleted(docs, deleted);
-  }
+  }*/
 
-  public class ChangedAndDeleted {
+/*  public class ChangedAndDeleted {
     private List<ImportDoc> changed;
     private List<ImportDoc> deleted;
 
@@ -1183,7 +1178,7 @@ public class ProjectManagement implements IProjectManagement {
     public List<ImportDoc> getDeleted() {
       return deleted;
     }
-  }
+  }*/
 
   /*@NotNull
   private List<ImportDoc> getDeletedDocs(long since, DBUser dominoAdminUser, ClientPMProject next) {
@@ -1208,10 +1203,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 */
 
-  @NotNull
+/*  @NotNull
   private FindOptions<DocumentColumn> getSince(String sinceInUTC) {
     FindOptions<DocumentColumn> options1 = new FindOptions<>();
     options1.addFilter(new FilterDetail<>(DocumentColumn.RevisionTime, sinceInUTC, FilterDetail.Operator.GT));
     return options1;
-  }
+  }*/
 }
