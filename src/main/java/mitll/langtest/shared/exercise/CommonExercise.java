@@ -107,4 +107,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   List<ExerciseAttribute> getAttributes();
 
   boolean isContext();
+
+  int getParentExerciseID();
+
+  int getParentDominoID();
 }

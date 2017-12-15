@@ -138,12 +138,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * This allows us to upload an exercise file.
    *
-   * @param request
-   * @param response
+   * @paramx request
+   * @paramx response
    * @throws ServletException
    * @throws IOException
    */
-  @Override
+/*  @Override
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
@@ -161,7 +161,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     } else {
       super.service(request, response);
     }
-  }
+  }*/
 
   protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
     return super.getSectionHelper();

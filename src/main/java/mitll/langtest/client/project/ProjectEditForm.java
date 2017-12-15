@@ -267,8 +267,7 @@ public class ProjectEditForm extends UserDialog {
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
     } else if (unit.getSafeText().isEmpty()) {
-      markErrorNoGrabRight(unit, PLEASE_ENTER_THE_FIRST_HIERARCHY);
-      logger.info("got invalid unit");
+      Window.alert("Please select a domino project.");
       return false;
     } else {
       return true;

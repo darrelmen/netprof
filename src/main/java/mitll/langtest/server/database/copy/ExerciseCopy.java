@@ -126,6 +126,37 @@ public class ExerciseCopy {
     return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
   }
 
+  public void addContextExercises(int importUser,
+                                  int projectid,
+                                  SlickUserExerciseDAO slickUEDAO,
+                                  Collection<CommonExercise> exercises,
+                                  Collection<String> typeOrder) {
+
+//    logger.info("copyUserAndPredefExercises for project " + projectid +
+//        "\n\tfound " + exercises.size() + " old exercises" +
+//        "\n\tand   " + idToCandidateOverride.size() + " overrides");
+//
+//    // TODO : why not add it to interface?
+//    Map<String, Integer> exToInt = addExercisesAndAttributes(importUser, projectid, slickUEDAO, exercises, typeOrder, idToCandidateOverride);
+//    idToFL.putAll(slickUEDAO.getIDToFL(projectid));
+//
+//    logger.info("copyUserAndPredefExercises old->new for project #" + projectid + " : " + exercises.size() + " exercises, " + exToInt.size());
+//    return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
+
+    List<SlickRelatedExercise> pairs = new ArrayList<>();
+
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+
+    for (CommonExercise context : exercises) {
+      SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
+          now, context.getParentExerciseID(), context);
+      pairs.add(e);
+    }
+
+    slickUEDAO.addBulkRelated(pairs);
+
+  }
+
   /**
    * @param importUser
    * @param projectid
@@ -171,6 +202,8 @@ public class ExerciseCopy {
   }
 
   /**
+   * Assumes we don't have exercise ids on the exercises yet.
+   *
    * @param projectid
    * @param slickUEDAO
    * @param exToInt
@@ -207,27 +240,26 @@ public class ExerciseCopy {
         logger.info("addContextExercises adding ex " + ex.getID() + " old " + oldID + " : " + ex.getEnglish() + " : " + ex.getForeignLanguage() + " with " + ex.getDirectlyRelated().size() + " sentences");
       }
 
-      if (oldID == null) logger.error("addContextExercises : huh? old id is null for " + ex);
-      Integer id = exToInt.get(oldID);
+      if (oldID == null) logger.error("addContextExercises : huh? old parentID is null for " + ex);
+      Integer parentID = exToInt.get(oldID);
 
-//      logger.info("exToInt '" +oldID + "' => " +id + " vs ex id " + ex.getID());
-      if (id == null) {
+//      logger.info("exToInt '" +oldID + "' => " +parentID + " vs ex parentID " + ex.getID());
+      if (parentID == null) {
         logger.error("addContextExercises can't find " + oldID + " in map of " + exToInt.size());
         missing.add(oldID);
       } else {
         int contextCount = 1;
         for (CommonExercise context : ex.getDirectlyRelated()) {
-          context.getMutable().setOldID("" + (id * 10) + (contextCount++));
+          context.getMutable().setOldID("" + (parentID * 10) + (contextCount++));
 
-          int contextid =
-              slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
-
-
-          pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid, now));
-          parentToChild.put(oldID, contextid);
+          SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
+              //pairs,
+              now, parentID, context);
+          pairs.add(e);
+          parentToChild.put(oldID, e.contextexid());
 
           if (DEBUG) {
-            logger.info("addContextExercises map parent ex " + id + " -> child ex " + contextid + " ( " + ex.getDirectlyRelated().size());
+            logger.info("addContextExercises map parent ex " + parentID + " -> child ex " + e.contextexid() + " ( " + ex.getDirectlyRelated().size());
           }
 
           ct++;
@@ -243,6 +275,23 @@ public class ExerciseCopy {
     logger.info("addContextExercises imported " + n + " predef exercises and " + ct + " context exercises, parent->child size " + parentToChild.size());
 
     return parentToChild;
+  }
+
+  private SlickRelatedExercise insertContextExercise(int projectid,
+                                                     SlickUserExerciseDAO slickUEDAO,
+                                                     int importUser,
+                                                     Collection<String> typeOrder,
+                                                     //  List<SlickRelatedExercise> pairs,
+                                                     Timestamp now,
+                                                     Integer parentExerciseID,
+                                                     CommonExercise context) {
+    int contextid =
+        slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
+
+
+    SlickRelatedExercise e = new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, now);
+    // pairs.add(e);
+    return e;
   }
 
   /**
@@ -278,6 +327,9 @@ public class ExerciseCopy {
       String oldID = ex.getOldID();
       if (oldID.isEmpty()) {
         logger.warn("old id is empty for " + ex);
+      }
+      if (ex.isContext()) {
+        logger.warn("addPredefExercises huh? ex " + ex.getOldID() + "/" + ex.getID() + " is a context exercise???\n\n\n");
       }
 //      logger.info("addPredefExercises adding ex old #" + oldID + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
 

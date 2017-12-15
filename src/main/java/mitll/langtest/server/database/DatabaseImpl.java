@@ -214,7 +214,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // first connect to postgres
 
     setPostgresDBConnection();
-    logger.debug("initializeDAOs --- " + servletContext);
+//    logger.debug("initializeDAOs --- " + servletContext);
 
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);

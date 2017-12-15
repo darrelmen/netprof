@@ -967,7 +967,7 @@ public class CopyToPostgres<T extends CommonShell> {
       config = cmd.getOptionValue(COPY.toLower());
     } else if (cmd.hasOption(DROP.toLower())) {
       action = DROP;
-      config = cmd.getOptionValue(COPY.toLower());
+      config = cmd.getOptionValue(DROP.toLower());
     } else if (cmd.hasOption(DROPALL.toLower())) {
       action = DROPALL;
       dropConfirm = cmd.getOptionValue(DROPALL.toLower());

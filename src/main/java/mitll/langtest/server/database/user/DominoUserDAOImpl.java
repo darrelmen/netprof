@@ -189,6 +189,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.debug("DominoUserDAOImpl no cache");
     }
     delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
+
     logger.debug("made" +
         "\ndelegate " + delegate.getClass() +
         "\nignite = " + ignite +

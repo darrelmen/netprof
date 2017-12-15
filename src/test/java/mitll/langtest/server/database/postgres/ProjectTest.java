@@ -458,14 +458,14 @@ public class ProjectTest extends BaseTest {
   }
 
 
-  @Test
+/*  @Test
   public void testReadDominoJSON() {
     DominoExerciseDAO dominoExerciseDAO = getAndPopulate().getDominoExerciseDAO();
     ImportInfo info = dominoExerciseDAO.readExercises("SAMPLE-NO-EXAM.json", null,
         -1, 1);
 
     logger.info("Got " + info);
-  }
+  }*/
 
   @Test
   public void testPhonesLookup() {

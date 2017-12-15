@@ -68,9 +68,7 @@ public class ImportInfo {
   private Date getExportTime() {
     return createTime;
   }
-  public List<CommonExercise> getExercises() {
-    return exercises;
-  }
+  public List<CommonExercise> getExercises() {    return exercises;  }
 
   /**
    * @return

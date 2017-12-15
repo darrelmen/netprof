@@ -35,7 +35,7 @@ import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS
 import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.SUCCESS;
 
 public class ProjectSync implements IProjectSync {
-  private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ProjectSync.class);
   public static final String ANY = "Any";
 
   public static final String ID = "_id";
@@ -109,6 +109,7 @@ public class ProjectSync implements IProjectSync {
       //  ones that are current but not in domino and have been deleted
 
       List<CommonExercise> newEx = new ArrayList<>();
+      List<CommonExercise> newContextEx = new ArrayList<>();
       List<CommonExercise> importUpdateEx = new ArrayList<>();
       Set<CommonExercise> bringBack = new HashSet<>();
 
@@ -150,7 +151,7 @@ public class ProjectSync implements IProjectSync {
 
           logger.info("import domino id " + dominoID);
           logger.info("import npID      '" + npID + "'");
-          logger.info("import importEx  " + importEx.getEnglish() + " " + importEx.getForeignLanguage());
+          logger.info("import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
 
           SlickExercise currentKnownExercise = dominoToEx.get(dominoID);
           if (currentKnownExercise == null && !npID.isEmpty()) {
@@ -190,13 +191,22 @@ public class ProjectSync implements IProjectSync {
               MutableExercise mutable = importEx.getMutable();
               mutable.setID(exID);
               mutable.setOldID(npID);
+            } else { // impossible?
+              newEx.add(importEx);
+              logger.info("\n\n\n 2 found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+            }
+          } else {
+            logger.info("found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+            if (importEx.isContext()) {
+              SlickExercise knownParent = dominoToEx.get(importEx.getParentDominoID());
+              if (knownParent != null) {
+                logger.info("\tfound parent " + knownParent.id() + " before parent = " + importEx.getParentExerciseID());
+                importEx.getMutable().setParentExerciseID(knownParent.id());
+                newContextEx.add(importEx);
+              }
             } else {
               newEx.add(importEx);
             }
-          } else {
-            logger.info("found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage());
-            newEx.add(importEx);
-
               /*SlickExercise prevDeleted = legacyToDeletedEx.get(dominoID);
 
               if (prevDeleted == null) {
@@ -215,7 +225,7 @@ public class ProjectSync implements IProjectSync {
 
         if (!newEx.isEmpty()) {
           // add new
-          logger.info("addPending adding " + newEx.size() + " new exercises");
+          logger.info("addPending adding " + newEx.size() + " new non-context exercises");
 
           new ExerciseCopy().addExercises(
               importUser,
@@ -225,6 +235,11 @@ public class ProjectSync implements IProjectSync {
               newEx,
               typeOrder2,
               new HashMap<>());
+        }
+
+        if (!newContextEx.isEmpty()) {
+          logger.info("addPending adding " + newEx.size() + " new Context exercises");
+          new ExerciseCopy().addContextExercises(importUser, projectid, slickUEDAO, newContextEx, typeOrder2);
         }
 
         if (!importUpdateEx.isEmpty()) {

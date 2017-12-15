@@ -97,6 +97,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private List<VocabToken> tokens;
 
+  private int parentExerciseID;
+  private int parentDominoID;
+
   // for serialization
   public Exercise() {
   }
@@ -610,5 +613,25 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public List<VocabToken> getTokens() {
     return tokens;
+  }
+
+  @Override
+  public int getParentExerciseID() {
+    return parentExerciseID;
+  }
+
+  @Override
+  public void setParentExerciseID(int parentExerciseID) {
+    this.parentExerciseID = parentExerciseID;
+  }
+
+  @Override
+  public int getParentDominoID() {
+    return parentDominoID;
+  }
+
+  @Override
+  public void setParentDominoID(int parentDominoID) {
+    this.parentDominoID = parentDominoID;
   }
 }

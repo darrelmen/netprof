@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.project;
 
-import mitll.langtest.server.FileUploadHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.domino.ImportInfo;
@@ -96,9 +95,9 @@ public interface IProjectManagement {
 
   List<SlimProject> getNestedProjectInfo();
 
-  FileUploadHelper getFileUploadHelper();
+ // FileUploadHelper getFileUploadHelper();
 
-  ImportInfo getImport(int projid);
+ // ImportInfo getImport(int projid);
 
   /**
    * Use file path to lookup in result table to get user id of who recorded it.

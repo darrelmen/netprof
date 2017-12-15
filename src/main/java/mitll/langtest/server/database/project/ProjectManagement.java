@@ -103,7 +103,7 @@ public class ProjectManagement implements IProjectManagement {
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
 
-  private FileUploadHelper fileUploadHelper;
+//  private FileUploadHelper fileUploadHelper;
   private final boolean debugOne;
 
   public static final String ID = "_id";
@@ -116,6 +116,7 @@ public class ProjectManagement implements IProjectManagement {
   private DocumentServiceDelegate documentDelegate;
 
   IDominoImport dominoImport;
+
   /**
    * @param pathHelper
    * @param properties
@@ -133,7 +134,7 @@ public class ProjectManagement implements IProjectManagement {
     this.logAndNotify = logAndNotify;
     this.db = db;
     this.debugOne = properties.debugOneProject();
-    fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
+    //fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
 
     if (servletContext == null) {
@@ -147,7 +148,7 @@ public class ProjectManagement implements IProjectManagement {
       documentDelegate = simpleDominoContext.getDocumentDelegate();
     }
 
-    dominoImport = new DominoImport(projectDelegate,workflowDelegate,documentDelegate);
+    dominoImport = new DominoImport(projectDelegate, workflowDelegate, documentDelegate);
   }
 
 
@@ -906,19 +907,21 @@ public class ProjectManagement implements IProjectManagement {
     return db.getProjectDAO().getPropValue(id, modelsDir);
   }
 
+/*
   @Override
   public ImportInfo getImport(int projid) {
     return getFileUploadHelper().getExercises(projid);
   }
+*/
 
-  @Override
-  public FileUploadHelper getFileUploadHelper() {
-    return fileUploadHelper;
-  }
+//  @Override
+//  public FileUploadHelper getFileUploadHelper() {
+//    return fileUploadHelper;
+//  }
 
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
-    return dominoImport.getImportFromDomino(projID,dominoID,sinceInUTC,db.getUserDAO().getDominoAdminUser());
+    return dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
 /*
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
 

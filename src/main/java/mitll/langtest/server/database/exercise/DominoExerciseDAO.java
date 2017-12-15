@@ -1,14 +1,8 @@
 package mitll.langtest.server.database.exercise;
 
-import mitll.hlt.domino.shared.model.SimpleHeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.*;
-import mitll.hlt.domino.shared.model.metadata.MetadataList;
-import mitll.hlt.domino.shared.model.metadata.MetadataSpecification;
 import mitll.hlt.domino.shared.model.project.ProjectContentDescriptor;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
-import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
-import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
-import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -24,29 +18,25 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.json.*;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
 
 /**
- * Read json export from domino!
+ * Read export from domino!
  * <p>
  * Created by go22670 on 5/2/17.
  */
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
-  private static final String V_UNIT = "v-unit";
-  private static final String V_CHAPTER = "v-chapter";
-  private static final String PROJECT = "project";
-  private static final String DOCUMENTS = "documents";
-  private static final String WORKFLOW = "workflow";
+
+//  private static final String V_UNIT = "v-unit";
+//  private static final String V_CHAPTER = "v-chapter";
+//  private static final String PROJECT = "project";
+//  private static final String DOCUMENTS = "documents";
+//  private static final String WORKFLOW = "workflow";
+//
   private static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
   private static final String V_NP_ID = "v-np-id";
@@ -77,7 +67,7 @@ public class DominoExerciseDAO {
    * @see mitll.langtest.server.FileUploadHelper#readJSON
    * @deprecated
    */
-  public ImportInfo readExercises(String file, InputStream inputStream, int projid, int importUser) {
+/*  public ImportInfo readExercises(String file, InputStream inputStream, int projid, int importUser) {
     try {
       JsonObject readObj = getJsonObject(file, inputStream);
 
@@ -103,7 +93,7 @@ public class DominoExerciseDAO {
       logger.error("Got " + e, e);
     }
     return null;
-  }
+  }*/
 
   /**
    * @param projid
@@ -129,7 +119,7 @@ public class DominoExerciseDAO {
     return new ImportInfo(projectInfo, exercises);
   }
 
-  private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
+ /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
     JsonReader reader = file == null ?
         Json.createReader(inputStream) :
         Json.createReader(new FileReader(file));
@@ -150,7 +140,7 @@ public class DominoExerciseDAO {
     projectInfo.setDominoProjectID(id);
     projectInfo.setCreateTime(createTime.getTime());
     projectInfo.setLanguage(languageName);
-  }
+  }*/
 
 
   /**
@@ -159,20 +149,21 @@ public class DominoExerciseDAO {
    * @param readObj
    * @return
    */
+/*
   @NotNull
   private ImportProjectInfo getProjectInfo(JsonObject readObj) {
-    ProjectWorkflow pw = getProjectWorkflow(readObj);
-
-    return getImportProjectInfoFromWorkflow(pw);
+    return getImportProjectInfoFromWorkflow(getProjectWorkflow(readObj));
   }
+*/
 
   /**
    * @param pw
    * @return
    * @see mitll.langtest.server.database.project.ProjectManagement#getImportProjectInfos
    */
+/*
   @NotNull
-  public ImportProjectInfo getImportProjectInfoFromWorkflow(ProjectWorkflow pw) {
+  private ImportProjectInfo getImportProjectInfoFromWorkflow(ProjectWorkflow pw) {
     TaskSpecification taskSpec = pw.getTaskSpec(EDIT);
     Collection<MetadataList> metadataLists = taskSpec.getMetadataLists();
     String unitName = "";
@@ -197,10 +188,8 @@ public class DominoExerciseDAO {
   private ProjectWorkflow getProjectWorkflow(JsonObject readObj) {
     return ser.deserialize(ProjectWorkflow.class, readObj.getJsonObject(WORKFLOW).toString());
   }
+*/
 
-  private SimpleHeadDocumentRevision getSimpleHeadDocumentRevision(JsonValue docObj) {
-    return ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
-  }
 
   /**
    * Get the language from the content descriptor.
@@ -224,7 +213,7 @@ public class DominoExerciseDAO {
    * @param pd
    * @return
    */
-  private int getCreator(int importUser, ProjectDescriptor pd) {
+/*  private int getCreator(int importUser, ProjectDescriptor pd) {
     UserDescriptor creator1 = pd.getCreator();
     return creator1 != null ? creator1.getDocumentDBID() : importUser;
   }
@@ -234,7 +223,7 @@ public class DominoExerciseDAO {
     List<CommonExercise> exercises = new ArrayList<>();
     docArr.forEach(docObj -> exercises.add(getExerciseFromVocabularyItem(projid, creator, unitName, chapterName, docObj)));
     return exercises;
-  }
+  }*/
 
   /**
    * @see #readExercises
@@ -259,6 +248,7 @@ public class DominoExerciseDAO {
     return exercises;
   }
 
+/*
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid, int creator, String unitName, String chapterName, JsonValue docObj) {
     SimpleHeadDocumentRevision shDoc = getSimpleHeadDocumentRevision(docObj);
@@ -271,13 +261,18 @@ public class DominoExerciseDAO {
     return getExerciseFromVocab(projid, creator, unitName, chapterName, docID, time, vocabularyItem);
   }
 
+
+  private SimpleHeadDocumentRevision getSimpleHeadDocumentRevision(JsonValue docObj) {
+    return ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
+  }*/
+
   private Exercise getExerciseFromVocab(int projid,
                                         int creator,
                                         String unitName, String chapterName,
                                         int docID,
                                         long time,
                                         VocabularyItem vocabularyItem) {
-    logger.info("ex for doc " + docID + " term " + vocabularyItem.getTerm());
+    logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
 
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
@@ -321,11 +316,19 @@ public class DominoExerciseDAO {
     }
   }
 
+  /**
+   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem)
+   * @param projid
+   * @param creator
+   * @param docID
+   * @param vocabularyItem
+   * @param parentExercise
+   */
   private void addContextSentences(int projid,
                                    int creator,
                                    int docID,
                                    VocabularyItem vocabularyItem,
-                                   Exercise ex) {
+                                   Exercise parentExercise) {
     IDocumentComposite samples = vocabularyItem.getSamples();
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
@@ -338,12 +341,15 @@ public class DominoExerciseDAO {
             removeMarkup(sentenceVal),
             removeMarkup(sample.getAlternateFormVal()),
             removeMarkup(sample.getTransliterationVal()),
-            removeMarkup(sample.getTranslationVal())
+            removeMarkup(sample.getTranslationVal()),
 
-        );
+            true);
 
-        context.setUnitToValue(ex.getUnitToValue());
-        ex.getDirectlyRelated().add(context);
+        context.setUnitToValue(parentExercise.getUnitToValue());
+        parentExercise.getDirectlyRelated().add(context);
+
+        logger.info("parent ex id " + parentExercise.getID() + " dom " + parentExercise.getDominoID());
+        context.setParentDominoID(parentExercise.getDominoID());
       }
     }
   }
@@ -374,7 +380,7 @@ public class DominoExerciseDAO {
         removeMarkup(termVal),
         removeMarkup(alternateFormVal),
         removeMarkup(transliterationVal),
-        removeMarkup(meaning));
+        removeMarkup(meaning), false);
     exerciseFromVocabularyItem.setUpdateTime(createTime);
 
     return exerciseFromVocabularyItem;
@@ -392,6 +398,7 @@ public class DominoExerciseDAO {
    * @param alternateFormVal
    * @param transliterationVal
    * @param meaning
+   * @param isContext
    * @return
    * @see #addContextSentences
    */
@@ -402,7 +409,7 @@ public class DominoExerciseDAO {
                                                  String termVal,
                                                  String alternateFormVal,
                                                  String transliterationVal,
-                                                 String meaning) {
+                                                 String meaning, boolean isContext) {
     String trim = termVal.trim();
     Exercise exercise = new Exercise(-1,
         "" + dominoID,
@@ -416,10 +423,10 @@ public class DominoExerciseDAO {
         projid,
         false,
         0,
-        false,
+        isContext,
         0
     );
-    logger.info("made new ex " + exercise.getDominoID() + " " + exercise.getOldID() + " ex " + exercise.getID() + " ex " + exercise.getEnglish());
+    logger.info("made new ex " + exercise.getDominoID() + " " + exercise.getOldID() + " ex " + exercise.getID() + " ex " + exercise.getEnglish() + " context " + isContext);
     exercise.setPredef(true);
     exercise.setDominoID(dominoID);
     return exercise;

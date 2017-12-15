@@ -914,7 +914,7 @@ public class SlickUserExerciseDAO
       id = unknownExercise.id();
     }
     unknownExerciseID = id;
-    logger.info("unknown ex " + unknownExerciseID);
+    //logger.info("unknown ex " + unknownExerciseID);
     return id;
   }
 
