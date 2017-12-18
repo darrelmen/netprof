@@ -73,15 +73,15 @@ public class InvalidateAudioTest {
   }
 
 
-  @Test
+/*  @Test
   public void testMarkDefectsForFL() {
     String config = "mandarin";
     String dbName = config;
     String props = "quizlet.properties";
 
     markDefectsFL(config, dbName, props);
-  }
-
+  }*/
+/*
   private void markDefectsFL(String config, String dbName, String props) {
     DatabaseImpl newDB = getDatabase(config, dbName, props);
     Map<String, CommonExercise> idToNewEx = getIDToExercise(newDB);
@@ -106,14 +106,14 @@ public class InvalidateAudioTest {
     }
     logger.warn("ids to change " + idsOfDefects);
     markDefects(newDB, idToNewEx, idsOfDefects);
-  }
+  }*/
 
-  private boolean isDifferent(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
+/*  private boolean isDifferent(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
     String foreignLanguageNew = newEx.getForeignLanguage().toLowerCase().trim();
     String foreignLanguageOld = oldEx.getForeignLanguage().toLowerCase().trim();
 
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld, smallVocabDecoder);
-  }
+  }*/
 
 /*  private boolean isDifferentContext(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
     String foreignLanguageNew = newEx.getContext().toLowerCase().trim();
@@ -121,13 +121,13 @@ public class InvalidateAudioTest {
 
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld,smallVocabDecoder);
   }*/
-
+/*
   private boolean isDifferent(String id, String foreignLanguageNew, String foreignLanguageOld, SmallVocabDecoder smallVocabDecoder) {
     List<String> newTokens = getTokens(foreignLanguageNew, smallVocabDecoder);
     List<String> oldTokens = getTokens(foreignLanguageOld, smallVocabDecoder);
 
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld, newTokens, oldTokens);
-  }
+  }*/
 
   private boolean isDifferent(String id, String foreignLanguageNew, String foreignLanguageOld,
                               Collection<String> newTokens, List<String> oldTokens) {
@@ -208,7 +208,7 @@ public class InvalidateAudioTest {
     logger.warn("marked " + c + "/" + i + " for " + exs.size());
   }
 
-  public List<String> getTokens(String sentence, SmallVocabDecoder smallVocabDecoder) {
+/*  public List<String> getTokens(String sentence, SmallVocabDecoder smallVocabDecoder) {
     List<String> all = new ArrayList<String>();
     // logger.debug("initial " + sentence);
     String trimmedSent = getTrimmed(sentence);
@@ -225,7 +225,7 @@ public class InvalidateAudioTest {
     }
 
     return all;
-  }
+  }*/
 
   public static String getTrimmed(String sentence) {
     // logger.debug("after  convert " + sentence);
