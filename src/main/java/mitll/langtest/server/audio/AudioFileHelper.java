@@ -1348,9 +1348,11 @@ public class AudioFileHelper implements AlignDecode {
     return webserviceScoring;
   }
 
+/*
   private boolean isWebservice(ASR asr) {
     return asr == webserviceScoring;
   }
+*/
 
   private boolean isMacOrWin() {
     String property = System.getProperty("os.name").toLowerCase();

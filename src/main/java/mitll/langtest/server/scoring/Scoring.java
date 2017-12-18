@@ -87,30 +87,15 @@ public abstract class Scoring {
   final ServerProperties props;
   final LogAndNotify logAndNotify;
 
-//  private static final double KEEP_THRESHOLD = 0.3;
-
-//  static final int FOREGROUND_VOCAB_LIMIT = 100;
-//  static final int VOCAB_SIZE_LIMIT = 200;
-
   /**
    * @see SLFFile#createSimpleSLFFile(Collection, String, float)
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-//  protected SmallVocabDecoder svDecoderHelper = null;
   private final CheckLTS checkLTSHelper;
 
-  /**
-   * By keeping these here, we ensure that we only ever read the dictionary once
-   */
-// private final HTKDictionary htkDictionary;
-  final boolean isMandarin;
+  final boolean isAsianLanguage;
 
-  /**
-   * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
-   * If the score was below a threshold, or the magic -1, we keep it around for future study.
-   */
-  //private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
   private LTSFactory ltsFactory;
   final String languageProperty;
 
@@ -126,15 +111,15 @@ public abstract class Scoring {
     this.deployPath = deployPath;
     this.props = props;
     this.logAndNotify = langTestDatabase;
-  //  this.htkDictionary = htkDictionary;
-  //  lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     String language = project.getLanguage();
     this.languageProperty = language;
-    isMandarin =
-        language.equalsIgnoreCase(MANDARIN) ||
-            language.equalsIgnoreCase("Japanese") ||
-            language.equalsIgnoreCase("Korean");
- //   if (isMandarin) logger.warn("using mandarin segmentation.");
+    isAsianLanguage = isAsianLanguage(language);
+       if (isAsianLanguage) logger.warn("using mandarin segmentation.");
+    setLTSFactory();
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel(), isAsianLanguage);
+  }
+
+  private void setLTSFactory() {
     try {
 //      logger.debug("\n" + this + " : Factory for " + languageProperty);
       ltsFactory = new LTSFactory(languageProperty);
@@ -142,8 +127,12 @@ public abstract class Scoring {
       ltsFactory = null;
       logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
     }
-    //makeDecoder();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel());
+  }
+
+  private boolean isAsianLanguage(String language) {
+    return language.equalsIgnoreCase(MANDARIN) ||
+        language.equalsIgnoreCase("Japanese") ||
+        language.equalsIgnoreCase("Korean");
   }
 
   LTS getLTS() {
@@ -213,73 +202,7 @@ public abstract class Scoring {
     }
   }
 
-  /**
-   * Parse the .lab files that are put into the audio directory as a side effect of alignment/decoding.
-   *
-   * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param audioFileNoSuffix
-   * @param useScoreToColorBkg
-   * @param prefix
-   * @param suffix
-   * @param decode
-   * @param useWebservice
-   * @param usePhoneToDisplay
-   * @return
-   * @seex ASRScoring#getPretestScore
-   */
- /* EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                    String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                    String prefix, String suffix, boolean decode, boolean useWebservice,
-                                    boolean usePhoneToDisplay) {
-    logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight +
-        " prefix " + prefix);
 
-    boolean foundATranscript = false;
-    // These may not all exist. The speech file is created only by multisv right now.
-    String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
-    Map<ImageType, String> typeToFile = new HashMap<>();
-    if (new File(phoneLabFile).exists()) {
-//      logger.info("using " + phoneLabFile);
-      typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-      foundATranscript = true;
-    } else {
-      logger.warn("no phones " + phoneLabFile);
-    }
-
-    String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
-    if (new File(wordLabFile).exists()) {
-//      logger.info("using " + wordLabFile);
-      typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-      foundATranscript = true;
-    } else {
-      logger.warn("no words " + wordLabFile);
-    }
-
-    if (!foundATranscript) {
-      logger.error("no label files found, e.g. " + phoneLabFile);
-    }
-
-    // logger.debug("typeToFile " + typeToFile);
-
-    if (decode || imageWidth < 0) {  // hack to skip image generation
-      return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay || props.usePhoneToDisplay()); // if align, don't use webservice regardless
-    } else {
-      String pathname = audioFileNoSuffix + ".wav";
-      pathname = prependDeploy(pathname);
-      if (!new File(pathname).exists()) {
-        logger.error("writeTranscripts : can't find " + pathname);
-        return new EventAndFileInfo();
-      }
-      imageOutDir = deployPath + File.separator + imageOutDir;
-      return new TranscriptWriter().writeTranscripts(pathname,
-          imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,
-          useWebservice,
-          usePhoneToDisplay || props.usePhoneToDisplay(),
-          props.getPhoneToDisplay());
-    }
-  }*/
 
   /**
    * TODO : actually use the json to
@@ -317,20 +240,19 @@ public abstract class Scoring {
       if (new File(wordLabFile).exists()) {
         typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
       }
-     // logger.debug("writeTranscriptsCached got " + typeToFile);
+      // logger.debug("writeTranscriptsCached got " + typeToFile);
 
       if (typeToFile.isEmpty()) {
         Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
             getTypeToTranscriptEvents(object, usePhoneToDisplay);
-        return new EventAndFileInfo(typeToFile,imageTypeMapMap);
-      }
-      else {
+        return new EventAndFileInfo(typeToFile, imageTypeMapMap);
+      } else {
         return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
       }
     } else {
-      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =getTypeToTranscriptEvents(object, usePhoneToDisplay);
+      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = getTypeToTranscriptEvents(object, usePhoneToDisplay);
 
-     // logger.info("imageTypeMapMap " + imageTypeMapMap);
+      // logger.info("imageTypeMapMap " + imageTypeMapMap);
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
       if (!new File(pathname).exists()) {
@@ -424,44 +346,30 @@ public abstract class Scoring {
     return pathname;
   }
 
-  /**
-   * @see #Scoring
-   */
 
-/*  private void makeDecoder() {
-    if (svDecoderHelper == null && htkDictionary != null) {
-      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
-    }
-  }*/
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
-   * @see mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
    * @param fl
    * @param transliteration
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
+   * @see mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
    */
   public boolean validLTS(String fl, String transliteration) {
     if (fl.isEmpty()) return false;
-    Set<String> strings = checkLTS(fl, transliteration);
+    Set<String> strings = checkLTSHelper.checkLTS(fl, transliteration);
     // logger.info("For " + fl + " got " + strings);
     return strings.isEmpty();
   }
 
   /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.scoring.Scoring#validLTS
-   */
-  private Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
-    return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
-  }
-
-  /**
    * Must be public.
+   *
    * @return
    */
-  public boolean isDictEmpty() { return checkLTSHelper.isDictEmpty(); }
+  public boolean isDictEmpty() {
+    return checkLTSHelper.isDictEmpty();
+  }
 
   /**
    * @param foreignLanguagePhrase
@@ -473,13 +381,8 @@ public abstract class Scoring {
   }
 
   public abstract SmallVocabDecoder getSmallVocabDecoder();
-//  {
-//    return svDecoderHelper;
-//  }
 
-  public Collator getCollator() {
-    return ltsFactory.getCollator();
-  }
+  public Collator getCollator() {   return ltsFactory.getCollator();  }
 
   /**
    * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a

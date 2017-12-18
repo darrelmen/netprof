@@ -173,7 +173,7 @@ public class SmallVocabDecoder {
   /**
    * @param sentence
    * @return
-   * @see ASRWebserviceScoring#getPronunciationsFromDictOrLTS(String, String, boolean)
+   * @see ASRWebserviceScoring#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
@@ -200,11 +200,9 @@ public class SmallVocabDecoder {
    * @param foreignLanguage
    * @return
    */
-  public List<String> getMandarinTokens(String foreignLanguage) {
+  private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
-    logger.info("getMandarinTokens '" + foreignLanguage +
-        "' = '" + segmentation +
-        "'");
+    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
     return getTokens(segmentation);
   }
 

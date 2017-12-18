@@ -33,9 +33,11 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
@@ -59,15 +61,17 @@ public class InDictFilter {
   }
 
   /**
+   * ONLY FOR AMAS
    * @param phrases
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases
+   * @see mitll.langtest.server.autocrt.AutoCRT#getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    */
   public Collection<String> getValidPhrases(Collection<String> phrases) {
     return getValidSentences(phrases);
   }
 
   /**
+   * ONLY FOR AMAS
    * @param sentences
    * @return lc of sentence...?
    * @see #getValidPhrases(java.util.Collection)
@@ -101,6 +105,12 @@ public class InDictFilter {
     return filtered;
   }
 
+  /**
+   * ONLY FOR AMAS
+   * @see #getValidSentences(Collection)
+   * @param sentence
+   * @return
+   */
   private boolean allValid(String sentence) {
     Collection<String> tokens = audioFileHelper.getSmallVocabDecoder().getTokens(sentence);
     if (tokens.isEmpty() && !sentence.isEmpty()) logger.error("huh? no tokens from " + sentence);

@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -65,6 +66,7 @@ public class DecodeCorrectnessChecker {
   private static final Logger logger = LogManager.getLogger(DecodeCorrectnessChecker.class);
 
   public static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
+  public static final String MANDARIN = "mandarin";
 
   private final AlignDecode alignDecode;
   private final double minPronScore;
@@ -101,17 +103,21 @@ public class DecodeCorrectnessChecker {
                                      PrecalcScores precalcScores) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
 
-    boolean b = language.equalsIgnoreCase("mandarin") ||
-        language.equalsIgnoreCase("japanese") ||
-        language.equalsIgnoreCase("korean");
+    boolean b = isAsianLanguage(language);
 
-    logger.info("is mandarin (" + language + ")" + b);
+    logger.info("is asian lang (" + language + ")" + b);
 
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
     return decodeScore;
+  }
+
+  private boolean isAsianLanguage(String language) {
+    return language.equalsIgnoreCase(MANDARIN) ||
+        language.equalsIgnoreCase("japanese") ||
+        language.equalsIgnoreCase("korean");
   }
 
   private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, int id) {
@@ -188,47 +194,56 @@ public class DecodeCorrectnessChecker {
   /**
    * Convert dashes into spaces and remove periods, and other punct
    *
-   * @param answerSentences
+   * @param expectedAnswers
    * @param recoSentence
    * @param isMandarinEtAl
    * @return
    */
-  private boolean isCorrect(Collection<String> answerSentences, String recoSentence, boolean isMandarinEtAl) {
-    if (DEBUG)
-      logger.debug("isCorrect - expected  '" + answerSentences + "' vs heard '" + recoSentence + "' = " + isMandarinEtAl);
+  private boolean isCorrect(Collection<String> expectedAnswers, String recoSentence, boolean isMandarinEtAl) {
+    if (DEBUG) {
+      logger.debug("isCorrect - expected  '" + expectedAnswers + "' vs heard '" + recoSentence + "', is asian lang = " + isMandarinEtAl);
+    }
 
-    List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence);
-    for (String answer : answerSentences) {
-      String converted = answer
-          .replaceAll("-", " ")
-          .replaceAll("\\.\\.\\.", " ")
-          .replaceAll("\\.", "")
-          .replaceAll(":", "")
-          .toLowerCase();
+    for (String answer : expectedAnswers) {
+      String converted = getPunctRemoved(answer);
 
-      if (DEBUG && !converted.equalsIgnoreCase(answer)) logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
+      if (DEBUG && !converted.equalsIgnoreCase(answer)) {
+        logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
+      }
 
       List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted);
+      List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence);
       if (answerTokens.size() == recoTokens.size()) {
         boolean same = true;
         for (int i = 0; i < answerTokens.size() && same; i++) {
           String s = answerTokens.get(i);
           String anotherString = recoTokens.get(i);
           if (DEBUG)
-            logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           same = s.equalsIgnoreCase(anotherString);
           if (!same) {
             if (DEBUG)
-              logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+              logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           }
         }
         if (same) return true;
       } else {
-        if (DEBUG) logger.debug("not same number of tokens " + answerTokens + " " +
+        if (DEBUG) logger.debug("isCorrect not same number of tokens " + answerTokens + " " +
             answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
       }
     }
     return false;
+  }
+
+  @NotNull
+  private String getPunctRemoved(String answer) {
+    return answer
+        .replaceAll("-", " ")
+        .replaceAll("\\.\\.\\.", " ")
+        .replaceAll("\\.", "")
+        .replaceAll(":", "")
+        .replaceAll("\u3002\u3066", " ") // japanese comma, japanese period
+        .toLowerCase();
   }
 
   /**
@@ -260,7 +275,7 @@ public class DecodeCorrectnessChecker {
    * @return
    */
   private String getPhraseToDecode(String rawRefSentence, String language) {
-    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
+    return isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
         svd.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
   }

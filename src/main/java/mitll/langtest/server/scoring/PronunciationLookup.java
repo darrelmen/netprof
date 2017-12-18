@@ -16,21 +16,18 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
- // private static final String DCODR = "dcodr";
   private static final String UNK = "+UNK+";
   private static final String SEMI = ";";
   public static final String SIL = "sil";
   private static final int MAX_FROM_ANY_TOKEN = 10;
-  public static final String POUND = "#";
+  private static final String POUND = "#";
 
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  //private final Project project;
   private boolean korean;
 
   /**
-   *
    * @param dictionary
    * @param lts
    * @param project
@@ -68,16 +65,8 @@ public class PronunciationLookup implements IPronunciationLookup {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
-    String dict
-        = "[";
-    String pronunciations = getPronunciationsFromDictOrLTS(transcript, transliteration, false);
-
-/*    logger.info("createHydraDict" +
-        "\n\ttranscript     " + transcript +
-        "\n\tpronunciations " + pronunciations
-    );*/
-
-    dict += pronunciations;
+    String dict = "[";
+    dict += getPronunciationsFromDictOrLTS(transcript, transliteration, false);
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
     return dict;
@@ -151,9 +140,9 @@ public class PronunciationLookup implements IPronunciationLookup {
     StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
-    //String[] transcriptTokens = transcript.split(" ");
+    logger.info("getPronunciationsFromDictOrLTS : transcript " + transcript);
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
-
+    transcriptTokens.forEach(token -> logger.info("\n\ttoken " + token));
     int numTokens = transcriptTokens.size();
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
     int index = 0;
@@ -250,7 +239,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
                 String pronStringForWord = getPronStringForWord(word, pron, justPhones);
                 if (korean) {
-                  logger.info("word " + word+ " = " + pronStringForWord);
+                  logger.info("word " + word + " = " + pronStringForWord);
                 }
                 dict.append(pronStringForWord);
               }
@@ -276,7 +265,6 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
 
     String after = transcriptCleaned.replaceAll(";;", sep);
-
     return after;
   }
 
@@ -315,7 +303,9 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   @NotNull
-  private String getUnkPron(String word) {    return word + "," + UNK + " sp" + SEMI;  }
+  private String getUnkPron(String word) {
+    return word + "," + UNK + " sp" + SEMI;
+  }
 
   private String getPhones(String[] pc) {
     StringBuilder builder = new StringBuilder();
@@ -346,7 +336,9 @@ public class PronunciationLookup implements IPronunciationLookup {
             (StringUtils.join(process[0], "-")).contains(POUND));
   }
 
-  private LTS getLTS() {  return lts;  }
+  private LTS getLTS() {
+    return lts;
+  }
 
   @Override
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {

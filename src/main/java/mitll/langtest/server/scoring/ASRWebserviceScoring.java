@@ -79,11 +79,7 @@ import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DE
 public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
 
-
-  // private static final int FOREGROUND_VOCAB_LIMIT = 100;
-  // private static final int VOCAB_SIZE_LIMIT = 200;
   private static final String DCODR = "dcodr";
-  // private static final String UNK = "+UNK+";
 
   private static final String SEMI = ";";
   private static final String SIL = "sil";
@@ -137,8 +133,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
     int port = getWebservicePort();
 
-   // logger.info("Dict is "+ htkDictionary);
-
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
     if (port != -1) {
       setAvailable();
@@ -146,7 +140,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   @Override
-  public SmallVocabDecoder getSmallVocabDecoder() {  return getPronunciationLookup().getSmallVocabDecoder();  }
+  public SmallVocabDecoder getSmallVocabDecoder() {
+    return getPronunciationLookup().getSmallVocabDecoder();
+  }
 
   private int getWebservicePort() {
     return project.getWebservicePort();
@@ -514,139 +510,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
-  ////////////////////////////////
-  ////////////////////////////////
-
-/*  private boolean ltsOutputOk(String[][] process) {
-    return !(
-        process == null ||
-            process.length == 0 ||
-            process[0].length == 0 ||
-            process[0][0].length() == 0 ||
-            (StringUtils.join(process[0], "-")).contains("#"));
-  }*/
-
-  /**
-   * TODO : Some phrases seem to break lts process?
-   * This will work for both align and decode modes, although align will ignore the unknownmodel.
-   * <p>
-   * Create a dcodr input string dictionary, a sequence of words and their phone sequence:
-   * e.g. [distra?do,d i s t rf a i d o sp;UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]
-   *
-   * @param transcript
-   * @return the dictionary for dcodr
-   * @see #runHydra
-   */
-/*
-  @Override
-  public String createHydraDict(String transcript, String transliteration) {
-    if (getLTS() == null) {
-      logger.warn(this + " : createHydraDict : LTS is null???");
-    }
-
-    String dict
-        = "[";
-    String pronunciations = getPronunciationsFromDictOrLTS(transcript, transliteration, false);
-
-*/
-/*    logger.info("createHydraDict" +
-        "\n\ttranscript     " + transcript +
-        "\n\tpronunciations " + pronunciations
-    );*//*
-
-
-    dict += pronunciations;
-    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
-    dict += "]";
-    return dict;
-  }
-*/
-
-//  private final Set<String> seen = new HashSet<>();
-
-  /**
-   * TODO : Why this method here too? Duplicate?
-   * TODO : add failure case back in
-   *
-   * @param transcript
-   * @param transliteration
-   * @return
-   * @see AudioFileHelper#getNumPhonesFromDictionary
-   */
-/*  public int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration) {
-    return pronunciationLookup.getNumPhonesFromDictionaryOrLTS(transcript,transliteration);
-  }*/
-
-  /**
-   * @param transcript
-   * @param transliteration
-   * @param justPhones
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
-   */
-/*  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones) {
-    return pronunciationLookup.getPronunciationsFromDictOrLTS(transcript,transliteration,justPhones);
-  }*/
-
-  /**
-   * TODO : (3/20/16) sp breaks wsdcodr when sent directly
-   * wsdcodr expects a pronunciation like : distraido,d i s t rf a i d o sp;
-   *
-   * @param word
-   * @param apply
-   * @param justPhones
-   * @return
-   */
-/*
-  private String getPronStringForWord(String word, String[] apply, boolean justPhones) {
-    String s = listToSpaceSepSequence(apply);
-    return justPhones ? s + " " : word + "," + s + " sp" + SEMI;
-  }
-*/
-
-  /**
-   * last resort, if we can't even use the transliteration to get some kind of pronunciation
-   *
-   * @param word
-   * @param apply
-   * @param justPhones
-   * @return
-   * @see #getPronunciationsFromDictOrLTS
-   */
-/*
-  private String getDefaultPronStringForWord(String word, String[][] apply, boolean justPhones) {
-    for (String[] pc : apply) {
-      String result = getPhones(pc);
-      if (result.length() > 0) {
-        return justPhones ? result + " " : word + "," + result + " sp" + SEMI;
-      }
-    }
-    return justPhones ? "" : getUnkPron(word); //hopefully we never get here...
-  }
-
-  @NotNull
-  private String getUnkPron(String word) {
-    return word + "," + UNK + " sp" + SEMI;
-  }
-
-  private String getPhones(String[] pc) {
-    StringBuilder builder = new StringBuilder();
-    for (String p : pc) {
-      if (!p.contains("#"))
-        builder.append(p).append(" ");
-    }
-    return builder.toString().trim();
-  }
-
-  private String listToSpaceSepSequence(String[] pron) {
-    StringBuilder builder = new StringBuilder();
-    for (String p : pron) {
-      builder.append(p).append(" ");
-    }
-    return builder.toString().trim();
-  }
-*/
-
   /**
    * @param audioPath
    * @param transcript
@@ -665,12 +528,24 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                            boolean decode,
                            int end) {
     // reference trans
-//    logger.info("transcript " + transcript);
+
     String cleaned = slfFile.cleanToken(transcript).trim();
-//    logger.info("cleaned    " + cleaned);
-    if (isMandarin) {
-      cleaned = (decode ?  UNKNOWN_MODEL + " " : "") +
+
+    if (isAsianLanguage) {
+      cleaned = (decode ? UNKNOWN_MODEL + " " : "") +
           pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
+      logger.info("runHydra now for asian language : " +
+          "\n\tdecode     " + decode +
+          "\n\ttranscript " + transcript +
+          "\n\tcleaned    " + cleaned
+      );
+    }
+    else {
+      logger.info("runHydra" +
+          "\n\tdecode     " + decode +
+          "\n\ttranscript " + transcript +
+          "\n\tcleaned    " + cleaned
+      );
     }
 
     // generate dictionary
@@ -685,8 +560,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       smallLM = "[" + slfOut[0] + "]";
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
-
-    // String cleanedTranscript = getCleanedTranscript(cleaned, SEMI);
 
     String hydraInput =
         tmpDir + "/:" +

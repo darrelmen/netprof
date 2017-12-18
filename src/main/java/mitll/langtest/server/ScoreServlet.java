@@ -74,21 +74,12 @@ public class ScoreServlet extends DatabaseServlet {
 
   public static final String REQUEST = "request";
 
-  /**
-   *
-   */
- // private static final String NESTED_CHAPTERS = "nestedChapters";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String ROUND_TRIP1 = "roundTrip";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private static final String PHONE_REPORT = "phoneReport";
-  /**
-   * @see #getProjects
-   */
-  //private static final String PROJECTS = "projects";
-
   private static final String ERROR = "ERROR";
   public static final String USER = "user";
 
@@ -107,15 +98,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REQUEST1 = REQUEST + "=";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
-//  private static final String YEAR = "year";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-//  private static final String JSON_REPORT = "jsonReport";
-//  private static final String REPORT = "report";
   private static final String VERSION_NOW = "1.0";
-//  private static final String EXPORT = "export";
-//  private static final String REMOVE_REF_RESULT = "removeRefResult";
   private static final String RESULT_ID = "resultID";
   private static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
@@ -123,8 +109,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String EXERCISE_TEXT = "exerciseText";
   private static final String SUCCESS = "success";
   private static final String ERROR1 = "error";
-  //public static final String HAS_USER = "hasUser";
-  public static final String NO_SESSION = "no session";
+  private static final String NO_SESSION = "no session";
 
   public static final String PASS = "pass";
   public static final String PROJID = "projid";
@@ -173,7 +158,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     try {
       makeAudioFileHelper();
 
@@ -221,6 +206,13 @@ public class ScoreServlet extends DatabaseServlet {
           "\n\tpath   " + request.getPathInfo() +
           "\n\turi    " + request.getRequestURI() +
           "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
+
+      {
+        Enumeration<String> headerNames = request.getHeaderNames();
+        Set<String> headers = new TreeSet<>();
+        while (headerNames.hasMoreElements()) headers.add(headerNames.nextElement());
+        headers.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
+      }
 
       long then = System.currentTimeMillis();
       configureResponse(response);

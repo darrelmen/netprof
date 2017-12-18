@@ -51,10 +51,10 @@ class CheckLTS {
   private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;
-  private final String languageProperty;
+  private final String language;
 
   private final HTKDictionary htkDictionary;
-  private final boolean isMandarin;
+  private final boolean isAsianLanguage;
 
   private static final boolean DEBUG = false;
 
@@ -62,24 +62,24 @@ class CheckLTS {
    * @param lts
    * @param htkDictionary
    * @param languageProperty
+   * @param isAsianLanguage
    * @see Scoring#Scoring
    */
-  CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
+  CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel, boolean isAsianLanguage) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
-      logger.warn("CheckLTS : dict is empty? lts = " +lts);
+      logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
-    String language = languageProperty != null ? languageProperty : "";
-    this.languageProperty = language;
-    isMandarin = language.equalsIgnoreCase("mandarin");
-    if (isMandarin) logger.warn("using mandarin segmentation.");
+    this.language = languageProperty != null ? languageProperty : "";
+    this.isAsianLanguage = isAsianLanguage;
+    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
   }
 
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.scoring.Scoring#checkLTS
+   * @see mitll.langtest.server.scoring.Scoring#validLTS(String, String)
    */
   Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
@@ -123,18 +123,18 @@ class CheckLTS {
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
-    String language = isMandarin ? " MANDARIN " : "";
+    //   String language = isAsianLanguage ? " MANDARIN " : "";
 
     if (DEBUG) {
       logger.debug("checkLTS '" + language + "'" +
-          "\n\ttokens : '" + tokens + "'" +
-          "\n\tlts " + lts +
-          "\n\tdict size " + htkDictionary.size() +
+          "\n\ttokens : '  " + tokens + "'" +
+          "\n\tlts         " + lts +
+          "\n\tdict size   " + htkDictionary.size() +
           "\n\ttranslit OK " + translitOk);
     }
 
-    Set<String> oov    = new HashSet<>();
-    Set<String> inlts  = new HashSet<>();
+    Set<String> oov = new HashSet<>();
+    Set<String> inlts = new HashSet<>();
     Set<String> indict = new HashSet<>();
     try {
       int i = 0;
@@ -143,13 +143,13 @@ class CheckLTS {
         if (token.equalsIgnoreCase(ASR.UNKNOWN_MODEL))
           return oov;
 
-        if (isMandarin) {
+        if (isAsianLanguage) {
           String segmentation = smallVocabDecoder.segmentation(trim);
           if (segmentation.isEmpty() && !translitOk) {
             logger.warn("checkLTSOnForeignPhrase: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
           }
-        } else  {
+        } else {
           String[][] process = (!isEmptyLTS) ? lts.process(token) : null;
 
           if (DEBUG) {
@@ -196,7 +196,7 @@ class CheckLTS {
               indict.add(trim);
             } else {
               if (!isEmptyLTS) {
-                logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+                logger.warn("checkLTS with " + lts + "/" + language + " token #" + i +
                     " : '" + token + "' hash " + token.hashCode() +
                     " is invalid in '" + foreignLanguagePhrase +
                     "' and not in dictionary of size " + htkDictionary.size() + " translitOk " + translitOk + " legitLTS " + legitLTS
@@ -210,9 +210,8 @@ class CheckLTS {
                     }
                   }
                 }*/
-              }
-              else if (DEBUG) {
-                logger.debug("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+              } else if (DEBUG) {
+                logger.debug("checkLTS with " + lts + "/" + language + " token #" + i +
                     " : '" + token + "' hash " + token.hashCode() +
                     " is invalid in '" + foreignLanguagePhrase +
                     "' and not in dictionary of size " + htkDictionary.size()
@@ -252,8 +251,8 @@ class CheckLTS {
   }
 
   /**
-   * @see Scoring#isDictEmpty
    * @return
+   * @see Scoring#isDictEmpty
    */
   boolean isDictEmpty() {
     return htkDictionary == null || htkDictionary.isEmpty();
@@ -308,7 +307,7 @@ class CheckLTS {
     List<String> firstPron = new ArrayList<>();
     Set<String> uphones = new TreeSet<>();
 
-    if (isMandarin) {
+    if (isAsianLanguage) {
       List<String> token2 = new ArrayList<>();
       for (String token : tokens) {
         String segmentation = smallVocabDecoder.segmentation(token.trim());

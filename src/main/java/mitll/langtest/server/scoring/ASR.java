@@ -60,8 +60,6 @@ public interface ASR {
 
   SmallVocabDecoder getSmallVocabDecoder();
 
-  //String createHydraDict(String transcript, String transliteration);
-
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
   /**
@@ -96,5 +94,4 @@ public interface ASR {
    * @return
    */
   boolean isAvailable();
-
 }
