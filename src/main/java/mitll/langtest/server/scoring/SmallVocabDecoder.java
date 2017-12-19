@@ -247,38 +247,103 @@ public class SmallVocabDecoder {
   //back in
 
   boolean DEBUG = false;
+  boolean DEBUG_SEGMENT = false;
+
   /**
    * @param phrase
    * @return
    * @see #getMandarinTokens(String)
    */
   String segmentation(String phrase) {
-    String s = longest_prefix(phrase, 0);
-    return (s.trim().isEmpty()) ? phrase : s;
+    Map<String, String> phraseToPrefix = new HashMap<>();
+    String s = longest_prefix(phrase, 0, phraseToPrefix);
+    boolean failedToSegment = s.trim().isEmpty();
+    if (failedToSegment) {
+     if (DEBUG_SEGMENT) logger.info("couldn't segment " + phrase + " fall back to character based segmentation.");
+      StringBuilder builder = new StringBuilder();
+
+      List<Character> characters = new ArrayList<>(phrase.length());
+      for (char c : phrase.toCharArray()) {
+        characters.add(c);
+      }
+
+      for (int i = 0; i < characters.size(); i++) {
+        Character first = characters.get(i);
+        Character second = (i < characters.size() - 1) ? characters.get(i + 1) : null;
+        Character third = (i < characters.size() - 2) ? characters.get(i + 2) : null;
+        boolean found = false;
+        if (third != null) {
+          String trigram = String.valueOf(first) + second + third;
+          if (inDict(trigram)) {
+            if (DEBUG_SEGMENT)  logger.info("match trigram " + trigram);
+            builder.append(trigram).append(" ");
+            i++;
+            i++;
+            found = true;
+          }
+        }
+
+        if (!found) {
+          if (second != null) {
+            String bigram = String.valueOf(first) + second;
+            if (inDict(bigram)) {
+              if (DEBUG_SEGMENT)  logger.info("match bigram " + bigram);
+              builder.append(bigram).append(" ");
+              i++;
+            } else {
+              builder.append(first).append(" ");
+            }
+          } else {
+            builder.append(first).append(" ");
+          }
+        }
+      }
+
+      String result = builder.toString();
+      if (DEBUG_SEGMENT)  logger.info("phrase " + phrase + " = " + result);
+      return result;
+    } else {
+      return s;
+    }
+//    return failedToSegment ? phrase : s;
   }
 
-  private String longest_prefix(String phrase, int i) {
+  private String longest_prefix(String phrase, int i, Map<String, String> phraseToPrefix) {
     if (i == phrase.length())
       return "";
-    String prefix = phrase.substring(0, phrase.length() - i);
+    int endOfPrefix = phrase.length() - i;
+    String prefix = phrase.substring(0, endOfPrefix);
     if (inDict(prefix.trim())) {
       if (i == 0) {
         if (DEBUG) logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
         return phrase;
       }
 
-      String rest = longest_prefix(phrase.substring(phrase.length() - i, phrase.length()), 0);
+      String substring = phrase.substring(endOfPrefix, phrase.length());
+      String memo = phraseToPrefix.get(substring);
+      if (memo == null) {
+        memo = longest_prefix(substring, 0, phraseToPrefix);
+        phraseToPrefix.put(substring, memo);
+      } else {
+//        logger.info("found " + substring + " = " + memo);
+      }
+      String rest = memo;// longest_prefix(substring, 0,phraseToPrefix);
+
       if (!rest.isEmpty()) {
         String s = prefix + " " + rest;
         if (DEBUG) {
           logger.debug("longest_prefix : found '" + rest + "' in '" + phrase + "' returning " + s);
         }
         return s;
+      } else {
+        if (DEBUG) {
+          logger.debug("longest_prefix : did not find '" + rest + "' in '" + phrase + "' from  " + endOfPrefix + " to " + phrase.length());
+        }
       }
     } else {
-      if (DEBUG)    logger.debug("longest_prefix : dict doesn't contain " + prefix);
+      if (DEBUG) logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
     }
-    return longest_prefix(phrase, i + 1);
+    return longest_prefix(phrase, i + 1, phraseToPrefix);
   }
 
   private boolean inDict(String token) {
@@ -290,7 +355,7 @@ public class SmallVocabDecoder {
 //      }
 
       if (DEBUG && b) {
-        logger.debug("inDict token '" +token + "'");
+        logger.debug("inDict token '" + token + "'");
       }
       return b;
     } catch (Exception e) {

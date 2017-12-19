@@ -131,7 +131,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   /**
    * @param transcript
    * @param transliteration
-   * @param justPhones true if just want the phones
+   * @param justPhones      true if just want the phones
    * @return
    * @see #createHydraDict
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
@@ -141,9 +141,14 @@ public class PronunciationLookup implements IPronunciationLookup {
     StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
-    logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "'");
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
-    transcriptTokens.forEach(token -> logger.info("\n\ttoken " + token));
+
+    {
+      StringBuilder builder = new StringBuilder();
+      transcriptTokens.forEach(token -> builder.append(token).append(" "));
+      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
+    }
+
     int numTokens = transcriptTokens.size();
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
     int index = 0;
