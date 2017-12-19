@@ -36,7 +36,6 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
@@ -82,6 +81,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final String LISTS = "Lists";
 
   private static final boolean DEBUG = false;
+  private static final boolean USE_PHONE_TO_DISPLAY = true;
 
   /**
    * @param request
@@ -1434,7 +1434,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
       }
 
-      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio);
+      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio, project.getLanguage());
 
       synchronized (audioToAlignment) {
         audioToAlignment.putAll(alignments);
@@ -1464,15 +1464,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * @param projectID
    * @param idToAudio
+   * @param language
    * @return
    * @see #addAlignmentOutput
    */
   private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
-                                                           Map<Integer, AudioAttribute> idToAudio) {
+                                                           Map<Integer, AudioAttribute> idToAudio, String language) {
     if (!idToAudio.isEmpty() && idToAudio.size() > 50)
       logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
 
-    Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet());
+    Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet(), language);
     addAlignmentToAudioAttribute(idToAudio, alignments);
     return alignments;
   }
@@ -1492,14 +1493,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param projid
    * @param audioIDs
+   * @param language
    * @return
    */
-  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs) {
+  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, String language) {
     logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
     if (audioIDs.isEmpty()) logger.warn("huh? no audio ids?");
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
     logger.info("getAlignmentsFromDB found " + audioIDMap.size() + " ref result alignments...");
-    return parseJsonToGetAlignments(audioIDs, audioIDMap);
+    return parseJsonToGetAlignments(audioIDs, audioIDMap, language);
   }
 
   @NotNull
@@ -1510,7 +1512,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private Map<Integer, AlignmentOutput> parseJsonToGetAlignments(Collection<Integer> audioIDs,
-                                                                 Map<Integer, ISlimResult> audioToResult) {
+                                                                 Map<Integer, ISlimResult> audioToResult,
+                                                                 String language) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
     for (Integer audioID : audioIDs) {
       // do we have alignment for this audio in the map
@@ -1523,43 +1526,47 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now?
         logger.info("parseJsonToGetAlignments : nothing in database for audio " + audioID);
       } else {
-        getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
+        getCachedAudioRef(idToAlignment, audioID, cachedResult, language);  // OK, let's translate the db info into the alignment output
       }
     }
     return idToAlignment;
   }
 
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {
-    PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
+  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, String language) {
+    PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
-        getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
+        getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 
   @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult) {
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, String language) {
     return new PrecalcScores(serverProps, cachedResult,
-        usePhoneToDisplay || serverProps.usePhoneToDisplay());
+        usePhoneToDisplay || serverProps.usePhoneToDisplay(), language);
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay) {
+                                                                                boolean usePhoneToDisplay, String language) {
     return
-        new ParseResultJson(db.getServerProps())
+        new ParseResultJson(db.getServerProps(), language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
   }
 
   /**
+   * TODO : why four copies!!!
+   *
    * @param typeToEvent
+   * @param language
    * @return
    * @see #getCachedAudioRef
    */
   @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
+    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
@@ -1568,11 +1575,20 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event, phoneToDisplay) : value.event;
+
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
       }
     }
 
     return typeToEndTimes;
+  }
+
+
+  protected String getDisplayName(String event, Map<String, String> phoneToDisplay) {
+    String displayName = phoneToDisplay.get(event);
+    displayName = displayName == null ? event : displayName;
+    return displayName;
   }
 
   /**

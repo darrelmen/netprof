@@ -274,7 +274,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
-          addTranscript(stringToMap, scoreJson, wordAndScore);
+          addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
         }
       } catch (NumberFormatException e) {
         logger.warn("got " + e + " for " + exid);

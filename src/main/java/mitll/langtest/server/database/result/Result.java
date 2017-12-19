@@ -52,7 +52,7 @@ public class Result extends SlimResult implements UserAndTime {
   private final String answer;
   private final long timestamp;
 
-  private AudioType audioType = AudioType.UNSET;
+  private AudioType audioType;
   private final long durationInMillis;
   private final boolean correct;
 

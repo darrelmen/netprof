@@ -34,7 +34,6 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.scoring.ASR;
-import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -187,10 +186,11 @@ public class ScoreToJSON {
    * Add overall score.
    *
    * @param score
+   * @param language
    * @return
-   * @see mitll.langtest.server.ScoreServlet#getJsonForAudioForUser
+   * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps) {
+  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, String language) {
     JSONObject jsonObject = new JSONObject();
 
     jsonObject.put(SCORE, score.getHydecScore());
@@ -207,7 +207,7 @@ public class ScoreToJSON {
         JSONObject object = new JSONObject();
         String event = segment.getEvent();
         if (usePhone) {  // remap to display labels
-          event = serverProps.getDisplayPhoneme(event);
+          event = serverProps.getDisplayPhoneme(language, event);
         }
 
         object.put(EVENT, event);

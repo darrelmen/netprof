@@ -166,7 +166,7 @@ public class ClickableTranscript {
       //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
       audioControl.repeatSegment(segment.getStart(), segment.getEnd());
       eventLogger.logEvent(widget, type.toString(),
-          new EventContext("" + exerciseID, "Clicked on " + segment.getEvent()));
+          new EventContext("" + exerciseID, "Clicked on " + segment.getDisplayEvent()));
     }
   }
 

@@ -40,8 +40,6 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,11 +56,11 @@ public class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
-  private final ParseResultJson parseResultJson;
+//  private final ParseResultJson parseResultJson;
 
   BasePhoneDAO(Database database) {
     super(database);
-    parseResultJson = new ParseResultJson(database.getServerProps());
+  //  parseResultJson = new ParseResultJson(database.getServerProps(), language);
   }
 
   /**
@@ -70,10 +68,12 @@ public class BasePhoneDAO extends DAO {
    * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
+   * @param language
    */
    void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                       String scoreJson,
-                      WordAndScore wordAndScore) {
+                      WordAndScore wordAndScore, String language) {
+     ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
          jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
@@ -163,7 +163,7 @@ public class BasePhoneDAO extends DAO {
   }
 
   /**
-   * @see #addTranscript(Map, String, WordAndScore)
+   * @see #addTranscript(Map, String, WordAndScore, String)
    * @param wordAndScore
    * @param netPronImageTypeListMap
    */

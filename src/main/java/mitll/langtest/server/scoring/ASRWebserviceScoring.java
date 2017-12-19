@@ -39,8 +39,6 @@ import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -104,6 +102,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Used in possible trimming
    */
   private static final boolean INCLUDE_SELF_SIL_LINK = false;
+  private final Map<String, String> phoneToDisplay;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -131,7 +130,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     fileToDuration = CacheBuilder.newBuilder().maximumSize(100000).build();
 
     this.project = project;
+
     int port = getWebservicePort();
+    phoneToDisplay = properties.getPhoneToDisplay(language.toLowerCase());
+
+
+      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
     if (port != -1) {
@@ -338,7 +342,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
       String rawAudioPath = getRawAudioPath(filePath, uniqueTimestamp2);
       try {
-        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
+        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + language);
 
         File tempFile = tempDir.toFile();
 
@@ -453,7 +457,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        Scores scores,
                                        String phoneLab,
                                        String wordLab,
-                                       double duration, int processDur, boolean usePhoneToDisplay,
+                                       double duration,
+                                       int processDur,
+                                       boolean usePhoneToDisplay,
                                        JsonObject jsonObject
   ) {
     try {
@@ -468,6 +474,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
 
+// what if we don't want images?
       int imageWidth = imageOptions.getWidth();
       int imageHeight = imageOptions.getHeight();
 
@@ -495,8 +502,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           "\n\ttypeToEndTimes " + typeToEndTimes
       );*/
 
+      Map<String, String> phoneToDisplay = Collections.emptyMap();
+      if (reallyUsePhone && this.phoneToDisplay != null) {
+        phoneToDisplay = this.phoneToDisplay;
+        logger.info("using " + phoneToDisplay.size());
+      }
       return new PretestScore(scores.hydraScore,
-          getPhoneToScore(scores),
+          getPhoneToScore(scores, phoneToDisplay),
           getWordToScore(scores),
           sTypeToImage,
           typeToEndTimes,
@@ -528,20 +540,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                            boolean decode,
                            int end) {
     // reference trans
-
     String cleaned = slfFile.cleanToken(transcript).trim();
 
     if (isAsianLanguage) {
-      cleaned = (decode ? UNKNOWN_MODEL + " " : "") +
-          pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
-      logger.info("runHydra now for asian language : " +
+      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
+      logger.info("runHydra now for asian language (" + language + "): " +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
           "\n\tcleaned    " + cleaned
       );
-    }
-    else {
-      logger.info("runHydra" +
+    } else {
+      logger.info("runHydra (" + language + ")" +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
           "\n\tcleaned    " + cleaned
@@ -549,7 +558,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     // generate dictionary
-    String hydraDict = pronunciationLookup.createHydraDict(cleaned, transliteration);
+    String hydraDict = getHydraDict(cleaned, transliteration);
     String smallLM = "[" +
         (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
         "]";
@@ -596,7 +605,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
-      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
+      logger.debug(language + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
           " hydra on " + audioPath + " - score: " + split[0] + " raw reply : " + resultsStr);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
@@ -608,6 +617,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 		}*/
       return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
     }
+  }
+
+  @Override
+  public String getHydraDict(String cleaned, String transliteration) {
+    return pronunciationLookup.createHydraDict(cleaned, transliteration);
+  }
+
+  /**
+   * @param transcript
+   * @return
+   * @see #runHydra(String, String, String, Collection, String, boolean, int)
+   */
+  public String getSegmented(String transcript) {
+    return pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim());
   }
 
   @NotNull
@@ -723,30 +746,44 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = eventAndFileInfo.typeToEvent;
-    return getTypeToSegments(typeToEvent);
-  }
-
-  @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+    eventAndFileInfo.typeToEvent.forEach((imageType, eventMap) -> {
+      NetPronImageType netPronImageType = NetPronImageType.valueOf(imageType.toString());
+      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(netPronImageType, k2 -> new ArrayList<>());
+      eventMap.values()
+          .forEach(value -> {
+            String event = value.event;
+            String displayName = netPronImageType == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(event) : event;
+            endTimes.add(new TranscriptSegment(value.start, value.end, event, value.score, displayName));
+          });
+    });
+
+/*    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
-      typeToEvents.getValue().values().forEach(value -> endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score)));
-  /*    for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+      typeToEvents
+          .getValue()
+          .values()
+          .forEach(value -> endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score)));
+  *//*    for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
         endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
-      }*/
-    }
+      }*//*
+    }*/
 
     return typeToEndTimes;
   }
 
-  private Map<String, Float> getPhoneToScore(Scores scores) {
-    Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
-    return getTokenToScore(scores, phones, true);
+
+  protected String getDisplayName(String event) {
+    String displayName = phoneToDisplay.get(event);
+    displayName = displayName == null ? event : displayName;
+    return displayName;
+  }
+
+  private Map<String, Float> getPhoneToScore(Scores scores, Map<String, String> phoneToDisplay) {
+    return getTokenToScore(scores, scores.eventScores.get(Scores.PHONES), true, phoneToDisplay);
   }
 
   /**
@@ -755,11 +792,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #getPretestScore
    */
   private Map<String, Float> getWordToScore(Scores scores) {
-    Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
-    return getTokenToScore(scores, phones, false);
+    return getTokenToScore(scores, scores.eventScores.get(Scores.WORDS), false, Collections.emptyMap());
   }
 
-  private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, boolean expecting) {
+  private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, boolean expecting, Map<String, String> phoneToDisplay) {
     if (phones == null) {
       if (expecting) {
         logger.warn("getTokenToScore no phone scores in " + scores.eventScores);
@@ -772,8 +808,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         if (!key.equalsIgnoreCase(SIL)) {
           Float value = phoneScorePair.getValue();
+          String s = phoneToDisplay.get(key);
+          if (s != null) logger.info(key + " = " + s);
+          s = s == null ? key : s;
           //   logger.info("getTokenToScore adding '" + key + "' : " + value);
-          phoneToScore.put(key, Math.min(1.0f, value));
+          phoneToScore.put(s, Math.min(1.0f, value));
         }
 //        else {
 //          // logger.info("getTokenToScore skipping key '" + key + "'");

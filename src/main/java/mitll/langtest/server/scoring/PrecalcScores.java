@@ -58,8 +58,8 @@ public class PrecalcScores {
   private boolean didRunNormally = false;
   private final ParseResultJson parseResultJson;
 
-  public PrecalcScores(ServerProperties serverProperties) {
-    this.parseResultJson = new ParseResultJson(serverProperties);
+  public PrecalcScores(ServerProperties serverProperties, String language) {
+    this.parseResultJson = new ParseResultJson(serverProperties, language);
   }
 
   /**
@@ -68,10 +68,11 @@ public class PrecalcScores {
    * @param serverProperties
    * @param precalcResult
    * @param usePhoneToDisplay
+   * @param language
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPrecalcScores
    */
-  public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay) {
-    this.parseResultJson = new ParseResultJson(serverProperties);
+  public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay, String language) {
+    this(serverProperties,language);
     this.precalcResult = precalcResult;
 
     this.didRunNormally = true;
@@ -83,8 +84,8 @@ public class PrecalcScores {
     }
   }
 
-  public PrecalcScores(ServerProperties serverProperties, String json) {
-    this.parseResultJson = new ParseResultJson(serverProperties);
+  public PrecalcScores(ServerProperties serverProperties, String json, String language) {
+    this(serverProperties,language);
     this.didRunNormally = true;
     parseJSON(false, -100, json);
   }
@@ -130,7 +131,7 @@ public class PrecalcScores {
    * @param pronScore
    * @param jsonObject
    * @return
-   * @see #PrecalcScores(ServerProperties, Result, boolean)
+   * @seex #PrecalcScores(ServerProperties, Result, boolean)
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =

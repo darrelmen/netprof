@@ -131,8 +131,9 @@ public class PronunciationLookup implements IPronunciationLookup {
   /**
    * @param transcript
    * @param transliteration
-   * @param justPhones
+   * @param justPhones true if just want the phones
    * @return
+   * @see #createHydraDict
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   @Override
@@ -140,7 +141,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
-    logger.info("getPronunciationsFromDictOrLTS : transcript " + transcript);
+    logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "'");
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
     transcriptTokens.forEach(token -> logger.info("\n\ttoken " + token));
     int numTokens = transcriptTokens.size();
@@ -220,7 +221,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                   dict += getUnkPron(word);
                 }*/
 
-                logger.info("using unk phone for " + word);
+                logger.warn("using unk phone for '" + word + "' in " + transcript);
                 dict.append(getUnkPron(word));
               }
             } else { // it's ok -use it

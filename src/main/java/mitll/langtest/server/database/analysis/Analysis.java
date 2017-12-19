@@ -69,12 +69,13 @@ public abstract class Analysis extends DAO {
   /**
    * @param database
    * @param phoneDAO
+   * @param language
    * @see DatabaseImpl#getAnalysis(int)
    * @see DatabaseImpl#makeDAO
    */
-  public Analysis(Database database, IPhoneDAO phoneDAO) {
+  public Analysis(Database database, IPhoneDAO phoneDAO, String language) {
     super(database);
-    parseResultJson = new ParseResultJson(database.getServerProps());
+    parseResultJson = new ParseResultJson(database.getServerProps(), language);
     this.phoneDAO = phoneDAO;
     //logger.info("Analysis : exToRef has " + exToRef.size());
   }

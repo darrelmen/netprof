@@ -114,7 +114,7 @@ public class WordTable {
 
   private void addPhones(String filter, StringBuilder builder, Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
     for (TranscriptSegment phone : pair.getValue()) {
-      String event = phone.getEvent();
+      String event = phone.getDisplayEvent();
       if (!event.equals("sil")) {
         String color = " background-color:" + SimpleColumnChart.getColor(phone.getScore());
         boolean match = event.equals(filter);
@@ -171,7 +171,7 @@ public class WordTable {
     String event = word.getEvent();
     if (event.equals("UNKNOWNMODEL")) event = "Low score";
     String coloredSpan = getColoredSpan(event, word.getScore());
-    //  logger.info("span '" + word.getEvent() + "' " + word.getScore() + " ");
+    //  logger.info("span '" + word.getPhoneEvent() + "' " + word.getScore() + " ");
     return coloredSpan;
   }
 
@@ -369,7 +369,7 @@ public class WordTable {
   private void addPhonesBelowWord(boolean showScore, List<TranscriptSegment> value, Table pTable, HTMLPanel scoreRow) {
     HTMLPanel col;
     for (TranscriptSegment phone : value) {
-      String phoneLabel = phone.getEvent();
+      String phoneLabel = getPhoneEvent(phone);
       if (!phoneLabel.equals("sil")) {
         TableHeader h = new TableHeader(phoneLabel);
         alignCenter(h);
@@ -391,6 +391,10 @@ public class WordTable {
         scoreRow.add(col);
       }
     }
+  }
+
+  private String getPhoneEvent(TranscriptSegment phone) {
+    return phone.getDisplayEvent();
   }
 
   /**
@@ -418,7 +422,7 @@ public class WordTable {
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
-      String phoneLabel = phoneSegment.getEvent();
+      String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
         float v = phoneSegment.getStart() * 100;
         int vi = (int) v;

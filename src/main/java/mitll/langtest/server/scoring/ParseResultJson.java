@@ -65,13 +65,18 @@ public class ParseResultJson {
   private static final String WORDS = "words";
   private static final String W = "w";
   private final ServerProperties props;
+  private final String language;
+  Map<String, String> phoneToDisplay;
 
   /**
    * @param properties
+   * @param language
    * @see PhoneDAO#PhoneDAO(Database)
    */
-  public ParseResultJson(ServerProperties properties) {
+  public ParseResultJson(ServerProperties properties, String language) {
     this.props = properties;
+    this.language = language;
+    phoneToDisplay = props.getPhoneToDisplay(language);
   }
 
   /**
@@ -83,18 +88,27 @@ public class ParseResultJson {
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event) : value.event;
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
       }
     }
 
     return typeToEndTimes;
   }
+
+  private String getDisplayName(String event) {
+    String displayName = phoneToDisplay.get(event);
+    displayName = displayName == null ? event : displayName;
+    return displayName;
+  }
+
 
   private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
@@ -114,7 +128,7 @@ public class ParseResultJson {
     return typeToEndTimes;
   }
 
- private  int warn = 0;
+  private int warn = 0;
 
   /**
    * @param json
@@ -172,7 +186,7 @@ public class ParseResultJson {
       //logger.warn("json is empty?");
       return emptyMap;
     } else if (json.equals("{}") || json.equals("null")) {
-     // logger.warn("json is " + json);
+      // logger.warn("json is " + json);
       return emptyMap;
     } else {
       return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
@@ -214,10 +228,10 @@ public class ParseResultJson {
    * @see Scoring#getTypeToTranscriptEvents
    */
   public Map<ImageType, Map<Float, TranscriptEvent>> readFromJSON(JsonObject jsonObject,
-                                                           String words1,
-                                                           String w1,
-                                                           boolean usePhones,
-                                                           Map<String, List<List<String>>> wordToPronunciations) {
+                                                                  String words1,
+                                                                  String w1,
+                                                                  boolean usePhones,
+                                                                  Map<String, List<List<String>>> wordToPronunciations) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
     SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
@@ -281,7 +295,7 @@ public class ParseResultJson {
     double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
     double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
     if (usePhone) {
-      token = props.getDisplayPhoneme(token);
+      token = props.getDisplayPhoneme(language, token);
     }
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));

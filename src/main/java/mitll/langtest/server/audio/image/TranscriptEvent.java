@@ -70,7 +70,7 @@ public class TranscriptEvent implements Comparable<TranscriptEvent> {
 
   @Override
   public int compareTo(TranscriptEvent o) {
-    return new Float(start).compareTo(o.start);
+    return Float.compare(start, o.start);
   }
 
   public String toString() {

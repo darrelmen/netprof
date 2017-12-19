@@ -97,7 +97,7 @@ public abstract class Scoring {
   final boolean isAsianLanguage;
 
   private LTSFactory ltsFactory;
-  final String languageProperty;
+  final String language;
 
   /**
    * @param deployPath
@@ -112,20 +112,22 @@ public abstract class Scoring {
     this.props = props;
     this.logAndNotify = langTestDatabase;
     String language = project.getLanguage();
-    this.languageProperty = language;
+    this.language = language;
     isAsianLanguage = isAsianLanguage(language);
-       if (isAsianLanguage) logger.warn("using mandarin segmentation.");
+    if (isAsianLanguage) {
+      logger.warn("using mandarin segmentation.");
+    }
     setLTSFactory();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel(), isAsianLanguage);
   }
 
   private void setLTSFactory() {
     try {
-//      logger.debug("\n" + this + " : Factory for " + languageProperty);
-      ltsFactory = new LTSFactory(languageProperty);
+//      logger.debug("\n" + this + " : Factory for " + language);
+      ltsFactory = new LTSFactory(language);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
+      logger.error("\n" + this + " : Scoring for " + language + " got " + e);
     }
   }
 
@@ -198,10 +200,9 @@ public abstract class Scoring {
 
       return new TranscriptWriter().writeTranscripts(pathname,
           imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice,
-          usePhone, props.getPhoneToDisplay());
+          usePhone, props.getPhoneToDisplay(language));
     }
   }
-
 
 
   /**
@@ -271,7 +272,7 @@ public abstract class Scoring {
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
     return
-        new ParseResultJson(props)
+        new ParseResultJson(props, language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
   }
 
@@ -292,10 +293,11 @@ public abstract class Scoring {
         ImageType imageType = o.getKey();
         boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
         TranscriptReader transcriptReader = new TranscriptReader();
+        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(language);
         typeToEvent.put(imageType,
             useWebservice ?
-                transcriptReader.readEventsFromString(o.getValue(), isPhone, props.getPhoneToDisplay()) :
-                transcriptReader.readEventsFromFile(o.getValue(), isPhone, props.getPhoneToDisplay()));
+                transcriptReader.readEventsFromString(o.getValue(), isPhone, phoneToDisplay) :
+                transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
 
       }
       return new EventAndFileInfo(new HashMap<>(), typeToEvent);
@@ -347,7 +349,6 @@ public abstract class Scoring {
   }
 
 
-
   /**
    * @param fl
    * @param transliteration
@@ -382,7 +383,9 @@ public abstract class Scoring {
 
   public abstract SmallVocabDecoder getSmallVocabDecoder();
 
-  public Collator getCollator() {   return ltsFactory.getCollator();  }
+  public Collator getCollator() {
+    return ltsFactory.getCollator();
+  }
 
   /**
    * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a

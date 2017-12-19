@@ -34,7 +34,6 @@ package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
@@ -219,7 +218,10 @@ public class ServerProperties {
    */
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
-  private final Map<String, String> phoneToDisplay = new HashMap<>();
+  //  private final Map<String, String> phoneToDisplay = new HashMap<>();
+  private final Map<String, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
+
+
   private List<Affiliation> affliations = new ArrayList<>();
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
@@ -249,6 +251,38 @@ public class ServerProperties {
       "rbtrbt"));
 
   public ServerProperties() {
+    Map<String, String> value = new HashMap<>();
+
+    // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
+
+    value.put("a1", "ā");
+    value.put("a2", "á");
+    value.put("a3", "ǎ");
+    value.put("a4", "à");
+
+    value.put("e1", "ē");
+    value.put("e2", "é");
+    value.put("e3", "ě");
+    value.put("e4", "è");
+
+    value.put("i1", "ī");
+    value.put("i2", "í");
+    value.put("i3", "ǐ");
+    value.put("i4", "ì");
+
+    value.put("o1", "ō");
+    value.put("o2", "ó");
+    value.put("o3", "ǒ");
+    value.put("o4", "ò");
+
+    value.put("u1", "ū");
+    value.put("u2", "ú");
+    value.put("u3", "ǔ");
+    value.put("u4", "ù");
+
+    langToPhoneToDisplay.put("mandarin", value);
+
+    logger.info("now " + langToPhoneToDisplay);
   }
 
   private Map<String, String> manifest = new HashMap<>();
@@ -261,6 +295,7 @@ public class ServerProperties {
   public ServerProperties(Properties props,
                           Map<String, String> manifest,
                           File configDir) {
+    this();
     this.props = props;
     this.manifest = manifest;
 
@@ -280,8 +315,8 @@ public class ServerProperties {
    */
   public ServerProperties(String configDir, String configFile) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
-    readProps(configDir, configFile);//, "");//getDateFromManifest(servletContext));
-    readPhonemeMap(configDir);
+    readProps(configDir, configFile);
+    //readPhonemeMap(configDir);
   }
 
   /**
@@ -483,16 +518,6 @@ public class ServerProperties {
     return getDefaultFalse(DO_TRIM);
   }
 
-/*
-  private int getIntProperty(String audioOffset) {
-    try {
-      return Integer.parseInt(props.getProperty(audioOffset));
-    } catch (NumberFormatException e) {
-      return 0;
-    }
-  }
-*/
-
   private int getIntPropertyDef(String audioOffset, int defaultValue) {
     try {
       String property = props.getProperty(audioOffset);
@@ -631,30 +656,25 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  /**
-   * Should be a per-project option.
-   *
-   * @return
-   */
- /* @Deprecated
-  public boolean shouldDropRefResult() {
-    return getDefaultFalse("dropRefResultTable");
-  }
-*/
-
-  public Map<String, String> getPhoneToDisplay() {
-    return phoneToDisplay;
+  public Map<String, String> getPhoneToDisplay(String language) {
+    Map<String, String> stringStringMap = langToPhoneToDisplay.get(language);
+    return stringStringMap == null ? Collections.emptyMap() : stringStringMap;
   }
 
   /**
+   * @param language
    * @param phone
    * @return
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
    */
-  public String getDisplayPhoneme(String phone) {
-    String s = phoneToDisplay.get(phone);
-    if (s == null) return phone;
-    else return s;
+  public String getDisplayPhoneme(String language, String phone) {
+    Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
+    if (phoneToDisplay == null) {
+      return phone;
+    } else {
+      String s = phoneToDisplay.get(phone);
+      return (s == null) ? phone : s;
+    }
   }
 
   /**
@@ -666,7 +686,7 @@ public class ServerProperties {
     return props.getProperty("dialog");
   }
 
-  private void readPhonemeMap(String configDir) {
+ /* private void readPhonemeMap(String configDir) {
     String phonemeMapping = props.getProperty("phonemeMapping");
 
     if (phonemeMapping == null) {
@@ -687,7 +707,7 @@ public class ServerProperties {
       file = new FileReader(file1);
       BufferedReader reader = new BufferedReader(file);
 
-      /*line =*/
+      *//*line =*//*
       reader.readLine(); // skip header
 
       while ((line = reader.readLine()) != null) {
@@ -703,9 +723,10 @@ public class ServerProperties {
       logger.error("got " + e, e);
     }
   }
+*/
 
   public boolean usePhoneToDisplay() {
-    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
+    return getDefaultTrue(USE_PHONE_TO_DISPLAY);
   }
 
   // EMAIL ------------------------
@@ -818,6 +839,9 @@ public class ServerProperties {
 
   public boolean debugOneProject() {
     return getDefaultFalse(DEBUG_ONE_PROJECT);
+  }
+  public int debugProjectID() {
+    return getIntPropertyDef("debugProjectID",-1);
   }
 
   public int getSleepBetweenDecodes() {

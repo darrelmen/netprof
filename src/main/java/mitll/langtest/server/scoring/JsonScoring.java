@@ -12,7 +12,6 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,7 +76,8 @@ public class JsonScoring {
                                            ScoreServlet.PostRequest request,
                                            String wavPath,
                                            File saveFile,
-                                           String deviceType, String device,
+                                           String deviceType,
+                                           String device,
                                            DecoderOptions options,
                                            boolean fullJSON) {
     long then = System.currentTimeMillis();
@@ -104,9 +104,12 @@ public class JsonScoring {
     if (answer != null && answer.isValid() && pretestScore != null) {
       boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
       ScoreToJSON scoreToJSON = new ScoreToJSON();
+
+      String language = db.getProject(projid).getLanguage();
+
       jsonForScore = fullJSON ?
           scoreToJSON.getJsonObject(pretestScore) :
-          scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps);
+          scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, language);
       jsonForScore.put(SCORE, pretestScore.getHydecScore());
 
       if (doFlashcard) {

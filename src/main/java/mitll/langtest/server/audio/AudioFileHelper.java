@@ -33,6 +33,7 @@
 package mitll.langtest.server.audio;
 
 import corpus.HTKDictionary;
+import jdk.nashorn.internal.objects.AccessorPropertyDescriptor;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -1075,7 +1076,7 @@ public class AudioFileHelper implements AlignDecode {
       session = getSession(hydraHost, project.getID());
     }
     HTTPClient httpClient = getHttpClient(hydraHost);
-    httpClient.addRequestProperty( ScoreServlet.REQUEST, ScoreServlet.PostRequest.ALIGN.toString());
+    httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.PostRequest.ALIGN.toString());
     httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
     httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
     // USE THE LANGUAGE INSTEAD
@@ -1094,7 +1095,7 @@ public class AudioFileHelper implements AlignDecode {
       //logger.info("getProxyScore dict     " + asrScoring.createHydraDict(trim, ""));
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
-      return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps) : new PrecalcScores(serverProps, json);
+      return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
     } catch (IOException e) {
       logger.error("checkForWebservice got " + e);
     }
@@ -1480,6 +1481,10 @@ public class AudioFileHelper implements AlignDecode {
     return !asrScoring.isDictEmpty();
   }
 
+  public ASR getASR() {
+    return asrScoring;
+  }
+
   /**
    * @see AlignDecode#getASRScoreForAudio
    */
@@ -1513,5 +1518,9 @@ public class AudioFileHelper implements AlignDecode {
 
       return this;
     }
+  }
+
+  public String getSegmented(String transcript) {
+    return asrScoring.getSegmented(transcript);
   }
 }

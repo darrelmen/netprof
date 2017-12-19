@@ -37,8 +37,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -48,6 +46,8 @@ import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private int start;                  /// Start time in seconds
   private int end;                    /// End time in seconds
+
+  private  String displayEvent;
 
   public TranscriptSegment() {
   }
@@ -59,12 +59,14 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
    * @param e     end time in seconds
    * @param name  event name (i.e. phone, word, etc.)
    * @param score
+   * @param displayName
    * @see mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes(Map)
    */
-  public TranscriptSegment(float s, float e, String name, float score) {
+  public TranscriptSegment(float s, float e, String name, float score, String displayName) {
     super(name,score);
     start = toInt(s);
     end = toInt(e);
+    this.displayEvent = displayName;
   }
 
   public float getStart() {
@@ -92,12 +94,20 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return Integer.compare(start, o.start);
   }
 
+  private float roundToHundredth(float totalHours) {
+    return ((float) ((Math.round(totalHours * 100d)))) / 100f;
+  }
+
+  public String getDisplayEvent() {
+    return displayEvent;
+  }
+
+  public void setDisplayEvent(String displayEvent) {
+    this.displayEvent = displayEvent;
+  }
+
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
         getEvent() + " (" + roundToHundredth(getScore()) + ")";
-  }
-
-  private float roundToHundredth(float totalHours) {
-    return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
 }

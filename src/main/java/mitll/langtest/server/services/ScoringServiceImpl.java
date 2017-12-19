@@ -64,7 +64,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
@@ -73,6 +72,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final boolean DEBUG = true;
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
+  public static final boolean USE_PHONE_TO_DISPLAY = true;
 
   /**
    * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...
@@ -96,11 +96,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         CommonShell exercise = null;
         String sentence = "";
         String transliteration = "";
+        int projectIDFromUser = getProjectIDFromUser();
         if (isAMAS) {
           exercise = db.getAMASExercise(exerciseID);
           sentence = exercise.getForeignLanguage();
         } else {
-          CommonExercise exercise1 = db.getExercise(getProjectIDFromUser(), exerciseID);
+          CommonExercise exercise1 = db.getExercise(projectIDFromUser, exerciseID);
 
           if (exercise1 != null) {
             transliteration = exercise1.getTransliteration();
@@ -124,6 +125,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           return new PretestScore();
         } else {
           String audioFilePath = result.getAnswer();
+          String language = db.getProject(projectIDFromUser).getLanguage();
 
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
@@ -135,7 +137,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
               transliteration,
               imageOptions,
               "" + exerciseID,
-              getPrecalcScores(serverProps.usePhoneToDisplay(), result),
+              getPrecalcScores(serverProps.usePhoneToDisplay(), result, language),
 
               new DecoderOptions()
                   .setDoFlashcard(false)
@@ -327,18 +329,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     } else {
       logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
 
-      getCachedAudioRef(idToAlignment, audioID, cachedResult);  // OK, let's translate the db info into the alignment output
+      getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguage());  // OK, let's translate the db info into the alignment output
     }
   }
 
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult) {
-    PrecalcScores precalcScores = getPrecalcScores(false, cachedResult);
+  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, String language) {
+    PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
-        getTypeToTranscriptEvents(precalcScores.getJsonObject(), false);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents);
+        getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
+
 
   private PretestScore recalcRefAudioWithHelper(int projid,
                                                 Integer audioID,
@@ -378,21 +381,23 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay) {
+                                                                                boolean usePhoneToDisplay, String language) {
     return
-        new ParseResultJson(db.getServerProps())
+        new ParseResultJson(db.getServerProps(), language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
   }
 
   /**
    * @param typeToEvent
+   * @param language
    * @return
    * @see #getCachedAudioRef
    */
   @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
+    Map<String,String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
@@ -401,11 +406,18 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event,phoneToDisplay) : value.event;
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
       }
     }
 
     return typeToEndTimes;
+  }
+
+  protected String getDisplayName(String event,Map<String,String> phoneToDisplay) {
+    String displayName = phoneToDisplay.get(event);
+    displayName = displayName == null ? event : displayName;
+    return displayName;
   }
 
   /**
@@ -481,21 +493,21 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
-    String[] split = testAudioFile.split(File.separator);
-    String answer = split[split.length - 1];
+    //String[] split = testAudioFile.split(File.separator);
+    //String answer = split[split.length - 1];
 //    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
-    ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
+  //  ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
-    if (cachedResult != null && precalcScores == null) {
-      precalcScores = getPrecalcScores(usePhoneToDisplay, cachedResult);
+/*    if (cachedResult != null && precalcScores == null) {
+      precalcScores = getPrecalcScores(usePhoneToDisplay, cachedResult, language);
       if (DEBUG)
         logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer);
       //  +
       //  " found previous " + cachedResult.getUniqueID());
     } else {
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
-    }
+    }*/
 
     PretestScore asrScoreForAudio = getPretestScoreMaybeUseCache(reqid,
         testAudioFile,
@@ -517,7 +529,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         "\n\ttook     " + timeToRunHydec + " millis " +
         "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 
-    if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
+    if (resultID > -1 /*&& cachedResult == null*/) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, true);
       Project project = db.getProjectManagement().getProject(projID);
       project.addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
@@ -562,8 +574,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult) {
-    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay());
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, String language) {
+    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay(), language);
   }
 
   /**

@@ -78,7 +78,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        SlickResultDAO resultDAO,
                        String language,
                        int projid) {
-    super(database, phoneDAO);
+    super(database, phoneDAO, language);
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;

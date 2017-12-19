@@ -84,8 +84,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
    * @param sTypeToEndTimes
    * @param recoSentence
    * @param processDur
-   * @seex mitll.langtest.server.scoring.ASRScoring#getPretestScore
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
+    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
@@ -142,14 +141,6 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return processDur;
   }
 
-  public String toString() {
-    return "hydec score " + hydecScore +
-        " phones " + getPhoneScores() +
-        " type->image " + getsTypeToImage() +
-        " type->endtimes " + getTypeToSegments() + " took " + processDur + " millis"
-        ;
-  }
-
   public String getJson() {
     return json;
   }
@@ -169,5 +160,13 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
    */
   public boolean isRanNormally() {
     return ranNormally;
+  }
+
+  public String toString() {
+    return "hydec score " + hydecScore +
+        " phones " + getPhoneScores() +
+        " type->image " + getsTypeToImage() +
+        " type->endtimes " + getTypeToSegments() + " took " + processDur + " millis"
+        ;
   }
 }

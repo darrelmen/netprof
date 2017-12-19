@@ -83,16 +83,16 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR TESTING
    */
-  private static final int LANG_ID = 2;
+  private static final int debugProjectID = 2;
 
   private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
   public static final String NUM_ITEMS = "Num Items";
-  public static final String CREATOR_ID = "creatorId";
-  public static final String DOMINO_ID = "Domino ID";
-  public static final String VOCABULARY = "Vocabulary";
+  //public static final String CREATOR_ID = "creatorId";
+  private static final String DOMINO_ID = "Domino ID";
+//  public static final String VOCABULARY = "Vocabulary";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -103,19 +103,17 @@ public class ProjectManagement implements IProjectManagement {
   private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
 
-//  private FileUploadHelper fileUploadHelper;
   private final boolean debugOne;
 
-  public static final String ID = "_id";
-  public static final String NAME = "name";
-  public static final String LANGUAGE_NAME = "languageName";
-  public static final String CREATE_TIME = "createTime";
+//  public static final String ID = "_id";
+//  public static final String NAME = "name";
+//  public static final String LANGUAGE_NAME = "languageName";
+//  public static final String CREATE_TIME = "createTime";
 
   private ProjectServiceDelegate projectDelegate;
-  private final IProjectWorkflowDAO workflowDelegate;
   private DocumentServiceDelegate documentDelegate;
 
-  IDominoImport dominoImport;
+  private final IDominoImport dominoImport;
 
   /**
    * @param pathHelper
@@ -134,9 +132,11 @@ public class ProjectManagement implements IProjectManagement {
     this.logAndNotify = logAndNotify;
     this.db = db;
     this.debugOne = properties.debugOneProject();
+    this.debugProjectID = properties.debugProjectID();
     //fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
 
+    IProjectWorkflowDAO workflowDelegate;
     if (servletContext == null) {
       logger.warn("no servlet context, no domino delegates");
       workflowDelegate = null;
@@ -196,7 +196,7 @@ public class ProjectManagement implements IProjectManagement {
       } else {
         if (!idToProject.containsKey(slickProject.id())) {
           if (debugOne) {
-            if (slickProject.id() == LANG_ID ||
+            if (slickProject.id() == debugProjectID ||
                 slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
                 ) {
               rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);

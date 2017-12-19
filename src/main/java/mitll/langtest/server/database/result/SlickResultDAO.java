@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
@@ -53,7 +54,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -65,15 +65,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private final ResultDAOWrapper dao;
   private SlickResult defaultResult;
+  //  private final ParseResultJson parser;
+  ServerProperties serverProps;
 
   /**
    * @param database
    * @param dbConnection
+   * @paramx xlanguage
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public SlickResultDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
+    serverProps = database.getServerProps();
     dao = new ResultDAOWrapper(dbConnection);
+    //  parser = new ParseResultJson(database.getServerProps(), language);
   }
 
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
@@ -121,9 +126,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param shared
    * @param projid
-   * @param exToInt
    * @param transcript
    * @return
+   * @paramx exToInt
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyResult
    */
   public SlickResult toSlick(Result shared,
@@ -297,7 +302,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<UserAndTime> userAndTimes = new ArrayList<>();
     for (SlickUserAndTime tuple : tuple4s) {
       userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified()*/
-/*, tuple.qid()*//*
+    /*, tuple.qid()*//*
 ));
     }
     return userAndTimes;
@@ -477,15 +482,16 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>();
     String relPrefix = getRelPrefix(language);
-    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix));
+    for (SlickCorrectAndScore scs : slickCorrectAndScores)
+      cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix, language));
     return cs;
   }
 
-  private final ParseResultJson parser = new ParseResultJson(database.getServerProps());
 
   @NotNull
   private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs,
-                                                              String relPrefix) {
+                                                              String relPrefix,
+                                                              String language) {
     String path = cs.path();
     boolean isLegacy = path.startsWith("answers");
     String filePath = isLegacy ?
@@ -496,8 +502,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
         trimPathForWebPage2(filePath), json);
 
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
-        parser.readFromJSON(json);
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(serverProps, language).readFromJSON(json);
 
     // TODO : maybe turn back on later?
 /*

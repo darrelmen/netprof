@@ -94,4 +94,8 @@ public interface ASR {
    * @return
    */
   boolean isAvailable();
+
+  String getHydraDict(String cleaned, String transliteration);
+
+  String getSegmented(String input);
 }

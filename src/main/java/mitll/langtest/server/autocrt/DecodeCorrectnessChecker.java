@@ -71,7 +71,7 @@ public class DecodeCorrectnessChecker {
   private final AlignDecode alignDecode;
   private final double minPronScore;
   private final SmallVocabDecoder svd;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param alignDecode

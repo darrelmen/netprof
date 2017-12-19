@@ -54,12 +54,9 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param database
    * @param phoneDAO
-   * @param exToRef
-   * @seex DatabaseImpl#getAnalysis()
-   * @seex DatabaseImpl#makeDAO(String, String, String)
    */
-  public H2Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
-    super(database, phoneDAO);
+  public H2Analysis(Database database, IPhoneDAO phoneDAO) {
+    super(database, phoneDAO, "unknown");
   }
 
   /**

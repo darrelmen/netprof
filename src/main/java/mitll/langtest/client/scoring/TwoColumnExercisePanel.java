@@ -482,7 +482,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
-      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0),
+      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all"),
           new AllHighlight(flclickables));
     } else {
       if (DEBUG_MATCH)

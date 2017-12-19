@@ -202,7 +202,7 @@ public class SmallVocabDecoder {
    */
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
-    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
+//    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
     return getTokens(segmentation);
   }
 
@@ -246,6 +246,7 @@ public class SmallVocabDecoder {
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in
 
+  boolean DEBUG = false;
   /**
    * @param phrase
    * @return
@@ -262,16 +263,20 @@ public class SmallVocabDecoder {
     String prefix = phrase.substring(0, phrase.length() - i);
     if (inDict(prefix.trim())) {
       if (i == 0) {
-       // logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
+        if (DEBUG) logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
         return phrase;
       }
 
       String rest = longest_prefix(phrase.substring(phrase.length() - i, phrase.length()), 0);
-      if (rest.length() > 0) {
-        return prefix + " " + rest;
+      if (!rest.isEmpty()) {
+        String s = prefix + " " + rest;
+        if (DEBUG) {
+          logger.debug("longest_prefix : found '" + rest + "' in '" + phrase + "' returning " + s);
+        }
+        return s;
       }
     } else {
- //     logger.debug("longest_prefix : dict doesn't contain " + prefix);
+      if (DEBUG)    logger.debug("longest_prefix : dict doesn't contain " + prefix);
     }
     return longest_prefix(phrase, i + 1);
   }
@@ -280,9 +285,13 @@ public class SmallVocabDecoder {
     try {
       scala.collection.immutable.List<?> apply = htkDictionary.apply(token);
       boolean b = (apply != null) && apply.nonEmpty();
-   //   if (!b) {
-   //     logger.debug("inDict token '" +token + "' not in " +htkDictionary.size());
-   //   }
+//      if (DEBUG && !b) {
+//        logger.debug("inDict token '" +token + "' not in " +htkDictionary.size());
+//      }
+
+      if (DEBUG && b) {
+        logger.debug("inDict token '" +token + "'");
+      }
       return b;
     } catch (Exception e) {
       logger.error("isDict for '" + token + "', dict " + (htkDictionary != null) + " got " + e, e);

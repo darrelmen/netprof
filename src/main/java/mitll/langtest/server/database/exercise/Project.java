@@ -51,6 +51,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -492,6 +493,12 @@ public class Project implements PronunciationLookup {
   }
 */
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, PronunciationLookup, List)
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
     return hasModel() ? audioFileHelper.getPronunciationsFromDictOrLTS(transcript, transliteration) : "";
