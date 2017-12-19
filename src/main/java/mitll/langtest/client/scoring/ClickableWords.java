@@ -7,7 +7,9 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
@@ -192,12 +194,14 @@ public class ClickableWords<T extends CommonExercise> {
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
       // logger.info("adding token " + (i++) + " " + segment);
-      InlineHTML clickable = segment.getClickable();
 //      if (addRightMargin) {
 //        clickable.addStyleName("rightFiveMargin");
 //        horizontal.add(new InlineHTML(" "));
 //      }
-      if (isRTL) clickable.addStyleName("floatRight");
+      if (isRTL) {
+        UIObject clickable = segment.getClickable();
+        clickable.addStyleName("floatRight");
+      }
     }
 
     horizontal.addStyleName("leftFiveMargin");
@@ -433,7 +437,7 @@ public class ClickableWords<T extends CommonExercise> {
       TwoColumnExercisePanel.FieldType fieldType) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir, !isSimple, showPhones);
 
-    InlineHTML highlightSegment = highlightSegmentDiv.getClickable();
+    HTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == TwoColumnExercisePanel.FieldType.FL) {
       if (dir == HasDirection.Direction.RTL) {
         highlightSegment.addStyleName("bigflfont");
@@ -477,7 +481,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param searchToken
    * @see #makeClickableText
    */
-  private void showSearchMatch(HasDirection.Direction dir, String html, InlineHTML w, String searchToken) {
+  private void showSearchMatch(HasDirection.Direction dir, String html, HTML w, String searchToken) {
     String[] toFind = new String[1];
     toFind[0] = searchToken;
     WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
@@ -515,7 +519,7 @@ public class ClickableWords<T extends CommonExercise> {
 
   /**
    * Not sure why we're doing this... again...
-   *
+   * <p>
    * First is russian accent mark.
    * russian hyphen
    * Chinese punctuation marks, spanish punct marks

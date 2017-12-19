@@ -538,7 +538,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       if (isKnownType(type)) {
         Collection<T> exercisesForSection = new HashSet<>(getExercisesForSection(type, pair.getValue()));
 
-        logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
+        if (DEBUG)
+          logger.info("getExercisesForSelectionState query " + type + " = " + pair.getValue() + " -> " + exercisesForSection.size());
+
         if (currentList == null) {
           currentList = exercisesForSection;
         } else {

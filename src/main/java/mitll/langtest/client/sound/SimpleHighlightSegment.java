@@ -1,9 +1,9 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 
 import java.util.logging.Logger;
 
@@ -72,7 +72,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   }
 
   @Override
-  public InlineHTML getClickable() {
+  public HTML getClickable() {
     return this;
   }
 

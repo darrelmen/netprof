@@ -111,6 +111,8 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {
+//    if (o1.getNumPhones() == 0) logger.warning("1 no phones for " +o1.getID());
+//    if (o2.getNumPhones() == 0) logger.warning("2 no phones for " +o2.getID());
     return Integer.compare(o1.getNumPhones(), o2.getNumPhones());
   }
 

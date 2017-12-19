@@ -1,7 +1,7 @@
 package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -18,7 +18,7 @@ public interface IHighlightSegment {
 
   boolean isClickable();
 
-  InlineHTML getClickable();
+  HTML getClickable();
 
   void setClickable(boolean clickable);
 

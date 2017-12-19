@@ -81,7 +81,6 @@ public class ServerProperties {
    * JkMount /netprof/answers/korean/* h2
    * JkMount /netprof/audioimages/korean/* h2
    */
-  // public static final Set<String> H2_LANGAUGES = new HashSet<>(Arrays.asList("korean", "levantine", "msa", "russian"));
 
   /**
    * Languages on the hydra2 server.
@@ -282,7 +281,7 @@ public class ServerProperties {
 
     langToPhoneToDisplay.put("mandarin", value);
 
-    logger.info("now " + langToPhoneToDisplay);
+//    logger.info("now " + langToPhoneToDisplay);
   }
 
   private Map<String, String> manifest = new HashMap<>();
@@ -726,7 +725,7 @@ public class ServerProperties {
 */
 
   public boolean usePhoneToDisplay() {
-    return getDefaultTrue(USE_PHONE_TO_DISPLAY);
+    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
   // EMAIL ------------------------

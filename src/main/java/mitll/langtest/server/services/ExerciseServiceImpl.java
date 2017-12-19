@@ -193,7 +193,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
     String prefix = request.getPrefix();
     if (!prefix.isEmpty()) {
-      logger.info("getExerciseWhenNoUnitChapter found prefix for user list " + userListByID);
+      logger.info("getExerciseWhenNoUnitChapter found prefix '" + prefix + "' for user list " + userListByID);
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID());
       if (request.getLimit() > 0) {
@@ -249,11 +249,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         boolean hasSearch = !searchTerm.isEmpty();
 
         {
-  /*        if (!basicExercises.isEmpty() && hasSearch) {
-            // if the search term is in the fl, sort by fl
-            sortByFL = basicExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-            logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
-          }*/
+          // only do this if we control the sort in the facet exercise list drop down
+          //     sortByFL = isSortByFL(basicExercises, sortByFL, searchTerm);
 
           sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL, searchTerm);
         }
@@ -297,6 +294,23 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return commonExercises;
+  }
+
+  private boolean isSortByFL(List<CommonExercise> basicExercises, boolean sortByFL, String searchTerm) {
+    boolean hasSearch = !searchTerm.isEmpty();
+    if (!basicExercises.isEmpty() && hasSearch) {
+      int max = Math.min(basicExercises.size(), 10);
+
+      int inFL = 0;
+      for (int i = 0; i < max; i++) {
+        if (basicExercises.get(i).getForeignLanguage().contains(searchTerm)) inFL++;
+      }
+
+      // if the search term is in the fl, sort by fl
+      sortByFL = ((float) inFL / (float) max) > 0.5;//.iterator().next().getForeignLanguage().contains(searchTerm);
+      logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL + " : " + inFL + "/" + max);
+    }
+    return sortByFL;
   }
 
   /**

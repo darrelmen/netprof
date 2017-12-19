@@ -2,10 +2,9 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -97,7 +96,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public InlineHTML getClickable() {
+  public HTML getClickable() {
     throw new IllegalArgumentException("don't call me");
   }
 

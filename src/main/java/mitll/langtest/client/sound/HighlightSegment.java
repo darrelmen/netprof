@@ -5,7 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.logging.Logger;
@@ -23,7 +23,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private boolean clickable = true;
   private final DivWidget north, south;
   private final String content;
-  private final InlineHTML span;
+//  private final InlineHTML span;
+  private final HTML span;
 
   /**
    * @param id
@@ -48,7 +49,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
-    this.span = new InlineHTML(html, dir);
+    this.span = new HTML(html, dir);
     span.getElement().setId("highlight_" + id + "_" + html);
 
     this.content = html;
@@ -80,7 +81,14 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     element.setId("Highlight_South_" + id);
   }
 
-  private void configureNorth(int id, DivWidget north, boolean isLTR, InlineHTML span) {
+  /**
+   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
+   * @param id
+   * @param north
+   * @param isLTR
+   * @param span
+   */
+  private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span) {
     north.add(span);
     north.getElement().setId("Highlight_North_" + id);
 
@@ -140,7 +148,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public InlineHTML getClickable() {
+  public HTML getClickable() {
     return span;
   }
 

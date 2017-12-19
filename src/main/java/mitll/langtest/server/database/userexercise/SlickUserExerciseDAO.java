@@ -56,6 +56,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,6 +94,7 @@ public class SlickUserExerciseDAO
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private String hostName;
+  private String hostAddress = "unk";
 
   /**
    * @param database
@@ -114,6 +117,15 @@ public class SlickUserExerciseDAO
       logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
     hostName = database.getServerProps().getHostName();
+
+    try {
+      InetAddress ip = InetAddress.getLocalHost();
+      hostAddress = ip.getHostAddress();
+    } catch (UnknownHostException e) {
+      logger.error("got " + e, e);
+
+    }
+    logger.info("hostName " + hostName + "/"+hostAddress);
   }
 
   public void createTable() {
@@ -339,7 +351,10 @@ public class SlickUserExerciseDAO
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
-    if (exercise.getNumPhones() < 1 && lookup.hasModel() && hostName.startsWith(HYDRA)) {
+    if (exercise.getNumPhones() < 1 &&
+        lookup.hasModel() &&
+        hostName.startsWith(HYDRA) ||
+        hostAddress.contains("MITLL")) {  // for local testing
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
