@@ -49,6 +49,9 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static mitll.langtest.shared.analysis.WordScore.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -124,7 +127,7 @@ public abstract class Analysis extends DAO {
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> idToUserInfo, IUserDAO userDAO) {
     List<UserInfo> userInfos = new ArrayList<>();
-    logger.info("getUserInfos for " + idToUserInfo.size()+ " users");
+    logger.info("getUserInfos for " + idToUserInfo.size() + " users");
     long then = System.currentTimeMillis();
     Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
@@ -184,22 +187,26 @@ public abstract class Analysis extends DAO {
     }
   }
 
+  int getCount(Collection<UserInfo> values) {
+    return (values.isEmpty()) ? 0 : getCount(values.iterator().next().getBestScores());
+  }
+
   /**
-   * @param best
+   * @paramx best
    * @return
    * @see SlickAnalysis#getPerformanceReportForUser
    */
-  List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
-    Collection<UserInfo> values = best.values();
+  List<WordScore> getWordScores(Collection<UserInfo> values) {
+    //Collection<UserInfo> values = best.values();
     logger.info("getWordScores " + values.size() + " users.");
     if (values.isEmpty()) {
       //logger.warn("no best values for " + id);
-      return getWordScore(Collections.emptyList());
+      return getWordScore(Collections.emptyList(), true);
     } else {
       List<BestScore> resultsForQuery = values.iterator().next().getBestScores();
       if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
-      List<WordScore> wordScore = getWordScore(resultsForQuery);
+      List<WordScore> wordScore = getWordScore(resultsForQuery, true);
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScore " + wordScore.size());
       }
@@ -208,6 +215,79 @@ public abstract class Analysis extends DAO {
     }
   }
 
+ /* List<WordScore> getWordScoresForPeriod(int projID, Map<Integer, UserInfo> best, long from, long to, String sortInfo) {
+    Collection<UserInfo> values = best.values();
+    logger.info("getWordScores " + values.size() + " users.");
+    if (values.isEmpty()) {
+      //logger.warn("no best values for " + id);
+      return getWordScore(Collections.emptyList(), true);
+    } else {
+      List<BestScore> resultsForQuery = values.iterator().next().getBestScores();
+
+      List<BestScore> inTime =
+          resultsForQuery.stream().filter(bestScore -> from < bestScore.getTimestamp() && bestScore.getTimestamp() <= to).collect(Collectors.toList());
+      if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+
+      inTime.sort(getComparator(database.getProject(projID), Arrays.asList(sortInfo.split(",")), inTime));
+
+      List<WordScore> wordScore = getWordScore(inTime, false);
+      if (DEBUG) {
+        logger.warn("getWordScoresForUser wordScore " + wordScore.size());
+      }
+
+      return wordScore;
+    }
+  }
+
+  private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
+
+    if (criteria.isEmpty() || criteria.iterator().next().equals("")) {
+      return Comparator.comparingLong(SimpleTimeAndScore::getTimestamp);
+    } else {
+      String col = criteria.get(0);
+      String[] split = col.split("_");
+      String field = split[0];
+      boolean asc = split.length <= 1 || split[1].equals(ASC);
+
+      Map<BestScore, String> scoreToFL = new HashMap<>();
+      if (field.equalsIgnoreCase(WORD)) {
+        inTime.forEach(bestScore -> scoreToFL.put(bestScore, project.getExerciseByID(bestScore.getExId()).getForeignLanguage()));
+      }
+
+      return new Comparator<BestScore>() {
+        @Override
+        public int compare(BestScore o1, BestScore o2) {
+          // text
+          int comp = 0;
+          switch (field) {
+            case WORD:
+              scoreToFL.get(o1);
+              comp = scoreToFL.get(o1).compareTo(scoreToFL.get(o2));
+              if (comp == 0) {
+                comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+              }
+              break;
+            case TIMESTAMP:
+              comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+              break;
+            case SCORE:
+              comp = Float.compare(o1.getScore(), o2.getScore());
+              break;
+          }
+          if (comp != 0) return getComp(asc, comp);
+
+          return comp;
+        }
+
+        int getComp(boolean asc, int comp) {
+          return (asc ? comp : -1 * comp);
+        }
+      };
+    }
+
+
+  }
+*/
   /**
    * @param userid
    * @param next
@@ -407,16 +487,27 @@ public abstract class Analysis extends DAO {
     return (answer == -1) ? path : path.substring(answer);
   }
 
+  public int getCount(List<BestScore> bestScores) {
+    int num = 0;
+    for (BestScore bs : bestScores) {
+      if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
+        num++;
+      }
+    }
+    return num;
+  }
+
   /**
    * TODO : why do we parse json when we could just get it out of word and phone tables????
    * <p>
    * Only show unique items -- even if BestScore might contain the same item multiple times.
    *
    * @param bestScores
+   * @param doDefaultSort
    * @return
    * @see #getWordScores
    */
-  private List<WordScore> getWordScore(List<BestScore> bestScores) {
+  protected List<WordScore> getWordScore(List<BestScore> bestScores, boolean doDefaultSort) {
     // logger.warn("getWordScore got " + bestScores.size());
     List<WordScore> results = new ArrayList<>();
 
@@ -447,11 +538,13 @@ public abstract class Analysis extends DAO {
       logger.debug("getWordScore took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
     }
 
-    then = System.currentTimeMillis();
-    Collections.sort(results);
-    now = System.currentTimeMillis();
-    if (now - then > 20) {
-      logger.debug("getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
+    if (doDefaultSort) {
+      then = System.currentTimeMillis();
+      Collections.sort(results);
+      now = System.currentTimeMillis();
+      if (now - then > 20) {
+        logger.debug("getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
+      }
     }
     //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 

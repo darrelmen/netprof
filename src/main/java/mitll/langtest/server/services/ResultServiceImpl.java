@@ -77,7 +77,6 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     int userIDFromSession = getUserIDFromSessionOrDB();
 
     if (hasAdminPerm(userIDFromSession)) {
-
       int projectID = getProjectIDFromUser(userIDFromSession);
       List<MonitorResult> results = getResults(projectID, unitToValue, -1, flText);
       if (!results.isEmpty()) {

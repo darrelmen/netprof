@@ -42,23 +42,23 @@ import java.util.Collection;
 @RemoteServiceRelativePath("exercise-manager")
 public interface ExerciseService<T extends CommonShell> extends RemoteService {
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    * @param request
-   * @paramx <T>
    * @return
+   * @paramx <T>
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
-  ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request)throws DominoSessionException;
+  ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    * @param <T>
    * @param exid
    * @param isFlashcardReq
    * @return
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
-  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq)throws DominoSessionException;
+  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException;
 
   ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
 
-  FilterResponse getTypeToValues(FilterRequest request)throws DominoSessionException;
+  FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 }

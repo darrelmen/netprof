@@ -39,6 +39,11 @@ import java.util.List;
 
 public interface IAnalysis {
   AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
+
+  List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid,
+                                       long from, long to,
+                                       int rangeStart, int rangeEnd, String sort);
+
   List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to);
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
 }

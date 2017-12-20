@@ -54,7 +54,7 @@ public class EasyAnalysisTest extends BaseTest {
     AnalysisReport performanceReportForUser = getPerformanceReportForUser(andPopulate, 2, 295, 1, -1);
 
     logger.info("Got " + performanceReportForUser);
-    logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
+  //  logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
 
     PhoneReport phoneReport = performanceReportForUser.getPhoneReport();
     logger.info("phone Report " + phoneReport);

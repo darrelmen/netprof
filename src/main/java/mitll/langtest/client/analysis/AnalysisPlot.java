@@ -164,7 +164,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     this.userid = userid;
     populateGranToLabel();
 
-    this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, this);
+    this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service);
   }
 
   private void populateGranToLabel() {
@@ -1037,6 +1037,12 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     this.exerciseToTimeToAnswer = exerciseToTimeToAnswer;
   }
 
+  /**
+   * @param exid
+   * @param timestamp
+   * @return
+   * @see PlayAudio#playLast(int, int, long)
+   */
   @Override
   public WordScore getAnswerPath(int exid, long timestamp) {
     return exerciseToTimeToAnswer.get(exid).get(timestamp);

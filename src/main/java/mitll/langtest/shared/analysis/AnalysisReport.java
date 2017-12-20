@@ -7,28 +7,39 @@ import java.util.List;
  * @see mitll.langtest.client.analysis.AnalysisTab#useReport
  */
 public class AnalysisReport implements Serializable {
-  private List<WordScore> wordScores;
+ // private List<WordScore> wordScores;
   private UserPerformance userPerformance;
   private PhoneReport phoneReport;
-
+  private int numScores;
   public AnalysisReport() {
   }
 
   /**
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPerformanceReportForUser(int, int, int)
    * @param userPerformance
-   * @param wordScores
+   * @paramx wordScores
    * @param phoneReport
    */
-  public AnalysisReport(UserPerformance userPerformance, List<WordScore> wordScores, PhoneReport phoneReport) {
+  public AnalysisReport(UserPerformance userPerformance,
+                        //List<WordScore> wordScores,
+                        PhoneReport phoneReport,
+                        int numScores) {
     this.userPerformance = userPerformance;
-    this.wordScores = wordScores;
+
+    //this.wordScores = wordScores;
     this.phoneReport = phoneReport;
+    this.numScores = numScores;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#useReport
+   * @return
+   */
+/*
   public List<WordScore> getWordScores() {
     return wordScores;
   }
+*/
 
   public UserPerformance getUserPerformance() {
     return userPerformance;
@@ -41,9 +52,13 @@ public class AnalysisReport implements Serializable {
   public String toString() {
     return "UserPerf:" +
         "\n\tperf :       " + userPerformance +
-        "\n\tword scores  " + wordScores.size() + " scores " +
+        "\n\tword scores  " +numScores+ " scores " +
         "\n\tphone scores " + phoneReport;
     //+
     //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();
+  }
+
+  public int getNumScores() {
+    return numScores;
   }
 }

@@ -60,6 +60,11 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   private static final int SCALE = 1000;
 
+  public static final String WORD = "WORD";
+  public static final String SCORE = "Score";
+  public static final String TIMESTAMP = "timestamp";
+  public static final String ASC = "ASC";
+
   private Map<NetPronImageType, List<SlimSegment>> transcript;
 
   public WordScore() {
@@ -105,6 +110,11 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     this.transcript = transcript;
   }
 
+  /**
+   * By score
+   * @param o
+   * @return
+   */
   @Override
   public int compareTo(WordScore o) {
     int i = Integer.compare(pronScore, o.pronScore);

@@ -84,6 +84,11 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
 
   @Override
+  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid, long from, long to, int rangeStart, int rangeEnd, String sort) {
+    return null;
+  }
+
+  @Override
   public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
     return null;
   }
@@ -157,8 +162,8 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @return
    * @throws SQLException
-   * @see Analysis#getPerformanceForUser(int, int, int)
-   * @see IAnalysis#getPhonesForUser
+   * @seex Analysis#getPerformanceForUser(int, int, int)
+   * @seex IAnalysis#getPhonesForUser
    * @seex Analysis#getWordScoresForUser
    */
   private Map<Integer, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
@@ -202,8 +207,7 @@ class H2Analysis extends Analysis implements IAnalysis {
   public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(userid), minRecordings);
-
-      return getWordScores(best);
+      return getWordScores(best.values());
     } catch (Exception ee) {
       logException(ee);
     }

@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.RestrictedOperationException;
@@ -56,6 +57,8 @@ public interface AnalysisService extends RemoteService {
   List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException;
 
   AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) throws DominoSessionException, RestrictedOperationException;
+
+  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime, int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
 
   List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException, RestrictedOperationException;
 }

@@ -151,11 +151,7 @@ public class ResultTypeAhead {
    * @return
    * @paramx w
    */
-  private KeyUpHandler getKeyUpHandler() {
-    return event -> {
-      redraw();
-    };
-  }
+  private KeyUpHandler getKeyUpHandler() { return event -> redraw();  }
 
   private void redraw() {
     RangeChangeEvent.fire(cellTable, cellTable.getVisibleRange());

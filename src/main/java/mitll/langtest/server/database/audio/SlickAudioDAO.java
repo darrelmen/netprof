@@ -466,6 +466,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  private boolean reportBadDNRAudio = false;
+
   /**
    * Skips over audio that has negative infinity DNR - usually a bad sign.
    * <p>
@@ -486,7 +488,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     for (SlickAudio slickAudio : all) {
       AudioAttribute audioAttribute = getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio);
       if (audioAttribute.getDnr() == Float.NEGATIVE_INFINITY) {
-        logger.info("toAudioAttributes : Skip bogus " + audioAttribute);
+        if (reportBadDNRAudio) {
+          logger.info("toAudioAttributes : Skip audio with bad dnr : " + audioAttribute);
+        }
       } else {
         copy.add(audioAttribute);
       }

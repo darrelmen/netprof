@@ -33,9 +33,11 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -65,4 +67,9 @@ public interface AnalysisServiceAsync {
    */
   void getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to,
                                            AsyncCallback<List<WordAndScore>> async);
+
+  void getWordScoresForUser(int userid, int minRecordings, int listid,
+                            long fromTime, long toTime, int rangeStart, int rangeEnd, String sort,
+                            int reqid,
+                            AsyncCallback<WordsAndTotal> async);
 }

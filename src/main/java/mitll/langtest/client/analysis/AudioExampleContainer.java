@@ -76,9 +76,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
    * @return
    * @see #getPlayAudio
    */
-  protected CommonShell getShell(int id) {
-    return plot.getShell(id);
-  }
+  protected CommonShell getShell(int id) {    return plot.getShell(id);  }
 
   @NotNull
   private String getTitle(CommonShell exercise) {

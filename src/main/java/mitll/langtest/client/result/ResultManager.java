@@ -57,9 +57,10 @@ import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
 
 /**
  * Show a dialog with all the results we've collected so far.
@@ -78,7 +79,7 @@ public class ResultManager extends PagerTable {
   private static final String NO = "No";
 
   private static final int PAGE_SIZE = 7;
-  private static final String TIMESTAMP = "timestamp";
+  //private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
   private static final String DURATION_SEC = "Dur (s)";
@@ -105,19 +106,18 @@ public class ResultManager extends PagerTable {
 
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
-  private final Map<Column<?, ?>, String> colToField = new HashMap<>();
+  //  private final Map<Column<?, ?>, String> colToField = new HashMap<>();
   private final Collection<String> typeOrder;
   private int req = 0;
   private final ExerciseController controller;
 
   private CellTable<MonitorResult> cellTable;
   private Panel reviewContainer;
+  private TableSortHelper tableSortHelper = new TableSortHelper();
 
   /**
    * @param nameForAnswer
    * @param eventRegistration
-   * @paramx s
-   * @seex mitll.langtest.client.initial.InitialUI.ResultsClickHandler#onClick
    */
   public ResultManager(String nameForAnswer,
                        Collection<String> typeOrder,
@@ -231,9 +231,7 @@ public class ResultManager extends PagerTable {
 
     // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
     cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(cellTable));
-
-    Column<?, ?> time = getColumn(TIMESTAMP);
-    cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
+    cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
     cellTable.setWidth("100%", false);
 
     return getPagerAndTable(cellTable, rightOfPager);
@@ -271,14 +269,14 @@ public class ResultManager extends PagerTable {
     }
   }
 
-  private Column<?, ?> getColumn(String name) {
-    for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
-      if (pair.getValue().equals(name)) {
-        return pair.getKey();
-      }
-    }
-    return null;
-  }
+//  private Column<?, ?> getColumn(String name) {
+//    for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
+//      if (pair.getValue().equals(name)) {
+//        return pair.getKey();
+//      }
+//    }
+//    return null;
+//  }
 
   /**
    * Deals with out of order requests, or where the requests outpace the responses
@@ -299,7 +297,7 @@ public class ResultManager extends PagerTable {
         end = end >= numResults ? numResults : end;
         //logger.info("createProvider asking for " + start +"->" + end);
 
-        StringBuilder builder = getColumnSortedState(table);
+        StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
         int val = req++;
@@ -357,23 +355,23 @@ public class ResultManager extends PagerTable {
    * @return
    * @see #createProvider
    */
-  private StringBuilder getColumnSortedState(CellTable<MonitorResult> table) {
-    final ColumnSortList sortList = table.getColumnSortList();
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < sortList.size(); i++) {
-      ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
-      Column<?, ?> column = columnSortInfo.getColumn();
-      String s = colToField.get(column);
-      if (s == null) {
-        logger.warning("Can't find column " + column + "?");
-      }
-      builder.append(s + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
-    }
-    if (!builder.toString().contains(TIMESTAMP)) {
-      builder.append(TIMESTAMP + "_" + DESC);
-    }
-    return builder;
-  }
+//  private StringBuilder getColumnSortedState(CellTable<?> table) {
+//    final ColumnSortList sortList = table.getColumnSortList();
+//    StringBuilder builder = new StringBuilder();
+//    for (int i = 0; i < sortList.size(); i++) {
+//      ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
+//      Column<?, ?> column = columnSortInfo.getColumn();
+//      String s = colToField.get(column);
+//      if (s == null) {
+//        logger.warning("Can't find column " + column + "?");
+//      }
+//      builder.append(s + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
+//    }
+//    if (!builder.toString().contains(TIMESTAMP)) {
+//      builder.append(TIMESTAMP + "_" + DESC);
+//    }
+//    return builder;
+//  }
 
 
   /**
@@ -410,7 +408,7 @@ public class ResultManager extends PagerTable {
     audioFile.setSortable(true);
 
     table.addColumn(audioFile, nameForAnswer);
-    colToField.put(audioFile, ANSWER);
+    rememberColumn(audioFile,ANSWER);
     addResultColumn(table);
   }
 
@@ -437,8 +435,12 @@ public class ResultManager extends PagerTable {
       };
       unit.setSortable(true);
       table.addColumn(unit, type);
-      colToField.put(unit, type);
+      rememberColumn(unit, type);
     }
+  }
+
+  private void rememberColumn( Column<?, ?> unit,String type) {
+    tableSortHelper.rememberColumn(unit, type);
   }
 
   private void addText(CellTable<MonitorResult> table) {
@@ -452,7 +454,7 @@ public class ResultManager extends PagerTable {
 
     fl.setSortable(true);
     table.addColumn(fl, "Text");
-    colToField.put(fl, TEXT);
+    rememberColumn(fl, TEXT);
     cellTable.setColumnWidth(fl, "180px");
   }
 
@@ -465,7 +467,7 @@ public class ResultManager extends PagerTable {
     };
     exercise.setSortable(true);
     table.addColumn(exercise, "Ex.");
-    colToField.put(exercise, ID);
+    rememberColumn(exercise,ID);
   }
 
   private void addUserID(CellTable<MonitorResult> table) {
@@ -473,7 +475,6 @@ public class ResultManager extends PagerTable {
       @Override
       public String getValue(MonitorResult answer) {
         if (answer == null) {
-//          System.err.println("huh? answer is null??");
           return "";
         } else {
           return "" + answer.getUserid();
@@ -482,7 +483,7 @@ public class ResultManager extends PagerTable {
     };
     userid.setSortable(true);
     table.addColumn(userid, USER_ID);
-    colToField.put(userid, USERID);
+    rememberColumn(userid, USERID);
   }
 
   /**
@@ -499,7 +500,7 @@ public class ResultManager extends PagerTable {
     };
     audioType.setSortable(true);
     table.addColumn(audioType, AUDIO_TYPE);
-    colToField.put(audioType, AUDIO_TYPE1);
+    rememberColumn(audioType, AUDIO_TYPE1);
 
     TextColumn<MonitorResult> dur = new TextColumn<MonitorResult>() {
       @Override
@@ -510,7 +511,7 @@ public class ResultManager extends PagerTable {
     };
     dur.setSortable(true);
     table.addColumn(dur, DURATION_SEC);
-    colToField.put(dur, DURATION_IN_MILLIS);
+    rememberColumn(dur, DURATION_IN_MILLIS);
 
     TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
       @Override
@@ -520,7 +521,7 @@ public class ResultManager extends PagerTable {
     };
     valid.setSortable(true);
     table.addColumn(valid, "Valid");
-    colToField.put(valid, VALID);
+    rememberColumn(valid, VALID);
 
     TextColumn<MonitorResult> validity = new TextColumn<MonitorResult>() {
       @Override
@@ -530,7 +531,7 @@ public class ResultManager extends PagerTable {
     };
     validity.setSortable(true);
     table.addColumn(validity, "Validity");
-    colToField.put(validity, "Validity");
+    rememberColumn(validity, "Validity");
 
     TextColumn<MonitorResult> dynamicRange = new TextColumn<MonitorResult>() {
       @Override
@@ -540,7 +541,7 @@ public class ResultManager extends PagerTable {
     };
     dynamicRange.setSortable(true);
     table.addColumn(dynamicRange, "Dynamic Range");
-    colToField.put(dynamicRange, "Dynamic Range");
+    rememberColumn(dynamicRange, "Dynamic Range");
 
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
@@ -550,7 +551,7 @@ public class ResultManager extends PagerTable {
     };
     correct.setSortable(true);
     table.addColumn(correct, CORRECT);
-    colToField.put(correct, CORRECT1);
+    rememberColumn(correct, CORRECT1);
 
     TextColumn<MonitorResult> pronScore = new TextColumn<MonitorResult>() {
       @Override
@@ -560,7 +561,7 @@ public class ResultManager extends PagerTable {
     };
     pronScore.setSortable(true);
     table.addColumn(pronScore, PRO_F_SCORE);
-    colToField.put(pronScore, PRON_SCORE);
+    rememberColumn(pronScore, PRON_SCORE);
 
     Column<MonitorResult, SafeHtml> type = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
@@ -571,7 +572,7 @@ public class ResultManager extends PagerTable {
 
     type.setSortable(true);
     table.addColumn(type, DEVICE);
-    colToField.put(type, DEVICE);
+    rememberColumn(type, DEVICE);
 
     TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
       @Override
@@ -581,19 +582,20 @@ public class ResultManager extends PagerTable {
     };
     wFlash.setSortable(true);
     table.addColumn(wFlash, "w/Flash");
-    colToField.put(wFlash, "withFlash");
+    rememberColumn(wFlash, "withFlash");
 
-    TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        float secs = ((float) answer.getProcessDur()) / 1000f;
-        return "" + roundToHundredth(secs);
-      }
-    };
-    processDur.setSortable(true);
-    table.addColumn(processDur, "Process");
-    colToField.put(processDur, "Process");
-
+    {
+      TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {
+        @Override
+        public String getValue(MonitorResult answer) {
+          float secs = ((float) answer.getProcessDur()) / 1000f;
+          return "" + roundToHundredth(secs);
+        }
+      };
+      processDur.setSortable(true);
+      table.addColumn(processDur, "Process");
+      rememberColumn(processDur, "Process");
+    }
 
     TextColumn<MonitorResult> rtDur = new TextColumn<MonitorResult>() {
       @Override
@@ -604,11 +606,11 @@ public class ResultManager extends PagerTable {
     };
     rtDur.setSortable(true);
     table.addColumn(rtDur, "RT");
-    colToField.put(rtDur, "RT");
+    rememberColumn(rtDur, "RT");
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
-    colToField.put(getDateColumn(table), TIMESTAMP);
+    rememberColumn(getDateColumn(table), TIMESTAMP);
   }
 
   private Column<MonitorResult, SafeHtml> getDateColumn(CellTable<MonitorResult> table) {

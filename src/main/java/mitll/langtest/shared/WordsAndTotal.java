@@ -30,75 +30,38 @@
  *
  */
 
-package mitll.langtest.shared.analysis;
+package mitll.langtest.shared;
 
-import mitll.langtest.server.database.phone.PhoneDAO;
+import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.result.MonitorResult;
 
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/22/15.
+ * @since 9/25/14.
  */
-public class PhoneReport implements Serializable {
-  private int overallPercent;
-  private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new HashMap<>();
-  private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
+public class WordsAndTotal implements IsSerializable {
+  private List<WordScore> results;
+  //public int numTotal;
+  private int req;
+  public WordsAndTotal() {}
 
-  private boolean valid;
-
-  public PhoneReport() {
-    valid = false;
+  public WordsAndTotal(List<WordScore> results, /*int n,*/ int req) {
+    this.results = results;
+    //this.numTotal = n;
+    this.req = req;
   }
 
-  /**
-   * @param overallPercent
-   * @param phoneToWordAndScoreSorted
-   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
-   */
-  public PhoneReport(int overallPercent,
-                     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
-                     Map<String, PhoneStats> phoneToAvgSorted
-  ) {
-    this.overallPercent = overallPercent;
-    this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
-    this.phoneToAvgSorted = phoneToAvgSorted;
-    valid = true;
+  public List<WordScore> getResults() {
+    return results;
   }
 
-  /**
-   * Map of each phone to words it appears in.
-   *
-   * @return
-   */
-  public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
-    return phoneToWordAndScoreSorted;
-  }
-
-  public int getOverallPercent() {
-    return overallPercent;
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager
-   */
-  public Map<String, PhoneStats> getPhoneToAvgSorted() {
-    return phoneToAvgSorted;
-  }
-
-  public boolean isValid() {
-    return valid;
-  }
-
-  public String toString() {
-    Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
-    return "valid " + valid + " : " +
-        (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
+  public int getReq() {
+    return req;
   }
 }

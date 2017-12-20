@@ -157,13 +157,42 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(AnalysisReport result) {
-        useReport(result, then, userChosenID, listid, isTeacherView, showTab, bottom, userid);
+        useReport(result, then, userChosenID, isTeacherView, showTab, bottom, new ReqInfo(userid,minRecordings,listid));
       }
     });
   }
 
-  private void useReport(AnalysisReport result, long then, String userChosenID, int listid, boolean isTeacherView,
-                         ShowTab showTab, DivWidget bottom, int userid) {
+  public static class ReqInfo {
+    private int userid;
+    private int minRecordings;
+    private int listid;
+
+    public ReqInfo(int userid, int minRecordings, int listid) {
+      this.userid = userid;
+      this.minRecordings = minRecordings;
+      this.listid = listid;
+    }
+
+    public int getUserid() {
+      return userid;
+    }
+
+    public int getMinRecordings() {
+      return minRecordings;
+    }
+
+    public int getListid() {
+      return listid;
+    }
+  }
+
+  private void useReport(AnalysisReport result,
+                         long then,
+                         String userChosenID,
+                        // int listid,
+                         boolean isTeacherView,
+                         ShowTab showTab, DivWidget bottom,
+                         ReqInfo reqInfo) {
     long now = System.currentTimeMillis();
 
     PhoneReport phoneReport = result.getPhoneReport();
@@ -171,7 +200,7 @@ public class AnalysisTab extends DivWidget {
     if (now - then > 200) {
       logger.info("useReport took " + (now - then) + " to get report" +
           "\n\tfor    " + userid + " " + userChosenID +
-          "\n\twords  " + result.getWordScores().size() +
+          "\n\twords  " + result.getNumScores() +
           "\n\tphones " + phoneReport.getPhoneToAvgSorted().size() +
           "\n\tphones word and score " + phoneReport.getPhoneToWordAndScoreSorted().values().size()
       );
@@ -188,8 +217,7 @@ public class AnalysisTab extends DivWidget {
     long then3 = now;
 
     Scheduler.get().scheduleDeferred(() ->
-        showWordScores(result.getWordScores(), controller, analysisPlot, showTab, bottom,
-            fphoneReport));
+        showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom,            fphoneReport,reqInfo));
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -346,15 +374,21 @@ public class AnalysisTab extends DivWidget {
    * @param phoneReport
    * @see #useReport
    */
-  private void showWordScores(List<WordScore> wordScores,
+  private void showWordScores(//List<WordScore> wordScores,
+                              int numScores,
                               ExerciseController controller,
                               AnalysisPlot analysisPlot,
                               ShowTab showTab,
                               Panel lowerHalf,
-                              PhoneReport phoneReport) {
+                              PhoneReport phoneReport,
+                              ReqInfo reqInfo) {
     {
       Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
-      Panel tableWithPager = getWordContainer(wordScores, controller, analysisPlot, showTab, wordsTitle);
+      Panel tableWithPager = getWordContainer(
+          reqInfo,
+          //wordScores,
+          numScores,
+          controller, analysisPlot, showTab, wordsTitle);
 
       tableWithPager.setWidth(WORD_WIDTH + "px");
 
@@ -375,23 +409,24 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @param wordScores
+   * @paramx wordScores
    * @param controller
    * @param analysisPlot
    * @param showTab
    * @param wordsTitle
    * @return
    */
-  private Panel getWordContainer(List<WordScore> wordScores,
+  private Panel getWordContainer(//List<WordScore> wordScores,
+                                 ReqInfo reqInfo,
+                                 int numResults,
                                  ExerciseController controller,
                                  AnalysisPlot analysisPlot,
                                  ShowTab showTab,
                                  Heading wordsTitle) {
-    WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
-    analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
-
-    return wordContainer
-        .getTableWithPager(wordScores);
+    //   WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle, wordScores.size());
+    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo,controller, analysisPlot, showTab, wordsTitle, numResults, analysisServiceAsync);
+    //   analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
+    return wordContainer.getTableWithPager();///*wordScores*/);
   }
 
   private DivWidget getSoundsDiv() {
@@ -400,8 +435,6 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("floatRight");
-    //  soundsDiv.addStyleName("inlineFlex");
-    //soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
     soundsDiv.addStyleName("leftFiveMargin");
     return soundsDiv;
   }

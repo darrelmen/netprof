@@ -33,12 +33,19 @@
 package mitll.langtest.client.analysis;
 
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -53,18 +60,20 @@ class PlayAudio {
   private final SoundPlayer soundFeedback;
   private final Widget playFeedback;
   private Timer t;
-  private ExerciseLookup exerciseLookup;
+//  private ExerciseLookup exerciseLookup;
+  ExerciseServiceAsync exerciseService;
 
   /**
    * @param soundFeedback
    * @param playFeedback
    * @see AnalysisPlot#AnalysisPlot
    */
-  PlayAudio(SoundPlayer soundFeedback, Widget playFeedback, ExerciseLookup exerciseLookup) {
-    //this.service = service;
+  PlayAudio(SoundPlayer soundFeedback, Widget playFeedback, //ExerciseLookup exerciseLookup,
+            ExerciseServiceAsync exerciseService) {
+    this.exerciseService = exerciseService;
     this.soundFeedback = soundFeedback;
     this.playFeedback = playFeedback;
-    this.exerciseLookup = exerciseLookup;
+   // this.exerciseLookup = exerciseLookup;
   }
 
   /**
@@ -76,56 +85,62 @@ class PlayAudio {
   void playLast(int id, int userid, long nearestXAsLong) {
     logger.info("playLast playing exercise " + id + " for " + userid);
     // CommonShell shell = exerciseLookup.getShell(id);
-    WordScore wordScore = exerciseLookup.getAnswerPath(id, nearestXAsLong);
+//    WordScore wordScore = exerciseLookup.getAnswerPath(id, nearestXAsLong);
 
-/*    if (shell == null) {
-      service.getExercise(id, false, new AsyncCallback<CommonExercise>() {
-        @Override
-        public void onFailure(Throwable throwable) {
-        }
+    // if (shell == null) {
+    exerciseService.getExercise(id, false, new AsyncCallback<Shell>() {
+      @Override
+      public void onFailure(Throwable caught) {
 
-        @Override
-        public void onSuccess(CommonExercise commonExercise) {
-          if (commonExercise == null) {
-            logger.info("playLast no exercise " + id + " for " + userid);
-            // if the exercise has been deleted...?
-            // show popup?
+      }
+
+      @Override
+      public void onSuccess(Shell commonExercise) {
+        if (commonExercise == null) {
+          logger.info("playLast no exercise " + id + " for " + userid);
+          // if the exercise has been deleted...?
+          // show popup?
+        } else {
+          CommonExercise commonExercise1 = (CommonExercise) commonExercise;
+          List<CorrectAndScore> scores = commonExercise1.getScores();
+          if (scores.isEmpty()) {
+            String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
+            logger.warning(msg);
+
           } else {
-            List<CorrectAndScore> scores = commonExercise.getScores();
-            if (scores.isEmpty()) {
-              String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
-              logger.warning(msg);
-              // TODO : consider putting this back
-            *//*            service.logMessage(msg, new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable throwable) {
-              }
+            CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
 
-              @Override
-              public void onSuccess(Void aVoid) {
+            long diff = Long.MAX_VALUE;
+            for (CorrectAndScore score : scores) {
+              long l = Math.abs(score.getTimestamp() - nearestXAsLong);
+              if (l < diff) {
+                diff = l;
+                logger.info("diff " + l + " found " + correctAndScore);
+                correctAndScore = score;
               }
-            });*//*
-            } else {
-              CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-
-              playBothCuts(commonExercise, correctAndScore);
             }
+
+            playBothCuts(commonExercise1, correctAndScore);
           }
         }
-      });
-    } else {*/
-    playBothCuts(wordScore.getAnswerAudio(), wordScore.getRefAudio());
+      }
+    });
+    //else {
+    // playBothCuts(wordScore.getAnswerAudio(), wordScore.getRefAudio());
     //  }
   }
-/*
+
   private void playBothCuts(CommonExercise commonExercise, CorrectAndScore correctAndScore) {
     String path = correctAndScore.getPath();
     String refAudio = commonExercise.getRefAudio();
 
     playBothCuts(path, refAudio);
-  }*/
+  }
 
   private void playBothCuts(String path, String refAudio) {
+    logger.info("playBothCuts play audio    " + path);
+    logger.info("playBothCuts play refAudio " + refAudio);
+
     if (t != null) {
       // logger.info("cancel timer");
       t.cancel();
@@ -199,6 +214,7 @@ class PlayAudio {
   private void showPlayback() {
     playFeedback.setVisible(true);
   }
+
   private void hidePlayback() {
     playFeedback.setVisible(false);
   }

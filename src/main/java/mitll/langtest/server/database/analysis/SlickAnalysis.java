@@ -50,6 +50,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static mitll.langtest.shared.analysis.WordScore.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
@@ -97,17 +100,114 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
 
-    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+    Collection<UserInfo> userInfos = bestForUser.values();
+    UserInfo next = bestForUser.isEmpty() ? null : userInfos.iterator().next();
 
     long then = System.currentTimeMillis();
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
-        getWordScores(bestForUser),
-        getPhoneReport(userid, next, project));
+        //  getWordScores(bestForUser.values()),
+        getPhoneReport(userid, next, project),
+        getCount(userInfos));
 
     long now = System.currentTimeMillis();
     logger.info("Return (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
+  }
+
+  @Override
+  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid,
+                                              long from, long to,
+                                              int rangeStart, int rangeEnd,
+                                              String sort) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
+
+    Collection<UserInfo> userInfos = bestForUser.values();
+    return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
+  }
+
+  private List<WordScore> getWordScoresForPeriod(Collection<UserInfo> userInfos, long from, long to,
+                                                 int rangeStart, int rangeEnd,
+
+                                                 String sortInfo) {
+    if (userInfos.isEmpty()) {
+      //logger.warn("no best values for " + id);
+      return getWordScore(Collections.emptyList(), true);
+    } else {
+      List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
+
+      List<BestScore> inTime =
+          resultsForQuery
+              .stream()
+              .filter(bestScore -> from < bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
+              .collect(Collectors.toList());
+
+      if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+
+      inTime.sort(getComparator(project, Arrays.asList(sortInfo.split(",")), inTime));
+
+      List<WordScore> wordScore = getWordScore(inTime, false);
+
+      // sublist is not serializable!
+      wordScore = new ArrayList<>(wordScore.subList(rangeStart, rangeEnd));
+      if (DEBUG) {
+        logger.warn("getWordScoresForUser wordScore " + wordScore.size());
+      }
+
+      return wordScore;
+    }
+  }
+
+  private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
+
+    if (criteria.isEmpty() || criteria.iterator().next().equals("")) {
+      return Comparator.comparingLong(SimpleTimeAndScore::getTimestamp);
+    } else {
+      String col = criteria.get(0);
+      String[] split = col.split("_");
+      String field = split[0];
+      boolean asc = split.length <= 1 || split[1].equals(ASC);
+
+      Map<BestScore, String> scoreToFL = new HashMap<>();
+      if (field.equalsIgnoreCase(WORD)) {
+        inTime.forEach(bestScore -> scoreToFL.put(bestScore, project.getExerciseByID(bestScore.getExId()).getForeignLanguage()));
+      }
+
+      return new Comparator<BestScore>() {
+        @Override
+        public int compare(BestScore o1, BestScore o2) {
+          // text
+          int comp = 0;
+          switch (field) {
+            case WORD:
+              scoreToFL.get(o1);
+              comp = scoreToFL.get(o1).compareTo(scoreToFL.get(o2));
+              if (comp == 0) {
+                comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+              }
+              break;
+            case TIMESTAMP:
+              comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+              break;
+            case SCORE:
+              comp = Float.compare(o1.getScore(), o2.getScore());
+              if (comp == 0) {
+                comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+              }
+              break;
+          }
+          if (comp != 0) return getComp(asc, comp);
+
+          return comp;
+        }
+
+        int getComp(boolean asc, int comp) {
+          return (asc ? comp : -1 * comp);
+        }
+      };
+    }
+
+
   }
 
   public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
@@ -139,8 +239,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
 
-      SortedSet<WordAndScore> examples = new TreeSet<>();
-      examples.addAll(wordAndScores);
+      SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
+      // examples.addAll(wordAndScores);
       List<WordAndScore> filteredWords = new ArrayList<>(examples);
 
       filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
@@ -327,8 +427,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * Skip results for default project - orphan exercises.
-   * @see #getUserToResults
+   *
    * @param perfs
+   * @see #getUserToResults
    */
   private void getNativeAudio(Collection<SlickPerfResult> perfs) {
     List<CommonExercise> exercises = new ArrayList<>();
@@ -344,7 +445,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
     });
 
-    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size()+ " and project " + projid);
+    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " and project " + projid);
 
     audioDAO.attachAudioToExercises(exercises, language);
   }

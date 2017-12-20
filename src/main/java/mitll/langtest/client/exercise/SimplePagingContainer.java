@@ -43,6 +43,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -94,6 +95,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     // logger.info("still setting up... starting");
 
     // Create a SimplePager.
+    return getTable(listOptions);
+  }
+
+  @NotNull
+  protected Panel getTable(ListOptions listOptions) {
     final SimplePager pager =
         new SimplePager(SimplePager.TextLocation.CENTER, true, true);
 
@@ -145,8 +151,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @param sortEnglish
    * @see #getTableWithPager
    */
-  private void makeCellTable(boolean sortEnglish) {
-    //  logger.info("simplePaging : makeCellTable -------- ");
+  protected CellTable<T> makeCellTable(boolean sortEnglish) {
+      logger.info("simplePaging : makeCellTable -------- ");
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
 
@@ -159,6 +165,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
         DoubleClickEvent.getType());
 
     configureTable(sortEnglish);
+    return table;
   }
 
   protected void gotDoubleClickOn(T selected) {

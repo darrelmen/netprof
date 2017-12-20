@@ -45,7 +45,7 @@ import java.util.*;
 /**
  * @see mitll.langtest.client.result.ResultManager
  */
-public class MonitorResult implements IsSerializable,UserAndTime {
+public class MonitorResult implements IsSerializable, UserAndTime {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";
   public static final String ID = "oldExID";
@@ -62,7 +62,8 @@ public class MonitorResult implements IsSerializable,UserAndTime {
 
   private int uniqueID;
   private int userid;
-  @Deprecated  private String oldExID;
+  @Deprecated
+  private String oldExID;
   private int exid;
 
   private String foreignText = "";
@@ -87,7 +88,8 @@ public class MonitorResult implements IsSerializable,UserAndTime {
   private transient String simpleDevice;
   private transient String scoreJSON;
 
-  public MonitorResult() {}
+  public MonitorResult() {
+  }
 
   /**
    * @param uniqueID
@@ -151,7 +153,6 @@ public class MonitorResult implements IsSerializable,UserAndTime {
   }
 
   /**
-   *
    * @return
    */
   public String getForeignText() {
@@ -181,7 +182,9 @@ public class MonitorResult implements IsSerializable,UserAndTime {
     return oldExID;
   }
 
-  public AudioType getAudioType() { return audioType;  }
+  public AudioType getAudioType() {
+    return audioType;
+  }
 
   public long getDurationInMillis() {
     return durationInMillis;
@@ -219,12 +222,7 @@ public class MonitorResult implements IsSerializable,UserAndTime {
     //logger.info("getComparator columns " + columns);
     final List<String> copy = new ArrayList<String>(columns);
     if (copy.isEmpty() || copy.iterator().next().equals("")) {
-      return new Comparator<MonitorResult>() {
-        @Override
-        public int compare(MonitorResult o1, MonitorResult o2) {
-          return o1.uniqueID < o2.uniqueID ? -1 : o1.uniqueID > o2.uniqueID ? +1 : 0;
-        }
-      };
+      return Comparator.comparingInt(MonitorResult::getUniqueID);
     } else {
       return new Comparator<MonitorResult>() {
         @Override
@@ -240,9 +238,9 @@ public class MonitorResult implements IsSerializable,UserAndTime {
           //  logger.info("col " + col + " asc = " + asc);
 
           // USERID ---------------
-          long comp = 0;
+          int comp = 0;
           if (field.equals(USERID)) {
-            comp = o1.userid < o2.userid ? -1 : o1.userid > o2.userid ? +1 : 0;
+            comp = Integer.compare(o1.userid, o2.userid);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -268,7 +266,7 @@ public class MonitorResult implements IsSerializable,UserAndTime {
 
           // timestamp
           if (field.equals(TIMESTAMP)) {
-            comp = o1.timestamp < o2.timestamp ? -1 : o1.timestamp > o2.timestamp ? +1 : 0;
+            comp = Long.compare(o1.timestamp, o2.timestamp);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -289,7 +287,7 @@ public class MonitorResult implements IsSerializable,UserAndTime {
 
           // duration
           if (field.equals(DURATION_IN_MILLIS)) {
-            comp = o1.durationInMillis < o2.durationInMillis ? -1 : o1.durationInMillis > o2.durationInMillis ? +1 : 0;
+            comp = Long.compare(o1.durationInMillis, o2.durationInMillis);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -308,7 +306,7 @@ public class MonitorResult implements IsSerializable,UserAndTime {
           if (field.equals(PRON_SCORE)) {
             float pronScore1 = o1.getPronScore();
             float pronScore2 = o2.getPronScore();
-            comp = pronScore1 < pronScore2 ? -1 : pronScore1 > pronScore2 ? +1 : 0;
+            comp = Float.compare(pronScore1, pronScore2);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -318,9 +316,7 @@ public class MonitorResult implements IsSerializable,UserAndTime {
           if (comp != 0) return getComp(asc, comp);
 
           if (field.equals(DYNAMIC_RANGE)) {
-            float pronScore1 = o1.getSnr();
-            float pronScore2 = o2.getSnr();
-            comp = pronScore1 < pronScore2 ? -1 : pronScore1 > pronScore2 ? +1 : 0;
+            comp = Float.compare(o1.getSnr(), o2.getSnr());
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -336,21 +332,21 @@ public class MonitorResult implements IsSerializable,UserAndTime {
             }
           }
 
-          if (comp == 0) comp = Integer.valueOf(o1.getUniqueID()).compareTo(o2.getUniqueID());
+          if (comp == 0) comp = Integer.compare(o1.getUniqueID(), o2.getUniqueID());
 
           return getComp(asc, comp);
         }
 
-        protected int getComp(boolean asc, long comp) {
-          return (int) (asc ? comp : -1 * comp);
+        int getComp(boolean asc, int comp) {
+          return (asc ? comp : -1 * comp);
         }
 
-        protected int compareTwoMaybeInts(String id1, String id2) {
+        int compareTwoMaybeInts(String id1, String id2) {
           int comp;
           try {   // this could be slow
             int i = Integer.parseInt(id1);
             int j = Integer.parseInt(id2);
-            comp = i < j ? -1 : i > j ? +1 : 0;
+            comp = Integer.compare(i, j);
           } catch (NumberFormatException e) {
             comp = id1.compareTo(id2);
           }
