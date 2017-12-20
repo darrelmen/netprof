@@ -280,74 +280,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * Case insensitive match.
-   * TODO : Super misleading -- password not really required???
-   *
-   * @param id
-   * @param passwordHash
-   * @return a
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
-   * @see mitll.langtest.server.ScoreServlet#doGet
-   */
-/*  @Override
-  public User getUser(String id, String passwordHash) {
-    User userWhere = getStrictUserWithPass(id, passwordHash);
-    if (userWhere == null) {
-      logger.debug("getUser : no user with id '" + id + "' and pass " + passwordHash);
-      userWhere = getUserByID(id);
-      logger.debug(language + " : getUser user with id '" + id + "' pass " + passwordHash +
-          " and empty or different pass is " + userWhere);
-    }
-    return userWhere;
-  }*/
-
-  /**
-   * Shouldn't call this...
-   *
-   * @return
-   * @paramx id
-   * @paramx freeTextPassword
-   * @deprecated
-   */
-  /*@Override
-  public User getUserFreeTextPassword(String id, String freeTextPassword) {
-    return getUser(id, freeTextPassword);
-  }
-*/
-/*
-  @Override
-  public User getStrictUserWithPass(String id, String passwordHash) {
-    logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
-    String sql = "SELECT * from " +
-        USERS +
-        " where " +
-        "(UPPER(" +
-
-
-
-        USER_ID +
-        ")='" + id.toUpperCase() + "' OR " +
-        EMAIL + "='" + id.toUpperCase() +
-
-        "') and UPPER(" + PASS + ")='" + passwordHash.toUpperCase() +
-        "'";
-
-    return getUserWhere(-1, sql);
-  }
-*/
-
-  /**
-   * @param id
-   * @param freeTextPassword
-   * @return
-   * @deprecated
-   */
-/*  @Override
-  public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
-    return getStrictUserWithPass(id, freeTextPassword);
-  }*/
-
-  /**
    * Case insensitive
    *
    * @param id
@@ -458,30 +390,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     statement.close();
   }
 
-/*  private void dropDefaultColumn(Connection connection, String column, String type) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ALTER COLUMN " + column +
-            " DROP DEFAULT"
-        //    " SET DEFAULT NULL"
-    );
-    //  logger.info("drop default on " +this);
-
-    statement.execute();
-    statement.close();
-
-    try {
-      String sql = "ALTER TABLE users ALTER COLUMN " + column +
-          " TIMESTAMP DEFAULT NOT NULL";
-
-      statement = connection.prepareStatement(sql
-      );
-      // logger.info("drop default on " + this);
-
-      statement.execute();
-      statement.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }*/
 
   /**
    * Pulls the list of users out of the database.
@@ -493,16 +401,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getUsers("SELECT * from users order by " + ID + " ASC");
   }
 
-
-//  @Override
-//  public List<ReportUser> getUsersDevices() {
-//    List<User> users = getUsers("SELECT * from users" +
-//        " where device like 'i%'" +
-//        " order by " + ID + " ASC"
-//    );
-//
-//    return new ArrayList<>(users);
-//  }
 
   @Override
   public ReportUsers getReportUsers() {
@@ -519,11 +417,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     for (User user : getUsers()) mini.put(user.getID(), new MiniUser(user));
     return mini;
   }
-//
-//  @Override
-//  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
-//    return null;
-//  }
 
   /**
    * @param userid
@@ -537,7 +430,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public Map<Integer, FirstLastUser> getFirstLastUsers() {
+  public Map<Integer, FirstLastUser> getFirstLastFor(Set<Integer> userDBIds) {
     return null;
   }
 
@@ -552,19 +445,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @param resetKey
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
-   */
-/*  @Override
-  public User getUserWithEnabledKey(String resetKey) {
-    return getUserWhere(-1, "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey + "'");
-  }*/
-
-  /**
    * @param userid
    * @return null if no user with that id else the user object
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy
+   * @deprecated
    */
   @Override
   public User getUserWhere(int userid) {
@@ -742,69 +626,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return permissions;
   }
 
-//  @Override
-//  public Map<Integer, User> getUserMap(boolean getMale) {
-//    return getUserMap(getMale, getUsers());
-//  }
-
- /* @Override
-  public Map<Integer, User> getUserMapFromUsers(boolean getMale, List<DBUser> all) {
-    return null;
-  }*/
-
-//  @Override
-//  public List<DBUser> getAll() {
-//    return null;
-//  }
-
-/*  @Override
-  public Set<Integer> getUserIDs(boolean getMale) {
-    return getUserMap(getMale).keySet();
-  }*/
-
   @Override
   public boolean isMale(int userid) {
     return false;
   }
 
-  /**
-   * @param getMale
-   * @return
-   * @seex AudioDAO#getUserIDsMatchingGender
-   */
-/*  Set<Long> getUserIDsMatchingGender(boolean getMale) {
-    return getUserIDs("SELECT " + ID + " FROM " + USERS + " WHERE " + GENDER + " = " + (getMale ? 0 : 1));
-  }*/
-
-/*
-  @Override
-  public Map<Integer, User> getUserMap() {
-    return getMap(getUsers());
-  }*/
-
-/*  private Map<Integer, User> getUserMap(boolean getMale, List<User> users) {
-    Map<Integer, User> idToUser = new HashMap<>();
-    for (User u : users) {
-      if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
-        idToUser.put(u.getID(), u);
-      }
-    }
-    return idToUser;
-  }*/
-
-  /**
-   * @param users
-   * @return
-   */
-/*
-  private Map<Integer, User> getMap(List<User> users) {
-    Map<Integer, User> idToUser = new HashMap<>();
-    for (User u : users) {
-      idToUser.put(u.getID(), u);
-    }
-    return idToUser;
-  }
-*/
   @Override
   public boolean changePassword(int user, String newHashPassword, String baseURL) {
     try {
@@ -851,54 +677,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return null;
   }
 
-  /**
-   * @param userid
-   * @param resetKey
-   * @param key
-   * @return
-   * @see IUserDAO#clearKey(int, boolean)
-   */
-/*  @Override
-  public boolean updateKey(int userid, boolean resetKey, String key) {
-    try {
-      Connection connection = getConnection();
-      String s = resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY;
-      PreparedStatement statement = connection.prepareStatement(
-          "UPDATE " + USERS + " SET " +
-              s + "=?" +
-              " WHERE " +
-              ID + "=?");
-      int i = 1;
-      statement.setString(i++, key);
-      statement.setLong(i++, userid);
-      int i1 = statement.executeUpdate();
-
-      statement.close();
-      database.closeConnection(connection);
-      logger.debug("for " + language + " update " + key + "/" + s + " for " + userid);
-      return i1 != 0;
-    } catch (Exception ee) {
-      logger.error("Got " + ee, ee);
-      database.logEvent("unk", "clearKey user: " + userid + " " + ee.toString(), 0, UNKNOWN);
-    }
-    return false;
-  }*/
-
-  /**
-   * @return
-   * @paramx user
-   * @paramx resetKey
-   * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
-   */
-/*  @Override
-  public boolean clearKey(int user, boolean resetKey) {
-    return updateKey(user, resetKey, "");
-  }*/
-
-/*  @Override
-  public Map<User.Kind, Integer> getCounts() {
-    return null;
-  }*/
   @Override
   public void update(User toUpdate) {
   }
@@ -924,42 +702,4 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   ) {
     return false;
   }
-
-/*  @Override
-  public boolean changeEnabled(int userid, boolean enabled) {
-    try {
-      Connection connection = getConnection();
-
-      PreparedStatement statement = connection.prepareStatement(
-          "UPDATE " + USERS + " SET " +
-              ENABLED + "=?" +
-              " WHERE " +
-              ID + "=?");
-      int i = 1;
-      statement.setBoolean(i++, enabled);
-      statement.setLong(i++, userid);
-      int i1 = statement.executeUpdate();
-
-      statement.close();
-      database.closeConnection(connection);
-      logger.debug("for " + language + " update " + ENABLED + "/" + enabled + " for " + userid + "  " + i1);
-      return i1 != 0;
-    } catch (Exception ee) {
-      logger.error("Got " + ee, ee);
-      database.logEvent("unk", "changeEnabled user: " + userid + " " + ee.toString(), 0, UNKNOWN);
-    }
-    return false;
-  }
-
-  */
-
-/*  public static void main(String[] arg) {
-    Kind kind = Kind.valueOf("STUDENT");
-    logger.info("got " + kind);
-
-    kind = Kind.valueOf("TEACHER");
-    logger.info("got " + kind);
-    kind = Kind.valueOf("CONTENT_DEVELOPER");
-    logger.info("got " + kind);
-  }*/
 }

@@ -84,7 +84,7 @@ public abstract class Analysis extends DAO {
    * @param userDAO
    * @param best
    * @return
-   * @see IAnalysis#getUserInfo
+   * @see SlickAnalysis#getUserInfo
    */
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
     List<UserInfo> userInfos = getUserInfos(best, userDAO);
@@ -117,20 +117,18 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   * @param best
+   * @param idToUserInfo
    * @return
    * @see #getUserInfos(IUserDAO, Map)
    */
   @NotNull
-  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> best, IUserDAO userDAO) {
+  private List<UserInfo> getUserInfos(Map<Integer, UserInfo> idToUserInfo, IUserDAO userDAO) {
     List<UserInfo> userInfos = new ArrayList<>();
-    logger.info("getUserInfos for " + best.size());
+    logger.info("getUserInfos for " + idToUserInfo.size()+ " users");
     long then = System.currentTimeMillis();
-    Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastUsers();
-    for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
-      Integer userid = pair.getKey();
+    Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
-//      MiniUser miniUser = userDAO.getMiniUser(userid);
+    idToUserInfo.forEach((userid, value) -> {
       FirstLastUser miniUser = firstLastUsers.get(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
@@ -138,20 +136,21 @@ public abstract class Analysis extends DAO {
         String userChosenID = miniUser.getUserID();
         boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
         if (!isLL) {
-          UserInfo value = pair.getValue();
-          value.setId(userid); // necessary?
-          value.setUserID(userChosenID);
-          value.setFirst(miniUser.getFirst());
-          value.setLast(miniUser.getLast());
+          value.setFrom(miniUser);
+//          value.setId(userid); // necessary?
+//          value.setUserID(userChosenID);
+//          value.setFirst(miniUser.getFirst());
+//          value.setLast(miniUser.getLast());
 
-          userInfos.add(pair.getValue());
+          userInfos.add(value);
         }
       }
-    }
+
+    });
     long now = System.currentTimeMillis();
 
     if (now - then > 100) {
-      logger.info("getUserInfos : took " + (now - then) + " to get " + best.size() + " user infos");
+      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos");
     }
     return userInfos;
   }
@@ -242,7 +241,7 @@ public abstract class Analysis extends DAO {
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
-          /*phonesForUser.size() +*/ " phones");
+            /*phonesForUser.size() +*/ " phones");
       }
 
       setSessions(phoneReport.getPhoneToAvgSorted());
@@ -277,10 +276,10 @@ public abstract class Analysis extends DAO {
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
-          /*phonesForUser.size() +*/ " phones");
+            /*phonesForUser.size() +*/ " phones");
       }
 
-     // setSessions(phoneReport.getPhoneToAvgSorted());
+      // setSessions(phoneReport.getPhoneToAvgSorted());
 
       return phoneReport;
     }
@@ -319,14 +318,11 @@ public abstract class Analysis extends DAO {
     }
 
     Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();
+    userToBest.keySet().forEach(id -> userToBest2.put(id, new ArrayList<>()));
+
     Map<Integer, Long> userToEarliest = new HashMap<>();
 
-    for (Integer key : userToBest.keySet()) {
-      userToBest2.put(key, new ArrayList<>());
-    }
-
-    for (Map.Entry<Integer, List<BestScore>> pair : userToBest.entrySet()) {
-      Integer userID = pair.getKey();
+    userToBest.forEach((userID, bestScores1) -> {
       List<BestScore> bestScores = userToBest2.get(userID);
 
       int last = -1;
@@ -335,7 +331,6 @@ public abstract class Analysis extends DAO {
       BestScore lastBest = null;
       Set<Integer> seen = new HashSet<>();
 
-      List<BestScore> bestScores1 = pair.getValue();
       if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
 
       // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
@@ -376,7 +371,7 @@ public abstract class Analysis extends DAO {
           bestScores.add(lastBest);
         }
       }
-    }
+    });
 
     return getUserIDToInfo(minRecordings, userToBest2, userToEarliest);
   }
@@ -394,17 +389,14 @@ public abstract class Analysis extends DAO {
                                                  Map<Integer, List<BestScore>> userToBest2,
                                                  Map<Integer, Long> userToEarliest) {
     Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
-    int userFinalScores = database.getServerProps().getUserFinalScores();
-
-    for (Map.Entry<Integer, List<BestScore>> pair : userToBest2.entrySet()) {
-      List<BestScore> value = pair.getValue();
-      Integer userID = pair.getKey();
-      if (value.size() >= minRecordings) {
-        userToUserInfo.put(userID, new UserInfo(value, userToEarliest.get(userID), userFinalScores));
+    userToBest2.forEach((userID, bestScores) -> {
+      if (bestScores.size() >= minRecordings) {
+        userToUserInfo.put(userID, new UserInfo(bestScores, userToEarliest.get(userID)));
       } else {
-        if (DEBUG) logger.debug("getUserIDToInfo skipping user " + userID + " with just " + value.size() + " scores");
+        if (DEBUG)
+          logger.debug("getUserIDToInfo skipping user " + userID + " with just " + bestScores.size() + " scores");
       }
-    }
+    });
 
     if (DEBUG) logger.info("getUserIDToInfo Return " + userToUserInfo);
     return userToUserInfo;

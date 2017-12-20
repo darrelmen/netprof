@@ -95,14 +95,52 @@ public class ProjectTest extends BaseTest {
 
     String fl = "そして, 何を飲みましたか";
 
-    String s = removePunct(fl);
-    List<String> tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, fl);
 
-    tokensAllLanguages.forEach(token->logger.info("got " + token));
+    String test = "海で泳いで、喫茶店で昼ごはんをたべました。";
 
-   tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, s);
 
-    tokensAllLanguages.forEach(token->logger.info("got " + token));
+    AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+
+
+    String segmented = audioFileHelper.getSegmented(test);
+
+  logger.info("got " + segmented);
+    logger.info("1 got '" + test + "' = '" + segmented + "'");
+
+    String pronunciationsFromDictOrLTS = audioFileHelper.getASR().getHydraDict(segmented, "");
+    logger.info("1 pronunciationsFromDictOrLTS '" + pronunciationsFromDictOrLTS + "' = '" + segmented + "'");
+
+
+/*    for (CommonExercise ex : project.getRawExercises()) {
+      String foreignLanguage = ex.getForeignLanguage();
+      String segmented = audioFileHelper.getSegmented(foreignLanguage);
+      logger.info("1 got '" + foreignLanguage + "' = '" + segmented + "'");
+
+      String pronunciationsFromDictOrLTS = audioFileHelper.getASR().getHydraDict(segmented, ex.getTransliteration());
+
+
+      //audioFileHelper.getPronunciationsFromDictOrLTS(foreignLanguage, ex.getTransliteration());
+      logger.info("1 got " + pronunciationsFromDictOrLTS);
+      for (CommonExercise ex2 : ex.getDirectlyRelated()) {
+        String foreignLanguage1 = ex2.getForeignLanguage();
+        String segmented1 = audioFileHelper.getSegmented(foreignLanguage1);
+        logger.info("2 got " + foreignLanguage1 + " = " + segmented1);
+
+        // String pronunciationsFromDictOrLTS2 = audioFileHelper.getPronunciationsFromDictOrLTS(foreignLanguage1, ex2.getTransliteration());
+        String pronunciationsFromDictOrLTS2 = audioFileHelper.getASR().getHydraDict(segmented1, ex2.getTransliteration());
+        logger.info("2 got " + pronunciationsFromDictOrLTS2);
+      }
+    }*/
+
+
+//    String s = removePunct(fl);
+//    List<String> tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, fl);
+//
+//    tokensAllLanguages.forEach(token->logger.info("got " + token));
+//
+//   tokensAllLanguages = project.getAudioFileHelper().getSmallVocabDecoder().getTokensAllLanguages(true, s);
+//
+//    tokensAllLanguages.forEach(token->logger.info("got " + token));
 
   }
 

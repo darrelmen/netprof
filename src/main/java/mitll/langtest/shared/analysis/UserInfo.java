@@ -32,12 +32,14 @@
 
 package mitll.langtest.shared.analysis;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.langtest.client.analysis.UserContainer;
-import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.user.FirstLastUser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +51,13 @@ import java.util.Map;
  * @since 10/29/15.
  */
 public class UserInfo implements HasID {
-
-  private int finalScores;
+//  private int finalScores;
   private int current;
   private int num;
-  private transient List<BestScore> bestScores;
   private long startTime;
+
+  private transient List<BestScore> bestScores;
+
   private int id;
   private String userID;
   private String first;
@@ -65,10 +68,9 @@ public class UserInfo implements HasID {
 
   /**
    * @param bestScores
-   * @param finalSamples
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
-  public UserInfo(List<BestScore> bestScores, long startTime, int finalSamples) {
+  public UserInfo(List<BestScore> bestScores, long startTime) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
     this.startTime = startTime;
@@ -77,9 +79,8 @@ public class UserInfo implements HasID {
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
 
 //    List<BestScore> initialScores = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
-    List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
-
-    this.finalScores = getPercent(finalScores);
+ //   List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
+//    this.finalScores = getPercent(finalScores);
     setCurrent(getPercent(bestScores));
   }
 
@@ -99,24 +100,32 @@ public class UserInfo implements HasID {
     return startTime;
   }
 
+  /**
+   * @see UserContainer#getCurrent
+   * @return
+   */
   public int getCurrent() {
     return current;
   }
 
-  public int getDiff() {
-    return getFinalScores() -  getCurrent();// - getStart();
-  }
+//  private int getDiff() {
+//    return getFinalScores() -  getCurrent();
+//  }
 
   public int getNum() {
     return num;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserPerformance
+   * @return
+   */
   public List<BestScore> getBestScores() {
     return bestScores;
   }
 
 
-  public void setCurrent(int current) {
+  private void setCurrent(int current) {
     this.current = current;
   }
 
@@ -129,7 +138,10 @@ public class UserInfo implements HasID {
   }
 
 
-
+  /**
+   * @see UserContainer#addTable(Collection, DivWidget)
+   * @return
+   */
   @Override
   public int getID() {
     return id;
@@ -139,15 +151,28 @@ public class UserInfo implements HasID {
     this.id = id;
   }
 
+  public void setFrom(FirstLastUser firstLastUser) {
+    setId(firstLastUser.getID()); // necessary?
+    setUserID(firstLastUser.getUserID());
+    setFirst(firstLastUser.getFirst());
+    setLast(firstLastUser.getLast());
+  }
+
   @Override
   public int compareTo(@NotNull HasID o) {
     return Integer.compare(id, o.getID());
   }
 
-  public int getFinalScores() {
+/*
+  private int getFinalScores() {
     return finalScores;
   }
+*/
 
+  /**
+   * @see Analysis#getUserInfos
+   * @param first
+   */
   public void setFirst(String first) {
     this.first = first;
   }
@@ -166,6 +191,6 @@ public class UserInfo implements HasID {
 
   public String toString() {
     //MiniUser user = getUser();
-    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent() + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
+    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 }

@@ -242,7 +242,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getAudioFileHelper(projID).getCollator(), getLanguage(projectForUser));
     } else {
       if (predefExercises) {
-        commonExercises = new ArrayList<>();
+        commonExercises = new ArrayList<>(exercises.getByID());
         List<CommonExercise> basicExercises = new ArrayList<>(exercises.getByExercise());
         boolean sortByFL = projectForUser.isEnglish();
         String searchTerm = request.getPrefix();
@@ -261,7 +261,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         // 1) first add any exact by id matches - should only be one
         if (exercises.getByID().size() > 1)
           logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
-        commonExercises.addAll(exercises.getByID());
+
         exercises.getByID().forEach(e -> unique.add(e.getID()));
         if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
 

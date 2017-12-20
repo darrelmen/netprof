@@ -46,6 +46,7 @@ import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserDAO extends IDAO, AutoCloseable {
   /**
@@ -144,7 +145,10 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   MiniUser getMiniUser(int userid);
 
-  Map<Integer,FirstLastUser> getFirstLastUsers();
+  //Map<Integer,FirstLastUser> getFirstLastUsers();
+
+  Map<Integer,FirstLastUser> getFirstLastFor(Set<Integer> userDBIds);
+
   String getUserChosenID(int userid);
 
   boolean isMale(int userid);

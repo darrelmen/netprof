@@ -158,7 +158,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param listid
    * @return
-   * @see Analysis#getPerformanceForUser
+   * @see #getPerformanceReportForUser(int, int, int)
+   * @see #getPhoneReportFor(int, int, String, long, long)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();

@@ -67,6 +67,7 @@ import javax.servlet.ServletContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -107,6 +108,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String ILR = "ILR";
   private static final String USER = "User";
   private static final String DEFAULT = "Default";
+  public static final int EST_NUM_USERS = 8000;
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -1099,8 +1101,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return byID == null ? null : getMini(byID);
   }
 
+/*
   public Map<Integer, FirstLastUser> getFirstLastUsers() {
     Collection<List<Object>> userFields = delegate.getUserFields("_id", "userId", "firstName", "lastName");
+    long now = System.currentTimeMillis();
 
     Map<Integer, FirstLastUser> idToFirstLast = new HashMap<>();
     for (List<Object> userField : userFields) {
@@ -1110,9 +1114,50 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       String o2 = (String) userField.get(i++);
       String o3 = (String) userField.get(i++);
       String o4 = (String) userField.get(i++);
-      idToFirstLast.put(o1, new FirstLastUser(o1, o2, o3, o4));
+      idToFirstLast.put(o1, new FirstLastUser(o1, o2, o3, o4, now));
     }
     return idToFirstLast;
+  }
+*/
+
+  private ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
+
+  @Override
+  public Map<Integer, FirstLastUser> getFirstLastFor(Set<Integer> userDBIds) {
+    refreshUserCache(userDBIds);
+
+    Map<Integer, FirstLastUser> idToFirstLast = new HashMap<>(userDBIds.size());
+    userDBIds.forEach(k -> idToFirstLast.put(k, idToFirstLastCache.get(k)));
+    return idToFirstLast;
+  }
+
+  private void refreshUserCache(Set<Integer> userDBIds) {
+    long now = System.currentTimeMillis();
+
+    Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
+    long then = System.currentTimeMillis();
+    Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
+    long now2 = System.currentTimeMillis();
+    logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
+    idToUserD.forEach((k, v) -> {
+      FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now);
+      idToFirstLastCache.put(k, value);
+    });
+  }
+
+  @NotNull
+  private Set<Integer> getMissingOrStale(Set<Integer> userDBIds, long now) {
+    Set<Integer> toAskFor = new HashSet<>();
+
+    long stale = now - 5L * 60L * 1000L;
+
+    userDBIds.forEach(id -> {
+      FirstLastUser firstLastUser = idToFirstLastCache.get(id);
+      if (firstLastUser == null || firstLastUser.getLastChecked() < stale) {
+        toAskFor.add(id);
+      }
+    });
+    return toAskFor;
   }
 
   public String getUserChosenID(int userid) {

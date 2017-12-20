@@ -8,6 +8,8 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
   protected String first = "";
   protected String last = "";
 
+  private transient long lastChecked;
+
   public FirstLastUser() {
   }
 
@@ -15,11 +17,12 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
     this.id = id;
   }
 
-  public FirstLastUser(int id, String userid, String first, String last) {
+  public FirstLastUser(int id, String userid, String first, String last, long lastChecked) {
     this.id = id;
     this.userID = userid;
     this.first = first;
     this.last = last;
+    this.lastChecked =lastChecked;
   }
 
   @Override
@@ -61,4 +64,12 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
   public String getUserID() {
     return userID;
   }
+
+  public long getLastChecked() {
+    return lastChecked;
+  }
+
+//  public void setLastChecked(long lastChecked) {
+//    this.lastChecked = lastChecked;
+//  }
 }

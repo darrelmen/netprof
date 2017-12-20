@@ -338,6 +338,8 @@ public class ProjectManagement implements IProjectManagement {
 
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
+      // side effect is to cache the users.
+      db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUserToProject().keySet());
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);

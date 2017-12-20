@@ -761,19 +761,15 @@ public class ServerProperties {
     return emailList.getReportEmails();
   }
 
-/*
-  public List<String> getReportNames() {
-    return emailList.getReportNames();
-  }
-*/
-
   public int getUserInitialScores() {
     return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
   }
 
+/*
   public int getUserFinalScores() {
     return getIntPropertyDef(ANALYSIS_NUM_FINAL_AVERAGE_SCORES, USER_FINAL_SCORES);
   }
+*/
 
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);

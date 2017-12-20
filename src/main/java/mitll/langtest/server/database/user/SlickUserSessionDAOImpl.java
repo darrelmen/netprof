@@ -99,7 +99,5 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     dao.removeSession(session);
   }
 
-  public int getNumRows() {
-    return dao.numRows();
-  }
+  public int getNumRows() {    return dao.numRows();  }
 }

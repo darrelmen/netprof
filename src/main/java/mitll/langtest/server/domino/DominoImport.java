@@ -187,7 +187,6 @@ public class DominoImport implements IDominoImport {
     public List<ImportDoc> getChanged() {
       return changed;
     }
-
     public List<ImportDoc> getDeleted() {
       return deleted;
     }
