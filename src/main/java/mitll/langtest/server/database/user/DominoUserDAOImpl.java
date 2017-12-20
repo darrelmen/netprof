@@ -148,7 +148,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (servletContext != null) {
         Enumeration<String> attributeNames = servletContext.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
-          logger.info("no user service " + servletContext.getAttributeNames());
+          logger.info("domino user dao: no user service (" + USER_SVC + ")" + attributeNames.nextElement());
         }
       }
       usedDominoResources = false;
@@ -605,7 +605,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Remember pair of user password and encoded password and their match result to speed up this call.
-   *
+   * <p>
    * remember password for user id
    *
    * @param userID
@@ -1250,9 +1250,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.UserCopy#checkMatchingGender
    * @param updateUser
    * @return
+   * @see mitll.langtest.server.database.copy.UserCopy#checkMatchingGender
    */
   @Override
   public SResult<ClientUserDetail> updateUser(DBUser updateUser) {

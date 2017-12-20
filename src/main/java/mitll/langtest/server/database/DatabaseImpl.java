@@ -219,8 +219,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
-
-    // simpleDominoContext.getProjectDelegate().getProjectIDNamePairs()
     initializeDAOs(pathHelper, dominoUserDAO);
     {
       long now = System.currentTimeMillis();
@@ -235,7 +233,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
 
   /**
-   * @seex CopyToPostgres#createProjectIfNotExists
    * @see DatabaseImpl#makeDAO
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
@@ -625,7 +622,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
           }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);//, userPermissionDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
       }
     }
   }

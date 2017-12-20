@@ -51,20 +51,20 @@ import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.User;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
@@ -206,14 +206,25 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.info("getStartupInfo no db yet...");
     } else {
-      projectInfos = db.getProjectManagement().getNestedProjectInfo();
+      if (db.getProjectManagement() == null) {
+        logger.error("config error - didn't make project management");
+      }
+      else {
+        long then = System.currentTimeMillis();
+        projectInfos = db.getProjectManagement().getNestedProjectInfo();
+        long now = System.currentTimeMillis();
+        logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
+      }
     }
 
     if (db == null || !db.isHasValidDB()) {
       startupMessage = NO_POSTGRES;
     }
+    long then = System.currentTimeMillis();
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
+    long now = System.currentTimeMillis();
+    logger.info("getStartupInfo took " +(now-then) + " millis to get startup info.");
 
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;

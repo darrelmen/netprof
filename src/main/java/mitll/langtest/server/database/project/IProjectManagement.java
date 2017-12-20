@@ -95,10 +95,6 @@ public interface IProjectManagement {
 
   List<SlimProject> getNestedProjectInfo();
 
- // FileUploadHelper getFileUploadHelper();
-
- // ImportInfo getImport(int projid);
-
   /**
    * Use file path to lookup in result table to get user id of who recorded it.
    * @param requestURI

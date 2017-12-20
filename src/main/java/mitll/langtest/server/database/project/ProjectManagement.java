@@ -63,6 +63,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.deprecated;
 
 import javax.servlet.ServletContext;
 import java.text.DateFormat;
@@ -153,14 +154,6 @@ public class ProjectManagement implements IProjectManagement {
 
 
   /**
-   * @see DatabaseImpl#populateProjects
-   */
-  @Override
-  public void populateProjects() {
-    populateProjects(pathHelper, serverProps, logAndNotify, db);
-  }
-
-  /**
    * @param id
    * @see DatabaseImpl#rememberProject
    */
@@ -178,21 +171,25 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * @see DatabaseImpl#populateProjects
+   */
+  @Override
+  public void populateProjects() {
+    populateProjects(pathHelper, serverProps, logAndNotify, db);
+  }
+
+  /**
    * Fill in id->project map
    *
-   * @see IProjectManagement#populateProjects()
+   * @see #populateProjects()
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
-    // Collection<SlickProject> all = projectDAO.getAll();
-//    if (!all.isEmpty()) {
-//      logger.info("populateProjects : found " + all.size() + " projects");
-//    }
-    for (SlickProject slickProject : getAllProjects()) {
+    getAllProjects().forEach(slickProject -> {
       if (slickProject.status().equalsIgnoreCase(DELETED.toString())) {
-        logger.info("skip deleted " + slickProject.id() + " " + slickProject.name());
+        logger.info("populateProjects skip deleted " + slickProject.id() + " " + slickProject.name());
       } else {
         if (!idToProject.containsKey(slickProject.id())) {
           if (debugOne) {
@@ -206,7 +203,7 @@ public class ProjectManagement implements IProjectManagement {
           }
         }
       }
-    }
+    });
 
     logger.info("populateProjects now project ids " + idToProject.keySet());
 /*    for (Project project : getProjects()) {
@@ -657,8 +654,11 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public Collection<Project> getProductionProjects() {
-    return idToProject
-        .values()
+    return getProductionProjects(idToProject.values());
+  }
+
+  private List<Project> getProductionProjects(Collection<Project> toFilter) {
+    return toFilter
         .stream()
         .filter(p -> p.getStatus() == ProjectStatus.PRODUCTION)
         .collect(Collectors.toList());
@@ -679,7 +679,6 @@ public class ProjectManagement implements IProjectManagement {
    * @param userWhere
    * @param projid
    * @see DatabaseImpl#setStartupInfo
-   * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
@@ -724,6 +723,7 @@ public class ProjectManagement implements IProjectManagement {
       if (type.isEmpty()) logger.error("setStartupInfo huh? type order has blank?? " + type);
     }
 
+    boolean hasModel = project.hasModel();
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(
         serverProps.getProperties(),
         typeOrder,
@@ -732,7 +732,7 @@ public class ProjectManagement implements IProjectManagement {
         language,
         toEnum(language),
         LTSFactory.getLocale(language),
-        hasModel(project1),
+        hasModel,
         sectionHelper.getTypeToDistinct(),
         sectionHelper.getRootTypes(),
         sectionHelper.getParentToChildTypes());
@@ -757,13 +757,14 @@ public class ProjectManagement implements IProjectManagement {
     return language1;
   }
 
-  private boolean hasModel(SlickProject project1) {
-    return getModel(project1) != null;
-  }
+//  private boolean hasModel(SlickProject project1) {
+//    return getModel(project1) != null;
+//  }
 
-  private String getModel(SlickProject project1) {
-    return getProp(project1.id(), ServerProperties.MODELS_DIR);
-  }
+//  @deprecated
+//  private String getModel(SlickProject project1) {
+//    return getPropFromDB(project1.id(), ServerProperties.MODELS_DIR);
+//  }
 
   /**
    * @return
@@ -771,21 +772,23 @@ public class ProjectManagement implements IProjectManagement {
    */
   public List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
-    Map<String, List<SlickProject>> langToProject = getLangToProjects();
+    Map<String, List<Project>> langToProject = getLangToProjects();
 //    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
-    langToProject.values().forEach(slickProjects -> {
-      List<SlickProject> production = getProductionProjects(slickProjects);
-      SlickProject firstProject = (production.isEmpty()) ? slickProjects.iterator().next() : production.iterator().next();
+    langToProject.values().forEach(projects -> {
+      List<Project> production = getProductionProjects(projects);
+      Project firstProject = (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
 
       SlimProject parent = getProjectInfo(firstProject);
       projectInfos.add(parent);
 
-      if (slickProjects.size() > 1) {
-        for (SlickProject slickProject : slickProjects) {
-          parent.addChild(getProjectInfo(slickProject));
-          //  logger.info("\t add child to " + parent);
-        }
+      if (projects.size() > 1) {
+        // add child to self?
+        projects.forEach(project -> parent.addChild(getProjectInfo(project)));
+//        for (Project project : projects) {
+//          parent.addChild(getProjectInfo(project));
+//          //  logger.info("\t add child to " + parent);
+//        }
       }
     });
 
@@ -801,28 +804,64 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @NotNull
-  private Map<String, List<SlickProject>> getLangToProjects() {
-    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
-    Collection<SlickProject> all = db.getProjectDAO().getAll();
+  private Map<String, List<Project>> getLangToProjects() {
+    Map<String, List<Project>> langToProject = new TreeMap<>();
+    // Collection<SlickProject> all = db.getProjectDAO().getAll();
+
+    getProjects().forEach(project -> {
+      List<Project> slimProjects = langToProject.computeIfAbsent(project.getLanguage(), k -> new ArrayList<>());
+      slimProjects.add(project);
+    });
 
     //   logger.info("getNestedProjectInfo : found " + all.size() + " projects");
-    for (SlickProject project : all) {
-      List<SlickProject> slimProjects = langToProject.computeIfAbsent(project.language(), k -> new ArrayList<>());
-      slimProjects.add(project);
-    }
+//    for (SlickProject project : all) {
+//      List<SlickProject> slimProjects = langToProject.computeIfAbsent(project.language(), k -> new ArrayList<>());
+//      slimProjects.add(project);
+//    }
     return langToProject;
   }
 
   /**
-   * @param project
+   * @param pproject
    * @return
    * @see #getNestedProjectInfo
    */
-  private SlimProject getProjectInfo(SlickProject project) {
+  private SlimProject getProjectInfo(Project pproject) {
     TreeMap<String, String> info = new TreeMap<>();
 
+    SlickProject project = pproject.getProject();
     addDateProps(project, info);
 
+
+    boolean isRTL = addOtherProps(project, info);
+
+    return new SlimProject(
+        project.id(),
+        project.name(),
+        project.language(),
+        project.course(), project.countrycode(),
+        ProjectStatus.valueOf(project.status()),
+        project.displayorder(),
+
+        pproject.hasModel(),
+        isRTL,
+
+        project.created().getTime(),
+        project.lastimport().getTime(),
+
+        pproject.getWebserviceHost(),
+
+        pproject.getPort(),
+        pproject.getModelsDir(),
+
+        project.first(),
+        project.second(),
+        pproject.isOnIOS(),
+        project.dominoid(),
+        info);
+  }
+
+  private boolean addOtherProps(SlickProject project, TreeMap<String, String> info) {
     boolean isRTL = false;
     if (getProjectStatus(project) != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
@@ -834,45 +873,24 @@ public class ProjectManagement implements IProjectManagement {
         info.put(DOMINO_ID, "" + project.dominoid());
       }
     }
-
-    return new SlimProject(
-        project.id(),
-        project.name(),
-        project.language(),
-        project.course(), project.countrycode(),
-        ProjectStatus.valueOf(project.status()),
-        project.displayorder(),
-
-        hasModel(project),
-        isRTL,
-
-        project.created().getTime(),
-        project.lastimport().getTime(),
-
-        getHostOrDefault(project),
-        getPort(project),
-        getProp(project.id(), ServerProperties.MODELS_DIR),
-        project.first(),
-        project.second(),
-        isOnIOS(project),
-        project.dominoid(),
-        info);
+    return isRTL;
   }
 
-  private void addDateProps(SlickProject project, TreeMap<String, String> info) {
-    DateFormat format = new SimpleDateFormat();
+  private DateFormat format = new SimpleDateFormat();
+
+  private void addDateProps(SlickProject project, Map<String, String> info) {
     info.put(CREATED, format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
   }
-
-  @NotNull
-  private String getHostOrDefault(SlickProject project) {
-    String host = getProp(project.id(), Project.WEBSERVICE_HOST);
-    if (host == null || host.isEmpty()) {
-      host = WEBSERVICE_HOST_DEFAULT;
-    }
-    return host;
-  }
+//
+//  @NotNull
+//  private String getHostOrDefault(Project project) {
+//    String host = project.getProp(Project.WEBSERVICE_HOST);
+//    if (host == null || host.isEmpty()) {
+//      host = WEBSERVICE_HOST_DEFAULT;
+//    }
+//    return host;
+//  }
 
   @NotNull
   private ProjectStatus getProjectStatus(SlickProject project) {
@@ -886,57 +904,42 @@ public class ProjectManagement implements IProjectManagement {
     return status;
   }
 
-  private boolean isOnIOS(SlickProject project) {
-    String prop2 = getProp(project.id(), Project.SHOW_ON_IOS);
-    if (prop2 == null) prop2 = "false";
-    return prop2.equalsIgnoreCase("true");
-  }
+//  private boolean isOnIOS(Project project) {
+//    String prop2 = project.getProp(Project.SHOW_ON_IOS);
+//    if (prop2 == null) prop2 = "false";
+//    return prop2.equalsIgnoreCase("true");
+//  }
 
-  private int getPort(SlickProject project) {
-    try {
-      String prop = getProp(project.id(), Project.WEBSERVICE_HOST_PORT);
-      if (prop == null || prop.isEmpty()) return -1;
-      else return Integer.parseInt(prop);
-    } catch (NumberFormatException e) {
-      logger.error("for " + project + " got " + e);
-      return -1;
-    }
-  }
+//  private int getPort(Project project) {
+//    try {
+//      project.getPort();
+//      String prop = getPropFromDB(project.id(), Project.WEBSERVICE_HOST_PORT);
+//      if (prop == null || prop.isEmpty()) return -1;
+//      else return Integer.parseInt(prop);
+//    } catch (NumberFormatException e) {
+//      logger.error("for " + project + " got " + e);
+//      return -1;
+//    }
+//  }
 
-  private String getProp(int id, String modelsDir) {
-    return db.getProjectDAO().getPropValue(id, modelsDir);
-  }
+//  private int getPort(SlickProject project) {
+//    try {
+//      String prop = getPropFromDB(project.id(), Project.WEBSERVICE_HOST_PORT);
+//      if (prop == null || prop.isEmpty()) return -1;
+//      else return Integer.parseInt(prop);
+//    } catch (NumberFormatException e) {
+//      logger.error("for " + project + " got " + e);
+//      return -1;
+//    }
+//  }
 
-/*
-  @Override
-  public ImportInfo getImport(int projid) {
-    return getFileUploadHelper().getExercises(projid);
-  }
-*/
-
-//  @Override
-//  public FileUploadHelper getFileUploadHelper() {
-//    return fileUploadHelper;
+//  private String getPropFromDB(int id, String modelsDir) {
+//    return db.getProjectDAO().getPropValue(id, modelsDir);
 //  }
 
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
     return dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
-/*
-    List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID);
-
-    if (matches.isEmpty()) {
-      return null;
-    } else {
-      DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
-      ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
-
-      return new DominoExerciseDAO()
-          .readExercises(projID, matches.iterator().next(),
-              getChangedDocs(sinceInUTC, dominoAdminUser, next)
-          );
-    }
-*/
   }
 
   /**

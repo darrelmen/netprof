@@ -173,7 +173,9 @@ public class Project implements PronunciationLookup {
 
   private Set<ProjectStatus> toSkip = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, ProjectStatus.DELETED));
 
-  public boolean isRetired() { return project != null && toSkip.contains(ProjectStatus.valueOf(project.status()));  }
+  public boolean isRetired() {
+    return project != null && toSkip.contains(ProjectStatus.valueOf(project.status()));
+  }
 
   /**
    * If we can't get the type order out of the section helper... find it from the project
@@ -317,14 +319,17 @@ public class Project implements PronunciationLookup {
 
   public boolean isOnIOS() {
     String prop = getProp(SHOW_ON_IOS);
-    return prop != null && prop.equalsIgnoreCase("true");
+    return prop != null && prop.equalsIgnoreCase(Boolean.TRUE.toString());
   }
 
   public String getModelsDir() {
     return getProp(ServerProperties.MODELS_DIR);
   }
 
-  public boolean hasProjectSpecificAudio() { return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase("true");}
+  public boolean hasProjectSpecificAudio() {
+    return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(Boolean.TRUE.toString());
+  }
+
   private Map<String, String> propCache = new HashMap<>();
 
   /**
@@ -338,6 +343,7 @@ public class Project implements PronunciationLookup {
 
   /**
    * Latchy
+   *
    * @param prop
    * @return
    */
@@ -355,7 +361,10 @@ public class Project implements PronunciationLookup {
     }
   }
 
-  private void putAllProps() {  propCache.putAll(db.getProjectDAO().getProps(getID()));  }
+  private void putAllProps() {
+    propCache.putAll(db.getProjectDAO().getProps(getID()));
+  }
+
   public CommonExercise getExerciseByID(int id) {
     return exerciseDAO.getExercise(id);
   }
@@ -494,10 +503,10 @@ public class Project implements PronunciationLookup {
 */
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, PronunciationLookup, List)
    * @param transcript
    * @param transliteration
    * @return
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, PronunciationLookup, List)
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
@@ -551,6 +560,7 @@ public class Project implements PronunciationLookup {
 
   /**
    * So if you're on hydra2, you only handle certain languages...
+   *
    * @return true if this server handles this project.
    */
   public boolean isMyProject() {
@@ -583,8 +593,8 @@ public class Project implements PronunciationLookup {
   public Integer getUserForFile(String requestURI) {
     Integer integer = fileToRecorder.get(requestURI);
 //    if (integer == null) {
-      //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
-  //  }
+    //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
+    //  }
     return integer;
   }
 
@@ -595,5 +605,16 @@ public class Project implements PronunciationLookup {
 
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public int getPort() {
+    try {
+      String prop = getProp(WEBSERVICE_HOST_PORT);
+      if (prop == null || prop.isEmpty()) return -1;
+      else return Integer.parseInt(prop);
+    } catch (NumberFormatException e) {
+      logger.error("for " + project + " got " + e);
+      return -1;
+    }
   }
 }
