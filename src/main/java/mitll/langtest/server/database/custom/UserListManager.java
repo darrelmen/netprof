@@ -81,15 +81,12 @@ public class UserListManager implements IUserListManager {
   private static final String MY_FAVORITES = "My Favorites";
   private static final String COMMENTS = "Comments";
   private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
-//  private static final String REVIEW = "Defects";
-//  private static final String ATTENTION = "AttentionLL";
-//  private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
+
 
   private static final boolean DEBUG = false;
 
   private final IUserDAO userDAO;
-  // private final IReviewedDAO reviewedDAO, secondStateDAO;
-  private int i = 0;
+   private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
   private final IUserListDAO userListDAO;
@@ -211,18 +208,18 @@ public class UserListManager implements IUserListManager {
                                                      boolean visitedLists) {
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
 
-    logger.info("for " + userid + " in " + projid + " found " + lists.size());
+//    logger.info("for " + userid + " in " + projid + " found " + lists.size());
     lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
     Set<Integer> listIDs = getListIDs(lists);
     Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
-    logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
+  //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
 
     List<IUserList> names = new ArrayList<>(lists.size());
     lists.forEach(l -> {
       int id = l.id();
 
       Integer numItems = numForList.getOrDefault(id, 0);
-      logger.info("list #" + id + " - " + numItems);
+    //  logger.info("list #" + id + " - " + numItems);
       names.add(
           new SimpleUserList(
               id,
@@ -248,13 +245,13 @@ public class UserListManager implements IUserListManager {
 
 
     Set<Integer> listIDs = getListIDs(lists);
-    logger.info("asking for number of exercises for " + listIDs);
+   // logger.info("asking for number of exercises for " + listIDs);
     Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
 
     lists.forEach(l -> {
       int id = l.id();
       Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
-      logger.info("For " + id + " got " + exids);
+     // logger.info("For " + id + " got " + exids);
       names.add(
           new SimpleUserListWithIDs(
               id,
@@ -280,14 +277,14 @@ public class UserListManager implements IUserListManager {
     SlickUserExerciseList favorite = getCreatedAndFavorite(userid, projid, listsICreated, lists);
     if (visitedLists) {
       Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
-      logger.info("found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
+      //logger.info("found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
       lists.addAll(visitedBy);
     }
     if (favorite != null) {
       lists.remove(favorite);
       lists.add(0, favorite);
     }
-    logger.info("found " + lists.size() + " raw lists for " + userid + " and " + projid);
+    //logger.info("found " + lists.size() + " raw lists for " + userid + " and " + projid);
 
     return lists;
   }
@@ -297,7 +294,7 @@ public class UserListManager implements IUserListManager {
     SlickUserExerciseList favorite = null;
     if (listsICreated) {
       Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
-      logger.info("found " + byUser.size() + " lists by " + userid + " in " + projid);
+      //logger.info("found " + byUser.size() + " lists by " + userid + " in " + projid);
       for (SlickUserExerciseList userList : byUser) {
         if (userList.isfavorite()) {
           favorite = userList;
