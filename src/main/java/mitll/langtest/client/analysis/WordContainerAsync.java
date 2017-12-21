@@ -58,11 +58,13 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
@@ -202,7 +204,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
                 } else {
-                  final int numTotal = result.getResults().size();
+                  final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
                   updateRowData(start, result.getResults());
 /*                  if (numTotal > 0) {
@@ -253,7 +255,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-    wordScoreCellTable.setWidth("100%", false);
+  //  wordScoreCellTable.setWidth("100%", false);
 
     addPlayer();
 
@@ -483,16 +485,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
           logger.warning("getItemColumn no word transcript for " + shell);
         }
 
-        String columnText = new WordTable().makeColoredTable(transcript);
-        if (columnText.isEmpty()) {
+        String columnText = new WordTable().makeColoredTableReally(transcript);
+
+   /*     if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
-          // logger.info("getItemColumn : column text empty for id " + shell.getExID() + " and found ex " + exercise);
+           logger.warning("getItemColumn : column text empty for id " +
+               shell.getExid() + " and found ex " + exercise);
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (spanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         } else {
           //logger.info("getItemColumn : Got item id " + shell.getExID() + " "+ columnText );
-        }
+        }*/
         return getSafeHtml(columnText);
       }
     };

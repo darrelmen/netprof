@@ -36,6 +36,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +85,7 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid, long from, long to, int rangeStart, int rangeEnd, String sort) {
+  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long from, long to, int rangeStart, int rangeEnd, String sort) {
     return null;
   }
 

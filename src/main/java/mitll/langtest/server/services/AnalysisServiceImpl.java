@@ -144,9 +144,13 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     int projectID = getProjectIDFromUser();
 
 //    WordsAndTotal wordsAndTotal = new WordsAndTotal();
-    List<WordScore> wordScoresForUser = getSlickAnalysis(projectID)
+    WordsAndTotal wordScoresForUser = getSlickAnalysis(projectID)
         .getWordScoresForUser(userid, minRecordings, listid, fromTime, toTime, rangeStart, rangeEnd, sort);
-    return new WordsAndTotal(wordScoresForUser, reqid);
+
+    wordScoresForUser.setReq(reqid);
+
+    return wordScoresForUser;
+    //return new WordsAndTotal(wordScoresForUser, reqid);
   }
 
   /**

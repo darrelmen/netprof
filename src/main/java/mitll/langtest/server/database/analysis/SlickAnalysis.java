@@ -40,12 +40,16 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.services.AnalysisServiceImpl;
+import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -116,45 +120,54 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid,
-                                              long from, long to,
-                                              int rangeStart, int rangeEnd,
-                                              String sort) {
+  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
+                                            long from, long to,
+                                            int rangeStart, int rangeEnd,
+                                            String sort) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
 
     Collection<UserInfo> userInfos = bestForUser.values();
+    logger.info("getWordScoresForUser for user " + userid + " got " + userInfos.size() + " from " + rangeStart + " to " + rangeEnd + " sort " + sort);
     return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
   }
 
-  private List<WordScore> getWordScoresForPeriod(Collection<UserInfo> userInfos, long from, long to,
-                                                 int rangeStart, int rangeEnd,
+  private WordsAndTotal getWordScoresForPeriod(Collection<UserInfo> userInfos, long from, long to,
+                                               int rangeStart, int rangeEnd,
 
-                                                 String sortInfo) {
+                                               String sortInfo) {
     if (userInfos.isEmpty()) {
       //logger.warn("no best values for " + id);
-      return getWordScore(Collections.emptyList(), true);
+      return new WordsAndTotal(Collections.emptyList(), 0);
     } else {
       List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
+
+      logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
 
       List<BestScore> inTime =
           resultsForQuery
               .stream()
-              .filter(bestScore -> from < bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
+              .filter(bestScore -> from <= bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
               .collect(Collectors.toList());
+      logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
 
-      if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+      //if (DEBUG) logger.warn("getWordScoresForUser " + resultsForQuery.size());
 
       inTime.sort(getComparator(project, Arrays.asList(sortInfo.split(",")), inTime));
 
       List<WordScore> wordScore = getWordScore(inTime, false);
+      int totalSize = wordScore.size();
+      logger.info("getWordScoresForUser got " + totalSize + " word and score ");
 
       // sublist is not serializable!
-      wordScore = new ArrayList<>(wordScore.subList(rangeStart, rangeEnd));
+      int min = Math.min(wordScore.size(), rangeEnd);
+      wordScore = new ArrayList<>(wordScore.subList(rangeStart, min));
       if (DEBUG) {
-        logger.warn("getWordScoresForUser wordScore " + wordScore.size());
+        logger.warn("getWordScoresForUser wordScore " + totalSize);
       }
+      logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/"+ min);
 
-      return wordScore;
+
+      return new WordsAndTotal(wordScore, totalSize);
     }
   }
 
@@ -170,7 +183,18 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       Map<BestScore, String> scoreToFL = new HashMap<>();
       if (field.equalsIgnoreCase(WORD)) {
-        inTime.forEach(bestScore -> scoreToFL.put(bestScore, project.getExerciseByID(bestScore.getExId()).getForeignLanguage()));
+        inTime.forEach(bestScore -> {
+          CommonExercise exerciseByID = project.getExerciseByID(bestScore.getExId());
+          if (exerciseByID == null) {
+            String transcriptFromJSON = getTranscriptFromJSON(bestScore);
+
+            logger.info("no ex for " + bestScore.getExId() + " so " + transcriptFromJSON);
+
+            scoreToFL.put(bestScore, transcriptFromJSON);
+          } else {
+            scoreToFL.put(bestScore, exerciseByID.getForeignLanguage());
+          }
+        });
       }
 
       return new Comparator<BestScore>() {
@@ -180,7 +204,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           int comp = 0;
           switch (field) {
             case WORD:
-              scoreToFL.get(o1);
+
               comp = scoreToFL.get(o1).compareTo(scoreToFL.get(o2));
               if (comp == 0) {
                 comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
@@ -208,6 +232,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
 
+  }
+
+  @NotNull
+  private String getTranscriptFromJSON(BestScore bestScore) {
+    Map<NetPronImageType, List<SlimSegment>> netPronImageTypeListMap =
+        parseResultJson.slimReadFromJSON(bestScore.getJson());
+    StringBuilder builder = new StringBuilder();
+    List<SlimSegment> slimSegments = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    slimSegments.forEach(slimSegment -> builder.append(slimSegment.getEvent()).append(" "));
+    return builder.toString().trim();
   }
 
   public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {

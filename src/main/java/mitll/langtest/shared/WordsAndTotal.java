@@ -47,15 +47,14 @@ import java.util.List;
  */
 public class WordsAndTotal implements IsSerializable {
   private List<WordScore> results;
-  //public int numTotal;
+  private int numTotal;
   private int req;
   public WordsAndTotal() {}
 
-  public WordsAndTotal(List<WordScore> results, /*int n,*/ int req) {
+  public WordsAndTotal(List<WordScore> results, int n) {
     this.results = results;
-    //this.numTotal = n;
-    this.req = req;
-  }
+    this.numTotal = n;
+   }
 
   public List<WordScore> getResults() {
     return results;
@@ -63,5 +62,13 @@ public class WordsAndTotal implements IsSerializable {
 
   public int getReq() {
     return req;
+  }
+
+  public int getNumTotal() {
+    return numTotal;
+  }
+
+  public void setReq(int req) {
+    this.req = req;
   }
 }

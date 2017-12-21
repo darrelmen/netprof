@@ -564,12 +564,12 @@ fieldset > legend {
     /*
     font-weight: bold;
     */
-/*    word-wrap: normal;
-    word-break: keep-all;
-    white-space: normal;
-    font-family: sans-serif;
-    line-height: 100%;
-    float: left;*/
+    /*    word-wrap: normal;
+        word-break: keep-all;
+        white-space: normal;
+        font-family: sans-serif;
+        line-height: 100%;
+        float: left;*/
 }
 
 .flfont {
@@ -1482,8 +1482,8 @@ document sections.*/
     width: 750px;
     */
 
-    margin-left:10px;
-    margin-right:155px;
+    margin-left: 10px;
+    margin-right: 155px;
 
     zoom: 1;
 }
@@ -1883,15 +1883,16 @@ h1, h2, h3, h4, h5, h6 {
     top: auto;
 }
 
-.phoneContainer {}
+.phoneContainer {
+}
 
 .phoneContainer .phoneColor {
     background-color: #EEF3E2;
 }
 
 .phoneColor {
-     background-color: #EEF3E2;
- }
+    background-color: #EEF3E2;
+}
 
 .phoneStyle {
     padding-right: 3px;
@@ -1918,7 +1919,7 @@ h1, h2, h3, h4, h5, h6 {
 .scoringRowStyle {
     margin-bottom: 5px;
     float: left;
-    width:100%;
+    width: 100%;
     display: inline-flex;
 }
 
@@ -1932,6 +1933,13 @@ h1, h2, h3, h4, h5, h6 {
 .recordingRowStyle .btn-large {
     padding: 11px 16px;
     border-radius: 27px;
+}
+
+.scoreStyle {
+    padding: 3px;
+    margin-left: 3px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 /*

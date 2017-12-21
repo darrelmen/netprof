@@ -100,7 +100,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
       if (property == null) {
         System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
-        logger.info("\n\n\n\n--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
+        logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
       }
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
