@@ -40,6 +40,7 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
   //  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseJoinDAO.class);
@@ -98,7 +99,14 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
     return dao.getNumRows() == 0;
   }
 
-  public Collection<Integer> getExids(int listid) {
-    return dao.realExids(listid);
+  public Collection<Integer> getExidsForList(int listid) {    return dao.realExids(listid);  }
+  @Override
+  public Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids) {
+    return dao.listToExids(listids);
+   }
+
+  @Override
+  public Map<Integer,Integer> getNumExidsForList(Collection<Integer> listids) {
+    return dao.listToNumExids(listids);
   }
 }

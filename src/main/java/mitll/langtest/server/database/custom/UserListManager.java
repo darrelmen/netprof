@@ -46,17 +46,19 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUserExerciseList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -164,13 +166,13 @@ public class UserListManager implements IUserListManager {
                                   String dliClass,
                                   boolean isPrivate,
                                   int projid) {
-    User userWhere = userDAO.getUserWhere(userid);
-    if (userWhere == null) {
+    // User userWhere = userDAO.getUserWhere(userid);
+    String userChosenID = userDAO.getUserChosenID(userid);
+    if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
       //logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
-
       List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name, projid);
       if (!byName.isEmpty()) {
         UserList<CommonShell> commonShellUserList = byName.get(0);
@@ -180,13 +182,9 @@ public class UserListManager implements IUserListManager {
         } else {
           return null;
         }
-      }
-      //if (hasByName(userid, name, projid)) {
-      //  return null;
-      //}
-      else {
+      } else {
         long now = System.currentTimeMillis();
-        UserList e = new UserList(i++, userid, userWhere.getUserID(), name, description, dliClass, isPrivate,
+        UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
             now, "", "", projid, false);
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
@@ -195,16 +193,123 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-/*
-  private boolean hasByName(int userid, String name, int projid) {
-    return userListDAO.hasByName(userid, name, projid);
+  @Override
+  public Collection<IUserListLight> getNamesForUser(int userid,
+                                                    int projid,
+                                                    boolean listsICreated,
+                                                    boolean visitedLists) {
+    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+    List<IUserListLight> names = new ArrayList<>(lists.size());
+    lists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
+    return names;
   }
-*/
 
-/*  @Override
-  public Collection<UserList<CommonShell>> getMyLists(int userid, int projid) {
-    return getListsForUser(userid, projid, true, false);
-  }*/
+  @Override
+  public Collection<IUserList> getSimpleListsForUser(int userid,
+                                                     int projid,
+                                                     boolean listsICreated,
+                                                     boolean visitedLists) {
+    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+
+    logger.info("for " + userid + " in " + projid + " found " + lists.size());
+    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
+    Set<Integer> listIDs = getListIDs(lists);
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
+    logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
+
+    List<IUserList> names = new ArrayList<>(lists.size());
+    lists.forEach(l -> {
+      int id = l.id();
+
+      Integer numItems = numForList.getOrDefault(id, 0);
+      logger.info("list #" + id + " - " + numItems);
+      names.add(
+          new SimpleUserList(
+              id,
+              l.name(),
+              l.projid(),
+              l.userid(),
+              userDAO.getUserChosenID(userid),
+              numItems
+          ));
+    });
+    return names;
+  }
+
+  @Override
+  public Collection<IUserListWithIDs> getListsWithIdsForUser(int userid,
+                                                             int projid,
+                                                             boolean listsICreated,
+                                                             boolean visitedLists) {
+
+    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+
+    List<IUserListWithIDs> names = new ArrayList<>(lists.size());
+
+
+    Set<Integer> listIDs = getListIDs(lists);
+    logger.info("asking for number of exercises for " + listIDs);
+    Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
+
+    lists.forEach(l -> {
+      int id = l.id();
+      Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
+      logger.info("For " + id + " got " + exids);
+      names.add(
+          new SimpleUserListWithIDs(
+              id,
+              l.name(),
+              l.projid(),
+              l.userid(),
+              userDAO.getUserChosenID(userid),
+              new ArrayList<>(exids)));
+    });
+    return names;
+  }
+
+  private Set<Integer> getListIDs(List<SlickUserExerciseList> lists) {
+    return lists
+        .stream()
+        .map(SlickUserExerciseList::id)
+        .collect(Collectors.toSet());
+  }
+
+  @NotNull
+  private List<SlickUserExerciseList> getRawLists(int userid, int projid, boolean listsICreated, boolean visitedLists) {
+    List<SlickUserExerciseList> lists = new ArrayList<>();
+    SlickUserExerciseList favorite = getCreatedAndFavorite(userid, projid, listsICreated, lists);
+    if (visitedLists) {
+      Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
+      logger.info("found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
+      lists.addAll(visitedBy);
+    }
+    if (favorite != null) {
+      lists.remove(favorite);
+      lists.add(0, favorite);
+    }
+    logger.info("found " + lists.size() + " raw lists for " + userid + " and " + projid);
+
+    return lists;
+  }
+
+  private SlickUserExerciseList getCreatedAndFavorite(int userid, int projid, boolean listsICreated,
+                                                      List<SlickUserExerciseList> lists) {
+    SlickUserExerciseList favorite = null;
+    if (listsICreated) {
+      Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
+      logger.info("found " + byUser.size() + " lists by " + userid + " in " + projid);
+      for (SlickUserExerciseList userList : byUser) {
+        if (userList.isfavorite()) {
+          favorite = userList;
+        } else {
+          //      logger.debug("not favorite " + userList + " " + userList.getName());
+        }
+        lists.add(userList);
+      }
+
+    }
+    return favorite;
+  }
 
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
@@ -214,8 +319,8 @@ public class UserListManager implements IUserListManager {
    * @param listsICreated
    * @param visitedLists
    * @return
+   * @seex #getMyLists
    * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
-   * @see #getMyLists
    */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid,
@@ -238,7 +343,7 @@ public class UserListManager implements IUserListManager {
       listsForUser = userListDAO.getAllByUser(userid, projid);
       long now = System.currentTimeMillis();
 
-      logger.info("getListsForUser took " + (now - then) +          " found " + listsForUser.size() + " created by " + userid);
+      logger.info("getListsForUser took " + (now - then) + " found " + listsForUser.size() + " created by " + userid);
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -335,7 +440,7 @@ public class UserListManager implements IUserListManager {
   /**
    * @param projID
    * @return
-   * @see IUserListManager#getUserListByIDExercises
+   * @seex IUserListManager#getUserListByIDExercises
    */
   @Override
   public UserList<CommonExercise> getCommentedListEx(int projID) {
@@ -425,7 +530,7 @@ public class UserListManager implements IUserListManager {
    * @return
    * @see #getReviewedExercises
    */
-  private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
+/*  private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
     List<CommonExercise> onList = new ArrayList<>();
 
     logger.info("getReviewed checking " + ids.size() + " against " + idToUserExercise.size());
@@ -454,17 +559,17 @@ public class UserListManager implements IUserListManager {
         }
       }
     }
-/*
+*//*
     Collections.sort(onList, new Comparator<HasID>() {
       @Override
       public int compare(HasID o1, HasID o2) {
         return o1.getID().compareTo(o2.getOldID());
       }
     });
-*/
+*//*
     Collections.sort(onList);
     return onList;
-  }
+  }*/
 
   /**
    * TODO : do a search over the list fields to find matches
@@ -473,7 +578,7 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getUserListsForText
+   * @seex mitll.langtest.server.services.ListServiceImpl#getUserListsForText
    */
   @Override
   public List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid) {

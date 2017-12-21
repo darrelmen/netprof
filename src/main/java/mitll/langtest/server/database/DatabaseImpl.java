@@ -1468,13 +1468,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param listid
    * @param projectid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
   @Override
   public UserList<CommonExercise> getUserListByIDExercises(int listid, int projectid) {
     boolean isNormalList = listid != COMMENT_MAGIC_ID;
     if (isNormalList) {
-      Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExids(listid);
+      Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listid);
       UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
       List<CommonExercise> exercises = new ArrayList<>();
       exids.forEach(exid -> {

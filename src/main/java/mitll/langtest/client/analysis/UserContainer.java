@@ -55,8 +55,7 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.custom.IUserListLight;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -69,10 +68,11 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  private final Logger logger = Logger.getLogger("UserContainer");
+
   public static final int MAX_LENGTH = 11;
   public static final int TABLE_WIDTH = 600;
   public static final String TRYING_TO_GET_STUDENTS = "trying to get students";
-  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final String FILTER_BY1 = "Filter by";
 
@@ -374,14 +374,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     listBox.addStyleName("floatLeft");
     listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
 
-    controller.getListService().getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    controller.getListService().getLightListsForUser(true, false, new AsyncCallback<Collection<IUserListLight>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting my lists", caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
+      public void onSuccess(Collection<IUserListLight> result) {
         useLists(result, listBox);
       }
     });
@@ -391,7 +391,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private List<Integer> rememberedLists;
   private int listid = -1;
 
-  private void useLists(Collection<UserList<CommonShell>> result, ListBox listBox) {
+  private void useLists(Collection<IUserListLight> result, ListBox listBox) {
     this.rememberedLists = new ArrayList<>();
     result.forEach(ul -> rememberedLists.add(ul.getID()));
 

@@ -38,6 +38,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.npdata.dao.SlickUserExerciseList;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +58,6 @@ public interface IUserListDAO extends IDAO {
 
   void updateName(long id, String name);
 */
-
 
   /**
    * @param listid
@@ -107,6 +107,10 @@ public interface IUserListDAO extends IDAO {
    * @return
    */
   Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid);
+
+  Collection<SlickUserExerciseList> getByUser(int userid, int projid);
+
+  Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 

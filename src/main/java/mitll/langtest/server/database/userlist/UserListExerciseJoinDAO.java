@@ -45,6 +45,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
   private static final Logger logger = LogManager.getLogger(UserListExerciseJoinDAO.class);
@@ -57,7 +58,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
 
   /**
    * @param database
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public UserListExerciseJoinDAO(Database database) {
     super(database);
@@ -182,7 +183,17 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
   }
 
   @Override
-  public Collection<Integer> getExids(int listid) {
+  public Collection<Integer> getExidsForList(int listid) {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids) {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, Integer> getNumExidsForList(Collection<Integer> listids) {
     return null;
   }
 

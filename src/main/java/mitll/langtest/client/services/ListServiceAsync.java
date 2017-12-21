@@ -33,6 +33,9 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -40,7 +43,15 @@ import mitll.langtest.shared.exercise.CommonShell;
 import java.util.Collection;
 
 public interface ListServiceAsync {
+  void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
+
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
+
+  void getSimpleListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserList>> async);
+
+  void getListsWithIDsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListWithIDs>> async);
+
+
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
@@ -52,10 +63,10 @@ public interface ListServiceAsync {
   void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
   /**
-   * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    * @param userExercise
    * @param keepAudio
    * @param async
+   * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 

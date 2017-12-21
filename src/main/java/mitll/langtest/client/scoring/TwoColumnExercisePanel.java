@@ -38,10 +38,12 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
  * Created by go22670 on 3/23/17.
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
+  private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
+
+
   public static final String SHOW_COMMENTS = "Show Comments";
   public static final String HIDE_COMMENTS = "Hide Comments";
   public static final String N_A = "N/A";
-  private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
   private static final String LEFT_WIDTH = "60%";
   private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;

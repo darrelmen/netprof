@@ -117,16 +117,10 @@ public class ForceNocacheFilter implements Filter {
 
     ThreadContext.clearAll();
   }
-/*
 
   @Override
-  public void destroy() {
-    if (DEBUG) log.info("destroy ");
-  }
-*/
+  public void init(FilterConfig arg0) {}
 
-/*  @Override
-  public void init(FilterConfig arg0) throws ServletException {
-    log.info("init ");
-  }*/
+  @Override
+  public void destroy() {}
 }

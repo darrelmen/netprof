@@ -36,6 +36,9 @@ import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -133,6 +136,61 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     //  logger.error("Got " + e, e);
     // return Collections.emptyList();
     // }
+  }
+
+  public Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+    //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
+    // try {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    long then = System.currentTimeMillis();
+    Collection<IUserListWithIDs> listsForUser = getUserListManager()
+        .getListsWithIdsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    return listsForUser;
+    // } catch (Exception e) {
+    //  logger.error("Got " + e, e);
+    // return Collections.emptyList();
+    // }
+  }
+
+  /**
+   * @param onlyCreated
+   * @param visited
+   * @return
+   */
+  @Override
+  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+    //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
+    // try {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    long then = System.currentTimeMillis();
+    Collection<IUserList> listsForUser = getUserListManager()
+        .getSimpleListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    return listsForUser;
+    // } catch (Exception e) {
+    //  logger.error("Got " + e, e);
+    // return Collections.emptyList();
+    // }
+  }
+
+  @Override
+  public Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    long then = System.currentTimeMillis();
+    Collection<IUserListLight> listsForUser = getUserListManager()
+        .getNamesForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    return listsForUser;
   }
 
   /**

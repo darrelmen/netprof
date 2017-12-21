@@ -56,7 +56,7 @@ import java.util.Map;
  * Time: 8:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserList<T extends HasID> extends BaseExercise {
+public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
   @Deprecated
@@ -67,6 +67,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String userChosenID;
 
   private String name;
+
   private String description;
   private String classMarker;
 
@@ -122,6 +123,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.isDeleted = isDeleted;
   }
 
+  @Override
   public int getUserID() {
     return userid;
   }
@@ -144,6 +146,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     exercises.add(toAdd);
   }
 
+  @Override
   public String getName() {
     return name;
   }
@@ -163,6 +166,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     return exercises;
   }
 
+  @Override
   public int getNumItems() {
     return exercises.size();
   }
@@ -208,6 +212,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.id = uniqueID;
   }
 
+  @Override
   public boolean containsByID(int id) {
     for (T ex : getExercises()) {
       if (ex.getID() == id) return true;
@@ -259,6 +264,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.oldid = id;
   }
 
+  @Override
   public String getUserChosenID() {
     return userChosenID;
   }
@@ -275,6 +281,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     return richText;
   }
 
+  @Override
   public int getProjid() {
     return projid;
   }

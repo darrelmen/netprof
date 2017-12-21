@@ -69,7 +69,4 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
     return lastChecked;
   }
 
-//  public void setLastChecked(long lastChecked) {
-//    this.lastChecked = lastChecked;
-//  }
 }

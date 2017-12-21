@@ -35,7 +35,6 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
@@ -63,6 +62,7 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -77,10 +77,11 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  public static final String ADDING_VISITOR = "adding visitor";
-  public static final String GETTING_LISTS_FOR_USER = "getting lists for user";
-  public static final String GETTING_TYPE_VALUES = "getting type->values";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+  private static final String ADDING_VISITOR = "adding visitor";
+  private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
+  private static final String GETTING_TYPE_VALUES = "getting type->values";
 
   private static final boolean DEBUG_STALE = false;
 
@@ -89,9 +90,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #showScore
    */
   private static final String ALL_PRACTICED = "All practiced!";
-  // private static final int DELAY_MILLIS = 150;
-  //private static final int USE_TIMER_DELAY = 2 * DELAY_MILLIS;
-
   private static final String LINK_FOR_CONTENT = "Link for content in different project.";
   private static final String PLEASE_CHANGE = "Please change to that project if you want to see the item.";
 
@@ -602,14 +600,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     final Map<String, Set<MatchInfo>> finalTypeToValues = typeToValues;
     final long then = System.currentTimeMillis();
 
-    listService.getListsForUser(true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getSimpleListsForUser(true, true, new AsyncCallback<Collection<IUserList>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError(GETTING_LISTS_FOR_USER, caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
+      public void onSuccess(Collection<IUserList> result) {
         logger.info("took " + (System.currentTimeMillis() - then) + " to get lists for user.");
 
         finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
@@ -624,11 +622,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   @NotNull
-  private Set<MatchInfo> getMatchInfoForEachList(Collection<UserList<CommonShell>> result) {
+  private Set<MatchInfo> getMatchInfoForEachList(Collection<IUserList> result) {
     Set<MatchInfo> value = new HashSet<>();
     idToListName.clear();
     int currentUser = controller.getUser();
-    for (UserList<?> list : result) {
+    for (IUserList list : result) {
       boolean isVisit = list.getUserID() != currentUser;
       String tooltip = isVisit ? " from " + list.getUserChosenID() : "";
       value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));

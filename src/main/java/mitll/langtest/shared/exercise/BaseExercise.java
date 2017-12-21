@@ -87,6 +87,6 @@ public class BaseExercise implements IsSerializable, Shell {
 
   @Override
   public int compareTo(HasID o) {
-    return Integer.valueOf(getID()).compareTo(o.getID());
+    return Integer.compare(getID(), o.getID());
   }
 }

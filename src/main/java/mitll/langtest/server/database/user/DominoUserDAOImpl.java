@@ -724,6 +724,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private DBUser lookupUser(int id) {
+
     return delegate.lookupDBUser(id);
   }
 
@@ -1161,8 +1162,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   public String getUserChosenID(int userid) {
-    DBUser byID = lookupUser(userid);
-    return byID == null ? null : byID.getUserId();
+    Map<Integer, FirstLastUser> firstLastFor = getFirstLastFor(Collections.singleton(userid));
+    FirstLastUser firstLastUser = firstLastFor.get(userid);
+    return firstLastUser == null ? null : firstLastUser.getUserID();
   }
 
   /**

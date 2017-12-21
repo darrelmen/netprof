@@ -36,6 +36,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface IUserListExerciseJoinDAO extends IDAO {
   /**
@@ -54,5 +55,9 @@ public interface IUserListExerciseJoinDAO extends IDAO {
 
   boolean remove(long listid, int exid);
 
-  Collection<Integer> getExids(int listid);
+  Collection<Integer> getExidsForList(int listid);
+
+  Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids);
+
+  Map<Integer,Integer> getNumExidsForList(Collection<Integer> listids);
 }

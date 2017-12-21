@@ -37,6 +37,9 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -53,6 +56,21 @@ public interface IUserListManager   {
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   int getNumLists(int userid, int projid);
+
+  Collection<IUserListLight> getNamesForUser(int userid,
+                                             int projid,
+                                             boolean listsICreated,
+                                             boolean visitedLists);
+
+  Collection<IUserList> getSimpleListsForUser(int userid,
+                                              int projid,
+                                              boolean listsICreated,
+                                              boolean visitedLists);
+
+  Collection<IUserListWithIDs> getListsWithIdsForUser(int userid,
+                                                      int projid,
+                                                      boolean listsICreated,
+                                                      boolean visitedLists);
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 

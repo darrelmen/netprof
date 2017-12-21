@@ -45,6 +45,9 @@ import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -109,14 +112,11 @@ public interface ListService extends RemoteService {
    */
   Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
-  /**
-   * TODO : not filled in yet
-   * @param search
-   * @return
-   * @see ListManager#viewLessons
-   */
-  //Collection<UserList<CommonShell>> getUserListsForText(String search);
+  Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
+  Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
+
+  Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
   /**
    * @param userListID
    * @param exID

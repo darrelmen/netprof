@@ -41,6 +41,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserExerciseList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -405,6 +406,16 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<SlickUserExerciseList> getByUser(int userid, int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid) {
     return null;
   }
 

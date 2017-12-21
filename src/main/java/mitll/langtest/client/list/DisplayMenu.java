@@ -36,6 +36,10 @@ public class DisplayMenu {
     this.storage = storage;
   }
 
+  /**
+   * @see FacetExerciseList#getPagerAndSort
+   * @return
+   */
   @NotNull
   Dropdown getRealViewMenu() {
     Dropdown view = new Dropdown("Show");

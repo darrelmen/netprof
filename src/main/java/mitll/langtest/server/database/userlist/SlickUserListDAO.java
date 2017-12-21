@@ -402,9 +402,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    */
   @Override
   public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {
-    List<UserList<CommonShell>> ret = new ArrayList<>();
-    getVisitedBy(userid, projid).forEach(ue -> ret.add(fromSlick(ue)));
+    Collection<SlickUserExerciseList> visitedBy = getVisitedBy(userid, projid);
+
+    List<UserList<CommonShell>> ret = new ArrayList<>(visitedBy.size());
+    visitedBy.forEach(ue -> ret.add(fromSlick(ue)));
     ret.forEach(this::populateList);
+
     return ret;
   }
 
@@ -449,11 +452,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return temp;
   }
 
-  private Collection<SlickUserExerciseList> getByUser(int userid, int projid) {
+  @Override
+  public Collection<SlickUserExerciseList> getByUser(int userid, int projid) {
     return dao.byUser(userid, projid);
   }
 
-  private Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid) {
+  @Override
+  public Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid) {
     return dao.getVisitedBy(userid, projid);
   }
 
@@ -464,7 +469,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    */
   @Override
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
-
   }
 
   @Override
