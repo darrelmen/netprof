@@ -33,6 +33,8 @@
 package mitll.langtest.server.database.user;
 
 import com.mongodb.MongoTimeoutException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
@@ -70,7 +72,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gt;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.ServerInitializationManager.JSON_SERIALIZER;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
@@ -678,6 +682,33 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     return null;
   }
+
+  private Collection<Integer> getDeletedDocsSince(long then) {
+    Bson query = and(
+        eq("active", "false"),
+        gt("updateTime", "time")
+    );
+
+    FindIterable<Document> projection = pool
+        .getMongoCollection("document_heads")
+        .find(query)
+        .projection(include("_id"));
+
+    List<Integer> ids = new ArrayList<>();
+
+    MongoCursor<Document> cursor = projection.iterator();
+    try {
+      while (cursor.hasNext()) {
+        Document doc = cursor.next();
+        ids.add(doc.getInteger("_id"));
+      }
+    } finally {
+      cursor.close();
+    }
+
+    return ids;
+  }
+
 
   /**
    * @param userID
@@ -1395,10 +1426,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * @see #getUserCredentials(String)
    */
+/*
   public Mongo getPool() {
     return pool;
   }
-
+*/
   @Override
   public DBUser getDominoAdminUser() {
     return dominoAdminUser;

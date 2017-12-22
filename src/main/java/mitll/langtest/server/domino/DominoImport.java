@@ -1,5 +1,8 @@
 package mitll.langtest.server.domino;
 
+import mitll.hlt.domino.server.util.Mongo;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
@@ -17,46 +20,77 @@ import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
 import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectManagement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.include;
+import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
+
 public class DominoImport implements IDominoImport {
   private static final Logger logger = LogManager.getLogger(DominoImport.class);
 
-  private static final String CREATED = "Created";
+  //private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
   public static final String NUM_ITEMS = "Num Items";
   public static final String CREATOR_ID = "creatorId";
   public static final String DOMINO_ID = "Domino ID";
   public static final String VOCABULARY = "Vocabulary";
+  public static final String V_UNIT = "v-unit";
+  public static final String V_CHAPTER = "v-chapter";
 
 
   private ProjectServiceDelegate projectDelegate;
   private DocumentServiceDelegate documentDelegate;
   private final IProjectWorkflowDAO workflowDelegate;
+  private Mongo pool;
 
-  public DominoImport(ProjectServiceDelegate projectDelegate, IProjectWorkflowDAO workflowDelegate, DocumentServiceDelegate documentDelegate) {
+  /**
+   * @param projectDelegate
+   * @param workflowDelegate
+   * @param documentDelegate
+   */
+  public DominoImport(ProjectServiceDelegate projectDelegate, IProjectWorkflowDAO workflowDelegate,
+                      DocumentServiceDelegate documentDelegate,
+                      Mongo pool) {
     this.projectDelegate = projectDelegate;
     this.workflowDelegate = workflowDelegate;
     this.documentDelegate = documentDelegate;
+    this.pool = pool;
   }
 
-//  @Override
+  /**
+   * @param projID
+   * @param dominoID
+   * @param sinceInUTC
+   * @param dominoAdminUser
+   * @return
+   * @see ProjectManagement#getImportFromDomino
+   */
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser) {
-    List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID,dominoAdminUser);
+    List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID, dominoAdminUser);
 
     if (matches.isEmpty()) {
       return null;
     } else {
-   //   DBUser dominoAdminUser = db.getUserDAO().getDominoAdminUser();
       ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
 
       return new DominoExerciseDAO()
@@ -76,14 +110,14 @@ public class DominoImport implements IDominoImport {
   public List<ImportProjectInfo> getImportProjectInfos(DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Skill, VOCABULARY, FilterDetail.Operator.EQ));
-    return getImportProjectInfos(options,dominoAdminUser);
+    return getImportProjectInfos(options, dominoAdminUser);
   }
 
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfosByID(int id, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + id, FilterDetail.Operator.EQ));
-    return getImportProjectInfos(options,dominoAdminUser);
+    return getImportProjectInfos(options, dominoAdminUser);
   }
 
   @NotNull
@@ -97,7 +131,6 @@ public class DominoImport implements IDominoImport {
     List<ImportProjectInfo> imported = new ArrayList<>();
 
     for (ProjectDescriptor project : projects1) {
-//      logger.info("Got " + project);
       Date now = project.getCreateTime();
 
       int documentDBID = project.getCreator().getDocumentDBID();
@@ -126,13 +159,11 @@ public class DominoImport implements IDominoImport {
           Collection<MetadataList> metadataLists = specification.getMetadataLists();
 
           for (MetadataList list : metadataLists) {
-//            logger.info("got " + list);
-
             List<MetadataSpecification> list1 = list.getList();
             for (MetadataSpecification specification1 : list1) {
-              if (specification1.getDBName().equalsIgnoreCase("v-unit")) {
+              if (specification1.getDBName().equalsIgnoreCase(V_UNIT)) {
                 creatorId.setUnitName(specification1.getLongName());
-              } else if (specification1.getDBName().equalsIgnoreCase("v-chapter")) {
+              } else if (specification1.getDBName().equalsIgnoreCase(V_CHAPTER)) {
                 creatorId.setChapterName(specification1.getLongName());
               }
             }
@@ -172,24 +203,38 @@ public class DominoImport implements IDominoImport {
 
     logger.info("getDocs : took " + (now - then) + " to get " + docs.size());
 
-    return new ChangedAndDeleted(docs, deleted);
+    ;
+    return new ChangedAndDeleted(docs, deleted, getDeletedDocsSince(sinceInUTC, next.getId()));
   }
 
   public class ChangedAndDeleted {
     private List<ImportDoc> changed;
     private List<ImportDoc> deleted;
+    private Collection<Integer> deleted2;
 
-    public ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted) {
+    public ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
+                             Collection<Integer> deleted2) {
       this.changed = changed;
       this.deleted = deleted;
+      this.deleted2 = deleted2;
     }
 
     public List<ImportDoc> getChanged() {
       return changed;
     }
+
     public List<ImportDoc> getDeleted() {
       return deleted;
     }
+
+    public Collection<Integer> getDeleted2() {
+      return deleted2;
+    }
+
+    public void setDeleted2(List<Integer> deleted2) {
+      this.deleted2 = deleted2;
+    }
+
   }
 
   @NotNull
@@ -199,4 +244,66 @@ public class DominoImport implements IDominoImport {
     return options1;
   }
 
+  private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid) {
+    logger.info("since " + sinceInUTC);
+
+    LocalDate sinceThen = getModifiedTime(sinceInUTC);
+
+    Bson query = and(
+        eq("projId", projid)
+//        ,
+//        eq("active", "false")
+        //,
+        //gt("updateTime", sinceInUTC)
+    );
+
+    FindIterable<Document> projection = pool
+        .getMongoCollection("document_heads")
+        .find(query)
+        .projection(include("_id", "updateTime", "active"));
+
+    List<Integer> ids = new ArrayList<>();
+
+    int total = 0;
+    MongoCursor<Document> cursor = projection.iterator();
+    try {
+      while (cursor.hasNext()) {
+        Document doc = cursor.next();
+        Integer id = doc.getInteger("_id");
+        Boolean active = doc.getBoolean("active");
+        if (!active) {
+          String updateTime = doc.getString("updateTime");
+          LocalDate update = getModifiedTime(updateTime);
+          if (update.isAfter(sinceThen)) {
+            logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
+            ids.add(id);
+          }
+          else {
+            logger.info("getDeletedDocsSince for " + id + " = " + updateTime + " or " + update + " not after " + sinceThen);
+
+            total++;
+          }
+        } else total++;
+      }
+    } finally {
+      cursor.close();
+    }
+
+    logger.info("found " + ids.size() + " deleted from " + total);
+    return ids;
+  }
+
+//  @NotNull
+//  private String getModifiedTimestamp(Timestamp modified) {
+//    Instant instant = modified.toInstant();
+//    ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+//    return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
+//  }
+
+
+  @NotNull
+  private LocalDate getModifiedTime(String toParse) {
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(MONGO_TIME);
+    return LocalDate.parse(toParse, dateTimeFormatter);
+  }
 }

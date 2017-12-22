@@ -6,7 +6,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
-import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
@@ -42,15 +41,15 @@ public class ProjectSync implements IProjectSync {
   public static final String NAME = "name";
   public static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  public static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+  private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
 
 
-  ProjectServices projectServices;
-  IProjectManagement projectManagement;
+  private final ProjectServices projectServices;
+  private final IProjectManagement projectManagement;
 
-  DAOContainer daoContainer;
+  private final DAOContainer daoContainer;
 
 
   public ProjectSync(ProjectServices projectServices, IProjectManagement projectManagement, DAOContainer daoContainer) {
@@ -283,7 +282,7 @@ public class ProjectSync implements IProjectSync {
     if (project.getRawExercises().isEmpty()) {
       Date fiveYearsAgo = new Date(System.currentTimeMillis() - FIVE_YEARS);
 
-      logger.info("Start from " + fiveYearsAgo);
+    //  logger.info("Start from " + fiveYearsAgo);
 
       zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), ZoneId.of("UTC"));
     } else {
@@ -333,7 +332,7 @@ public class ProjectSync implements IProjectSync {
 
     project1.updateLastImport(requestTime);
     daoContainer.getProjectDAO().easyUpdate(project1);
-    logger.info("update modified time for project #" + project1.id());
+//    logger.info("update modified time for project #" + project1.id());
   }
 
 //  private void markDeleted(int projectid) {
@@ -471,7 +470,7 @@ public class ProjectSync implements IProjectSync {
      * @param candidate
      * @see #copyMatchingAudio(int, int, List, AudioMatches)
      */
-    public void add(SlickAudio candidate) {
+    void add(SlickAudio candidate) {
       //   int gender = candidate.gender();
       boolean regularSpeed = getAudioType(candidate).isRegularSpeed();
 //      logger.info("AudioMatches Examine candidate " + candidate);
@@ -715,7 +714,7 @@ public class ProjectSync implements IProjectSync {
     private int match;
     private int noMatch;
 
-    public MatchInfo(int match, int noMatch) {
+    MatchInfo(int match, int noMatch) {
       this.match = match;
       this.noMatch = noMatch;
     }
@@ -724,7 +723,7 @@ public class ProjectSync implements IProjectSync {
       add(matchInfo);
     }
 
-    public void add(MatchInfo matchInfo) {
+    void add(MatchInfo matchInfo) {
       this.match += matchInfo.match;
       this.noMatch += matchInfo.noMatch;
     }

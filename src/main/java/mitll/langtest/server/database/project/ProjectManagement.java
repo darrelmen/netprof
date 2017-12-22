@@ -38,6 +38,7 @@ import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
+import mitll.hlt.domino.server.util.Mongo;
 import mitll.langtest.server.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
@@ -71,6 +72,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.shared.project.ProjectStatus.DELETED;
 
@@ -149,7 +151,8 @@ public class ProjectManagement implements IProjectManagement {
       documentDelegate = simpleDominoContext.getDocumentDelegate();
     }
 
-    dominoImport = new DominoImport(projectDelegate, workflowDelegate, documentDelegate);
+    dominoImport = new DominoImport(projectDelegate, workflowDelegate, documentDelegate,
+        (Mongo) servletContext.getAttribute(MONGO_ATT_NAME));
   }
 
 
@@ -939,6 +942,13 @@ public class ProjectManagement implements IProjectManagement {
 //    return db.getProjectDAO().getPropValue(id, modelsDir);
 //  }
 
+  /**
+   * @see mitll.langtest.server.domino.ProjectSync#addPending
+   * @param projID
+   * @param dominoID
+   * @param sinceInUTC
+   * @return
+   */
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
     return dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
