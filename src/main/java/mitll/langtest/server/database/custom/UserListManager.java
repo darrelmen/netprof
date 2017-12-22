@@ -55,6 +55,7 @@ import mitll.npdata.dao.SlickUserExerciseList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -86,7 +87,7 @@ public class UserListManager implements IUserListManager {
   private static final boolean DEBUG = false;
 
   private final IUserDAO userDAO;
-   private int i = 0;
+  private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
   private final IUserListDAO userListDAO;
@@ -212,25 +213,38 @@ public class UserListManager implements IUserListManager {
     lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
     Set<Integer> listIDs = getListIDs(lists);
     Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
-  //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
+    //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
 
     List<IUserList> names = new ArrayList<>(lists.size());
+    Map<Integer, String> idToName = new HashMap<>();
     lists.forEach(l -> {
       int id = l.id();
 
       Integer numItems = numForList.getOrDefault(id, 0);
-    //  logger.info("list #" + id + " - " + numItems);
+
+      int userid1 = l.userid();
+      String name = getUserName(userid1, idToName);
+      //  logger.info("list #" + id + " - " + numItems);
       names.add(
           new SimpleUserList(
               id,
               l.name(),
               l.projid(),
-              l.userid(),
-              userDAO.getUserChosenID(userid),
+              userid1,
+              name,
               numItems
           ));
     });
     return names;
+  }
+
+  @Nullable
+  private String getUserName(int userid, Map<Integer, String> idToName) {
+    String name = idToName.get(userid);
+    if (name == null) {
+      idToName.put(userid, userDAO.getUserChosenID(userid));
+    }
+    return name;
   }
 
   @Override
@@ -245,20 +259,25 @@ public class UserListManager implements IUserListManager {
 
 
     Set<Integer> listIDs = getListIDs(lists);
-   // logger.info("asking for number of exercises for " + listIDs);
+    // logger.info("asking for number of exercises for " + listIDs);
     Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
+    Map<Integer, String> idToName = new HashMap<>();
 
     lists.forEach(l -> {
       int id = l.id();
+
+      int userid1 = l.userid();
+      String name = getUserName(userid1, idToName);
+
       Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
-     // logger.info("For " + id + " got " + exids);
+      // logger.info("For " + id + " got " + exids);
       names.add(
           new SimpleUserListWithIDs(
               id,
               l.name(),
               l.projid(),
               l.userid(),
-              userDAO.getUserChosenID(userid),
+              name,
               new ArrayList<>(exids)));
     });
     return names;
