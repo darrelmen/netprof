@@ -138,10 +138,10 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * This allows us to upload an exercise file.
    *
-   * @paramx request
-   * @paramx response
    * @throws ServletException
    * @throws IOException
+   * @paramx request
+   * @paramx response
    */
 /*  @Override
   protected void service(HttpServletRequest request,
@@ -162,7 +162,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       super.service(request, response);
     }
   }*/
-
   protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
     return super.getSectionHelper();
   }
@@ -208,12 +207,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     } else {
       if (db.getProjectManagement() == null) {
         logger.error("config error - didn't make project management");
-      }
-      else {
+      } else {
         long then = System.currentTimeMillis();
         projectInfos = db.getProjectManagement().getNestedProjectInfo();
         long now = System.currentTimeMillis();
-        logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
+        if (now - then > 50L)
+          logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
       }
     }
 
@@ -224,8 +223,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
     long now = System.currentTimeMillis();
-    logger.info("getStartupInfo took " +(now-then) + " millis to get startup info.");
-
+    if (now - then > 100L) {
+      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
+    }
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }

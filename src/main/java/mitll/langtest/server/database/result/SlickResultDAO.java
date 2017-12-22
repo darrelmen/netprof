@@ -382,9 +382,16 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       long then = System.currentTimeMillis();
       correctAndScoresForReal = dao.exidAndScoreWhere(userid, idsToFind);
       long now = System.currentTimeMillis();
-      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises");
+      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises for user " + userid);
     }
- /*   else {
+
+    long then = System.currentTimeMillis();
+    Map<Integer, SlickExerciseScore> correctAndScoresForReal2 = dao.exidAndScore(userid);
+    long now = System.currentTimeMillis();
+    logger.info("getScores 2 took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids - "+ correctAndScoresForReal2.size());
+
+    /*   else {
+
       long then = System.currentTimeMillis();
       correctAndScoresForReal = dao.exidAndScore(userid);
       long now = System.currentTimeMillis();

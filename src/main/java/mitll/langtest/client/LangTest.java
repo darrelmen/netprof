@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -53,7 +52,6 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.amas.AMASInitialUI;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -561,7 +559,7 @@ public class LangTest implements
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
-      ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
+      ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef(), true);
       getAudioService().getImageForAudioFile(reqid, path, type, imageOptions, exerciseID,
           language,
           new AsyncCallback<ImageResponse>() {

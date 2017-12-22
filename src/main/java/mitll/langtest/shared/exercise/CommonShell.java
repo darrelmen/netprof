@@ -36,32 +36,56 @@ import java.util.Collection;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
+ * <p>
  * TODO: consider adding info to permit sorting
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/21/2014.
  */
 public interface CommonShell extends Shell {
+  /**
+   * @return
+   * @see mitll.langtest.client.list.ListSorting#compEnglish
+   */
   String getEnglish();
+
+  /**
+   * @return
+   * @see mitll.langtest.client.list.ListSorting#compMeaning
+   */
   String getMeaning();
+
+  /**
+   * @return
+   * @see mitll.langtest.client.list.ListSorting#compForeign
+   */
   String getForeignLanguage();
 
   MutableShell getMutableShell();
 
   /**
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    * @return
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    */
   Collection<String> getRefSentences();
 
   CommonShell getShell();
 
   int getNumPhones();
+
   int getRawScore();
+
   boolean hasScore();
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getSuggestion(String, String[], CommonShell)
+   * @return
+   */
   String getCforeignLanguage();
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getSuggestion(String, String[], CommonShell)
+   * @return
+   */
   String getCenglish();
 }

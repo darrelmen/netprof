@@ -157,6 +157,7 @@ public abstract class Scoring {
    * @param prefix
    * @param suffix
    * @param decode             if true don't bother to write out images for word and phone
+   * @param writeImages
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    * @see ASRWebserviceScoring#getPretestScore
    */
@@ -164,7 +165,7 @@ public abstract class Scoring {
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode,
                                     String phoneLab, String wordLab, boolean useWebservice,
-                                    boolean usePhoneToDisplay) {
+                                    boolean usePhoneToDisplay, boolean writeImages) {
     // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
@@ -187,7 +188,7 @@ public abstract class Scoring {
     }
 
     boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay();
-    if (decode || imageWidth < 0) {  // hack to skip image generation
+    if (decode || !writeImages) {  //  skip image generation
       return getEventInfo(typeToFile, useWebservice, usePhone);
     } else {
       String pathname = audioFileNoSuffix + ".wav";
@@ -218,6 +219,7 @@ public abstract class Scoring {
    * @param decode
    * @param useWebservice
    * @param object
+   * @param writeImages
    * @return
    * @see ASRWebserviceScoring#getPretestScore
    */
@@ -228,9 +230,9 @@ public abstract class Scoring {
                                           boolean decode,
                                           boolean useWebservice,
                                           JsonObject object,
-                                          boolean usePhoneToDisplay) {
+                                          boolean usePhoneToDisplay, boolean writeImages) {
     //logger.debug("writeTranscriptsCached " + object);
-    if (decode || imageWidth < 0) {  // hack to skip image generation
+    if (decode || !writeImages) {  //  skip image generation
       // These may not all exist. The speech file is created only by multisv right now.
       String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
       Map<ImageType, String> typeToFile = new HashMap<>();
@@ -281,7 +283,7 @@ public abstract class Scoring {
    * @param useWebservice
    * @param usePhoneToDisplay
    * @return
-   * @see #writeTranscriptsCached(String, int, int, String, boolean, String, String, boolean, boolean, JsonObject, boolean)
+   * @see #writeTranscriptsCached(String, int, int, String, boolean, String, String, boolean, boolean, JsonObject, boolean, boolean)
    */
   // JESS reupdate here
   private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes,

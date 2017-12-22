@@ -33,7 +33,6 @@
 package mitll.langtest.server.audio;
 
 import corpus.HTKDictionary;
-import jdk.nashorn.internal.objects.AccessorPropertyDescriptor;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -82,8 +81,8 @@ public class AudioFileHelper implements AlignDecode {
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
-  private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false);
-  public static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
+  private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false, false);
+  private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;

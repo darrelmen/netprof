@@ -1136,14 +1136,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     long now = System.currentTimeMillis();
 
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
-    long then = System.currentTimeMillis();
-    Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
-    long now2 = System.currentTimeMillis();
-    logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
-    idToUserD.forEach((k, v) -> {
-      FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now);
-      idToFirstLastCache.put(k, value);
-    });
+    if (!toAskFor.isEmpty()) {
+      long then = System.currentTimeMillis();
+      Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
+      long now2 = System.currentTimeMillis();
+      logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
+      idToUserD.forEach((k, v) -> {
+        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now);
+        idToFirstLastCache.put(k, value);
+      });
+    }
+
   }
 
   @NotNull

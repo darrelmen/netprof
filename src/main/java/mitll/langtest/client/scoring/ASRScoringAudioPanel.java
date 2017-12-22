@@ -37,7 +37,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonAudioExercise;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -143,7 +142,7 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
     AsyncCallback<PretestScore> async = getPretestScoreAsyncCallback(path, wordTranscript, phoneTranscript, t);
 
     int id = exercise.getID();
-    ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg);
+    ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg, true);
 
     boolean usePhoneToDisplay = controller.getProps().shouldUsePhoneToDisplay();
     controller.getScoringService().getASRScoreForAudio(

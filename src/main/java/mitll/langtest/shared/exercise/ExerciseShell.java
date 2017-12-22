@@ -80,7 +80,9 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
                 String meaning,
                 String foreignLanguage,
                 int realID,
-                int numPhones, String cfl, String cenglish) {
+                int numPhones,
+                String cfl,
+                String cenglish) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
@@ -91,7 +93,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   /**
-   * @param includeContextIGNORED
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
@@ -128,7 +129,10 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return this;
   }
 
-
+  /**
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
+   * @return
+   */
   @Override
   public Collection<String> getRefSentences() {
     return Collections.singleton(getForeignLanguage());

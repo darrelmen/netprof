@@ -82,6 +82,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private static final boolean DEBUG = false;
   private static final boolean USE_PHONE_TO_DISPLAY = true;
+  public static final boolean WARN_MISSING_REF_RESULT = false;
 
   /**
    * @param request
@@ -158,7 +159,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
-        logger.info("1 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+        logger.info("getExerciseIds : 1 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
         return exerciseWhenNoUnitChapter;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
@@ -166,11 +167,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
           ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
-          logger.info("2 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+          logger.info("getExerciseIds : 2 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
           return exerciseListWrapperForPrefix;
         } else {
           ExerciseListWrapper<T> exercisesForSelectionState = getExercisesForSelectionState(request, projectID);
-          logger.info("3 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+          logger.info("getExerciseIds : 3 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
           return exercisesForSelectionState;
         }
       }
@@ -184,6 +185,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private ExerciseListWrapper<T> getExerciseWhenNoUnitChapter(ExerciseListRequest request,
                                                               int projectID,
                                                               UserList<CommonExercise> userListByID) {
+    long then = System.currentTimeMillis();
     List<CommonExercise> exercises;
     boolean predefExercises = userListByID == null;
     exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
@@ -211,6 +213,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     // now sort : everything gets sorted the same way
     List<CommonExercise> commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+
+    long now = System.currentTimeMillis();
+
+    logger.info("getExerciseWhenNoUnitChapter took " + (now - then) + " to get " + commonExercises.size());
+
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
 
 //    if (request.isNoFilter()) {
@@ -561,6 +568,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
                                                                                  Collection<CommonExercise> exercises,
                                                                                  int projID) {
+    long then = System.currentTimeMillis();
     CommonExercise firstExercise = exercises.isEmpty() ? null : request.isAddFirst() ? exercises.iterator().next() : null;
 
     int userID = request.getUserID();
@@ -580,7 +588,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         exercises = withContext;
       }
     }
-    List<CommonShell> exerciseShells = getExerciseShells(exercises, request.getLimit() > -1);
+    List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
 //    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
@@ -591,15 +599,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (exerciseShells1.isEmpty() && firstExercise != null) {
       logger.error("makeExerciseListWrapper huh? no exercises");
     }
-    ExerciseListWrapper<T> exerciseListWrapper =
-        new ExerciseListWrapper<>(request.getReqID(), exerciseShells1, firstExercise);
+
+    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(), exerciseShells1, firstExercise);
 
     if (!request.isQC()) {
       Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
       exerciseListWrapper.setIdToScore(scores);
     }
 
-    logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper);
+    logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper + " in " + (System.currentTimeMillis() - then) + " millis");
     return exerciseListWrapper;
   }
 
@@ -1168,7 +1176,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean includeContext) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
     List<CommonShell> ids = new ArrayList<>(exercises.size());
     exercises.forEach(ex -> ids.add(ex.getShell()));
     return ids;
@@ -1494,12 +1502,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
                                             Map<Integer, AlignmentOutput> alignments) {
-    for (Map.Entry<Integer, AudioAttribute> pair : idToAudio.entrySet()) {
-      AlignmentOutput alignmentOutput = alignments.get(pair.getKey());
+    idToAudio.forEach((k, v) -> {
+      AlignmentOutput alignmentOutput = alignments.get(k);
       if (alignmentOutput == null)
-        logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for " + pair.getValue());
-      else pair.getValue().setAlignmentOutput(alignmentOutput);
-    }
+        logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
+      else v.setAlignmentOutput(alignmentOutput);
+    });
   }
 
   /**
@@ -1538,7 +1546,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
 
       if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now?
-        logger.info("parseJsonToGetAlignments : nothing in database for audio " + audioID);
+        if (WARN_MISSING_REF_RESULT) logger.info("parseJsonToGetAlignments : nothing in database for audio " + audioID);
       } else {
         getCachedAudioRef(idToAlignment, audioID, cachedResult, language);  // OK, let's translate the db info into the alignment output
       }

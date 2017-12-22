@@ -181,7 +181,7 @@ public class TranscriptWriter extends mitll.langtest.server.audio.imagewriter.Ba
     }
     long now = System.currentTimeMillis();
     long diff3 = now - start;
-    if (diff3 > 1000l) {
+    if (diff3 > 70L) {
       logger.info("writeTranscriptImageTypes took " + diff3 + " millis.");
     }
     return typeToPath;

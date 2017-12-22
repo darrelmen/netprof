@@ -336,7 +336,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           }
 
           protected void addTable(Panel column) {
-
           }
 
           @Override
@@ -349,7 +348,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           protected void gotRangeChanged(final Range newRange) {
-            long then = System.currentTimeMillis();
+//            long then = System.currentTimeMillis();
             // logger.info("gotRangeChanged event for " + newRange);
             final int currentReq = incrReq();
 

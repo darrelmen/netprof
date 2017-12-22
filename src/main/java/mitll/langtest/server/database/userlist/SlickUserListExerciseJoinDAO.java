@@ -87,14 +87,12 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
   }
 
   @Override
-  public void removeListRefs(long listid) {
-  }
+  public void removeListRefs(long listid) {}
 
   @Override
   public boolean remove(long listid, int exid) {
     return dao.remove((int) listid, exid) == 1;
   }
-
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
   }

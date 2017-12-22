@@ -36,6 +36,12 @@ public class SearchTypeahead {
   private final SearchHighlighter highlighter = new SearchHighlighter();
   private Button add;
 
+  /**
+   * @see EditableExerciseList#getTypeahead
+   * @param controller
+   * @param feedbackExerciseList
+   * @param add
+   */
   SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList, Button add) {
     this.controller = controller;
     this.feedbackExerciseList = feedbackExerciseList;

@@ -535,7 +535,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
-    logger.info("setStartupInfo on " + userWhere.getUserID());
+//    logger.info("setStartupInfo on " + userWhere.getUserID());
     setStartupInfo(userWhere, projectForUser(userWhere.getID()));
   }
 

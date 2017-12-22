@@ -452,7 +452,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
     long now = System.currentTimeMillis();
 
-    log.info("took " + (now - then) + " to lookup user from session");
+    if(now-then>10L) {
+      log.info("took " + (now - then) + " to lookup user from session");
+    }
 
     return sessUser;
   }

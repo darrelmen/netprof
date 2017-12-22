@@ -482,11 +482,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
-              prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay) :
+              prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay, imageOptions.isWriteImages()) :
           writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
-              prefix1, "", decode, false, jsonObject, reallyUsePhone);
+              prefix1, "", decode, false, jsonObject, reallyUsePhone, imageOptions.isWriteImages());
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 
 /*

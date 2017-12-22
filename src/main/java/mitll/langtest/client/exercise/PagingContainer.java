@@ -110,7 +110,6 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   /**
    * @see #configureTable
    */
-
   protected void addColumnsToTable(boolean sortEnglish) {
     Column<T, SafeHtml> flColumn = addFLColumn();
 
@@ -141,6 +140,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     table.setColumnWidth(flColumn, FIFTY, Style.Unit.PCT);
   }
 
+  /**
+   * @see #addColumnsToTable
+   * @return
+   */
   @NotNull
   private Column<T, SafeHtml> addFLColumn() {
     Column<T, SafeHtml> flColumn = getFLColumn();
@@ -274,7 +277,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
   /**
    * @return
-   * @see SimplePagingContainer#addColumnsToTable
+   * @see #addFLColumn
    */
   private Column<T, SafeHtml> getFLColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
@@ -306,7 +309,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    */
   private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
-    String s = english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/ ? shell.getForeignLanguage() : shell.getEnglish();
+    String s = english ? shell.getForeignLanguage() : shell.getEnglish();
     // if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
@@ -316,17 +319,15 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    *
    * @param shell
    * @return
+   * @see #getFLColumn
    */
   private String getFLText(CommonShell shell) {
 //    logger.info("getFLText on " +shell);
     String toShow = shell.getForeignLanguage();
-    if (english /*&& !shell.getEnglish().equals(EditItem.NEW_ITEM)*/) {
+    if (english) {
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
-//    if (toShow.isEmpty()) {
-//      toShow = "*Nothing Yet*";//""+shell.getID();
-//    }
     return toShow;
   }
 }

@@ -255,14 +255,18 @@ public class UserListManager implements IUserListManager {
 
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
 
-    List<IUserListWithIDs> names = new ArrayList<>(lists.size());
-
-
-    Set<Integer> listIDs = getListIDs(lists);
     // logger.info("asking for number of exercises for " + listIDs);
-    Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
+    long then = System.currentTimeMillis();
+    Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(getListIDs(lists));
+
+    long now = System.currentTimeMillis();
+
+    if (now - then > 20) {
+      logger.info("getListsWithIdsForUser found " + exidsForList.size() + " list->exids for " + userid + " and " + projid + " took " + (now - then));
+    }
     Map<Integer, String> idToName = new HashMap<>();
 
+    List<IUserListWithIDs> names = new ArrayList<>(lists.size());
     lists.forEach(l -> {
       int id = l.id();
 
@@ -295,8 +299,14 @@ public class UserListManager implements IUserListManager {
     List<SlickUserExerciseList> lists = new ArrayList<>();
     SlickUserExerciseList favorite = getCreatedAndFavorite(userid, projid, listsICreated, lists);
     if (visitedLists) {
+      long then = System.currentTimeMillis();
       Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
-      //logger.info("found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
+      long now = System.currentTimeMillis();
+
+      if (now - then > 20) {
+        logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
+      }
+      //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
       lists.addAll(visitedBy);
     }
     if (favorite != null) {
@@ -312,8 +322,14 @@ public class UserListManager implements IUserListManager {
                                                       List<SlickUserExerciseList> lists) {
     SlickUserExerciseList favorite = null;
     if (listsICreated) {
+      long then = System.currentTimeMillis();
       Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
-      //logger.info("found " + byUser.size() + " lists by " + userid + " in " + projid);
+      long now = System.currentTimeMillis();
+
+      if (now - then > 20) {
+        logger.info("getCreatedAndFavorite found " + byUser.size() + " lists by " + userid + " in " + projid + " took " + (now - then));
+      }
+
       for (SlickUserExerciseList userList : byUser) {
         if (userList.isfavorite()) {
           favorite = userList;
