@@ -37,10 +37,10 @@ public class SearchTypeahead {
   private Button add;
 
   /**
-   * @see EditableExerciseList#getTypeahead
    * @param controller
    * @param feedbackExerciseList
    * @param add
+   * @see EditableExerciseList#getTypeahead
    */
   SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList, Button add) {
     this.controller = controller;
@@ -49,18 +49,18 @@ public class SearchTypeahead {
   }
 
   /**
-   * @param w
+   * @param textBox
    * @param <T>
    * @return
    * @see EditableExerciseList#getTypeahead
    */
-  <T extends CommonShell> Typeahead getTypeaheadUsing(TextBox w) {
+  <T extends CommonShell> Typeahead getTypeaheadUsing(TextBox textBox) {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info("make request for '" + request.getQuery() + "'");
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
-            .setPrefix(w.getText())
+            .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
             .setAddFirst(false);
 
@@ -80,7 +80,13 @@ public class SearchTypeahead {
       }
     };
 
+    return getTypeAhead(textBox, oracle);
+  }
+
+  @NotNull
+  private Typeahead getTypeAhead(TextBox textBox, SuggestOracle oracle) {
     Typeahead typeahead = new Typeahead(oracle);
+
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> true);
     typeahead.setUpdaterCallback(selectedSuggestion -> {
@@ -89,8 +95,8 @@ public class SearchTypeahead {
       return selectedSuggestion.getReplacementString();
     });
 
-    w.getElement().setId("TextBox_exercise");
-    typeahead.setWidget(w);
+    textBox.getElement().setId("TextBox_exercise");
+    typeahead.setWidget(textBox);
     return typeahead;
   }
 

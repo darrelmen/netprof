@@ -188,6 +188,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     quickAddText.setVisibleLength(40);
     quickAddText.addStyleName("topMargin");
     quickAddText.setWidth(235 + "px");
+    quickAddText.getElement().getStyle().setProperty("fontFamily","sans-serif");
+    quickAddText.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    //quickAddText.addStyleName("bigflfont");
 
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
     this.searchTypeahead = new SearchTypeahead(controller, this, add);

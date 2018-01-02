@@ -40,10 +40,9 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
-
-  public static final String SHOW_COMMENTS = "Show Comments";
-  public static final String HIDE_COMMENTS = "Hide Comments";
-  public static final String N_A = "N/A";
+  private static final String SHOW_COMMENTS = "Show Comments";
+  private static final String HIDE_COMMENTS = "Hide Comments";
+  private static final String N_A = "N/A";
 
   private static final String LEFT_WIDTH = "60%";
   private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
@@ -58,7 +57,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String EMAIL = "Email Item";
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
-  static final int CONTEXT_INDENT = 56;
+  static final int CONTEXT_INDENT = 50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
@@ -745,6 +744,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  /**
+   *
+   * @param wordSegment
+   * @param phonesInWord
+   * @param audioControl
+   * @param phoneMap
+   * @return
+   */
   @NotNull
   private DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                          List<TranscriptSegment> phonesInWord,

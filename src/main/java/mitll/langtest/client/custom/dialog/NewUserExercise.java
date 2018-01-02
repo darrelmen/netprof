@@ -336,8 +336,13 @@ abstract class NewUserExercise extends BasicDialog {
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    setFontSize(foreignLang);
     setMarginBottom(foreignLang);
     return foreignLang;
+  }
+
+  private void setFontSize(FormField foreignLang) {
+    foreignLang.box.getElement().getStyle().setFontSize(24, Style.Unit.PX);
   }
 
   private String getLanguage() {
@@ -367,6 +372,7 @@ abstract class NewUserExercise extends BasicDialog {
    */
   private FormField addContext(Panel container, CommonExercise newUserExercise) {
     FormField formField = makeBoxAndAnnoArea(container, CONTEXT_LABEL, "", contextAnno);
+    setFontSize(formField);
 
     TextBoxBase box = formField.box;
     box.setDirectionEstimator(true);   // automatically detect whether text is RTL

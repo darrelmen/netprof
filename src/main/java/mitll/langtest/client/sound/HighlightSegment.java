@@ -66,20 +66,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     length = html.length();
   }
 
-  private void configureSouth(int id, DivWidget south, boolean isLTR, boolean ensureHeight) {
-    if (isLTR) {
-      south.addStyleName("floatLeft");
-    }
-    Element element = south.getElement();
-    Style style = element.getStyle();
-    style.setClear(Style.Clear.BOTH);
-
-    if (ensureHeight)
-      style.setHeight(20, Style.Unit.PX); // if all the phones are there but one, make sure it has height
-
-    element.setId("Highlight_South_" + id);
-  }
-
   /**
    * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
    * @param id
@@ -100,6 +86,20 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
       north.addStyleName("wordSpacerLeft");
       north.addStyleName("rtlMarginBottom");
     }
+  }
+
+  private void configureSouth(int id, DivWidget south, boolean isLTR, boolean ensureHeight) {
+    if (isLTR) {
+      south.addStyleName("floatLeft");
+    }
+    Element element = south.getElement();
+    Style style = element.getStyle();
+    style.setClear(Style.Clear.BOTH);
+
+    if (ensureHeight)
+      style.setHeight(20, Style.Unit.PX); // if all the phones are there but one, make sure it has height
+
+    element.setId("Highlight_South_" + id);
   }
 
   public int getLength() {
@@ -171,10 +171,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void clearSouth() {
-    //  logger.info("clearSouth...");
-    remove(south);
-  }
+  public void clearSouth() {    remove(south);  }
 
   @Override
   public DivWidget getNorth() {

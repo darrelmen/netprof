@@ -16,8 +16,9 @@ import java.util.List;
 
 /**
  * Created by go22670 on 2/24/17.
+ * @see ScoringAudioPanel
  */
-public class ClickableTranscript {
+class ClickableTranscript {
   private final AudioPanel.ImageAndCheck words;
   private final AudioPanel.ImageAndCheck phones;
   private PretestScore result;
@@ -26,18 +27,18 @@ public class ClickableTranscript {
   private final AudioControl audioControl;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel
    * @param words
    * @param phones
    * @param eventLogger
    * @param exerciseID
    * @param audioControl
+   * @see ScoringAudioPanel#ScoringAudioPanel
    */
-  public ClickableTranscript(AudioPanel.ImageAndCheck words,
-                             AudioPanel.ImageAndCheck phones,
-                             EventLogger eventLogger,
-                             int exerciseID,
-                             AudioControl audioControl
+  ClickableTranscript(AudioPanel.ImageAndCheck words,
+                      AudioPanel.ImageAndCheck phones,
+                      EventLogger eventLogger,
+                      int exerciseID,
+                      AudioControl audioControl
   ) {
     this.words = words;
     this.phones = phones;

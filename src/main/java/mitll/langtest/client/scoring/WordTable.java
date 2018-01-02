@@ -65,7 +65,8 @@ public class WordTable {
 
   private static final String TR = "tr";
   private static final String TD = "td";
-  public static final String LOW_SCORE = "Low score";
+  private static final String LOW_SCORE = "Low score";
+  private static final String CLICK_TO_HEAR_WORD = "Click to hear.";
 
   /**
    * @param netPronImageTypeToEndTime
@@ -207,6 +208,7 @@ public class WordTable {
 
   /**
    * TODO : don't put css here.
+   *
    * @param event
    * @param score
    * @return
@@ -219,7 +221,7 @@ public class WordTable {
         "padding:3px; " +
         "margin-left:3px; " +
         "text-align:center; " +
-        "font-family:sans-serif; "+
+        "font-family:sans-serif; " +
         "white-space:nowrap; " +
         "background-color:" + SimpleColumnChart.getColor(score) +
         "'>");
@@ -244,8 +246,6 @@ public class WordTable {
     table.addStyleName("leftFiveMargin");
     table.addStyleName("floatLeftAndClear");
 
-    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
-
     TreeMap<TranscriptSegment, IHighlightSegment> words = new TreeMap<>();
     typeToSegmentToWidget.put(NetPronImageType.WORD_TRANSCRIPT, words);
 
@@ -253,7 +253,8 @@ public class WordTable {
     typeToSegmentToWidget.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
 
     int id = 0;
-    Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries = wordToPhones.entrySet();
+    Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries =
+        getWordToPhones(netPronImageTypeToEndTime).entrySet();
 
     if (isRTL) {
       List<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries1 = new ArrayList<>(entries);
@@ -264,34 +265,60 @@ public class WordTable {
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : entries) {
       TranscriptSegment word = pair.getKey();
 
-      String wordLabel = word.getEvent();
-      if (!shouldSkipWord(wordLabel)) {
-        DivWidget col = new DivWidget();
-        col.addStyleName("wordTableWord");
-        table.add(col);
-
-        HighlightSegment header = new HighlightSegment(id++, wordLabel);
-        alignCenter(header);
-        header.addStyleName("floatLeft");
-        header.setWidth("100%");
-        header.getNorth().setWidth("100%");
-
-        words.put(word, header);
-        addClickHandler(audioControl, word, header.getClickable());
-
-        setColorClickable(word, header);
-
-        DivWidget hdiv = new DivWidget();
-        hdiv.setWidth("100%");
-        hdiv.add(header);
-        col.add(hdiv);
-
-        DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, pair.getValue(), false, null, isRTL);
-        col.add(phones);
+      if (!shouldSkipWord(word.getEvent())) {
+        table.add(getDivForWord(audioControl, isRTL, words, phoneMap, id, pair.getValue(), word));
+        id++;
       }
     }
 
     return table;
+  }
+
+  private Widget getDivForWord(AudioControl audioControl, boolean isRTL,// DivWidget table,
+                               TreeMap<TranscriptSegment, IHighlightSegment> words,
+                               TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                               int id,
+                               List<TranscriptSegment> phonesForWord, TranscriptSegment word) {
+
+
+    //DivWidget col = new DivWidget();
+    //col.addStyleName("wordTableWord");
+    //col.setWidth("100%");
+    //table.add(col);
+
+
+      HighlightSegment header = getWordLabel(id, word.getEvent());
+     // header.setWidth("100%");
+      header.addStyleName("wordTableWord");
+
+      words.put(word, header);
+      addClickHandler(audioControl, word, header.getClickable());
+
+      setColorClickable(word, header);
+
+//      DivWidget hdiv = new DivWidget();
+//      hdiv.setWidth("100%");
+//      hdiv.add(header);
+//      col.add(hdiv);
+
+    new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
+
+    // List<TranscriptSegment> phonesForWord = pair.getValue();
+    DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, isRTL);
+    header.setSouth(phones);
+   // col.add(phones);
+    return header;
+  }
+
+  @NotNull
+  private HighlightSegment getWordLabel(int id, String wordLabel) {
+    HighlightSegment header = new HighlightSegment(id, wordLabel);
+    alignCenter(header);
+    header.addStyleName("floatLeft");
+    header.setWidth("100%");
+    header.getNorth().setWidth("100%");
+    header.getNorth().getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    return header;
   }
 
   /**
@@ -302,6 +329,7 @@ public class WordTable {
    * @param wordSegment
    * @param isRTL
    * @return
+   * @see TwoColumnExercisePanel#getPhoneDivBelowWord
    */
   @NotNull
   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
@@ -313,30 +341,15 @@ public class WordTable {
     phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
 
-    new TooltipHelper().addTooltip(phones, "Click to hear word.");
 
   /*  Icon playFeedback = getPlayFeedback();
-
     phones.addDomHandler(event -> playFeedback.setVisible(false), MouseOutEvent.getType());
     phones.addDomHandler(event -> playFeedback.setVisible(true), MouseOverEvent.getType());*/
 
-    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment, isRTL);
+    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
     //phones.add(playFeedback);
     return phones;
   }
-
-/*  @NotNull
-  private Icon getPlayFeedback() {
-    Icon playFeedback = new Icon(IconType.VOLUME_UP);
-    playFeedback.addStyleName("leftFiveMargin");
-    playFeedback.addStyleName("topFiveMargin");
-    playFeedback.setVisible(false);
-    Style style = playFeedback.getElement().getStyle();
-    //style.setMarginLeft(-20, Style.Unit.PX);
-    style.setMarginTop(-20, Style.Unit.PX);
-    style.setZIndex(100);
-    return playFeedback;
-  }*/
 
   /**
    * @param netPronImageTypeToEndTime
@@ -406,7 +419,6 @@ public class WordTable {
   }
 
   private void addPhonesBelowWord(boolean showScore, List<TranscriptSegment> value, Table pTable, HTMLPanel scoreRow) {
-    HTMLPanel col;
     for (TranscriptSegment phone : value) {
       String phoneLabel = getPhoneEvent(phone);
       if (!phoneLabel.equals("sil")) {
@@ -415,12 +427,11 @@ public class WordTable {
         pTable.add(h);
         setColor(phone, h);
 
-        //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
         HTML score = showScore ? getScore(phone) : new HTML();
         alignCenter(score);
         score.getElement().getStyle().setWidth(PHONE_WIDTH, Style.Unit.PX);
 
-        col = new HTMLPanel(TD, "");
+        HTMLPanel col = new HTMLPanel(TD, "");
 
         if (!showScore) {
           score.getElement().getStyle().setHeight(0, Style.Unit.PX);
@@ -437,13 +448,16 @@ public class WordTable {
   }
 
   /**
+   * Feedback from DLI instructors is that phones should go left to right, even for RTL languages
+   * like arabic.
+   *
    * @param phoneSegments
    * @param scoreRow
    * @param audioControl
    * @param phoneMap
    * @param simpleLayout
    * @param wordSegment
-   * @param isRTL
+   * @paramx isRTL
    * @see #getPhoneDivBelowWord(AudioControl, TreeMap, List, boolean, TranscriptSegment, boolean)
    */
   private void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
@@ -451,13 +465,14 @@ public class WordTable {
                                    AudioControl audioControl,
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
-                                   TranscriptSegment wordSegment,
-                                   boolean isRTL) {
-    if (isRTL) {
+                                   TranscriptSegment wordSegment//,
+                                   //boolean isRTL
+  ) {
+/*    if (isRTL) {
       List<TranscriptSegment> copy = new ArrayList<>(phoneSegments);
       Collections.reverse(copy);
       phoneSegments = copy;
-    }
+    }*/
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();

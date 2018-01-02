@@ -560,7 +560,7 @@ fieldset > legend {
     /*
     color: #CC6600;
     */
-    font-size: 24px;
+    font-size: 28px;
     /*
     font-weight: bold;
     */
@@ -1823,6 +1823,11 @@ h1, h2, h3, h4, h5, h6 {
     padding: 3px;
     */
     float: left;
+}
+
+.wordTableWord .gwt-HTML {
+    font-family: sans-serif;
+    font-size: 18px;
 }
 
 .playButton {

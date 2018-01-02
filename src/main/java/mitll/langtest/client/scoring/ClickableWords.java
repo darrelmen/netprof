@@ -199,8 +199,7 @@ public class ClickableWords<T extends CommonExercise> {
 //        horizontal.add(new InlineHTML(" "));
 //      }
       if (isRTL) {
-        UIObject clickable = segment.getClickable();
-        clickable.addStyleName("floatRight");
+        segment.getClickable().addStyleName("floatRight");
       }
     }
 
