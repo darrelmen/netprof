@@ -54,7 +54,6 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
-import mitll.langtest.shared.user.LoginResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -66,7 +65,7 @@ import java.util.*;
  * @since 8/11/14.
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
-//  private final Logger logger = Logger.getLogger("UserPassLogin");
+  //  private final Logger logger = Logger.getLogger("UserPassLogin");
   public static final String USER_NAME_BOX = "UserNameBox";
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -85,8 +84,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
-  private static final int FLAG_DIM = 32;
-  private static final int COLUMNS = 4;
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -96,7 +93,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private final SignUp signUpForm;
   private final SignIn signInForm;
 
-  private List<Pair> ccs = new ArrayList<>();
+  FlagsDisplay flagsDisplay;
 
   /**
    * @param props
@@ -109,7 +106,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
                        EventRegistration eventRegistration,
                        StartupInfo startupInfo) {
     super(props);
-
+    flagsDisplay = new FlagsDisplay();
     signUpForm = new SignUpForm(props, userManager, eventRegistration, this, startupInfo);
     signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
 
@@ -117,7 +114,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       showSuggestApp();
     }
 
-    getFlags(startupInfo);
+    flagsDisplay.getFlags(startupInfo);
 
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = getKeyPressHelper();
@@ -126,38 +123,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signUpForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
   }
 
-  private void getFlags(StartupInfo startupInfo) {
-    Set<String> seen = new HashSet<>();
-
-    startupInfo.getProjects().forEach(slimProject -> {
-      String language = slimProject.getLanguage();
-      if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
-        if (!seen.contains(language)) {
-          ccs.add(new Pair(slimProject.getCountryCode(), language.substring(0, 1).toUpperCase() + language.substring(1)));
-          seen.add(language);
-        }
-      }
-    });
-    Collections.sort(ccs);
-  }
-
-
-  /**
-   * Sorts by language
-   */
-  private static class Pair implements Comparable<Pair> {
-    String cc, language;
-
-    public Pair(String cc, String language) {
-      this.cc = cc;
-      this.language = language;
-    }
-
-    @Override
-    public int compareTo(@NotNull Pair o) {
-      return language.toLowerCase().compareTo(o.language.toLowerCase());
-    }
-  }
 
   private KeyPressHelper getKeyPressHelper() {
     return new KeyPressHelper(true) {
@@ -200,6 +165,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   /**
    * Don't redirect them to download site just yet.
+   *
    * @see #UserPassLogin(PropertyHandler, UserManager, EventRegistration, StartupInfo)
    */
   private void showSuggestApp() {
@@ -214,7 +180,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     modal.show();
   }
 
-  private void showWelcome2() { new ModalInfoDialog("Help", props.getHelpMessage());  }
+  private void showWelcome2() {
+    new ModalInfoDialog("Help", props.getHelpMessage());
+  }
 
   /**
    * @return
@@ -276,8 +244,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   }
 
   /**
-   * @see #getForgotRow
    * @return
+   * @see #getForgotRow
    */
   private Button getHelpButton() {
     Button help = new Button(HELP);
@@ -381,53 +349,17 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
     String firstBullet = props.getFirstBullet();
     if (props.isAMAS()) {
-      addBullett(left, firstBullet, "NewProF2_48x48.png");
+      addBullet(left, firstBullet, "NewProF2_48x48.png");
     } else {
-      addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
-      addBullett(left, firstBullet, "NewProF2_48x48.png");
-      addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
+      addBullet(left, SECOND_BULLET, "NewProF1_48x48.png");
+      addBullet(left, firstBullet, "NewProF2_48x48.png");
+      addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
     }
 
-    left.add(getFlagsDisplay());
+    left.add(flagsDisplay.getFlagsDisplay());
   }
 
-  @NotNull
-  private Grid getFlagsDisplay() {
-    int row = (int) Math.ceil((float) ccs.size() / (float) COLUMNS);
-    Grid langs = new Grid(row, COLUMNS);
-    int r = 0;
-
-    for (Pair pair : ccs) {
-      DivWidget both = new DivWidget();
-      both.addStyleName("inlineFlex");
-
-      {
-        com.google.gwt.user.client.ui.Image flag = getFlag(pair.cc);
-        flag.addStyleName("rightFiveMargin");
-        flag.setHeight(FLAG_DIM + "px");
-        flag.setWidth(FLAG_DIM + "px");
-        both.add(flag);
-      }
-
-      {
-        HTML w = new HTML(pair.language);
-        w.addStyleName("rightTenMargin");
-        w.addStyleName("topFiveMargin");
-        both.add(w);
-      }
-      langs.setWidget(r / COLUMNS, r % COLUMNS, both);
-      r++;
-    }
-
-    langs.getElement().getStyle().setMarginTop(30, Style.Unit.PX);
-    return langs;
-  }
-
-  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
-    return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
-  }
-
-  private void addBullett(DivWidget left, String bulletText, String image) {
+  private void addBullet(DivWidget left, String bulletText, String image) {
     Widget w1 = new HTML(bulletText);
     Panel h = new HorizontalPanel();
     h.add(new Image(LangTest.LANGTEST_IMAGES + image));
@@ -435,7 +367,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     configure(h);
 
     left.add(h);
-    w1.getElement().getStyle().setMarginTop(COLUMNS, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginTop(4, Style.Unit.PX);
     configure(w1);
   }
 

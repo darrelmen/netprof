@@ -226,10 +226,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
 
+/*
     logger.info("attach context " + allNonContextExercises.size());
     logger.info("related        " + related.size());
     logger.info("idToContext    " + idToContext.size());
     logger.info("idToEx         " + idToEx.size());// + " : " + idToEx.keySet());
+*/
 
     for (SlickRelatedExercise relatedExercise : related) {
       CommonExercise root = idToEx.get(relatedExercise.exid());

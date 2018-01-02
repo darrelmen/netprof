@@ -54,10 +54,10 @@ public interface IProjectDAO extends IDAO {
 
   /**
    * @return
-   * @seex LangTestDatabaseImpl#getNestedProjectInfo
    * @see ProjectManagement#populateProjects
    */
   Collection<SlickProject> getAll();
+  int getNumProjects();
 
   void addProperty(int projid, String key, String value, String propertyType, String parent);
 

@@ -570,6 +570,7 @@ fieldset > legend {
         font-family: sans-serif;
         line-height: 100%;
         float: left;*/
+    font-family: sans-serif;
 }
 
 .flfont {
@@ -921,6 +922,7 @@ fieldset > legend {
 .editComment {
     font-size: 1.8em;
     font-weight: bold;
+    font-family: sans-serif;
 }
 
 .buttonGroupInsetFirst {

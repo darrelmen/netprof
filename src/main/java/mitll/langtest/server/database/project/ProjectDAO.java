@@ -377,9 +377,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   @Override
-  public Collection<SlickProject> getAll() {
-    return dao.getAll();
-  }
+  public Collection<SlickProject> getAll() {    return dao.getAll();  }
+
+  @Override
+  public int getNumProjects() { return dao.countAll(); }
 
   @Override
   public int getByName(String name) {

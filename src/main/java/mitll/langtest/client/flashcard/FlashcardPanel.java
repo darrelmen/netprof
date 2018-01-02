@@ -47,6 +47,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -64,6 +65,7 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -305,7 +307,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private boolean isRTLContent(String content) {
-    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
+    return getDirection(content) == HasDirection.Direction.RTL;
+  }
+
+  private HasDirection.Direction getDirection(String content) {
+    return WordCountDirectionEstimator.get().estimateDirection(content);
   }
 
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
@@ -528,7 +534,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * @param delay
-   * @see BootstrapExercisePanel#goToNextAfter
+   * @seex BootstrapExercisePanel#goToNextAfter
    * @see BootstrapExercisePanel#nextAfterDelay(boolean, String)
    * @see StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
    */
@@ -975,15 +981,18 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       englishTranslations = foreignSentence;
       usedForeign = true;
     }
-    FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
-    englishPhrase.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
-    englishPhrase.setWidth("100%");
+
     DivWidget div = new DivWidget();
     div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
-    div.add(englishPhrase);
+    {
+      FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
+      englishPhrase.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
+      englishPhrase.setWidth("100%");
+      div.add(englishPhrase);
+    }
 
-    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio());
+    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio(), getDirection(foreignSentence));
 
     if (!usedForeign) {
       div.add(foreign);
@@ -992,7 +1001,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     return div;
   }
-
+//  private boolean isRTLContent(String content) {
+//    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
+//  }
   private FocusPanel makeEnglishPhrase(String englishSentence) {
     Heading englishHeading = new Heading(1, englishSentence);
     //  englishHeading.getElement().getStyle().setWidth(500, Style.Unit.PX);
@@ -1014,35 +1025,48 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getQuestionContent
    */
-  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
-    Heading foreignLanguageContent = new Heading(1, foreignSentence);
-    foreignLanguageContent.getElement().setId("ForeignLanguageContent");
-    foreignLanguageContent.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-
-    FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
-    flPhraseContainer.getElement().setId("FLPhrase_container");
-
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio,HasDirection.Direction dir) {
     Panel hp = new HorizontalPanel();
-    hp.add(foreignLanguageContent);
-    Widget toShow;
+    hp.add(getFLContainer(foreignSentence, dir));
+
     Icon w = new Icon(IconType.VOLUME_UP);
     w.setSize(IconSize.TWO_TIMES);
-    toShow = w;
+    //Widget toShow = w;
 
     if (!hasRefAudio) {
       w.getElement().getStyle().setColor("red");
     }
 
-    Panel simple = new SimplePanel();
-    simple.add(toShow);
-    simple.addStyleName("leftTenMargin");
-    hp.add(simple);
-    DivWidget centeringRow = getCenteringRow();
-    centeringRow.add(hp);
-    flPhraseContainer.add(centeringRow);
+    {
+      Panel simple = new SimplePanel();
+      simple.add(w);
+      simple.addStyleName("leftTenMargin");
+      hp.add(simple);
+    }
+
+    FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
+    flPhraseContainer.getElement().setId("FLPhrase_container");
+    {
+      DivWidget centeringRow = getCenteringRow();
+      centeringRow.add(hp);
+      flPhraseContainer.add(centeringRow);
+    }
 
     addAudioBindings(flPhraseContainer);
     return flPhraseContainer;
+  }
+
+  @NotNull
+  private Widget getFLContainer(String foreignSentence,HasDirection.Direction dir) {
+    Heading foreignLanguageContent = new Heading(1, foreignSentence);
+    //HTML foreignLanguageContent = new HTML(foreignSentence, dir);
+
+    Element element = foreignLanguageContent.getElement();
+    element.setId("ForeignLanguageContent");
+    element.getStyle().setTextAlign(Style.TextAlign.CENTER);
+    //foreignLanguageContent.addStyleName("bigflfont");
+    foreignLanguageContent.getElement().getStyle().setProperty("fontFamily","sans-serif");
+    return foreignLanguageContent;
   }
 
   private DivWidget getCenteringRow() {
@@ -1055,37 +1079,19 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * @param focusPanel
-   * @see #getForeignLanguageContent(String, boolean)
+   * @see #getForeignLanguageContent
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    focusPanel.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logger.info("addAudioBindings : click on audio playback panel...");
-        setAutoPlay(false);
-        playRefLater();
-        event.getNativeEvent().stopPropagation();
-      }
+    focusPanel.addClickHandler(event -> {
+      //logger.info("addAudioBindings : click on audio playback panel...");
+      setAutoPlay(false);
+      playRefLater();
+      event.getNativeEvent().stopPropagation();
     });
-    focusPanel.addMouseOverHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        focusPanel.addStyleName("mouseOverHighlight");
-      }
-    });
-    focusPanel.addMouseOutHandler(new MouseOutHandler() {
-      @Override
-      public void onMouseOut(MouseOutEvent event) {
-        focusPanel.removeStyleName("mouseOverHighlight");
-      }
-    });
-    focusPanel.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        focusPanel.setFocus(false);
-      }
-    });
+    focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
+    focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));
+    focusPanel.addFocusHandler(event -> focusPanel.setFocus(false));
   }
 
   private void showEnglishOrForeign() {

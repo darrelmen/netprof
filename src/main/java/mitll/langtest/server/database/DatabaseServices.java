@@ -113,21 +113,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   void recordWordAndPhoneInfo(AudioAnswer answer, long answerID);
 
-/*  long addRefAnswer(int userID,
-                    int projid,
-                    int exerciseID,
-                    int audioid, long durationInMillis,
-                    boolean correct,
-                    DecodeAlignOutput alignOutput,
-                    DecodeAlignOutput decodeOutput,
-
-                    DecodeAlignOutput alignOutputOld,
-                    DecodeAlignOutput decodeOutputOld,
-
-                    boolean isMale,
-                    String speed,
-                    String model);*/
-
   ServerProperties getServerProps();
 
   void stopDecode();

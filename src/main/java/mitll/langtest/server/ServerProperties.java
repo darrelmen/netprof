@@ -228,7 +228,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
   public static List<String> CORE_PROPERTIES = Arrays.asList(
-      ServerProperties.MODELS_DIR,
+      MODELS_DIR,
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
@@ -678,8 +678,8 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see DatabaseImpl#getContextPractice
-   * @deprecated
+   * @see DatabaseImpl#preloadContextPractice
+   * @deprecated - new project will do something different
    */
   public String getDialogFile() {
     return props.getProperty("dialog");
@@ -921,13 +921,11 @@ public class ServerProperties {
   }
 
   public String getCurrentModel() {
-    String models_dir = getProperty("MODELS_DIR");
+    String models_dir = getProperty(MODELS_DIR);
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  List<Affiliation> getAffiliations() {
-    return affliations;
-  }
+  List<Affiliation> getAffiliations() {    return affliations;  }
 
   public Set<String> getLincolnPeople() {
     return lincoln;

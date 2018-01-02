@@ -113,6 +113,7 @@ public class BasicDialog {
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
 
     FormField formField = new FormField(textBox, userGroup, minLength);
+    textBox.getElement().getStyle().setProperty("fontFamily","sans-serif");
     // formField.setRightSide(rightSide);
     return formField;
   }

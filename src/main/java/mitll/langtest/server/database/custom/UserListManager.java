@@ -210,7 +210,7 @@ public class UserListManager implements IUserListManager {
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
 
 //    logger.info("for " + userid + " in " + projid + " found " + lists.size());
-    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
+//    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
     Set<Integer> listIDs = getListIDs(lists);
     Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
     //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);

@@ -125,7 +125,7 @@ public class SlickUserExerciseDAO
       logger.error("got " + e, e);
 
     }
-    logger.info("hostName " + hostName + "/"+hostAddress);
+//    logger.info("hostName " + hostName + "/"+hostAddress);
   }
 
   public void createTable() {

@@ -65,6 +65,7 @@ public class WordTable {
 
   private static final String TR = "tr";
   private static final String TD = "td";
+  public static final String LOW_SCORE = "Low score";
 
   /**
    * @param netPronImageTypeToEndTime
@@ -198,12 +199,18 @@ public class WordTable {
 
   private String getColoredSpanForWord(SlimSegment word) {
     String event = word.getEvent();
-    if (event.equals("UNKNOWNMODEL")) event = "Low score";
+    if (event.equals("UNKNOWNMODEL")) event = LOW_SCORE;
     String coloredSpan = getColoredSpan(event, word.getScore());
     //  logger.info("span '" + word.getPhoneEvent() + "' " + word.getScore() + " ");
     return coloredSpan;
   }
 
+  /**
+   * TODO : don't put css here.
+   * @param event
+   * @param score
+   * @return
+   */
   public String getColoredSpan(String event, float score) {
     StringBuilder builder = new StringBuilder();
     builder.append("<span " +
@@ -212,6 +219,7 @@ public class WordTable {
         "padding:3px; " +
         "margin-left:3px; " +
         "text-align:center; " +
+        "font-family:sans-serif; "+
         "white-space:nowrap; " +
         "background-color:" + SimpleColumnChart.getColor(score) +
         "'>");

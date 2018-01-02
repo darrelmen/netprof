@@ -32,10 +32,12 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
+import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.SlimProject;
@@ -91,8 +93,17 @@ public interface IProjectManagement {
    * @return number of exercises in the project
    */
   int configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
+
+  /**
+   * @see OpenUserServiceImpl#setProject
+   * @param projid
+   */
   void configureProjectByID(int projid);
 
+  /**
+   * @see LangTestDatabaseImpl#getStartupInfo
+   * @return
+   */
   List<SlimProject> getNestedProjectInfo();
 
   /**

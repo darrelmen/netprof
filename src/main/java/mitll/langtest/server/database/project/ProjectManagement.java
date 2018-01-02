@@ -93,9 +93,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
   public static final String NUM_ITEMS = "Num Items";
-  //public static final String CREATOR_ID = "creatorId";
   private static final String DOMINO_ID = "Domino ID";
-//  public static final String VOCABULARY = "Vocabulary";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -104,17 +102,12 @@ public class ProjectManagement implements IProjectManagement {
   private final IProjectDAO projectDAO;
 
   private final DatabaseImpl db;
+  /**
+   *
+   */
   private final Map<Integer, Project> idToProject = new HashMap<>();
 
   private final boolean debugOne;
-
-//  public static final String ID = "_id";
-//  public static final String NAME = "name";
-//  public static final String LANGUAGE_NAME = "languageName";
-//  public static final String CREATE_TIME = "createTime";
-
-  private ProjectServiceDelegate projectDelegate;
-  private DocumentServiceDelegate documentDelegate;
 
   private final IDominoImport dominoImport;
 
@@ -136,22 +129,24 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     this.debugOne = properties.debugOneProject();
     this.debugProjectID = properties.debugProjectID();
-    //fileUploadHelper = new FileUploadHelper(db, db.getDominoExerciseDAO());
     this.projectDAO = db.getProjectDAO();
 
-    IProjectWorkflowDAO workflowDelegate;
     if (servletContext == null) {
-      logger.warn("no servlet context, no domino delegates");
-      workflowDelegate = null;
+      logger.warn("ProjectManagement : no servlet context, no domino delegates");
+      dominoImport = null;
     } else {
-      SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
-      simpleDominoContext.init(servletContext);
-      projectDelegate = simpleDominoContext.getProjectDelegate();
-      workflowDelegate = simpleDominoContext.getWorkflowDAO();
-      documentDelegate = simpleDominoContext.getDocumentDelegate();
+      dominoImport = setupDominoProjectImport(servletContext);
     }
+  }
 
-    dominoImport = new DominoImport(projectDelegate, workflowDelegate, documentDelegate,
+  private DominoImport setupDominoProjectImport(ServletContext servletContext) {
+    IProjectWorkflowDAO workflowDelegate;
+    SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
+    simpleDominoContext.init(servletContext);
+    ProjectServiceDelegate projectDelegate = simpleDominoContext.getProjectDelegate();
+    workflowDelegate = simpleDominoContext.getWorkflowDAO();
+    DocumentServiceDelegate documentDelegate = simpleDominoContext.getDocumentDelegate();
+    return new DominoImport(projectDelegate, workflowDelegate, documentDelegate,
         (Mongo) servletContext.getAttribute(MONGO_ATT_NAME));
   }
 
@@ -182,7 +177,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * Safe to call this multiple times - if a project is already known it's skipped
+   * If a project is already configured, won't be configured again.
    * Fill in id->project map
+   *
    *
    * @see #populateProjects()
    */
@@ -191,19 +189,15 @@ public class ProjectManagement implements IProjectManagement {
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
     getAllProjects().forEach(slickProject -> {
-      if (slickProject.status().equalsIgnoreCase(DELETED.toString())) {
-        logger.info("populateProjects skip deleted " + slickProject.id() + " " + slickProject.name());
-      } else {
-        if (!idToProject.containsKey(slickProject.id())) {
-          if (debugOne) {
-            if (slickProject.id() == debugProjectID ||
-                slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
-                ) {
-              rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
-            }
-          } else {
+      if (!idToProject.containsKey(slickProject.id())) {
+        if (debugOne) {
+          if (slickProject.id() == debugProjectID ||
+              slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
+              ) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
+        } else {
+          rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
         }
       }
     });
@@ -432,7 +426,7 @@ public class ProjectManagement implements IProjectManagement {
   @Override
   public void refreshProjects() {
     Map<Integer, SlickProject> idToSlickProject = getIdToProjectMapFromDB();
-    idToProject.values().forEach(project -> {
+    getProjects().forEach(project -> {
       SlickProject project1 = idToSlickProject.get(project.getID());
       if (project1 == null) {
         logger.warn("huh? no project for " + project.getID() + " : " + project);
@@ -629,6 +623,10 @@ public class ProjectManagement implements IProjectManagement {
     //  }
   }
 
+  /**
+   * @return
+   * @see #getProject
+   */
   private boolean anyNewProjectsAdded() {
     return !getNewProjects(idToProject.keySet()).isEmpty();
   }
@@ -653,14 +651,12 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public Collection<Project> getProjects() {
-    return idToProject.values();
+  public Collection<Project> getProductionProjects() {
+    return getProductionProjects(getProjects());
   }
 
   @Override
-  public Collection<Project> getProductionProjects() {
-    return getProductionProjects(idToProject.values());
-  }
+  public Collection<Project> getProjects() {    return idToProject.values();  }
 
   private List<Project> getProductionProjects(Collection<Project> toFilter) {
     return toFilter
@@ -762,20 +758,19 @@ public class ProjectManagement implements IProjectManagement {
     return language1;
   }
 
-//  private boolean hasModel(SlickProject project1) {
-//    return getModel(project1) != null;
-//  }
-
-//  @deprecated
-//  private String getModel(SlickProject project1) {
-//    return getPropFromDB(project1.id(), ServerProperties.MODELS_DIR);
-//  }
-
   /**
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
    */
   public List<SlimProject> getNestedProjectInfo() {
+    int numProjects = projectDAO.getNumProjects();
+    int currentNumProjects = idToProject.size();
+
+    if (numProjects != currentNumProjects) {
+      logger.info("getNestedProjectInfo : project loaded? db projects " + numProjects + " current " +currentNumProjects);
+      populateProjects();
+    }
+
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<String, List<Project>> langToProject = getLangToProjects();
 //    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
@@ -811,22 +806,16 @@ public class ProjectManagement implements IProjectManagement {
   @NotNull
   private Map<String, List<Project>> getLangToProjects() {
     Map<String, List<Project>> langToProject = new TreeMap<>();
-    // Collection<SlickProject> all = db.getProjectDAO().getAll();
-
     getProjects().forEach(project -> {
       List<Project> slimProjects = langToProject.computeIfAbsent(project.getLanguage(), k -> new ArrayList<>());
       slimProjects.add(project);
     });
-
-    //   logger.info("getNestedProjectInfo : found " + all.size() + " projects");
-//    for (SlickProject project : all) {
-//      List<SlickProject> slimProjects = langToProject.computeIfAbsent(project.language(), k -> new ArrayList<>());
-//      slimProjects.add(project);
-//    }
     return langToProject;
   }
 
   /**
+   * TODO : SlimProject not so slim anymore. simplify.
+   *
    * @param pproject
    * @return
    * @see #getNestedProjectInfo
@@ -836,7 +825,6 @@ public class ProjectManagement implements IProjectManagement {
 
     SlickProject project = pproject.getProject();
     addDateProps(project, info);
-
 
     boolean isRTL = addOtherProps(project, info);
 
@@ -866,7 +854,7 @@ public class ProjectManagement implements IProjectManagement {
         info);
   }
 
-  private boolean addOtherProps(SlickProject project, TreeMap<String, String> info) {
+  private boolean addOtherProps(SlickProject project, Map<String, String> info) {
     boolean isRTL = false;
     if (getProjectStatus(project) != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
@@ -943,11 +931,11 @@ public class ProjectManagement implements IProjectManagement {
 //  }
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#addPending
    * @param projID
    * @param dominoID
    * @param sinceInUTC
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#addPending
    */
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {

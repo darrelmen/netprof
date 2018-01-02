@@ -61,9 +61,11 @@ public class StartupInfo implements IsSerializable {
   public StartupInfo() {
   } // for serialization
 
+/*
   public Set<String> getKnownHydraHosts() {
     return projects.stream().map(ProjectInfo::getHost).collect(Collectors.toSet());
   }
+  */
 
   /**
    * @param properties - ui properties only!
@@ -92,6 +94,7 @@ public class StartupInfo implements IsSerializable {
   }
 
   /**
+   * @see LangTest#getAllProjects
    * OK to modify the returned list.
    * @return mutable copy of the current project list
    */
@@ -124,8 +127,7 @@ public class StartupInfo implements IsSerializable {
       return "";
     } else {
       String host = withThisID.iterator().next().getHost();
-      String s = (host.equals(Project.WEBSERVICE_HOST_DEFAULT)) ? "" : host;
-      return s;
+      return host.equals(Project.WEBSERVICE_HOST_DEFAULT) ? "" : host;
     }
   }
 

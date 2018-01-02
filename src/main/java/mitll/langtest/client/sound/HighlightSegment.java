@@ -23,7 +23,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private boolean clickable = true;
   private final DivWidget north, south;
   private final String content;
-//  private final InlineHTML span;
   private final HTML span;
 
   /**

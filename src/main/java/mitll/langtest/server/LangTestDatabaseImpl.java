@@ -32,12 +32,14 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
@@ -192,12 +194,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * The very first thing that gets called from the client.
    * <p>
-   * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
-   * <p>
    * Shows a better message if configuration is bad.
    *
    * @return
-   * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @see LangTest#askForStartupInfo
+   * @see LangTest#refreshStartupInfo
    */
   @Override
   public StartupInfo getStartupInfo() {
@@ -205,11 +206,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.info("getStartupInfo no db yet...");
     } else {
-      if (db.getProjectManagement() == null) {
-        logger.error("config error - didn't make project management");
+      IProjectManagement projectManagement = db.getProjectManagement();
+      if (projectManagement == null) {
+        logger.error("getStartupInfo : config error - didn't make project management");
       } else {
         long then = System.currentTimeMillis();
-        projectInfos = db.getProjectManagement().getNestedProjectInfo();
+        projectInfos = projectManagement.getNestedProjectInfo();
         long now = System.currentTimeMillis();
         if (now - then > 50L)
           logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
@@ -219,13 +221,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null || !db.isHasValidDB()) {
       startupMessage = NO_POSTGRES;
     }
-    long then = System.currentTimeMillis();
+    //long then = System.currentTimeMillis();
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
-    long now = System.currentTimeMillis();
-    if (now - then > 100L) {
-      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
-    }
+//    long now = System.currentTimeMillis();
+//    if (now - then > 100L) {
+//      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
+//    }
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
@@ -393,9 +395,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       Object attribute = servletContext.getAttribute(USER_SVC);
 
       if (attribute != null) {
-        logger.info("got " + attribute + " : " + attribute.getClass());
+//        logger.info("got " + attribute + " : " + attribute.getClass());
       } else {
-        logger.warn("no servlet context... ");
+        logger.warn("readProperties : no " +USER_SVC + " attribute...? ");
       }
 
       db = makeDatabaseImpl(serverProps);

@@ -322,6 +322,11 @@ abstract class NewUserExercise extends BasicDialog {
     return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
+  /**
+   *
+   * @param container
+   * @return
+   */
   private FormField makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
