@@ -12,6 +12,7 @@ import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.DominoProject;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
@@ -39,10 +40,10 @@ public class ProjectSync implements IProjectSync {
 
   public static final String ID = "_id";
   public static final String NAME = "name";
-  public static final String LANGUAGE_NAME = "languageName";
+  private static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
-  public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
 
 
@@ -281,9 +282,7 @@ public class ProjectSync implements IProjectSync {
 
     if (project.getRawExercises().isEmpty()) {
       Date fiveYearsAgo = new Date(System.currentTimeMillis() - FIVE_YEARS);
-
-    //  logger.info("Start from " + fiveYearsAgo);
-
+      //  logger.info("Start from " + fiveYearsAgo);
       zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), ZoneId.of("UTC"));
     } else {
       zdt = ZonedDateTime.ofInstant(modified.toInstant(), ZoneId.of("UTC"));
@@ -291,26 +290,64 @@ public class ProjectSync implements IProjectSync {
     return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
   }
 
-  //  @Override
+  /**
+   * @param lang
+   * @return
+   * @see mitll.langtest.server.services.ProjectServiceImpl#getDominoForLanguage
+   */
   public List<DominoProject> getDominoForLanguage(String lang) {
-    //if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-    List<ImportProjectInfo> collect = projectManagement.getVocabProjects()
+    List<DominoProject> dominoProjects = new ArrayList<>();
+    getForLanguage(lang, projectManagement.getVocabProjects())
+        .forEach(importProjectInfo -> dominoProjects.add(getDominoProject(importProjectInfo)));
+    return dominoProjects;
+  }
+
+  @NotNull
+  private DominoProject getDominoProject(ImportProjectInfo importProjectInfo) {
+    return new DominoProject(
+        importProjectInfo.getDominoProjectID(),
+        importProjectInfo.getName(),
+        importProjectInfo.getUnitName(),
+        importProjectInfo.getChapterName()
+    );
+  }
+
+  @NotNull
+  private List<ImportProjectInfo> getForLanguage(String lang, List<ImportProjectInfo> vocabProjects) {
+    List<ImportProjectInfo> collect = getByLanguage(lang, vocabProjects);
+
+    if (collect.isEmpty()) {
+      Language language = getLanguage(lang);
+      String dominoName = language.getDominoName();
+      if (!dominoName.isEmpty()) {
+        logger.debug("getForLanguage trying using domino language : " + dominoName);
+        collect = getByLanguage(dominoName, vocabProjects);
+        if (!collect.isEmpty()) {
+          logger.info("getForLanguage found project using domino language : " + dominoName);
+        }
+      }
+    }
+    if (collect.isEmpty()) {
+      logger.info("getForLanguage no projects in domino for language '" + lang + "'");
+    }
+    return collect;
+  }
+
+  private Language getLanguage(String lang) {
+    Language language = Language.UNKNOWN;
+    try {
+      language = Language.valueOf(lang.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.error("unknown language " + lang);
+    }
+    return language;
+  }
+
+  private List<ImportProjectInfo> getByLanguage(String lang, List<ImportProjectInfo> vocabProjects) {
+    return vocabProjects
         .stream()
         .filter(importProjectInfo -> importProjectInfo.getLanguage().toLowerCase().equals(lang.toLowerCase()))
         .collect(Collectors.toList());
-
-    List<DominoProject> dominoProjects = new ArrayList<>();
-    collect
-        .forEach(importProjectInfo -> dominoProjects.add(new DominoProject(
-            importProjectInfo.getDominoProjectID(), importProjectInfo.getName(),
-            importProjectInfo.getUnitName(),
-            importProjectInfo.getChapterName()
-
-        )));
-    return dominoProjects;
-//    } else {
-//      throw getRestricted("getting domino projects");
-//    }
   }
 
   /**
@@ -731,7 +768,6 @@ public class ProjectSync implements IProjectSync {
 /*    public int getMatch() {
       return match;
     }
-
     public int getNoMatch() {
       return noMatch;
     }*/
@@ -922,7 +958,6 @@ public class ProjectSync implements IProjectSync {
   private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
     String currentUnit = toUpdate.getUnitToValue().get(first);
     String currentChapter = toUpdate.getUnitToValue().get(second);
-
 
     return
         !currentExercise.english().equals(toUpdate.getEnglish()) ||

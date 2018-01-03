@@ -7,27 +7,27 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum Language implements IsSerializable {
   ARABIC(true),
-  CROATIAN,
-  DARI(true),
-  EGYPTIAN(true),
+  CROATIAN("SERBO-CROATIAN"),
+  DARI(true, "PERSIAN-AFGHAN"),
+  EGYPTIAN(true, "ARABIC-EGYPTIAN"),
   ENGLISH,
-  FARSI(true),
+  FARSI(true, "PERSIAN-IRANIAN"),
   FRENCH,
   GERMAN,
   HINDI,
-  IRAQI(true),
+  IRAQI(true, "ARABIC-IRAQI"),
   JAPANESE,
-  LEVANTINE(true),
+  LEVANTINE(true, "ARABIC-SYRIAN"),
   KOREAN(32),
-  MANDARIN(32),
-  MSA(true),
-  PASHTO(true),
-  PORTUGUESE,
+  MANDARIN(32, "CHINESE-MANDARIN"),
+  MSA(true, "ARABIC (MODERN STANDARD)"),
+  PASHTO(true, "PUSHTU-AFGHAN"),
+  PORTUGUESE("PORTUGUESE-BRAZILIAN"),
   RUSSIAN,
-  SERBIAN,
+  SERBIAN("SERBO-CROATIAN"),
   SORANI(true),
   SPANISH,
-  SUDANESE(true),
+  SUDANESE(true, "ARABIC-SUDANESE"),
   TAGALOG,
   TURKISH,
   URDU(true),
@@ -35,6 +35,7 @@ public enum Language implements IsSerializable {
 
   private final boolean isRTL;
   private int fontSize = 24;
+  private String dominoName = "";
 
   Language() {
     this.isRTL = false;
@@ -44,12 +45,24 @@ public enum Language implements IsSerializable {
     this.isRTL = isRTL;
   }
 
-/*  Language(boolean isRTL, int fontSize) {
-    this(isRTL); this.fontSize = fontSize;
-  }*/
+  Language(boolean isRTL, String dominoName) {
+    this(isRTL);
+    this.dominoName = dominoName;
+  }
 
-  Language( int fontSize) {
-    this(false); this.fontSize = fontSize;
+  Language(String dominoName) {
+    this(false);
+    this.dominoName = dominoName;
+  }
+
+  Language(int fontSize) {
+    this(false);
+    this.fontSize = fontSize;
+  }
+
+  Language(int fontSize, String dominoName) {
+    this(fontSize);
+    this.dominoName = dominoName;
   }
 
   public String toDisplay() {
@@ -62,5 +75,9 @@ public enum Language implements IsSerializable {
 
   public int getFontSize() {
     return fontSize;
+  }
+
+  public String getDominoName() {
+    return dominoName;
   }
 }

@@ -1,5 +1,8 @@
 package mitll.langtest.server.domino;
 
+import mitll.hlt.domino.shared.common.FindOptions;
+import mitll.hlt.domino.shared.model.user.DBUser;
+
 import java.util.Date;
 
 public class ImportProjectInfo {
@@ -16,7 +19,15 @@ public class ImportProjectInfo {
     this.chapterName = chapterName;
   }
 
-  public ImportProjectInfo(int dominoProjectID, int creatorID, String name, String language, long createTime) {
+  /**
+   * @see DominoImport#getImportProjectInfos(FindOptions, DBUser)
+   * @param dominoProjectID
+   * @param creatorID
+   * @param name
+   * @param language
+   * @param createTime
+   */
+  ImportProjectInfo(int dominoProjectID, int creatorID, String name, String language, long createTime) {
     this.dominoProjectID = dominoProjectID;
     this.creatorID = creatorID;
     this.name = name;

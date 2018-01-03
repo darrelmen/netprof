@@ -2,6 +2,9 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+/**
+ * @see mitll.langtest.client.project.ProjectEditForm#addDominoProject
+ */
 public class DominoProject implements IsSerializable {
   String firstType = "";
   String secondType = "";
@@ -11,6 +14,13 @@ public class DominoProject implements IsSerializable {
   public DominoProject() {
   }
 
+  /**
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoProject
+   * @param dominoID
+   * @param name
+   * @param first
+   * @param secondType
+   */
   public DominoProject(int dominoID, String name, String first, String secondType) {
     this.dominoID = dominoID;
     this.name = name;

@@ -99,7 +99,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   @Override
-  public boolean exists(int projectid) {    return getProjectDAO().exists(projectid);  }
+  public boolean exists(int projectid) {
+    return getProjectDAO().exists(projectid);
+  }
 
   /**
    * @param name
@@ -214,8 +216,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
-     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db,db.getProjectManagement(),db).addPending(projectid, getImportUser());
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return new ProjectSync(db, db.getProjectManagement(), db).addPending(projectid, getImportUser());
     } else {
       throw getRestricted("adding pending exercises");
     }
@@ -224,15 +226,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db,db.getProjectManagement(),db).getDominoForLanguage(lang);
-     } else {
+      return new ProjectSync(db, db.getProjectManagement(), db).getDominoForLanguage(lang);
+    } else {
       throw getRestricted("getting domino projects");
     }
   }
 
   private void markDeleted(int projectid) {
-    Project project = db.getProject(projectid);
-    SlickProject slickProject = project.getProject();
+    SlickProject slickProject =  db.getProject(projectid).getProject();
     slickProject.updateStatus(ProjectStatus.DELETED.toString());
     getProjectDAO().easyUpdate(slickProject);
   }

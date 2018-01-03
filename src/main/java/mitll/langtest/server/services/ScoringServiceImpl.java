@@ -286,8 +286,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
       if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
 
+      Set<Integer> completed = new HashSet<>(audioToResult.size());
       audioIDs.forEach(audioID ->
-          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment));
+          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment,completed,audioIDs.size()));
 
     } else {
       logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
@@ -309,7 +310,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                     AudioFileHelper audioFileHelper,
                                     int userIDFromSession,
                                     ISlimResult cachedResult,
-                                    Map<Integer, AlignmentOutput> idToAlignment) {
+                                    Map<Integer, AlignmentOutput> idToAlignment,
+                                    Set<Integer> completed,
+                                    int total) {
     if (cachedResult == null) { // nope, ask the database
       cachedResult = db.getRefResultDAO().getResult(audioID);
     }
@@ -318,7 +321,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       if (cachedResult != null && !cachedResult.isValid()) {
         boolean b = db.getRefResultDAO().removeByAudioID(audioID);
         if (!b) {
-          logger.warn("getAlignmentsFromDB remove invalid ref result for audio id " + audioID + " = " + b);
+          logger.warn("recalcOneOrGetCached remove invalid ref result for audio id " + audioID + " = " + b);
         }
       }
 
@@ -330,6 +333,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
 
       getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguage());  // OK, let's translate the db info into the alignment output
+    }
+    completed.add(audioID);
+
+    if (completed.size() % 500 == 0) {
+      logger.info("recalcOneOrGetCached : project " + projid + " completed " + completed.size() + "/" + total + "(" +
+          Math.round(100f * (float) completed.size() / (float) total) +
+          "% )");
     }
   }
 
@@ -372,10 +382,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      logger.info("getAlignmentsFromDB decoding " + audioID + " for " + byID.getExid() + "...");
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " for exercise #" + byID.getExid() + "...");
       return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
     } else {
-      logger.info("getAlignmentsFromDB can't find audio id " + audioID);
+      logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
       return null;
     }
   }
@@ -388,6 +398,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
+   * TODO : remove duplicate code
+   *
    * @param typeToEvent
    * @param language
    * @return

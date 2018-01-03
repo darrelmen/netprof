@@ -46,21 +46,19 @@ import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
 
 public class DominoImport implements IDominoImport {
   private static final Logger logger = LogManager.getLogger(DominoImport.class);
-
-  //private static final String CREATED = "Created";
-  public static final String MODIFIED = "Modified";
-  public static final String NUM_ITEMS = "Num Items";
-  public static final String CREATOR_ID = "creatorId";
-  public static final String DOMINO_ID = "Domino ID";
-  public static final String VOCABULARY = "Vocabulary";
-  public static final String V_UNIT = "v-unit";
-  public static final String V_CHAPTER = "v-chapter";
+//  public static final String MODIFIED = "Modified";
+//  public static final String NUM_ITEMS = "Num Items";
+//  public static final String CREATOR_ID = "creatorId";
+//  public static final String DOMINO_ID = "Domino ID";
+  private static final String VOCABULARY = "Vocabulary";
+  private static final String V_UNIT = "v-unit";
+  private static final String V_CHAPTER = "v-chapter";
 
 
-  private ProjectServiceDelegate projectDelegate;
-  private DocumentServiceDelegate documentDelegate;
+  private final ProjectServiceDelegate projectDelegate;
+  private final DocumentServiceDelegate documentDelegate;
   private final IProjectWorkflowDAO workflowDelegate;
-  private Mongo pool;
+  private final Mongo pool;
 
   /**
    * @param projectDelegate
@@ -102,8 +100,7 @@ public class DominoImport implements IDominoImport {
 
   /**
    * @return
-   * @see IProjectManagement#getImportFromDomino
-   * @see #getVocabProjects
+   * @see ProjectManagement#getVocabProjects
    */
   @Override
   @NotNull
@@ -113,6 +110,12 @@ public class DominoImport implements IDominoImport {
     return getImportProjectInfos(options, dominoAdminUser);
   }
 
+  /**
+   * @param id
+   * @param dominoAdminUser
+   * @return
+   * @see #getImportFromDomino(int, int, String, DBUser)
+   */
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfosByID(int id, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
@@ -122,57 +125,68 @@ public class DominoImport implements IDominoImport {
 
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfos(FindOptions<ProjectColumn> options, DBUser dominoAdminUser) {
-    List<ProjectDescriptor> projects1 = projectDelegate.getProjects(dominoAdminUser,
+    List<ImportProjectInfo> imported = new ArrayList<>();
+    getProjectDescriptors(options, dominoAdminUser)
+        .forEach(projectDescriptor -> imported.add(getImportProjectInfo(projectDescriptor)));
+    return imported;
+  }
+
+  @NotNull
+  private ImportProjectInfo getImportProjectInfo(ProjectDescriptor project) {
+    int id = project.getId();
+    ImportProjectInfo importProjectInfo = new ImportProjectInfo(
+        id,
+        project.getCreator().getDocumentDBID(),
+        project.getName(),
+        project.getContent().getLanguageName(),
+        project.getCreateTime().getTime()
+    );
+
+    setUnitAndChapter(id, importProjectInfo);
+    return importProjectInfo;
+  }
+
+  /**
+   * From workflow.
+   *
+   * @param id
+   * @param importProjectInfo
+   */
+  private void setUnitAndChapter(int id, ImportProjectInfo importProjectInfo) {
+    ProjectWorkflow forProject = workflowDelegate.getForProject(id);
+
+    if (forProject == null) {
+      logger.warn("no workflow for project " + id);
+    } else {
+      forProject
+          .getTaskSpecs()
+          .forEach(taskSpecification -> {
+            taskSpecification
+                .getMetadataLists()
+                .forEach(metadataList -> {
+                  metadataList
+                      .getList()
+                      .forEach(metadataSpecification -> {
+                        String dbName = metadataSpecification.getDBName();
+                        String longName = metadataSpecification.getLongName();
+
+                        if (dbName.equalsIgnoreCase(V_UNIT)) {
+                          importProjectInfo.setUnitName(longName);
+                        } else if (dbName.equalsIgnoreCase(V_CHAPTER)) {
+                          importProjectInfo.setChapterName(longName);
+                        }
+                      });
+                });
+          });
+    }
+  }
+
+  private List<ProjectDescriptor> getProjectDescriptors(FindOptions<ProjectColumn> options, DBUser dominoAdminUser) {
+    return projectDelegate.getProjects(dominoAdminUser,
         null,
         options,
         false, false, false
     );
-
-    List<ImportProjectInfo> imported = new ArrayList<>();
-
-    for (ProjectDescriptor project : projects1) {
-      Date now = project.getCreateTime();
-
-      int documentDBID = project.getCreator().getDocumentDBID();
-
-      project.getContent().getLanguageName();
-
-      int id = project.getId();
-      ImportProjectInfo creatorId = new ImportProjectInfo(
-          id,
-          documentDBID,
-          project.getName(),
-          project.getContent().getLanguageName(),
-          now.getTime()
-      );
-
-      imported.add(creatorId);
-
-      ProjectWorkflow forProject = workflowDelegate.getForProject(id);
-
-      if (forProject == null) {
-        logger.warn("no workflow for project " + id);
-      } else {
-        List<TaskSpecification> taskSpecs = forProject.getTaskSpecs();
-
-        for (TaskSpecification specification : taskSpecs) {
-          Collection<MetadataList> metadataLists = specification.getMetadataLists();
-
-          for (MetadataList list : metadataLists) {
-            List<MetadataSpecification> list1 = list.getList();
-            for (MetadataSpecification specification1 : list1) {
-              if (specification1.getDBName().equalsIgnoreCase(V_UNIT)) {
-                creatorId.setUnitName(specification1.getLongName());
-              } else if (specification1.getDBName().equalsIgnoreCase(V_CHAPTER)) {
-                creatorId.setChapterName(specification1.getLongName());
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return imported;
   }
 
   private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
@@ -208,12 +222,12 @@ public class DominoImport implements IDominoImport {
   }
 
   public class ChangedAndDeleted {
-    private List<ImportDoc> changed;
-    private List<ImportDoc> deleted;
+    private final List<ImportDoc> changed;
+    private final List<ImportDoc> deleted;
     private Collection<Integer> deleted2;
 
-    public ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
-                             Collection<Integer> deleted2) {
+    ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
+                      Collection<Integer> deleted2) {
       this.changed = changed;
       this.deleted = deleted;
       this.deleted2 = deleted2;
@@ -277,8 +291,7 @@ public class DominoImport implements IDominoImport {
           if (update.isAfter(sinceThen)) {
             logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
             ids.add(id);
-          }
-          else {
+          } else {
             logger.info("getDeletedDocsSince for " + id + " = " + updateTime + " or " + update + " not after " + sinceThen);
 
             total++;
