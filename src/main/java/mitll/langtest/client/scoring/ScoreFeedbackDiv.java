@@ -4,11 +4,14 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadContainer;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
@@ -24,8 +27,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv {
-  public static final double NATIVE_THRSHOLD = .75;
   private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+
+  private static final double NATIVE_THRSHOLD = .75;
   private static final String OVERALL_SCORE = "Overall Score";
 
   private final ProgressBar progressBar;
@@ -55,21 +59,42 @@ public class ScoreFeedbackDiv {
   }
 
   private void addTooltip(Widget w, String tip) {
-     new TooltipHelper().addTooltip(w, tip);
+    new TooltipHelper().addTooltip(w, tip);
   }
 
+  /**
+   * Color the feedback with same color scheme as words and phones.
+   * Not the 4 color styles that come with the progress bar.
+   * @param score
+   */
   void showScore(double score) {
     double percent = score / 100d;
-    progressBar.setPercent(100 * percent);
-    progressBar.setText("" + Math.round(score));
-    progressBar.setColor(
-        score > SECOND_STEP ?
-            ProgressBarBase.Color.SUCCESS :
-            score > FIRST_STEP ?
-                ProgressBarBase.Color.WARNING :
-                ProgressBarBase.Color.DANGER);
-
     progressBar.setVisible(true);
+
+    long round = Math.round(score);
+    progressBar.setText("" + round);
+
+//    progressBar.setColor(
+//        score > SECOND_STEP ?
+//            ProgressBarBase.Color.SUCCESS :
+//            score > FIRST_STEP ?
+//                ProgressBarBase.Color.WARNING :
+//                ProgressBarBase.Color.DANGER);
+
+    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+
+    // logger.info("showScore : color " + color + " for " + percent);
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      Widget theBar = progressBar.getWidget(0);
+      Style style = theBar.getElement().getStyle();
+      style.setBackgroundImage("linear-gradient(to bottom," +
+          color +
+          "," +
+          color +
+          ")");
+      if (percent > 0.4) style.setColor("black");
+      progressBar.setPercent(round);//(int)(100 * percent));
+    });
   }
 
   void hideScore() {
@@ -80,19 +105,21 @@ public class ScoreFeedbackDiv {
    * Add score feedback to the right of the play button.
    *
    * @return
-   * @seex mitll.langtest.client.scoring.AudioPanel#addWidgets
    */
   private void styleTheProgressBar(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
     style.setMarginBottom(0, Style.Unit.PX);
+    style.setHeight(25, Style.Unit.PX);
+    style.setFontSize(16, Style.Unit.PX);
     progressBar.setVisible(false);
   }
 
   /**
    * Horizontal - play audio, score feedback, download widget
    * Shows a little praise message too!
+   *
    * @param pretestScore
    * @param isRTL
    * @return
@@ -121,11 +148,11 @@ public class ScoreFeedbackDiv {
       playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
-      if (hydecScore> NATIVE_THRSHOLD) {
+      if (hydecScore > NATIVE_THRSHOLD) {
         Heading w = new Heading(4, getPraiseMessage());
         w.addStyleName("leftFiveMargin");
         w.addStyleName("correctCard");
-        DivWidget praise= new DivWidget();
+        DivWidget praise = new DivWidget();
         praise.add(w);
         wordTableContainer.add(praise);
       }
@@ -143,8 +170,9 @@ public class ScoreFeedbackDiv {
     return wordTableContainer;
   }
 
-  private List<String> praise = Arrays.asList("Fantastic!","Outstanding!","Great!","Well done!","Good Job!","Two thumbs up!","Awesome!","Fabulous!","Splendid!","Amazing!","Terrific!","Superb!","Nice!","Bravo!","Magnificent!");
-  private Random rand=new Random();
+  private List<String> praise = Arrays.asList("Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!", "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!", "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!");
+  private Random rand = new Random();
+
   @NotNull
   private String getPraiseMessage() {
     return praise.get(rand.nextInt(praise.size()));

@@ -52,7 +52,7 @@ public class TranscriptImage extends AudioImage {
   private static final int BKG_ALPHA = 150;
 
   // don't color these events when coloring
-  public static final HashSet<String> IGNORE_TOKENS = new HashSet<>(Arrays.asList(
+  private static final HashSet<String> IGNORE_TOKENS = new HashSet<>(Arrays.asList(
       "sil",
       "SIL",
       "<s>",

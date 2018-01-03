@@ -757,7 +757,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                          List<TranscriptSegment> phonesInWord,
                                          AudioControl audioControl,
                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, isRTL);
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment/*, isRTL*/);
   }
 
   /**

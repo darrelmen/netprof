@@ -12,6 +12,8 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,10 +27,12 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  public static final String MP3 = ".mp3";
   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
+  public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
+
+  private static final float HUNDRED = 100.0f;
 
   /**
    * TODO : limit connection here...
@@ -152,7 +156,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @see TwoColumnExercisePanel#makeFirstRow
    */
-  PostAudioRecordButton getPostAudioRecordButton() {  return postAudioRecordButton;  }
+  PostAudioRecordButton getPostAudioRecordButton() {
+    return postAudioRecordButton;
+  }
 
   /**
    * @return
@@ -224,7 +230,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void stopRecording() {
-  //  logger.info("stopRecording...");
+    //  logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
 
     goodwaveExercisePanel.setBusy(false);
@@ -259,7 +265,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void useInvalidResult(boolean isValid) {
-  //  logger.info("useInvalidResult " + isValid);
+    //  logger.info("useInvalidResult " + isValid);
 
     waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
@@ -269,7 +275,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     else playAudioPanel.showPlayButton();
 
     playAudioPanel.setEnabled(isValid);
- }
+  }
 
   @Override
   public void flip(boolean first) {
@@ -290,7 +296,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
     getReadyToPlayAudio(path);
     if (isValid) {
-      scoreFeedbackDiv.showScore(Math.min(100.0f, hydecScore * 100f));
+      List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+      if (transcriptSegments != null && transcriptSegments.size() == 1) {
+        float wordScore = transcriptSegments.get(0).getScore();
+      //  logger.info("useResult using word score " + wordScore + " instead of hydec score " + hydecScore);
+        hydecScore = wordScore;
+      }
+      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED));
       listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       scoreFeedbackDiv.hideScore();
@@ -320,8 +332,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         miniScoreListener.addScore(score);
       }
       setVisible(hasScoreHistory);
-    }
-    else logger.warning("scores is null?");
+    } else logger.warning("scores is null?");
 
     miniScoreListener.showChart(controller.getHost());
   }

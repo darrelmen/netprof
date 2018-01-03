@@ -166,6 +166,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return 0;
   }
 
+  /**
+   * AMAS
+   * @return
+   */
   public boolean hasUserScore() {
     return false;//userScore > -1;
   }

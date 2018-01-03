@@ -1819,15 +1819,20 @@ h1, h2, h3, h4, h5, h6 {
 .wordTableWord {
     margin-right: 1px;
     font-weight: bold;
-    /*
-    padding: 3px;
-    */
     float: left;
 }
 
 .wordTableWord .gwt-HTML {
     font-family: sans-serif;
     font-size: 18px;
+}
+
+.scoringRowStyle .progress .bar {
+    font-size: 18px;
+    line-height: 25px;
+    -webkit-transition: width 1s; /* Safari */
+    transition: width 1s;
+    transition-timing-function: ease-in;
 }
 
 .playButton {

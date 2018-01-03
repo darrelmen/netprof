@@ -1205,7 +1205,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     try {
-      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
+//      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("close got " + e, e);

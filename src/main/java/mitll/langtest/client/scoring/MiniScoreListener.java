@@ -21,7 +21,6 @@ public interface MiniScoreListener {
    * @param path
    */
   void gotScore(PretestScore score, String path);
-  //void gotScore(CorrectAndScore hydecScore);
 
   /**
    * @see MiniScoreListener#gotScore(PretestScore, String)
