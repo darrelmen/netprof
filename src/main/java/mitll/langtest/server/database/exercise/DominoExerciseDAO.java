@@ -31,7 +31,7 @@ import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Voc
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
 
-//  private static final String V_UNIT = "v-unit";
+  //  private static final String V_UNIT = "v-unit";
 //  private static final String V_CHAPTER = "v-chapter";
 //  private static final String PROJECT = "project";
 //  private static final String DOCUMENTS = "documents";
@@ -116,7 +116,7 @@ public class DominoExerciseDAO {
             importDocs
         );
 
-    return new ImportInfo(projectInfo, exercises);
+    return new ImportInfo(projectInfo, exercises, importDocs.getDeleted2());
   }
 
  /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
@@ -226,13 +226,13 @@ public class DominoExerciseDAO {
   }*/
 
   /**
-   * @see #readExercises
    * @param projid
    * @param creator
    * @param unitName
    * @param chapterName
    * @param changedAndDeleted
    * @return
+   * @see #readExercises
    */
   @NotNull
   private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName,
@@ -317,12 +317,12 @@ public class DominoExerciseDAO {
   }
 
   /**
-   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem)
    * @param projid
    * @param creator
    * @param docID
    * @param vocabularyItem
    * @param parentExercise
+   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem)
    */
   private void addContextSentences(int projid,
                                    int creator,
@@ -334,7 +334,7 @@ public class DominoExerciseDAO {
       SampleSentence sample = (SampleSentence) comp;
       int compid = docID * 10 + sample.getNum();
       String sentenceVal = sample.getSentenceVal();
-      logger.info("addContextSentences : context import id " + compid + " "+ sentenceVal);
+      logger.info("addContextSentences : context import id " + compid + " " + sentenceVal);
       if (!sentenceVal.trim().isEmpty()) {
         Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
 

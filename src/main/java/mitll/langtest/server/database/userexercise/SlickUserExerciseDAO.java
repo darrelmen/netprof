@@ -1019,10 +1019,7 @@ public class SlickUserExerciseDAO
     return getUserExercises(dao.byIDs(exids));
   }
 
-
-  public void deleteByExID(Collection<Integer> exids) {
-    dao.deleteByIDs(exids);
-  }
+  public void deleteByExID(Collection<Integer> exids) {   dao.deleteByIDs(exids);  }
 
   /**
    * TODOx : Why so complicated?

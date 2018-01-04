@@ -35,44 +35,20 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
-import mitll.langtest.server.database.copy.ExerciseCopy;
-import mitll.langtest.server.domino.IProjectSync;
-import mitll.langtest.server.domino.ImportInfo;
-import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.domino.ProjectSync;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
-import mitll.npdata.dao.SlickAudio;
-import mitll.npdata.dao.SlickExercise;
-import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
-import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
-import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.SUCCESS;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
@@ -217,7 +193,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db).addPending(projectid, getImportUser());
+      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO()).addPending(projectid, getImportUser());
     } else {
       throw getRestricted("adding pending exercises");
     }
@@ -226,7 +202,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db).getDominoForLanguage(lang);
+      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO()).getDominoForLanguage(lang);
     } else {
       throw getRestricted("getting domino projects");
     }

@@ -226,6 +226,12 @@ public class DominoImport implements IDominoImport {
     private final List<ImportDoc> deleted;
     private Collection<Integer> deleted2;
 
+    /**
+     *
+     * @param changed
+     * @param deleted
+     * @param deleted2
+     */
     ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
                       Collection<Integer> deleted2) {
       this.changed = changed;

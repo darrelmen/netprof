@@ -5,6 +5,7 @@ import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -40,23 +41,29 @@ public class ProjectSync implements IProjectSync {
 
   public static final String ID = "_id";
   public static final String NAME = "name";
-  private static final String LANGUAGE_NAME = "languageName";
+  //private static final String LANGUAGE_NAME = "languageName";
   public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
   static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
 
-
   private final ProjectServices projectServices;
   private final IProjectManagement projectManagement;
-
+  IUserExerciseDAO userExerciseDAO;
   private final DAOContainer daoContainer;
 
-
-  public ProjectSync(ProjectServices projectServices, IProjectManagement projectManagement, DAOContainer daoContainer) {
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
+   * @param projectServices
+   * @param projectManagement
+   * @param daoContainer
+   * @param userExerciseDAO
+   */
+  public ProjectSync(ProjectServices projectServices, IProjectManagement projectManagement, DAOContainer daoContainer, IUserExerciseDAO userExerciseDAO) {
     this.projectServices = projectServices;
     this.projectManagement = projectManagement;
     this.daoContainer = daoContainer;
+    this.userExerciseDAO = userExerciseDAO;
   }
 
   /**
@@ -74,8 +81,8 @@ public class ProjectSync implements IProjectSync {
    *
    * @param projectid
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
+   * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    */
-
   public DominoUpdateResponse addPending(int projectid, int importUser) {
     long requestTime = System.currentTimeMillis();
     // if (hasAdminPerm(getUserIDFromSessionOrDB())) {
@@ -248,6 +255,9 @@ public class ProjectSync implements IProjectSync {
           logger.info("addPending updating  " + importUpdateEx.size() + " exercises");
           doUpdate(projectid, importUser, slickUEDAO, importUpdateEx, typeOrder2, dominoToEx, oldIDToExer, bringBack);
         }
+
+        doDelete(importFromDomino, dominoToEx);
+
 /*
           if (!deleteEx.isEmpty()) {
             logger.info("deleting " + deleteEx.size() + " exercises");
@@ -266,6 +276,24 @@ public class ProjectSync implements IProjectSync {
       return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
     }
 
+  }
+
+  private void doDelete(ImportInfo importFromDomino, Map<Integer, SlickExercise> dominoToEx) {
+    List<Integer> toDelete = new ArrayList<>(importFromDomino.getDeletedDominoIDs().size());
+
+    importFromDomino.getDeletedDominoIDs().forEach(id -> {
+      int exid = dominoToEx.get(id).id();
+      toDelete.add(exid);
+
+      CommonExercise byExID = userExerciseDAO.getByExID(exid);
+      if (byExID == null) logger.warn("addPending no ex by " + exid);
+      else toDelete.add(byExID.getID());
+    });
+
+
+    logger.info("Deleting " + toDelete.size() + " exercises.");
+
+    userExerciseDAO.deleteByExID(toDelete);
   }
 
   /**
