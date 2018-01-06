@@ -18,18 +18,22 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import static mitll.langtest.client.list.FacetExerciseList.PAGE_SIZE_SELECTED;
 
 /**
  * Created by go22670 on 4/5/17.
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+//  private final Logger logger = Logger.getLogger("NewLearnHelper");
+
   NewLearnHelper(ExerciseController controller) {
     super(controller);
   }
 
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    ExerciseController outerC = controller;
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       /**
        * @see FlexListLayout#makeNPFExerciseList
@@ -46,9 +50,13 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        NPFlexSectionExerciseList widgets = new NPFlexSectionExerciseList(outerC, topRow, currentExercisePanel,
-            new ListOptions(instanceName), listHeader, footer, FacetExerciseList.FIRST_PAGE_SIZE);
-        return widgets;
+        int pageSelected = controller.getStorage().getInt(PAGE_SIZE_SELECTED);
+        int pageSize = (pageSelected == -1) ? FacetExerciseList.FIRST_PAGE_SIZE : FacetExerciseList.PAGE_SIZE_CHOICES.get(pageSelected);
+
+      //  logger.info("got " + pageSelected + " = " + pageSize);
+
+        return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
+            new ListOptions(instanceName), listHeader, footer, pageSize);
       }
     };
   }

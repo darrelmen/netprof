@@ -48,6 +48,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadEvent;
@@ -77,6 +78,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+  public static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String ADDING_VISITOR = "adding visitor";
@@ -102,12 +104,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * Smaller on a laptop.
+   * @see mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
    */
   public static final int FIRST_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
-  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(FIRST_PAGE_SIZE, 10, 25);
+  public static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIRST_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 
-  private static final int TOTAL = 28;//32;
+  private static final int TOTAL = 28;
   private static final int CLOSE_TO_END = 2;
 
   /**
@@ -121,6 +124,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final String SHOW_MORE = "<i>View all</i>";
   private static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
+
+
   private final ProgressBar progressBar;
   private final DivWidget pagerAndSortRow;
 
@@ -265,15 +270,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     pagesize.addStyleName("floatLeft");
 
-    for (Integer num : PAGE_SIZE_CHOICES) {
-      pagesize.addItem(num + ITEMS_PAGE, "" + num);
-    }
+    PAGE_SIZE_CHOICES.forEach(num -> pagesize.addItem(num + ITEMS_PAGE, "" + num));
 
-    int pageSize = getPageIndex();
-    if (pageSize != -1) {
+    int pageIndex = getPageIndex();
+    int pageSize = pageIndex == -1? PAGE_SIZE_CHOICES.indexOf(FIRST_PAGE_SIZE):pageIndex;
+//    if (pageSize != -1) {
       pagesize.setItemSelected(pageSize, true);
       //  logger.info("page size now at " + pageSize);
-    }
+  //  }
 
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
 
@@ -281,7 +285,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private int getPageIndex() {
-    return controller.getStorage().getInt("pageSizeSelected");
+    return controller.getStorage().getInt(PAGE_SIZE_SELECTED);
   }
 
   private void onPageSizeChange(ListBox pagesize) {
@@ -289,7 +293,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     String value = pagesize.getValue();
     int i = Integer.parseInt(value);
     pagingContainer.setPageSize(i);
-    controller.getStorage().setInt("pageSizeSelected", pagesize.getSelectedIndex());
+    controller.getStorage().setInt(PAGE_SIZE_SELECTED, pagesize.getSelectedIndex());
     scrollToTop();
   }
 
@@ -297,7 +301,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Window.scrollTo(0, 0);
   }
 
-  private boolean finished = false;
+  private boolean finished;
 
   @NotNull
   private DivWidget addSortBox(String language) {

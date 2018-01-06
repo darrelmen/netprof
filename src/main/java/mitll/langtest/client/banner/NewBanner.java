@@ -29,6 +29,8 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final String NETPROF = "netprof";
+  public static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
@@ -69,6 +71,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final ExerciseController controller;
 
   /**
+   * setInverse = white on black background
    * @param userManager
    * @param lifecycle
    * @see InitialUI#InitialUI(LangTest, UserManager)
@@ -79,7 +82,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
                    Breadcrumbs breadcrumbs,
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
-    setInverse(true);
+
+
+//    setInverse(true);
 
     this.controller = controller;
     this.lifecycle = lifecycle;
@@ -159,10 +164,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   @NotNull
   private Brand getBrand() {
-    Brand netprof = new Brand("netprof");
+    Brand netprof = new Brand(NETPROF);
     netprof.addStyleName("topFiveMargin");
     addHomeClick(netprof);
     netprof.addStyleName("handCursor");
+    new TooltipHelper().addTooltip(netprof, "Choose a different language or project.");
+
     return netprof;
   }
 
@@ -219,7 +226,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.addStyleName("floatLeft");
     subtitle.setType(LabelType.WARNING);
     subtitle.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    new TooltipHelper().addTooltip(subtitle, "Is your microphone active?");
+    new TooltipHelper().addTooltip(subtitle, IS_YOUR_MICROPHONE_ACTIVE);
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
