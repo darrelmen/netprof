@@ -100,7 +100,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
       styleBottomRowDiv(bottomRowDiv, listHeader);
     }
 
-    //  Panel bottomRow = new HorizontalPanel();
     Panel bottomRow = new DivWidget();
     bottomRow.add(exerciseListContainer);
     bottomRow.getElement().setId("NPFHelper_bottomRow");
@@ -161,44 +160,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   //  makeSureFacetsAlwaysVisible(section);
   }
 
- /* private void makeSureFacetsAlwaysVisible(FlowPanel section) {
-    Window.addWindowScrollHandler(new Window.ScrollHandler() {
-      @Override
-      public void onWindowScroll(Window.ScrollEvent event) {
-        boolean nowAtTop = event.getScrollTop() == 0;
-        logger.info("onWindowScroll got scroll " + event + " " + event.getScrollTop()+ " : " + nowAtTop + " pos " +event.getScrollTop());
-        if (atTop != nowAtTop) {
-          atTop = nowAtTop;
-          if (!atTop) {
-
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                logger.info("onWindowScroll got scroll " + event + " adding scrollpos\n\n\n");
-
-                section.removeStyleName("initialpos");
-                section.addStyleName("scrolledpos");
-              }
-            });
-
-
-          } else {
-
-
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                logger.info("onWindowScroll got scroll " + event + " adding initialpos");
-                section.addStyleName("initialpos");
-                section.removeStyleName("scrolledpos");
-              }
-            });
-
-          }
-        }
-      }
-    });
-  }*/
 
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
     bottomRowDiv.addStyleName("floatLeft");
@@ -220,6 +181,10 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return footer;
   }
 
+  /**
+   * @see #doInternalLayout
+   * @return
+   */
   protected Panel getCurrentExercisePanel() {
     FlowPanel currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("NPFHelper_defect_currentExercisePanel");
@@ -231,8 +196,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   }
 
   protected void styleBottomRow(Panel bottomRow) {
-    //bottomRow.setWidth("100%");
-    //bottomRow.addStyleName("trueInlineStyle");
   }
 
   /**
@@ -256,12 +219,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     exerciseList.setUserListID(userListID);
 
     exerciseList.setFactory(getFactory(exerciseList));
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        exerciseList.onResize();
-      }
-    });
+    Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;
   }
 

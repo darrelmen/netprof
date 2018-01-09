@@ -31,14 +31,11 @@ import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Voc
 public class DominoExerciseDAO {
   private static final Logger logger = LogManager.getLogger(DominoExerciseDAO.class);
 
-  //  private static final String V_UNIT = "v-unit";
-//  private static final String V_CHAPTER = "v-chapter";
-//  private static final String PROJECT = "project";
-//  private static final String DOCUMENTS = "documents";
-//  private static final String WORKFLOW = "workflow";
-//
   private static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
+  /**
+   * @see #addAttributes(String, String, VocabularyItem, Exercise)
+   */
   private static final String V_NP_ID = "v-np-id";
   private static final String PREFIX = "v-";
   public static final String EDIT = "edit";
@@ -248,42 +245,25 @@ public class DominoExerciseDAO {
     return exercises;
   }
 
-/*
-  @NotNull
-  private Exercise getExerciseFromVocabularyItem(int projid, int creator, String unitName, String chapterName, JsonValue docObj) {
-    SimpleHeadDocumentRevision shDoc = getSimpleHeadDocumentRevision(docObj);
-
-    VocabularyItem vocabularyItem = (VocabularyItem) shDoc.getDocument();
-
-    int docID = shDoc.getId();
-    long time = shDoc.getCreateDate().getTime();
-
-    return getExerciseFromVocab(projid, creator, unitName, chapterName, docID, time, vocabularyItem);
-  }
-
-
-  private SimpleHeadDocumentRevision getSimpleHeadDocumentRevision(JsonValue docObj) {
-    return ser.deserialize(SimpleHeadDocumentRevision.class, docObj.toString());
-  }*/
-
   private Exercise getExerciseFromVocab(int projid,
                                         int creator,
-                                        String unitName, String chapterName,
+                                        String unitName,
+                                        String chapterName,
                                         int docID,
                                         long time,
                                         VocabularyItem vocabularyItem) {
     logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
-
-    Exercise ex = getExerciseFromVocabularyItem(projid, docID, vocabularyItem, creator, time);
+    String npID = getNPId(vocabularyItem);
+    Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
-    addContextSentences(projid, creator, docID, vocabularyItem, ex);
+    addContextSentences(projid, creator, docID, npID, vocabularyItem, ex);
 
     return ex;
   }
 
 
-  private void addAttributes(String unitName, String chapterName, VocabularyItem vocabularyItem, Exercise ex) {
+  private void addAttributes(String unitName, String chapterName, MetadataComponentBase vocabularyItem, Exercise ex) {
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
     for (IMetadataField field : metadataFields) {
       String name = field.getName();
@@ -292,15 +272,27 @@ public class DominoExerciseDAO {
       boolean isNPID = name.equals(V_NP_ID);
       if (name.startsWith(PREFIX) && !isNPID) {
         name = name.substring(2);
-
         addAttribute(unitName, chapterName, name, displayValue, ex);
       }
+//
+//      if (isNPID && !displayValue.isEmpty()) {
+//        ex.setOldID(displayValue);
+//      }
+    }
+  }
 
-      if (isNPID && !displayValue.isEmpty()) {
-        ex.setOldID(displayValue);
+  private String getNPId(MetadataComponentBase vocabularyItem) {
+    List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
+    for (IMetadataField field : metadataFields) {
+      String name = field.getName();
+      String displayValue = field.getDisplayValue();
 
+      if (name.equals(V_NP_ID) && !displayValue.isEmpty()) {
+        return displayValue;
       }
     }
+    return "unknown";
+
   }
 
   private void addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
@@ -327,16 +319,34 @@ public class DominoExerciseDAO {
   private void addContextSentences(int projid,
                                    int creator,
                                    int docID,
+                                   String npID,
                                    VocabularyItem vocabularyItem,
                                    Exercise parentExercise) {
     IDocumentComposite samples = vocabularyItem.getSamples();
+
+    boolean isInt = false;
+    int npInt = -1;
+    try {
+      npInt = Integer.parseInt(npID);
+      isInt = true;
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
       int compid = docID * 10 + sample.getNum();
+
+      String contextNPID = isInt ? "" + npInt * 10 + sample.getNum() : (npID + "_" + sample.getNum());
+
       String sentenceVal = sample.getSentenceVal();
-      logger.info("addContextSentences : context import id " + compid + " " + sentenceVal);
+      logger.info("addContextSentences : context import id " + compid + "/" + contextNPID +
+          " " + sentenceVal);
       if (!sentenceVal.trim().isEmpty()) {
-        Exercise context = getExerciseFromVocabularyItem(projid, compid, creator,
+        Exercise context = getExerciseFromVocabularyItem(
+            projid,
+            contextNPID,
+            compid,
+            creator,
 
             removeMarkup(sentenceVal),
             removeMarkup(sample.getAlternateFormVal()),
@@ -348,7 +358,7 @@ public class DominoExerciseDAO {
         context.setUnitToValue(parentExercise.getUnitToValue());
         parentExercise.getDirectlyRelated().add(context);
 
-        logger.info("parent ex id " + parentExercise.getID() + " dom " + parentExercise.getDominoID());
+        logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentExercise.getDominoID());
         context.setParentDominoID(parentExercise.getDominoID());
       }
     }
@@ -368,6 +378,7 @@ public class DominoExerciseDAO {
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
                                                  int oldid,
+                                                 String npID,
                                                  VocabularyItem vocabularyItem,
                                                  int creatorID,
                                                  long createTime) {
@@ -376,7 +387,11 @@ public class DominoExerciseDAO {
     String transliterationVal = vocabularyItem.getTransliterationVal();
     String meaning = vocabularyItem.getMeaningVal();
 
-    Exercise exerciseFromVocabularyItem = getExerciseFromVocabularyItem(projid, oldid, creatorID,
+    Exercise exerciseFromVocabularyItem = getExerciseFromVocabularyItem(
+        projid,
+        npID,
+        oldid,
+        creatorID,
         removeMarkup(termVal),
         removeMarkup(alternateFormVal),
         removeMarkup(transliterationVal),
@@ -392,6 +407,7 @@ public class DominoExerciseDAO {
 
   /**
    * @param projid
+   * @param npID
    * @param dominoID
    * @param creatorID
    * @param termVal
@@ -404,15 +420,17 @@ public class DominoExerciseDAO {
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
+                                                 String npID,
                                                  int dominoID,
                                                  int creatorID,
                                                  String termVal,
                                                  String alternateFormVal,
                                                  String transliterationVal,
-                                                 String meaning, boolean isContext) {
+                                                 String meaning,
+                                                 boolean isContext) {
     String trim = termVal.trim();
     Exercise exercise = new Exercise(-1,
-        "" + dominoID,
+        npID,
         creatorID,
         meaning.trim(),
         trim,
@@ -424,11 +442,11 @@ public class DominoExerciseDAO {
         false,
         0,
         isContext,
-        0
-    );
+        0,
+        dominoID);
     logger.info("made new ex " + exercise.getDominoID() + " " + exercise.getOldID() + " ex " + exercise.getID() + " ex " + exercise.getEnglish() + " context " + isContext);
     exercise.setPredef(true);
-    exercise.setDominoID(dominoID);
+
     return exercise;
   }
 }

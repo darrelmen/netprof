@@ -193,7 +193,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO()).addPending(projectid, getImportUser());
+      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).addPending(projectid, getImportUser());
     } else {
       throw getRestricted("adding pending exercises");
     }
@@ -202,14 +202,14 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO()).getDominoForLanguage(lang);
+      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).getDominoForLanguage(lang);
     } else {
       throw getRestricted("getting domino projects");
     }
   }
 
   private void markDeleted(int projectid) {
-    SlickProject slickProject =  db.getProject(projectid).getProject();
+    SlickProject slickProject = db.getProject(projectid).getProject();
     slickProject.updateStatus(ProjectStatus.DELETED.toString());
     getProjectDAO().easyUpdate(slickProject);
   }

@@ -100,7 +100,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     // logger.info("got " + e + " and " + e.getDominoID());
 //    int dominoID = e.getDominoID();
 //    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    String subtext = "" + getID(e) + (e.getOldID().isEmpty() ? "" : "/" + e.getOldID());
+    String subtext = getID(e);// + (e.getOldID().isEmpty() ? "" : "/" + e.getOldID());
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, subtext);
     // w.getElement().setId("ItemHeading");
     return w;
@@ -126,9 +126,10 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
 
   @NotNull
   private String getID(T e) {
-    int dominoID = e.getDominoID();
-    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    return "" + idToUse;
+    return  ""+ e.getID();
+//    int dominoID = e.getDominoID();
+//    int idToUse = dominoID != -1 ? dominoID : e.getID();
+//    return "" + idToUse;
   }
 
   private InlineLabel getLabel(T e) {
@@ -154,6 +155,11 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
         child.addStyleName("rightFiveMargin");
         flow.add(child);
       }
+    }
+    if (exercise.getDominoID() > 0) {
+      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, "Domino ID", "" + exercise.getDominoID());
+      child.addStyleName("rightFiveMargin");
+      flow.add(child);
     }
     return flow;
   }

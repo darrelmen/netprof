@@ -36,10 +36,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.PronunciationLookup;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -76,11 +73,11 @@ public class SlickUserExerciseDAO
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
   private static final String DEFAULT_FOR_EMPTY = ANY;
-  //  private static final int DESIRED_RANGES = 10;
   public static final boolean ADD_SOUNDS = false;
   private static final String HYDRA = "hydra";
   public static final int DEFAULT_PROJECT = 1;
   public static final boolean WARN_ABOUT_MISSING_PHONES = false;
+  public static final String QUOT = "&quot;";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -95,7 +92,6 @@ public class SlickUserExerciseDAO
   private final boolean hasMediaDir;
   private String hostName;
   private String hostAddress = "unk";
-
   /**
    * @param database
    * @param dbConnection
@@ -107,6 +103,7 @@ public class SlickUserExerciseDAO
     relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
     attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
     attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
+
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
@@ -235,26 +232,19 @@ public class SlickUserExerciseDAO
 //        " = '" + firstType + "' " +
 //        "" + second + " = '" + secondType + "'");
 
-    String foreignLanguage = shared.getForeignLanguage();
-    if (foreignLanguage.contains("&quot;")) {
-      String convert = foreignLanguage.replaceAll("&quot;", "\"");
-      //logger.info("toSlick : convert\nfrom "+ foreignLanguage + "\nto  " + convert);
-      foreignLanguage = convert;
-    }
-
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
         shared.getEnglish(),
         shared.getMeaning(),
-        foreignLanguage,
+        getFL(shared),
         shared.getAltFL(),
         shared.getTransliteration(),
         isOverride,
         firstType,
         secondType,
-        projectID,//shared.getProjectIDFromUser(),  // project id fk
+        projectID,  // project id fk
         shared.isPredefined(),
         isContext,
         false,
@@ -262,6 +252,16 @@ public class SlickUserExerciseDAO
         false,
         never,
         shared.getNumPhones());
+  }
+
+  private String getFL(CommonExercise shared) {
+    String foreignLanguage = shared.getForeignLanguage();
+    if (foreignLanguage.contains(QUOT)) {
+      String convert = foreignLanguage.replaceAll(QUOT, "\"");
+      //logger.info("toSlick : convert\nfrom "+ foreignLanguage + "\nto  " + convert);
+      foreignLanguage = convert;
+    }
+    return foreignLanguage;
   }
 
   private final Timestamp never = new Timestamp(0);
@@ -276,6 +276,7 @@ public class SlickUserExerciseDAO
   private Exercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = getUnitToValue(slick);
 
+    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
@@ -293,13 +294,14 @@ public class SlickUserExerciseDAO
         slick.candecodechecked().getTime(),
         slick.iscontext(),
         slick.numphones(),
-        factory.getTokens(slick.foreignlanguage()));
- /*   logger.info("fromSlick " +
+        factory.getTokens(slick.foreignlanguage()),
+        slick.legacyid());
+    logger.info("fromSlick " +
 
         "\n\tfrom    " + slick+
         "\n\tcreated " + userExercise+
         "\n\tcontext " + userExercise.isContext()
-    );*/
+    );
     return userExercise;
   }
 
@@ -398,7 +400,8 @@ public class SlickUserExerciseDAO
         slick.candecode(),
         slick.candecodechecked().getTime(),
         slick.iscontext(),
-        slick.numphones());
+        slick.numphones(),
+        slick.legacyid());  // i.e. dominoID
 
     {
       List<String> translations = new ArrayList<String>();
@@ -878,6 +881,11 @@ public class SlickUserExerciseDAO
     return dao.getNumOnList(listID);
   }
 
+  /**
+   * Pull out of the database.
+   * @param exid
+   * @return
+   */
   @Override
   public CommonExercise getByExID(int exid) {
     Collection<SlickExercise> byExid = dao.byID(exid);
@@ -1027,7 +1035,7 @@ public class SlickUserExerciseDAO
    * @param userExercise
    * @param isContext
    * @param typeOrder
-   * @see mitll.langtest.server.services.ProjectServiceImpl#doUpdate
+   * @see mitll.langtest.server.domino.ProjectSync#doUpdate
    */
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {
@@ -1058,7 +1066,7 @@ public class SlickUserExerciseDAO
   /**
    * @param projectid
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String, int, boolean, boolean)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig
    */
   public boolean isProjectEmpty(int projectid) {
     return dao.isProjectEmpty(projectid);
@@ -1221,11 +1229,10 @@ public class SlickUserExerciseDAO
   }
 
   public class BothMaps {
-
     private Map<String, Integer> oldToNew;
     private Map<Integer, Integer> dominoToNew;
 
-    public BothMaps(Map<String, Integer> oldToNew, Map<Integer, Integer> dominoToNew) {
+    BothMaps(Map<String, Integer> oldToNew, Map<Integer, Integer> dominoToNew) {
       this.oldToNew = oldToNew;
       this.dominoToNew = dominoToNew;
     }
@@ -1252,6 +1259,11 @@ public class SlickUserExerciseDAO
     }
   }
 
+  /**
+   *
+   * @param oldToNew
+   * @param allPredefByProject
+   */
   private void addToDominoMap(Map<Integer, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
     for (SlickExercise exercise : allPredefByProject) {
       Integer before = oldToNew.put(exercise.legacyid(), exercise.id());
@@ -1263,7 +1275,7 @@ public class SlickUserExerciseDAO
   /**
    * @param projid
    * @return
-   * @see DBExerciseDAO#getIDToFL(int)
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercises
    */
   public Map<Integer, String> getIDToFL(int projid) {
     return dao.getIDToFL(projid);

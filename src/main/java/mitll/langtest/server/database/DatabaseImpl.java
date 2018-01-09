@@ -433,9 +433,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #getCustomOrPredefExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) {
-    return projectManagement.getExercise(projectid, id);
-  }
+  public CommonExercise getExercise(int projectid, int id) {    return projectManagement.getExercise(projectid, id);  }
 
   public JsonExport getJSONExport(int projectid) {
     getExercises(projectid);

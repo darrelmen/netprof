@@ -46,10 +46,6 @@ import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
 
 public class DominoImport implements IDominoImport {
   private static final Logger logger = LogManager.getLogger(DominoImport.class);
-//  public static final String MODIFIED = "Modified";
-//  public static final String NUM_ITEMS = "Num Items";
-//  public static final String CREATOR_ID = "creatorId";
-//  public static final String DOMINO_ID = "Domino ID";
   private static final String VOCABULARY = "Vocabulary";
   private static final String V_UNIT = "v-unit";
   private static final String V_CHAPTER = "v-chapter";
@@ -92,8 +88,7 @@ public class DominoImport implements IDominoImport {
       ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
 
       return new DominoExerciseDAO()
-          .readExercises(projID, matches.iterator().next(),
-              getChangedDocs(sinceInUTC, dominoAdminUser, next)
+          .readExercises(projID, matches.iterator().next(), getChangedDocs(sinceInUTC, dominoAdminUser, next)
           );
     }
   }
@@ -197,6 +192,13 @@ public class DominoImport implements IDominoImport {
     return projectDescriptor.iterator().next();
   }
 
+  /**
+   * @param sinceInUTC
+   * @param dominoAdminUser
+   * @param next
+   * @return
+   * @see #getImportFromDomino
+   */
   @NotNull
   private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
     long then = System.currentTimeMillis();
@@ -205,19 +207,19 @@ public class DominoImport implements IDominoImport {
 
     List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
 
-    List<ImportDoc> docs = new ArrayList<>();
+    List<ImportDoc> docs = new ArrayList<>(documents1.size());
     List<ImportDoc> deleted = new ArrayList<>();
-    for (HeadDocumentRevision doc : documents1) {
-      Integer id1 = doc.getId();
+
+    documents1.forEach(doc -> {
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
-      docs.add(new ImportDoc(id1, doc.getUpdateTime().getTime(), vocabularyItem));
-      logger.info("\t found changed " + vocabularyItem);
-    }
+      docs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), vocabularyItem));
+      logger.info("\t getChangedDocs : found changed " + vocabularyItem);
+    });
+
     long now = System.currentTimeMillis();
 
-    logger.info("getDocs : took " + (now - then) + " to get " + docs.size());
+    logger.info("getChangedDocs : took " + (now - then) + " to get " + docs.size());
 
-    ;
     return new ChangedAndDeleted(docs, deleted, getDeletedDocsSince(sinceInUTC, next.getId()));
   }
 
@@ -227,7 +229,6 @@ public class DominoImport implements IDominoImport {
     private Collection<Integer> deleted2;
 
     /**
-     *
      * @param changed
      * @param deleted
      * @param deleted2
@@ -239,6 +240,10 @@ public class DominoImport implements IDominoImport {
       this.deleted2 = deleted2;
     }
 
+    /**
+     * @see DominoExerciseDAO#getCommonExercises(int, int, String, String, ChangedAndDeleted)
+     * @return
+     */
     public List<ImportDoc> getChanged() {
       return changed;
     }
@@ -264,8 +269,14 @@ public class DominoImport implements IDominoImport {
     return options1;
   }
 
+  /**
+   * @param sinceInUTC
+   * @param projid
+   * @return
+   * @see #getChangedDocs(String, DBUser, ClientPMProject)
+   */
   private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid) {
-    logger.info("since " + sinceInUTC);
+    logger.info("getDeletedDocsSince since " + sinceInUTC);
 
     LocalDate sinceThen = getModifiedTime(sinceInUTC);
 
@@ -280,7 +291,7 @@ public class DominoImport implements IDominoImport {
     FindIterable<Document> projection = pool
         .getMongoCollection("document_heads")
         .find(query)
-        .projection(include("_id", "updateTime", "active"));
+        .projection(include("_id", "deleteTime", "active"));
 
     List<Integer> ids = new ArrayList<>();
 
@@ -292,7 +303,7 @@ public class DominoImport implements IDominoImport {
         Integer id = doc.getInteger("_id");
         Boolean active = doc.getBoolean("active");
         if (!active) {
-          String updateTime = doc.getString("updateTime");
+          String updateTime = doc.getString("deleteTime");
           LocalDate update = getModifiedTime(updateTime);
           if (update.isAfter(sinceThen)) {
             logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
@@ -308,16 +319,9 @@ public class DominoImport implements IDominoImport {
       cursor.close();
     }
 
-    logger.info("found " + ids.size() + " deleted from " + total);
+    logger.info("getDeletedDocsSince : found " + ids.size() + " deleted from " + total);
     return ids;
   }
-
-//  @NotNull
-//  private String getModifiedTimestamp(Timestamp modified) {
-//    Instant instant = modified.toInstant();
-//    ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
-//    return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
-//  }
 
 
   @NotNull

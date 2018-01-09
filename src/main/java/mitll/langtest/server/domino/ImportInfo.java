@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class ImportInfo {
   private final Date createTime;
@@ -79,6 +80,10 @@ public class ImportInfo {
     return dominoID;
   }
 
+  /**
+   * @see ProjectSync#doDelete
+   * @return
+   */
   public Collection<Integer> getDeletedDominoIDs() {
     return deletedDominoIDs;
   }

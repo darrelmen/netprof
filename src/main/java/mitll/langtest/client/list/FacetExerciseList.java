@@ -48,7 +48,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadEvent;
@@ -104,6 +103,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * Smaller on a laptop.
+   *
    * @see mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
    */
   public static final int FIRST_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
@@ -272,16 +272,22 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     PAGE_SIZE_CHOICES.forEach(num -> pagesize.addItem(num + ITEMS_PAGE, "" + num));
 
-    int pageIndex = getPageIndex();
-    int pageSize = pageIndex == -1? PAGE_SIZE_CHOICES.indexOf(FIRST_PAGE_SIZE):pageIndex;
-//    if (pageSize != -1) {
-      pagesize.setItemSelected(pageSize, true);
-      //  logger.info("page size now at " + pageSize);
-  //  }
-
+    int chosenPageSize = getChosenPageIndex();
+//    logger.info("chose size " + chosenPageSize);
+    pagesize.setItemSelected(chosenPageSize, true);
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
 
     return pagesize;
+  }
+
+  private int getChosenPageIndex() {
+    int pageIndex = getPageIndex();
+//    logger.info("getChosenPageIndex pageIndex " + pageIndex);
+    return pageIndex == -1 ? PAGE_SIZE_CHOICES.indexOf(FIRST_PAGE_SIZE) : pageIndex;
+  }
+
+  private int getChosenPageSize() {
+    return PAGE_SIZE_CHOICES.get((getChosenPageIndex()));
   }
 
   private int getPageIndex() {
@@ -370,16 +376,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
-            int pageSize = getPageIndex();
-            if (pageSize != -1) {
-              try {
-                return PAGE_SIZE_CHOICES.get(pageSize);
-              } catch (Exception e) {
-                return numToShow;
-              }
-            } else {
-              return numToShow;
-            }
+            int pageSize = getChosenPageSize();
+       //     logger.info("getNumTableRowsGivenScreenHeight " + pageSize + " vs " + numToShow);
+            return pageSize;
           }
         };
     return pagingContainer;
@@ -1445,7 +1444,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     //  });
   }
 
+  /**
+   * @param visibleIDs
+   * @param currentReq
+   * @see
+   */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
+    logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs);
     long then = System.currentTimeMillis();
     List<Integer> requested = new ArrayList<>();
     List<CommonExercise> alreadyFetched = new ArrayList<>();
@@ -1459,9 +1464,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     if (requested.isEmpty()) {
+      logger.info("reallyGetExercises no req for " + alreadyFetched);
       gotFullExercises(currentReq, alreadyFetched);
     } else {
-      //  logger.info("reallyGetExercises make req.");
+      logger.info("reallyGetExercises make req for " + requested);
       if (controller.getUser() > 0) {
         service.getFullExercises(currentReq, requested,
             new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
@@ -1475,6 +1481,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
               @Override
               public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
+                logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
                 if (result.getExercises() != null) {
                   long now = System.currentTimeMillis();
                   int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
@@ -1487,10 +1494,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
               }
             });
       }
+      else {
+        logger.warning("not asking for " + requested);
+      }
     }
   }
 
-  private void getFullExercisesSuccess(ExerciseListWrapper<CommonExercise> result, List<CommonExercise> alreadyFetched, Collection<Integer> visibleIDs) {
+  private void getFullExercisesSuccess(ExerciseListWrapper<CommonExercise> result,
+                                       List<CommonExercise> alreadyFetched,
+                                       Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
     // int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
     // logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
@@ -1504,7 +1516,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       }
       result.getExercises().forEach(this::addExerciseToCached);
 
-      for (int id : visibleIDs) toShow.add(idToEx.get(id));
+      for (int id : visibleIDs) {
+        CommonExercise e = idToEx.get(id);
+        if (e == null) {
+          logger.warning("getFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+        } else {
+          toShow.add(e);
+        }
+      }
     }
 
     if (isCurrent(reqID)) {
@@ -1530,6 +1549,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
     for (CommonExercise ex : result.getExercises()) {
+   //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
       idToEx.put(id, ex);
       List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
@@ -1539,6 +1559,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
       ex.getMutable().setScores(scoreTotal);
     }
+    //logger.info("setScoreHistory now " + idToEx.size());
+
     return idToEx;
   }
 
@@ -1552,6 +1574,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           showExercises(toShow, reqID);
           progressBar.setVisible(false);
         } else {
+      //    logger.info("showing " + toShow.size() + " exercises");
           showExercises(toShow, reqID);
         }
       }

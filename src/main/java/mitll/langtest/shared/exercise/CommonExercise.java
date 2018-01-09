@@ -32,9 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -72,13 +70,13 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   String getContext();
   String getContextTranslation();
 
-  Collection<CommonExercise> getDirectlyRelated();
+  List<CommonExercise> getDirectlyRelated();
 
   boolean isSafeToDecode();
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
+   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
    */
   int getCreator();
 

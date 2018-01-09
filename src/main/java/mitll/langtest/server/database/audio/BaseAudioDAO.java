@@ -154,9 +154,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   public void attachAudioToExercises(Collection<CommonExercise> exercises, String language) {
-    logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " + language);
 
     Set<Integer> exerciseIDs = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
+    logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " + language + " : " + exerciseIDs);
 
     exercises.forEach(exercise -> exercise.getDirectlyRelated()
         .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));

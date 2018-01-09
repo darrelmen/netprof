@@ -87,13 +87,20 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       CommonExercise commonExercise = idToExercise.get(id);
 
       if (commonExercise == null) {
+        logger.warn("getExercise huh?  cant' find " + id);
         if (id != userExerciseDAO.getUnknownExerciseID()) {
           commonExercise = idToContextExercise.get(id);
           if (commonExercise == null) {
             logger.warn(this + " getExercise : couldn't find exercise #" + id +
                 " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
           }
+          else {
+            logger.warn("getExercise context " + commonExercise.getID());
+          }
         }
+      }
+      else {
+        logger.warn("getEx " + id + " : " + commonExercise);
       }
       return commonExercise;
     }
@@ -135,10 +142,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    */
   protected void addOverlays(Collection<Integer> removes) {
   }
-
-/*  public Map<Integer, String> getIDToFL(int projid) {
-    return userExerciseDAO.getIDToFL(projid);
-  }*/
 
   /**
    * Does join with related exercise table - maybe better way to do this in scala side?

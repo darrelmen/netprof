@@ -366,7 +366,9 @@ public class Project implements PronunciationLookup {
   }
 
   public CommonExercise getExerciseByID(int id) {
-    return exerciseDAO.getExercise(id);
+    CommonExercise exercise = exerciseDAO.getExercise(id);
+    logger.info("getExerciseByID " + id + " = " + exercise.getID() + " " + exercise);
+    return exercise;
   }
 
   /**

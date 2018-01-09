@@ -62,14 +62,6 @@ import java.util.Set;
  */
 public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends SimpleExerciseDAO<T> {
   /**
-   * @param userExercise
-   * @return
-   * @Deprecated - do we still need this with domino content management?
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem
-   */
-  //CommonExercise addOverlay(CommonExercise userExercise);
-
-  /**
    * @param userExerciseDAO
    * @param projid
    * @param isMyProject is the data on this host? e.g. hydra2 may only have some projects and audio
@@ -80,8 +72,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        IAudioDAO audioDAO,
                        int projid,
                        Database database, boolean isMyProject);
- // Map<Integer, String> getIDToFL(int projid);
-
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
 
   /**

@@ -65,7 +65,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private final ResultDAOWrapper dao;
   private SlickResult defaultResult;
-  //  private final ParseResultJson parser;
   ServerProperties serverProps;
 
   /**
@@ -78,7 +77,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     super(database);
     serverProps = database.getServerProps();
     dao = new ResultDAOWrapper(dbConnection);
-    //  parser = new ParseResultJson(database.getServerProps(), language);
   }
 
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
@@ -378,6 +376,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .collect(Collectors.toSet());
 
     Map<Integer, SlickExerciseScore> correctAndScoresForReal;
+
     if (idsToFind.size() < 200 || true) {
       long then = System.currentTimeMillis();
       correctAndScoresForReal = dao.exidAndScoreWhere(userid, idsToFind);

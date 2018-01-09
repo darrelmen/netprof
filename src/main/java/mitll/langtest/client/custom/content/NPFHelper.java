@@ -145,11 +145,11 @@ public class NPFHelper implements RequiresResize {
     return hp;
   }
 
-  void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
+  private void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
     left.add(exerciseListOnLeftSide);
   }
 
-  Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
+  private Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
@@ -165,7 +165,7 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see ##getRightSideContent
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
+  private PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
     //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         makeExerciseList(right, new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(showFirstNotCompleted));
@@ -184,8 +184,7 @@ public class NPFHelper implements RequiresResize {
   private void rememberAndLoadFirstFromUserList(final UserList<CommonShell> ul, HasID toSelect) {
     npfExerciseList.setUserListID(ul.getID());
 
-    List<CommonShell> copy = new ArrayList<>();
-    copy.addAll(ul.getExercises());
+    List<CommonShell> copy = new ArrayList<>(ul.getExercises());
 
     int id = toSelect == null ? -1 : toSelect.getID();
     logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
@@ -214,7 +213,7 @@ public class NPFHelper implements RequiresResize {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
+  private ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
       final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
       final String instanceName,
       final boolean showQC) {
@@ -226,7 +225,6 @@ public class NPFHelper implements RequiresResize {
         if (showQC) {
           return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
         } else {
-        //  getChoices(), getPhoneChoices();
           TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(e,
               controller,
               exerciseList,

@@ -34,6 +34,7 @@ package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -117,9 +118,11 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
        */
       @Override
       protected Panel getCurrentExercisePanel() {
-        Panel currentExercisePanel = super.getCurrentExercisePanel();
-        currentExercisePanel.getElement().getStyle().setPadding(5, Style.Unit.PX);
-        return currentExercisePanel;
+        FlowPanel currentExerciseVPanel = new FlowPanel();
+        currentExerciseVPanel.getElement().setId("NPFHelper_amas_currentExercisePanel");
+        currentExerciseVPanel.addStyleName("floatLeft");
+        currentExerciseVPanel.getElement().getStyle().setPadding(5, Style.Unit.PX);
+        return currentExerciseVPanel;
       }
 
       /**

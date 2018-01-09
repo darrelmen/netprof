@@ -1628,6 +1628,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                              int projectID) {
     Set<CommonExercise> toAddAudioTo = new HashSet<>();
 
+    logger.info("getCommonExercisesWithoutAudio " +ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
@@ -1636,6 +1637,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       //}
       exercises.add(byID);
+      logger.info("\tgetCommonExercisesWithoutAudio " +byID.getID());
+
     }
     return toAddAudioTo;
   }

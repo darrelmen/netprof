@@ -136,17 +136,19 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public Collection<Integer> getVisibleIDs() {
-
     Range visibleRange = getVisibleRange();
+
+//    logger.info("getVisibleIDs : visible range " + visibleRange);
 
     if (visibleRange.getLength() == 1) {
       if (isEmpty()) {
-       // logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
+        // logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
         return Collections.emptyList();
       } else {
         T currentSelection = getCurrentSelection();
         int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
-       // logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
+  //      logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
+    //    logger.info("ClickablePagingContainer.getVisibleIDs : not getting " + getIdsForRange(visibleRange));
         List<Integer> visible = new ArrayList<>();
         visible.add(id);
         return visible;
@@ -164,12 +166,12 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
     int start = visibleRange.getStart();
     int end = Math.min(getList().size(), start + visibleRange.getLength());
-    // logger.info("ClickablePagingContainer.getVisibleIDs : get from " + start + " to " + end + " vs " + getList().size());
 
     List<Integer> visible = new ArrayList<>();
     for (int i = start; i < end; i++) {
       visible.add(getAt(i).getID());
     }
+//    logger.info("ClickablePagingContainer.getIdsForRange : get from " + start + " to " + end + " vs " + getList().size()+ " : " + visible);
     return visible;
   }
 
@@ -294,15 +296,15 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     int numRows = getNumTableRowsGivenScreenHeight();
     //   logger.info("onResize size is " + numRows);
     if (/*table.getParent() != null &&*/ table.getPageSize() != numRows) {
-    //  logger.info("2 onResize size is " + numRows + " parent " +table.getParent());
+      //  logger.info("2 onResize size is " + numRows + " parent " +table.getParent());
       table.setPageSize(numRows);
-     // table.redraw();
+      // table.redraw();
       markCurrent(currentExercise);
     }
   }
 
   public void setPageSize(int pageSize) {
-    //  logger.info("page size is " + pageSize);
+  //  logger.info("setPageSize: page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

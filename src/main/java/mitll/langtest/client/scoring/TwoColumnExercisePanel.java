@@ -107,7 +107,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param controller
    * @param listContainer
    * @param alignments
-   * @paramx phonesChoices
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
    */
@@ -140,6 +139,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
     } else {
+      logger.warning("addWidgets no project startup info?");
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
     }
@@ -931,7 +931,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private Widget getItemContent(final T e) {
     Panel card = new DivWidget();
-    //card.getElement().setId("TwoColumn_QuestionContent");
     card.setWidth("100%");
 
     boolean meaningValid = isMeaningValid(e);

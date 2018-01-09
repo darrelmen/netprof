@@ -695,11 +695,13 @@ public class ProjectManagement implements IProjectManagement {
 
       Project project = getProject(projid);
 
-      if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
-        logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
-        userWhere.setStartupInfo(null);
-      } else {
-        setStartupInfoOnUser(userWhere, projid, project);
+      if (project != null) {
+        if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
+          logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
+          userWhere.setStartupInfo(null);
+        } else {
+          setStartupInfoOnUser(userWhere, projid, project);
+        }
       }
     }
   }

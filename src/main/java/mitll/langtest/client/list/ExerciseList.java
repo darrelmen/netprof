@@ -274,6 +274,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
+
+      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
     }
 
     public void onFailure(Throwable caught) {
@@ -283,13 +285,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
-      logger.info("took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
+      logger.info("onSuccess took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
 
       showFinishedGettingExercises();
       if (DEBUG) {
         List<T> exercises = result.getExercises();
+
+        exercises.forEach(exercise->logger.info("Got " + exercise.getID() + " " + exercise.getEnglish()));
         if (exercises == null)
-          logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results");
+          logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
       }
       if (isStaleResponse(result)) {
         if (DEBUG)

@@ -63,7 +63,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String SEMI = ";";
   private static final int MAX_WARNS = Integer.MAX_VALUE;
 
-  protected final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
+  final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
   private final Map<String, CommonExercise> oldidToExercise = new HashMap<>();
 
   private final ISection<CommonExercise> sectionHelper = new SectionHelper<>();
@@ -212,7 +212,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
-      idToExercise.put(e.getDominoID(), e);
+     // idToExercise.put(e.getDominoID(), e);
       oldidToExercise.put(e.getOldID(), e);
     }
 
@@ -360,6 +360,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     synchronized (idToExercise) {
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
+
+      logger.info("add : put " + ue.getID() + " ue " + ue);
       oldidToExercise.put(ue.getOldID(), ue);
 
       if (exercises.size() != idToExercise.size()) {

@@ -565,7 +565,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         System.currentTimeMillis(),
         false,
         -1,
-        factory.getTokens(foreignLanguage));
+        factory.getTokens(foreignLanguage), -1);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

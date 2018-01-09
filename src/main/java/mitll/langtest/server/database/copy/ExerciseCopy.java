@@ -23,7 +23,7 @@ import java.util.*;
 public class ExerciseCopy {
   private static final Logger logger = LogManager.getLogger(ExerciseCopy.class);
 
-  boolean DEBUG = false;
+  private  boolean DEBUG = false;
 
   /**
    * TODO :  How to make sure we don't add duplicates?
@@ -250,16 +250,16 @@ public class ExerciseCopy {
       } else {
         int contextCount = 1;
         for (CommonExercise context : ex.getDirectlyRelated()) {
-          context.getMutable().setOldID("" + (parentID * 10) + (contextCount++));
+          int i = (parentID * 10) + (contextCount++);
+          context.getMutable().setOldID("" + i);
 
-          SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
-              //pairs,
-              now, parentID, context);
-          pairs.add(e);
-          parentToChild.put(oldID, e.contextexid());
+          SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context);
+          pairs.add(relation);
+          parentToChild.put(oldID, relation.contextexid());
 
           if (DEBUG) {
-            logger.info("addContextExercises map parent ex " + parentID + " -> child ex " + e.contextexid() + " ( " + ex.getDirectlyRelated().size());
+            logger.info("addContextExercises map parent ex " + parentID + " -> child ex " + relation.contextexid() +
+                " ( " + ex.getDirectlyRelated().size());
           }
 
           ct++;
@@ -281,17 +281,13 @@ public class ExerciseCopy {
                                                      SlickUserExerciseDAO slickUEDAO,
                                                      int importUser,
                                                      Collection<String> typeOrder,
-                                                     //  List<SlickRelatedExercise> pairs,
                                                      Timestamp now,
                                                      Integer parentExerciseID,
                                                      CommonExercise context) {
     int contextid =
         slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
 
-
-    SlickRelatedExercise e = new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, now);
-    // pairs.add(e);
-    return e;
+    return new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, now);
   }
 
   /**

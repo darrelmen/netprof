@@ -564,13 +564,12 @@ fieldset > legend {
     /*
     font-weight: bold;
     */
-    /*    word-wrap: normal;
-        word-break: keep-all;
-        white-space: normal;
-        font-family: sans-serif;
-        line-height: 100%;
-        float: left;*/
+    word-wrap: normal;
+    word-break: keep-all;
+    white-space: normal;
     font-family: sans-serif;
+    line-height: 100%;
+    float: left;
 }
 
 .flfont {
@@ -1881,7 +1880,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
 }
 
-.navbar #lnav > li > a:hover  {
+.navbar #lnav > li > a:hover {
     color: #62b0df;
 }
 
@@ -1898,7 +1897,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar .breadcrumb {
-    background-color: #dbdbdb;
+    background-color: unset;
 }
 
 .mainBlock select {
