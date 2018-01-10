@@ -549,7 +549,7 @@ public class RefResultDecoder {
               staleExercise++;
             }
           } else {
-            if (notThere < 10 *//*|| exid.startsWith("1")*//*)
+            if (notThere < 100 *//*|| exid.startsWith("1")*//*)
               logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
             notThere++;
           }

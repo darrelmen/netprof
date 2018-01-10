@@ -1148,7 +1148,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (c < directlyRelated.size()) {
         rowWidget = getRowWidget();
         card.add(rowWidget);
-        rowWidget.getElement().setId("contextRow_again");
+        //rowWidget.getElement().setId("contextRow_again");
       }
     }
   }

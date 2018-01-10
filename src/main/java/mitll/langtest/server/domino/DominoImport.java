@@ -1,27 +1,22 @@
 package mitll.langtest.server.domino;
 
-import mitll.hlt.domino.server.util.Mongo;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
+import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.DocumentColumn;
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
-import mitll.hlt.domino.shared.model.metadata.MetadataList;
-import mitll.hlt.domino.shared.model.metadata.MetadataSpecification;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.project.ProjectColumn;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
-import mitll.hlt.domino.shared.model.taskspec.TaskSpecification;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,18 +24,14 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
 
@@ -49,7 +40,6 @@ public class DominoImport implements IDominoImport {
   private static final String VOCABULARY = "Vocabulary";
   private static final String V_UNIT = "v-unit";
   private static final String V_CHAPTER = "v-chapter";
-
 
   private final ProjectServiceDelegate projectDelegate;
   private final DocumentServiceDelegate documentDelegate;
@@ -323,10 +313,8 @@ public class DominoImport implements IDominoImport {
     return ids;
   }
 
-
   @NotNull
   private LocalDate getModifiedTime(String toParse) {
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(MONGO_TIME);
-    return LocalDate.parse(toParse, dateTimeFormatter);
+    return LocalDate.parse(toParse, DateTimeFormatter.ofPattern(MONGO_TIME));
   }
 }

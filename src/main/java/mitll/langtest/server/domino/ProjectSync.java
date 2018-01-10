@@ -22,6 +22,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -51,7 +52,8 @@ public class ProjectSync implements IProjectSync {
   private final IProjectManagement projectManagement;
   private IUserExerciseDAO userExerciseDAO;
   private final DAOContainer daoContainer;
-  ExerciseServices exerciseServices;
+  private ExerciseServices exerciseServices;
+  private SlickUserExerciseDAO slickUEDAO;
 
   /**
    * @param projectServices
@@ -67,6 +69,7 @@ public class ProjectSync implements IProjectSync {
     this.daoContainer = daoContainer;
     this.userExerciseDAO = userExerciseDAO;
     this.exerciseServices = exerciseServices;
+    slickUEDAO = (SlickUserExerciseDAO) daoContainer.getUserExerciseDAO();
   }
 
   /**
@@ -110,83 +113,17 @@ public class ProjectSync implements IProjectSync {
         }
       }
 
-      SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) daoContainer.getUserExerciseDAO();
-
       // so on update we have three sets of exercises - Add, change, delete
       //  new exercises we haven't seen before,
       //  ones we have which might have changed and would then need to be updated
       //  ones that are current but not in domino and have been deleted
 
+      Map<Integer, SlickExercise> dominoToNonContextEx = slickUEDAO.getLegacyToEx(projectid);
       List<CommonExercise> newEx = new ArrayList<>();
       List<CommonExercise> newContextEx = new ArrayList<>();
       List<CommonExercise> importUpdateEx = new ArrayList<>();
-      Set<CommonExercise> bringBack = new HashSet<>();
 
-      Map<Integer, SlickExercise> dominoToEx = slickUEDAO.getLegacyToEx(projectid);
-
-      Map<String, SlickExercise> oldIDToExer = new HashMap<>();
-      dominoToEx.values().forEach(slickExercise -> {
-        oldIDToExer.put(slickExercise.exid(), slickExercise);
-      });
-
-      logger.info("addPending found " + dominoToEx.size() + " current exercises for " + projectid);
-
-      {
-        Set<Integer> currentIDs = dominoToEx.keySet();
-        Set<String> oldIDs = oldIDToExer.keySet();
-
-        Map<Integer, CommonExercise> dominoIDToExercise = getDominoIDToExercise(importFromDomino.getExercises());
-
-        logger.info("addPending importing " + dominoIDToExercise.size() + " exercises");
-
-        // three piles:
-        // currentIDs exercises for the project that are not in the import should be deleted
-        // import exercises not in the currentIDs set are new and need to be added
-        // matching exercises need to be checked to see if they have changed
-        // * but previously deleted exercises can be brought back
-
-        dominoIDToExercise.forEach((dominoID, importEx) -> {
-          String npID = importEx.getOldID();
-
-          logger.info("addPending import domino id " + dominoID);
-          logger.info("addPending import npID      '" + npID + "'");
-          logger.info("addPending import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
-
-          // try to find it by domino or np id
-          // np id for production projects.
-          SlickExercise currentKnownExercise = dominoToEx.get(dominoID);
-          if (currentKnownExercise == null && !npID.isEmpty()) {
-            logger.info("\taddPending can't find ex by domino id " + dominoID);
-
-            currentKnownExercise = oldIDToExer.get(npID);
-            if (currentKnownExercise != null) {
-              logger.info("\taddPending found ex by netprof id " + npID);
-            }
-          }
-
-          if (currentKnownExercise != null) {
-            int exID = currentKnownExercise.id();
-
-            if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
-              importUpdateEx.add(importEx);
-              MutableExercise mutable = importEx.getMutable();
-              mutable.setID(exID);
-              mutable.setOldID(npID);
-            } else { // impossible?
-              newEx.add(importEx);
-              logger.info("\n\n\n addPending 2 found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
-            }
-          } else {
-            logger.info("addPending found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
-            if (importEx.isContext()) {
-              matchContext(projectid, newContextEx, importUpdateEx, dominoToEx, dominoID, importEx);
-            } else {
-
-              newEx.add(importEx);
-            }
-          }
-        });
-      }
+      Map<String, SlickExercise> oldIDToExer = getNewAndChangedExercises(projectid, importFromDomino, dominoToNonContextEx, newEx, importUpdateEx);
 
       {
         Collection<String> typeOrder2 = project.getTypeOrder();
@@ -214,10 +151,10 @@ public class ProjectSync implements IProjectSync {
           // now update...
           // update the exercises...
           logger.info("addPending updating  " + importUpdateEx.size() + " exercises");
-          doUpdate(projectid, importUser, slickUEDAO, importUpdateEx, typeOrder2, dominoToEx, oldIDToExer, bringBack);
+          doUpdate(projectid, importUser, slickUEDAO, importUpdateEx, typeOrder2, dominoToNonContextEx, oldIDToExer);//, bringBack);
         }
 
-        doDelete(importFromDomino, dominoToEx);
+        doDelete(importFromDomino, dominoToNonContextEx);
 
 /*
           if (!deleteEx.isEmpty()) {
@@ -236,6 +173,159 @@ public class ProjectSync implements IProjectSync {
       int i = projectManagement.configureProject(project, false, true);
       return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
     }
+  }
+
+  @NotNull
+  private Map<String, SlickExercise> getNewAndChangedExercises(int projectid,
+                                                               ImportInfo importFromDomino,
+                                                               Map<Integer, SlickExercise> dominoToNonContextEx,
+                                                               List<CommonExercise> newEx,
+                                                               List<CommonExercise> importUpdateEx) {
+    // Map<Integer, SlickExercise> dominoToNonContextEx = slickUEDAO.getLegacyToEx(projectid);
+
+    Map<String, SlickExercise> oldIDToExer = new HashMap<>();
+    dominoToNonContextEx.values().forEach(slickExercise -> {
+      oldIDToExer.put(slickExercise.exid(), slickExercise);
+    });
+
+    logger.info("addPending found " + dominoToNonContextEx.size() + " current exercises for " + projectid);
+
+    {
+      Set<Integer> currentIDs = dominoToNonContextEx.keySet();
+      Set<String> oldIDs = oldIDToExer.keySet();
+
+      Map<Integer, CommonExercise> dominoIDToExercise = getDominoIDToExercise(importFromDomino.getExercises());
+
+      logger.info("addPending importing " + dominoIDToExercise.size() + " exercises ");
+
+      // three piles:
+      // currentIDs exercises for the project that are not in the import should be deleted
+      // import exercises not in the currentIDs set are new and need to be added
+      // matching exercises need to be checked to see if they have changed
+      // * but previously deleted exercises can be brought back
+
+      dominoIDToExercise.forEach((dominoID, importEx) -> {
+        String npID = importEx.getOldID();
+
+        logger.info("addPending import" +
+            "\n\tcontext   " + importEx.isContext() +
+            "\n\tdomino id " + dominoID +
+            "\n\tnpID      '" + npID + "'" +
+            "\n\teng       " + importEx.getEnglish() +
+            "\n\tfl        " + importEx.getForeignLanguage()
+        );
+        // logger.info("addPending import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
+
+        // try to find it by domino or np id
+        // np id for production projects.
+        SlickExercise currentKnownExercise = getKnownSlickExercise(dominoToNonContextEx, oldIDToExer, dominoID, npID);
+
+        if (currentKnownExercise != null) {
+          int exID = currentKnownExercise.id();
+
+          if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
+            importUpdateEx.add(importEx);
+            MutableExercise mutable = importEx.getMutable();
+            mutable.setID(exID);
+            mutable.setOldID(npID);
+          } else { // impossible?
+            newEx.add(importEx);
+            logger.warn("\n\n\n addPending 2 found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+          }
+        } else {
+          logger.info("addPending found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+          newEx.add(importEx);
+        }
+      });
+    }
+    return oldIDToExer;
+  }
+
+/*  @NotNull
+  private void getNewAndChangedContextExercises(int projectid,
+                                                               ImportInfo importFromDomino,
+                                                                      Map<String, SlickExercise> oldIDToExer,
+                                                               List<CommonExercise> newContextEx,
+                                                               List<CommonExercise> importUpdateEx) {
+   // Map<Integer, SlickExercise> dominoToNonContextEx = slickUEDAO.getLegacyToEx(projectid);
+
+//    Map<String, SlickExercise> oldIDToExer = new HashMap<>();
+//    dominoToNonContextEx.values().forEach(slickExercise -> {
+//      oldIDToExer.put(slickExercise.exid(), slickExercise);
+//    });
+
+    //logger.info("addPending found " + dominoToNonContextEx.size() + " current exercises for " + projectid);
+
+    {
+//      Set<Integer> currentIDs = dominoToNonContextEx.keySet();
+      Set<String> oldIDs = oldIDToExer.keySet();
+
+      Map<String, CommonExercise> dominoIDToContextExercise = getDominoIDToContextExercise(importFromDomino.getExercises());
+
+      logger.info("addPending importing " + dominoIDToContextExercise.size() + " context ");
+
+      // three piles:
+      // currentIDs exercises for the project that are not in the import should be deleted
+      // import exercises not in the currentIDs set are new and need to be added
+      // matching exercises need to be checked to see if they have changed
+      // * but previously deleted exercises can be brought back
+
+      dominoIDToContextExercise.forEach((dominoID, importEx) -> {
+        String npID = importEx.getOldID();
+
+        logger.info("addPending import" +
+            "\n\tcontext   " + importEx.isContext() +
+            "\n\tdomino id " + dominoID +
+            "\n\tnpID      '" + npID + "'" +
+            "\n\teng       " + importEx.getEnglish() +
+            "\n\tfl        " + importEx.getForeignLanguage()
+        );
+        // logger.info("addPending import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
+
+        // try to find it by domino or np id
+        // np id for production projects.
+        SlickExercise currentKnownExercise = getKnownSlickExercise(dominoIDToContextExercise, oldIDToExer, dominoID, npID);
+
+        if (currentKnownExercise != null) {
+          int exID = currentKnownExercise.id();
+
+          if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
+            importUpdateEx.add(importEx);
+            MutableExercise mutable = importEx.getMutable();
+            mutable.setID(exID);
+            mutable.setOldID(npID);
+          } else { // impossible?
+            newEx.add(importEx);
+            logger.warn("\n\n\n addPending 2 found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+          }
+        } else {
+          logger.info("addPending found new ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
+          if (importEx.isContext()) {
+            matchContext(projectid, newContextEx, importUpdateEx, dominoToNonContextEx, dominoID, importEx);
+          } else {
+            newEx.add(importEx);
+          }
+        }
+      });
+    }
+    return oldIDToExer;
+  }*/
+
+  @Nullable
+  private SlickExercise getKnownSlickExercise(Map<Integer, SlickExercise> dominoToNonContextEx,
+                                              Map<String, SlickExercise> oldIDToExer,
+                                              Integer dominoID,
+                                              String npID) {
+    SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
+    if (currentKnownExercise == null && !npID.isEmpty()) {
+      logger.info("\taddPending can't find ex by domino id " + dominoID);
+
+      currentKnownExercise = oldIDToExer.get(npID);
+      if (currentKnownExercise != null) {
+        logger.info("\taddPending found ex by netprof id " + npID);
+      }
+    }
+    return currentKnownExercise;
   }
 
   private void matchContext(int projectid, List<CommonExercise> newContextEx, List<CommonExercise> importUpdateEx, Map<Integer, SlickExercise> dominoToEx, Integer dominoID, CommonExercise importEx) {
@@ -422,13 +512,6 @@ public class ProjectSync implements IProjectSync {
 //    logger.info("update modified time for project #" + project1.id());
   }
 
-//  private void markDeleted(int projectid) {
-//    Project project = projectServices.getProject(projectid);
-//    SlickProject slickProject = project.getProject();
-//    slickProject.updateStatus(ProjectStatus.DELETED.toString());
-//    daoContainer.getProjectDAO().easyUpdate(slickProject);
-//  }
-
   @NotNull
   private List<Project> getProjectForDominoID(int jsonDominoID) {
     List<Project> existingBound = new ArrayList<>();
@@ -462,12 +545,13 @@ public class ProjectSync implements IProjectSync {
   }
 
 
-  // add context exercises too.
   @NotNull
   private Map<Integer, CommonExercise> getDominoIDToExercise(Collection<CommonExercise> toImport) {
     Map<Integer, CommonExercise> dominoToEx = new HashMap<>();
     toImport.forEach(ex -> dominoToEx.put(ex.getDominoID(), ex));
     logger.info("getDominoIDToExercise importing " + toImport.size() + " vocab items");
+
+/*
     toImport.forEach(ex ->
         ex.getDirectlyRelated().forEach(commonExercise -> {
           int dominoID = commonExercise.getDominoID();
@@ -479,6 +563,26 @@ public class ProjectSync implements IProjectSync {
         })
     );
     logger.info("getDominoIDToExercise importing " + toImport.size() + " vocab items + context exercises...");
+*/
+
+    return dominoToEx;
+  }
+
+  @NotNull
+  private Map<String, CommonExercise> getDominoIDToContextExercise(Collection<CommonExercise> toImport) {
+    Map<String, CommonExercise> dominoToEx = new HashMap<>();
+
+    toImport.forEach(ex ->
+        ex.getDirectlyRelated().forEach(commonExercise -> {
+          int dominoID = commonExercise.getDominoID();
+          if (dominoID > 0) {
+            dominoToEx.put(dominoID + "_" + commonExercise.getDominoContextIndex(), commonExercise);
+          } else {
+            logger.error("getDominoIDToContextExercise : huh? no domino ID for " + commonExercise);
+          }
+        })
+    );
+    logger.info("getDominoIDToContextExercise importing " + toImport.size() + " vocab items + context exercises...");
 
     return dominoToEx;
   }
@@ -883,8 +987,10 @@ public class ProjectSync implements IProjectSync {
                         List<CommonExercise> updateEx,
                         Collection<String> typeOrder2,
                         Map<Integer, SlickExercise> legacyToEx,
-                        Map<String, SlickExercise> oldIDToExer,
-                        Set<CommonExercise> bringBack) {
+                        Map<String, SlickExercise> oldIDToExer
+                        //    ,
+                        //                    Set<CommonExercise> bringBack
+  ) {
     int failed = 0;
 
     Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getIDToPair(projectid);
@@ -917,7 +1023,7 @@ public class ProjectSync implements IProjectSync {
         logger.info("Exercise #" + currentExercise.id() + " with domino id " + toUpdate.getDominoID() + " : '" + currentExercise.english() + "' is a new import!");
       }
 
-      boolean changed = newImport || changed(currentExercise, toUpdate, first, second) || bringBack.contains(toUpdate);
+      boolean changed = newImport || changed(currentExercise, toUpdate, first, second);// || bringBack.contains(toUpdate);
       if (!changed) {
         logger.info("Exercise #" + currentExercise.id() + " " + currentExercise.english() + " has not changed");
       }

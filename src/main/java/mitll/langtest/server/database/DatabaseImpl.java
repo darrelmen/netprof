@@ -34,14 +34,16 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
-import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.audio.AudioExportOptions;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
-import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -82,11 +84,13 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.result.MonitorResult;
@@ -104,7 +108,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -156,8 +159,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IUserProjectDAO userProjectDAO;
   private IDLIClassDAO dliClassDAO;
   private IDLIClassJoinDAO dliClassJoinDAO;
-
-  private ContextPractice contextPractice;
 
   protected ServerProperties serverProps;
   protected LogAndNotify logAndNotify;
@@ -509,18 +510,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userid
    * @param projectid
-   * @see mitll.langtest.server.services.UserServiceImpl#setProject
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
   @Override
   public void rememberUsersCurrentProject(int userid, int projectid) {
-    logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
+  //  logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
 
   /**
    * @param userid
-   * @see UserServiceImpl#forgetProject
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
    */
   @Override
   public void forgetProject(int userid) {
@@ -541,7 +542,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param userWhere
    * @param projid
    * @see #setStartupInfo(User)
-   * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
@@ -704,38 +705,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return numExercises;
   }*/
 
-/*
-  @Override
-  public void reloadExercises(int projectid) {
-    ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
-    if (exerciseDAO != null) {
-      logger.info("reloading from exercise dao");
-      exerciseDAO.reload();
-    } else {
-      if (fileExerciseDAO != null) {
-        logger.info("reloading from fileExerciseDAO");
-        fileExerciseDAO.reload();
-        // numExercises = fileExerciseDAO.getNumExercises();
-      } else {
-        logger.error("huh? no exercise DAO yet???");
-      }
-    }
-  }
-*/
-
-  /**
-   * Dialog practice
-   *
-   * @param contextPracticeFile
-   * @param installPath
-   */
-  private void makeContextPractice(String contextPracticeFile, String installPath) {
-    if (contextPractice == null && contextPracticeFile != null) {
-      synchronized (this) {
-        this.contextPractice = new ContextPracticeImport(installPath + File.separator + contextPracticeFile).getContextPractice();
-      }
-    }
-  }
 
   /**
    * TODO : why is this so confusing???
@@ -928,34 +897,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
         language);
   }
 
-  /**
-   * @see LangTestDatabaseImpl#init()
-   */
-  @Override
-  public void preloadContextPractice() {
-    makeContextPractice(getServerProps().getDialogFile(), "");
-  }
-
   @Override
   public Connection getConnection(String who) {
     return null;
   }
 
   @Override
-  public void closeConnection(Connection connection) {
-  }
+  public void closeConnection(Connection connection) {}
 
-  /**
-   * @return
-   * @seex LangTestDatabaseImpl#getContextPractice
-   */
-/*  @Override
-  public ContextPractice getContextPractice() {
-    if (this.contextPractice == null) {
-      makeContextPractice(getServerProps().getDialogFile(), installPath);
-    }
-    return this.contextPractice;
-  }*/
   public void logEvent(String exid, String context, int userid, String device, int projID) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     logEvent(UNKNOWN, "server", exid, context, userid, device, projID);

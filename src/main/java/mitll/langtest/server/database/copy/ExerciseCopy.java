@@ -23,7 +23,7 @@ import java.util.*;
 public class ExerciseCopy {
   private static final Logger logger = LogManager.getLogger(ExerciseCopy.class);
 
-  private  boolean DEBUG = false;
+  private boolean DEBUG = false;
 
   /**
    * TODO :  How to make sure we don't add duplicates?
@@ -250,8 +250,7 @@ public class ExerciseCopy {
       } else {
         int contextCount = 1;
         for (CommonExercise context : ex.getDirectlyRelated()) {
-          int i = (parentID * 10) + (contextCount++);
-          context.getMutable().setOldID("" + i);
+          context.getMutable().setOldID(parentID + "_" + (contextCount++));
 
           SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context);
           pairs.add(relation);

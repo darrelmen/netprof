@@ -56,9 +56,9 @@ import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
  */
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
-
   protected String oldid = "";
   private int dominoID = -1;
+  private int dominoContextIndex = -1;
 
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores = new ArrayList<>();
@@ -506,35 +506,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
         );
   }
 
-  public String toString() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }
-
-    return "Exercise #" +
-
-        getID() +
-        ", domino # " + getDominoID() +
-        " old '" + getOldID() +  "'" +
-        " project " + projectid +
-        " english '" + getEnglish() +
-        "'/'" + getForeignLanguage() + "' " +
-        (getAltFL().isEmpty() ? "" : getAltFL()) +
-        "meaning '" + getMeaning() +
-        "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
-        " audio childCount = " + audioAttributes1.size() +
-        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue() +
-        " attr " + getAttributes();
-  }
-
   @Deprecated
   public String getOldID() {  return oldid;  }
 
@@ -550,6 +521,36 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public Map<String, String> getUnitToValue() {
     return unitToValue;
+  }
+
+  public String toString() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr : audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
+      }
+    }
+
+    return "Exercise #" +
+
+        getID() +
+        ", domino # " + getDominoID() +
+        " np id '" + getOldID() +  "'" +
+        " context index " + dominoContextIndex+
+        " project " + projectid +
+        " english '" + getEnglish() +
+        "'/'" + getForeignLanguage() + "' " +
+        (getAltFL().isEmpty() ? "" : getAltFL()) +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
+        "' context " + getDirectlyRelated() +
+        " audio childCount = " + audioAttributes1.size() +
+        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
+        " unit->lesson " + getUnitToValue() +
+        " attr " + getAttributes();
   }
 
   /**
@@ -644,5 +645,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public void setParentDominoID(int parentDominoID) {
     this.parentDominoID = parentDominoID;
+  }
+
+  @Override
+  public int getDominoContextIndex() {
+    return dominoContextIndex;
+  }
+
+  public void setDominoContextIndex(int dominoContextIndex) {
+    this.dominoContextIndex = dominoContextIndex;
   }
 }

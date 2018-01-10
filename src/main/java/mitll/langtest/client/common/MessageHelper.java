@@ -153,7 +153,7 @@ public class MessageHelper {
     } else if (throwable instanceof RestrictedOperationException) {
       makeInternalDialog("Operation not Permitted! (" +msg+ ")", DDialogType.NonFatalError, true);
     } else if (throwable instanceof IncompatibleRemoteServiceException) {
-      makeInternalDialog("Your version of Domino is out of date. Please click refresh on your browser to get the latest version.<br/><br/>",
+      makeInternalDialog("Your version of netprof is out of date. Please click refresh on your browser to get the latest version.<br/><br/>",
           DDialogType.NonFatalError, false);
     } else if (isReload(throwable)) {
       // check wrapped

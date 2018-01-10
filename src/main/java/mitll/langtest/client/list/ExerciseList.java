@@ -275,7 +275,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.exerciseID = exerciseID;
       this.request = request;
 
-      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      //logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
     }
 
     public void onFailure(Throwable caught) {

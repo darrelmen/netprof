@@ -22,32 +22,15 @@ public class StateManager implements IStateManager {
 
   private final IReviewedDAO reviewedDAO, secondStateDAO;
 
-  public StateManager(IReviewedDAO reviewedDAO,
-                      IReviewedDAO secondStateDAO) {
+  public StateManager(IReviewedDAO reviewedDAO, IReviewedDAO secondStateDAO) {
     this.reviewedDAO = reviewedDAO;
     this.secondStateDAO = secondStateDAO;
   }
 
-  /**
-   * TODO put this back
-   * TODO : this doesn't really do anything - doesn't touch the exercises?????
-   * <p>
-   * Turned off setting second state for now -- what does it mean?
-   *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init()
-   */
-  @Override
-  public void setStateOnExercises() {
-    // getAmmendedStateMap();
- //   Map<Integer, StateCreator> exerciseToState = getExerciseToState(false);
-    //setStateOnExercises(exerciseToState, true);
-    //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
-  }
-
-
   public IReviewedDAO getReviewedDAO() {
     return reviewedDAO;
   }
+
   public IReviewedDAO getSecondStateDAO() {
     return secondStateDAO;
   }
@@ -187,7 +170,7 @@ public class StateManager implements IStateManager {
       if (stateCreator != null) {
         shell.setState(stateCreator.getState());
         //  logger.debug("\t for " + shell.getOldID() + " state " + stateCreator.getState());
-          c++;
+        c++;
       }
     }
 
@@ -293,14 +276,16 @@ public class StateManager implements IStateManager {
 
 
   /**
-   * @see IUserListManager#getCommentedList
    * @return
+   * @see IUserListManager#getCommentedList
    */
-  public Collection<Integer> getDefectExercises() {  return reviewedDAO.getDefectExercises();  }
+  public Collection<Integer> getDefectExercises() {
+    return reviewedDAO.getDefectExercises();
+  }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUninspected(Collection)
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUninspected(Collection)
    */
   public Collection<Integer> getInspectedExercises() {
     return reviewedDAO.getInspectedExercises();

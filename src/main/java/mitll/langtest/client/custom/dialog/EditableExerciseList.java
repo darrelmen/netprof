@@ -36,14 +36,6 @@ import java.util.logging.Logger;
  */
 class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
-
-//  private static final String ADD = "Add";
-
-  /**
-   * @see #makeDeleteButton
-   */
-//  private static final String REMOVE_FROM_LIST = "Remove";// from list";
-
   private final EditItem editItem;
   private final UserList<CommonShell> list;
   private SearchTypeahead searchTypeahead;
@@ -394,13 +386,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       }
     });
   }
-
-/*
-  @Override
-  protected void onLastItem() {
-  //  new ModalInfoDialog("Complete", "List complete!", hiddenEvent -> reloadExercises());
-    showListComplete();
-  }*/
 
   private void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);

@@ -157,7 +157,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     if (didChange) {
       currentProject.clearPropCache();
-      logger.info("update for " + projid);
+//      logger.info("update for " + projid);
     } else {
       logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
     }

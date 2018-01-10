@@ -1450,7 +1450,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
-    logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs);
+  //  logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs);
     long then = System.currentTimeMillis();
     List<Integer> requested = new ArrayList<>();
     List<CommonExercise> alreadyFetched = new ArrayList<>();
@@ -1464,10 +1464,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     if (requested.isEmpty()) {
-      logger.info("reallyGetExercises no req for " + alreadyFetched);
+    //  logger.info("reallyGetExercises no req for " + alreadyFetched);
       gotFullExercises(currentReq, alreadyFetched);
     } else {
-      logger.info("reallyGetExercises make req for " + requested);
+      //logger.info("reallyGetExercises make req for " + requested);
       if (controller.getUser() > 0) {
         service.getFullExercises(currentReq, requested,
             new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
@@ -1481,7 +1481,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
               @Override
               public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-                logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+        //        logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
                 if (result.getExercises() != null) {
                   long now = System.currentTimeMillis();
                   int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
@@ -1495,7 +1495,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             });
       }
       else {
-        logger.warning("not asking for " + requested);
+        //logger.warning("not asking for " + requested);
       }
     }
   }

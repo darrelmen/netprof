@@ -109,4 +109,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   int getParentExerciseID();
 
   int getParentDominoID();
+
+  int getDominoContextIndex();
 }

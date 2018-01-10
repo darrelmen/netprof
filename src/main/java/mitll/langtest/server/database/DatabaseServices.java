@@ -34,7 +34,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.IAnalysis;
-import mitll.langtest.server.database.contextPractice.ContextServices;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.ExerciseServices;
@@ -68,7 +67,7 @@ import java.util.Map;
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DatabaseServices extends DAOContainer, ProjectServices, AmasServices, ContextServices,
+public interface DatabaseServices extends DAOContainer, ProjectServices, AmasServices,
     UserListServices, ExerciseServices, ReportingServices {
   Database getDatabase();
 

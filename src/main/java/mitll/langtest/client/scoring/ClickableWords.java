@@ -246,12 +246,15 @@ public class ClickableWords<T extends CommonExercise> {
     }
 
     // if the highlight token is not in the display, skip over it -
-    List<String> realHighlight = getMatchingHighlight(tokens, getTokens(highlight, isChineseCharacter));
 
-    if (DEBUG) logger.info("getClickableWordsHighlight real " + realHighlight);
+    List<String> highlightTokens = getTokens(highlight, isChineseCharacter);
+    int highlightStartIndex = getMatchingHighlightAll(tokens, highlightTokens);
+   // List<String> realHighlight = (List<String>) startIndex;
 
-    Iterator<String> highlightIterator = realHighlight.iterator();
-    String toFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
+
+    Iterator<String> highlightIterator = highlightTokens.iterator();
+    String highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
+    if (DEBUG) logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
 
@@ -271,10 +274,16 @@ public class ClickableWords<T extends CommonExercise> {
 
     String searchToken = searchIterator.hasNext() ? searchIterator.next() : null;
 
-    for (String token : tokens) {
-      if (DEBUG) logger.info("getClickableWordsHighlight token '" + toFind + "' and '" + token + "'");
 
-      boolean isMatch = toFind != null && isMatch(token, toFind);
+    for (String token : tokens) {
+      if (DEBUG) logger.info("getClickableWordsHighlight token '" + highlightToFind + "' and '" + token + "' " + id + " vs " + highlightStartIndex);
+
+      boolean isHighlightMatch =
+          //highlightStartIndex >= 0 &&
+              id >= highlightStartIndex &&
+          highlightToFind != null &&
+              isMatch(token, highlightToFind);
+
       boolean searchMatch = isSearchMatch(token, searchToken);
 
       //  logger.info("got search match for " +searchToken + " in " +token);
@@ -282,22 +291,16 @@ public class ClickableWords<T extends CommonExercise> {
           dir,
           token,
           searchMatch ? searchToken : null,
-          isMatch,
+          isHighlightMatch,
           id++,
           isSimple, fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
-      //if (showPhones) {
-      //  w.addStyleName("rightFiveMargin");
-      //}
       horizontal.add(w);
 
-      // add spacer - also required if we want to select text and copy it somewhere.
-      // horizontal.add(new InlineHTML(" "));
-
-      if (isMatch) {
-        if (DEBUG) logger.info("getClickableWordsHighlight highlight '" + toFind + "' = '" + token + "'");
-        toFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
+      if (isHighlightMatch) {
+        if (DEBUG) logger.info("getClickableWordsHighlight *highlight* '" + highlightToFind + "' = '" + token + "'");
+        highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
       }
 
       if (searchMatch) {
@@ -310,8 +313,8 @@ public class ClickableWords<T extends CommonExercise> {
           }
         }
       }
-//      else if (isMatch) {
-//        logger.fine("getClickableWordsHighlight no highlight '" + toFind + "' vs '" + token + "' match at " + match);
+//      else if (isHighlightMatch) {
+//        logger.fine("getClickableWordsHighlight no highlight '" + highightToFind + "' vs '" + token + "' match at " + match);
 //      }
     }
 
@@ -327,14 +330,16 @@ public class ClickableWords<T extends CommonExercise> {
    * @param tokens
    * @param highlightTokens
    * @return
-   * @see #getClickableWords
+   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
-  @NotNull
+/*  @NotNull
   private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
     List<String> realHighlight = new ArrayList<>();
     Iterator<String> hIter = highlightTokens.iterator();
 
     int index = 0;
+
+    int numToFind = highlightTokens.size();
 
     for (; hIter.hasNext(); ) {
       String toFind = hIter.next();
@@ -343,13 +348,53 @@ public class ClickableWords<T extends CommonExercise> {
         String next = tokens.get(i);
         if (isMatch(next, toFind)) {
           index = i;
-          realHighlight.add(toFind);
+//          realHighlight.add(toFind);
           //logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
           break;
         }
       }
     }
     return realHighlight;
+  }*/
+
+  /**
+   * Korean feedback said no partial matches
+   *
+   * @param tokens
+   * @param highlightTokens
+   * @return
+   */
+  @NotNull
+  private int getMatchingHighlightAll(List<String> tokens, List<String> highlightTokens) {
+    List<String> realHighlight = new ArrayList<>();
+    int numToFind = highlightTokens.size();
+
+    int searchStart = 0;
+    int startIndex = -1;
+
+    while (realHighlight.size() < numToFind && searchStart<tokens.size()-realHighlight.size()) {
+      Iterator<String> hIter = highlightTokens.iterator();
+      String toFind = hIter.next();
+      for (int i = searchStart; i < tokens.size() && startIndex == -1; i++) {
+        if (isMatch(tokens.get(i), toFind)) {
+          startIndex = i;
+        }
+      }
+
+      if (startIndex > -1) { // found first match
+        while (toFind != null && isMatch(tokens.get(startIndex++), toFind)) {
+          realHighlight.add(toFind);
+          toFind = hIter.hasNext() ? hIter.next() : null;
+        }
+      }
+
+      if (realHighlight.size() < numToFind) {
+        realHighlight.clear();
+        searchStart++;
+      }
+    }
+
+    return searchStart;
   }
 
   /**
@@ -357,7 +402,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param shorter
    * @return
    * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
-   * @see #getMatchingHighlight
+   * @see #getMatchingHighlightAll
    * @see #makeClickableText
    */
   private boolean isMatch(String longer, String shorter) {
