@@ -1125,9 +1125,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @see #makeFirstRow
    */
-  private boolean hasAudio(T e) {
-    return e.hasAudioNonContext(true);
-  }
+  private boolean hasAudio(T e) {    return e.hasAudioNonContext(true);  }
 
   /**
    * @param e

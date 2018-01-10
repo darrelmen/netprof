@@ -45,4 +45,6 @@ public interface ExerciseServiceAsync {
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
   void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
+
+  void getLatestScoreAudioPath(int exid, long nearTime, AsyncCallback<Pair> async);
 }

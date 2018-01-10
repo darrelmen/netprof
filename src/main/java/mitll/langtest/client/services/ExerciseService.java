@@ -61,4 +61,6 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
   ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
 
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
+
+  Pair getLatestScoreAudioPath(int exid, long nearTime) throws DominoSessionException;
 }

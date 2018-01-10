@@ -58,7 +58,6 @@ public abstract class BaseResultDAO extends DAO {
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
   private final boolean DEBUG = false;
   List<MonitorResult> cachedMonitorResultsForQuery = null;
-  //private List<CorrectAndScore> cachedResultsForQuery2 = null;
 
   /**
    * @param database
@@ -454,7 +453,7 @@ public abstract class BaseResultDAO extends DAO {
 
   abstract List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language);
 
-  private List<CorrectAndScore> getResultsForExIDInForUser(int userID,
+  public List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                            int id,
                                                            boolean isFlashcardRequest,
                                                            String language) {

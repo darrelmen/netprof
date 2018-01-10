@@ -139,9 +139,11 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private MessageHelper messageHelper;
 
   /**
+   *
    * @param service
    * @param userid
    * @see AnalysisTab#AnalysisTab
+   * @see #setRawBestScores
    */
   public AnalysisPlot(ExerciseServiceAsync service,
                       int userid,
@@ -160,11 +162,14 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
+    /**
+     * setRawBestScores
+     */
     this.service = GWT.create(AnalysisService.class);
     this.userid = userid;
     populateGranToLabel();
 
-    this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service);
+    this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service, exceptionSupport);
   }
 
   private void populateGranToLabel() {
@@ -565,7 +570,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       long nearestXAsLong = clickEvent.getNearestXAsLong();
       Integer exid = timeToId.get(nearestXAsLong);
       if (exid != null) {
-        playAudio.playLast(exid, userid, nearestXAsLong);
+        playAudio.playLast(exid, nearestXAsLong);
       } else {
         logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
       }
@@ -861,6 +866,11 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     //}
   }
 
+  /**
+   * @see AudioExampleContainer#getShell
+   * @param id
+   * @return
+   */
   @Override
   public CommonShell getShell(int id) {
     return getIdToEx().get(id);
@@ -1041,7 +1051,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @param exid
    * @param timestamp
    * @return
-   * @see PlayAudio#playLast(int, int, long)
+   * @see PlayAudio#playLast(int, long)
    */
   @Override
   public WordScore getAnswerPath(int exid, long timestamp) {

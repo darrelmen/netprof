@@ -479,17 +479,16 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return idToScore;
   }
 
-/*
-  Map<Integer, SlickExerciseScore> getCorrectAndScoresForReal(int userid, Collection<Integer> exids) {
-    return dao.exidAndScoreWhere(userid, exids);
-  }
-*/
-
+  /**
+   *
+   * @param slickCorrectAndScores
+   * @param language so we can fix the file path
+   * @return
+   */
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
-    List<CorrectAndScore> cs = new ArrayList<>();
+    List<CorrectAndScore> cs = new ArrayList<>(slickCorrectAndScores.size());
     String relPrefix = getRelPrefix(language);
-    for (SlickCorrectAndScore scs : slickCorrectAndScores)
-      cs.add(fromSlickCorrectAndScoreWithRelPath(scs, relPrefix, language));
+    slickCorrectAndScores.forEach(slickCorrectAndScore -> cs.add(fromSlickCorrectAndScoreWithRelPath(slickCorrectAndScore, relPrefix, language)));
     return cs;
   }
 

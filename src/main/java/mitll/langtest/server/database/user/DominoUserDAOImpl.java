@@ -755,7 +755,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private DBUser lookupUser(int id) {
-
     return delegate.lookupDBUser(id);
   }
 
@@ -1255,8 +1254,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
+  /**
+   *
+   * @param userid assumes a valid user id
+   * @return
+   */
   public boolean isMale(int userid) {
-    return getByID(userid).isMale();
+    return lookupUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
+//    User byID = getByID(userid);
+//    return byID.isMale();
   }
 
   /**

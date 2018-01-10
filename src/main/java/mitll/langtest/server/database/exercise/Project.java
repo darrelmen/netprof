@@ -367,7 +367,12 @@ public class Project implements PronunciationLookup {
 
   public CommonExercise getExerciseByID(int id) {
     CommonExercise exercise = exerciseDAO.getExercise(id);
-    logger.info("getExerciseByID " + id + " = " + exercise.getID() + " " + exercise);
+    if (exercise == null) {
+      logger.warn("getExerciseByID no exercise for " + id);
+    }
+    else {
+      logger.info("getExerciseByID " + id + " = " + exercise);
+    }
     return exercise;
   }
 

@@ -112,6 +112,11 @@ public interface IResultDAO extends IDAO {
 
   Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language);
 
+  List<CorrectAndScore> getResultsForExIDInForUser(int userID,
+                                                   int id,
+                                                   boolean isFlashcardRequest,
+                                                   String language);
+
   List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language);
 
   int getNumResults(int projid);

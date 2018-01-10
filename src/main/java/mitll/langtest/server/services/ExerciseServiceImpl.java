@@ -32,17 +32,16 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.ISlimResult;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
@@ -51,6 +50,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.ActivityType;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -1028,25 +1028,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private Collection<Integer> getRecordedByMatchingGender(int userID, int projid, boolean onlyExamples) {
-    // int userID = request.getUserID();
-    logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
-        " examples only " + onlyExamples);// + " from " + exercises.size());
-
-/*
-    Map<Integer, String> exToTranscript = new HashMap<>();
-    Map<Integer, String> exToContextTranscript = new HashMap<>();
-
-    for (CommonExercise shell : exercises) {
-      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
-
-
-      String context = shell.hasContext() ? shell.getContext() : null;
-      if (context != null && !context.isEmpty()) {
-        exToContextTranscript.put(shell.getID(), context);
-      }
-
-    }
-*/
+    logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + " examples only " + onlyExamples);// + " from " + exercises.size());
 
     return onlyExamples ?
         db.getAudioDAO().getWithContext(userID, projid) :
@@ -1402,6 +1384,72 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
+   * Find the closest student answer in time for this exercise - and return the path to the audio file
+   * so we can play the audio from analysis.
+   *
+   * @param exid
+   * @param nearTime
+   * @return Pair - ref audio first, student audio second
+   * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast
+   */
+  @Override
+  public Pair getLatestScoreAudioPath(int exid, long nearTime) throws DominoSessionException {
+    int userID = getUserIDFromSessionOrDB();
+    int projectIDFromUser = getProjectIDFromUser(userID);
+
+    CorrectAndScore closest = null;
+    long closestTimeDiff = Long.MAX_VALUE;
+    List<CorrectAndScore> correctAndScoresForEx = getCorrectAndScoresForEx(userID, projectIDFromUser, exid);
+
+    logger.info("getLatestScoreAudioPath user " + userID + " project " + projectIDFromUser +
+        " at " + new Date(nearTime) + " found " + correctAndScoresForEx.size());
+
+    for (CorrectAndScore correctAndScore : correctAndScoresForEx) {
+      long timeDiff = Math.abs(correctAndScore.getTimestamp() - nearTime);
+      if (closest == null || timeDiff < closestTimeDiff) {
+        closest = correctAndScore;
+        closestTimeDiff = timeDiff;
+      }
+    }
+    if (closestTimeDiff > 10000) {
+      logger.warn("huh? returning " + closest + " despite req for " + new Date(nearTime));
+    }
+
+    String refAudio = getRefAudio(userID, projectIDFromUser, exid);
+    Pair pair = new Pair(
+        refAudio,
+        closest == null ? null : closest.getPath());
+    logger.info("getLatestScoreAudioPath returning " + pair);
+    return pair;
+  }
+
+  @Nullable
+  private String getRefAudio(int userID, int projectIDFromUser, int exid) {
+    CommonExercise byID = db.getCustomOrPredefExercise(projectIDFromUser, exid);
+    String refAudio = null;
+    if (byID == null) {
+      logger.warn("getRefAudio can't find ex id " + exid);
+    } else {
+      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguage(projectIDFromUser));
+      AudioAttribute audioAttributePrefGender = byID.getAudioAttributePrefGender(db.getUserDAO().isMale(userID), true);
+      if (audioAttributePrefGender == null) {
+        logger.warn("getRefAudio : no audio on ex " + exid + " ?");
+      }
+      refAudio = audioAttributePrefGender == null ? null : audioAttributePrefGender.getAudioRef();
+    }
+    return refAudio;
+  }
+
+  private List<CorrectAndScore> getCorrectAndScoresForEx(int userID,
+                                                         int projectIDFromUser,
+                                                         int exid) {
+
+    return db.getResultDAO()
+        .getResultsForExIDInForUser(userID, exid, false, getLanguage(projectIDFromUser));
+  }
+
+  /**
    * Join between exercises and scores
    *
    * @param ids
@@ -1628,7 +1676,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                              int projectID) {
     Set<CommonExercise> toAddAudioTo = new HashSet<>();
 
-    logger.info("getCommonExercisesWithoutAudio " +ids);
+    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way
@@ -1637,7 +1685,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       //}
       exercises.add(byID);
-      logger.info("\tgetCommonExercisesWithoutAudio " +byID.getID());
+      logger.info("\tgetCommonExercisesWithoutAudio " + byID.getID());
 
     }
     return toAddAudioTo;

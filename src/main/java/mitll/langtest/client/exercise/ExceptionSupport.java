@@ -4,4 +4,6 @@ public interface ExceptionSupport {
   String logException(Throwable throwable);
 
   void logMessageOnServer(String message, String prefix, boolean sendEmail);
+
+  void handleNonFatalError(String message, Throwable throwable);
 }

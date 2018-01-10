@@ -35,17 +35,13 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.exercise.Pair;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -56,39 +52,48 @@ import java.util.logging.Logger;
  */
 class PlayAudio {
   private final Logger logger = Logger.getLogger("PlayAudio");
-  //private final ExerciseServiceAsync service;
   private final SoundPlayer soundFeedback;
   private final Widget playFeedback;
   private Timer t;
-//  private ExerciseLookup exerciseLookup;
-  ExerciseServiceAsync exerciseService;
+  private ExerciseServiceAsync exerciseService;
+  ExceptionSupport exceptionSupport;
 
   /**
    * @param soundFeedback
    * @param playFeedback
+   * @param exceptionSupport
    * @see AnalysisPlot#AnalysisPlot
    */
-  PlayAudio(SoundPlayer soundFeedback, Widget playFeedback, //ExerciseLookup exerciseLookup,
-            ExerciseServiceAsync exerciseService) {
+  PlayAudio(SoundPlayer soundFeedback,
+            Widget playFeedback,
+            ExerciseServiceAsync exerciseService, ExceptionSupport exceptionSupport) {
     this.exerciseService = exerciseService;
     this.soundFeedback = soundFeedback;
     this.playFeedback = playFeedback;
-   // this.exerciseLookup = exerciseLookup;
+    this.exceptionSupport = exceptionSupport;
   }
 
   /**
    * @param id
-   * @param userid
    * @param nearestXAsLong
    * @see AnalysisPlot#getSeriesClickEventHandler
    */
-  void playLast(int id, int userid, long nearestXAsLong) {
-    logger.info("playLast playing exercise " + id + " for " + userid);
-    // CommonShell shell = exerciseLookup.getShell(id);
-//    WordScore wordScore = exerciseLookup.getAnswerPath(id, nearestXAsLong);
+  void playLast(int id, long nearestXAsLong) {
+    logger.info("playLast playing exercise " + id);
 
-    // if (shell == null) {
-    exerciseService.getExercise(id, false, new AsyncCallback<Shell>() {
+    exerciseService.getLatestScoreAudioPath(id, nearestXAsLong, new AsyncCallback<Pair>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        exceptionSupport.handleNonFatalError("getting the audio path for score", caught);
+      }
+
+      @Override
+      public void onSuccess(Pair result) {
+        playBothCuts(result.getProperty(), result.getValue());
+      }
+    });
+
+/*    exerciseService.getExercise(id, false, new AsyncCallback<Shell>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -120,25 +125,24 @@ class PlayAudio {
               }
             }
 
-            playBothCuts(commonExercise1, correctAndScore);
+            playBothCuts(commonExercise1, correctAndScore.getPath());
           }
         }
       }
-    });
+    });*/
     //else {
     // playBothCuts(wordScore.getAnswerAudio(), wordScore.getRefAudio());
     //  }
   }
 
-  private void playBothCuts(CommonExercise commonExercise, CorrectAndScore correctAndScore) {
-    String path = correctAndScore.getPath();
-    String refAudio = commonExercise.getRefAudio();
+/*  private void playBothCuts(String refAudio, String path) {
+   // String path = correctAndScore.getPath();
+//    String refAudio = commonExercise.getRefAudio();
+    playBothCuts(path, refAudio);//commonExercise.getRefAudio());
+  }*/
 
-    playBothCuts(path, refAudio);
-  }
-
-  private void playBothCuts(String path, String refAudio) {
-    logger.info("playBothCuts play audio    " + path);
+  private void playBothCuts( String refAudio,String studentAudioPath) {
+    logger.info("playBothCuts play audio    " + studentAudioPath);
     logger.info("playBothCuts play refAudio " + refAudio);
 
     if (t != null) {
@@ -146,9 +150,9 @@ class PlayAudio {
       t.cancel();
     }
     if (refAudio != null) {
-      playLastThenRef(path, refAudio);
+      playLastThenRef(studentAudioPath, refAudio);
     } else {
-      playUserAudio(path);
+      playUserAudio(studentAudioPath);
       //   logger.info("no ref audio for " + commonExercise.getOldID());
     }
   }

@@ -196,10 +196,14 @@ public class AudioExercise extends ExerciseShell {
   public Collection<AudioAttribute> getAudioAttributes() {    return audioAttributes.values();  }
 
   /**
-   * @param isMale
-   * @param isRegular
-   * @return null if no regular and asking for regular...
+   * Get most recently recorded audio - maybe want highest score instead?
+   * Prefer matching gender and matching speed.
+   *
+   * @param isMale prefer gender match
+   * @param isRegular prefer speed match
+   * @return null only if no audio at all
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getNativeAudio
    */
   public AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
     Collection<AudioAttribute> collect = getAudioPrefGender(isMale);
@@ -231,6 +235,11 @@ public class AudioExercise extends ExerciseShell {
     return audioPrefGender.isEmpty() ? null : audioPrefGender.iterator().next();
   }
 
+  /**
+   * Try to get matching gender but fall back to all audio if no match.
+   * @param isMale
+   * @return
+   */
   @NotNull
   private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes();
