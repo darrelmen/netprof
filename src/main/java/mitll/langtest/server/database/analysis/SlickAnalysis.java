@@ -64,6 +64,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final String ANSWERS = "answers";
   private static final int MAX_TO_SEND = 25;
   public static final int DEFAULT_PROJECT = 1;
+  public static final int UNKNOWN_EXERCISE = 2;
   private final SlickResultDAO resultDAO;
   private final String language;
   private final int projid;
@@ -188,7 +189,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           if (exerciseByID == null) {
             String transcriptFromJSON = getTranscriptFromJSON(bestScore);
 
-            logger.info("no ex for " + bestScore.getExId() + " so " + transcriptFromJSON);
+            logger.info("getComparator no ex for " + bestScore.getExId() + " so " + transcriptFromJSON);
 
             scoreToFL.put(bestScore, transcriptFromJSON);
           } else {
@@ -468,18 +469,28 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private void getNativeAudio(Collection<SlickPerfResult> perfs) {
     List<CommonExercise> exercises = new ArrayList<>();
 
-    logger.info("getNativeAudio getting exercises for " + perfs.size() + " and project " + projid);
+    logger.info("getNativeAudio getting exercises for " + perfs.size() + " recordings in project " + projid);
 
+    List<Integer> skipped = new ArrayList<>();
 
     perfs.forEach(perf -> {
-      CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, perf.exid());
-      if (customOrPredefExercise != null &&
-          customOrPredefExercise.getProjectID() != DEFAULT_PROJECT) {
-        exercises.add(customOrPredefExercise);
+      int exid = perf.exid();
+
+      if (exid == UNKNOWN_EXERCISE) {
+        logger.info("getNativeAudio skipping " + perf.id() + " for unknonw exercise by " + perf.userid() + " : " + perf.answer());
+        skipped.add(perf.id());
+      }
+      else {
+        CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, exid);
+        if (customOrPredefExercise != null &&
+            customOrPredefExercise.getProjectID() != DEFAULT_PROJECT) {
+          exercises.add(customOrPredefExercise);
+        }
       }
     });
 
-    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " and project " + projid);
+    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size()+
+        " skipped) and project " + projid);
 
     audioDAO.attachAudioToExercises(exercises, language);
   }

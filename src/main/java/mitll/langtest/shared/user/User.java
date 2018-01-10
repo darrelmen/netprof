@@ -56,17 +56,10 @@ public class User extends MiniUser implements ReportUser {
    * @deprecated
    */
   private String passwordHash;
-
-  /*
-    private String emailHash;
-  */
   private String email = "";
   private boolean enabled;
   private boolean admin;
-  //  private int numResults;
-//  private float rate = 0.0f;
-//  private boolean complete;
-//  private float completePercent = 0.0f;
+
   private Kind userKind;
   @Deprecated
   private String nativeLang;
@@ -74,7 +67,6 @@ public class User extends MiniUser implements ReportUser {
   private String device;
   @Deprecated
   private String resetKey;
-  private String affiliation;
   private boolean hasAppPermission;
 
   private Collection<Permission> permissions;
@@ -89,9 +81,12 @@ public class User extends MiniUser implements ReportUser {
    */
   public static Collection<Permission> getInitialPermsForRole(Kind role) {
     switch (role) {
-      case STUDENT: return Collections.emptyList();
-      case TEACHER: return Collections.singletonList(TEACHER_PERM);
-      case AUDIO_RECORDER: return Collections.singleton(RECORD_AUDIO);
+      case STUDENT:
+        return Collections.emptyList();
+      case TEACHER:
+        return Collections.singletonList(TEACHER_PERM);
+      case AUDIO_RECORDER:
+        return Collections.singleton(RECORD_AUDIO);
       case QAQC:
       case CONTENT_DEVELOPER:
         return Arrays.asList(
@@ -110,8 +105,8 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
    * @return
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
    */
   public boolean isHasAppPermission() {
     return hasAppPermission;
@@ -417,8 +412,8 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
    * @return
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getPermissions
    */
   public boolean isEnabled() {
     return enabled;
@@ -460,7 +455,9 @@ public class User extends MiniUser implements ReportUser {
    * @param email
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
-  public void setEmail(String email) {  this.email = email;  }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
   public void setDialect(String dialect) {
     this.dialect = dialect;
@@ -478,14 +475,6 @@ public class User extends MiniUser implements ReportUser {
     this.admin = admin;
   }
 
-  public String getAffiliation() {
-    return this.affiliation;
-  }
-
-  public void setAffiliation(String affilation) {
-    this.affiliation = affilation;
-  }
-
   /**
    * Two cases-
    * legacy users that are missing first, last, and email
@@ -497,7 +486,7 @@ public class User extends MiniUser implements ReportUser {
     return hasValidEmail() &&
         isValid(first) &&
         isValid(last) &&
-        isValid(affiliation) &&
+        isValid(getAffiliation()) &&
 
         // must have a gender (and ideally age and dialect) if you want to record audio
 

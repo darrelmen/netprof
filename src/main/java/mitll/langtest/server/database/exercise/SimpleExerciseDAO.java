@@ -51,7 +51,7 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
    * @return
    * @see DatabaseImpl#getExercise
    * @see DatabaseImpl#makeDAO
-   * @see UserManagement#getUsers()
+   * @see UserManagement#getUsers
    */
   List<T> getRawExercises();
 

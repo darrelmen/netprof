@@ -365,6 +365,11 @@ public class Project implements PronunciationLookup {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
+  /**
+   * @see
+   * @param id
+   * @return
+   */
   public CommonExercise getExerciseByID(int id) {
     CommonExercise exercise = exerciseDAO.getExercise(id);
     if (exercise == null) {

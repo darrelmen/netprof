@@ -107,7 +107,7 @@ public class MiniUser extends FirstLastUser {
    * @see UserDAO#getMiniUsers()
    */
   public MiniUser(User user) {
-    this(user.getID(), user.getAge(), user.isMale(), user.getRealGender(), new String(user.getUserID()), user.isAdmin());
+    this(user.getID(), user.getAge(), user.isMale(), user.getRealGender(), user.getUserID(), user.isAdmin());
   }
 
   @Override

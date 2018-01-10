@@ -73,14 +73,12 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
-  public void addBulk(Collection<SlickUserProject> bulk) {
-    dao.addBulk(bulk);
-  }
+  public void addBulk(Collection<SlickUserProject> bulk) {  dao.addBulk(bulk);  }
+  @Override
+  public void forgetUsersBulk(Collection<Integer> bulk) {  dao.forgetUsersBulk(bulk);  }
 
   @Override
-  public void forget(int userid) {
-    dao.forget(userid);
-  }
+  public void forget(int userid) {    dao.forget(userid);  }
 
   /**
    * TODO - we seem to hit this too often

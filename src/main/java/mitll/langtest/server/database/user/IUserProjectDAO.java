@@ -53,6 +53,8 @@ public interface IUserProjectDAO extends IDAO {
    */
   void addBulk(Collection<SlickUserProject> bulk);
 
+  void forgetUsersBulk(Collection<Integer> bulk);
+
   /**
    * @param userid
    * @see mitll.langtest.server.database.DatabaseImpl#forgetProject(int)

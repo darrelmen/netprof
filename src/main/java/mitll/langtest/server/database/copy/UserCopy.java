@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.copy;
 
+import mitll.hlt.domino.shared.model.user.AccountDetail;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.domino.shared.model.user.Group;
@@ -103,13 +104,13 @@ public class UserCopy {
           if (dominoDBUser == null) { // new user
 //            logger.info("copyUsers no existing user id '" + importUserID + "'");
             ClientUserDetail newUser = addUser(dominoUserDAO, oldToNew, toImport, optName, group);
-            userToCreation.put(newUser.getDocumentDBID(), newUser.getAcctDetail().getCrTime().getTime());
+            userToCreation.put(newUser.getDocumentDBID(), getAccountCreationTime(newUser));
             added.add(newUser);
           } else { // user exists
             if (dominoDBUser.getUserId().equals(D_ADMIN)) {
               logger.warn("copyUsers found d.admin " + dominoDBUser);
             } else {
-              userToCreation.put(dominoDBUser.getDocumentDBID(), dominoDBUser.getAcctDetail().getCrTime().getTime());
+              userToCreation.put(dominoDBUser.getDocumentDBID(), getAccountCreationTime(dominoDBUser));
             }
 
             if (foundExistingUser(projid,
@@ -127,14 +128,21 @@ public class UserCopy {
       }
     }
 
-    addUserProjectBinding(projid, slickUserProjectDAO, userToCreation);
+    addUserProjectBinding(slickUserProjectDAO, projid, userToCreation);
+
     logger.info("copyUsers after, postgres importUsers " +
         //"num = " + dominoUserDAO.getUsers().size() +
-        " added " + added.size() +
-        " collisions " + collisions +
-        " lurker " + lurker
+        "\n\tadded          " + added.size() +
+        "\n\tcollisions     " + collisions +
+        "\n\tlurker         " + lurker +
+        "\n\tuserToCreation " + userToCreation.size()
     );
+
     return oldToNew;
+  }
+
+  private long getAccountCreationTime(DBUser user) {
+    return user.getAcctDetail().getCrTime().getTime();
   }
 
   @NotNull
@@ -400,15 +408,19 @@ public class UserCopy {
   }
 
   /**
-   * @param projid
    * @param slickUserProjectDAO
+   * @param projid
    * @param added
    * @see #copyUsers
    */
-  private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, Map<Integer, Long> added) {
+  private void addUserProjectBinding(IUserProjectDAO slickUserProjectDAO, int projid, Map<Integer, Long> added) {
     // logger.info("addUserProjectBinding adding user->project for " + projid);
     List<SlickUserProject> toAdd = new ArrayList<>();
+
+    slickUserProjectDAO.forgetUsersBulk(added.keySet());
+
     added.forEach((userID, modified) -> toAdd.add(new SlickUserProject(-1, userID, projid, new Timestamp(modified))));
+
     slickUserProjectDAO.addBulk(toAdd);
   }
 }

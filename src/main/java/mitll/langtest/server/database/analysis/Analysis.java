@@ -43,6 +43,7 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -120,6 +121,8 @@ public abstract class Analysis extends DAO {
   }
 
   /**
+   * Filter out everyone with a lincoln affiliation
+   *
    * @param idToUserInfo
    * @return
    * @see #getUserInfos(IUserDAO, Map)
@@ -131,31 +134,44 @@ public abstract class Analysis extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
+    Set<String> lincoln = getLincolnAffiliations();
+
+    Set<String> skipped = new TreeSet<>();
+
     idToUserInfo.forEach((userid, value) -> {
       FirstLastUser miniUser = firstLastUsers.get(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-        String userChosenID = miniUser.getUserID();
-        boolean isLL = database.getServerProps().getLincolnPeople().contains(userChosenID);
-        if (!isLL) {
+        //String userChosenID = miniUser.getUserID();
+        boolean isLL = lincoln.contains(miniUser.getAffiliation().toLowerCase());//database.getServerProps().getLincolnPeople().contains(userChosenID);
+        if (isLL) {
+          skipped.add(miniUser.getUserID());
+        } else {
           value.setFrom(miniUser);
-//          value.setId(userid); // necessary?
-//          value.setUserID(userChosenID);
-//          value.setFirst(miniUser.getFirst());
-//          value.setLast(miniUser.getLast());
-
           userInfos.add(value);
         }
       }
-
     });
     long now = System.currentTimeMillis();
 
     if (now - then > 100) {
-      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos");
+      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos, skipped " + skipped);
     }
     return userInfos;
+  }
+
+  @NotNull
+  private Set<String> getLincolnAffiliations() {
+    List<Affiliation> affiliations = database.getServerProps().getAffiliations();
+
+    Set<Affiliation> lincolnPeople = affiliations.stream().filter(affiliation -> affiliation.getAbb().contains("incoln") || affiliation.getDisp().contains("incoln")).collect(Collectors.toSet());
+    Set<String> lincoln = new HashSet<>();
+    lincolnPeople.forEach(affiliation -> {
+      lincoln.add(affiliation.getAbb().toLowerCase());
+      lincoln.add(affiliation.getDisp().toLowerCase());
+    });
+    return lincoln;
   }
 
   private void sortUsersByTime(List<UserInfo> userInfos) {
@@ -192,8 +208,8 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   * @paramx best
    * @return
+   * @paramx best
    * @see SlickAnalysis#getPerformanceReportForUser
    */
   List<WordScore> getWordScores(Collection<UserInfo> values) {
@@ -288,6 +304,7 @@ public abstract class Analysis extends DAO {
 
   }
 */
+
   /**
    * @param userid
    * @param next

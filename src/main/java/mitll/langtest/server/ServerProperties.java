@@ -233,6 +233,7 @@ public class ServerProperties {
   );
   private String configFileFullPath;
 
+/*
   private final Set<String> lincoln = new HashSet<>(Arrays.asList(
       "gvidaver",
       "rbudd",
@@ -248,6 +249,7 @@ public class ServerProperties {
       "dajone3",
       //"WagnerSandy",
       "rbtrbt"));
+      */
 
   public ServerProperties() {
     Map<String, String> value = new HashMap<>();
@@ -924,11 +926,12 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  List<Affiliation> getAffiliations() {    return affliations;  }
+  public List<Affiliation> getAffiliations() {    return affliations;  }
 
+  /*
   public Set<String> getLincolnPeople() {
     return lincoln;
-  }
+  }*/
 
   /**
    * @return

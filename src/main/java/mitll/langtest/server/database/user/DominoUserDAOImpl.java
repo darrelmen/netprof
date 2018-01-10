@@ -47,6 +47,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
+import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
@@ -113,6 +114,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String USER = "User";
   private static final String DEFAULT = "Default";
   public static final int EST_NUM_USERS = 8000;
+  public static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -745,9 +747,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see NPUserSecurityManager#getUserForID
    */
-  public User getByID(int id) {
-    return getUser(lookupUser(id));
-  }
+  public User getByID(int id) {    return getUser(lookupUser(id));  }
 
   @Override
   public User getUserWhere(int userid) {
@@ -1168,11 +1168,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
     if (!toAskFor.isEmpty()) {
       long then = System.currentTimeMillis();
-      Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
+//      Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
+      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();
       logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
       idToUserD.forEach((k, v) -> {
-        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now);
+        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now, v.getAffiliation());
         idToFirstLastCache.put(k, value);
       });
     }
@@ -1305,7 +1306,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * user updates happen in domino UI...
    *
    * @param toUpdate
-   * @see UserServiceImpl#addUser
+   * @see OpenUserServiceImpl#addUser
    */
   @Override
   public void update(User toUpdate) {
@@ -1385,15 +1386,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return clientUserDetailSResult;
   }
 
-  private boolean isValidAsEmail(String text) {
-    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-  }
+  private boolean isValidAsEmail(String text) {  return text.trim().toUpperCase().matches(VALID_EMAIL);  }
 
   /**
    * @param user
    * @param url
    * @return
-   * @see UserServiceImpl#resetPassword
+   * @see OpenUserServiceImpl#resetPassword
    */
   @Override
   public boolean forgotPassword(String user, String url) {

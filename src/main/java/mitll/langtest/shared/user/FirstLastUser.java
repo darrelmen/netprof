@@ -4,9 +4,10 @@ import mitll.langtest.shared.exercise.HasID;
 
 public class FirstLastUser implements HasID, Comparable<HasID> {
   protected int id;
-  protected String userID;
+  protected String userID = "";
   protected String first = "";
   protected String last = "";
+  protected String affiliation = "";
 
   private transient long lastChecked;
 
@@ -17,12 +18,13 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
     this.id = id;
   }
 
-  public FirstLastUser(int id, String userid, String first, String last, long lastChecked) {
+  public FirstLastUser(int id, String userid, String first, String last, long lastChecked, String affiliation) {
     this.id = id;
     this.userID = userid;
     this.first = first;
     this.last = last;
-    this.lastChecked =lastChecked;
+    this.lastChecked = lastChecked;
+    this.affiliation = affiliation;
   }
 
   @Override
@@ -69,4 +71,15 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
     return lastChecked;
   }
 
+  public String getAffiliation() {
+    return this.affiliation;
+  }
+
+  public void setAffiliation(String affilation) {
+    this.affiliation = affilation;
+  }
+
+  public String toString() {
+    return "user " + getID() + " : " + first + " " + last + " from " + getAffiliation();
+  }
 }
