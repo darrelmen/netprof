@@ -62,5 +62,13 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
 
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 
-  Pair getLatestScoreAudioPath(int exid, long nearTime) throws DominoSessionException;
+  /**
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast
+   * @param userID
+   * @param exid
+   * @param nearTime
+   * @return
+   * @throws DominoSessionException
+   */
+  Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException;
 }

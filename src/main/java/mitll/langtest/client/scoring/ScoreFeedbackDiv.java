@@ -134,7 +134,7 @@ public class ScoreFeedbackDiv {
     wordTableContainer.add(getPlayButtonDiv());
 
     float hydecScore = pretestScore.getHydecScore();
-    logger.info("score " + hydecScore);
+  //  logger.info("score " + hydecScore);
     if (hydecScore > 0) {
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);

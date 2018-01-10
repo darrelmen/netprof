@@ -80,11 +80,6 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     }
   }
 
-/*  @Override
-  public void showList(int listid) {
-    facetExerciseList.showList(listid);
-  }*/
-
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>( controller, outer) {
@@ -97,7 +92,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
         return facetExerciseList = new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
             new ListOptions(instanceName)
                 .setShowPager(false).
-                setShowTypeAhead(false), listHeader, footer, 1) {
+                setShowTypeAhead(false), listHeader, true) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();

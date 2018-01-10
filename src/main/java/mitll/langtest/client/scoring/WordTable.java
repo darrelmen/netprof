@@ -315,7 +315,7 @@ public class WordTable {
                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                  List<TranscriptSegment> value,
                                  boolean simpleLayout,
-                                 TranscriptSegment wordSegment//, boolean isRTL
+                                 TranscriptSegment wordSegment
   ) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("inlineFlex");

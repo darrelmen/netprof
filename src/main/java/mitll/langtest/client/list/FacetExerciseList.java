@@ -84,7 +84,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
   private static final String GETTING_TYPE_VALUES = "getting type->values";
 
-  private static final boolean DEBUG_STALE = false;
+  private static final boolean DEBUG_STALE = true;
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
@@ -132,9 +132,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
-  private final int numToShow;
+ // private final int numToShow;
   private Panel tableWithPager;
-
+boolean isDrill = false;
   /**
    * for now only single selection
    */
@@ -156,7 +156,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @paramx numToShow
+   * @param isDrillView hack - should not have drill stuff in here... although eventually there won't be a drill view
    * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FacetExerciseList(Panel secondRow,
@@ -164,12 +164,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                            ExerciseController controller,
                            ListOptions listOptions,
                            DivWidget listHeader,
-                           int numToShow) {
+                           boolean isDrillView) {
     super(currentExerciseVPanel, controller, listOptions);
 
-    this.numToShow = numToShow;
+    this.isDrill = isDrillView;
     sectionPanel = new DivWidget();
-    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
+//    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
     secondRow.add(sectionPanel);
@@ -377,7 +377,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
             int pageSize = getChosenPageSize();
-       //     logger.info("getNumTableRowsGivenScreenHeight " + pageSize + " vs " + numToShow);
+            //     logger.info("getNumTableRowsGivenScreenHeight " + pageSize + " vs " + numToShow);
             return pageSize;
           }
         };
@@ -520,7 +520,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private ListItem liForDimensionForList;
 
   /**
-   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, int)
+   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean)
    */
   private void gotListChanged() {
     if (liForDimensionForList != null) {
@@ -1373,55 +1373,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     pagerAndSortRow.setVisible(true);
   }
 
-/*  private com.google.gwt.user.client.Timer exercisesTimer;
-
-  private long lastReqMillis = 0;*/
-
-  /**
-   * @param visibleIDs
-   */
-/*
-  private void getExercisesTimer(final Collection<Integer> visibleIDs) {
-    setExerciseContainer(new DivWidget());
-    long now = System.currentTimeMillis();
-    long diff = now - lastReqMillis;
-    boolean useTimer = (diff < USE_TIMER_DELAY) && false;
-    lastReqMillis = now;
-
-    if (useTimer) {
-      logger.warning("getExercises USE TIMER " + diff);
-      if (exercisesTimer != null) {
-        if (exercisesTimer.isRunning()) {
-          logger.info("getExercises cancel timer ");
-          exercisesTimer.cancel();
-        }
-      }
-
-      exercisesTimer = new Timer() {
-        @Override
-        public void run() {
-          final int currentReq = incrReq();
-          logger.info("getExercises timer fired for " + visibleIDs.size() + " visible and req " + currentReq);
-          reallyGetExercises(visibleIDs, currentReq);
-        }
-      };
-
-      exercisesTimer.schedule(DELAY_MILLIS);
-    } else {
-      //    logger.warning("getExercises NO timer " + diff);
-      final int currentReq = incrReq();
-      Scheduler.get().scheduleDeferred((Command) () -> {
-        //logger.info("showExercises for check " + reqID);
-        if (isCurrent(currentReq)) {
-          reallyGetExercises(visibleIDs, currentReq);
-        } else {
-          logger.info("getExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
-        }
-      });
-    }
-  }
-*/
-
   /**
    * @param visibleIDs
    * @param currentReq
@@ -1431,7 +1382,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (!isDrillView()) { // no blink
       setExerciseContainer(new DivWidget());
     }
-
     //    logger.warning("getExercises NO timer " + diff);
     // final int currentReq = incrReq();
 //    Scheduler.get().scheduleDeferred((Command) () -> {
@@ -1464,10 +1414,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 
     if (requested.isEmpty()) {
-    //  logger.info("reallyGetExercises no req for " + alreadyFetched);
+      logger.info("reallyGetExercises no req for " + alreadyFetched);
       gotFullExercises(currentReq, alreadyFetched);
     } else {
-      //logger.info("reallyGetExercises make req for " + requested);
+/*      logger.info("reallyGetExercises make" +
+          "\n\treq for " + requested +
+          "\n\tvisible " + visibleIDs);*/
+
       if (controller.getUser() > 0) {
         service.getFullExercises(currentReq, requested,
             new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
@@ -1481,7 +1434,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
               @Override
               public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-        //        logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+  //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
                 if (result.getExercises() != null) {
                   long now = System.currentTimeMillis();
                   int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
@@ -1493,9 +1446,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                 }
               }
             });
-      }
-      else {
-        //logger.warning("not asking for " + requested);
+      } else {
+        logger.warning("not asking for " + requested);
       }
     }
   }
@@ -1504,8 +1456,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                        List<CommonExercise> alreadyFetched,
                                        Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
-    // int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-    // logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
+    int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+   //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
     List<CommonExercise> toShow = new ArrayList<>();
 
@@ -1515,12 +1467,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         idToEx.put(ex.getID(), ex);
       }
       result.getExercises().forEach(this::addExerciseToCached);
+     // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
 
       for (int id : visibleIDs) {
         CommonExercise e = idToEx.get(id);
         if (e == null) {
           logger.warning("getFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
         } else {
+       //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
           toShow.add(e);
         }
       }
@@ -1535,7 +1489,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void setExerciseContainer(DivWidget w) {
-    //  logger.info("setExerciseContainer with " +w.getWidgetCount());
     innerContainer.setWidget(w);  // immediate feedback that something is happening...
   }
 
@@ -1549,7 +1502,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
     for (CommonExercise ex : result.getExercises()) {
-   //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
+      //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
       idToEx.put(id, ex);
       List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
@@ -1574,7 +1527,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           showExercises(toShow, reqID);
           progressBar.setVisible(false);
         } else {
-      //    logger.info("showing " + toShow.size() + " exercises");
+             logger.info("gotFullExercises : showing " + toShow.size() + " exercises");
           showExercises(toShow, reqID);
         }
       }
@@ -1631,7 +1584,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private boolean isDrillView() {
-    return numToShow == 1;
+    return isDrill;
   }
 
   private void reallyShowExercises(Collection<CommonExercise> result, int reqID) {

@@ -10,7 +10,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -18,7 +17,6 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.list.FacetExerciseList.PAGE_SIZE_SELECTED;
 
@@ -50,13 +48,11 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        int pageSelected = controller.getStorage().getInt(PAGE_SIZE_SELECTED);
-        int pageSize = (pageSelected == -1) ? FacetExerciseList.FIRST_PAGE_SIZE : FacetExerciseList.PAGE_SIZE_CHOICES.get(pageSelected);
-
+//        int pageSelected = controller.getStorage().getInt(PAGE_SIZE_SELECTED);
+//        int pageSize = (pageSelected == -1) ? FacetExerciseList.FIRST_PAGE_SIZE : FacetExerciseList.PAGE_SIZE_CHOICES.get(pageSelected);
       //  logger.info("got " + pageSelected + " = " + pageSize);
-
         return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
-            new ListOptions(instanceName), listHeader, footer, pageSize);
+            new ListOptions(instanceName), listHeader, false);
       }
     };
   }

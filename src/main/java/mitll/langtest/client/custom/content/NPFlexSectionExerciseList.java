@@ -50,8 +50,7 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
    * @param currentExercisePanel
    * @param listOptions
    * @param listHeader
-   * @param footer
-   * @param numToShow
+   * @param isDrillView
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, DivWidget, DivWidget)
    */
   public NPFlexSectionExerciseList(ExerciseController controller,
@@ -59,9 +58,8 @@ public class NPFlexSectionExerciseList extends FacetExerciseList {
                                    Panel currentExercisePanel,
                                    ListOptions listOptions,
                                    DivWidget listHeader,
-                                   DivWidget footer,
-                                   int numToShow) {
-    super(topRow, currentExercisePanel, controller, listOptions, listHeader, numToShow);
+                                   boolean isDrillView) {
+    super(topRow, currentExercisePanel, controller, listOptions, listHeader, isDrillView);
   }
 
   @Override

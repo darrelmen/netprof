@@ -121,7 +121,6 @@ public class AnalysisTab extends DivWidget {
                      int listid) {
     this.userid = userid;
     this.listid = listid;
-    //getElement().setId("AnalysisTab");
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");

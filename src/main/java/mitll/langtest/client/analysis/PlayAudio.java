@@ -74,14 +74,15 @@ class PlayAudio {
   }
 
   /**
+   * @param userID
    * @param id
    * @param nearestXAsLong
    * @see AnalysisPlot#getSeriesClickEventHandler
    */
-  void playLast(int id, long nearestXAsLong) {
+  void playLast(int userID, int id, long nearestXAsLong) {
     logger.info("playLast playing exercise " + id);
 
-    exerciseService.getLatestScoreAudioPath(id, nearestXAsLong, new AsyncCallback<Pair>() {
+    exerciseService.getLatestScoreAudioPath(userID, id, nearestXAsLong, new AsyncCallback<Pair>() {
       @Override
       public void onFailure(Throwable caught) {
         exceptionSupport.handleNonFatalError("getting the audio path for score", caught);

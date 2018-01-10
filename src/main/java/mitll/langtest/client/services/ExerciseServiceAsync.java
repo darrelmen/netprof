@@ -46,5 +46,5 @@ public interface ExerciseServiceAsync {
 
   void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
 
-  void getLatestScoreAudioPath(int exid, long nearTime, AsyncCallback<Pair> async);
+  void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
 }

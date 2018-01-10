@@ -726,14 +726,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   /**
-   * @param user
+   * @param selectedUser
    */
-  public void gotClickOnItem(final UserInfo user) {
-//    logger.info("gotClickOnItem " + user.getUserID());
-    super.gotClickOnItem(user);
+  public void gotClickOnItem(final UserInfo selectedUser) {
+//    logger.info("gotClickOnItem " + selectedUser.getUserID());
+    super.gotClickOnItem(selectedUser);
     enableButtons();
     rightSide.clear();
-    rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom, user.getID(), user.getUserID(), listid));
+    rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom,
+        selectedUser.getID(), selectedUser.getUserID(), listid));
   }
 
   public Button getAdd() {

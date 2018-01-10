@@ -1340,7 +1340,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long now = System.currentTimeMillis();
 
     if (now - then > 50)
-      logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises");
+      logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises" +
+          "\n\tfor req = " + ids);
 
 /*
     if (ids.size() > toAddAudioTo.size()) {
@@ -1380,6 +1381,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
     logger.info("getFullExercises found " + exercises.size() + " exercises and " + scoreHistoryPerExercise.size() + " scores");
+   // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
   }
 
@@ -1387,6 +1389,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Find the closest student answer in time for this exercise - and return the path to the audio file
    * so we can play the audio from analysis.
    *
+   * @param userID
    * @param exid
    * @param nearTime
    * @return Pair - ref audio first, student audio second
@@ -1394,8 +1397,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
   @Override
-  public Pair getLatestScoreAudioPath(int exid, long nearTime) throws DominoSessionException {
-    int userID = getUserIDFromSessionOrDB();
+  public Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException {
+    getUserIDFromSessionOrDB();  // just so we check permissions
+
     int projectIDFromUser = getProjectIDFromUser(userID);
 
     CorrectAndScore closest = null;
@@ -1512,6 +1516,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
+  /**
+   * TODO : why not concurrent hash map...
+   *
+   * @param audioToAlignment
+   * @param idToAudio
+   * @param exercise
+   */
   private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
                                 Map<Integer, AudioAttribute> idToAudio,
                                 CommonExercise exercise) {
@@ -1565,6 +1576,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param audioIDs
    * @param language
    * @return
+   * @see #rememberAlignments
    */
   private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, String language) {
     logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
@@ -1654,7 +1666,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return typeToEndTimes;
   }
 
-
   protected String getDisplayName(String event, Map<String, String> phoneToDisplay) {
     String displayName = phoneToDisplay.get(event);
     displayName = displayName == null ? event : displayName;
@@ -1675,8 +1686,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                              List<CommonExercise> exercises,
                                                              int projectID) {
     Set<CommonExercise> toAddAudioTo = new HashSet<>();
-
-    logger.info("getCommonExercisesWithoutAudio " + ids);
+//    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
       addAnnotations(byID); // todo do this in a better way

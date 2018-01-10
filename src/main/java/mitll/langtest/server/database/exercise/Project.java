@@ -370,9 +370,9 @@ public class Project implements PronunciationLookup {
     if (exercise == null) {
       logger.warn("getExerciseByID no exercise for " + id);
     }
-    else {
-      logger.info("getExerciseByID " + id + " = " + exercise);
-    }
+//    else {
+//      logger.info("getExerciseByID " + id + " = " + exercise);
+//    }
     return exercise;
   }
 

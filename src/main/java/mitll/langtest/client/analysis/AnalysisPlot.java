@@ -141,7 +141,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   /**
    *
    * @param service
-   * @param userid
+   * @param userid either for yourself if you're a student or a selected student if you're a teacher
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -570,7 +570,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       long nearestXAsLong = clickEvent.getNearestXAsLong();
       Integer exid = timeToId.get(nearestXAsLong);
       if (exid != null) {
-        playAudio.playLast(exid, nearestXAsLong);
+        playAudio.playLast(userid, exid, nearestXAsLong);
       } else {
         logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
       }

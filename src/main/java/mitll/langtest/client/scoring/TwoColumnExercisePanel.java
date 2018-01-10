@@ -507,14 +507,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               "\n\tto       " + flclickables);
 
           clickableRow.clear();
-          doOneToManyMatch(phones,
-              audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickableRow);
+          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickableRow);
         }
       }
     }
     if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio value is " + value);
     return value;
   }
+
 
   private void doOneToManyMatch(List<TranscriptSegment> phones,
                                 AudioControl audioControl,
@@ -549,9 +549,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             List<TranscriptSegment> phonesInWordAll = new ArrayList<>();
 
             while (!fragment1.isEmpty()) {
-              boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
-
-              if (fragmentContainsSegment) {
+             // boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
+              if (fragment1.startsWith(lcSegment)) {
                 // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + fragment1);
 
                 fragment1 = fragment1.substring(lcSegment.length());
@@ -597,15 +596,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             }
 
           } else {
-//            value1.asWidget().addStyleName("floatLeft");
-//            segmentToWord.put(wordSegment, value1);
-//            clickableRow.add(value1.asWidget());
-
             if (DEBUG_MATCH) logger.warning("doOneToManyMatch no match for " + wordSegment);
           }
         } else {
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
-
           if (!isRTL) {
             addFloatLeft(value1);
           }
@@ -640,7 +634,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
-                               Iterator<IHighlightSegment> iterator, List<TranscriptSegment> wordSegments) {
+                               Iterator<IHighlightSegment> iterator,
+                               List<TranscriptSegment> wordSegments) {
     for (TranscriptSegment wordSegment : wordSegments) {
       if (iterator.hasNext()) {
         List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);

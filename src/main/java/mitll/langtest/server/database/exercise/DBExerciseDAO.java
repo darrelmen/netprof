@@ -95,12 +95,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
                 " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
           }
           else {
-            logger.warn("getExercise context " + commonExercise.getID());
+            logger.info("getExercise context " + commonExercise.getID());
           }
         }
       }
+
       else {
-        logger.warn("getEx " + id + " : " + commonExercise);
+        if (id != commonExercise.getID()) {
+          logger.error("getExercise " + id + " != " + commonExercise);
+        }
       }
       return commonExercise;
     }
