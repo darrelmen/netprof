@@ -279,8 +279,7 @@ public class ServerProperties {
     value.put("u3", "ǔ");
     value.put("u4", "ù");
 
-    langToPhoneToDisplay.put("mandarin", value);
-
+//    langToPhoneToDisplay.put("mandarin", value);
 //    logger.info("now " + langToPhoneToDisplay);
   }
 

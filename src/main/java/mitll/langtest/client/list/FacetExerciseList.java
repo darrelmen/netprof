@@ -149,7 +149,6 @@ boolean isDrill = false;
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
 
-
   /**
    * @param secondRow             add the section panel to this row
    * @param currentExerciseVPanel

@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  private final Logger logger = Logger.getLogger("UserContainer");
+//  private final Logger logger = Logger.getLogger("UserContainer");
 
   public static final int MAX_LENGTH = 11;
   public static final int TABLE_WIDTH = 600;

@@ -134,8 +134,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int port = getWebservicePort();
     phoneToDisplay = properties.getPhoneToDisplay(language.toLowerCase());
 
-
-      logger.info("(" + language + ") phone->display " + phoneToDisplay);
+//      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
     if (port != -1) {
@@ -506,7 +505,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
         phoneToDisplay = this.phoneToDisplay;
-        logger.info("using " + phoneToDisplay.size());
+       // logger.info("using " + phoneToDisplay.size());
       }
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores, phoneToDisplay),

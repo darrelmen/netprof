@@ -73,8 +73,7 @@ public class StudentAnalysis extends DivWidget {
    */
   public StudentAnalysis(final ExerciseController controller, final ShowTab showTab) {
     //logger.info("StudentAnalysis got here " + appTitle);
-    getElement().setId("StudentAnalysis");
-   // add(new HTML("Please wait..."));
+//    getElement().setId("StudentAnalysis");
 
     final String selectedUserKey = getRememberedSelectedUser(controller);
 

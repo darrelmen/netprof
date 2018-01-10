@@ -480,9 +480,10 @@ public class LangTest implements
   private boolean lastWasStackOverflow = false;
 
   public String logException(Throwable throwable) {
-    logger.info("got exception " + throwable.getMessage());
+    logger.info("logException got exception " + throwable.getMessage());
 
     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+    logger.info("logException stack " + exceptionAsString);
     boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
     if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
       return ""; // skip repeat exceptions

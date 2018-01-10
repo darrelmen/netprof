@@ -249,12 +249,13 @@ public class ClickableWords<T extends CommonExercise> {
 
     List<String> highlightTokens = getTokens(highlight, isChineseCharacter);
     int highlightStartIndex = getMatchingHighlightAll(tokens, highlightTokens);
-   // List<String> realHighlight = (List<String>) startIndex;
+    // List<String> realHighlight = (List<String>) startIndex;
 
 
     Iterator<String> highlightIterator = highlightTokens.iterator();
     String highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
-    if (DEBUG) logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
+    if (DEBUG)
+      logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
 
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
 
@@ -276,12 +277,13 @@ public class ClickableWords<T extends CommonExercise> {
 
 
     for (String token : tokens) {
-      if (DEBUG) logger.info("getClickableWordsHighlight token '" + highlightToFind + "' and '" + token + "' " + id + " vs " + highlightStartIndex);
+      if (DEBUG)
+        logger.info("getClickableWordsHighlight token '" + highlightToFind + "' and '" + token + "' " + id + " vs " + highlightStartIndex);
 
       boolean isHighlightMatch =
           //highlightStartIndex >= 0 &&
-              id >= highlightStartIndex &&
-          highlightToFind != null &&
+          id >= highlightStartIndex &&
+              highlightToFind != null &&
               isMatch(token, highlightToFind);
 
       boolean searchMatch = isSearchMatch(token, searchToken);
@@ -372,17 +374,27 @@ public class ClickableWords<T extends CommonExercise> {
     int searchStart = 0;
     int startIndex = -1;
 
-    while (realHighlight.size() < numToFind && searchStart<tokens.size()-realHighlight.size()) {
+    int numTokens = tokens.size();
+    while (realHighlight.size() < numToFind && searchStart < numTokens - realHighlight.size()) {
       Iterator<String> hIter = highlightTokens.iterator();
       String toFind = hIter.next();
-      for (int i = searchStart; i < tokens.size() && startIndex == -1; i++) {
-        if (isMatch(tokens.get(i), toFind)) {
+
+    //  logger.info("getMatchingHighlightAll : find '" + toFind + "'");
+      for (int i = searchStart; i < numTokens && startIndex == -1; i++) {
+        String longer = tokens.get(i);
+        if (isMatch(longer, toFind)) {
           startIndex = i;
+        }
+        else {
+  //        logger.info("\tno match for '" + longer + "'");
         }
       }
 
       if (startIndex > -1) { // found first match
-        while (toFind != null && isMatch(tokens.get(startIndex++), toFind)) {
+//        logger.info("getMatchingHighlightAll at " + startIndex);
+        while (toFind != null &&
+            startIndex < numTokens &&
+            isMatch(tokens.get(startIndex++), toFind)) {
           realHighlight.add(toFind);
           toFind = hIter.hasNext() ? hIter.next() : null;
         }
@@ -410,9 +422,12 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(longer.toLowerCase());
-      String vocab = removePunct(shorter.toLowerCase());
+      String vocab   = removePunct(shorter.toLowerCase());
       // if (DEBUG) logger.info("context " + context + " longer " + longer);
-      boolean b = context.equals(vocab) || (context.contains(vocab) && !vocab.isEmpty());
+      boolean equals = context.equals(vocab);
+    //   if (DEBUG) logger.info("isMatch : context '" + context + "' vocab '" + longer +"' = " + equals);
+
+      boolean b = equals || (context.contains(vocab) && !vocab.isEmpty());
 /*      if (b && DEBUG)
         logger.info("isMatch match '" + longer + "' '" + shorter + "' context '" + context + "' vocab '" + vocab + "'");
      */
@@ -569,7 +584,9 @@ public class ClickableWords<T extends CommonExercise> {
    * Chinese punctuation marks, spanish punct marks
    * horizontal ellipsis...
    * reverse solidus
+   * aprostophe...
    *
+   * right single quote
    * @param t
    * @return
    */
@@ -579,6 +596,6 @@ public class ClickableWords<T extends CommonExercise> {
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
         // .replaceAll("\\u00E9", "\\u0435")
-        .replaceAll("[\\u0301\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013]", "");
+        .replaceAll("[\\u0301\\u0022\\u0027\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013\\u2019]", "");
   }
 }

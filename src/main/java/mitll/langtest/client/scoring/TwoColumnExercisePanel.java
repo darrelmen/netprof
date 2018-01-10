@@ -515,7 +515,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return value;
   }
 
-
   private void doOneToManyMatch(List<TranscriptSegment> phones,
                                 AudioControl audioControl,
                                 TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
@@ -729,7 +728,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         return null;
       } else { // all clickables match this segment
         AllHighlight allHighlight = new AllHighlight(bulk);
-        if (showPhones)  allHighlight.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
+        if (showPhones) {
+          allHighlight.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
+        }
 
         if (DEBUG)
           logger.info("matchSegmentToWidgetForAudio create composite from " + bulk.size() + " = " + allHighlight);
