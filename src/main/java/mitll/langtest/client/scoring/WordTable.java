@@ -288,6 +288,12 @@ public class WordTable {
     return header;
   }
 
+  /**
+   * @see #getDivForWord
+   * @param id
+   * @param wordLabel
+   * @return
+   */
   @NotNull
   private HighlightSegment getWordLabel(int id, String wordLabel) {
     HighlightSegment header = new HighlightSegment(id, wordLabel);

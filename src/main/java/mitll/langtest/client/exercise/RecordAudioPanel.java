@@ -188,11 +188,11 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
     return
         (audioType.equals(AudioType.REGULAR)
             || audioType.equals(AudioType.CONTEXT_REGULAR)
-        ) ? "Record regular"
+        ) ? "Regular"
             :
             (audioType.equals(AudioType.SLOW)
                 || audioType.equals(AudioType.CONTEXT_SLOW)
-            ) ? "Record slow" : "Record";
+            ) ? "Slow" : "";
   }
 
   /**

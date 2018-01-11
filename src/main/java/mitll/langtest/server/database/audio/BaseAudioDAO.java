@@ -450,14 +450,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    */
   private boolean isMatchExToAudio(AudioAttribute attr, String foreignLanguage) {
-    String transcript = attr.getTranscript();
-
-    String normFL = normArabic(foreignLanguage, normalizer);
-    String normTranscript = normArabic(transcript, normalizer);
-
     return attr.matchTranscript(
-        StringUtils.stripAccents(normFL),
-        StringUtils.stripAccents(normTranscript));
+        StringUtils.stripAccents(normArabic(foreignLanguage, normalizer)),
+        StringUtils.stripAccents(normArabic(attr.getTranscript(), normalizer)));
   }
 
   private ArabicNormalizer normalizer = new ArabicNormalizer();

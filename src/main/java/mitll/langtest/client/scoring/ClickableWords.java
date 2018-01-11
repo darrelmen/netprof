@@ -8,8 +8,6 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
@@ -132,7 +130,7 @@ public class ClickableWords<T extends CommonExercise> {
     List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isSimple, tokens, searchTokens, dir, fieldType);
     clickables.addAll(segmentsForTokens);
 
-    return getClickableDivFromSegments(segmentsForTokens, addRightMargin, dir == HasDirection.Direction.RTL);
+    return getClickableDivFromSegments(segmentsForTokens, dir == HasDirection.Direction.RTL);
   }
 
   /**
@@ -176,38 +174,35 @@ public class ClickableWords<T extends CommonExercise> {
 
   /**
    * @param segmentsForTokens
-   * @param addRightMargin
    * @param isRTL
    * @return a clickable row
    * @see #getClickableDiv(List, List, boolean, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
    */
   @NotNull
-  private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean addRightMargin, boolean isRTL) {
-    DivWidget horizontal = new DivWidget();
-    horizontal.getElement().setId(CLICKABLE_ROW);
+  private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean isRTL) {
+    DivWidget horizontal = getClickableDiv(isRTL);
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+    horizontal.getElement().setId(CLICKABLE_ROW);
 
-    if (isRTL) {
-      setDirection(horizontal);
-    }
-    // int i = 0;
     for (IHighlightSegment segment : segmentsForTokens) {
       horizontal.add(segment.asWidget());
-      // logger.info("adding token " + (i++) + " " + segment);
-//      if (addRightMargin) {
-//        clickable.addStyleName("rightFiveMargin");
-//        horizontal.add(new InlineHTML(" "));
-//      }
       if (isRTL) {
         segment.getClickable().addStyleName("floatRight");
       }
     }
 
-    horizontal.addStyleName("leftFiveMargin");
-
     return horizontal;
   }
 
+  public DivWidget getClickableDiv(boolean isRTL) {
+    DivWidget horizontal = new DivWidget();
+    horizontal.addStyleName("leftFiveMargin");
+
+    if (isRTL) {
+      setDirection(horizontal);
+    }
+    return  horizontal;
+  }
 
   /**
    * Only for context.
@@ -249,8 +244,6 @@ public class ClickableWords<T extends CommonExercise> {
 
     List<String> highlightTokens = getTokens(highlight, isChineseCharacter);
     int highlightStartIndex = getMatchingHighlightAll(tokens, highlightTokens);
-    // List<String> realHighlight = (List<String>) startIndex;
-
 
     Iterator<String> highlightIterator = highlightTokens.iterator();
     String highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
@@ -494,7 +487,10 @@ public class ClickableWords<T extends CommonExercise> {
       int id,
       boolean isSimple,
       TwoColumnExercisePanel.FieldType fieldType) {
-    final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir, !isSimple, showPhones);
+    final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
+        //!isSimple,
+        false,
+        false);
 
     HTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == TwoColumnExercisePanel.FieldType.FL) {

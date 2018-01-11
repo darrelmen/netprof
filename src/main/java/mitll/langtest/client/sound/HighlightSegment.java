@@ -28,7 +28,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   /**
    * @param id
    * @param content
-   * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
+   * @see mitll.langtest.client.scoring.WordTable#getWordLabel
    */
   public HighlightSegment(int id, String content) {
     this(id, content, HasDirection.Direction.LTR, true, true);

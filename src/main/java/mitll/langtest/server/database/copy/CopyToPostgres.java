@@ -77,6 +77,14 @@ import java.util.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
 
+/**
+ * Take an old netprof 1 website (excel spreadsheet and h2.db file) and copy its info
+ * into the postgres database of netprof 2.
+ * <p>
+ * Note we don't copy the event table, since the events from netprof 1 aren't relevant to netprof 2.
+ *
+ * @param <T>
+ */
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
@@ -138,28 +146,29 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optionalProperties,
                                        String optionalName,
                                        int displayOrder,
-                                       boolean isEval, boolean skipRefResult) {
+                                       boolean isEval,
+                                       boolean skipRefResult) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     DatabaseImpl databaseLight = null;
     try {
       databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
       String language = databaseLight.getLanguage();
-      boolean hasModel = databaseLight.getServerProps().hasModel();
+      ServerProperties serverProps = databaseLight.getServerProps();
+      boolean hasModel = serverProps.hasModel();
 
       logger.info("copyOneConfigCommand :" +
           "\n\tloading  " + language +
           "\n\thasModel " + hasModel +
           "\n\tisEval   " + isEval +
-          "\n\tmodel    " + databaseLight.getServerProps().getCurrentModel());
+          "\n\tmodel    " + serverProps.getCurrentModel());
 
       String nameToUse = optionalName == null ? language : optionalName;
 
-      ProjectStatus status = ProjectStatus.PRODUCTION;
-      if (!hasModel) status = ProjectStatus.DEVELOPMENT;
-      else if (isEval) status = ProjectStatus.EVALUATION;
+      ProjectStatus status = getProjectStatus(isEval, hasModel);
 
-      copyToPostgres.copyOneConfig(databaseLight, getCreateProject(databaseLight).getCC(language), nameToUse, displayOrder, status, skipRefResult);
+      String cc = getCreateProject(serverProps).getCC(language);
+      copyToPostgres.copyOneConfig(databaseLight, cc, nameToUse, displayOrder, status, skipRefResult);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -172,8 +181,16 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   @NotNull
-  private CreateProject getCreateProject(DatabaseImpl databaseLight) {
-    return new CreateProject(databaseLight.getServerProps().getHydra2Languages());
+  private ProjectStatus getProjectStatus(boolean isEval, boolean hasModel) {
+    ProjectStatus status = ProjectStatus.PRODUCTION;
+    if (!hasModel) status = ProjectStatus.DEVELOPMENT;
+    else if (isEval) status = ProjectStatus.EVALUATION;
+    return status;
+  }
+
+  @NotNull
+  private CreateProject getCreateProject( ServerProperties serverProps) {
+    return new CreateProject(serverProps.getHydra2Languages());
   }
 
   private void dropOneConfig(String config) {
@@ -308,21 +325,25 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param skipRefResult
    * @see #copyOneConfigCommand
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, ProjectStatus status,
+  public void copyOneConfig(DatabaseImpl db,
+                            String cc,
+                            String optName,
+                            int displayOrder,
+                            ProjectStatus status,
                             boolean skipRefResult) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
-        "\n\tproject is            " + optName +
-        "\n\tcc is                 " + cc +
-        "\n\ttype order is         " + typeOrder +
+        "\n\tproject            " + optName +
+        "\n\tcc                  " + cc +
+        "\n\ttype order          " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, status);  // TODO : course?
 
     logger.info("copyOneConfig" +
-        "\n\tproject #" + projectID +
-        "\n\ttype order is " + typeOrder +
+        "\n\tproject #             " + projectID +
+        "\n\ttype order            " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
@@ -331,7 +352,7 @@ public class CopyToPostgres<T extends CommonShell> {
     // check once if we've added it before
     if (slickUEDAO.isProjectEmpty(projectID)) {
       ResultDAO resultDAO = new ResultDAO(db);
-      Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName);
+      Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
 
       Map<Integer, String> idToFL = new HashMap<>();
 
@@ -408,7 +429,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                        int displayOrder,
                                        Collection<String> typeOrder,
                                        ProjectStatus status) {
-    return getCreateProject(db)
+    return getCreateProject(db.getServerProps())
         .createProjectIfNotExists(db, cc, optName, "", displayOrder, typeOrder, status);
   }
 
@@ -866,7 +887,7 @@ public class CopyToPostgres<T extends CommonShell> {
                              Map<String, Integer> pathToAudioID,
                              int projid) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
-     List<SlickRefResult> bulk = new ArrayList<>();
+    List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> toImport = new RefResultDAO(db, false).getResults();
     logger.info("copyRefResult for project " + projid + " found " + toImport.size() + " original ref results.");
     logger.info("copyRefResult found " + oldToNewUser.size() + " oldToNewUser entries.");
@@ -941,15 +962,15 @@ public class CopyToPostgres<T extends CommonShell> {
   public static void main(String[] args) {
     Options options = getOptions();
 
-    CommandLineParser parser = new GnuParser();
     HelpFormatter formatter = new HelpFormatter();
+
     CommandLine cmd;
 
     try {
-      cmd = parser.parse(options, args);
+      cmd = new DefaultParser().parse(options, args);
     } catch (ParseException e) {
       logger.error(e.getMessage());
-      formatter.printHelp("copy", options);
+      new HelpFormatter().printHelp("copy", options);
 
       System.exit(1);
       return;
@@ -1000,7 +1021,6 @@ public class CopyToPostgres<T extends CommonShell> {
 
     switch (action) {
       case UNKNOWN:
-//        logger.error("not sure what to do with action ");
         formatter.printHelp("copy", options);
         break;
       case DROP:
@@ -1017,12 +1037,12 @@ public class CopyToPostgres<T extends CommonShell> {
             "\noptconfig '" + optConfigValue + "' " +
             "\nname      '" + optName + "'" +
             "\norder     " + displayOrderValue +
-            "\neval " + isEval
+            "\neval      " + isEval
         );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult);
           if (!b) {
-            System.exit(1);
+            System.exit(1);  // ?
           }
         } catch (Exception e) {
           logger.error("couldn't copy config " + config, e);
@@ -1105,7 +1125,7 @@ public class CopyToPostgres<T extends CommonShell> {
       database.dropAll();
     } catch (Exception e) {
       logger.error("couldn't drop all tables, got " + e, e);
-      String concat = database.getTables().concat(",\n");
+      String concat = database == null ? "" : database.getTables().concat(",\n");
       logger.info("doDropAll now there are " + concat);
     } finally {
       try {

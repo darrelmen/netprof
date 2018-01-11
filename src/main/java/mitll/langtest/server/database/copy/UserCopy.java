@@ -1,6 +1,5 @@
 package mitll.langtest.server.database.copy;
 
-import mitll.hlt.domino.shared.model.user.AccountDetail;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.domino.shared.model.user.Group;
@@ -8,6 +7,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.server.database.user.*;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserProject;
@@ -57,9 +57,10 @@ public class UserCopy {
    * @param projid       to import into
    * @param oldResultDAO - so we can check if the user ever recorded anything - if not we skip them on import
    * @param optName      if you want to name the project something other than the language
+   * @param status
    * @see CopyToPostgres#copyOneConfig
    */
-  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName) throws Exception {
+  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName, ProjectStatus status) throws Exception {
     DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     Map<Integer, Integer> oldToNew = new HashMap<>();
@@ -128,7 +129,9 @@ public class UserCopy {
       }
     }
 
-    addUserProjectBinding(slickUserProjectDAO, projid, userToCreation);
+    if (status != ProjectStatus.EVALUATION) {
+      addUserProjectBinding(slickUserProjectDAO, projid, userToCreation);
+    }
 
     logger.info("copyUsers after, postgres importUsers " +
         //"num = " + dominoUserDAO.getUsers().size() +

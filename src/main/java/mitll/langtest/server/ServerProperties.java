@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.ProjectProperty;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
@@ -44,10 +45,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+
+import static mitll.langtest.server.database.exercise.ProjectProperty.MODELS_DIR;
+import static mitll.langtest.server.database.exercise.ProjectProperty.WEBSERVICE_HOST_PORT;
 
 /**
  * This has a lot of overlap with the PropertyHandler set of properties.
@@ -127,7 +134,7 @@ public class ServerProperties {
   private static final String USE_H_2 = "useH2";
 
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
-  public static final String MODELS_DIR = "MODELS_DIR";
+  //public static final String MODELS_DIR = "MODELS_DIR";
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
@@ -138,7 +145,7 @@ public class ServerProperties {
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
-  private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
+  // private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
@@ -222,12 +229,12 @@ public class ServerProperties {
 
 
   private List<Affiliation> affliations = new ArrayList<>();
-  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  //public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
   /**
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
-  public static List<String> CORE_PROPERTIES = Arrays.asList(
+  public static List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
       MODELS_DIR,
       WEBSERVICE_HOST_PORT
   );
@@ -602,7 +609,7 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel", props.getProperty(MODELS_DIR, ""));
+    props.put("scoringModel", getPropertyDef(MODELS_DIR, ""));
 
     String lessonPlan = getLessonPlan();
     if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty("talksToDomino", TRUE);
@@ -630,6 +637,14 @@ public class ServerProperties {
 
   private String getProperty(String prop) {
     return props.getProperty(prop);
+  }
+
+  private String getProperty(ProjectProperty prop) {
+    return props.getProperty(prop.getName());
+  }
+
+  private String getPropertyDef(ProjectProperty prop, String def) {
+    return props.getProperty(prop.getName(), def);
   }
 
   /**
@@ -679,12 +694,14 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see DatabaseImpl#preloadContextPractice
+   * @seex DatabaseImpl#preloadContextPractice
    * @deprecated - new project will do something different
    */
+/*
   public String getDialogFile() {
     return props.getProperty("dialog");
   }
+*/
 
  /* private void readPhonemeMap(String configDir) {
     String phonemeMapping = props.getProperty("phonemeMapping");
@@ -836,8 +853,9 @@ public class ServerProperties {
   public boolean debugOneProject() {
     return getDefaultFalse(DEBUG_ONE_PROJECT);
   }
+
   public int debugProjectID() {
-    return getIntPropertyDef("debugProjectID",-1);
+    return getIntPropertyDef("debugProjectID", -1);
   }
 
   public int getSleepBetweenDecodes() {
@@ -926,7 +944,9 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  public List<Affiliation> getAffiliations() {    return affliations;  }
+  public List<Affiliation> getAffiliations() {
+    return affliations;
+  }
 
   /*
   public Set<String> getLincolnPeople() {

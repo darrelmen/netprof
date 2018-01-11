@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.ProjectProperty;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -53,8 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static mitll.langtest.server.ServerProperties.MODELS_DIR;
-import static mitll.langtest.server.database.exercise.Project.*;
+import static mitll.langtest.server.database.exercise.ProjectProperty.*;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
@@ -111,7 +111,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    *
    * @param changed
    * @return
-   * @see mitll.langtest.server.services.ProjectServiceImpl#updateProjectIfSomethingChanged(int, Collection, Collection, SlickProject, long)
+   * @see mitll.langtest.server.domino.ProjectSync#updateProjectIfSomethingChanged
    */
   @Override
   public boolean easyUpdate(SlickProject changed) {
@@ -193,9 +193,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
     return countryCode;
   }
+//
+//  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
+//    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
+//  }
+  private boolean addOrUpdateBooleanProperty(int projid, ProjectProperty projectProperty, boolean newValue) {
+    return addOrUpdateProperty(projid, projectProperty.getName(), newValue ? "true" : "false");
+  }
 
-  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
-    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
+  private boolean addOrUpdateProperty(int projid, ProjectProperty projectProperty, String newValue) {
+    return addOrUpdateProperty(projid, projectProperty.getName(), newValue);
   }
 
   private boolean addOrUpdateProperty(int projid, String key, String newValue) {
@@ -256,6 +263,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   public void addProperty(int project, String key, String value, String propertyType, String parent) {
     propertyDAO.add(project, System.currentTimeMillis(), key, value, propertyType, parent);
   }
+  public void addProperty(int project, ProjectProperty projectProperty, String value, String propertyType, String parent) {
+    propertyDAO.add(project, System.currentTimeMillis(), projectProperty.getName(), value, propertyType, parent);
+  }
 
   /**
    * @return
@@ -288,7 +298,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param secondType
    * @param countryCode
    * @param displayOrder
-   * @param isDev
+   * @paraxm isDev
    * @param dominoID
    * @return
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
@@ -298,7 +308,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
         //isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
 
-       status,
+        status,
         firstType, secondType, countryCode, displayOrder, dominoID);
   }
 
@@ -377,10 +387,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   @Override
-  public Collection<SlickProject> getAll() {    return dao.getAll();  }
+  public Collection<SlickProject> getAll() {
+    return dao.getAll();
+  }
 
   @Override
-  public int getNumProjects() { return dao.countAll(); }
+  public int getNumProjects() {
+    return dao.countAll();
+  }
 
   @Override
   public int getByName(String name) {

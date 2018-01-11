@@ -3,25 +3,28 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.ProjectProperty;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
-import static mitll.langtest.server.database.exercise.Project.AUDIO_PER_PROJECT;
+import static mitll.langtest.server.database.exercise.ProjectProperty.*;
 
 /**
  * Created by go22670 on 10/26/16.
  */
 public class CreateProject {
   private static final Logger logger = LogManager.getLogger(CreateProject.class);
+
   public static final String MODEL_PROPERTY_TYPE = "model";
+  private static final String PROPERTY = "property";
   private final Set<String> h2Languages;
 
   public CreateProject(Set<String> h2Languages) {
@@ -74,7 +77,7 @@ public class CreateProject {
    * @param course
    * @param displayOrder
    * @param typeOrder
-   * @param status
+   * @param status - eval = audio per project
    * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db,
@@ -88,10 +91,7 @@ public class CreateProject {
     Iterator<String> iterator = typeOrder.iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
-    String language = getOldLanguage(db);
-
-    if (language.equals("msa")) language = "MSA";
-    if (language.equals("levantine")) language = "Levantine";
+    String language = getLanguage(db);
 
     int beforeLoginUser = db.getUserDAO().getBeforeLoginUser();
     int projectID =
@@ -108,19 +108,28 @@ public class CreateProject {
 
     addProjectProperties(db, projectDAO, projectID);
     if (status == ProjectStatus.EVALUATION) {
-      projectDAO.addProperty(projectID, AUDIO_PER_PROJECT, Boolean.TRUE.toString(), "", "");
+      addModelProp(projectDAO, projectID, AUDIO_PER_PROJECT, Boolean.TRUE.toString());
     }
     addDefaultHostProperty(language, projectDAO, projectID);
     logger.info("createProject : created project " + projectID);
     return projectID;
   }
 
+  @NotNull
+  private String getLanguage(DatabaseImpl db) {
+    String language = getOldLanguage(db);
+
+    if (language.equals("msa")) language = "MSA";
+    if (language.equals("levantine")) language = "Levantine";
+    return language;
+  }
+
   private void addProjectProperties(DatabaseImpl db, IProjectDAO projectDAO, int projectID) {
     Properties props = db.getServerProps().getProps();
-    for (String prop : ServerProperties.CORE_PROPERTIES) {
-      String property = props.getProperty(prop);
+    for (ProjectProperty prop : ServerProperties.CORE_PROPERTIES) {
+      String property = props.getProperty(prop.getName());
       if (property != null) {
-        projectDAO.addProperty(projectID, prop, property, MODEL_PROPERTY_TYPE, "");
+        addModelProp(projectDAO, projectID, prop, property);
       }
     }
   }
@@ -155,20 +164,13 @@ public class CreateProject {
           info.getSecondType(),
           info.getDominoID());
 
-      projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
-          "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
-
 //      addHostProperty(info, projectDAO, projectID);
-      projectDAO.addProperty(projectID, Project.WEBSERVICE_HOST, info.getHost(), MODEL_PROPERTY_TYPE, "");
-
-      projectDAO.addProperty(projectID, ServerProperties.WEBSERVICE_HOST_PORT,
-          "" + info.getPort(), MODEL_PROPERTY_TYPE, "");
-
-      projectDAO.addProperty(projectID, ServerProperties.MODELS_DIR,
-          "" + info.getModelsDir(), MODEL_PROPERTY_TYPE, "");
+      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
+      addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
+      addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 
       for (Map.Entry<String, String> pair : info.getPropertyValue().entrySet()) {
-        projectDAO.addProperty(projectID, pair.getKey(), pair.getValue(), "property", "");
+        projectDAO.addProperty(projectID, pair.getKey(), pair.getValue(), PROPERTY, "");
       }
       projectServices.rememberProject(projectID);
       return true;
@@ -179,10 +181,13 @@ public class CreateProject {
 
   private void addDefaultHostProperty(String language, IProjectDAO projectDAO, int projectID) {
     if (h2Languages.contains(language.toLowerCase())) {
-      String h2Host = H2_HOST;
-      logger.info("createProject: setting hydra host to " + h2Host);
-      projectDAO.addProperty(projectID, Project.WEBSERVICE_HOST, h2Host, MODEL_PROPERTY_TYPE, "");
+      logger.info("createProject: setting hydra host to " + H2_HOST);
+      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, H2_HOST);
     }
+  }
+
+  private void addModelProp(IProjectDAO projectDAO, int projectID, ProjectProperty webserviceHost, String host) {
+    projectDAO.addProperty(projectID, webserviceHost, host, MODEL_PROPERTY_TYPE, "");
   }
 
   private int addProject(IProjectDAO projectDAO,

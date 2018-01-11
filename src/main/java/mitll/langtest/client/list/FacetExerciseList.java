@@ -132,9 +132,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
- // private final int numToShow;
+  // private final int numToShow;
   private Panel tableWithPager;
-boolean isDrill = false;
+  boolean isDrill = false;
   /**
    * for now only single selection
    */
@@ -155,7 +155,7 @@ boolean isDrill = false;
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @param isDrillView hack - should not have drill stuff in here... although eventually there won't be a drill view
+   * @param isDrillView           hack - should not have drill stuff in here... although eventually there won't be a drill view
    * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FacetExerciseList(Panel secondRow,
@@ -1399,7 +1399,7 @@ boolean isDrill = false;
    * @see
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
-  //  logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs);
+    //  logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs);
     long then = System.currentTimeMillis();
     List<Integer> requested = new ArrayList<>();
     List<CommonExercise> alreadyFetched = new ArrayList<>();
@@ -1413,7 +1413,7 @@ boolean isDrill = false;
     }
 
     if (requested.isEmpty()) {
-      logger.info("reallyGetExercises no req for " + alreadyFetched);
+//      logger.info("reallyGetExercises no req for " + alreadyFetched.size());
       gotFullExercises(currentReq, alreadyFetched);
     } else {
 /*      logger.info("reallyGetExercises make" +
@@ -1433,7 +1433,7 @@ boolean isDrill = false;
 
               @Override
               public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-  //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+                //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
                 if (result.getExercises() != null) {
                   long now = System.currentTimeMillis();
                   int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
@@ -1456,7 +1456,7 @@ boolean isDrill = false;
                                        Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
     int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-   //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
+    //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
     List<CommonExercise> toShow = new ArrayList<>();
 
@@ -1466,14 +1466,14 @@ boolean isDrill = false;
         idToEx.put(ex.getID(), ex);
       }
       result.getExercises().forEach(this::addExerciseToCached);
-     // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
+      // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
 
       for (int id : visibleIDs) {
         CommonExercise e = idToEx.get(id);
         if (e == null) {
           logger.warning("getFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
         } else {
-       //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
+          //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
           toShow.add(e);
         }
       }
@@ -1526,7 +1526,7 @@ boolean isDrill = false;
           showExercises(toShow, reqID);
           progressBar.setVisible(false);
         } else {
-             logger.info("gotFullExercises : showing " + toShow.size() + " exercises");
+          //      logger.info("gotFullExercises : showing " + toShow.size() + " exercises");
           showExercises(toShow, reqID);
         }
       }
@@ -1589,7 +1589,11 @@ boolean isDrill = false;
   private void reallyShowExercises(Collection<CommonExercise> result, int reqID) {
     //logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
     DivWidget exerciseContainer = new DivWidget();
+    long then = System.currentTimeMillis();
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
+    long now = System.currentTimeMillis();
+
+    logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now-then) + " millis");
 
     if (!getters.isEmpty()) {
       getRefAudio(getters.iterator());
@@ -1632,14 +1636,20 @@ boolean isDrill = false;
           RefAudioGetter refAudioGetter = (RefAudioGetter) exercisePanel;
           getters.add(refAudioGetter);
           refAudioGetter.setReq(getCurrentExerciseReq());
+       //   long then2 = System.currentTimeMillis();
           refAudioGetter.addWidgets(choices, phoneChoices);
+         // long now = System.currentTimeMillis();
+     //     logger.info("makeExercisePanels took " +(now-then2) + " millis to make panel for " + exercise.getID());
         }
         if (first) {
           markCurrentExercise(exercise.getID());
           first = false;
         }
         if (isCurrent(reqID)) {
+       //   long then2 = System.currentTimeMillis();
           exerciseContainer.add(exercisePanel);
+         // long now = System.currentTimeMillis();
+         // logger.info("makeExercisePanels took " +(now-then2) + " millis to add panel for " + exercise.getID());
         } else {
           logger.info("makeExercisePanels 2 stop stale req " + reqID + " vs current " + getCurrentExerciseReq() + " count = " + exerciseContainer.getWidgetCount());
         }
@@ -1683,7 +1693,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       } else {
         next.getRefAudio(() -> {
           if (iterator.hasNext()) {
-            //  logger.info("\tgetRefAudio panel complete...");
+            logger.info("\tgetRefAudio panel complete...");
             final int reqid = next.getReq();
             Scheduler.get().scheduleDeferred(() -> {
               if (isCurrent(reqid)) {
@@ -1693,7 +1703,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
               }
             });
           } else {
-            //logger.info("\tgetRefAudio all panels complete...");
+            logger.info("\tgetRefAudio all panels complete...");
           }
         });
       }

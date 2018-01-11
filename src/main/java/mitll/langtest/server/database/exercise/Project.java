@@ -58,6 +58,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.exercise.ProjectProperty.*;
+
 /**
  * Has everything associated with a project
  * <p>
@@ -75,7 +77,7 @@ public class Project implements IPronunciationLookup {
    * @see mitll.langtest.server.database.project.ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
-  public static final String WEBSERVICE_HOST = "webserviceHost";
+ // public static final String WEBSERVICE_HOST = "webserviceHost";
   /**
    * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
    *
@@ -87,9 +89,9 @@ public class Project implements IPronunciationLookup {
    * @see #getWebservicePort
    * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
    */
-  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+/*  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   public static final String SHOW_ON_IOS = "showOniOS";
-  public static final String AUDIO_PER_PROJECT = "audioPerProject";
+  public static final String AUDIO_PER_PROJECT = "audioPerProject";*/
 
   private SlickProject project;
   private ExerciseDAO<CommonExercise> exerciseDAO;
@@ -321,9 +323,7 @@ public class Project implements IPronunciationLookup {
     return prop != null && prop.equalsIgnoreCase(Boolean.TRUE.toString());
   }
 
-  public String getModelsDir() {
-    return getProp(ServerProperties.MODELS_DIR);
-  }
+  public String getModelsDir() { return getProp(MODELS_DIR);  }
 
   public boolean hasProjectSpecificAudio() {
     return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(Boolean.TRUE.toString());
@@ -338,6 +338,10 @@ public class Project implements IPronunciationLookup {
 //    logger.debug("clear project #" + getID());
     propCache.clear();
     putAllProps();
+  }
+
+  private String getProp(ProjectProperty projectProperty) {
+    return getProp(projectProperty.getName());
   }
 
   /**
@@ -555,11 +559,9 @@ public class Project implements IPronunciationLookup {
   public boolean isRTL() {
     return isRTL;
   }
-
   public void setRTL(boolean RTL) {
     isRTL = RTL;
   }
-
 
   public void ensureAudio(Set<CommonExercise> toAddAudioTo) {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);

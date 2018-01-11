@@ -84,6 +84,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private List<IHighlightSegment> contextClickables, altContextClickables;
 
   private DivWidget flClickableRow, altFLClickableRow;
+  private DivWidget contextClickableRow;
+
+  private DivWidget flClickableRowPhones, altFLClickableRowPhones;
+  /**
+   * @see #contextAudioChanged
+   * @see #getContext
+   */
+  private DivWidget contextClickableRowPhones;
 
   private ShowChoices choices;
   /**
@@ -95,7 +103,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
-  private DivWidget contextClickableRow;
   private int req;
 //  private boolean DEBUG_STALE = false;
 
@@ -147,7 +154,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   /**
    * @param listener
-   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio(Iterator)
+   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    */
   @Override
   public void getRefAudio(RefAudioListener listener) {
@@ -157,7 +164,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
     int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
 
-
+    if (DEBUG) logger.info("getRefAudio asking for" +
+            "\n\texercise  " + exercise.getID() +
+            "\n\taudio     " + contextAudioAttr// +
+//            "\n\talignment " + contextAudioAttr
+        //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
+        //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
+    );
     Set<Integer> req = new HashSet<>();
     int exerciseID = exercise.getID();
     if (refID != -1) {
@@ -177,7 +190,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       });
     }
     //else {
-      //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
+    //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
     //}
 
     if (contextRefID != -1) {
@@ -219,16 +232,17 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         }
       });
     } else {
-     // logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
+      // logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
     }
 
     if (req.isEmpty()) {
       if (DEBUG) {
-        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio   " + refID + " " + alignments.containsKey(refID));
+        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio #" + refID + " = " + alignments.containsKey(refID));
         logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.containsKey(contextRefID));
       }
 
-      registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+      //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+
       listener.refAudioComplete();
       cacheOthers(listener);
     } else {
@@ -270,7 +284,46 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private void registerSegments(int refID,
+  private void getAlignments(RefAudioListener listener,
+                             AudioAttribute currentAudioAttr,
+                             int refID,
+                             AudioAttribute contextAudioAttr,
+                             int contextRefID,
+                             Set<Integer> req,
+                             int projectid) {
+    if (DEBUG || true) {
+      logger.info("getAlignments asking scoring service for " + req.size() +  " : " + req+
+          " alignments for " + refID + " and context " + contextRefID);
+    }
+    final boolean needToShowRef = req.contains(refID);
+    final boolean needToShowContextRef = req.contains(contextRefID);
+    controller.getScoringService().getAlignments(
+        projectid,
+        req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("get alignments", caught);
+          }
+
+          @Override
+          public void onSuccess(Map<Integer, AlignmentOutput> result) {
+            alignments.putAll(result);
+
+            if (needToShowRef) {
+              audioChanged(refID, currentAudioAttr.getDurationInMillis());
+            }
+            if (needToShowContextRef) {
+              logger.info("registerSegments register " + refID + " context " + contextRefID);
+              contextAudioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
+            }
+
+//            registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
+            cacheOthers(listener);
+          }
+        });
+  }
+
+ /* private void registerSegments(int refID,
                                 AudioAttribute currentAudioAttr,
                                 int contextRefID,
                                 AudioAttribute currentAudioAttr1) {
@@ -280,36 +333,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //logger.warning("registerSegments huh? register " + refID);
     }
     if (contextRefID != -1) {
+      logger.info("registerSegments register " + refID + " context " + contextRefID);
       contextAudioChanged(contextRefID, currentAudioAttr1.getDurationInMillis());
     }
-  }
-
-  private void getAlignments(RefAudioListener listener,
-                             AudioAttribute currentAudioAttr,
-                             int refID,
-                             AudioAttribute contextAudioAttr,
-                             int contextRefID,
-                             Set<Integer> req,
-                             int projectid) {
-    if (DEBUG) {
-      logger.info("getAlignments asking for " + req.size() + " alignments for " + refID + " and context " + contextRefID);
-    }
-    controller.getScoringService().getAlignments(
-        projectid,
-        req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("get alignments",caught);
-          }
-
-          @Override
-          public void onSuccess(Map<Integer, AlignmentOutput> result) {
-            alignments.putAll(result);
-            registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-            cacheOthers(listener);
-          }
-        });
-  }
+  }*/
 
   /**
    * @param listener
@@ -318,15 +345,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void cacheOthers(RefAudioListener listener) {
     Set<Integer> req = getReqAudio();
 
-    if (!req.isEmpty()) {
-//      logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
+    if (req.isEmpty()) {
+      listener.refAudioComplete();
+    } else {
+
+      if (DEBUG) logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
             req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
               @Override
               public void onFailure(Throwable caught) {
-                controller.handleNonFatalError("cacheOthers get alignments",caught);
+                controller.handleNonFatalError("cacheOthers get alignments", caught);
               }
 
               @Override
@@ -336,8 +366,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               }
             });
       }
-    } else {
-      listener.refAudioComplete();
     }
   }
 
@@ -367,13 +395,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-   // if (shouldShowPhones()) {
-      if (alignmentOutputFromAudio != null) {
-        alignments.put(id, alignmentOutputFromAudio);
-      }
-//      AlignmentOutput alignmentOutput = alignmentOutputFromAudio == null ? alignments.get(id) : alignmentOutputFromAudio;
-      audioChanged(id, duration);
-   // }
+    if (alignmentOutputFromAudio != null) {
+      alignments.put(id, alignmentOutputFromAudio);
+    }
+    //logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
+    audioChanged(id, duration);
   }
 
   /**
@@ -383,9 +409,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void audioChanged(int id, long duration) {
-  //  if (shouldShowPhones()) {
-      showAlignment(id, duration, alignments.get(id));
-   // }
+    showAlignment(id, duration, alignments.get(id));
   }
 
   private int currentAudioDisplayed = -1;
@@ -401,14 +425,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG) logger.info("audioChanged for ex " + exercise.getID() + " audio id " + id);
+        if (DEBUG) logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
-        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow);
+        DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
+        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickablePhoneRow);
       }
     } else {
       if (DEBUG)
-        logger.info("audioChanged no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+        logger.info("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
 
@@ -419,6 +444,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param flclickables
    * @param playAudio
    * @param clickableRow
+   * @param clickablePhones
    * @see #audioChanged
    * @see #contextAudioChanged
    */
@@ -427,9 +453,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                          AlignmentOutput alignmentOutput,
                                          List<IHighlightSegment> flclickables,
                                          ChoicePlayAudioPanel playAudio,
-                                         DivWidget clickableRow) {
+                                         DivWidget clickableRow, DivWidget clickablePhones) {
+    if (DEBUG)  logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
-        matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow);
+        matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
   }
 
@@ -438,18 +465,18 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
                                ChoicePlayAudioPanel playAudio) {
     if (DEBUG) {
-      logger.info("audioChanged for ex " + exercise.getID() +
+      logger.info("setPlayListener for ex " + exercise.getID() +
           " audio id " + id + " : " +
           (typeToSegmentToWidget == null ? "missing" : typeToSegmentToWidget.size()));
     }
 
     if (typeToSegmentToWidget == null) {
-      logger.warning("audioChanged no type to segment for " + id + " and exercise " + exercise.getID());
+      logger.warning("setPlayListener no type to segment for " + id + " and exercise " + exercise.getID());
     } else {
       if (DEBUG) {
         TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
             typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
-        logger.info("audioChanged segments now for ex " + exercise.getID() +
+        logger.info("setPlayListener segments now for ex " + exercise.getID() +
             " audio " + id + " dur " + duration +
             "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet() +
             "\n\tphone: " + typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT).keySet()
@@ -467,6 +494,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param flclickables
    * @param audioControl
    * @param clickableRow
+   * @param clickablePhones
    * @return
    * @see #matchSegmentsToClickables
    */
@@ -475,7 +503,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                                                                                             AlignmentOutput alignmentOutput,
                                                                                                             List<IHighlightSegment> flclickables,
                                                                                                             AudioControl audioControl,
-                                                                                                            DivWidget clickableRow) {
+                                                                                                            DivWidget clickableRow, DivWidget clickablePhones) {
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
 
     TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord = new TreeMap<>();
@@ -500,14 +528,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
 
         if (transcriptMatches(flclickables, wordSegments)) {
-          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments);
+          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickablePhones);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
               "\n\tto       " + flclickables);
 
           clickableRow.clear();
-          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickableRow);
+          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickableRow, clickablePhones);
         }
       }
     }
@@ -521,7 +549,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                 ListIterator<IHighlightSegment> clickablesIterator,
                                 List<TranscriptSegment> wordSegments,
-                                DivWidget clickableRow) {
+                                DivWidget clickableRow,
+                                DivWidget clickablePhones) {
     ListIterator<TranscriptSegment> transcriptSegmentListIterator = wordSegments.listIterator();
     while (transcriptSegmentListIterator.hasNext()) {
       TranscriptSegment wordSegment = transcriptSegmentListIterator.next();
@@ -533,7 +562,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           logger.info("doOneToManyMatch got segment " + wordSegment);// + " length " + segmentLength);
 
         IHighlightSegment value1 =
-            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap);
+            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones);
 
         if (value1 == null) {
           if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
@@ -548,7 +577,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             List<TranscriptSegment> phonesInWordAll = new ArrayList<>();
 
             while (!fragment1.isEmpty()) {
-             // boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
+              // boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
               if (fragment1.startsWith(lcSegment)) {
                 // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + fragment1);
 
@@ -565,7 +594,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                   }
                 }
               } else {
-                if (DEBUG_MATCH)  logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
+                if (DEBUG_MATCH) logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
                     "'  vs '" + fragment1 +
                     "'");
                 break;
@@ -578,7 +607,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               //    logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
 
               if (shouldShowPhones()) {
-                current.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap));
+                DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap);
+//                current.setSouth(phoneDivBelowWord);
+                clickablePhones.add(phoneDivBelowWord);
+                phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
               }
 
               segmentToWord.put(wordSegment, current); // only one for now...
@@ -629,12 +661,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     current.asWidget().addStyleName("floatLeft");
   }
 
+  /**
+   * @param phones
+   * @param audioControl
+   * @param phoneMap
+   * @param segmentToWord   remember map of transcript seg to highlight segment
+   * @param iterator
+   * @param wordSegments
+   * @param clickablePhones
+   */
   private void doOneToOneMatch(List<TranscriptSegment> phones,
                                AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                Iterator<IHighlightSegment> iterator,
-                               List<TranscriptSegment> wordSegments) {
+                               List<TranscriptSegment> wordSegments, DivWidget clickablePhones) {
     for (TranscriptSegment wordSegment : wordSegments) {
       if (iterator.hasNext()) {
         List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);
@@ -643,7 +684,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           logger.info("doOneToOneMatch got segment " + wordSegment);// + " length " + segmentLength);
 
         IHighlightSegment value1 =
-            matchEventSegmentToClickable(iterator, wordSegment, phonesInWord, audioControl, phoneMap);
+            matchEventSegmentToClickable(iterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones);
 
         if (value1 == null) {
           if (DEBUG) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
@@ -690,13 +731,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param phonesInWord
    * @param audioControl
    * @param phoneMap
+   * @param clickablePhones
    * @return
+   * @see #doOneToManyMatch(List, AudioControl, TreeMap, TreeMap, ListIterator, List, DivWidget, DivWidget)
    */
   private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> clickables,
                                                          TranscriptSegment wordSegment,
                                                          List<TranscriptSegment> phonesInWord,
                                                          AudioControl audioControl,
-                                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
+                                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                                         DivWidget clickablePhones) {
     IHighlightSegment clickable = clickables.next();
     clickable = skipUnclickable(clickables, clickable);
     String segment = wordSegment.getEvent();
@@ -713,23 +757,31 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           "\n\tsegment       " + lcSegment + //" length " + segmentLength +
           "\n\tvs clickable '" + fragment1 + "'");
 
-    boolean showPhones =shouldShowPhones();
+    boolean showPhones = shouldShowPhones();
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {  // easy match -
       if (showPhones) {
-        clickable.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
+        DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
+
+//        clickable.setSouth(phoneDivBelowWord);
+
+        clickablePhones.add(phoneDivBelowWord);
+        phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
       }
 
       return clickable;
     } else {
-      Collection<IHighlightSegment> bulk =  getMatchingSegments(clickables, clickable, lcSegment);// : Collections.EMPTY_LIST;
+      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment);// : Collections.EMPTY_LIST;
 
       if (bulk.isEmpty()) {
         return null;
       } else { // all clickables match this segment
         AllHighlight allHighlight = new AllHighlight(bulk);
         if (showPhones) {
-          allHighlight.setSouth(getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap));
+          DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
+//          allHighlight.setSouth(phoneDivBelowWord);
+          clickablePhones.add(phoneDivBelowWord);
+          phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
         }
 
         if (DEBUG)
@@ -741,7 +793,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   *
    * @param wordSegment
    * @param phonesInWord
    * @param audioControl
@@ -821,8 +872,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private boolean transcriptMatches(List<IHighlightSegment> clickables,
                                     List<TranscriptSegment> segments) {
     int i = 0;
-    //List<IHighlightSegment> compOrder = clickables;
-
     int c = 0;
     for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
@@ -861,7 +910,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * ideographic comma
    * right double quote
    * double quote
-   *
+   * <p>
    * 2d = dash like in twenty-first
    *
    * @param t
@@ -926,6 +975,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemContent(final T e) {
+    long then = System.currentTimeMillis();
     Panel card = new DivWidget();
     card.setWidth("100%");
 
@@ -963,7 +1013,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //rowWidget.getElement().setId("contextRow");
       addContext(e, card, rowWidget);
     }
+    long now = System.currentTimeMillis();
 
+    logger.info("getItemContent for " + e.getID() + " took " + (now-then));
     return card;
   }
 
@@ -1038,7 +1090,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       flContainer.add(playAudio = getPlayAudioPanel());
     }
     //else {
-      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     //}
 
     DivWidget fieldContainer = new DivWidget();
@@ -1048,8 +1100,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String trim = e.getAltFL().trim();
     if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
+      fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
+      flClickableRowPhones.addStyleName("inlineFlex");
+      flClickableRowPhones.getElement().setId("flClickableRowPhones");
+
       if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
         AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+
+        if (DEBUG) logger.info("audioChangedWithAlignment audio " + currentAudioAttr.getUniqueID());
+
         audioChangedWithAlignment(currentAudioAttr.getUniqueID(),
             currentAudioAttr.getDurationInMillis(),
             currentAudioAttr.getAlignmentOutput());
@@ -1058,6 +1117,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (choices == BOTH || choices == ALTFL) {
       addField(fieldContainer, addAltFL(e, choices == BOTH));
+      altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
+      altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
+      altFLClickableRowPhones.addStyleName("inlineFlex");
+      addField(fieldContainer, altFLClickableRowPhones);
     }
 
     addField(fieldContainer, addTransliteration(e));
@@ -1105,7 +1168,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         e.getAnnotation(FOREIGN_LANGUAGE),
         false,
         showInitially,
-        annotationHelper, isRTL, contentWidget,e.getID());
+        annotationHelper, isRTL, contentWidget, e.getID());
 
     if (isRTL) {
       clickableWords.setDirection(flEntry);
@@ -1121,7 +1184,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @return
    * @see #makeFirstRow
    */
-  private boolean hasAudio(T e) {    return e.hasAudioNonContext(true);  }
+  private boolean hasAudio(T e) {
+    return e.hasAudioNonContext(true);
+  }
 
   /**
    * @param e
@@ -1202,7 +1267,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private DivWidget getItemWidget(T e) {
     InlineLabel itemHeader = commonExerciseUnitChapterItemHelper.showPopup(e);
-     itemHeader.addStyleName("floatRight");
+    itemHeader.addStyleName("floatRight");
     DivWidget itemContainer = new DivWidget();
     itemContainer.add(itemHeader);
     itemContainer.addStyleName("floatRight");
@@ -1263,6 +1328,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return flContainer;
   }
 
+  /**
+   * @param e
+   * @param addTopMargin
+   * @return
+   * @see #makeFirstRow
+   */
   private Widget addAltFL(T e, boolean addTopMargin) {
     String altFL = e.getAltFL().trim();
     if (!altFL.isEmpty() && !altFL.equals(N_A) && !e.getForeignLanguage().trim().equals(altFL)) {
@@ -1279,7 +1350,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       altFLClickableRow = contentWidget;
 
       DivWidget flEntry = getCommentEntry(QCNPFExercise.ALTFL, e.getAnnotation(QCNPFExercise.ALTFL), false,
-          showInitially, annotationHelper, isRTL, contentWidget,e.getID());
+          showInitially, annotationHelper, isRTL, contentWidget, e.getID());
 
       if (addTopMargin) {
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
@@ -1295,7 +1366,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     } else return null;
   }
 
-  private void addFloatLeft(DivWidget flEntry) {  flEntry.addStyleName("floatLeft");  }
+  private void addFloatLeft(DivWidget flEntry) {
+    flEntry.addStyleName("floatLeft");
+  }
 
   private Widget addTransliteration(T e) {
     String translitSentence = e.getTransliteration();
@@ -1306,7 +1379,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return null;
   }
 
-  private boolean isMeaningValid(T e) {  return isValid(e.getMeaning());  }
+  private boolean isMeaningValid(T e) {
+    return isValid(e.getMeaning());
+  }
 
   private boolean isValid(String meaning) {
     return meaning != null && !meaning.trim().isEmpty() && !meaning.equals(N_A);
@@ -1339,18 +1414,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           FieldType.FL, contextClickables = new ArrayList<>(), false);
 
       contextClickableRow = contentWidget;
+      contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
+      contextClickableRowPhones.addStyleName("inlineFlex");
+      contextClickableRowPhones.getElement().setId("contextClickableRowPhones");
 
-      CommentBox commentBox = getCommentBox(annotationHelper,contextExercise.getID());
-      ExerciseAnnotation annotation = contextExercise.getAnnotation(FOREIGN_LANGUAGE);
+      // CommentBox commentBox = getCommentBox(annotationHelper, contextExercise.getID());
+      //ExerciseAnnotation annotation = contextExercise.getAnnotation(FOREIGN_LANGUAGE);
 
 /*      logger.info("context '" + context1 +
           "' = '" + annotation +
           "'");*/
 
       Widget commentRow =
-          commentBox
+          getCommentBox(annotationHelper, contextExercise.getID())
               .getEntry(FOREIGN_LANGUAGE, contentWidget,
-                  annotation, showInitially, isRTL);
+                  contextExercise.getAnnotation(FOREIGN_LANGUAGE), showInitially, isRTL);
 
       commentRow.setWidth("100%");
 
@@ -1361,11 +1439,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       String altFL1 = contextExercise.getAltFL();
       if (choices == BOTH || choices == FL || altFL1.isEmpty()) {
         col.add(commentRow);
+        col.add(contextClickableRowPhones);
       }
 
       if (choices == BOTH || choices == ALTFL) {
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
-          Widget altContext = getAltContext(altFL, altFL1, annotationHelper,contextExercise.getID());
+          Widget altContext = getAltContext(altFL, altFL1, annotationHelper, contextExercise.getID());
           if (choices == BOTH) altContext.addStyleName("topFiveMargin");
           col.add(altContext);
         }
@@ -1396,11 +1475,22 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     AudioChangeListener contextAudioChanged = new AudioChangeListener() {
       @Override
       public void audioChanged(int id, long duration) {
+        if (DEBUG) {
+          logger.info("getContextPlay audioChanged for ex " + exercise.getID() + "/" + contextExercise.getID() +
+              " CONTEXT audio id "
+          );
+        }
+
         contextAudioChanged(id, duration);
       }
 
       @Override
       public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+        if (DEBUG) {
+          logger.info("getContextPlay audioChangedWithAlignment for ex " + exercise.getID() + "/" + contextExercise.getID() +
+              " CONTEXT audio id "
+          );
+        }
         contextAudioChangedWithAlignment(id, duration, alignmentOutputFromAudio);
       }
     };
@@ -1413,6 +1503,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void contextAudioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+    if (DEBUG) {
+      logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+          " alignment " + alignmentOutputFromAudio);
+    }
+
     if (alignmentOutputFromAudio != null) {
       alignments.put(id, alignmentOutputFromAudio);
     }
@@ -1420,27 +1515,26 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void contextAudioChanged(int id, long duration) {
-   // if (shouldShowPhones()) {
-
-      AlignmentOutput alignmentOutput = alignments.get(id);
-      if (alignmentOutput != null) {
-        if (DEBUG) {
-          logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
-              " alignment " + alignmentOutput);
-        }
-        if (contextClickables == null) {
-          logger.warning("contextAudioChanged : huh? context not set for " + id);
-        } else {
-          matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow);
-        }
-      } else {
-        //logger.warning("contextAudioChanged : no alignment output for " + id);
+    AlignmentOutput alignmentOutput = alignments.get(id);
+    if (alignmentOutput != null) {
+      if (DEBUG) {
+        logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+            " alignment " + alignmentOutput);
       }
-
+      if (contextClickables == null) {
+        logger.warning("contextAudioChanged : huh? context not set for " + id);
+      } else {
+        matchSegmentsToClickables(id, duration, alignmentOutput, contextClickables, contextPlay, contextClickableRow, contextClickableRowPhones);
+      }
+    }
+    //else {
+      //logger.warning("contextAudioChanged : no alignment output for " + id);
     //}
   }
 
-  private boolean shouldShowPhones() {  return phonesChoices == SHOW;  }
+  private boolean shouldShowPhones() {
+    return phonesChoices == SHOW;
+  }
 
   private Widget addContextTranslation(AnnotationExercise e,
                                        String contextTranslation,
@@ -1511,7 +1605,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         fieldType != FieldType.FL, addRightMargin, isRTL);
     // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     return getCommentEntry(field, annotation, fieldType == FieldType.TRANSLIT, showInitially,
-        annotationHelper, isRTL, contentWidget,exid);
+        annotationHelper, isRTL, contentWidget, exid);
   }
 
   private DivWidget getCommentEntry(String field,
@@ -1526,7 +1620,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       contentWidget.addStyleName("floatRight");
     }
     return
-        getCommentBox(annotationHelper,exid)
+        getCommentBox(annotationHelper, exid)
             .getEntry(field, contentWidget, annotation, showInitially, isRTL);
   }
 
@@ -1541,7 +1635,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
     T exercise = this.exercise;
     CommentBox commentBox = new CommentBox(exid, controller,
-            annotationHelper, exercise.getMutableAnnotation(), true);
+        annotationHelper, exercise.getMutableAnnotation(), true);
     comments.add(commentBox);
     return commentBox;
   }
