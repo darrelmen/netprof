@@ -291,8 +291,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              int contextRefID,
                              Set<Integer> req,
                              int projectid) {
-    if (DEBUG || true) {
-      logger.info("getAlignments asking scoring service for " + req.size() +  " : " + req+
+    if (DEBUG) {
+      logger.info("getAlignments asking scoring service for " + req.size() + " : " + req +
           " alignments for " + refID + " and context " + contextRefID);
     }
     final boolean needToShowRef = req.contains(refID);
@@ -349,7 +349,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       listener.refAudioComplete();
     } else {
 
-      if (DEBUG) logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
+      if (DEBUG)
+        logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
@@ -425,7 +426,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG) logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
+        if (DEBUG)
+          logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
         DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
@@ -454,7 +456,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                          List<IHighlightSegment> flclickables,
                                          ChoicePlayAudioPanel playAudio,
                                          DivWidget clickableRow, DivWidget clickablePhones) {
-    if (DEBUG)  logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
+    if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
@@ -979,27 +981,31 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Panel card = new DivWidget();
     card.setWidth("100%");
 
-    boolean meaningValid = isMeaningValid(e);
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
-    boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
+    boolean useMeaningInsteadOfEnglish = isEnglish && isMeaningValid(e);
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
     DivWidget rowWidget = getRowWidget();
     //rowWidget.getElement().setId("firstRow");
 
     boolean hasEnglish = isValid(english);
-    SimpleRecordAudioPanel<T> recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
+    Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
     card.add(rowWidget);
 
-    DivWidget lr = getHorizDiv();
-    addFloatLeft(lr);
-    lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
+    long now = System.currentTimeMillis();
+  //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
 
-    if (hasEnglish) lr.add(getEnglishWidget(e, english));
-    lr.add(getItemWidget(e));
-    lr.add(getDropdown());
+    {
+      DivWidget lr = getHorizDiv();
+      addFloatLeft(lr);
+      lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
 
-    rowWidget.add(lr);
+      if (hasEnglish) lr.add(getEnglishWidget(e, english));
+      lr.add(getItemWidget(e));
+      lr.add(getDropdown());
+
+      rowWidget.add(lr);
+    }
 
     rowWidget = getRowWidget();
     card.add(rowWidget);
@@ -1013,9 +1019,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //rowWidget.getElement().setId("contextRow");
       addContext(e, card, rowWidget);
     }
-    long now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
 
-    logger.info("getItemContent for " + e.getID() + " took " + (now-then));
+//    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
     return card;
   }
 
@@ -1076,15 +1082,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
+    long then = System.currentTimeMillis();
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
 
     DivWidget flContainer = getHorizDiv();
-    flContainer.getElement().setId("flWidget");
+    //flContainer.getElement().setId("flWidget");
 
-    DivWidget recordButtonContainer = new DivWidget();
-    recordButtonContainer.addStyleName("recordingRowStyle");
-    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-    flContainer.add(recordButtonContainer);
+    {
+      DivWidget recordButtonContainer = new DivWidget();
+      recordButtonContainer.addStyleName("recordingRowStyle");
+      recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+      flContainer.add(recordButtonContainer);
+    }
+
+    long now = System.currentTimeMillis();
+  //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
@@ -1098,6 +1110,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     fieldContainer.getElement().setId("leftSideFieldContainer");
 
     String trim = e.getAltFL().trim();
+
+    now = System.currentTimeMillis();
+   // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
+
     if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
       fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
@@ -1114,6 +1130,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
             currentAudioAttr.getAlignmentOutput());
       }
     }
+
+    now = System.currentTimeMillis();
+   // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
 
     if (choices == BOTH || choices == ALTFL) {
       addField(fieldContainer, addAltFL(e, choices == BOTH));
@@ -1302,16 +1321,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
-    return new SimpleRecordAudioPanel<>(new BusyPanel() {
-      @Override
-      public boolean isBusy() {
-        return false;
-      }
-
-      @Override
-      public void setBusy(boolean v) {
-      }
-    }, controller, e, listContainer);
+    return new SimpleRecordAudioPanel<>(null, controller, e, listContainer);
   }
 
   @NotNull
@@ -1528,7 +1538,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     }
     //else {
-      //logger.warning("contextAudioChanged : no alignment output for " + id);
+    //logger.warning("contextAudioChanged : no alignment output for " + id);
     //}
   }
 

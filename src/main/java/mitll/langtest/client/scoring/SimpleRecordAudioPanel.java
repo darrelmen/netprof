@@ -27,7 +27,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+ // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
@@ -74,8 +74,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     this.exercise = exercise;
     this.listContainer = listContainer;
 
-    getElement().setId("SimpleRecordAudioPanel");
-    this.isRTL = new ClickableWords<>().isRTL(exercise);
+    //getElement().setId("SimpleRecordAudioPanel");
+    this.isRTL = controller.isRightAlignContent();//new ClickableWords<>().isRTL(exercise);
     setWidth("100%");
     addWidgets();
     List<CorrectAndScore> scores = exercise.getScores();
@@ -97,13 +97,16 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
   private void addWidgets() {
+    long then = System.currentTimeMillis();
+
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
+
     {
       DivWidget historyHoriz = new DivWidget();
       historyHoriz.addStyleName("inlineFlex");
       DivWidget spacer = new DivWidget();
-      spacer.getElement().setId("simpleSpacer");
+      //spacer.getElement().setId("simpleSpacer");
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
       historyHoriz.add(spacer);
@@ -111,15 +114,18 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       col.add(historyHoriz);
     }
 
-    add(col);
-
     recordFeedback = makePlayAudioPanel().getRecordFeedback(waitCursorHelper.getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
     scoreFeedback.add(recordFeedback);
 
     this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel.getRealDownloadContainer());
-    scoreFeedback.getElement().setId("scoreFeedbackRow");
+
+    add(col);
+
+   // long now = System.currentTimeMillis();
+   // logger.info("addWidgets "+ (now-then)+ " millis");
+    //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
   private void addMiniScoreListener(MiniScoreListener l) {
@@ -136,8 +142,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #addWidgets
    */
   private RecorderPlayAudioPanel makePlayAudioPanel() {
-    waitCursorHelper = new WaitCursorHelper();
-    waitCursorHelper.showFinished();
+    long then = System.currentTimeMillis();
+    makeWaitCursor();
 
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
     postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -149,7 +155,16 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         controller, exercise);
     playAudioPanel.hidePlayButton();
 
+//    long now = System.currentTimeMillis();
+   // logger.info("took " + (now-then) + " for makeAudioPanel");
     return playAudioPanel;
+  }
+
+  private void makeWaitCursor() {
+    //if (waitCursorHelper == null) {
+      waitCursorHelper = new WaitCursorHelper();
+      waitCursorHelper.showFinished();
+   // }
   }
 
   /**
@@ -211,7 +226,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.setEnabled(false);
     scoreFeedbackDiv.hideScore();
 
-    goodwaveExercisePanel.setBusy(true);
+    if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(true);
     playAudioPanel.showFirstRecord();
 
     waitCursorHelper.showFinished();
@@ -233,7 +248,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     //  logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
 
-    goodwaveExercisePanel.setBusy(false);
+    if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
     scoreHistory.setVisible(true);
@@ -251,7 +266,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   @Override
   public void useResult(AudioAnswer result) {
 //    logger.info("useResult " + result);
-
     waitCursorHelper.showFinished();
     setVisible(true);
     hasScoreHistory = true;
@@ -299,7 +313,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
       if (transcriptSegments != null && transcriptSegments.size() == 1) {
         float wordScore = transcriptSegments.get(0).getScore();
-      //  logger.info("useResult using word score " + wordScore + " instead of hydec score " + hydecScore);
+        //  logger.info("useResult using word score " + wordScore + " instead of hydec score " + hydecScore);
         hydecScore = wordScore;
       }
       scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED));
@@ -332,7 +346,9 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         miniScoreListener.addScore(score);
       }
       setVisible(hasScoreHistory);
-    } else logger.warning("scores is null?");
+    } else {
+      //logger.warning("scores is null?");
+    }
 
     miniScoreListener.showChart(controller.getHost());
   }
