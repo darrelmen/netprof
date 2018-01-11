@@ -59,8 +59,8 @@ public class LTSFactory {
 
   private final Language thisLanguage;
 
-  private final LTS unknown = new EmptyLTS();
-  private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
+  private final LTS emptyLTS = new EmptyLTS();
+  private LTS ltsForLanguage = emptyLTS; /// attempt to deal with undefined LTS...
 
   public static boolean isEmpty(LTS lts) {
     return lts.getClass() == EmptyLTS.class;
@@ -156,7 +156,7 @@ public class LTSFactory {
     try {
       lang = Language.valueOf(language1.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.error("getLocale for unknown language " + language1);
+      logger.error("getLocale for emptyLTS language " + language1);
       lang = Language.ENGLISH;
     }
     return LTSFactory.getID(lang);

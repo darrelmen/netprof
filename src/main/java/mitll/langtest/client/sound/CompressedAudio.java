@@ -58,6 +58,10 @@ public class CompressedAudio {
     return (path.endsWith(WAV)) ? path.replace(WAV, useOGG ? OGG : MP3) : (!useOGG && path.endsWith(OGG) ? path.replace(OGG,MP3) : path);
   }
 
+  /**
+   * @see #getPathNoSlashChange
+   * @return
+   */
   public static native boolean supportsOgg() /*-{
       if (typeof $wnd.Modernizr == "undefined") {
           console.log("no modernizr?");

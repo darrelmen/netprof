@@ -56,7 +56,7 @@ class PlayAudio {
   private final Widget playFeedback;
   private Timer t;
   private ExerciseServiceAsync exerciseService;
-  ExceptionSupport exceptionSupport;
+  private ExceptionSupport exceptionSupport;
 
   /**
    * @param soundFeedback
@@ -142,7 +142,7 @@ class PlayAudio {
     playBothCuts(path, refAudio);//commonExercise.getRefAudio());
   }*/
 
-  private void playBothCuts( String refAudio,String studentAudioPath) {
+  private void playBothCuts(String refAudio, String studentAudioPath) {
     logger.info("playBothCuts play audio    " + studentAudioPath);
     logger.info("playBothCuts play refAudio " + refAudio);
 
@@ -165,8 +165,8 @@ class PlayAudio {
    */
   private void playLastThenRef(String answerAudio, String refAudio) {
     final String path = getPath(refAudio);
-    final String path1 = getPath(answerAudio);
-    soundFeedback.queueSong(path1, new SoundFeedback.EndListener() {
+    // final String path1 = getPath(answerAudio);
+    soundFeedback.queueSong(getPath(answerAudio), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         showPlayback();
@@ -180,18 +180,7 @@ class PlayAudio {
         t = new Timer() {
           @Override
           public void run() {
-            //   logger.info("\t songEnded queue song " + path + " -------  " + System.currentTimeMillis());
-            soundFeedback.queueSong(path, new SoundFeedback.EndListener() {
-              @Override
-              public void songStarted() {
-                showPlayback();
-              }
-
-              @Override
-              public void songEnded() {
-                hidePlayback();
-              }
-            });
+            playAudio(path);
           }
         };
         t.schedule(100);
@@ -201,16 +190,18 @@ class PlayAudio {
 
 
   private void playUserAudio(String answerAudio) {
-    soundFeedback.queueSong(getPath(answerAudio), new SoundFeedback.EndListener() {
+    playAudio(getPath(answerAudio));
+  }
+
+  private void playAudio(String path) {
+    soundFeedback.queueSong(path, new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         showPlayback();
-        //logger.info("playUserAudio songStarted song " + path1 + " -------  " + System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-        //logger.info("playUserAudio songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         hidePlayback();
       }
     });
@@ -219,11 +210,16 @@ class PlayAudio {
   private void showPlayback() {
     playFeedback.setVisible(true);
   }
-
   private void hidePlayback() {
     playFeedback.setVisible(false);
   }
 
+  /**
+   * Safe - chooses right compressed format based on browser.
+   *
+   * @param path .wav ok
+   * @return ogg or mp3
+   */
   private String getPath(String path) {
     return CompressedAudio.getPath(path);
   }

@@ -9,8 +9,7 @@ import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.DocumentColumn;
-import mitll.hlt.domino.shared.model.document.VocabularyItem;
+import mitll.hlt.domino.shared.model.document.*;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.project.ProjectColumn;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
@@ -26,13 +25,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
+import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.VocabularyMetadata.V_NP_ID;
 import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
 
 public class DominoImport implements IDominoImport {
@@ -166,6 +164,19 @@ public class DominoImport implements IDominoImport {
     }
   }
 
+  private String getNPId(MetadataComponentBase vocabularyItem) {
+    List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
+    for (IMetadataField field : metadataFields) {
+      String name = field.getName();
+      String displayValue = field.getDisplayValue();
+
+      if (name.equals(V_NP_ID) && !displayValue.isEmpty()) {
+        return displayValue;
+      }
+    }
+    return "unknown";
+  }
+
   private List<ProjectDescriptor> getProjectDescriptors(FindOptions<ProjectColumn> options, DBUser dominoAdminUser) {
     return projectDelegate.getProjects(dominoAdminUser,
         null,
@@ -193,9 +204,8 @@ public class DominoImport implements IDominoImport {
   private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
     long then = System.currentTimeMillis();
 
-    FindOptions<DocumentColumn> options1 = getSince(sinceInUTC);
-
-    List<HeadDocumentRevision> documents1 = documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
+    List<HeadDocumentRevision> documents1 =
+        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, getSince(sinceInUTC));
 
     List<ImportDoc> docs = new ArrayList<>(documents1.size());
     List<ImportDoc> deleted = new ArrayList<>();
@@ -210,13 +220,34 @@ public class DominoImport implements IDominoImport {
 
     logger.info("getChangedDocs : took " + (now - then) + " to get " + docs.size());
 
-    return new ChangedAndDeleted(docs, deleted, getDeletedDocsSince(sinceInUTC, next.getId()));
+    Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, next.getId());
+
+    Set<String> deletedNPIDs = new TreeSet<>();
+
+    deletedDocsSince.forEach(id -> {
+      FindOptions<DocumentColumn> options1 = new FindOptions<>();
+      options1.addFilter(new FilterDetail<DocumentColumn>(DocumentColumn.Id, "" + id, FilterDetail.Operator.EQ));
+
+      List<HeadDocumentRevision> documents2 =
+          documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
+      if (!documents2.isEmpty()) {
+        HeadDocumentRevision headDocumentRevision = documents2.get(0);
+
+        IDocument document = headDocumentRevision.getDocument();
+        VocabularyItem vocabularyItem = (VocabularyItem) document;
+        deletedNPIDs.add(getNPId(vocabularyItem));
+      }
+    });
+
+    logger.info("got " + deletedNPIDs + " deleted np items");
+    return new ChangedAndDeleted(docs, deleted, deletedDocsSince, deletedNPIDs);
   }
 
   public class ChangedAndDeleted {
     private final List<ImportDoc> changed;
     private final List<ImportDoc> deleted;
     private Collection<Integer> deleted2;
+    private Set<String> deletedNPIDs;
 
     /**
      * @param changed
@@ -224,15 +255,16 @@ public class DominoImport implements IDominoImport {
      * @param deleted2
      */
     ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
-                      Collection<Integer> deleted2) {
+                      Collection<Integer> deleted2, Set<String> deletedNPIDs) {
       this.changed = changed;
       this.deleted = deleted;
       this.deleted2 = deleted2;
+      this.deletedNPIDs = deletedNPIDs;
     }
 
     /**
-     * @see DominoExerciseDAO#getCommonExercises(int, int, String, String, ChangedAndDeleted)
      * @return
+     * @see DominoExerciseDAO#getCommonExercises(int, int, String, String, ChangedAndDeleted)
      */
     public List<ImportDoc> getChanged() {
       return changed;
@@ -246,10 +278,15 @@ public class DominoImport implements IDominoImport {
       return deleted2;
     }
 
+/*
     public void setDeleted2(List<Integer> deleted2) {
       this.deleted2 = deleted2;
     }
+*/
 
+    public Set<String> getDeletedNPIDs() {
+      return deletedNPIDs;
+    }
   }
 
   @NotNull
@@ -266,8 +303,7 @@ public class DominoImport implements IDominoImport {
    * @see #getChangedDocs(String, DBUser, ClientPMProject)
    */
   private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid) {
-    logger.info("getDeletedDocsSince since " + sinceInUTC);
-
+//    logger.info("getDeletedDocsSince since " + sinceInUTC);
     LocalDate sinceThen = getModifiedTime(sinceInUTC);
 
     Bson query = and(

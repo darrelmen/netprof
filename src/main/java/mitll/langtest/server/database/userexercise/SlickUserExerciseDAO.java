@@ -350,7 +350,7 @@ public class SlickUserExerciseDAO
                                                 Collection<String> baseTypeOrder,
                                                 ISection<CommonExercise> sectionHelper,
                                                 Map<Integer, ExercisePhoneInfo> exToPhones,
-                                                PronunciationLookup lookup,
+                                                IPronunciationLookup lookup,
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
@@ -429,7 +429,7 @@ public class SlickUserExerciseDAO
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
                                                  Map<Integer, ExercisePhoneInfo> exToPhones,
-                                                 PronunciationLookup lookup,
+                                                 IPronunciationLookup lookup,
                                                  List<SlickExercisePhone> pairs) {
     ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
@@ -465,11 +465,11 @@ public class SlickUserExerciseDAO
    * @param slick
    * @param lookup
    * @return
-   * @see #getExercisePhoneInfo(SlickExercise, Map, PronunciationLookup, List)
+   * @see #getExercisePhoneInfo(SlickExercise, Map, IPronunciationLookup, List)
    */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick,
-                                                         PronunciationLookup lookup,
+                                                         IPronunciationLookup lookup,
                                                          List<SlickExercisePhone> pairs) {
     ExercisePhoneInfo exercisePhoneInfo;
 

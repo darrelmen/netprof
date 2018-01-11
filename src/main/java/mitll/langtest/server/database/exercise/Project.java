@@ -39,7 +39,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -64,7 +63,7 @@ import java.util.stream.Collectors;
  * <p>
  * TODO : give this an interface
  */
-public class Project implements PronunciationLookup {
+public class Project implements IPronunciationLookup {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String HYDRA_2 = "hydra2";
@@ -518,7 +517,7 @@ public class Project implements PronunciationLookup {
    * @param transcript
    * @param transliteration
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, PronunciationLookup, List)
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, IPronunciationLookup, List)
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {

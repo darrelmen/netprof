@@ -3,16 +3,13 @@ package mitll.langtest.server.domino;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ImportInfo {
   private final Date createTime;
-  //  private final Date modifiedTime;
   private final List<CommonExercise> exercises;
   private final Collection<Integer> deletedDominoIDs;
+  private Set<String> deletedNPIDs;
 
   private final String language;
   private final mitll.langtest.shared.project.Language lang;
@@ -23,9 +20,10 @@ public class ImportInfo {
    *
    * @param importProjectInfo
    * @param exercises
+   * @param deletedNPIDs
    * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted)
    */
-  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises, Collection<Integer> deletedDominoIDs) {
+  public ImportInfo(ImportProjectInfo importProjectInfo, List<CommonExercise> exercises, Collection<Integer> deletedDominoIDs, Set<String> deletedNPIDs) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),
@@ -33,6 +31,8 @@ public class ImportInfo {
 
         exercises,
         deletedDominoIDs);
+
+    this.deletedNPIDs = deletedNPIDs;
   }
 
   /**
@@ -40,9 +40,6 @@ public class ImportInfo {
    * @param language
    * @param exportTime
    * @param exercises
-   * @paramx lang
-   * @paramx updateTime consider using this somehow
-   * @see #readExercises
    */
   private ImportInfo(int dominoID,
                      String language,
@@ -86,6 +83,10 @@ public class ImportInfo {
    */
   public Collection<Integer> getDeletedDominoIDs() {
     return deletedDominoIDs;
+  }
+
+  public Set<String> getDeletedNPIDs() {
+    return deletedNPIDs;
   }
 
   public String toString() {

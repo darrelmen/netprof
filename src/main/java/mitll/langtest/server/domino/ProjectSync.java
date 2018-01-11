@@ -386,25 +386,40 @@ public class ProjectSync implements IProjectSync {
             !exercise.getAltFL().equals(importEx.getAltFL());
   }
 
+  /**
+   * TODO : delete by np id
+   *
+   * @param importFromDomino
+   * @param dominoToEx
+   */
   private void doDelete(ImportInfo importFromDomino, Map<Integer, SlickExercise> dominoToEx) {
     Collection<Integer> deletedDominoIDs = importFromDomino.getDeletedDominoIDs();
     List<Integer> toDelete = new ArrayList<>(deletedDominoIDs.size());
 
+    Set<Integer> missing = new TreeSet<>();
     deletedDominoIDs.forEach(id -> {
-      int exid = dominoToEx.get(id).id();
-      toDelete.add(exid);
-
-      CommonExercise byExID = userExerciseDAO.getByExID(exid);
-      if (byExID == null) {
-        logger.warn("doDelete :  no ex by " + exid);
+      SlickExercise slickExercise = dominoToEx.get(id);
+      if (slickExercise == null) {
+        missing.add(id);
       } else {
-        toDelete.add(byExID.getID());
+        int exid = slickExercise.id();
+        toDelete.add(exid);
+
+        CommonExercise byExID = userExerciseDAO.getByExID(exid);
+        if (byExID == null) {
+          logger.warn("doDelete :  no ex by " + exid);
+        } else {
+          toDelete.add(byExID.getID());
+        }
       }
     });
 
 
     logger.info("doDelete : Deleting " + toDelete.size() + " exercises, given " + deletedDominoIDs.size());
 
+    if (!missing.isEmpty()) {
+      logger.warn("doDelete : " + missing + " could not be deleted?");
+    }
     userExerciseDAO.deleteByExID(toDelete);
   }
 

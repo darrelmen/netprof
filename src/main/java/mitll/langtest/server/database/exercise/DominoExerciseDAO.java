@@ -34,7 +34,7 @@ public class DominoExerciseDAO {
   private static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
   /**
-   * @see #addAttributes(String, String, VocabularyItem, Exercise)
+   * @see #addAttributes
    */
   private static final String V_NP_ID = "v-np-id";
   private static final String PREFIX = "v-";
@@ -113,7 +113,7 @@ public class DominoExerciseDAO {
             importDocs
         );
 
-    return new ImportInfo(projectInfo, exercises, importDocs.getDeleted2());
+    return new ImportInfo(projectInfo, exercises, importDocs.getDeleted2(), importDocs.getDeletedNPIDs());
   }
 
  /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
@@ -284,10 +284,6 @@ public class DominoExerciseDAO {
         name = name.substring(2);
         addAttribute(unitName, chapterName, name, displayValue, ex);
       }
-//
-//      if (isNPID && !displayValue.isEmpty()) {
-//        ex.setOldID(displayValue);
-//      }
     }
   }
 
@@ -302,7 +298,6 @@ public class DominoExerciseDAO {
       }
     }
     return "unknown";
-
   }
 
   private void addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
