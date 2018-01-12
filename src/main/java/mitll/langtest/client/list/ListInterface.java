@@ -43,6 +43,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.Map;
@@ -185,5 +186,10 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   void gotClickOnItem(T newExercise);
 
+  /**
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useScoredResult
+   * @param id
+   * @param hydecScore
+   */
   void setScore(int id, float hydecScore);
 }

@@ -57,21 +57,23 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     configureNorth(id, north, isLTR, span);
     this.north = north;
 
+    south = new DivWidget();
     if (addSouth) {
-      add(south = new DivWidget());
+      add(south);
       configureSouth(id, south, isLTR, showPhones);
-    } else {
-      south = null;
     }
+//    else {
+//      south = null;
+//    }
     length = html.length();
   }
 
   /**
-   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
    * @param id
    * @param north
    * @param isLTR
    * @param span
+   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
    */
   private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span) {
     north.add(span);
@@ -171,7 +173,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void clearSouth() {    remove(south);  }
+  public void clearSouth() {
+
+    remove(south);
+  }
 
   @Override
   public DivWidget getNorth() {

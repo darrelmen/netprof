@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -205,13 +204,13 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   /**
    * @param result
    * @param isRTL
-   * @see #useResult(PretestScore, boolean, String)
+   * @see #useResult
    */
   private void scoreAudio(AudioAnswer result, boolean isRTL) {
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
     scoreFeedback.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
-    useResult(pretestScore, false, result.getPath());
+    useScoredResult(pretestScore, false, result.getPath());
 
     // Gotta remember the score on the exercise now...
     exercise.getScores().add(new CorrectAndScore(result));
@@ -265,7 +264,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
   @Override
   public void useResult(AudioAnswer result) {
-//    logger.info("useResult " + result);
+//    logger.info("useScoredResult " + result);
     waitCursorHelper.showFinished();
     setVisible(true);
     hasScoreHistory = true;
@@ -302,7 +301,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @param path
    * @see #scoreAudio
    */
-  private void useResult(PretestScore result, boolean scoredBefore, String path) {
+  private void useScoredResult(PretestScore result, boolean scoredBefore, String path) {
     float hydecScore = result.getHydecScore();
     boolean isValid = hydecScore > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
@@ -313,7 +312,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
       if (transcriptSegments != null && transcriptSegments.size() == 1) {
         float wordScore = transcriptSegments.get(0).getScore();
-        //  logger.info("useResult using word score " + wordScore + " instead of hydec score " + hydecScore);
+        //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + hydecScore);
         hydecScore = wordScore;
       }
       scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED));

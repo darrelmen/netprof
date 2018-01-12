@@ -39,6 +39,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
@@ -164,6 +165,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @see FacetExerciseList#makePagingContainer
    */
   protected Collection<Integer> getIdsForRange(Range visibleRange) {
+  //  logger.info("getIdsForRange : range " + visibleRange);
+
     int start = visibleRange.getStart();
     int end = Math.min(getList().size(), start + visibleRange.getLength());
 
@@ -171,7 +174,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     for (int i = start; i < end; i++) {
       visible.add(getAt(i).getID());
     }
-//    logger.info("ClickablePagingContainer.getIdsForRange : get from " + start + " to " + end + " vs " + getList().size()+ " : " + visible);
+    //logger.info("ClickablePagingContainer.getIdsForRange : get from " + start + " to " + end + " vs " + getList().size()+ " : " + visible);
     return visible;
   }
 
@@ -224,7 +227,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   /**
    * @param afterThisOne null means put at the start
    * @param exercise
-   * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter
+   * @see mitll.langtest.client.custom.userlist.ListView#madeIt
    */
   public void addExerciseAfter(T afterThisOne, T exercise) {
     //logger.info("addExercise adding " + exercise);
@@ -260,7 +263,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
     T found = idToExercise.get(itemID);
-    // logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
+  //  logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
     markCurrent(getIndex(found), found);
   }
 

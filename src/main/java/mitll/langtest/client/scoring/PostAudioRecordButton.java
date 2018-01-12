@@ -201,8 +201,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void onPostSuccess(AudioAnswer result, long then) {
     long now = System.currentTimeMillis();
     long roundtrip = now - then;
-
-    logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
+    //logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
 
     if (result.getReqid() != reqid) {
       logger.info("onPostSuccess ignoring old response " + result);

@@ -67,6 +67,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -358,7 +359,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected void gotRangeChanged(final Range newRange) {
 //            long then = System.currentTimeMillis();
-            // logger.info("gotRangeChanged event for " + newRange);
+       //     logger.info("gotRangeChanged event for " + newRange);
             final int currentReq = incrReq();
 
             //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
@@ -1736,10 +1737,20 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useResult
+   * @param id
+   * @param hydecScore
+   */
   @Override
   public void setScore(int id, float hydecScore) {
     super.setScore(id, hydecScore);
-    if (hydecScore > -1f) exercisesWithScores.add(id);
+    if (hydecScore > -1f) {
+      exercisesWithScores.add(id);
+    }
+    else {
+      logger.info("skipping low score for " + id);
+    }
     showScore(exercisesWithScores.size(), pagingContainer.getSize());
   }
 

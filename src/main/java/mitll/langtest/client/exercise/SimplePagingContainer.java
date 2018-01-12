@@ -156,6 +156,13 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
 
+    addDoubleClick();
+
+    configureTable(sortEnglish);
+    return table;
+  }
+
+  private void addDoubleClick() {
     table.addDomHandler(event -> {
           T selected = selectionModel.getSelectedObject();
           if (selected != null) {
@@ -163,9 +170,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
           }
         },
         DoubleClickEvent.getType());
-
-    configureTable(sortEnglish);
-    return table;
   }
 
   protected void gotDoubleClickOn(T selected) {
@@ -214,7 +218,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public void flush() {
     if (comp != null) {
-      Collections.sort(getList(), comp);
+      getList().sort(comp);
     }
     dataProvider.flush();
     table.setRowCount(getList().size());
@@ -333,6 +337,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     int newIndex = pageNum * pageSize;
 
     int pageStart = table.getPageStart();
+/*
+
+    logger.info("scrollToVisible " +
+        "pageStart " + pageStart +
+        " i " + i);*/
 
     if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
@@ -342,8 +351,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
       int pageEnd = table.getPageStart() + pageSize;
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
-//        if (ClickablePagingContainer.DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-//            " vs current " + table.getVisibleRange());
+//
+//        if (false)
+//          logger.info("scrollToVisible new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+//              " vs current " + table.getVisibleRange());
+
         table.setVisibleRange(newStart, pageSize);
       }
     }
@@ -364,9 +376,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.comp = comp;
     long then = System.currentTimeMillis();
 //    logger.info("sortBy about to sort ------- ");
-    Collections.sort(getList(), comp);
+    getList().sort(comp);
     long now = System.currentTimeMillis();
-    logger.info("sortBy finished sort in " + (now - then) + " ----- ");
+  //  logger.info("sortBy finished sort in " + (now - then) + " ----- ");
   }
 
   public void hide() {

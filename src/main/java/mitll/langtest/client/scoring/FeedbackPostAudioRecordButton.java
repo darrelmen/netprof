@@ -1,20 +1,17 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
-import java.util.logging.Logger;
-
 /**
- * @see AudioPanel#makePlayAudioPanel(Widget, String, String, mitll.langtest.shared.exercise.AudioRefExercise)
+ * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   //private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
-
   private static final String STOP = "Stop";
+  public static final String RECORD_BUTTON = "RecordButton";
 
   private final RecordingAudioListener simpleRecordAudioPanel;
 
@@ -39,17 +36,16 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     setSize(ButtonSize.LARGE);
   }
 
-
   @Override
   public void startRecording() {
-    controller.logEvent(this, "RecordButton", getExerciseID(), "startRecording");
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "startRecording");
     super.startRecording();
     simpleRecordAudioPanel.startRecording();
   }
 
   @Override
   public boolean stopRecording(long duration) {
-    controller.logEvent(this, "RecordButton", getExerciseID(), "stopRecording");
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording");
     boolean b = super.stopRecording(duration);
     if (b) {
       simpleRecordAudioPanel.stopRecording();
