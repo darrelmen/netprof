@@ -86,7 +86,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
       north.addStyleName("wordSpacerRight");
     } else {
       north.addStyleName("wordSpacerLeft");
-      north.addStyleName("rtlMarginBottom");
+//      north.addStyleName("rtlMarginBottom");
     }
   }
 

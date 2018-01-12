@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.BusyPanel;
@@ -86,6 +87,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private DivWidget flClickableRow, altFLClickableRow;
   private DivWidget contextClickableRow;
 
+  /**
+   *
+   */
   private DivWidget flClickableRowPhones, altFLClickableRowPhones;
   /**
    * @see #contextAudioChanged
@@ -313,7 +317,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               audioChanged(refID, currentAudioAttr.getDurationInMillis());
             }
             if (needToShowContextRef) {
-              logger.info("registerSegments register " + refID + " context " + contextRefID);
+              //logger.info("registerSegments register " + refID + " context " + contextRefID);
               contextAudioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
             }
 
@@ -766,7 +770,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
 
 //        clickable.setSouth(phoneDivBelowWord);
-
         clickablePhones.add(phoneDivBelowWord);
         phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
       }
@@ -781,7 +784,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         AllHighlight allHighlight = new AllHighlight(bulk);
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-//          allHighlight.setSouth(phoneDivBelowWord);
+
+          //          allHighlight.setSouth(phoneDivBelowWord);
           clickablePhones.add(phoneDivBelowWord);
           phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
         }
@@ -993,7 +997,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     card.add(rowWidget);
 
     long now = System.currentTimeMillis();
-  //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
+    //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
 
     {
       DivWidget lr = getHorizDiv();
@@ -1096,7 +1100,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     long now = System.currentTimeMillis();
-  //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
+    //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
@@ -1112,13 +1116,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String trim = e.getAltFL().trim();
 
     now = System.currentTimeMillis();
-   // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
+    // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
 
     if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
       fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
-      flClickableRowPhones.addStyleName("inlineFlex");
       flClickableRowPhones.getElement().setId("flClickableRowPhones");
+      stylePhoneRow(flClickableRowPhones);
 
       if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
         AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
@@ -1132,13 +1136,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     now = System.currentTimeMillis();
-   // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
+    // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
 
     if (choices == BOTH || choices == ALTFL) {
       addField(fieldContainer, addAltFL(e, choices == BOTH));
       altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
       altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
-      altFLClickableRowPhones.addStyleName("inlineFlex");
+      stylePhoneRow(altFLClickableRowPhones);
+
       addField(fieldContainer, altFLClickableRowPhones);
     }
 
@@ -1164,6 +1169,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     rowWidget.add(flContainer);
     return recordPanel;
+  }
+
+  private void stylePhoneRow(UIObject phoneRow) {
+    phoneRow.addStyleName("inlineFlex");
+    if (isRTL) phoneRow.addStyleName("floatRight");
   }
 
   enum FieldType {FL, TRANSLIT, MEANING, EN}
@@ -1301,6 +1311,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
+    englishWidget.addStyleName("leftFiveMargin");
     englishWidget.setWidth("90%");
     return englishWidget;
   }
@@ -1425,13 +1436,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
-      contextClickableRowPhones.addStyleName("inlineFlex");
       contextClickableRowPhones.getElement().setId("contextClickableRowPhones");
+      stylePhoneRow(contextClickableRowPhones);
 
-      // CommentBox commentBox = getCommentBox(annotationHelper, contextExercise.getID());
-      //ExerciseAnnotation annotation = contextExercise.getAnnotation(FOREIGN_LANGUAGE);
-
-/*      logger.info("context '" + context1 +
+      /*      logger.info("context '" + context1 +
           "' = '" + annotation +
           "'");*/
 
@@ -1440,7 +1448,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               .getEntry(FOREIGN_LANGUAGE, contentWidget,
                   contextExercise.getAnnotation(FOREIGN_LANGUAGE), showInitially, isRTL);
 
-      commentRow.setWidth("100%");
+      commentRow.setWidth(75 +          "%");
 
       DivWidget col = new DivWidget();
       col.setWidth("100%");

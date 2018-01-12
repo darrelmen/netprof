@@ -74,7 +74,12 @@ import java.util.logging.Logger;
  */
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
-  private static final int MARGIN_TOP = 49;
+
+  /**
+   * TODO : WHY???
+   * @see #getRootContainer
+   */
+  private static final int MARGIN_TOP = 47;
 
   /**
    * @see #getRootContainer

@@ -282,13 +282,14 @@ public abstract class BaseAudioDAO extends DAO {
     if (now - then > WARN_DURATION)
       logger.warn("attachAudioToExercise took " + (now - then) + " to attach audio to " + id);
 
-    if (!attachedAll)
+    if (!attachedAll) {
       logger.info("attachAudioToExercise didn't attach all audio to " + id + " " + firstExercise.getForeignLanguage());
 /*    if (DEBUG) {
       for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
         logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getOldID() + " audio " + attribute);
       }
-    }*/
+      */
+    }
 
     return audioAttributes.size();
   }

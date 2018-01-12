@@ -273,7 +273,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     boolean validAlignJSON = alignScore > 0 && !scoreJson.contains(WORDS);
 
     if (!validAlignJSON && scoreJson != null) {
-      logger.info("fromSlickToSlim : slickRef " + slickRef + " not valid " + alignScore + " score " + scoreJson);
+//      logger.info("fromSlickToSlim : slickRef " + slickRef + " not valid " + alignScore + " score " + scoreJson);
     }
 
     return new SlimResult(slickRef.exid(), slickRef.audioid(), validAlignJSON, scoreJson, alignScore);

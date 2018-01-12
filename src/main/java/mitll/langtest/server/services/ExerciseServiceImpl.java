@@ -1695,8 +1695,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
       //}
       exercises.add(byID);
-      logger.info("\tgetCommonExercisesWithoutAudio " + byID.getID());
-
+//      logger.info("\tgetCommonExercisesWithoutAudio " + byID.getID());
     }
     return toAddAudioTo;
   }

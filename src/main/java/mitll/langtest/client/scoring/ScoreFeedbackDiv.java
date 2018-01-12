@@ -130,6 +130,7 @@ public class ScoreFeedbackDiv {
     wordTableContainer.getElement().setId("wordTableContainer");
     wordTableContainer.addStyleName("inlineFlex");
     wordTableContainer.addStyleName("floatLeft");
+    wordTableContainer.addStyleName("scoringFeedback");
 
     wordTableContainer.add(getPlayButtonDiv());
 

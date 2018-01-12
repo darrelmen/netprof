@@ -100,6 +100,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
+    scoreFeedback.getElement().setId("scoreFeedback_"+exercise.getID());
 
     {
       DivWidget historyHoriz = new DivWidget();

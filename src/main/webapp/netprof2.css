@@ -1851,9 +1851,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-inner .breadcrumb {
-    /*
-    background-color: black;
-    */
+
+    background-color: lightgrey;
+
     text-shadow: none;
     border-radius: 4px;
     list-style: outside none none;
@@ -1865,6 +1865,19 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: none;
 }
 
+.navbar .navbar-inner {
+    background-image: unset;
+    background-color: unset;
+}
+
+.navbar div > .nav > li > a {
+    color: black;
+}
+
+.navbar div > .nav > li > a:hover {
+     color: #62b0df;
+ }
+
 .navbar #lnav > a:hover {
     color: #62b0df;
 }
@@ -1874,7 +1887,7 @@ h1, h2, h3, h4, h5, h6 {
 .navbar #lnav > .active > a:focus {
     color: #000;
     text-decoration: none;
-    background-color: #25aae1;
+    background-color: #25aae180;
     -webkit-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     -moz-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
@@ -1902,7 +1915,7 @@ h1, h2, h3, h4, h5, h6 {
 .navbar #recnav > .active > a:focus {
     color: #000;
     text-decoration: none;
-    background-color: #25aae1;
+    background-color: #25aae180;
     -webkit-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     -moz-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
@@ -1929,7 +1942,7 @@ h1, h2, h3, h4, h5, h6 {
 .navbar #defectnav > .active > a:focus {
     color: #000;
     text-decoration: none;
-    background-color: #25aae1;
+    background-color: #25aae180;
     -webkit-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     -moz-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
@@ -1951,21 +1964,16 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
 }
 
+/*
 .navbar .breadcrumb {
     background-color: unset;
-}
+}*/
 
 .mainBlock select {
     width: auto;
 }
 
-/*
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a {
-*/
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a {
-    /*    background-color: #0081c2;
-        background-image: linear-gradient(to bottom, #08c, #0077b3);
-        background-repeat: repeat-x;*/
     color: #fff;
     text-decoration: none;
 }
@@ -1973,9 +1981,6 @@ h1, h2, h3, h4, h5, h6 {
 .initialpos {
     bottom: auto;
     position: absolute;
-    /*
-    top: 191px;
-    */
 }
 
 .scrolledpos {
@@ -2017,6 +2022,14 @@ h1, h2, h3, h4, h5, h6 {
 
     float: left;
     width: 100%;
+}
+
+.scoringFeedback {
+    border: #CAC3B8;
+    border-width: 1px 1px 1px 1px;
+    border-style: solid;
+    margin-bottom: 2px;
+    padding-bottom: 4px;
 }
 
 .scoringRowStyle {

@@ -277,7 +277,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
-        choice1.addStyleName("leftTenMargin");
+        choice1.addStyleName("leftTwentyMargin");
       }
       first = false;
       choices.add(choice1);

@@ -107,8 +107,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @see mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
    */
-  public static final int FIRST_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
-  public static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIRST_PAGE_SIZE, 10, 25);
+  private static final int FIVE_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
+  private static final int FIRST_PAGE_SIZE = 1;
+  private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIVE_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 
   private static final int TOTAL = 28;
@@ -368,9 +369,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 //                long now = System.currentTimeMillis();
                 //   logger.info("gotRangeChanged (" + (now - then) + ") req " + currentReq + "  for  " + newRange);
                 gotVisibleRangeChanged(getIdsForRange(newRange), currentReq);
-              } else {
-                logger.warning("gotRangeChanged STALE req " + currentReq + "  for  " + newRange);
               }
+//              else {
+//                logger.warning("gotRangeChanged STALE req " + currentReq + "  for  " + newRange);
+//              }
             });
           }
 

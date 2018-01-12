@@ -101,7 +101,28 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
     final SimplePager pager =
-        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+        new SimplePager(SimplePager.TextLocation.CENTER, true, true) {
+          // Override page start here to give more natural paging. Without override, the last page include extra elements
+          // I.e. on page size 100, with list of 156 entries, second page would be the last 100 entries.
+          // With the change here, the second page size is 56 entries.
+          @Override
+          public void setPageStart(int index) {
+            if (getDisplay() != null) {
+              Range range = getDisplay().getVisibleRange();
+              int pageSize = range.getLength();
+
+              // Removed the min to show fixed ranges
+              //if (isRangeLimited && display.isRowCountExact()) {
+              //  index = Math.min(index, display.getRowCount() - pageSize);
+              //}
+
+              index = Math.max(0, index);
+              if (index != range.getStart()) {
+                getDisplay().setVisibleRange(index, pageSize);
+              }
+            }
+          }
+        };
 
     this.pager = pager;
     // Set the cellList as the display.
