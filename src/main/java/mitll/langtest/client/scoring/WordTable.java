@@ -268,7 +268,17 @@ public class WordTable {
     return table;
   }
 
-  private Widget getDivForWord(AudioControl audioControl, //boolean isRTL,
+  /**
+   * inline flex on phones expands to fill space.
+   * @param audioControl
+   * @param words
+   * @param phoneMap
+   * @param id
+   * @param phonesForWord
+   * @param word
+   * @return
+   */
+  private Widget getDivForWord(AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> words,
                                TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                int id,
@@ -278,13 +288,15 @@ public class WordTable {
     words.put(word, header);
     addClickHandler(audioControl, word, header.getClickable());
 
-//    String color =
+   // String color =
         setColorClickable(word, header);
-  //  logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
+ //   logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
     DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null /*isRTL*/);
+    phones.addStyleName("inlineFlex");
+
     header.setSouthScore(phones);
     return header;
   }

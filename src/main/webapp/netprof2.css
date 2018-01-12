@@ -1864,6 +1864,10 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: none;
 }
 
+.navbar-inner .breadcrumb > li > .divider {
+     color: #0c0c0c;
+}
+
 .navbar .navbar-inner {
     background-image: unset;
     background-color: unset;
@@ -1904,6 +1908,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
     text-decoration: none;
     text-shadow: none;
+    border-radius: 4px;
 }
 
 
@@ -1932,6 +1937,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
     text-decoration: none;
     text-shadow: none;
+    border-radius: 4px;
 }
 
 .navbar #defectnav > a:hover {
@@ -1959,6 +1965,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
     text-decoration: none;
     text-shadow: none;
+    border-radius: 4px;
 }
 
 .navbar .breadcrumb > .active {

@@ -181,24 +181,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   public void setSouth(DivWidget widget) {
-    //south.clear();
-    //south.add(widget);
     south = widget;
 
     south.addDomHandler(event -> addStyleName("underline"), MouseOverEvent.getType());
     south.addDomHandler(event -> removeStyleName("underline"), MouseOutEvent.getType());
-
-    //    south.addMouseOverHandler(mouseOverEvent -> {
-//      //addStyleName("underline");
-//      south.addStyleName("underline");
-//    });
-//
-//    south.addMouseOutHandler(mouseOutEvent -> {
-//      //removeStyleName("underline");
-//      south.removeStyleName("underline");
-//    });
-
-
   }
 
   public void setSouthScore(DivWidget widget) {
