@@ -74,7 +74,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * setInverse = white on black background
    * @param userManager
    * @param lifecycle
-   * @see InitialUI#InitialUI(LangTest, UserManager)
+   * @see InitialUI#InitialUI
    */
   public NewBanner(UserManager userManager,
                    UILifecycle lifecycle,
@@ -82,8 +82,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
                    Breadcrumbs breadcrumbs,
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
-
-
+    // we do white on black now
 //    setInverse(true);
 
     this.controller = controller;

@@ -147,7 +147,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   MiniUser getMiniUser(int userid);
 
 
-  Map<Integer, FirstLastUser> getFirstLastFor(Set<Integer> userDBIds);
+  Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds);
 
   String getUserChosenID(int userid);
 

@@ -951,7 +951,6 @@ public class SlickUserExerciseDAO
    * @param sectionHelper
    * @param theProject
    * @return
-   * @paramx attributeTypes
    * @see DBExerciseDAO#readExercises
    */
   public List<CommonExercise> getByProject(
@@ -964,7 +963,9 @@ public class SlickUserExerciseDAO
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
 //    Collection<String> attributeTypes = getAttributeTypes(projectid);
-    return getExercises(dao.getAllPredefByProject(theProject.getID()),
+    List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(theProject.getID());
+    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
+    return getExercises(allPredefByProject,
         typeOrder,
         sectionHelper,
         exerciseToPhoneForProject,

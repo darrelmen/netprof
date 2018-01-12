@@ -1851,7 +1851,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-inner .breadcrumb {
-
     background-color: lightgrey;
 
     text-shadow: none;
@@ -1888,6 +1887,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
     text-decoration: none;
     background-color: #25aae180;
+
     -webkit-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     -moz-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
     box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
@@ -1895,6 +1895,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar #lnav > li > a:hover {
     color: #62b0df;
+    background-color: lightgrey;
 }
 
 .navbar #lnav > li > a {
@@ -1992,6 +1993,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .phoneContainer {
+    float: left;
 }
 
 .phoneContainer .phoneColor {

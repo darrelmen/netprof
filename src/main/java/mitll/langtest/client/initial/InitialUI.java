@@ -77,6 +77,7 @@ public class InitialUI implements UILifecycle {
 
   /**
    * TODO : WHY???
+   *
    * @see #getRootContainer
    */
   private static final int MARGIN_TOP = 47;
@@ -165,7 +166,7 @@ public class InitialUI implements UILifecycle {
    */
   protected DivWidget makeFirstTwoRows(Container verticalContainer) {
     // add header row
-  //  logger.info("makeFirstTwoRows ");
+    //  logger.info("makeFirstTwoRows ");
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
 //    rootPanel.add(makeHeaderRow2());
@@ -345,6 +346,9 @@ public class InitialUI implements UILifecycle {
         logger.info("addCrumbs no project startup info yet for " + current.getUserID());
       }*/
       banner.checkProjectSelected();
+    }
+    if (breadcrumbs != null) {
+      breadcrumbs.setVisible(breadcrumbs.getWidgetCount() > 0);
     }
 /*    else {
      // logger.warning("addCrumbs no current user");
@@ -573,7 +577,7 @@ public class InitialUI implements UILifecycle {
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-     // logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      // logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();
@@ -609,10 +613,10 @@ public class InitialUI implements UILifecycle {
    * @see UILifecycle#gotUser
    */
   protected void configureUIGivenUser(long userID) {
-   // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
+    // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-     // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {
@@ -651,7 +655,9 @@ public class InitialUI implements UILifecycle {
    * @see #addProjectChoices
    */
   @Override
-  public void addBreadcrumbs() {    addCrumbs(breadcrumbs);  }
+  public void addBreadcrumbs() {
+    addCrumbs(breadcrumbs);
+  }
 
   /**
    * @param name
@@ -679,11 +685,12 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #clickOnParentCrumb(SlimProject)
+   * @see #clickOnParentCrumb
    */
   private void removeLastCrumb() {
-    //logger.info("removeLastCrumb has " +breadcrumbs.getWidgetCount());
+  //  logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
+  //  logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
   /**
@@ -699,6 +706,7 @@ public class InitialUI implements UILifecycle {
       boolean remove = breadcrumbs.remove(i);
       // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
+//    logger.info("removeUntilCrumb now " + breadcrumbs.getWidgetCount());
   }
 
   /**

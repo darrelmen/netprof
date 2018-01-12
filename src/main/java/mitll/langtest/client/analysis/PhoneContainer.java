@@ -70,8 +70,15 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
+  /**
+   * @see #getTableWithPagerForHistory
+   */
   private static final int PHONE_CONTAINER_MIN_WIDTH = 220;
-  private static final int TABLE_WIDTH = 235;
+
+  /**
+   * @see #setMaxWidth
+   */
+  private static final int TABLE_WIDTH = 225;
 
   private static final int MAX_EXAMPLES = 25;
 
@@ -101,12 +108,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param exampleContainer
    * @param phonePlot
    * @param listid
-   * @param userid           @see AnalysisTab#getPhoneReport
+   * @param userid
+   *
+   * @see AnalysisTab#getPhoneReport
    */
   PhoneContainer(ExerciseController controller,
                  PhoneExampleContainer exampleContainer,
                  PhonePlot phonePlot,
-                 AnalysisServiceAsync analysisServiceAsync, int listid, int userid) {
+                 AnalysisServiceAsync analysisServiceAsync,
+                 int listid,
+                 int userid) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
@@ -141,7 +152,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     from = 0;
     to = System.currentTimeMillis();
     this.phoneReport = phoneReport;
-    return getTableWithPager(getPhoneAndStatsList(from, to));
+    return getTableWithPagerForHistory(getPhoneAndStatsList(from, to));
   }
 
   /**
@@ -300,9 +311,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @param sortedHistory
    * @return
-   * @see #getTableWithPager(PhoneReport)
+   * @see #getTableWithPager
    */
-  private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
+  private Panel getTableWithPagerForHistory(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
     // table.setTableLayoutFixed(false);
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
@@ -533,6 +544,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     phonePlot.showErrorBarData(filtered, phone);
   }*/
+
   private void clickOnPhone2(String phone) {
     PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
     //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));

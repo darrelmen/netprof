@@ -69,4 +69,7 @@ public interface IUserProjectDAO extends IDAO {
   int mostRecentByUser(int user);
 
   Map<Integer, Integer> getUserToProject();
+
+
+  Collection<Integer> getUsersForProject(int projid);
 }

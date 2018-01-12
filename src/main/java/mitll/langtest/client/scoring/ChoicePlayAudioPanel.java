@@ -31,6 +31,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel extends PlayAudioPanel {
+  public static final String FAST = "Fast";
+  public static final String SLOW1 = "Slow";
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String IS_MALE = "isMale";
@@ -38,7 +40,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
-  private boolean includeContext = false;
+  private boolean includeContext;
   private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private Set<AudioAttribute> allPossible;
@@ -90,7 +92,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-      // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+      logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
@@ -134,7 +136,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   /**
-   * @param playButton
+   * Shows check mark next to current audio choice.
+   *
+   *
+   * @param playButton     null if just getting an update event
    * @param includeContext
    * @param tellListener
    * @see #gotAudioSelected
@@ -144,7 +149,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     // what we want to match, as closely as possible
     boolean isMale = isMale();
     boolean isFemale = !isMale;
-    boolean isReg = controller.getStorage().isTrue(IS_REG);
+    boolean isReg = isSpeedReg();
     boolean isSlow = !isReg;
 
     Collection<Integer> preferredVoices = Collections.emptyList(); // bogus for now...
@@ -158,8 +163,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
         "\n\tmale       " + isMale +
         "\n\tis reg     " + isReg +
         "\n\tmale map   " + malesMap.size() +
-        "\n\tfemale map " + femalesMap.size());
-        */
+        "\n\tfemale map " + femalesMap.size());*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -167,11 +171,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
     allPossible = new HashSet<>();
 
+    boolean hasPlayButton = playButton != null;
     {
       AudioAttribute mr = getAtSpeed(malesMap, true);
       if (mr != null) {
         allPossible.add(mr);
-        if (playButton != null) addAudioChoice(playButton, true, true, mr);
+        if (hasPlayButton) addAudioChoice(playButton, true, true, mr);
         if (isMale && isReg) toUse = mr;
         else if (isMale) genderFallback = mr;
         else fallback = mr;
@@ -183,7 +188,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     AudioAttribute ms = getAtSpeed(malesMap, false);
     if (ms != null) {
       allPossible.add(ms);
-      if (playButton != null) addAudioChoice(playButton, true, false, ms);
+      if (hasPlayButton) addAudioChoice(playButton, true, false, ms);
       if (isMale && isSlow) toUse = ms;
       else if (isMale) genderFallback = ms;
       if (fallback == null) fallback = ms;
@@ -192,7 +197,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     AudioAttribute fr = getAtSpeed(femalesMap, true);
     if (fr != null) {
       allPossible.add(fr);
-      if (playButton != null) addAudioChoice(playButton, false, true, fr);
+      if (hasPlayButton) addAudioChoice(playButton, false, true, fr);
       if (isFemale && isReg) toUse = fr;
       else if (isFemale) genderFallback = fr;
       if (fallback == null) fallback = fr;
@@ -202,7 +207,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     if (fs != null) {
       allPossible.add(fs);
 
-      if (playButton != null) addAudioChoice(playButton, false, false, fs);
+      if (hasPlayButton) addAudioChoice(playButton, false, false, fs);
       if (isFemale && isSlow) toUse = fs;
       else if (isFemale) genderFallback = fs;
       if (fallback == null) fallback = fs;
@@ -218,13 +223,18 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
     boolean hasAnyAudio = toUse != null;
 
-    // setEnabled(hasAnyAudio);
     if (actual != null) actual.setEnabled(hasAnyAudio);
 
     splitDropdownButton.getTriggerWidget().setEnabled(hasAnyAudio);
     if (hasAnyAudio) {
-      // currentAudioID = toUse.getUniqueID();
+      if (currentAudioAttr != null) {
+        attrToWidget.get(currentAudioAttr).setVisible(false);
+      }
+
       currentAudioAttr = toUse;
+
+      attrToWidget.get(currentAudioAttr).setVisible(true);
+
       // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
         logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
@@ -236,37 +246,74 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     }
   }
 
+  private boolean isSpeedReg() {
+    return controller.getStorage().isTrue(IS_REG);
+  }
+
   private boolean isMale() {
     KeyStorage storage = controller.getStorage();
     boolean hasGender = storage.hasValue(IS_MALE);
     return hasGender && storage.isTrue(IS_MALE) || (!hasGender && controller.getUserManager().isMale());
   }
 
+  private Map<AudioAttribute, IconAnchor> attrToWidget = new HashMap<>();
+
   private void addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg, AudioAttribute mr) {
-    addAudioChoice(playButton, isMale1, isReg)
-        .addClickHandler(getChoiceHandler(mr, isMale1, isReg));
+    NavLink widgets = addAudioChoice(isMale1, isReg, mr);
+    playButton.add(widgets);
+
+    widgets.addClickHandler(getChoiceHandler(mr, isMale1, isReg));
   }
 
+  /**
+   * Shows the currently chosen audio choice.
+   *
+   * @param isMale1
+   * @param isReg
+   * @param attr
+   * @return
+   */
   @NotNull
-  private NavLink addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg) {
-    NavLink widget = new NavLink();//male + " " + regular + " Speed");
-    playButton.add(widget);
+  private NavLink addAudioChoice(boolean isMale1, boolean isReg, AudioAttribute attr) {
+    NavLink widget = new NavLink();
     widget.setIcon(isMale1 ? IconType.MALE : IconType.FEMALE);
     widget.setIconSize(IconSize.TWO_TIMES);
-    IconAnchor speed = new IconAnchor();
-    speed.setBaseIcon(isReg ? MyCustomIconType.rabbit : MyCustomIconType.turtle);
-    widget.add(speed);
-    speed.addStyleName("leftFiveMargin");
+
+    {
+      IconAnchor speed = new IconAnchor();
+      speed.setBaseIcon(isReg ? MyCustomIconType.rabbit : MyCustomIconType.turtle);
+      speed.addStyleName("leftFiveMargin");
+      widget.add(speed);
+    }
+
+    {
+      IconAnchor check = new IconAnchor();
+      check.setIcon(IconType.OK);
+      check.setIconSize(IconSize.TWO_TIMES);
+      check.setVisible(false);
+      check.addStyleName("leftFiveMargin");
+
+      widget.add(check);
+
+      attrToWidget.put(attr, check);
+    }
+
     return widget;
   }
 
   @NotNull
   private ClickHandler getChoiceHandler(AudioAttribute mr, boolean isMale, boolean isReg) {
-    return event -> playAndRemember(mr.getUniqueID(), mr.getAudioRef(), mr.getDurationInMillis(), isMale, isReg);
+    return event -> playAndRemember(mr.getUniqueID(), mr.getAudioRef(), mr.getDurationInMillis(), isMale, isReg, mr);
   }
 
-  private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg) {
+  private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg, AudioAttribute mr) {
     //   logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
+
+    if (currentAudioAttr != null) {
+      attrToWidget.get(currentAudioAttr).setVisible(false);
+    }
+    currentAudioAttr = mr;
+    attrToWidget.get(currentAudioAttr).setVisible(true);
 
     doPause();
     listener.audioChanged(audioID, durationInMillis);
@@ -297,7 +344,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     for (List<AudioAttribute> attrs : values) {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
-          if (audioAttribute.getAudioRef().startsWith("Fast") || audioAttribute.getAudioRef().startsWith("Slow")) {
+          if (audioAttribute.getAudioRef().startsWith(FAST) || audioAttribute.getAudioRef().startsWith(SLOW1)) {
             logger.info("getAtSpeed Skip " + audioAttribute);
           } else {
             return audioAttribute;

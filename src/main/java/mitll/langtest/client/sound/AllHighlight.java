@@ -4,12 +4,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -117,15 +113,18 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
   /**
    * @param widget
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable(Iterator, TranscriptSegment, List, AudioControl, TreeMap)
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable
    */
-  public void setSouth(Widget widget) {
+  public void setSouth(DivWidget widget) {
     south.clear();
     south.add(widget);
   }
 
+
+  public void setSouthScore(DivWidget widget) { setSouth(widget);}
+
   public void clearSouth() {
-    logger.info("doing clear south");
+//    logger.info("doing clear south");
     remove(south);
   }
 

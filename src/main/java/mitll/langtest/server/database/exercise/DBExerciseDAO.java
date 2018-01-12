@@ -93,14 +93,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           if (commonExercise == null) {
             logger.warn(this + " getExercise : couldn't find exercise #" + id +
                 " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
-          }
-          else {
+          } else {
             logger.info("getExercise found context " + commonExercise.getID());
           }
         }
-      }
-
-      else {
+      } else {
         if (id != commonExercise.getID()) {
           logger.error("getExercise " + id + " != " + commonExercise);
         }
@@ -171,12 +168,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       });
       */
 
-/*      logger.info("readExercises" +
+      logger.info("readExercises" +
           "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
-          "\n\ttype order " + typeOrder);*/
-      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+          "\n\ttype order " + typeOrder);
 
-      //  logger.info("addExerciseAttributes found " + allByProject.size() + " attributes");
+      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+      logger.info("readExercises found " + allByProject.size() + " attributes");
+
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
 
       // do we add attributes to context exercises?

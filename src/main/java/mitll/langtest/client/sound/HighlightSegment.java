@@ -2,6 +2,8 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.Element;
@@ -21,7 +23,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
-  private final DivWidget north, south;
+  private final DivWidget north;
+  private DivWidget south;
   private final String content;
   private final HTML span;
 
@@ -58,14 +61,24 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     this.north = north;
 
     south = new DivWidget();
+
+    addMouseOverHandler(mouseOverEvent -> south.addStyleName("underline"));
+    addMouseOutHandler(mouseOutEvent -> south.removeStyleName("underline"));
+
     if (addSouth) {
       add(south);
       configureSouth(id, south, isLTR, showPhones);
     }
-//    else {
-//      south = null;
-//    }
+
     length = html.length();
+  }
+
+  private HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+    return addDomHandler(handler, MouseOutEvent.getType());
+  }
+
+  private HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+    return addDomHandler(handler, MouseOverEvent.getType());
   }
 
   /**
@@ -90,7 +103,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     }
   }
 
-  private void configureSouth(int id, DivWidget south, boolean isLTR, boolean ensureHeight) {
+  private void configureSouth(int id, Widget south, boolean isLTR, boolean ensureHeight) {
     if (isLTR) {
       south.addStyleName("floatLeft");
     }
@@ -167,14 +180,34 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return content;
   }
 
-  public void setSouth(Widget widget) {
+  public void setSouth(DivWidget widget) {
+    //south.clear();
+    //south.add(widget);
+    south = widget;
+
+    south.addDomHandler(event -> addStyleName("underline"), MouseOverEvent.getType());
+    south.addDomHandler(event -> removeStyleName("underline"), MouseOutEvent.getType());
+
+    //    south.addMouseOverHandler(mouseOverEvent -> {
+//      //addStyleName("underline");
+//      south.addStyleName("underline");
+//    });
+//
+//    south.addMouseOutHandler(mouseOutEvent -> {
+//      //removeStyleName("underline");
+//      south.removeStyleName("underline");
+//    });
+
+
+  }
+
+  public void setSouthScore(DivWidget widget) {
     south.clear();
     south.add(widget);
   }
 
   @Override
   public void clearSouth() {
-
     remove(south);
   }
 

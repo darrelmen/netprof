@@ -24,7 +24,8 @@ public interface IHighlightSegment {
 
   String getContent();
 
-  void setSouth(Widget widget);
+  void setSouth(DivWidget widget);
+  void setSouthScore(DivWidget widget);
 
   Widget asWidget();
 

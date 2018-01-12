@@ -46,6 +46,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
@@ -115,6 +116,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String DEFAULT = "Default";
   public static final int EST_NUM_USERS = 8000;
   public static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+  public static final long STALE_DUR = 5L * 60L * 1000L;
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -1153,8 +1155,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
+  /**
+   * @see Analysis#getUserInfos(Map, IUserDAO)
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
+   * @param userDBIds
+   * @return
+   */
   @Override
-  public Map<Integer, FirstLastUser> getFirstLastFor(Set<Integer> userDBIds) {
+  public Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds) {
     refreshUserCache(userDBIds);
 
     Map<Integer, FirstLastUser> idToFirstLast = new HashMap<>(userDBIds.size());
@@ -1162,7 +1170,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return idToFirstLast;
   }
 
-  private void refreshUserCache(Set<Integer> userDBIds) {
+  private void refreshUserCache(Collection<Integer> userDBIds) {
     long now = System.currentTimeMillis();
 
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
@@ -1177,14 +1185,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         idToFirstLastCache.put(k, value);
       });
     }
-
   }
 
+  /**
+   * Go get the user every 5 minutes...?
+   * @param userDBIds
+   * @param now
+   * @return
+   */
   @NotNull
-  private Set<Integer> getMissingOrStale(Set<Integer> userDBIds, long now) {
+  private Set<Integer> getMissingOrStale(Collection<Integer> userDBIds, long now) {
     Set<Integer> toAskFor = new HashSet<>();
 
-    long stale = now - 5L * 60L * 1000L;
+    long stale = now - STALE_DUR;
 
     userDBIds.forEach(id -> {
       FirstLastUser firstLastUser = idToFirstLastCache.get(id);

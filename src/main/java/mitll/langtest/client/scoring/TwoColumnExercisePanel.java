@@ -41,6 +41,10 @@ import static mitll.langtest.client.scoring.ShowChoices.*;
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
+  public static final int CONTEXT_WIDTH = 75;
+
+  enum FieldType {FL, TRANSLIT, MEANING, EN}
+
   private static final String SHOW_COMMENTS = "Show Comments";
   private static final String HIDE_COMMENTS = "Hide Comments";
   private static final String N_A = "N/A";
@@ -459,7 +463,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                          AlignmentOutput alignmentOutput,
                                          List<IHighlightSegment> flclickables,
                                          ChoicePlayAudioPanel playAudio,
-                                         DivWidget clickableRow, DivWidget clickablePhones) {
+                                         DivWidget clickableRow,
+                                         DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
@@ -509,7 +514,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                                                                                             AlignmentOutput alignmentOutput,
                                                                                                             List<IHighlightSegment> flclickables,
                                                                                                             AudioControl audioControl,
-                                                                                                            DivWidget clickableRow, DivWidget clickablePhones) {
+                                                                                                            DivWidget clickableRow,
+                                                                                                            DivWidget clickablePhones) {
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
 
     TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord = new TreeMap<>();
@@ -557,6 +563,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 List<TranscriptSegment> wordSegments,
                                 DivWidget clickableRow,
                                 DivWidget clickablePhones) {
+    clickablePhones.clear();
     ListIterator<TranscriptSegment> transcriptSegmentListIterator = wordSegments.listIterator();
     while (transcriptSegmentListIterator.hasNext()) {
       TranscriptSegment wordSegment = transcriptSegmentListIterator.next();
@@ -614,9 +621,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
               if (shouldShowPhones()) {
                 DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap);
-//                current.setSouth(phoneDivBelowWord);
-                clickablePhones.add(phoneDivBelowWord);
-                phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
+                addSouthClickable(clickablePhones, current, phoneDivBelowWord);
               }
 
               segmentToWord.put(wordSegment, current); // only one for now...
@@ -681,7 +686,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                Iterator<IHighlightSegment> iterator,
-                               List<TranscriptSegment> wordSegments, DivWidget clickablePhones) {
+                               List<TranscriptSegment> wordSegments,
+                               DivWidget clickablePhones) {
+    clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (iterator.hasNext()) {
         List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);
@@ -769,9 +776,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       if (showPhones) {
         DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
 
-//        clickable.setSouth(phoneDivBelowWord);
-        clickablePhones.add(phoneDivBelowWord);
-        phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
+        addSouthClickable(clickablePhones, clickable, phoneDivBelowWord);
       }
 
       return clickable;
@@ -785,9 +790,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
 
-          //          allHighlight.setSouth(phoneDivBelowWord);
-          clickablePhones.add(phoneDivBelowWord);
-          phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
+          addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);
         }
 
         if (DEBUG)
@@ -796,6 +799,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         return allHighlight;
       }
     }
+  }
+
+  private void addSouthClickable(DivWidget clickablePhones, IHighlightSegment clickable, DivWidget phoneDivBelowWord) {
+    clickable.setSouth(phoneDivBelowWord);
+    clickablePhones.add(phoneDivBelowWord);
+    phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
   }
 
   /**
@@ -1172,11 +1181,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private void stylePhoneRow(UIObject phoneRow) {
-    phoneRow.addStyleName("inlineFlex");
+    //  phoneRow.addStyleName("inlineFlex");
     if (isRTL) phoneRow.addStyleName("floatRight");
   }
 
-  enum FieldType {FL, TRANSLIT, MEANING, EN}
 
   /**
    * @param e
@@ -1439,6 +1447,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       contextClickableRowPhones.getElement().setId("contextClickableRowPhones");
       stylePhoneRow(contextClickableRowPhones);
 
+//      contextClickableRowPhones.setWidth(CONTEXT_WIDTH +          "%");
+
       /*      logger.info("context '" + context1 +
           "' = '" + annotation +
           "'");*/
@@ -1448,10 +1458,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
               .getEntry(FOREIGN_LANGUAGE, contentWidget,
                   contextExercise.getAnnotation(FOREIGN_LANGUAGE), showInitially, isRTL);
 
-      commentRow.setWidth(75 +          "%");
+      commentRow.setWidth(100 + "%");
 
       DivWidget col = new DivWidget();
-      col.setWidth("100%");
+      col.setWidth(CONTEXT_WIDTH + "%");
       hp.add(col);
 
       String altFL1 = contextExercise.getAltFL();
@@ -1484,7 +1494,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private DivWidget getSpacer() {
     DivWidget spacer = new DivWidget();
-    spacer.getElement().setId("spacer");
+    //spacer.getElement().setId("spacer");
     spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
     return spacer;
   }

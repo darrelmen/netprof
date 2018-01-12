@@ -108,7 +108,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
    */
   private static final int FIVE_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
-  private static final int FIRST_PAGE_SIZE = 1;
+  private static final int FIRST_PAGE_SIZE = FIVE_PAGE_SIZE;
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIVE_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 

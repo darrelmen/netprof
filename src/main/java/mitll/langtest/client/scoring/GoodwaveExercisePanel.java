@@ -423,30 +423,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     String s = removePunct(html);
     if (!s.isEmpty()) {
       w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      w.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent clickEvent) {
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-              String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
-              String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
-              listContainer.searchBoxEntry(s2);
-            }
-          });
-        }
-      });
-      w.addMouseOverHandler(new MouseOverHandler() {
-        @Override
-        public void onMouseOver(MouseOverEvent mouseOverEvent) {
-          w.addStyleName("underline");
-        }
-      });
-      w.addMouseOutHandler(new MouseOutHandler() {
-        @Override
-        public void onMouseOut(MouseOutEvent mouseOutEvent) {
-          w.removeStyleName("underline");
-        }
-      });
+      w.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> {
+        String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
+        String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
+        listContainer.searchBoxEntry(s2);
+      }));
+      w.addMouseOverHandler(mouseOverEvent -> w.addStyleName("underline"));
+      w.addMouseOutHandler(mouseOutEvent -> w.removeStyleName("underline"));
     }
 
     w.addStyleName("Instruction-data-with-wrap-keep-word");

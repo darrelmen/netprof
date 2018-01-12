@@ -278,13 +278,14 @@ public class WordTable {
     words.put(word, header);
     addClickHandler(audioControl, word, header.getClickable());
 
-    String color = setColorClickable(word, header);
+//    String color =
+        setColorClickable(word, header);
   //  logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
     DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null /*isRTL*/);
-    header.setSouth(phones);
+    header.setSouthScore(phones);
     return header;
   }
 
@@ -324,9 +325,9 @@ public class WordTable {
                                  TranscriptSegment wordSegment
   ) {
     DivWidget phones = new DivWidget();
-    phones.addStyleName("inlineFlex");
+    //phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
-    phones.setWidth("100%");
+    //phones.setWidth("100%");
 
     addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
     return phones;

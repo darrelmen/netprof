@@ -73,12 +73,19 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
-  public void addBulk(Collection<SlickUserProject> bulk) {  dao.addBulk(bulk);  }
-  @Override
-  public void forgetUsersBulk(Collection<Integer> bulk) {  dao.forgetUsersBulk(bulk);  }
+  public void addBulk(Collection<SlickUserProject> bulk) {
+    dao.addBulk(bulk);
+  }
 
   @Override
-  public void forget(int userid) {    dao.forget(userid);  }
+  public void forgetUsersBulk(Collection<Integer> bulk) {
+    dao.forgetUsersBulk(bulk);
+  }
+
+  @Override
+  public void forget(int userid) {
+    dao.forget(userid);
+  }
 
   /**
    * TODO - we seem to hit this too often
@@ -89,17 +96,16 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    if (slickUserProjects.isEmpty()) {
-      return -1;
-    }
-    else {
-      SlickUserProject next = slickUserProjects.iterator().next();
-      return next.projid();
-     }
+    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
   }
 
   @Override
   public Map<Integer, Integer> getUserToProject() {
     return dao.getUserToProject();
+  }
+
+  @Override
+  public Collection<Integer> getUsersForProject(int projid) {
+    return dao.usersOnProject(projid);
   }
 }

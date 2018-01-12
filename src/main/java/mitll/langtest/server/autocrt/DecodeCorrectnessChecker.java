@@ -104,8 +104,7 @@ public class DecodeCorrectnessChecker {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
 
     boolean b = isAsianLanguage(language);
-
-    logger.info("is asian lang (" + language + ")" + b);
+//    logger.info("is asian lang (" + language + ")" + b);
 
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b);
     // log what happened

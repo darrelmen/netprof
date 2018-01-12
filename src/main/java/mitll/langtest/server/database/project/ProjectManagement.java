@@ -181,7 +181,6 @@ public class ProjectManagement implements IProjectManagement {
    * If a project is already configured, won't be configured again.
    * Fill in id->project map
    *
-   *
    * @see #populateProjects()
    */
   private void populateProjects(PathHelper pathHelper,
@@ -336,12 +335,16 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.
-      db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUserToProject().keySet());
+      new Thread(() -> rememberUsers(projectID)).start();
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
       return 0;
     }
+  }
+
+  private void rememberUsers(int projectID) {
+    db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
   }
 
   @Override
@@ -656,7 +659,9 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public Collection<Project> getProjects() {    return idToProject.values();  }
+  public Collection<Project> getProjects() {
+    return idToProject.values();
+  }
 
   private List<Project> getProductionProjects(Collection<Project> toFilter) {
     return toFilter
@@ -769,7 +774,7 @@ public class ProjectManagement implements IProjectManagement {
     int currentNumProjects = idToProject.size();
 
     if (numProjects != currentNumProjects) {
-      logger.info("getNestedProjectInfo : project loaded? db projects " + numProjects + " current " +currentNumProjects);
+      logger.info("getNestedProjectInfo : project loaded? db projects " + numProjects + " current " + currentNumProjects);
       populateProjects();
     }
 
@@ -945,8 +950,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
    */
   public List<ImportProjectInfo> getVocabProjects() {
     return dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());

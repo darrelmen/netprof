@@ -430,7 +430,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public Map<Integer, FirstLastUser> getFirstLastFor(Set<Integer> userDBIds) {
+  public Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds) {
     return null;
   }
 
@@ -447,7 +447,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * @param userid
    * @return null if no user with that id else the user object
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getUserBy
    * @deprecated
    */
   @Override
