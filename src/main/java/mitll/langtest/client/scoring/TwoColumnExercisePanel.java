@@ -569,7 +569,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       TranscriptSegment wordSegment = transcriptSegmentListIterator.next();
 
       if (clickablesIterator.hasNext()) {
-        List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);
+        List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
 
         if (DEBUG_MATCH)
           logger.info("doOneToManyMatch got segment " + wordSegment);// + " length " + segmentLength);
@@ -603,7 +603,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                   if (transcriptSegmentListIterator.hasNext()) {
                     wordSegment = transcriptSegmentListIterator.next();
                     lcSegment = removePunct(wordSegment.getEvent().toLowerCase());
-                    phonesInWord = getPhonesInWord(phones, wordSegment);
+                    phonesInWord = getSegs(phones, wordSegment);
                   }
                 }
               } else {
@@ -691,7 +691,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (iterator.hasNext()) {
-        List<TranscriptSegment> phonesInWord = getPhonesInWord(phones, wordSegment);
+        List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
 
         if (DEBUG)
           logger.info("doOneToOneMatch got segment " + wordSegment);// + " length " + segmentLength);
@@ -710,13 +710,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  private List<TranscriptSegment> getPhonesInWord(List<TranscriptSegment> phones, TranscriptSegment wordSegment) {
+  // the phones go left to right, even in rtl languages.
+
+/*  private List<TranscriptSegment> getPhonesInWord(List<TranscriptSegment> phones, TranscriptSegment wordSegment) {
     List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
-    if (isRTL) { // phones should play right to left
-      Collections.reverse(phonesInWord);
-    }
+//    if (isRTL) { // phones should play right to left
+//      Collections.reverse(phonesInWord);
+//    }
     return phonesInWord;
-  }
+  }*/
 
   private List<TranscriptSegment> getWordSegments(AlignmentOutput alignmentOutput) {
     List<TranscriptSegment> wordSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
