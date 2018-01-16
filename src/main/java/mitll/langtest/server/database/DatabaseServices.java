@@ -53,6 +53,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import java.text.CollationKey;
 import java.util.Collection;
 import java.util.List;
@@ -103,7 +104,13 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
                                        Map<Integer, CollationKey> idToKey,
                                        String language);
 
-
+  /**
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
+   * @see mitll.langtest.server.services.ResultServiceImpl#getMonitorResults(int)
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
+   * @param projid
+   * @return
+   */
   Collection<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid);

@@ -330,8 +330,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         idToAlignment.put(audioID, pretestScore);
       }
     } else {
-      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
-
+//      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
       getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguage());  // OK, let's translate the db info into the alignment output
     }
     completed.add(audioID);

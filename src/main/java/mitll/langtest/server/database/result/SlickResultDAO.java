@@ -258,9 +258,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.getAll();
   }
 
-  private List<SlickResult> getAllByProject(int projid) {
-    return dao.getAllByProject(projid);
-  }
+
 
   @Override
   public Collection<MonitorResult> getResultsDevices(int projid) {
@@ -272,9 +270,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return fromSlick(dao.byID(id));
   }
 
+  /**
+   * Don't return results where the exercises are not known.
+   * @param projid
+   * @return
+   */
   @Override
   public List<MonitorResult> getMonitorResults(int projid) {
-    return getMonitorResults(getAllByProject(projid));
+    return getMonitorResults(dao.getAllByProject(projid));
+  }
+
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
+    return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
   }
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {

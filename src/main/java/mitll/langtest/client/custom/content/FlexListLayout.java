@@ -75,6 +75,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param instanceName
    * @param hasTopRow
    * @return
+   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#doNPF
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public Panel doInternalLayout(int userListID, String instanceName, boolean hasTopRow) {
@@ -106,7 +107,10 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     //  bottomRow.addStyleName("inlineFlex");
     styleBottomRow(bottomRow);
-    if (!hasTopRow) bottomRow.setWidth("100%");
+    if (!hasTopRow) {
+      bottomRow.setWidth("100%");
+      bottomRow.setHeight("100%");
+    }
 
     bottomRowDiv.add(bottomRow);
 //    ScrollPanel widgets1 = new ScrollPanel(bottomRowDiv);
@@ -186,8 +190,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @return
    */
   protected Panel getCurrentExercisePanel() {
-    FlowPanel currentExerciseVPanel = new FlowPanel();
-    currentExerciseVPanel.getElement().setId("NPFHelper_defect_currentExercisePanel");
+    DivWidget currentExerciseVPanel = new DivWidget();
+    currentExerciseVPanel.getElement().setId("FlexListLayout_currentExercisePanel");
     currentExerciseVPanel.addStyleName("floatLeft");
     return currentExerciseVPanel;
   }

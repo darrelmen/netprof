@@ -33,6 +33,7 @@
 package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -76,7 +77,7 @@ public class AMASInitialUI extends InitialUI {
    * @see #showLogin()
    */
   @Override
-  protected void populateBelowHeader(Container verticalContainer/*, Panel contentRow*/) {
+  protected void populateBelowHeader(DivWidget verticalContainer/*, Panel contentRow*/) {
     RootPanel.get().clear();
     RootPanel.get().add(verticalContainer);
     /**
@@ -126,7 +127,7 @@ public class AMASInitialUI extends InitialUI {
    * @see #populateRootPanelIfLogin()
    */
   public void populateRootPanel() {
-    Container verticalContainer = getRootContainer();
+    DivWidget verticalContainer = getRootContainer();
     // header/title line
     // first row ---------------
     Panel firstRow = makeFirstTwoRows(verticalContainer);

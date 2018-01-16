@@ -80,8 +80,10 @@ public class UserCopy {
 
     Group group = dominoUserDAO.getGroup();
 
-    int collisions = 0;
-    int lurker = 0;
+//    int collisions = 0;
+    List<Integer> collisions = new ArrayList<>();
+    List<Integer> lurkers = new ArrayList<>();
+    //int lurker = 0;
     List<ClientUserDetail> added = new ArrayList<>();
     int c = 0;
     Map<Integer, Long> userToCreation = new HashMap<>();
@@ -97,7 +99,7 @@ public class UserCopy {
       if (importID != defectDetector && !dominoUserDAO.isDefaultUser(importUserID)) {
         if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
           logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
-          lurker++;
+          lurkers.add(importID);
         } else {
           if (DEBUG) logger.info("copyUsers #" + c + "/" + importUsers.size() + " : import " + toImport);
           mitll.hlt.domino.shared.model.user.DBUser dominoDBUser = dominoUserDAO.getDBUser(importUserID);
@@ -122,7 +124,7 @@ public class UserCopy {
                 toImport,
                 dominoDBUser,
                 group)) {
-              collisions++;
+              collisions.add(importID);
             }
           }
         }
@@ -136,8 +138,8 @@ public class UserCopy {
     logger.info("copyUsers after, postgres importUsers " +
         //"num = " + dominoUserDAO.getUsers().size() +
         "\n\tadded          " + added.size() +
-        "\n\tcollisions     " + collisions +
-        "\n\tlurker         " + lurker +
+        "\n\tcollisions     " + collisions.size() +
+        "\n\tlurker         " + lurkers.size() +
         "\n\tuserToCreation " + userToCreation.size()
     );
 

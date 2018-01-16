@@ -32,7 +32,10 @@
 
 package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Breadcrumbs;
+import com.github.gwtbootstrap.client.ui.FluidContainer;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -58,7 +61,6 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
-import org.apache.xpath.operations.Div;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -73,6 +75,7 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle {
+  public static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
   private final Logger logger = Logger.getLogger("InitialUI");
 
   /**
@@ -80,7 +83,7 @@ public class InitialUI implements UILifecycle {
    *
    * @see #getRootContainer
    */
-  private static final int MARGIN_TOP = 47;
+  private static final int MARGIN_TOP = 47;//5;//47;
 
   /**
    * @see #getRootContainer
@@ -116,7 +119,7 @@ public class InitialUI implements UILifecycle {
   private final Breadcrumbs breadcrumbs;
   protected DivWidget contentRow;
   private INavigation navigation;
-  private Container verticalContainer;
+  private DivWidget verticalContainer;
   private final ProjectChoices choices;
 
   private static final boolean DEBUG = false;
@@ -141,6 +144,33 @@ public class InitialUI implements UILifecycle {
     return navigation;
   }
 
+
+  /**
+   * So, if we're currently showing the login, let's switch to the tab panel...
+   *
+   * @see UILifecycle#gotUser
+   * @see #configureUIGivenUser(long) (long)
+   */
+  protected void populateRootPanelIfLogin() {
+    int childCount = contentRow.getElement().getChildCount();
+
+    if (DEBUG)
+      logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+
+    if (childCount > 0) {
+      Node child = contentRow.getElement().getChild(0);
+      Element as = Element.as(child);
+      if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
+
+      if (as.getId().contains(LOGIN)) {
+        // logger.info("populateRootPanelIfLogin found login...");
+        populateRootPanel();
+      } else {
+        if (DEBUG) logger.info("populateRootPanelIfLogin no login...");
+      }
+    }
+  }
+
   /**
    * @see LangTest#showLogin()
    * @see LangTest#populateRootPanel()
@@ -148,7 +178,7 @@ public class InitialUI implements UILifecycle {
   @Override
   public void populateRootPanel() {
     //  logger.info("----> populateRootPanel BEGIN ------>");
-    Container verticalContainer = getRootContainer();
+    DivWidget verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
     // first row ---------------
@@ -164,16 +194,15 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel
    */
-  protected DivWidget makeFirstTwoRows(Container verticalContainer) {
+  protected DivWidget makeFirstTwoRows(DivWidget verticalContainer) {
     // add header row
-    //  logger.info("makeFirstTwoRows ");
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
-//    rootPanel.add(makeHeaderRow2());
-//    headerRow.getElement().setId("headerRow");
 
     DivWidget contentRow = new DivWidget();
-    contentRow.getElement().setId("contentRow");
+    contentRow.getElement().setId("InitialUI_contentRow");
+    contentRow.setHeight("100%");
+    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
 
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
@@ -247,6 +276,8 @@ public class InitialUI implements UILifecycle {
   public void clearContent() {
     clearStartupInfo();
     contentRow.clear();
+    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
+
     contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
 
@@ -256,12 +287,17 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @return
+   * @see #populateRootPanel
    */
-  protected Container getRootContainer() {
+  protected DivWidget getRootContainer() {
     RootPanel.get().clear();   // necessary?
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
-    verticalContainer.getElement().getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
+
+    DivWidget verticalContainer = new FluidContainer();
+    com.google.gwt.user.client.Element element = verticalContainer.getElement();
+    element.setId(ROOT_VERTICAL_CONTAINER);
+    element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
+    verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
+
     return verticalContainer;
   }
 
@@ -276,17 +312,17 @@ public class InitialUI implements UILifecycle {
    * * TODO : FIX ME for headstart?
    *
    * @param verticalContainer
-   * @see #populateRootPanel()
+   * @see #populateRootPanel
    * @see #showLogin()
    */
-  protected void populateBelowHeader(Container verticalContainer) {
+  protected void populateBelowHeader(DivWidget verticalContainer) {
     RootPanel.get().add(verticalContainer);
 
     /**
      * {@link #makeFlashContainer}
      */
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
-    child = new Heading(3, "Please allow recording");
+    child = new Heading(3, PLEASE_ALLOW_RECORDING);
     child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
     contentRow.add(child);
 
@@ -509,6 +545,8 @@ public class InitialUI implements UILifecycle {
 
   private void showLogin(EventRegistration eventRegistration) {
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
+    contentRow.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();
@@ -525,7 +563,7 @@ public class InitialUI implements UILifecycle {
    * @param resetPassToken
    * @see #showLogin
    */
-  private void handleResetPass(final Container verticalContainer,
+  private void handleResetPass(final DivWidget verticalContainer,
                                final Panel firstRow,
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
@@ -536,7 +574,7 @@ public class InitialUI implements UILifecycle {
     hideCogMenu();
   }
 
-  private void handleSendResetPass(final Container verticalContainer,
+  private void handleSendResetPass(final DivWidget verticalContainer,
                                    final Panel firstRow,
                                    final EventRegistration eventRegistration,
                                    final String resetPassToken) {
@@ -547,7 +585,7 @@ public class InitialUI implements UILifecycle {
     hideCogMenu();
   }
 
-  private void clearPadding(Container verticalContainer) {
+  private void clearPadding(DivWidget verticalContainer) {
     verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
@@ -688,9 +726,9 @@ public class InitialUI implements UILifecycle {
    * @see #clickOnParentCrumb
    */
   private void removeLastCrumb() {
-  //  logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
+    //  logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
-  //  logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
+    //  logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
   /**
@@ -707,32 +745,6 @@ public class InitialUI implements UILifecycle {
       // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
 //    logger.info("removeUntilCrumb now " + breadcrumbs.getWidgetCount());
-  }
-
-  /**
-   * So, if we're currently showing the login, let's switch to the tab panel...
-   *
-   * @see UILifecycle#gotUser
-   * @see #configureUIGivenUser(long) (long)
-   */
-  protected void populateRootPanelIfLogin() {
-    int childCount = contentRow.getElement().getChildCount();
-
-    if (DEBUG)
-      logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
-
-    if (childCount > 0) {
-      Node child = contentRow.getElement().getChild(0);
-      Element as = Element.as(child);
-      if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
-
-      if (as.getId().contains(LOGIN)) {
-        // logger.info("populateRootPanelIfLogin found login...");
-        populateRootPanel();
-      } else {
-        if (DEBUG) logger.info("populateRootPanelIfLogin no login...");
-      }
-    }
   }
 
   /**

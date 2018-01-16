@@ -65,6 +65,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
+  private final FlexListLayout<T, U> flexListLayout;
 
   /**
    * @param controller
@@ -104,14 +105,13 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   @Override
   public void showContent(Panel listContent, String instanceName) { listContent.add(doNPF(instanceName));  }
 
-  private final FlexListLayout<T, U> flexListLayout;
 
   /**
    * Make the instance name uses the unique id for the list.
    *
    * @param instanceName
    * @return
-   * @see #showContent(Panel, String)
+   * @see #showContent
    */
   private Panel doNPF(String instanceName) {
    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);

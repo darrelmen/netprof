@@ -29,9 +29,11 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
-  public static final String NETPROF = "netprof";
-  public static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
   private final Logger logger = Logger.getLogger("NewBanner");
+
+
+  private static final String NETPROF = "netprof";
+  private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";

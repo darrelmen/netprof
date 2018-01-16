@@ -1149,11 +1149,11 @@ body > .dropdown-popup .nav-list > li.active > a {
 }
 
 .loginPage {
-    /*
-    margin: -154px -2288px 0 -418px;
-    */
     margin: -189px -228px 0 -418px;
+    /*
     top: 290px;
+    */
+    top: 220px;
     width: 838px;
     left: 50%;
     position: absolute;
@@ -1865,7 +1865,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-inner .breadcrumb > li > .divider {
-     color: #0c0c0c;
+    color: #0c0c0c;
 }
 
 .navbar .navbar-inner {
@@ -1875,11 +1875,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar div > .nav > li > a {
     color: black;
+    border-radius: 4px;
 }
 
 .navbar div > .nav > li > a:hover {
-     color: #62b0df;
- }
+    color: #62b0df;
+    background-color: lightgrey;
+    border-radius: 4px;
+}
 
 .navbar #lnav > a:hover {
     color: #62b0df;
@@ -1911,7 +1914,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 4px;
 }
 
-
 .navbar #recnav > a:hover {
     color: #62b0df;
 }
@@ -1929,6 +1931,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar #recnav > li > a:hover {
     color: #62b0df;
+    background-color: lightgrey;
 }
 
 .navbar #recnav > li > a {
@@ -1957,6 +1960,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar #defectnav > li > a:hover {
     color: #62b0df;
+    background-color: lightgrey;
 }
 
 .navbar #defectnav > li > a {
@@ -2086,3 +2090,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 12px;
     line-height: 1.42857;
 }*/
+
+.inlineFlex .btn-group > .btn:hover, .btn-group > .btn:focus, .btn-group > .btn:active, .btn-group > .btn.active {
+    z-index: unset;
+}

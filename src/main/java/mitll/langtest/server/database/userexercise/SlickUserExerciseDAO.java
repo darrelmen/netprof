@@ -277,7 +277,7 @@ public class SlickUserExerciseDAO
   private Exercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = getUnitToValue(slick);
 
-    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
+//    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
@@ -297,12 +297,12 @@ public class SlickUserExerciseDAO
         slick.numphones(),
         factory.getTokens(slick.foreignlanguage()),
         slick.legacyid());
-    logger.info("fromSlick " +
+/*    logger.info("fromSlick " +
 
         "\n\tfrom    " + slick+
         "\n\tcreated " + userExercise+
         "\n\tcontext " + userExercise.isContext()
-    );
+    );*/
     return userExercise;
   }
 

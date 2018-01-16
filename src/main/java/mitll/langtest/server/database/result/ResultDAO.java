@@ -62,6 +62,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
 
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
+    return null;
+  }
+
   public static final String RESULTS = "results";
 
   static final String FLQ = "flq";

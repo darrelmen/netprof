@@ -77,7 +77,6 @@ public class Project implements IPronunciationLookup {
    * @see mitll.langtest.server.database.project.ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
- // public static final String WEBSERVICE_HOST = "webserviceHost";
   /**
    * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
    *
@@ -89,9 +88,6 @@ public class Project implements IPronunciationLookup {
    * @see #getWebservicePort
    * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
    */
-/*  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
-  public static final String SHOW_ON_IOS = "showOniOS";
-  public static final String AUDIO_PER_PROJECT = "audioPerProject";*/
 
   private SlickProject project;
   private ExerciseDAO<CommonExercise> exerciseDAO;
@@ -374,6 +370,9 @@ public class Project implements IPronunciationLookup {
    * @return
    */
   public CommonExercise getExerciseByID(int id) {
+    if (id == 2) {
+
+    }
     CommonExercise exercise = exerciseDAO.getExercise(id);
     if (exercise == null) {
       logger.warn("getExerciseByID no exercise for " + id);

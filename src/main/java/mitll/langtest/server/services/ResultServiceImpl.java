@@ -127,18 +127,17 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    */
   private List<MonitorResult> getResults(int projectID, Map<String, String> unitToValue, int userid, String flText) {
     logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
-    //  int projectID = getProjectIDFromUser();
 
     if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
       List<MonitorResult> monitorResultsByID =
           db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(i), projectID);
-      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText +
-          " returning " + monitorResultsByID.size() + " results...");
+      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
       return monitorResultsByID;
     }
 
-    Collection<MonitorResult> results = db.getMonitorResults(projectID);
+    Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
+//    Collection<MonitorResult> results = db.getMonitorResults(projectID);
 
     // filter on unit->value
     if (!unitToValue.isEmpty()) {

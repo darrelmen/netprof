@@ -1,6 +1,7 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -55,6 +56,9 @@ public class NewContentChooser implements INavigation {
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
+    divWidget.setId("NewContentChooser");
+    divWidget.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+    divWidget.setHeight("100%");
   }
 
   @Override
@@ -154,12 +158,7 @@ public class NewContentChooser implements INavigation {
 
       @Override
       public void onSuccess(UserList<CommonShell> result) {
-        List<CommonShell> exercises = result.getExercises();
-        logger.info("got back " + result.getNumItems() + " exercises");
-        CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
-        Panel review = new ReviewItemHelper(controller)
-            .doNPF(result, "review", true, toSelect);
-        divWidget.add(review);
+        showReviewItems(result);
       }
     });
   }
@@ -170,6 +169,15 @@ public class NewContentChooser implements INavigation {
 
   private void storeValue(VIEWS view) {
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
+  }
+
+  private void showReviewItems(UserList<CommonShell> result) {
+    List<CommonShell> exercises = result.getExercises();
+    // logger.info("got back " + result.getNumItems() + " exercises");
+    CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
+    Panel review = new ReviewItemHelper(controller)
+        .doNPF(result, "review", true, toSelect);
+    divWidget.add(review);
   }
 
   public void showProgress() {
@@ -184,6 +192,15 @@ public class NewContentChooser implements INavigation {
 
   private void clear() {
     divWidget.clear();
+  }
+
+  /**
+   * @see InitialUI#showNavigation
+   * @return
+   */
+  @Override
+  public Widget getNavigation() {
+    return divWidget;
   }
 
   @NotNull
@@ -214,11 +231,6 @@ public class NewContentChooser implements INavigation {
 
   private void setHistoryWithList(int listid) {
     History.newItem(FacetExerciseList.LISTS + "=" + listid);
-  }
-
-  @Override
-  public Widget getNavigation() {
-    return divWidget;
   }
 
   @Override

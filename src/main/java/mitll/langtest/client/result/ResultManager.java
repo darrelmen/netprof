@@ -73,6 +73,7 @@ import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  public static final int TOP = 56;
   private final Logger logger = Logger.getLogger("ResultManager");
 
   private static final String YES = "Yes";
@@ -85,8 +86,8 @@ public class ResultManager extends PagerTable {
   private static final String DURATION_SEC = "Dur (s)";
   private static final String AUDIO_TYPE = "Audio Type";
   private static final String USER_ID = "User";
-  private static final String DESC = "DESC";
-  private static final String ASC = "ASC";
+//  private static final String DESC = "DESC";
+//  private static final String ASC = "ASC";
 
   private static final String ANSWER = "answer";
   private static final String USERID = MonitorResult.USERID;
@@ -144,7 +145,7 @@ public class ResultManager extends PagerTable {
 
     int left = (Window.getClientWidth()) / 200;
     //int top = (Window.getClientHeight()) / 200;
-    dialogBox.setPopupPosition(left, 55);
+    dialogBox.setPopupPosition(left, TOP);
 
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
@@ -566,7 +567,9 @@ public class ResultManager extends PagerTable {
     Column<MonitorResult, SafeHtml> type = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
-        return getNoWrapContent(answer.getDevice());
+        String device = answer.getDevice();
+        if (device.length() > 12) device = device.substring(0,12) + "...";
+        return getNoWrapContent(device);
       }
     };
 
