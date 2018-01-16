@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
 import static mitll.langtest.client.qc.QCNPFExercise.FOREIGN_LANGUAGE;
 import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
-import static mitll.langtest.client.scoring.ShowChoices.*;
 
 /**
  * Created by go22670 on 3/23/17.
@@ -101,7 +99,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private DivWidget contextClickableRowPhones;
 
-  private ShowChoices choices;
+  //  private ShowChoices choices;
+  private boolean showFL;
+  private boolean showALTFL;
   /**
    *
    */
@@ -140,8 +140,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   @Override
-  public void addWidgets(ShowChoices choices, PhonesChoices phonesChoices) {
-    this.choices = choices;
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
+    this.showFL = showFL;
+    this.showALTFL = showALTFL;
+
     this.phonesChoices = phonesChoices;
 
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
@@ -1129,7 +1131,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     now = System.currentTimeMillis();
     // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
 
-    if (choices == BOTH || choices == FL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
+    if (showFL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
       fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
       flClickableRowPhones.getElement().setId("flClickableRowPhones");
@@ -1149,8 +1151,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     now = System.currentTimeMillis();
     // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
 
-    if (choices == BOTH || choices == ALTFL) {
-      addField(fieldContainer, addAltFL(e, choices == BOTH));
+    if (showALTFL) {
+      addField(fieldContainer, addAltFL(e, showFL && showALTFL));
       altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
       altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
       stylePhoneRow(altFLClickableRowPhones);
@@ -1467,15 +1469,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(col);
 
       String altFL1 = contextExercise.getAltFL();
-      if (choices == BOTH || choices == FL || altFL1.isEmpty()) {
+      if (showFL  || altFL1.isEmpty()) {
         col.add(commentRow);
         col.add(contextClickableRowPhones);
       }
 
-      if (choices == BOTH || choices == ALTFL) {
+      if (showALTFL) {
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
           Widget altContext = getAltContext(altFL, altFL1, annotationHelper, contextExercise.getID());
-          if (choices == BOTH) altContext.addStyleName("topFiveMargin");
+          if (showFL && showALTFL) altContext.addStyleName("topFiveMargin");
           col.add(altContext);
         }
       }

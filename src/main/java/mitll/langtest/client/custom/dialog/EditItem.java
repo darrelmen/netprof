@@ -214,7 +214,7 @@ public class EditItem {
               controller,
               exerciseList,
               alignments);
-          widgets.addWidgets(getChoices(), getPhoneChoices());
+          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
    //     }
 

@@ -59,7 +59,6 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.IUserList;
@@ -67,7 +66,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -78,8 +76,10 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
-  public static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+
+  public static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
   private static final String ADDING_VISITOR = "adding visitor";
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
@@ -1624,8 +1624,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 */
 //    logger.info("makeExercisePanels req " + reqID + " vs current " + getCurrentExerciseReq() + " for " + result.size() + " exercises");
 
-    long then = System.currentTimeMillis();
-    ShowChoices choices = factory.getChoices();
+    //long then = System.currentTimeMillis();
+
+    boolean showFL = factory.getFLChoice();
+    boolean showALTFL = factory.getALTFLChoice();
+
     PhonesChoices phoneChoices = factory.getPhoneChoices();
     for (CommonExercise exercise : result) {
       if (isStale(reqID)) {
@@ -1640,7 +1643,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           getters.add(refAudioGetter);
           refAudioGetter.setReq(getCurrentExerciseReq());
        //   long then2 = System.currentTimeMillis();
-          refAudioGetter.addWidgets(choices, phoneChoices);
+          refAudioGetter.addWidgets(showFL, showALTFL, phoneChoices);
          // long now = System.currentTimeMillis();
      //     logger.info("makeExercisePanels took " +(now-then2) + " millis to make panel for " + exercise.getID());
         }

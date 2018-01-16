@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewBanner;
+import mitll.langtest.client.list.DisplayMenu;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.ShowChoices;
@@ -83,19 +84,23 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   public abstract Panel getExercisePanel(U e);
 
   @NotNull
-  public ShowChoices getChoices() {
-    ShowChoices choices = ShowChoices.FL;
-    String show = controller.getStorage().getValue(NewBanner.SHOW);
+  public boolean getFLChoice() {
+    String show = controller.getStorage().getValue(DisplayMenu.SHOWFL);
+    Boolean showFL = true;
     if (show != null) {
-      // logger.warning("value for show " + controller.getStorage().getValue("show"));
-      try {
-        choices = ShowChoices.valueOf(show);
-        // logger.info("ExercisePanelFactory got " + choices);
-      } catch (IllegalArgumentException ee) {
-        // logger.warning("got " + ee);
-      }
+      showFL = Boolean.valueOf(show);
     }
-    return choices;
+    return showFL;
+  }
+
+  @NotNull
+  public boolean getALTFLChoice() {
+    String show = controller.getStorage().getValue(DisplayMenu.SHOWALT);
+    Boolean showFL = false;
+    if (show != null) {
+      showFL = Boolean.valueOf(show);
+    }
+    return showFL;
   }
 
   @NotNull

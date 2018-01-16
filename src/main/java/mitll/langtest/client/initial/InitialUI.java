@@ -75,8 +75,9 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle {
-  public static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
   private final Logger logger = Logger.getLogger("InitialUI");
+
+  private static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
 
   /**
    * TODO : WHY???

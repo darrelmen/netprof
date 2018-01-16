@@ -1479,14 +1479,11 @@ document sections.*/
 .mainBlock {
     vertical-align: top;
     display: inline-block;
-    /*
-    width: 750px;
-    */
-
     margin-left: 10px;
-    margin-right: 155px;
-
+    margin-right: 175px;
+    /*
     zoom: 1;
+    */
 }
 
 .leftBlock {

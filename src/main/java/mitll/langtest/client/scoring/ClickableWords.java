@@ -63,7 +63,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param exercise
    * @param language
    * @param fontSize
-   * @see TwoColumnExercisePanel#addWidgets
+   * @see RefAudioGetter#addWidgets
    */
   ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
     this.listContainer = listContainer;

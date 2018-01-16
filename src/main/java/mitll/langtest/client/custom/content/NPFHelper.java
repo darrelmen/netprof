@@ -32,11 +32,9 @@
 
 package mitll.langtest.client.custom.content;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListOptions;
@@ -229,7 +227,7 @@ public class NPFHelper implements RequiresResize {
               controller,
               exerciseList,
               alignments);
-          widgets.addWidgets(getChoices(),getPhoneChoices());
+          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
 
           return widgets;
         }

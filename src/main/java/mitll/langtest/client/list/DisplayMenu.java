@@ -2,6 +2,7 @@ package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
@@ -20,16 +21,25 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/18/17.
+ *
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 public class DisplayMenu {
+  private static final String SHOW1 = "Options";
+  private static final String DOWNLOAD = "Download Content";
+  private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
+
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
   private static final String SHOW_SOUNDS = "Show Sounds";
 
   public static final String SHOW_PHONES = "showPhones";
+
   private static final IconType CHECK = IconType.CHECK;
-  private static final String SHOW = "showStorage";
+
+  public static final String SHOWFL = "showStorageFL";
+  public static final String SHOWALT = "showStorageALTFL";
+
   private final KeyStorage storage;
 
   DisplayMenu(KeyStorage storage) {
@@ -37,19 +47,23 @@ public class DisplayMenu {
   }
 
   /**
-   * @see FacetExerciseList#getPagerAndSort
    * @return
+   * @see FacetExerciseList#getPagerAndSort
    */
   @NotNull
   Dropdown getRealViewMenu() {
-    Dropdown view = new Dropdown("Show");
+    Dropdown view = new Dropdown(SHOW1);
+    view.setIcon(IconType.COG);
     view.getTriggerWidget().getElement().getStyle().setColor("black");
     view.addStyleName("rightFiveMargin");
     view.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    view.setWidth("60px");
+    view.setWidth(85 + "px");
 
     view.add(getShowSounds());
-    view.add(getViewMenu());
+    NavLink primary = new NavLink("Show Primary text");
+    view.add(primary);
+
+    view.add(flTextChoices(primary));
     view.add(getDownload());
 
     return view;
@@ -57,18 +71,18 @@ public class DisplayMenu {
 
   @NotNull
   private NavLink getDownload() {
-    NavLink download = new NavLink("Download");
+    NavLink download = new NavLink(DOWNLOAD);
     download.setIcon(IconType.DOWNLOAD_ALT);
     download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
     return download;
   }
 
-  @NotNull
+/*  @NotNull
   private DropdownSubmenu getViewMenu() {
     DropdownSubmenu showChoices = new DropdownSubmenu("Show");
     flTextChoices(showChoices);
     return showChoices;
-  }
+  }*/
 
   private NavLink getShowSounds() {
     NavLink phoneChoice = new NavLink(SHOW_SOUNDS);
@@ -89,73 +103,104 @@ public class DisplayMenu {
     return phoneChoice;
   }
 
-  private void flTextChoices(DropdownSubmenu showChoices) {
-    NavLink altflChoice = new NavLink("Alternate text");
-    NavLink primary = new NavLink("Primary text");
-    NavLink both = new NavLink("Both Primary and Alternate");
+  private NavLink flTextChoices(NavLink primary) {
+    NavLink altflChoice = new NavLink(SHOW_ALTERNATE_TEXT);
+    boolean choicesFL1 = getChoicesFL();
+    primary.setIcon(choicesFL1 ? IconType.CHECK : null);
+    boolean choicesALT1 = getChoicesALT();
+    altflChoice.setIcon(choicesALT1 ? IconType.CHECK : null);
 
-    ShowChoices choices = getChoices();
-    switch (choices) {
-      case BOTH:
-        both.setIcon(CHECK);
-        break;
-      case FL:
-        primary.setIcon(CHECK);
-        break;
-      case ALTFL:
-        altflChoice.setIcon(CHECK);
-        break;
+    if (!choicesFL1 && !choicesALT1) {
+      // ?
+      storeShowChoicesFL(true);
+      primary.setIcon(IconType.CHECK);
     }
+
     altflChoice.addClickHandler(event -> {
-      storeShowChoices(ShowChoices.ALTFL.toString());
+      boolean choicesFL = getChoicesFL();
+      boolean choicesALT = getChoicesALT();
+
+      // if alt selected, then unselect
+      storeShowChoicesALT(!choicesALT);
+      if (choicesALT && !choicesFL) {
+        storeShowChoicesFL(true);
+        primary.setIcon(IconType.CHECK);
+      }
       fireShowEvent();
-      altflChoice.setIcon(CHECK);
-      both.setIcon(null);
-      primary.setIcon(null);
+
+      altflChoice.setIcon(choicesALT ? null : CHECK);
     });
-    showChoices.add(primary);
-    showChoices.add(altflChoice);
+
+//    showChoices.add(altflChoice);
+
     primary.addClickHandler(event -> {
-      storeShowChoices(ShowChoices.FL.toString());
+      boolean choicesFL = getChoicesFL();
+      boolean choicesALT = getChoicesALT();
+
+      // if alt selected, then unselect
+      storeShowChoicesFL(!choicesFL);
+      if (choicesFL && !choicesALT) {
+        storeShowChoicesALT(true);
+        altflChoice.setIcon(IconType.CHECK);
+      }
       fireShowEvent();
-      altflChoice.setIcon(null);
-      both.setIcon(null);
-      primary.setIcon(CHECK);
+
+      primary.setIcon(choicesFL ? null : CHECK);
     });
-    showChoices.add(both);
+    //  showChoices.add(primary);
+
+ /*   showChoices.add(both);
     both.addClickHandler(event -> {
       storeShowChoices(ShowChoices.BOTH.toString());
       fireShowEvent();
       altflChoice.setIcon(null);
       both.setIcon(CHECK);
       primary.setIcon(null);
-    });
+    });*/
+    return altflChoice;
+
   }
 
   @NotNull
-  private ShowChoices getChoices() {
-    ShowChoices choices = ShowChoices.FL;
-    String show = storage.getValue(SHOW);
-    if (show != null) {
-      try {
-        choices = ShowChoices.valueOf(show);
-      } catch (IllegalArgumentException ee) {
-      }
-    }
-    return choices;
+  private boolean getChoicesFL() {
+    boolean stored = getStored(storage.getValue(SHOWFL), true);
+    //logger.info("Stored fl value " + stored);
+    return stored;
   }
 
-  private void storeShowChoices(String toStore) {
-    storage.storeValue(SHOW, toStore);
+  private void storeShowChoicesFL(boolean toStore) {
+    storage.storeValue(SHOWFL, Boolean.toString(toStore));
   }
-  private void storePhoneChoices(String toStore) {   storage.storeValue(SHOW_PHONES, toStore);  }
+
+  @NotNull
+  private boolean getChoicesALT() {
+    return getStored(storage.getValue(SHOWALT), false);
+  }
+
+  private void storeShowChoicesALT(boolean toStore) {
+    storage.storeValue(SHOWALT, Boolean.toString(toStore));
+  }
+
+  private boolean getStored(String show, boolean defaultVal) {
+    Boolean showFL = defaultVal;
+    if (show != null) {
+      showFL = Boolean.valueOf(show);
+    }
+    return showFL;
+  }
+
+
+  private void storePhoneChoices(String toStore) {
+    storage.storeValue(SHOW_PHONES, toStore);
+  }
+
   private void fireShowEvent() {
     LangTest.EVENT_BUS.fireEvent(new ShowEvent());
   }
 
   /**
-   * @see #getShowSounds
    * @return
+   * @see #getShowSounds
    */
   @NotNull
   private PhonesChoices getPhonesDisplay() {

@@ -9,7 +9,7 @@ import java.util.Set;
  * Created by go22670 on 5/3/17.
  */
 public interface RefAudioGetter {
-  void addWidgets(ShowChoices choices, PhonesChoices phonesChoices);
+  void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices);
 
   void getRefAudio(RefAudioListener listener);
 
