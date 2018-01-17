@@ -11,11 +11,10 @@ public class ListOptions {
   private boolean sort = true;
   private boolean showTypeAhead = true;
   private String instance = "unk";
-  private boolean incorrectFirst = false;
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
   private boolean showPager = true;
-  private boolean contextOnly = false;
+//  private boolean contextOnly = false;
 
   public ListOptions() {
   }
@@ -44,10 +43,10 @@ public class ListOptions {
     return this;
   }
 
-  public ListOptions setIncorrectFirst(boolean val) {
+ /* public ListOptions setIncorrectFirst(boolean val) {
     this.incorrectFirst = val;
     return this;
-  }
+  }*/
 
   public ListOptions setInstance(String instance) {
     this.instance = instance;
@@ -75,7 +74,8 @@ public class ListOptions {
   }
 
   boolean isIncorrectFirst() {
-    return incorrectFirst;
+  //  boolean incorrectFirst = false;
+    return false;
   }
 
   boolean isShowFirstNotCompleted() {
@@ -89,13 +89,12 @@ public class ListOptions {
   public boolean isShowPager() {
     return showPager;
   }
-
-  public boolean isContextOnly() {
+/*  public boolean isContextOnly() {
     return contextOnly;
   }
 
   public ListOptions setContextOnly(boolean contextOnly) {
     this.contextOnly = contextOnly;
     return this;
-  }
+  }*/
 }

@@ -70,8 +70,9 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
-  public static final String GETTING_EXERCISE = "getting exercise";
   private final Logger logger = Logger.getLogger("ExerciseList");
+
+  private static final String GETTING_EXERCISE = "getting exercise";
 
   private static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>" +
       "<p>Try clearing one of your selections or changing the search.</p>";
@@ -85,9 +86,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private static final int MAX_MSG_LEN = 200;
 
   protected SimplePanel innerContainer;
-  protected final ExerciseServiceAsync service;
+  final ExerciseServiceAsync service;
   private final UserFeedback feedback;
-  protected ExercisePanelFactory<T, U> factory;
+  ExercisePanelFactory<T, U> factory;
   protected final ExerciseController controller;
 
   protected Panel createdPanel;
@@ -233,13 +234,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract ActivityType getActivityType();
 
   /**
-   * @see ListInterface#getExercises()
+   * @see ListInterface#getExercises
    */
   protected abstract void showFinishedGettingExercises();
 
   protected abstract List<T> rememberExercises(List<T> result);
 
-  public Panel getCreatedPanel() {
+  Panel getCreatedPanel() {
     return createdPanel;
   }
 
@@ -259,7 +260,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     private final String selectionID;
     private final String searchIfAny;
     private final int exerciseID;
-    long then = System.currentTimeMillis();
+    final long then = System.currentTimeMillis();
     private final ExerciseListRequest request;
 
     /**
@@ -491,7 +492,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param exerciseID
    * @see #rememberAndLoadFirst(List, String, String, int)
    */
-  protected void goToFirst(String searchIfAny, int exerciseID) {
+  void goToFirst(String searchIfAny, int exerciseID) {
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
@@ -597,8 +598,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param id
    * @see HistoryExerciseList#checkAndAskOrFirst
    */
-  @Override
-  public void checkAndAskServer(int id) {
+  //@Override
+  void checkAndAskServer(int id) {
     if (DEBUG) {
       logger.info(getClass() + " : (" + getInstance() + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     }
@@ -611,8 +612,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  @Override
-  public boolean loadByID(int id) {
+  //@Override
+  boolean loadByID(int id) {
     if (hasExercise(id)) {
       // if (DEBUG) logger.info("loading exercise " + id);
       loadExercise(id);
@@ -628,7 +629,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param itemID
    * @see ListInterface#checkAndAskServer(int)
    */
-  protected void askServerForExercise(int itemID) {
+  void askServerForExercise(int itemID) {
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + getInstance());
@@ -675,7 +676,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #rememberAndLoadFirst
    * @see ExerciseAsyncCallback#onSuccess
    */
-  void showExercise(final U commonExercise) {
+  private void showExercise(final U commonExercise) {
     if (DEBUG) {
       logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID() + " " + commonExercise.getClass());
     }
@@ -861,7 +862,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return leftColumn;
   }
 
-  protected void addMinWidthStyle(Panel leftColumn) {
+  void addMinWidthStyle(Panel leftColumn) {
     leftColumn.getElement().getStyle().setProperty("minHeight", LIST_HEIGHT + "px");
     leftColumn.addStyleName("minWidth");
     leftColumn.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
@@ -871,10 +872,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return this;
   }
 
-  @Override
-  public boolean onFirst() {
-    return onFirst(getCurrentExercise());
-  }
+  //@Override
+//  public boolean onFirst() {
+//    return onFirst(getCurrentExercise());
+//  }
 
   /**
    * @param current
@@ -900,8 +901,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return i == getSize() - 1;
   }
 
-  @Override
-  public void reloadExercises() {
+  //@Override
+  private void reloadExercises() {
     loadFirstExercise("");
   }
 

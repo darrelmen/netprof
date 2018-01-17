@@ -1,18 +1,28 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Command;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.logging.Logger;
 
 /**
+ * TODO : don't do sorting here on text
  * Created by go22670 on 3/22/17.
  */
-public class ListSorting<T extends CommonShell, U extends Shell> {
+class ListSorting<T extends CommonShell, U extends Shell> {
+  public static final String LANG_ASC = "langASC";
+  public static final String LANG_DSC = "langDSC";
   private final Logger logger = Logger.getLogger("ListSorting");
+
+  private static final String ASCENDING = "ascending";
+  private static final String DESCENDING = "descending";
+  public static final String LIST_BOX_SETTING = "listBoxSetting";
 
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
@@ -21,14 +31,12 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   private static final String MEANING_ASC = "Meaning : A-Z";
   private static final String ENGLISH_DSC = "English : Z-A";
   private static final String MEANING_DSC = "Meaning : Z-A";
+
   private static final String LENGTH_SHORT_TO_LONG = "Length : short to long";
   private static final String LENGTH_LONG_TO_SHORT = "Length : long to short";
+
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
-
-  public static final int MAX_TO_SHOW = 4;
-  public static final String ANY = "Any";
-  public static final String MENU_ITEM = "menuItem";
 
   /**
    * @param exerciseList
@@ -51,9 +59,9 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
     boolean isEnglish = language.equalsIgnoreCase("English");
     w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
     w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
-    String langASC = language + " : ascending";
+    String langASC = getLangASC(language, ASCENDING);
     w1.addItem(langASC);
-    String langDSC = language + " : descending";
+    String langDSC = getLangASC(language, DESCENDING);
     w1.addItem(langDSC);
     w1.addItem(LENGTH_SHORT_TO_LONG);
     w1.addItem(LENGTH_LONG_TO_SHORT);
@@ -62,11 +70,69 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
 
     w1.addChangeHandler(event -> ListSorting.this.onChange(w1, langASC, langDSC));
 
+//    makeDropDownReflectStoredValue(w1, langASC, langDSC);
     return w1;
+  }
+
+  /**
+   * TODO : Can't do it yet - we need to do the sort on the request to the exercise service...
+   *
+   * @param w1
+   * @param langASC
+   * @param langDSC
+   */
+  private void makeDropDownReflectStoredValue(ListBox w1, String langASC, String langDSC) {
+    String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
+
+    if (value != null) {
+      value = getNormValue(langASC, langDSC, value);
+      w1.setSelectedValue(value);
+      if (!w1.getSelectedValue().equalsIgnoreCase(value)) logger.warning("didn't set " + value);
+      //  sortLater(w1, langASC, langDSC, value);
+    }
+  }
+
+  private String getNormValue(String langASC, String langDSC, String value) {
+    if (value.equalsIgnoreCase(LANG_ASC)) {
+      value = langASC;
+    } else if (value.equalsIgnoreCase(LANG_DSC)) {
+      value = langDSC;
+    }
+    return value;
+  }
+
+  @NotNull
+  private String getLangASC(String language, String ascending) {
+    return language + " : " + ascending;
+  }
+
+  public void sortLater(ListBox w1, String lang) {
+    if (w1.getSelectedIndex() != 0) {
+      String langASC = getLangASC(lang, ASCENDING);
+      String langDSC = getLangASC(lang, DESCENDING);
+      final String fvalue = getNormValue(w1.getSelectedValue(), langASC, langDSC);
+
+      sortByValue(fvalue, langASC, langDSC);
+
+//      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));
+    }
   }
 
   private void onChange(ListBox w1, String langASC, String langDSC) {
     String selectedValue = w1.getSelectedValue();
+
+    String toStore = selectedValue;
+    if (toStore.equalsIgnoreCase(langASC)) {
+      toStore = LANG_ASC;
+    } else if (toStore.equalsIgnoreCase(langDSC)) {
+      toStore = LANG_DSC;
+    }
+    exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
+
+    sortByValue(selectedValue, langASC, langDSC);
+  }
+
+  private void sortByValue(String selectedValue, String langASC, String langDSC) {
     if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
       sortBy((o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
@@ -101,13 +167,7 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private void sortBy(Comparator<T> comp) {
-//    Scheduler.get().scheduleDeferred(new Command() {
-//      public void execute() {
-    exerciseList.waitCursorHelper.scheduleWaitTimer();
     exerciseList.sortBy(comp);
-    exerciseList.waitCursorHelper.showFinished();
-//      }
-    //  });
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {
@@ -140,9 +200,6 @@ public class ListSorting<T extends CommonShell, U extends Shell> {
   }-*/;
 
   private int compForeign(CommonShell o1, CommonShell o2) {
-    //   return o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
-    //  return compareWithLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
-    // return compareAgain(o1.getForeignLanguage(), o2.getForeignLanguage());
     return compareAgainLocale(o1.getForeignLanguage(), o2.getForeignLanguage(), locale);
   }
 

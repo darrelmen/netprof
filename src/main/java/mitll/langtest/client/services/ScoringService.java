@@ -62,11 +62,6 @@ public interface ScoringService extends RemoteService {
    */
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) throws DominoSessionException, RestrictedOperationException;
 
-  /**
-   * @param projid
-   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
-   */
-  void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
   Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
 
@@ -120,4 +115,12 @@ public interface ScoringService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
+
+  /**
+   * @param projid
+   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
+   */
+  void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
+
+  void recalcAllAlignments()throws DominoSessionException, RestrictedOperationException;
 }

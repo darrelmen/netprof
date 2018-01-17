@@ -43,6 +43,8 @@ import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  public static final String RECALC_REF = "Recalc Ref";
+  public static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   private static final String COURSE = "Course";
@@ -51,13 +53,7 @@ public class ProjectChoices {
    * @see #showDeleteDialog
    */
   private static final String DELETING_PLEASE_WAIT = "Deleting... please wait.";
-
   private static final String CHECK_AUDIO = "Check Audio";
-
-  /**
-   *
-   */
-  //private static final String IMPORT_DATA_INTO = "Import data into ";
 
   /**
    * @see #showNewProjectDialog
@@ -138,8 +134,7 @@ public class ProjectChoices {
       public void onFailure(Throwable caught) {
         lifecycleSupport.onFailure(caught, then);
       }
-
-      public void onSuccess(StartupInfo startupInfo) {
+     public void onSuccess(StartupInfo startupInfo) {
         addProjectChoices(level, startupInfo.getProjects());
       }
     });
@@ -368,7 +363,7 @@ public class ProjectChoices {
   }
 
   private void getRecalcRefAudioButton(DivWidget header, HTML status) {
-    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Recalc Ref");
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(RECALC_REF);
 
     DivWidget right = new DivWidget();
     right.add(w);
@@ -385,7 +380,7 @@ public class ProjectChoices {
 
   private void recalcProject(List<SlimProject> projects, HTML status) {
     if (projects.isEmpty()) {
-      status.setText("All projects complete.");
+      status.setText(ALL_PROJECTS_COMPLETE);
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Recalculating alignments for " + remove.getName() + "...");
@@ -642,11 +637,16 @@ public class ProjectChoices {
     return w;
   }
 
+  /**
+   * Set button disabled for now - until we know all sync operations are good (1/17).
+   * @param projectForLang
+   * @return
+   */
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.EXCHANGE);
-    //  w.addClickHandler(event -> showImportDialog(projectForLang));
+    w.setEnabled(false);
     w.addClickHandler(event -> {
       w.setEnabled(false);
       showImportDialog(projectForLang, w);
@@ -685,9 +685,6 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button) {
-//    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-//      @Override
-//      public boolean gotYes() {
     projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {

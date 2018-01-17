@@ -1,20 +1,15 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
-import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.ShowChoices;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;

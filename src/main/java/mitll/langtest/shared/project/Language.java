@@ -17,7 +17,7 @@ public enum Language implements IsSerializable {
   HINDI,
   IRAQI(true, "ARABIC-IRAQI"),
   JAPANESE,
-  LEVANTINE(true, "ARABIC-SYRIAN"),
+  LEVANTINE(true, "ARABIC-LEVANTINE"),
   KOREAN(32),
   MANDARIN(32, "CHINESE-MANDARIN"),
   MSA(true, "ARABIC (MODERN STANDARD)"),

@@ -399,6 +399,11 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     //this.quizPanel = quizPanel;
   }
 
+  @Override
+  public boolean isCurrentReq(int req) {
+    return true;
+  }
+
 /*  private void getScores() {
     service.getScoresForUser(getTypeToSelection(), controller.getUser(), getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
       @Override

@@ -25,7 +25,6 @@ import static mitll.langtest.client.list.FacetExerciseList.PAGE_SIZE_SELECTED;
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
 //  private final Logger logger = Logger.getLogger("NewLearnHelper");
-
   NewLearnHelper(ExerciseController controller) {
     super(controller);
   }
@@ -48,9 +47,6 @@ public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-//        int pageSelected = controller.getStorage().getInt(PAGE_SIZE_SELECTED);
-//        int pageSize = (pageSelected == -1) ? FacetExerciseList.FIRST_PAGE_SIZE : FacetExerciseList.PAGE_SIZE_CHOICES.get(pageSelected);
-      //  logger.info("got " + pageSelected + " = " + pageSize);
         return new NPFlexSectionExerciseList(controller, topRow, currentExercisePanel,
             new ListOptions(instanceName), listHeader, false);
       }

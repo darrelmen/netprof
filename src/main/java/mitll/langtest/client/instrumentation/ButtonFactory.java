@@ -78,7 +78,7 @@ public class ButtonFactory implements EventLogger {
   }
 
   private void registerButton(final UIObject button, final String exid, final int userid) {
-    String text = ((HasText)button).getText();
+    String text = ((HasText) button).getText();
     registerButton(button, new EventContext(exid, text, userid));
   }
 
@@ -133,42 +133,46 @@ public class ButtonFactory implements EventLogger {
 //    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
     final ButtonFactory outer = this;
     if (context.getUserid() == -1) context.setUserid(controller.getUserState().getUser());
+    Scheduler.get().scheduleDeferred(() -> ifValidSendEvent(widgetID, widgetType, context, outer));
+  }
 
-    Scheduler.get().scheduleDeferred(() -> {
-      try {
-        if (outer != null &&
-            props != null &&
-            controller != null &&
-            service != null) {
-          String browserInfo = controller.getBrowserInfo();
+  private void ifValidSendEvent(String widgetID, String widgetType, EventContext context, ButtonFactory outer) {
+    try {
+      if (outer != null &&
+          props != null &&
+          controller != null &&
+          service != null) {
+        String browserInfo = controller.getBrowserInfo();
 
-          if (
-              browserInfo != null) {
-            //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
-
-            ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-            int projID = projectStartupInfo == null? -1:projectStartupInfo.getProjectid();
-            service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), browserInfo,
-                projID, new AsyncCallback<Void>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                    if (caught != null &&
-                        caught.getMessage() != null &&
-                        !caught.getMessage().trim().equals("0")) {
-                      logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
-                      //caught.printStackTrace();
-                    }
-                  }
-
-                  @Override
-                  public void onSuccess(Void result) {
-                    //logger.info("logEvent sent event for " + widgetID);
-                  }
-                });
-          }
+        if (browserInfo != null) {
+          //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
+          sendEvent(widgetID, widgetType, context, browserInfo);
         }
-      } catch (Exception e) {
       }
-    });
+    } catch (Exception e) {
+      logger.warning("got " + e);
+    }
+  }
+
+  private void sendEvent(String widgetID, String widgetType, EventContext context, String browserInfo) {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    int projID = projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
+    service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), browserInfo,
+        projID, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            if (caught != null &&
+                caught.getMessage() != null &&
+                !caught.getMessage().trim().equals("0")) {
+              logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
+              //caught.printStackTrace();
+            }
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            //logger.info("logEvent sent event for " + widgetID);
+          }
+        });
   }
 }

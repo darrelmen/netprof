@@ -842,10 +842,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         " prefix " + prefix + " matches " + basicExercises.size());
     ExerciseTrie<T> fullContextTrie = (ExerciseTrie<T>) getProject(projectID).getFullContextTrie();
 
+    List<T> ts = predefExercises ? fullContextTrie.getExercises(prefix) : Collections.emptyList();
+    if (predefExercises) {
+      ts = fullContextTrie.getExercises(prefix);
+      logger.info("getExercisesForSearchWithTrie for full context for '" + prefix + "' got " + ts.size());
+    }
     return new TripleExercises<>(
         getExerciseByExid(prefix, userID, projectID),
         basicExercises,
-        predefExercises ? fullContextTrie.getExercises(prefix) : Collections.emptyList());
+        ts);
   }
 
   /**
@@ -1381,7 +1386,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
     logger.info("getFullExercises found " + exercises.size() + " exercises and " + scoreHistoryPerExercise.size() + " scores");
-   // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
+    // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
   }
 

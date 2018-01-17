@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  */
 public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private Logger logger = Logger.getLogger("NPExerciseList");
-  private int pageSize;
+  private final int pageSize;
 
   public NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
                            ListOptions listOptions, int pageSize) {
@@ -86,7 +86,6 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
     if (logger == null) {
       logger = Logger.getLogger("NPExerciseList");
     }
-    final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
 /*
     logger.info("makePagingContainer : for" +
@@ -94,15 +93,19 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
         "\n\tshow first not complete " + showFirstNotCompleted +
         "\n\tactivityType " + getActivityType());
 */
-
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
+    final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
-    pagingContainer =
-        new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted, outer);
+    pagingContainer = new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted, outer);
     return pagingContainer;
   }
 
   public int getPageSize() {
     return pageSize;
+  }
+
+  @Override
+  public boolean isCurrentReq(int req) {
+    return true;
   }
 }

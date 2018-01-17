@@ -85,6 +85,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
   private static final String GETTING_TYPE_VALUES = "getting type->values";
 
+  /**
+   *
+   */
   private static final boolean DEBUG_STALE = true;
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
@@ -136,7 +139,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private final DownloadHelper downloadHelper;
   // private final int numToShow;
   private Panel tableWithPager;
-  boolean isDrill = false;
+  private boolean isDrill;
   /**
    * for now only single selection
    */
@@ -211,7 +214,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
   }
 
-
   /**
    * @param controller
    * @return
@@ -226,12 +228,19 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     pagerAndSort.add(tableWithPager);
     tableWithPager.addStyleName("floatLeft");
     tableWithPager.setWidth("100%");
+    tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
 
-    Dropdown realViewMenu = new DisplayMenu(controller.getStorage()).getRealViewMenu();
-    DivWidget widgets = new DivWidget();
-    widgets.addStyleName("topFiveMargin");
-    widgets.add(realViewMenu);
-    pagerAndSort.add(widgets);
+//    DivWidget expander = new DivWidget();
+//    expander.setWidth("100%");
+//    pagerAndSort.add(expander);
+//    expander.addStyleName("floatRight");
+    {
+      Dropdown realViewMenu = new DisplayMenu(controller.getStorage()).getRealViewMenu();
+      DivWidget widgets = new DivWidget();
+      widgets.addStyleName("topFiveMargin");
+      widgets.add(realViewMenu);
+      pagerAndSort.add(widgets);
+    }
 
     addPageSize(pagerAndSort);
 
@@ -308,7 +317,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Window.scrollTo(0, 0);
   }
 
-  private boolean finished;
+  private final boolean finished;
+  ListBox sortBoxReally;
 
   @NotNull
   private DivWidget addSortBox(String language) {
@@ -322,7 +332,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     w.addStyleName("inlineFlex");
 
     w.add(w1);
-    w.add(new ListSorting<>(this).getSortBox(language));
+
+    sortBoxReally = new ListSorting<>(this).getSortBox(language);
+    w.add(sortBoxReally);
     return w;
   }
 
@@ -360,12 +372,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           protected void gotRangeChanged(final Range newRange) {
 //            long then = System.currentTimeMillis();
-       //     logger.info("gotRangeChanged event for " + newRange);
+            //     logger.info("gotRangeChanged event for " + newRange);
             final int currentReq = incrReq();
 
             //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             Scheduler.get().scheduleDeferred((Command) () -> {
-              if (isCurrent(currentReq)) {
+              if (isCurrentReq(currentReq)) {
 //                long now = System.currentTimeMillis();
                 //   logger.info("gotRangeChanged (" + (now - then) + ") req " + currentReq + "  for  " + newRange);
                 gotVisibleRangeChanged(getIdsForRange(newRange), currentReq);
@@ -1332,7 +1344,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return visibleIDs;
   }
 
-  private boolean isCurrent(int reqID) {
+  @Override
+  public boolean isCurrentReq(int reqID) {
     return reqID == -1 || reqID == getCurrentExerciseReq();
   }
 
@@ -1351,7 +1364,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #showExercises
    */
   private boolean isStale(int reqID) {
-    return !isCurrent(reqID);
+    return !isCurrentReq(reqID);
   }
 
   private void hidePrevNext() {
@@ -1382,13 +1395,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   private void getExercises(final Collection<Integer> visibleIDs, final int currentReq) {
     if (!isDrillView()) { // no blink
-      setExerciseContainer(new DivWidget());
+      Widget widget = innerContainer.getWidget();
+      if (widget != null) {
+        widget.getElement().getStyle().setOpacity(0.2);
+      }
+//      setExerciseContainer(new DivWidget());
     }
     //    logger.warning("getExercises NO timer " + diff);
     // final int currentReq = incrReq();
 //    Scheduler.get().scheduleDeferred((Command) () -> {
     //logger.info("showExercises for check " + reqID);
-    if (isCurrent(currentReq)) {
+    if (isCurrentReq(currentReq)) {
       reallyGetExercises(visibleIDs, currentReq);
     } else {
       logger.info("getExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
@@ -1424,36 +1441,47 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           "\n\tvisible " + visibleIDs);*/
 
       if (controller.getUser() > 0) {
-        service.getFullExercises(currentReq, requested,
-            new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                logger.warning("getExercises got exception : " + caught);
-                logger.warning("getExercises got " + getExceptionAsString(caught));
-                dealWithRPCError(caught);
-                hidePrevNext();
-              }
-
-              @Override
-              public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-                //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
-                if (result.getExercises() != null) {
-                  long now = System.currentTimeMillis();
-                  int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-                  if (now - then > 1000) {
-                    logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
-                  }
-
-                  getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
-                }
-              }
-            });
+        getFullExercises(visibleIDs, currentReq, requested, alreadyFetched);
       } else {
         logger.warning("not asking for " + requested);
       }
     }
   }
 
+  private void getFullExercises(Collection<Integer> visibleIDs, int currentReq, List<Integer> requested, List<CommonExercise> alreadyFetched) {
+    long then = System.currentTimeMillis();
+    service.getFullExercises(currentReq, requested,
+        new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("getExercises got exception : " + caught);
+            logger.warning("getExercises got " + getExceptionAsString(caught));
+            dealWithRPCError(caught);
+            hidePrevNext();
+          }
+
+          @Override
+          public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
+            //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+            if (result.getExercises() != null) {
+              long now = System.currentTimeMillis();
+              int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+              if (now - then > 1000) {
+                logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
+              }
+
+              getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
+            }
+          }
+        });
+  }
+
+  /**
+   * @param result
+   * @param alreadyFetched
+   * @param visibleIDs
+   * @see #reallyGetExercises
+   */
   private void getFullExercisesSuccess(ExerciseListWrapper<CommonExercise> result,
                                        List<CommonExercise> alreadyFetched,
                                        Collection<Integer> visibleIDs) {
@@ -1474,7 +1502,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       for (int id : visibleIDs) {
         CommonExercise e = idToEx.get(id);
         if (e == null) {
-          logger.warning("getFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+          logger.warning("\n\ngetFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
         } else {
           //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
           toShow.add(e);
@@ -1482,7 +1510,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       }
     }
 
-    if (isCurrent(reqID)) {
+    if (isCurrentReq(reqID)) {
       gotFullExercises(reqID, toShow);
     } else {
       if (DEBUG_STALE)
@@ -1492,6 +1520,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void setExerciseContainer(DivWidget w) {
     innerContainer.setWidget(w);  // immediate feedback that something is happening...
+    //   w.getElement().getStyle().setOpacity(1);
   }
 
   private CommonExercise getCachedExercise(Integer id) {
@@ -1520,7 +1549,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void gotFullExercises(final int reqID, List<CommonExercise> toShow) {
-    if (isCurrent(reqID)) {
+    if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {
         hidePrevNext();
       } else {
@@ -1558,9 +1587,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       } else {
         Scheduler.get().scheduleDeferred((Command) () -> {
           //logger.info("showExercises for check " + reqID);
-          if (isCurrent(reqID)) {
+          if (isCurrentReq(reqID)) {
             reallyShowExercises(result, reqID);
-            if (isCurrent(reqID)) {
+            if (isCurrentReq(reqID)) {
               //logger.info("showExercises for progress current " + reqID);
               setProgressBarScore(getInOrder(), reqID);
             } else {
@@ -1574,7 +1603,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         });
 
   /*      Scheduler.get().scheduleDeferred((Command) () -> {
-          if (isCurrent(reqID)) {
+          if (isCurrentReq(reqID)) {
             //logger.info("showExercises for progress current " + reqID);
             setProgressBarScore(getInOrder(), reqID);
           } else {
@@ -1589,6 +1618,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return isDrill;
   }
 
+  /**
+   * @param result
+   * @param reqID
+   * @see #showExercises(Collection, int)
+   */
   private void reallyShowExercises(Collection<CommonExercise> result, int reqID) {
     //logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
     DivWidget exerciseContainer = new DivWidget();
@@ -1596,7 +1630,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now-then) + " millis");
+    logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis");
 
     if (!getters.isEmpty()) {
       getRefAudio(getters.iterator());
@@ -1604,6 +1638,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     setExerciseContainer(exerciseContainer);
     showPrevNext();
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
+//    logger.info("logException stack:\n" + exceptionAsString);
+    // new ListSorting<>(this).sortLater(sortBoxReally, controller.getLanguage());
   }
 
   /**
@@ -1623,7 +1661,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
 */
 //    logger.info("makeExercisePanels req " + reqID + " vs current " + getCurrentExerciseReq() + " for " + result.size() + " exercises");
-
     //long then = System.currentTimeMillis();
 
     boolean showFL = factory.getFLChoice();
@@ -1642,20 +1679,20 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           RefAudioGetter refAudioGetter = (RefAudioGetter) exercisePanel;
           getters.add(refAudioGetter);
           refAudioGetter.setReq(getCurrentExerciseReq());
-       //   long then2 = System.currentTimeMillis();
+          //   long then2 = System.currentTimeMillis();
           refAudioGetter.addWidgets(showFL, showALTFL, phoneChoices);
-         // long now = System.currentTimeMillis();
-     //     logger.info("makeExercisePanels took " +(now-then2) + " millis to make panel for " + exercise.getID());
+          // long now = System.currentTimeMillis();
+          //     logger.info("makeExercisePanels took " +(now-then2) + " millis to make panel for " + exercise.getID());
         }
         if (first) {
           markCurrentExercise(exercise.getID());
           first = false;
         }
-        if (isCurrent(reqID)) {
-       //   long then2 = System.currentTimeMillis();
+        if (isCurrentReq(reqID)) {
+          //   long then2 = System.currentTimeMillis();
           exerciseContainer.add(exercisePanel);
-         // long now = System.currentTimeMillis();
-         // logger.info("makeExercisePanels took " +(now-then2) + " millis to add panel for " + exercise.getID());
+          // long now = System.currentTimeMillis();
+          // logger.info("makeExercisePanels took " +(now-then2) + " millis to add panel for " + exercise.getID());
         } else {
           logger.info("makeExercisePanels 2 stop stale req " + reqID + " vs current " + getCurrentExerciseReq() + " count = " + exerciseContainer.getWidgetCount());
         }
@@ -1695,21 +1732,23 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       //logger.info("getRefAudio asking next panel...");
 
       if (isStale(next.getReq())) {
-        //logger.info("getRefAudio : skip stale req for panel...");
+        logger.info("getRefAudio : skip stale req for panel...");
       } else {
         next.getRefAudio(() -> {
           if (iterator.hasNext()) {
-          //  logger.info("\tgetRefAudio panel complete...");
+            logger.info("\tgetRefAudio panel complete...");
             final int reqid = next.getReq();
-            Scheduler.get().scheduleDeferred(() -> {
-              if (isCurrent(reqid)) {
-                getRefAudio(iterator);
-              } else {
-                if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req for panel...");
-              }
-            });
+            if (isCurrentReq(reqid)) {
+              Scheduler.get().scheduleDeferred(() -> {
+                if (isCurrentReq(reqid)) {
+                  getRefAudio(iterator);
+                } else {
+                  if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req for panel...");
+                }
+              });
+            }
           } else {
-            //logger.info("\tgetRefAudio all panels complete...");
+            logger.info("\tgetRefAudio all panels complete...");
           }
         });
       }
@@ -1729,7 +1768,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
         // logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         exercisesWithScores.add(exercise.getID());
       }
-      // if (!isCurrent(reqid)) break;
+      // if (!isCurrentReq(reqid)) break;
     }
     //  long now = System.currentTimeMillis();
 
@@ -1737,23 +1776,22 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       logger.info("setProgressBarScore took " + (now - then) + " millis");
     }*/
 
-    if (isCurrent(reqid)) {
+    if (isCurrentReq(reqid)) {
       showScore(exercisesWithScores.size(), result.size());
     }
   }
 
   /**
-   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useResult
    * @param id
    * @param hydecScore
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useResult
    */
   @Override
   public void setScore(int id, float hydecScore) {
     super.setScore(id, hydecScore);
     if (hydecScore > -1f) {
       exercisesWithScores.add(id);
-    }
-    else {
+    } else {
       logger.info("skipping low score for " + id);
     }
     showScore(exercisesWithScores.size(), pagingContainer.getSize());

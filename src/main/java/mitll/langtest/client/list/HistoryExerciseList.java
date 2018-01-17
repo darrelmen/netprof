@@ -69,7 +69,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
   private HandlerRegistration handlerRegistration;
-  protected long userID;
+  private long userID;
   private final FacetContainer sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
@@ -91,10 +91,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected abstract FacetContainer getSectionWidgetContainer();
 
-  protected String getHistoryToken(int id) {
+/*  protected String getHistoryToken(int id) {
     //  logger.info("\tgetHistoryToken " + id);
     return getHistoryTokenFromUIState(getTypeAheadText(), id);
-  }
+  }*/
 
   protected String getInitialHistoryToken() {
     //  logger.info("\tgetInitialHistoryToken ");
@@ -210,7 +210,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see ExerciseList#pushFirstSelection(int, String)
    * @see ExerciseList#pushNewItem(String, int)
    */
-  void checkAndAskOrFirst(int exerciseID) {
+  private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
       //logger.info("\tcheckAndAskOrFirst "+ exerciseID);
@@ -432,8 +432,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
-  protected void projectChangedTo(int project) {
-  }
+  void projectChangedTo(int project) {}
 
   /**
    * @param selectionState
@@ -462,7 +461,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    *
    * @see #simpleLoadExercises
    */
-  protected void loadExercises(String selectionState,
+  private void loadExercises(String selectionState,
                                String prefix,
 
 

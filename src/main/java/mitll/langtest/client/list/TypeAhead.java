@@ -101,10 +101,10 @@ public abstract class TypeAhead implements ITypeAhead {
    * @return
    * @see PagingExerciseList#showEmptySelection
    */
-  @Override
-  public Widget getWidget() {
-    return typeAhead;
-  }
+//  @Override
+//  public Widget getWidget() {
+//    return typeAhead;
+//  }
 
   /**
    * On key up, do something, like go get a new list given a search term.
@@ -113,7 +113,7 @@ public abstract class TypeAhead implements ITypeAhead {
     typeAhead.setWidth(WIDTH + "px");
     typeAhead.setHeight(24 + "px");
     typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
-    getTypeAhead().getElement().setId("TypeAhead");
+   // getTypeAhead().getElement().setId("TypeAhead");
 
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
@@ -122,7 +122,7 @@ public abstract class TypeAhead implements ITypeAhead {
         String current = getTypeAhead().getText();
 
         if (previous.equals(current) && !previous.isEmpty()) {
-          logger.info("makeTypeAhead prev = current '" + previous + "'");
+        //  logger.info("makeTypeAhead prev = current '" + previous + "'");
         } else {
           gotTypeAheadEntry(current);
           previous = current;
@@ -138,7 +138,7 @@ public abstract class TypeAhead implements ITypeAhead {
    *
    * @param text
    */
-  public abstract void gotTypeAheadEntry(String text);
+  protected abstract void gotTypeAheadEntry(String text);
 
   private Widget getControlGroup(Widget waitCursor, String title) {
     Panel flow = new HorizontalPanel();

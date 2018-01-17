@@ -247,6 +247,11 @@ public class Project implements IPronunciationLookup {
 
     new Thread(() -> {
       long then1 = System.currentTimeMillis();
+
+      if (fullContextTrie != null) {
+        logger.warn("buildExerciseTrie : rebuilding full context trie for "+ rawExercises.size() + " exercises.");
+      }
+
       fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
       logger.info("for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
     }).start();

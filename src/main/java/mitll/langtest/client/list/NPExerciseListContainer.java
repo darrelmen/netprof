@@ -2,18 +2,15 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
-import mitll.langtest.client.analysis.AudioExampleContainer;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.logging.Logger;
-
 class NPExerciseListContainer extends PagingContainer<CommonShell> {
 //  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
 
-  private NPExerciseList exerciseList;
+  private final NPExerciseList exerciseList;
   private final PagingExerciseList<CommonShell, CommonExercise> outer;
 
   NPExerciseListContainer(NPExerciseList exerciseList, boolean isRecorder,

@@ -66,10 +66,10 @@ public class WaitCursorHelper {
     waitTimer.schedule(delayMillis);
   }
 
-  public void hide() {
+  private void hide() {
     waitCursor.setVisible(false);
   }
-  public void show() {
+  private void show() {
     waitCursor.setVisible(true);
   }
 }

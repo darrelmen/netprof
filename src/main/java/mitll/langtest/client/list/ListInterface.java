@@ -32,18 +32,14 @@
 
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.Map;
@@ -59,14 +55,7 @@ import java.util.Map;
  */
 public interface ListInterface<T extends Shell, U extends Shell> extends RequiresResize, Reloadable {
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   * @param hasID
-   * @return
-   */
-  T byHasID(HasID hasID);
-
-  /**
-   * @see Navigation#showLearnAndItem
+   * @seex Navigation#showLearnAndItem
    * @param name
    * @return
    */
@@ -78,15 +67,9 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   /**
    * @param factory
-   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
+   * @seex mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    */
   void setFactory(ExercisePanelFactory<T,U> factory);
-
-  /**
-   * @see mitll.langtest.client.LangTest#gotUser
-   * @see HistoryExerciseList#noSectionsGetExercises(long, int)
-   */
-  boolean getExercises();
 
   /**
    * @return
@@ -111,58 +94,25 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   boolean loadPreviousExercise(HasID current);
 
-  void checkAndAskServer(int id);
-
-  /**
-   * @param id
-   * @return
-   * @see ShowTab#showLearnAndItem(int)
-   */
-  boolean loadByID(int id);
-
-
-  /**
-   * @return
-   */
-  boolean onFirst();
-
   boolean onFirst(HasID current);
 
   boolean onLast();
 
   boolean onLast(HasID current);
 
-  /**
-   * @see mitll.langtest.client.LangTest#resetState
-   */
-  void clear();
-
   int getComplete();
-
-  /**
-   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
-   */
-  void reloadExercises();
 
   int getSize();
 
   /**
    * @return
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, ExerciseController, boolean, String)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget
    */
   boolean isPendingReq();
 
   void hide();
 
-  /**
-   * @return
-   * @see Navigation#getNavigation()
-   */
-  Panel getCreatedPanel();
-
   void setState(int id, STATE state);
-
-  void setSecondState(int id, STATE state);
 
   void addListChangedListener(ListChangeListener<T> listener);
 
@@ -192,4 +142,6 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
    * @param hydecScore
    */
   void setScore(int id, float hydecScore);
+
+  boolean isCurrentReq(int req);
 }

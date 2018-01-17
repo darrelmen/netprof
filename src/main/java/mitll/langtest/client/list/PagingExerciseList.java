@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -91,8 +90,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   void sortBy(Comparator<T> comp) {
+    scheduleWaitTimer();
+
     pagingContainer.sortBy(comp);
     loadFirst();
+
+    showFinishedGettingExercises();
   }
 
   public void loadFirst() {
@@ -104,10 +107,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     byID(id).setState(state);
   }
 
-  @Override
-  public void setSecondState(int id, STATE state) {
-    byID(id).setSecondState(state);
-  }
+//  @Override
+//  public void setSecondState(int id, STATE state) {
+//    byID(id).setSecondState(state);
+//  }
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
@@ -123,22 +126,22 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @param selectionState
-   * @param prefix
-   * @param onlyWithAudioAnno
-   * @param onlyUnrecorded
-   * @param onlyDefaultUser
-   * @param onlyUninspected
-   * @param exerciseID
+   * @paramx selectionState
+   * @paramx prefix
+   * @paramx onlyWithAudioAnno
+   * @paramx onlyUnrecorded
+   * @paramx onlyDefaultUser
+   * @paramx onlyUninspected
+   * @paramx exerciseID
    * @see HistoryExerciseList#simpleLoadExercises
    */
-  void loadExercises(String selectionState,
+/*  void loadExercises(String selectionState,
                      String prefix,
                      boolean onlyWithAudioAnno,
                      boolean onlyUnrecorded,
                      boolean onlyDefaultUser,
                      boolean onlyUninspected, int exerciseID) {
-    waitCursorHelper.scheduleWaitTimer();
+    scheduleWaitTimer();
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
 
@@ -146,6 +149,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     service.getExerciseIds(
         request,
         new SetExercisesCallback("", prefix, -1, request));
+  }*/
+  private void scheduleWaitTimer() {
+    waitCursorHelper.scheduleWaitTimer();
   }
 
   protected ExerciseListRequest getRequest(String prefix) {
@@ -287,12 +293,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (listOptions.isShowTypeAhead()) {
-      logger.info("searchBoxEntry type ahead '" + text + "'");
+      //logger.info("searchBoxEntry type ahead '" + text + "'");
       // why would this be a bad idea?
       //setTypeAheadText(text);
       alwaysSetTypeAhead(text);
       pushNewItem(text, -1);
-
       //gotTypeAheadEvent(text, true);
     } else {
       logger.warning("skipping searchBoxEntry ");
@@ -444,15 +449,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see FacetExerciseList#gotEmptyExerciseList
    */
   void showEmptySelection() {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-  /*      if (typeAhead != null) {
-          showPopup("No items match the selection and search.",
-              "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
-        }*/
-        showEmptyExercise();
-      }
-    });
+    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
   }
 
   String getHistoryTokenFromUIState(String search, int id) {
@@ -463,7 +460,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @NotNull
-  protected String getSearchTerm(String search) {
+  String getSearchTerm(String search) {
     return SelectionState.SEARCH + "=" + search;
   }
 
@@ -471,7 +468,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.clear();
   }
 
-  public void flush() {
+  private void flush() {
     pagingContainer.flush();
     onResize();
   }
@@ -526,10 +523,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     return pagingContainer.getFirst();
   }
 
-  @Override
+/*  @Override
   public T byHasID(HasID hasID) {
     return pagingContainer.byID(hasID.getID());
-  }
+  }*/
 
   @Override
   public T byID(int name) {
@@ -560,16 +557,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.addExercise(es);
   }
 
-  /**
-   * @paramx after
-   * @paramx es
-   * @seex mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   */
-/*
-  public void addExerciseAfter(T after, T es) {
-    pagingContainer.addExerciseAfter(after, es);
-  }
-*/
   public T forgetExercise(int id) {
     T es = byID(id);
     if (es != null) {
@@ -584,7 +571,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
-  @Override
+  //@Override
   public T simpleRemove(int id) {
     T es = byID(id);
     pagingContainer.forgetItem(es);
@@ -628,7 +615,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public ActivityType getActivityType() {
+  ActivityType getActivityType() {
     return listOptions.getActivityType();
   }
 }

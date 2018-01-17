@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
@@ -62,7 +63,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
   private static final String NO_AUDIO_TO_RECORD = "No in-context audio for this exercise.";
-
   public static final String CONTEXT = "context=";
 
   /**
@@ -70,7 +70,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   //private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
-//  private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -136,10 +135,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     return doNormalRecording;
   }
 
-  private boolean isExampleRecord() {
-    return !doNormalRecording;
-  }
-
   /**
    * TODO : support recording audio for multiple context sentences...?
    *
@@ -176,7 +171,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     Panel vp = new VerticalPanel();
 
     // add normal speed recording widget
-    // if (isNormalRecord()) {
     boolean normalRecord = isNormalRecord();
     AudioType regular = normalRecord ? AudioType.REGULAR : AudioType.CONTEXT_REGULAR;
     addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular);
@@ -184,9 +178,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
     VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
     widgets.addStyleName("topFiveMargin");
-    //} else {
-    //  addExampleSentenceRecorder(exercise, controller, index, vp);
-   // }
 
     return vp;
   }
@@ -194,19 +185,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   private boolean hasContext(T exercise) {
     return exercise.isContext() || !exercise.getDirectlyRelated().isEmpty();
   }
-
-  /*private void addExampleSentenceRecorder(T exercise, ExerciseController controller,
-                                          int index, Panel vp) {
-    logger.info("addExampleSentenceRecorder for " + exercise.getID() + " is context = " + exercise.isContext());
-
-    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false,
-        AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
-    audioPanels.add(fast);
-    vp.add(fast);
-
-    if (fast.isAudioPathSet()) recordCompleted(fast);
-    addAnswerWidget(index, fast);
-  }*/
 
   /**
    * @param exercise
@@ -237,9 +215,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   public void onResize() {
 /*    logger.info(getElement().getId() + " gotResize " + (audioPanels
         != null ? audioPanels.size() : ""));*/
-    for (RecordAudioPanel ap : audioPanels) {
-      ap.onResize();
-    }
+    audioPanels.forEach(AudioPanel::onResize);
   }
 
   /**
@@ -263,12 +239,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   protected void showRecordedState(HasID completedExercise) {
     int id = completedExercise.getID();
     // logger.info("showRecordedState setting state on " + id);
-
     exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);
     //logger.info("after recording " +l.getState());
     LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
-
     exerciseList.redraw();
   }
 }

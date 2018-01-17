@@ -53,6 +53,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -155,6 +156,18 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @Override
+  public void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      db.getProjects().stream()
+          .filter(project -> project.getStatus() == ProjectStatus.PRODUCTION)
+          .forEach(project -> recalcAlignments(userIDFromSessionOrDB, project));
+    } else {
+      throw getRestricted("recalc alignments");
+    }
+  }
+
+  @Override
   public void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
@@ -164,6 +177,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
+  /**
+   * @param userIDFromSession
+   * @param project
+   * @see #recalcAlignments(int)
+   */
   private void recalcAlignments(int userIDFromSession, Project project) {
     if (project.getWebservicePort() > 100) {
       try {
@@ -202,7 +220,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @NotNull
   private List<Integer> getAllAudioIDs(int projectID) {
     boolean hasProjectSpecificAudio = db.getProject(projectID).hasProjectSpecificAudio();
-    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projectID,hasProjectSpecificAudio);
+    Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projectID, hasProjectSpecificAudio);
     List<Integer> audioIDs = new ArrayList<>(exToAudio.size());
     exToAudio.values().forEach(audioAttributes -> audioIDs.addAll(audioAttributes
         .stream()
@@ -288,7 +306,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
       Set<Integer> completed = new HashSet<>(audioToResult.size());
       audioIDs.forEach(audioID ->
-          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment,completed,audioIDs.size()));
+          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment, completed, audioIDs.size()));
 
     } else {
       logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
@@ -408,7 +426,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
-    Map<String,String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
+    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
@@ -417,7 +435,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event,phoneToDisplay) : value.event;
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event, phoneToDisplay) : value.event;
         endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
       }
     }
@@ -425,7 +443,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return typeToEndTimes;
   }
 
-  protected String getDisplayName(String event,Map<String,String> phoneToDisplay) {
+  protected String getDisplayName(String event, Map<String, String> phoneToDisplay) {
     String displayName = phoneToDisplay.get(event);
     displayName = displayName == null ? event : displayName;
     return displayName;
@@ -507,7 +525,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     //String[] split = testAudioFile.split(File.separator);
     //String answer = split[split.length - 1];
 //    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
-  //  ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
+    //  ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 /*    if (cachedResult != null && precalcScores == null) {
@@ -544,7 +562,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       db.rememberScore(resultID, asrScoreForAudio, true);
       Project project = db.getProjectManagement().getProject(projID);
       project.addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
-      project.addAnswerToUser(absPath,       userIDFromSessionOrDB);
+      project.addAnswerToUser(absPath, userIDFromSessionOrDB);
     }
     return asrScoreForAudio;
   }

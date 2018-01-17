@@ -39,7 +39,7 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
-  public static final int CONTEXT_WIDTH = 75;
+  private static final int CONTEXT_WIDTH = 75;
 
   enum FieldType {FL, TRANSLIT, MEANING, EN}
 
@@ -99,7 +99,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private DivWidget contextClickableRowPhones;
 
-  //  private ShowChoices choices;
   private boolean showFL;
   private boolean showALTFL;
   /**
@@ -112,7 +111,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
   private int req;
-//  private boolean DEBUG_STALE = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -146,7 +144,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     this.phonesChoices = phonesChoices;
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
@@ -252,14 +250,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
 
       //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-
       listener.refAudioComplete();
-      cacheOthers(listener);
+      if (listContainer.isCurrentReq(getReq())) {
+        cacheOthers(listener);
+      }
     } else {
-      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
       // threre could be a race where we go to get this after we log out...
-      if (projectStartupInfo != null) {
+      if (projectStartupInfo != null && listContainer.isCurrentReq(getReq())) {
         getAlignments(listener, currentAudioAttr, refID, contextAudioAttr, contextRefID, req, projectStartupInfo.getProjectid());
       }
     }
@@ -361,7 +360,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       if (DEBUG)
         logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
-      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
             req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
@@ -380,6 +379,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
+  private ProjectStartupInfo getProjectStartupInfo() {
+    return controller.getProjectStartupInfo();
+  }
+
   public Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
@@ -394,6 +397,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return req;
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
+   * @param req
+   */
   @Override
   public void setReq(int req) {
     this.req = req;
@@ -998,7 +1005,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     Panel card = new DivWidget();
     card.setWidth("100%");
 
-    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    boolean isEnglish = isEnglish();
     boolean useMeaningInsteadOfEnglish = isEnglish && isMeaningValid(e);
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
@@ -1040,6 +1047,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
 //    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
     return card;
+  }
+
+  private boolean isEnglish() {
+    return controller.getLanguage().equalsIgnoreCase("english");
   }
 
   private boolean showingComments = false;
@@ -1163,8 +1174,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     addField(fieldContainer, addTransliteration(e));
 
     boolean meaningValid = isMeaningValid(e);
-    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
-    boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
+    boolean useMeaningInsteadOfEnglish = meaningValid && isEnglish();
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       Widget meaningWidget =
@@ -1188,7 +1198,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     //  phoneRow.addStyleName("inlineFlex");
     if (isRTL) phoneRow.addStyleName("floatRight");
   }
-
 
   /**
    * @param e
