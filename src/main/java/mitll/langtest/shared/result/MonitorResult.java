@@ -323,12 +323,20 @@ public class MonitorResult implements IsSerializable, UserAndTime {
           // unit and chapter
           Map<String, String> unitToValue1 = o1.getUnitToValue();
           Map<String, String> unitToValue2 = o2.getUnitToValue();
-          if (unitToValue1.containsKey(field) || unitToValue2.containsKey(field)) {
-            String first = unitToValue1.get(field);
-            String second = unitToValue2.get(field);
-            comp = first == null ? +1 : second == null ? -1 : 0;
-            if (comp == 0) {
-              comp = compareTwoMaybeInts(first, second);
+
+          if (unitToValue1 != null && unitToValue2 != null) {
+            if (unitToValue1.containsKey(field) || unitToValue2.containsKey(field)) {
+              String first  = unitToValue1.get(field);
+              String second = unitToValue2.get(field);
+              if (first == null && second == null) {
+                comp = 0;
+              }
+              else {
+                comp = first == null ? +1 : second == null ? -1 : 0;
+                if (comp == 0) {
+                  comp = compareTwoMaybeInts(first, second);
+                }
+              }
             }
           }
 

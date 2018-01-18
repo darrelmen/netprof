@@ -249,7 +249,7 @@ public class Project implements IPronunciationLookup {
       long then1 = System.currentTimeMillis();
 
       if (fullContextTrie != null) {
-        logger.warn("buildExerciseTrie : rebuilding full context trie for "+ rawExercises.size() + " exercises.");
+        logger.warn("buildExerciseTrie : rebuilding full context trie for " + rawExercises.size() + " exercises.");
       }
 
       fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
@@ -324,7 +324,9 @@ public class Project implements IPronunciationLookup {
     return prop != null && prop.equalsIgnoreCase(Boolean.TRUE.toString());
   }
 
-  public String getModelsDir() { return getProp(MODELS_DIR);  }
+  public String getModelsDir() {
+    return getProp(MODELS_DIR);
+  }
 
   public boolean hasProjectSpecificAudio() {
     return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(Boolean.TRUE.toString());
@@ -370,22 +372,24 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   * @see
    * @param id
    * @return
+   * @see
    */
   public CommonExercise getExerciseByID(int id) {
     if (id == 2) {
-
-    }
-    CommonExercise exercise = exerciseDAO.getExercise(id);
-    if (exercise == null) {
-      logger.warn("getExerciseByID no exercise for " + id);
-    }
+      logger.warn("getExerciseByID project # " + getID() + " : skip request for unknown exercise (2)");
+      return null;
+    } else {
+      CommonExercise exercise = exerciseDAO.getExercise(id);
+      if (exercise == null) {
+        logger.warn("getExerciseByID project # " + getID() + " : no exercise for #" + id);
+      }
 //    else {
 //      logger.info("getExerciseByID " + id + " = " + exercise);
 //    }
-    return exercise;
+      return exercise;
+    }
   }
 
   /**
@@ -563,6 +567,7 @@ public class Project implements IPronunciationLookup {
   public boolean isRTL() {
     return isRTL;
   }
+
   public void setRTL(boolean RTL) {
     isRTL = RTL;
   }

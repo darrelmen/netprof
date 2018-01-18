@@ -87,14 +87,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       CommonExercise commonExercise = idToExercise.get(id);
 
       if (commonExercise == null) {
-        logger.info("getExercise can't find exercise " + id);
+        //logger.info("getExercise can't find exercise " + id);
         if (id != userExerciseDAO.getUnknownExerciseID()) {
           commonExercise = idToContextExercise.get(id);
           if (commonExercise == null) {
             logger.warn(this + " getExercise : couldn't find exercise #" + id +
                 " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
           } else {
-            logger.info("getExercise found context " + commonExercise.getID());
+          //  logger.info("getExercise found context " + commonExercise.getID());
           }
         }
       } else {
