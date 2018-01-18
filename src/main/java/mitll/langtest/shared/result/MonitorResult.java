@@ -62,8 +62,8 @@ public class MonitorResult implements IsSerializable, UserAndTime {
 
   private int uniqueID;
   private int userid;
-  @Deprecated
-  private String oldExID;
+//  @Deprecated
+//  private String oldExID;
   private int exid;
 
   private String foreignText = "";
@@ -119,7 +119,7 @@ public class MonitorResult implements IsSerializable, UserAndTime {
                        String transcript, int exid) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-    this.oldExID = oldExID;
+//    this.oldExID = oldExID;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
@@ -176,11 +176,11 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     return exid;
   }
 
-  @Deprecated
-  @Override
-  public String getID() {
-    return oldExID;
-  }
+//  @Deprecated
+//  @Override
+//  public String getID() {
+//    return oldExID;
+//  }
 
   public AudioType getAudioType() {
     return audioType;
@@ -245,12 +245,12 @@ public class MonitorResult implements IsSerializable, UserAndTime {
           if (comp != 0) return getComp(asc, comp);
 
           // oldExID
-          if (field.equals(ID)) {
-            String id1 = o1.oldExID;
-            String id2 = o2.oldExID;
-            comp = compareTwoMaybeInts(id1, id2);
-          }
-          if (comp != 0) return getComp(asc, comp);
+//          if (field.equals(ID)) {
+//            String id1 = o1.oldExID;
+//            String id2 = o2.oldExID;
+//            comp = compareTwoMaybeInts(id1, id2);
+//          }
+//          if (comp != 0) return getComp(asc, comp);
 
           // text
           if (field.equals(TEXT)) {
@@ -374,7 +374,8 @@ public class MonitorResult implements IsSerializable, UserAndTime {
 
   @Override
   public String toString() {
-    return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\toldExID " + oldExID + " " +
+    return "MonitorResult #" + uniqueID + "\t\tby user " + userid +
+        //"\toldExID " + oldExID + " " +
         " at " + new Date(timestamp) +
         "  ans " + answer +
         " audioType : " + audioType +
@@ -401,10 +402,10 @@ public class MonitorResult implements IsSerializable, UserAndTime {
   public float getSnr() {
     return snr;
   }
-
-  public void setDisplayID(String displayID) {
-    this.oldExID = displayID;
-  }
+//
+//  public void setDisplayID(String displayID) {
+//    this.oldExID = displayID;
+//  }
 
   public String getDeviceType() {
     return deviceType;

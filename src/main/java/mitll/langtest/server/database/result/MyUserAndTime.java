@@ -37,6 +37,10 @@ import mitll.langtest.shared.UserAndTime;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+/**
+ * Just for ResultDAO.
+ * @see ResultDAO#getUserAndTimeForQuery
+ */
 class MyUserAndTime implements UserAndTime {
   private final int userID;
   private final int exid;
@@ -71,11 +75,11 @@ class MyUserAndTime implements UserAndTime {
   public int getExid() {
     return exid;
   }
-
-  @Override
-  public String getID() {
-    return getExid() + "/" + 0;//qid;
-  }
+//
+//  @Override
+//  public String getID() {
+//    return getExid() + "/" + 0;//qid;
+//  }
 
   public String toString () { return "user " + userID + " exid " + exid + " time " + time; }
 }

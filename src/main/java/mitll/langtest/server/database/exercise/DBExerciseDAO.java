@@ -94,7 +94,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
             logger.warn(this + " getExercise : couldn't find exercise #" + id +
                 " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
           } else {
-          //  logger.info("getExercise found context " + commonExercise.getID());
+            //  logger.info("getExercise found context " + commonExercise.getID());
           }
         }
       } else {
@@ -168,12 +168,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       });
       */
 
-      logger.info("readExercises" +
-          "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
-          "\n\ttype order " + typeOrder);
-
       Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
-      logger.info("readExercises found " + allByProject.size() + " attributes");
+      logger.info("readExercises" +
+          "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          "\n\ttype order     " + typeOrder +
+          "\n\tnum attributes " + allByProject.size()
+      );
+      //logger.info("readExercises found " + allByProject.size() + " attributes");
 
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
 

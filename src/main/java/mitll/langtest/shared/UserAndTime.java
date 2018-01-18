@@ -40,5 +40,5 @@ package mitll.langtest.shared;
  */
 public interface UserAndTime extends UserTimeBase {
   int getExid();
-  String getID();
+//  String getID();
 }

@@ -241,8 +241,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public boolean isStudent(int userIDFromSessionOrDB) {
     User user = getByID(userIDFromSessionOrDB);
     boolean b = user.isStudent() && user.getPermissions().isEmpty();
-    if (b) logger.info("isStudent " + userIDFromSessionOrDB);
-    else logger.debug("not a student " + userIDFromSessionOrDB);
+    if (b) {
+      //logger.info("isStudent " + userIDFromSessionOrDB);
+    }
+    else {
+      logger.debug("isStudent : not a student #" + userIDFromSessionOrDB);
+    }
     return b;
   }
 

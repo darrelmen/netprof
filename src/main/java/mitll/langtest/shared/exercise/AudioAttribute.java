@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.TrackInfo;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -194,15 +195,19 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return exid;
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
+   * @param exid
+   */
   public void setExid(int exid) {
     this.exid = exid;
   }
 
-  @Deprecated
-  @Override
-  public String getID() {
-    return exid + "/1";
-  }
+//  @Deprecated
+//  @Override
+//  public String getID() {
+//    return exid + "/1";
+//  }
 
   public AudioAttribute markRegular() {
     addAttribute(SPEED, REGULAR);

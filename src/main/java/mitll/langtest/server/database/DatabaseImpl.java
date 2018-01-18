@@ -1019,17 +1019,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public Collection<MonitorResult> getMonitorResults(int projid) {
-    List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid);
 
     logger.debug("getMonitorResults got back " + monitorResults.size() + " for project " + projid);
-    for (MonitorResult result : monitorResults) {
+/*    for (MonitorResult result : monitorResults) {
       int exID = result.getExID();
       CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
       if (exercise != null) {
         int dominoID = isAmas() ? -1 : ((CommonExercise) exercise).getDominoID();
         result.setDisplayID("" + dominoID);
       }
-    }
+    }*/
     List<MonitorResult> monitorResultsWithText = getMonitorResultsWithText(monitorResults, projid);
 
     logger.debug("getMonitorResults got back after join " + monitorResultsWithText.size() + " for project " + projid);
@@ -1047,7 +1047,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {
     Map<Integer, CommonExercise> idToExerciseMap = getIdToExerciseMap(projid);
-    logger.debug("Got size = " + idToExerciseMap.size() + " id->ex map");
+    logger.debug("getMonitorResultsWithText Got size = " + idToExerciseMap.size() + " id->ex map");
     addUnitAndChapterToResults(monitorResults, idToExerciseMap);
     return monitorResults;
   }
