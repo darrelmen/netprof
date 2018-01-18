@@ -439,7 +439,8 @@ public class AudioConversion extends AudioBase {
    */
   public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
     try {
-      String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
+      String absolutePath = absolutePathToWav.getAbsolutePath();
+      String mp3File = getMP3ForWav(absolutePath);
       if (!writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)) return FILE_MISSING;
       if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
       return mp3File;
@@ -447,6 +448,10 @@ public class AudioConversion extends AudioBase {
       logger.error("writeCompressedVersions got " + e, e);
       return FILE_MISSING;
     }
+  }
+
+  public String getMP3ForWav(String absolutePath) {
+    return absolutePath.replace(WAV, MP3);
   }
 
   private boolean writeMP3(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, String mp3File) {

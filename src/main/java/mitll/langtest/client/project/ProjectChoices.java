@@ -43,9 +43,10 @@ import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String RECALC_REF = "Recalc Ref";
-  public static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final String RECALC_REF = "Recalc Ref";
+  private static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
 
   private static final String COURSE = "Course";
 
@@ -72,7 +73,7 @@ public class ProjectChoices {
   private static final int LANGUAGE_SIZE = 3;
 
   /**
-   * @see #showProjectChoices(List, int)
+   * @see #showProjectChoices
    */
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
@@ -134,7 +135,8 @@ public class ProjectChoices {
       public void onFailure(Throwable caught) {
         lifecycleSupport.onFailure(caught, then);
       }
-     public void onSuccess(StartupInfo startupInfo) {
+
+      public void onSuccess(StartupInfo startupInfo) {
         addProjectChoices(level, startupInfo.getProjects());
       }
     });
@@ -198,11 +200,16 @@ public class ProjectChoices {
   private Section showProjectChoices(List<SlimProject> result, int nest) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = new Section("section");
+    section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+    section.setHeight("100%");
+
     section.add(getHeader(result, nest));
 
     final Container flags = new Container();
-    section.add(flags);
+   // flags.getElement().getStyle().setMarginBottom(30, Style.Unit.PX);
+
     flags.add(addFlags(result, nest));
+    section.add(flags);
 
     return section;
   }
@@ -214,7 +221,7 @@ public class ProjectChoices {
    */
   private Thumbnails addFlags(List<SlimProject> result, int nest) {
     Thumbnails current = new Thumbnails();
-
+    current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
     getSorted(result, nest)
         .forEach(project -> current.add(getLangIcon(capitalize(project.getLanguage()), project, nest)));
 
@@ -639,6 +646,7 @@ public class ProjectChoices {
 
   /**
    * Set button disabled for now - until we know all sync operations are good (1/17).
+   *
    * @param projectForLang
    * @return
    */
@@ -869,6 +877,10 @@ public class ProjectChoices {
     });
   }
 
+  /**
+   * @param contentRow
+   * @see InitialUI#populateRootPanel
+   */
   public void setContentRow(DivWidget contentRow) {
     this.contentRow = contentRow;
   }

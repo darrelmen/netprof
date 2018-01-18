@@ -409,10 +409,15 @@ public class AudioExport {
                                     AudioAttribute audioAttribute,
                                     String language) throws IOException {
     String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-    String s = getAbsFilePath(audioConversion, audioAttribute, language);
+    String mp3File = getMP3(audioConversion, audioAttribute, language);
 
 //    logger.info("ex " + ex.getID() + "  " + ex.getEnglish() + " name " + name + " path " + s);
-    copyAudioAtPath(zOut, names, name, speed, audioAttribute, ex.getID(), s);
+    copyAudioAtPath(zOut, names, name, speed, audioAttribute, ex.getID(), mp3File);
+  }
+
+  private String getMP3(AudioConversion audioConversion, AudioAttribute audioAttribute, String language) {
+    String s = getAbsFilePath(audioConversion, audioAttribute, language);
+    return audioConversion.getMP3ForWav(s);
   }
 
   private boolean copyContextAudioBothGenders(ZipOutputStream zOut,
@@ -496,8 +501,9 @@ public class AudioExport {
       name = buildFileName(folder, countryCode, unitToValue, id);
     }
 
-    String s = getAbsFilePath(audioConversion, latestContext, language);
-    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext, ex.getID(), s);
+    String mp3File = getMP3(audioConversion, latestContext, language);
+
+    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext, ex.getID(), mp3File);
   }
 
   @NotNull

@@ -297,7 +297,7 @@ public class InitialUI implements UILifecycle {
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
-    verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
+ //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
 
     return verticalContainer;
   }
