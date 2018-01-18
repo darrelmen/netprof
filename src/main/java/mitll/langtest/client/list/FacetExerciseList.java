@@ -371,9 +371,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           protected void gotRangeChanged(final Range newRange) {
+            askServerForExercise(-1);
 //            long then = System.currentTimeMillis();
             //     logger.info("gotRangeChanged event for " + newRange);
-            final int currentReq = incrReq();
+/*            final int currentReq = incrReq();
 
             //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
             Scheduler.get().scheduleDeferred((Command) () -> {
@@ -385,7 +386,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 //              else {
 //                logger.warning("gotRangeChanged STALE req " + currentReq + "  for  " + newRange);
 //              }
-            });
+            });*/
           }
 
           @Override
@@ -406,7 +407,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #makePagingContainer
    */
   protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, final int currentReq) {
-    askServerForExercises(-1, idsForRange, currentReq);
+    askServerForVisibleExercises(-1, idsForRange, currentReq);
   }
 
   /**
@@ -426,7 +427,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
-   * @see ListInterface#getExercises()
+   * @see ListInterface#getExercises
    */
   @Override
   public void addWidgets() {
@@ -1312,11 +1313,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * goes ahead and asks the server for the next item so we don't have to wait for it.
    *
    * @param itemID
-   * @see ListInterface#checkAndAskServer(int)
+   * @see ExerciseList#checkAndAskServer
+   *
    */
   protected void askServerForExercise(int itemID) {
     final int currentReq = incrReq();
-    askServerForExercises(itemID, pagingContainer.getVisibleIDs(), currentReq);
+    askServerForVisibleExercises(itemID, pagingContainer.getVisibleIDs(), currentReq);
   }
 
   /**
@@ -1325,7 +1327,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param currentReq
    * @see #gotVisibleRangeChanged
    */
-  private void askServerForExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
+  private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
     // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       //   logger.info("askServerForExercises show empty -- ");
@@ -1353,6 +1355,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return freqid;
   }
 
+  /**
+   * @see #askServerForExercise(int)
+   * @see #makePagingContainer
+   * @return
+   */
   private int incrReq() {
     return ++freqid;
   }
@@ -1743,7 +1750,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                 if (isCurrentReq(reqid)) {
                   getRefAudio(iterator);
                 } else {
-                  if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req for panel...");
+                  if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req (" +reqid+
+                      ") for panel vs " + getCurrentExerciseReq());
                 }
               });
             }

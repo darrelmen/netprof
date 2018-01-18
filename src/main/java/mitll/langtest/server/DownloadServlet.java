@@ -277,7 +277,7 @@ public class DownloadServlet extends DatabaseServlet {
                         int projectid,
                         AudioExportOptions options) {
     try {
-      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options);
+      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options, ensureAudioHelper);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }

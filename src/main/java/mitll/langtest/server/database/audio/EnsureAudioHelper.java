@@ -79,6 +79,10 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private int spew = 0;
   private PathHelper pathHelper;
 
+  /**
+   * @param db
+   * @param pathHelper
+   */
   public EnsureAudioHelper(DatabaseServices db, PathHelper pathHelper) {
     this.db = db;
     serverProps = db.getServerProps();
@@ -86,11 +90,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
   }
 
-
   /**
    * This could take a long time - lots of files, shell out for each one...
    *
    * @param projectid
+   * @see mitll.langtest.server.services.AudioServiceImpl#checkAudio
    */
   @Override
   public void ensureAudio(int projectid) {
@@ -98,12 +102,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     long then;
     then = now;
     List<CommonExercise> exercises = db.getExercises(projectid);
-    String language = db.getLanguage(projectid);
     now = System.currentTimeMillis();
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises(exercises, language);
+    ensureAudioForExercises(exercises, db.getLanguage(projectid));
   }
 
   /**
@@ -249,38 +252,14 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param trackInfo
    * @param language
    * @return true if mp3 file exists
-   * @see #writeAudioFile
+   * @see #ensureCompressedAudio(int, CommonExercise, String, AudioType, String)
    */
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);
       // File test = new File(parent + File.separator + language, wavFile);
-      File test = new File(wavFile);
-      if (!test.exists()) {
-        if (WARN_MISSING_FILE) {
-          logger.warn("ensureMP3 : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
-        }
-        parent = serverProps.getAudioBaseDir();// + File.separator + language;
-        if (DEBUG)
-          logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
-      }
-
-      File fileUnderParent = new File(parent, wavFile);
-
-      if (!fileUnderParent.exists()) {
-        parent += ServerProperties.BEST_AUDIO + File.separator + language.toLowerCase();
-        File fileUnderParent2 = new File(parent, wavFile);
-
-        if (DEBUG)
-          logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
-
-        if (!fileUnderParent2.exists()) {
-          logger.error("ensureMP3 nope " + fileUnderParent2.getAbsolutePath());
-        } else {
-          // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());
-        }
-      }
+      parent = audioConversion.getParentForFilePathUnderBaseAudio(wavFile, language, parent, serverProps.getAudioBaseDir());
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
         if (WARN_MISSING_FILE && spew++ < 10) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
@@ -300,7 +279,6 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
       return FILE_MISSING;
     }
   }
-
 
   /**
    * Here we assume the audioFile path is like

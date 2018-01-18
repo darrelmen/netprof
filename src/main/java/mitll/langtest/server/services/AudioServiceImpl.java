@@ -75,7 +75,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public void init() {
     super.init();
     pathWriter = new PathWriter(serverProps);
-    ensureAudioHelper = new EnsureAudioHelper(db,pathHelper);
+    ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
     pathWriter.doSanityCheckOnDir(new File(serverProps.getAnswerDir()), " answers dir ");
   }
 
@@ -470,5 +470,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return new ImageResponse(reqid, imageURL, duration);
   }
 
-  public void recalcRefAudio(int projid) {   db.getProject(projid).recalcRefAudio();  }
+  public void recalcRefAudio(int projid) {
+    db.getProject(projid).recalcRefAudio();
+  }
 }

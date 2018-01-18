@@ -43,6 +43,7 @@ import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.custom.IStateManager;
@@ -206,9 +207,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see #DatabaseImpl
    * @param pathHelper
    * @param servletContext
+   * @see #DatabaseImpl
    */
   void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
@@ -434,7 +435,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #getCustomOrPredefExercise
    */
   @Override
-  public CommonExercise getExercise(int projectid, int id) {    return projectManagement.getExercise(projectid, id);  }
+  public CommonExercise getExercise(int projectid, int id) {
+    return projectManagement.getExercise(projectid, id);
+  }
 
   public JsonExport getJSONExport(int projectid) {
     getExercises(projectid);
@@ -514,7 +517,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void rememberUsersCurrentProject(int userid, int projectid) {
-  //  logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
+    //  logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -669,7 +672,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return null;
     } else {
       if (projectManagement == null) {
-        setInstallPath("",null);
+        setInstallPath("", null);
       }
       return projectManagement.getProject(projectid);
     }
@@ -903,7 +906,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
-  public void closeConnection(Connection connection) {}
+  public void closeConnection(Connection connection) {
+  }
 
   public void logEvent(String exid, String context, int userid, String device, int projID) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
@@ -1266,26 +1270,36 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param out
    * @param typeToSection
    * @param projectid
+   * @param ensureAudioHelper
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public void writeZip(OutputStream out,
                        Map<String, Collection<String>> typeToSection,
                        int projectid,
-                       AudioExportOptions options) throws Exception {
+                       AudioExportOptions options,
+                       IEnsureAudioHelper ensureAudioHelper) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
     Project project = getProject(projectid);
 
     String language = getLanguage(project);
+
+    if (!typeToSection.isEmpty()) {
+      logger.info("ensure audio for " + exercisesForSelectionState.size() +
+          " for " + project.getLanguage() + " sel " + typeToSection);
+
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, project.getLanguage());
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, project.getLanguage());
+    }
+
     new AudioExport(getServerProps())
         .writeZip(out,
             typeToSection,
             getSectionHelper(projectid),
             exercisesForSelectionState,
             language,
-            getAudioDAO(),
             false,
             options,
             project.isEnglish());
@@ -1307,25 +1321,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   @Override
   @Deprecated
-  public String getLanguage() {    return getOldLanguage(getServerProps());  }
+  public String getLanguage() {
+    return getOldLanguage(getServerProps());
+  }
 
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();
   }
-
-  /**
-   * @param out
-   * @throws Exception
-   * @seex DownloadServlet#writeAllAudio
-   */
-/*  public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
-    new AudioExport(getServerProps()).writeZipJustOneAudio(
-        out,
-        getExercises(projectid),
-        installPath,
-        getProject(projectid).getLanguage()
-    );
-  }*/
 
   /**
    * For downloading a user list.
@@ -1384,7 +1386,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param projectid
    * @see DatabaseImpl#getJSONExport
    */
-  public void attachAllAudio(int projectid) {
+  private void attachAllAudio(int projectid) {
     long then = System.currentTimeMillis();
 
     Collection<CommonExercise> exercises = getExercises(projectid);

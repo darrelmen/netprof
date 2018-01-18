@@ -33,6 +33,8 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.EnsureAudioHelper;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import org.apache.logging.log4j.LogManager;
@@ -56,12 +58,14 @@ public class DatabaseServlet extends HttpServlet {
   DatabaseImpl db = null;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
+  protected IEnsureAudioHelper ensureAudioHelper;
 
   /**
    * @see DownloadServlet#init
    */
   void setPaths() {
     pathHelper = getPathHelper();
+    ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
   }
 
   private PathHelper getPathHelper() {
@@ -71,7 +75,7 @@ public class DatabaseServlet extends HttpServlet {
       return null;
     }
     ServerProperties serverProps = database.getServerProps();
-    if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
+    if (serverProps == null) throw new IllegalArgumentException("getPathHelper huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
   }
 

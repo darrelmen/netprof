@@ -402,8 +402,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
+   * @deprecated  - do we ever set this properly???
    * @return
-   * @see mitll.langtest.server.audio.AudioExport#ensureCompressedAudio(AudioConversion, AudioAttribute, TrackInfo)
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    */
   public String getActualPath() {
     return actualPath;

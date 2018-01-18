@@ -13,8 +13,9 @@ import java.nio.file.Path;
  * Created by go22670 on 2/23/17.
  */
 public class AudioBase {
-  public static final String WAV = ".wav";
   private static final Logger logger = LogManager.getLogger(AudioBase.class);
+
+  public static final String WAV = ".wav";
   private static final boolean DEBUG = false;
 
   /**

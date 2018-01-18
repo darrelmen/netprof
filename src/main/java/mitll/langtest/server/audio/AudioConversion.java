@@ -31,6 +31,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.ServerProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +66,8 @@ public class AudioConversion extends AudioBase {
 //  private final long trimMillisAfter;
 
   private static final boolean DEBUG = false;
-  private boolean trimAudio = false;
+  private boolean trimAudio;
+  private static final boolean WARN_MISSING_FILE = false;
 
   /**
    * @paramx props
@@ -291,7 +293,7 @@ public class AudioConversion extends AudioBase {
 
   /**
    * Paul said to do this:
-   *
+   * <p>
    * sox audio-in audio-out silence 1 0.01 -90d gain -3 highpass 80.0
    *
    * @param pathToAudioFile
@@ -390,7 +392,7 @@ public class AudioConversion extends AudioBase {
   /**
    * @param realContextPath
    * @param pathToWav
-   * @param overwrite
+   * @param overwrite       true if step on existing file.
    * @param trackInfo
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#ensureMP3
@@ -432,7 +434,7 @@ public class AudioConversion extends AudioBase {
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo
-   * @return
+   * @return absolute path to file
    * @see PathWriter#getPermanentAudioPath
    */
   public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
@@ -613,4 +615,40 @@ public class AudioConversion extends AudioBase {
     return true;
   }
 
+  public String getAbsPathForAudio(String wavFile, String language, String parent, String audioBaseDir) {
+    String parent2 = getParentForFilePathUnderBaseAudio(wavFile, language, parent, audioBaseDir);
+    File file = new File(parent2, wavFile);
+    //  logger.info("parent 2 " + parent2 + " wav " + wavFile + " file " + file);
+    return file.getAbsolutePath();
+  }
+
+  public String getParentForFilePathUnderBaseAudio(String wavFile, String language, String parent, String audioBaseDir) {
+    File test = new File(wavFile);
+    if (!test.exists()) {
+      if (WARN_MISSING_FILE) {
+        logger.warn("ensureMP3 : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
+      }
+//      String audioBaseDir = serverProps.getAudioBaseDir();
+      parent = audioBaseDir;// + File.separator + language;
+      if (DEBUG)
+        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+    }
+
+    File fileUnderParent = new File(parent, wavFile);
+
+    if (!fileUnderParent.exists()) {
+      parent += ServerProperties.BEST_AUDIO + File.separator + language.toLowerCase();
+      File fileUnderParent2 = new File(parent, wavFile);
+
+      if (DEBUG)
+        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+
+      if (!fileUnderParent2.exists()) {
+        logger.error("ensureMP3 nope " + fileUnderParent2.getAbsolutePath());
+      } else {
+        // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());
+      }
+    }
+    return parent;
+  }
 }
