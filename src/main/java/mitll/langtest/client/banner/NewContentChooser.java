@@ -57,7 +57,7 @@ public class NewContentChooser implements INavigation {
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
-    divWidget.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+    divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
     divWidget.setHeight("100%");
   }
 

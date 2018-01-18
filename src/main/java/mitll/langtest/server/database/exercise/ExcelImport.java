@@ -211,7 +211,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       logger.info("lastModifiedBy:   " + lastModifiedBy);
       logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + modified);
 
-      return modified.getTime();
+      return modified == null ? System.currentTimeMillis() : modified.getTime();
     } catch (IOException | OpenXML4JException | XmlException e) {
       logger.error("got " + e, e);
     }

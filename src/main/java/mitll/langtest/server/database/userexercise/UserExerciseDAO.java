@@ -39,10 +39,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -359,6 +356,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     }
     return userExercises2;
   }
+
+  /**
+   * @param exid
+   * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getReviewedUserExercises
+   * @see IUserListManager#markState(CommonExercise, STATE, int)
+   */
+  private CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
 
   @Override
   public List<CommonExercise> getCommonExercises(int listID) {
@@ -703,5 +708,46 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   private void addColumnToTable6(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, CONTEXT_TRANSLATION);
+  }
+
+  /**
+   * TODO : Do we need to set the english field to meaning for english items???
+   *
+   * @param userExercises2
+   * @param userExercises
+   * @deprecated not needed with postgres
+   */
+  void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
+    int c = 0;
+    for (CommonExercise ue : userExercises) {
+      // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getOldID() + " / " + ue.getUniqueID() + " : " + ue);
+      if (ue.isPredefined()) {
+        CommonExercise byID = getExercise(ue);
+
+        if (byID != null) {
+          userExercises2.add(new Exercise(byID)); // all predefined references
+          /// TODO : put this back???
+          // if (isEnglish) {
+          //    e.setEnglish(exercise.getMeaning());
+          //  }
+
+        } else {
+          if (c++ < 10)
+            logger.error("getOnList: huh can't find user exercise '" + ue.getOldID() + "'");
+        }
+      } else {
+        userExercises2.add(ue);
+      }
+    }
+    if (c > 0) logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
+  }
+
+  /**
+   * @param ue
+   * @return
+   * @see #enrichWithPredefInfo
+   */
+  private CommonExercise getExercise(HasID ue) {
+    return exerciseDAO.getExercise(ue.getID());
   }
 }

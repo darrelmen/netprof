@@ -220,13 +220,11 @@ public class SelectionState {
           Collections.sort(sorted);
 
           String sep = sorted.size() == 2 ? " and " : ", ";
-          for (String item : sorted) {
-            status2.append(item).append(sep);
-          }
+          sorted.forEach(item -> status2.append(item).append(sep));
 
           String s = status2.toString();
           if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
-          String statusForType = type + " " + s;
+          String statusForType = type + " " + "<b>" + s + "</b>";
           status.append(statusForType).append(" and ");
         }
       }

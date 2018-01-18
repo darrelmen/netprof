@@ -90,7 +90,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
-  CommonExercise getPredefExercise(int exid);
+//  CommonExercise getPredefExercise(int exid);
 
   //void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones);
 

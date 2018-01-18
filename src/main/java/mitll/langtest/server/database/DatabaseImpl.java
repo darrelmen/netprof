@@ -1287,8 +1287,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     String language = getLanguage(project);
 
     if (!typeToSection.isEmpty()) {
-      logger.info("ensure audio for " + exercisesForSelectionState.size() +
-          " for " + project.getLanguage() + " sel " + typeToSection);
+      logger.info("writeZip for project " + projectid +
+          " ensure audio for " + exercisesForSelectionState.size() +
+          " exercises for " + project.getLanguage() +
+          " selection " + typeToSection);
 
       audioDAO.attachAudioToExercises(exercisesForSelectionState, project.getLanguage());
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, project.getLanguage());

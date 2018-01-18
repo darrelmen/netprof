@@ -52,11 +52,11 @@ import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -84,6 +84,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
+  public static final String INSTALL_APP = "Install App?";
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -92,8 +93,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   private final SignUp signUpForm;
   private final SignIn signInForm;
-
-  FlagsDisplay flagsDisplay;
+  private FlagsDisplay flagsDisplay;
 
   /**
    * @param props
@@ -130,12 +130,13 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       public void userHitEnterKey(Button button) {
         if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
-        } else if (signInForm.clickSendEmail()) {
+        }
+        //else if (signInForm.clickSendEmail()) {
           //    sendEmail.fireEvent(new ButtonClickEvent());
-        } else if (signInHasFocus) {
+        //}
+        else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
-          // signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
           signUpForm.clickSignUp();
         }
       }
@@ -171,7 +172,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private void showSuggestApp() {
     List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
-        "Install App?",
+        INSTALL_APP,
         messages,
         Collections.emptySet(),
         null, hiddenEvent -> signInForm.setFocusOnUserID(),
@@ -181,16 +182,21 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   }
 
   private void showWelcome2() {
-    new ModalInfoDialog("Help", props.getHelpMessage());
+    new ModalInfoDialog(HELP, props.getHelpMessage());
   }
 
   /**
+   * TODO : initial page will scroll under header... still
+   *
    * @return
    * @see mitll.langtest.client.LangTest#showLogin()
    */
   public Panel getContent() {
     Panel container = new DivWidget();
     container.getElement().setId("UserPassLogin");
+
+//    container.setHeight("100%");
+  //  container.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
 
     DivWidget child = new DivWidget();
     container.add(child);
@@ -337,7 +343,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftAndClear");
-    // left.addStyleName("rightFiveMargin");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;

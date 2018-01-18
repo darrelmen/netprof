@@ -1,11 +1,9 @@
 package mitll.langtest.client.download;
 
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -15,7 +13,10 @@ import org.jetbrains.annotations.NotNull;
  * Created by go22670 on 5/19/17.
  */
 public class DownloadContainer {
-  public static final String DOWNLOAD_AUDIO = "downloadAudio";
+  /**
+   * @see DownloadHelper#downloadContext
+   */
+  static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private IconAnchor download;
@@ -28,8 +29,7 @@ public class DownloadContainer {
 
   @NotNull
   public static String getDownloadAudio(String host) {
-    String hostSuffix = host.isEmpty() ? "" : "/" + host;
-    return DownloadContainer.DOWNLOAD_AUDIO + hostSuffix;
+    return DownloadContainer.DOWNLOAD_AUDIO + (host.isEmpty() ? "" : "/" + host);
   }
 
   private void addDownloadAudioWidget() {
@@ -61,8 +61,8 @@ public class DownloadContainer {
     return download;
   }
 
-  private Tooltip addTooltip(Widget w, String tip) {
-    return new TooltipHelper().addTooltip(w, tip);
+  private void addTooltip(Widget w, String tip) {
+    new TooltipHelper().addTooltip(w, tip);
   }
 
   /**

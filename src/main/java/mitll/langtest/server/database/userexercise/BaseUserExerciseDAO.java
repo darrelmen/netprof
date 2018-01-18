@@ -47,61 +47,11 @@ public class BaseUserExerciseDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);
 
   /**
-   * @see #getPredefExercise
    * @see #setExerciseDAO
    */
-  ExerciseDAO<CommonExercise> exerciseDAO;
+  protected ExerciseDAO<CommonExercise> exerciseDAO;
 
   protected BaseUserExerciseDAO(Database database) { super(database);  }
-
-  /**
-   * TODO : Do we need to set the english field to meaning for english items???
-   *
-   * @param userExercises2
-   * @param userExercises
-   * @deprecated not needed with postgres
-   */
-  void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
-    int c = 0;
-    for (CommonExercise ue : userExercises) {
-      // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getOldID() + " / " + ue.getUniqueID() + " : " + ue);
-      if (ue.isPredefined()) {
-        CommonExercise byID = getExercise(ue);
-
-        if (byID != null) {
-          userExercises2.add(new Exercise(byID)); // all predefined references
-          /// TODO : put this back???
-          // if (isEnglish) {
-          //    e.setEnglish(exercise.getMeaning());
-          //  }
-
-        } else {
-          if (c++ < 10)
-            logger.error("getOnList: huh can't find user exercise '" + ue.getOldID() + "'");
-        }
-      } else {
-        userExercises2.add(ue);
-      }
-    }
-    if (c > 0) logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
-  }
-
-  /**
-   * @param ue
-   * @return
-   * @see #enrichWithPredefInfo
-   */
-  private CommonExercise getExercise(HasID ue) {
-    return getPredefExercise(ue.getID());
-  }
-
-  /**
-   * @param exid
-   * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getReviewedUserExercises
-   * @see IUserListManager#markState(CommonExercise, STATE, int)
-   */
-  public CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
@@ -109,6 +59,6 @@ public class BaseUserExerciseDAO extends DAO {
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
-    logger.info("setExerciseDAO : exercise dao now " + exerciseDAO);
+ //   logger.info("setExerciseDAO : exercise dao now " + exerciseDAO);
   }
 }

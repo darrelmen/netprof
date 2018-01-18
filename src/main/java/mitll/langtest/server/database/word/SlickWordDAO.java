@@ -34,10 +34,15 @@ package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickWord;
 import mitll.npdata.dao.word.WordDAOWrapper;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

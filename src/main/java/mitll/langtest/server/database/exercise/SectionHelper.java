@@ -100,9 +100,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public List<String> getTypeOrder() {
     if (predefinedTypeOrder.isEmpty()) {
-      List<String> types = new ArrayList<>();
-
-      types.addAll(typeToUnitToLesson.keySet());
+      List<String> types = new ArrayList<>(typeToUnitToLesson.keySet());
       if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
       if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder typeToCount = " + typeToCount);
 

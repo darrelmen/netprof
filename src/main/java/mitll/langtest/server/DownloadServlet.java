@@ -32,6 +32,8 @@
 
 package mitll.langtest.server;
 
+import com.google.gwt.http.client.URL;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
@@ -54,6 +56,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -89,6 +92,11 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private static final String ALLCONTEXT = "allcontext";
   private static final String LISTS = "Lists=[";
+
+  private static final String REGEXAMPERSAND = "&";
+
+  private static final String AMPERSAND = DownloadHelper.AMPERSAND;//"___AMPERSAND___";
+  private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
 
   /**
    * This is getting complicated.
@@ -140,12 +148,17 @@ public class DownloadServlet extends DatabaseServlet {
         if (requestURI.toLowerCase().contains(AUDIO)) {
           String queryString = request.getQueryString();
 
+          String decode = URLDecoder.decode(queryString, "UTF-8");
+
           logger.debug("doGet :" +
               "\n\tRequest " + queryString +
+              "\n\tRequest decode " + decode +
               "\n\tpath    " + request.getPathInfo() +
               "\n\turi     " + requestURI +
               "\n\turl     " + request.getRequestURL() +
               "\n\tpath    " + request.getServletPath());
+
+          queryString = decode;
 
           if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
             if (queryString.contains(LISTS)) {
@@ -153,14 +166,14 @@ public class DownloadServlet extends DatabaseServlet {
               String[] split = s.split(("\\]"));
               String listid = split[0];
               if (!listid.isEmpty()) {
-                String[] splitArgs = split[1].split("&");
+                String[] splitArgs = split[1].split(REGEXAMPERSAND);
                 writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
               }
             } else {
               String[] split = queryString.split("list=");
 
               if (split.length == 2) {
-                String[] splitArgs = split[1].split("&");
+                String[] splitArgs = split[1].split(REGEXAMPERSAND);
                 String listid = splitArgs[0];
                 if (!listid.isEmpty()) {
                   writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
@@ -228,7 +241,7 @@ public class DownloadServlet extends DatabaseServlet {
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
       else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
-        logger.warn("huh? got unexpected arg '" + arg + "'");
+        logger.info("getAudioExportOptions : got unexpected arg '" + arg + "'");
       }
     }
     return options;
@@ -247,7 +260,7 @@ public class DownloadServlet extends DatabaseServlet {
   private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString,
                              int projid, String language) {
     // logger.debug("request " +  " query " + queryString);
-    String[] split1 = queryString.split("&");
+    String[] split1 = queryString.split(REGEXAMPERSAND);
 
     String unitChapter = "";
     for (String arg : split1) {
@@ -324,7 +337,7 @@ public class DownloadServlet extends DatabaseServlet {
                                String queryString,
                                String language,
                                int projid) throws IOException {
-    String[] split = queryString.split("&");
+    String[] split = queryString.split(REGEXAMPERSAND);
 
     String file = split[0].split("=")[1];
 
@@ -502,6 +515,12 @@ public class DownloadServlet extends DatabaseServlet {
   /**
    * Parse the query string that indicates the unit and chapter selections.
    *
+   * So here we remap an encoded ampersand and an encoded comma back to unencoded versions.
+   *
+   * Encoded in download helper.
+   *
+   * @see mitll.langtest.client.download.DownloadHelper#getURL
+   *
    * @param queryString
    * @return map representing unit/chapter selections - what SectionHelper will parse
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -534,18 +553,20 @@ public class DownloadServlet extends DatabaseServlet {
         s = s.replaceAll("]", "");
         //   logger.debug("\ts " + s);
 
+        s = s
+            .replaceAll(AMPERSAND, "&")
+        ;
         List<String> values = Arrays.asList(s.split(","));
         List<String> trimmed = new ArrayList<>();
-        for (String v : values) {
-          trimmed.add(v.trim());
-        }
+        values.forEach(v -> trimmed.add(v.replaceAll(COMMA, ",").trim()));
+
 //        logger.debug("\tkey " + key + "=" + trimmed);
         typeToSection.put(key.trim(), trimmed);
       } else {
         logger.debug("\tgetTypeToSelectionFromRequest sections 1" + split1[0]);
       }
     }
-    logger.debug("getTypeToSelectionFromRequest returning " + typeToSection + " for " + queryString);
+    logger.debug("getTypeToSelectionFromRequest returning type->selection '" + typeToSection + "' for '" + queryString + "'");
     return typeToSection;
   }
 

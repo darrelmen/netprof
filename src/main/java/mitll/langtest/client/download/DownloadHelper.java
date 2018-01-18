@@ -42,8 +42,8 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
@@ -52,13 +52,17 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 public class DownloadHelper {
-  private final Logger logger = Logger.getLogger("DownloadHelper");
+//  private final Logger logger = Logger.getLogger("DownloadHelper");
+
+  public static final String AMPERSAND = "___AMPERSAND___";
+  public static final String COMMA = "___COMMA___";
+
+  private static final String VOCABULARY = "Vocabulary";
 
   private SelectionState selectionState;
   private Collection<String> typeOrder;
@@ -80,7 +84,9 @@ public class DownloadHelper {
   }
 
   public void downloadContext(String host) {
-    String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&allcontext=true";
+    String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&" +
+        "allcontext" +
+        "=true";
     new DownloadIFrame(urlForDownload);
   }
 
@@ -188,7 +194,7 @@ public class DownloadHelper {
     FluidRow row;
     row = new FluidRow();
     row.add(new Heading(4, "Content"));
-    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList("Vocabulary", "Context Sentences"), "vocab", ButtonType.DEFAULT);
+    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList(VOCABULARY, "Context Sentences"), "vocab", ButtonType.DEFAULT);
     row.add(buttonBarChoices);
     return row;
   }
@@ -236,21 +242,13 @@ public class DownloadHelper {
   }
 
   private Button getChoice(ButtonGroup buttonGroup, final String text) {
-    final Button onButton = new Button(text);
-    ClickHandler handler = new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            isContext = !(text.equals("Vocabulary"));
-            isContextSet = true;
-            showStatus();
-          }
-        });
-      }
-    };
+    ClickHandler handler = event -> Scheduler.get().scheduleDeferred(() -> {
+      isContext = !(text.equals(VOCABULARY));
+      isContextSet = true;
+      showStatus();
+    });
 
-    Button choice1 = configure(text, handler, onButton);
+    Button choice1 = configure(text, handler, new Button(text));
     buttonGroup.add(choice1);
     return choice1;
   }
@@ -289,14 +287,12 @@ public class DownloadHelper {
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-  //  private DivWidget getGenderChoices(boolean selectFirst) {
   private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
     ButtonToolbar buttonToolbar = getToolbar(buttonGroup);
 
     for (final String choice : Arrays.asList(M, F)) {
-      logger.info("making choice "+ choice);
-
+      // logger.info("making choice " + choice);
       com.github.gwtbootstrap.client.ui.Button choiceButton = getChoice(choice, false, event -> {
 
         if (choice.equals(M)) isMale = true;
@@ -321,39 +317,32 @@ public class DownloadHelper {
     return buttonToolbar;
   }
 
-  private Panel getToolbar2() {
-    Panel buttonToolbar = new HorizontalPanel();
-    return buttonToolbar;
-  }
-
   private Widget getSpeedChoices() {
     Panel buttonToolbar = getToolbar2();
     buttonToolbar.setHeight("40px");
     String choice = "Regular";
 
-    regular = getChoice2(choice, rabbit, rabbitSelected, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        isRegular = regular.isDown();
-        isRegularSet = true;
-        showSpeeds();
-      }
+    regular = getChoice2(choice, rabbit, rabbitSelected, event -> {
+      isRegular = regular.isDown();
+      isRegularSet = true;
+      showSpeeds();
     });
     buttonToolbar.add(regular);
 
     String choice2 = "Slow";
-    slow = getChoice2(choice2, turtle, turtleSelected, new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        isRegular = !slow.isDown();
-        logger.info("got slow click " + isRegular);
-        isRegularSet = true;
-        showSpeeds();
-      }
+    slow = getChoice2(choice2, turtle, turtleSelected, event -> {
+      isRegular = !slow.isDown();
+      //  logger.info("got slow click " + isRegular);
+      isRegularSet = true;
+      showSpeeds();
     });
     buttonToolbar.add(slow);
     buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
     return buttonToolbar;
+  }
+
+  private Panel getToolbar2() {
+    return new HorizontalPanel();
   }
 
   private ToggleButton regular, slow;
@@ -364,8 +353,7 @@ public class DownloadHelper {
     showStatus();
   }
 
-  private com.github.gwtbootstrap.client.ui.Button getChoice(String title
-      , boolean isActive, ClickHandler handler) {
+  private com.github.gwtbootstrap.client.ui.Button getChoice(String title, boolean isActive, ClickHandler handler) {
     com.github.gwtbootstrap.client.ui.Button onButton =
         new com.github.gwtbootstrap.client.ui.Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
     onButton.getElement().setId("Choice_" + title);
@@ -381,8 +369,8 @@ public class DownloadHelper {
     onButton.getElement().setId("Choice_" + title);
     onButton.addClickHandler(handler);
     onButton.getElement().getStyle().setZIndex(0);
-    onButton.setWidth("50" + "px");
-    onButton.setHeight("32" + "px");
+    onButton.setWidth(50 + "px");
+    onButton.setHeight(32 + "px");
     return onButton;
   }
 
@@ -401,11 +389,40 @@ public class DownloadHelper {
     return dominoUrl.toString();
   }
 
+  /**
+   * Map comma and ampersand to encoded versions so they make it through parsing the url in the download servlet.
+   *
+   * Probably better ways to do this...
+   *
+   * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
+   * @param request
+   * @param typeToSection
+   * @return
+   */
   private String getURL(String request, Map<String, Collection<String>> typeToSection) {
+    Map<String, Collection<String>> ts = new HashMap<>();
+    typeToSection.forEach((k, v) -> {
+      List<String> newV = new ArrayList<>();
+      v.forEach(value -> newV.add(
+          value
+              .replaceAll(",", COMMA)
+              .replaceAll("&", AMPERSAND)
+      ));
+      ts.put(k, newV);
+    });
+    String sel = ts.toString();
+    String encode = URL.encodeQueryString(sel);
+
+/*    logger.info("getURL " +
+        "\n\torig '" + typeToSection.toString() + "'" +
+        "\n\tsel '" + sel + "'" +
+        " = '" + encode +
+        "'");*/
+
     return "?" +
-        "request="  + request +
-        "&unit="    + typeToSection +
-        "&male="    + isMale +
+        "request=" + request +
+        "&unit=" + encode +
+        "&male=" + isMale +
         "&regular=" + isRegular +
         "&context=" + isContext;
   }
