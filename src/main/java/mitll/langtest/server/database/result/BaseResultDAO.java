@@ -89,7 +89,7 @@ public abstract class BaseResultDAO extends DAO {
                                                  Map<Integer, CollationKey> idToKey, String language) {
     List<Session> sessions = new ArrayList<>();
     Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, language));
-    if (DEBUG) logger.debug("Got " + userToAnswers.size() + " user->answer map");
+    if (DEBUG) logger.debug("getSessionsForUserIn2 Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Integer, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
       if (DEBUG)
@@ -99,10 +99,10 @@ public abstract class BaseResultDAO extends DAO {
     }
 
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid, language);
-    if (DEBUG) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+    if (DEBUG) logger.debug("getSessionsForUserIn2 found " + results.size() + " results for " + allIds.size() + " items");
 
     List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds, idToKey);
-    if (DEBUG) logger.debug("found " + sessions.size() + " sessions for " + ids);
+    if (DEBUG) logger.debug("getSessionsForUserIn2 found " + sessions.size() + " sessions for " + ids);
 
     return new SessionsAndScores(sessions, sortedResults);
   }
@@ -118,13 +118,10 @@ public abstract class BaseResultDAO extends DAO {
                                                             Collection<Integer> allIds,
                                                             final Map<Integer, CollationKey> idToKey) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
-    Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
-      @Override
-      public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-        CollationKey fl = idToKey.get(o1.getId());
-        CollationKey otherFL = idToKey.get(o2.getId());
-        return compareTo(o1, o2, fl, otherFL);
-      }
+    sortedResults.sort((o1, o2) -> {
+      CollationKey fl = idToKey.get(o1.getId());
+      CollationKey otherFL = idToKey.get(o2.getId());
+      return compareTo(o1, o2, fl, otherFL);
     });
     return sortedResults;
   }
@@ -148,12 +145,12 @@ public abstract class BaseResultDAO extends DAO {
   private int compScores(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
     int myI = o1.getDiff();
     int oI = o2.getDiff();
-    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    int i = Integer.compare(myI, oI);
     if (i == 0) {
       float myScore = o1.getAvgScore();
       float otherScore = o2.getAvgScore();
-      int comp = new Float(myScore).compareTo(otherScore);
-      return comp == 0 ? Integer.valueOf(o1.getId()).compareTo(o2.getId()) : comp;
+      int comp = Float.compare(myScore, otherScore);
+      return comp == 0 ? Integer.compare(o1.getId(), o2.getId()) : comp;
     } else {
       return i;
     }

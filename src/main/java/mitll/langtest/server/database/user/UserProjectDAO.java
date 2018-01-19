@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
@@ -45,10 +46,13 @@ import java.util.List;
 import java.util.Map;
 
 public class UserProjectDAO implements IUserProjectDAO {
-  private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
-
+  //private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
   private UserProjectDAOWrapper dao;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param dbConnection
+   */
   public UserProjectDAO(DBConnection dbConnection) {
     dao = new UserProjectDAOWrapper(dbConnection);
   }
@@ -92,11 +96,12 @@ public class UserProjectDAO implements IUserProjectDAO {
    *
    * @param user
    * @return -1 if has no project
+   * @see mitll.langtest.server.database.DatabaseImpl#projectForUser
    */
   @Override
   public int mostRecentByUser(int user) {
-    List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
+    List<Integer> slickUserProjects = dao.mostRecentByUser(user);
+    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
   }
 
   @Override

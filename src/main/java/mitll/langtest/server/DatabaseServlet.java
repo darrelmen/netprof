@@ -58,7 +58,7 @@ public class DatabaseServlet extends HttpServlet {
   DatabaseImpl db = null;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
-  protected IEnsureAudioHelper ensureAudioHelper;
+  IEnsureAudioHelper ensureAudioHelper;
 
   /**
    * @see DownloadServlet#init

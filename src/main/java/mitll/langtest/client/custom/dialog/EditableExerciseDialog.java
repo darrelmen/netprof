@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
- * @deprecated
+
  */
 class EditableExerciseDialog extends NewUserExercise {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");

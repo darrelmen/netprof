@@ -57,7 +57,6 @@ public class NewContentChooser implements INavigation {
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
-    divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
     divWidget.setHeight("100%");
   }
 
@@ -109,6 +108,10 @@ public class NewContentChooser implements INavigation {
       switch (view) {
         case LEARN:
           clear();
+
+          divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+          divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
+
           learnHelper.showContent(divWidget, LEARN.toString());
           break;
         case DRILL:
@@ -190,8 +193,15 @@ public class NewContentChooser implements INavigation {
     currentSection = PROGRESS;
   }
 
+  /**
+   * We want to support proper scrolling in the learn view...
+   */
   private void clear() {
     divWidget.clear();
+
+    Style style = divWidget.getElement().getStyle();
+    style.clearProperty("overflow");
+    style.clearProperty("position");
   }
 
   /**

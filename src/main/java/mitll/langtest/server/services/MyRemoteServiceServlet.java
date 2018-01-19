@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -112,10 +113,11 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
+/*
   protected boolean hasRecordPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     return permissions.contains(User.Permission.RECORD_AUDIO) || permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
-  }
+  }*/
 
   /**
    * Also checks whether user is enabled and approved for netprof.
@@ -158,6 +160,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   /**
    * @return
+   * @see LangTestDatabaseImpl#getExercisesForUser
    */
   protected int getProjectIDFromUser() throws DominoSessionException {
     return getProjectIDFromUser(getUserIDFromSessionOrDB());
@@ -168,23 +171,28 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       // it's not in the current session - can we recover it from the remember me cookie?
       logger.warn("getProjectIDFromUser : no user in session, so we can't get the project id for the user.");
       return -1;
-    }
-    int mostRecentByUser = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
-    Project project = db.getProject(mostRecentByUser);
+    } else {
+      int mostRecentByUser = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+
+      // why would we want to configure it as a side effect here???
+      // if it's a new project, we'd want to configure it there?
+
+    /*    Project project = db.getProject(mostRecentByUser);
     if (project == null) {
       logger.warn("getProjectIDFromUser user " + userIDFromSession + " no project for id " + mostRecentByUser);
     } else {
       logger.info("getProjectIDFromUser user " + userIDFromSession + " = project " + project.getID() + " " + project.getLanguage());
       db.configureProject(project, false); //check if we should configure it - might be a new project
+    }*/
+      return mostRecentByUser;
     }
-    return mostRecentByUser;
   }
 
   protected Project getProject(int projID) {
     return db.getProject(projID);
   }
 
-  protected Project getProject() throws DominoSessionException {
+  private Project getProject() throws DominoSessionException {
     int userIDFromSession = getUserIDFromSessionOrDB();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
@@ -223,8 +231,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   /**
    * Add startup info to user.
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
+   *
    * @return
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   public User getUserFromSession() throws DominoSessionException {
     try {
@@ -247,15 +256,22 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    * @throws DominoSessionException
    */
-  User getSessionUser() throws DominoSessionException {return securityManager.getLoggedInUser(getThreadLocalRequest());}
-  int getSessionUserID() throws DominoSessionException {return securityManager.getLoggedInUserID(getThreadLocalRequest());}
+  User getSessionUser() throws DominoSessionException {
+    return securityManager.getLoggedInUser(getThreadLocalRequest());
+  }
+
+  int getSessionUserID() throws DominoSessionException {
+    return securityManager.getLoggedInUserID(getThreadLocalRequest());
+  }
 
   /**
    * This is safe!
    *
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {    return getLanguage(getProject());  }
+  protected String getLanguage() throws DominoSessionException {
+    return getLanguage(getProject());
+  }
 
   protected String getLanguage(Project project) {
     if (project == null) {

@@ -58,7 +58,7 @@ public class UserSessionHistory {
                                               Map<Integer, CollationKey> idToKey,
                                               IResultDAO resultDAO,
                                               String language) {
-    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
+//    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
     SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey, language);
     /*List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();

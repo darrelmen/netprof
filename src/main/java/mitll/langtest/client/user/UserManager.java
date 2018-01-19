@@ -70,7 +70,7 @@ public class UserManager {
   private static final String USER_PENDING_ID = "userPendingID";
 
   private final UserServiceAsync userServiceAsync;
-  private final OpenUserServiceAsync openUserService;
+  //private final OpenUserServiceAsync openUserService;
   private final UserNotification userNotification;
   private final UserFeedback userFeedback;
   private int userID = NO_USER_SET;
@@ -95,7 +95,7 @@ public class UserManager {
                      PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-    this.openUserService = openUserService;
+   // this.openUserService = openUserService;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
   }
@@ -144,7 +144,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        logger.info("took " + (System.currentTimeMillis()-then)  + " to get current user.");
+     //   logger.info("took " + (System.currentTimeMillis()-then)  + " to get current user.");
         gotSessionUser(result);
       }
     });

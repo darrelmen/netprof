@@ -128,6 +128,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    */
   private long firstTime;
   private long lastTime;
+
   private final List<Long> weeks = new ArrayList<>();
   private final List<Long> months = new ArrayList<>();
 
@@ -192,6 +193,9 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    */
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+
+    logger.info("showUserPerformance scores = " + rawBestScores.size());
+
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
@@ -254,7 +258,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @param userPerformance
    * @param userChosenID
    * @param isTeacherView
-   * @see #getPerformanceForUser
+   * @see #showUserPerformance
    */
   private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList, boolean isTeacherView) {
     clear();
@@ -292,10 +296,13 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
         ")";
   }
 
+  /**
+   *
+   */
   private void showSeriesByVisible() {
     Scheduler.get().scheduleDeferred(() -> {
       if (chart != null) {
-        // logger.info("doing deferred ---------- ");
+         logger.info("showSeriesByVisible : doing deferred ---------- ");
         for (Series series : seriesToVisible.keySet()) {
           //  String name = series.getName();
           Boolean expected = seriesToVisible.get(series);
@@ -362,7 +369,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @param seriesName
    * @param userPerformance
    * @return
-   * @see AnalysisPlot#AnalysisPlot
+   * @see #addChart
    */
   private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
     final Chart chart = getChart(title);
@@ -834,7 +841,6 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       }
     }
 /*
-
     if (toGet.isEmpty()) {
       // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
     }
@@ -847,7 +853,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       this.lastTime = timeAndScore.getTimestamp();
 
       if (!toGet.isEmpty()) {
-        // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+         logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -857,7 +863,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
             commonShells.forEach(commonShell -> idToEx.put(commonShell.getID(), commonShell));
-//            logger.info("setRawBestScores getShells got " + commonShells.size());
+           logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
       }

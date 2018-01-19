@@ -468,14 +468,18 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void getTypeOrder() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    ProjectStartupInfo projectStartupInfo = getStartupInfo();
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
-      typeOrder = projectStartupInfo.getTypeOrder();
+      typeOrder = getTypeOrder(projectStartupInfo);
       //    logger.info("getTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
+  }
+
+  private List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
+    return projectStartupInfo.getTypeOrder();
   }
 
   /**
@@ -1019,7 +1023,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private String getChildForParent(String childType) {
-    Map<String, String> parentToChild = controller.getProjectStartupInfo().getParentToChild();
+    Map<String, String> parentToChild = getStartupInfo().getParentToChild();
     String s = parentToChild.get(childType);
 //    logger.info("getChildForParent parent->child " + parentToChild);
 //    logger.info("getChildForParent childType     " + childType + " = " + s);
@@ -1072,7 +1076,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getSectionWidgetContainer()
    */
   private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
-    boolean hasUser = controller.getUser() > 0;
+    boolean hasUser = isThereALoggedInUser();
     if (!hasUser) return;
 
     List<Pair> pairs = getPairs(typeToSelection);
@@ -1105,11 +1109,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         });
   }
 
+  private boolean isThereALoggedInUser() {
+    return controller.getUser() > 0;
+  }
+
   @NotNull
   private List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = new ArrayList<>();
 
-    for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
+    for (String type : getTypeOrder(getStartupInfo())) {
       String s = typeToSelection.get(type);
       pairs.add(new Pair(type, (s == null) ? ANY : s));
     }
@@ -1268,7 +1276,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   @NotNull
   private String getProjectParam() {
-    int projectid = controller.getProjectStartupInfo() == null ? -1 : getCurrentProject();
+    int projectid = getStartupInfo() == null ? -1 : getCurrentProject();
     return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + projectid;
   }
 
@@ -1288,9 +1296,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return userListID;
   }
 
-
   private int getCurrentProject() {
-    return controller.getProjectStartupInfo().getProjectid();
+    return getStartupInfo().getProjectid();
+  }
+  
+  private ProjectStartupInfo getStartupInfo() {
+    return controller.getProjectStartupInfo();
   }
 
   @NotNull
@@ -1459,7 +1470,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           "\n\treq for " + requested +
           "\n\tvisible " + visibleIDs);*/
 
-      if (controller.getUser() > 0) {
+      if (isThereALoggedInUser()) {
         getFullExercises(visibleIDs, currentReq, requested, alreadyFetched);
       } else {
         logger.warning("not asking for " + requested);
@@ -1508,26 +1519,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
-    List<CommonExercise> toShow = new ArrayList<>();
+    //List<CommonExercise> toShow = new ArrayList<>();
 
-    {
-      Map<Integer, CommonExercise> idToEx = setScoreHistory(result);
-      for (CommonExercise ex : alreadyFetched) {
-        idToEx.put(ex.getID(), ex);
-      }
-      result.getExercises().forEach(this::addExerciseToCached);
-      // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
+    Map<Integer, CommonExercise> idToEx = setScoreHistory(result);
+    alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
-      for (int id : visibleIDs) {
-        CommonExercise e = idToEx.get(id);
-        if (e == null) {
-          logger.warning("\n\ngetFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
-        } else {
-          //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
-          toShow.add(e);
-        }
-      }
-    }
+    result.getExercises().forEach(this::addExerciseToCached);
+    // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
+
+    Collection<CommonExercise> toShow = getVisibleExercises(visibleIDs, idToEx);
 
     if (isCurrentReq(reqID)) {
       gotFullExercises(reqID, toShow);
@@ -1537,16 +1537,36 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
+  private List<CommonExercise> getVisibleExercises(Collection<Integer> visibleIDs,
+
+                                   Map<Integer, CommonExercise> idToEx) {
+    List<CommonExercise> toShow = new ArrayList<>();
+    for (int id : visibleIDs) {
+      CommonExercise e = idToEx.get(id);
+      if (e == null) {
+        logger.warning("\n\ngetFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+      } else {
+        //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
+        toShow.add(e);
+      }
+    }
+    return toShow;
+  }
+
   private void setExerciseContainer(DivWidget w) {
     innerContainer.setWidget(w);  // immediate feedback that something is happening...
-    //   w.getElement().getStyle().setOpacity(1);
   }
 
   private CommonExercise getCachedExercise(Integer id) {
     return fetched.get(id);
   }
 
-
+  /**
+   * TODO : why? ?>
+   *
+   * @param result
+   * @return
+   */
   @NotNull
   private Map<Integer, CommonExercise> setScoreHistory(ExerciseListWrapper<CommonExercise> result) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
@@ -1555,19 +1575,23 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
       idToEx.put(id, ex);
-      List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
 
-      // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
-      List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
-      //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
-      ex.getMutable().setScores(scoreTotal);
+
+      {
+        List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
+
+        // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
+        List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
+        //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
+        ex.getMutable().setScores(scoreTotal);
+      }
     }
     //logger.info("setScoreHistory now " + idToEx.size());
 
     return idToEx;
   }
 
-  private void gotFullExercises(final int reqID, List<CommonExercise> toShow) {
+  private void gotFullExercises(final int reqID, Collection<CommonExercise> toShow) {
     if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {
         hidePrevNext();

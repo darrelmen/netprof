@@ -148,6 +148,10 @@ public class UserPerformance implements Serializable {
     }
   }
 
+  /**
+   *
+   * @return
+   */
   public List<TimeAndScore> getRawBestScores() {
     return rawTimeAndScores;
   }

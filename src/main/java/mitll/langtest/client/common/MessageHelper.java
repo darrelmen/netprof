@@ -74,7 +74,7 @@ import java.util.logging.Logger;
  */
 public class MessageHelper {
   private static final Logger log = Logger.getLogger(MessageHelper.class.getName());
-  public static final String DOMINO_ERROR = "NetProF Error!";
+  private static final String DOMINO_ERROR = "NetProF Error!";
 
   public enum DDialogType {
     Loading, FatalError, NonFatalError,

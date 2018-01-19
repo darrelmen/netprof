@@ -263,6 +263,10 @@ public class LangTest implements
    *
    */
   private StartupInfo startupInfo;
+  /**
+   * @see #setProjectStartupInfo(User)
+   * @see #clearStartupInfo
+   */
   private ProjectStartupInfo projectStartupInfo;
 
   private EventLogger buttonFactory;
@@ -800,6 +804,8 @@ public class LangTest implements
     //   logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
     initialUI.showCogMenu();
   }
+
+
 
   /**
    * So if during history changes we see the project has changed, we have to react to it here.

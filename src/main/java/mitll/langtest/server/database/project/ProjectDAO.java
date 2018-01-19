@@ -312,7 +312,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         firstType, secondType, countryCode, displayOrder, dominoID);
   }
 
-
+/*
   public SlickProject getFirst() {
     if (first == null) {
       List<SlickProject> all = dao.getAll();
@@ -320,6 +320,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
     return first;
   }
+*/
 
   /**
    * Really does delete it - could take a long time if a big project.
@@ -407,12 +408,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * TODO : don't do two round trips to database.
+   * TODOx : don't do two round trips to database.
    *
    * @param user
    * @return
    */
-  @Override
+/*  @Override
   public SlickProject mostRecentByUser(int user) {
     int i = userProjectDAO.mostRecentByUser(user);
     if (i == -1) return null;
@@ -420,5 +421,5 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       Collection<SlickProject> slickProjectSeq = dao.byID(i);
       return slickProjectSeq.isEmpty() ? null : slickProjectSeq.iterator().next();
     }
-  }
+  }*/
 }

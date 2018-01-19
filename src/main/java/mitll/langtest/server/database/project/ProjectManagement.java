@@ -636,7 +636,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private Project lazyGetProject(int projectid) {
     logger.warn("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-        ") - refreshing projects");
+        ") - refreshing projects", new Exception("huh?"));
     populateProjects();
     return idToProject.get(projectid);
   }

@@ -207,7 +207,12 @@ public class InitialUI implements UILifecycle {
     DivWidget contentRow = new DivWidget();
     contentRow.getElement().setId("InitialUI_contentRow");
     contentRow.setHeight("100%");
-    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
+
+
+
+    //contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
+
+
 
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;

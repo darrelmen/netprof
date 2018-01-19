@@ -938,7 +938,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     if (projID == -1) {
-      projID = getUserProjectDAO().mostRecentByUser(userid);
+      projID = projectForUser(userid);
       if (projID == -1 && !getProjects().isEmpty()) {
         projID = 1; // default project
       }

@@ -45,9 +45,40 @@ public interface IProjectDAO extends IDAO {
   String getPropValue(int projid, String key);
   Map<String, String> getProps(int projid);
 
+  /**
+   * TODO : why two calls?
+   * @see mitll.langtest.server.database.copy.CreateProject#addProject
+   * @param userid
+   * @param name
+   * @param language
+   * @param course
+   * @param firstType
+   * @param secondType
+   * @param countryCode
+   * @param displayOrder
+   * @param status
+   * @param dominoID
+   * @return
+   */
   int add(int userid, String name, String language, String course,
           String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID);
 
+  /**
+   * @see ProjectDAO#add(int, long, String, String, String, ProjectType, ProjectStatus, String, String, String, int, int)
+   * @param userid
+   * @param modified
+   * @param name
+   * @param language
+   * @param course
+   * @param type
+   * @param status
+   * @param firstType
+   * @param secondType
+   * @param countryCode
+   * @param displayOrder
+   * @param dominoID
+   * @return
+   */
   int add(int userid, long modified, String name, String language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder, int dominoID);
 
@@ -58,6 +89,11 @@ public interface IProjectDAO extends IDAO {
    * @see ProjectManagement#populateProjects
    */
   Collection<SlickProject> getAll();
+
+  /**
+   * @see ProjectManagement#getNestedProjectInfo
+   * @return
+   */
   int getNumProjects();
 
   void addProperty(int projid, ProjectProperty projectProperty, String value, String propertyType, String parent);
@@ -67,14 +103,19 @@ public interface IProjectDAO extends IDAO {
 
   int getByLanguage(String language);
 
-  SlickProject mostRecentByUser(int user);
+//  SlickProject mostRecentByUser(int user);
 
-  SlickProject getFirst();
+ // SlickProject getFirst();
 
   int ensureDefaultProject(int defaultUser);
 
   int getDefault();
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#exists(int)
+   * @param projid
+   * @return
+   */
   boolean exists(int projid);
 
   /**

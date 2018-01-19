@@ -1174,18 +1174,24 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return idToFirstLast;
   }
 
+  /**
+   * TODO : for now we skip getting the affiliation b/c lookupDBUsers is much slower.
+   * Not really worth it - not showing lincoln users in analysis? Why is that a big deal?
+   *
+   * @param userDBIds
+   */
   private void refreshUserCache(Collection<Integer> userDBIds) {
     long now = System.currentTimeMillis();
 
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
     if (!toAskFor.isEmpty()) {
       long then = System.currentTimeMillis();
-//      Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
-      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
+      Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
+//      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();
       logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
       idToUserD.forEach((k, v) -> {
-        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now, v.getAffiliation());
+        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now, "");// v.getAffiliation());
         idToFirstLastCache.put(k, value);
       });
     }
@@ -1320,7 +1326,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * user updates happen in domino UI...
+   * For taking old legacy users and adding the new netprof 2 info to them.
+   *
+   * user updates happen in domino UI too...
    *
    * @param toUpdate
    * @see OpenUserServiceImpl#addUser

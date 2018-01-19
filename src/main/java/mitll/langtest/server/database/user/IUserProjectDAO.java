@@ -57,12 +57,12 @@ public interface IUserProjectDAO extends IDAO {
 
   /**
    * @param userid
-   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject(int)
+   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
    */
   void forget(int userid);
 
   /**
-   *
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
    * @param user
    * @return -1 if has no project
    */
