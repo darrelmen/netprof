@@ -41,6 +41,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -77,6 +78,9 @@ import java.util.logging.Logger;
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  /**
+   *
+   */
   private static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
 
   /**
@@ -297,7 +301,7 @@ public class InitialUI implements UILifecycle {
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
- //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
+    //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
 
     return verticalContainer;
   }
@@ -310,7 +314,7 @@ public class InitialUI implements UILifecycle {
   private Heading child;
 
   /**
-   * * TODO : FIX ME for headstart?
+   * * TODOx : FIX ME for headstart?
    *
    * @param verticalContainer
    * @see #populateRootPanel
@@ -323,9 +327,23 @@ public class InitialUI implements UILifecycle {
      * {@link #makeFlashContainer}
      */
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
-    child = new Heading(3, PLEASE_ALLOW_RECORDING);
-    child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
-    contentRow.add(child);
+
+    {
+      child = new Heading(3, PLEASE_ALLOW_RECORDING);
+      child.setVisible(false);
+
+
+      Timer waitTimer = new Timer() {
+        @Override
+        public void run() {
+          child.setVisible(true);
+        }
+      };
+      waitTimer.schedule(1000);
+
+      child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+      contentRow.add(child);
+    }
 
     lifecycleSupport.recordingModeSelect();
     makeNavigation();

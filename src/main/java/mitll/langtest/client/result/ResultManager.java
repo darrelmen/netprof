@@ -301,8 +301,8 @@ public class ResultManager extends PagerTable {
         StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
-        int val = req++;
-        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+        int currentReq = req++;
+        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " currentReq " + currentReq);
         //   logger.info("got " + builder.toString());
 
         resultServiceAsync.getResults(
@@ -311,7 +311,7 @@ public class ResultManager extends PagerTable {
             builder.toString(),
             unitToValue,
             resultTypeAhead.getText(),
-            val,
+            currentReq,
             new AsyncCallback<ResultAndTotal>() {
               @Override
               public void onFailure(Throwable caught) {

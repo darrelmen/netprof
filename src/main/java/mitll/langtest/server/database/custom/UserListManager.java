@@ -41,6 +41,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -96,6 +97,7 @@ public class UserListManager implements IUserListManager {
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
   private IStateManager stateManager;
+  IProjectManagement projectManagement;
 
   /**
    * @param userDAO
@@ -111,6 +113,7 @@ public class UserListManager implements IUserListManager {
                          IAnnotationDAO annotationDAO,
                          IStateManager stateManager,
                          IUserExerciseListVisitorDAO visitorDAO,
+                         IProjectManagement projectManagement,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -119,6 +122,7 @@ public class UserListManager implements IUserListManager {
     this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
+    this.projectManagement = projectManagement;
   }
 
 
@@ -164,7 +168,6 @@ public class UserListManager implements IUserListManager {
                                   String dliClass,
                                   boolean isPrivate,
                                   int projid) {
-    // User userWhere = userDAO.getUserWhere(userid);
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -458,17 +461,6 @@ public class UserListManager implements IUserListManager {
     return reviewList;
   }
 
-  @NotNull
-  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
-    List<CommonExercise> defectExercises = new ArrayList<>();
-    incorrectAnnotations.forEach(id -> {
-      CommonExercise byExID = userExerciseDAO.getByExID(id);
-      if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
-      else defectExercises.add(byExID);
-    });
-    return defectExercises;
-  }
-
   /**
    * @param projID
    * @return
@@ -478,6 +470,17 @@ public class UserListManager implements IUserListManager {
   public UserList<CommonExercise> getCommentedListEx(int projID) {
     List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
     return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
+  }
+
+  @NotNull
+  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
+    List<CommonExercise> defectExercises = new ArrayList<>();
+    incorrectAnnotations.forEach(id -> {
+      CommonExercise byExID = projectManagement.getExercise(projID, id);
+      if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
+      else defectExercises.add(byExID);
+    });
+    return defectExercises;
   }
 
   /**

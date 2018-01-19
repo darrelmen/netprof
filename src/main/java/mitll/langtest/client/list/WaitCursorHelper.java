@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/28/17.
  */
 public class WaitCursorHelper {
-  private Logger logger = Logger.getLogger("WaitCursorHelper");
+ // private Logger logger = Logger.getLogger("WaitCursorHelper");
 
   private Timer waitTimer = null;
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");

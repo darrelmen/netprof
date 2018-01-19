@@ -130,14 +130,15 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
 
-
+  /**
+   *
+   */
   private final ProgressBar progressBar;
   private final DivWidget pagerAndSortRow;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
-  // private final int numToShow;
   private Panel tableWithPager;
   private boolean isDrill;
   /**
@@ -253,38 +254,50 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
+
+    style.setHeight(25, Style.Unit.PX);
+    style.setFontSize(16, Style.Unit.PX);
+
+
     progressBar.setVisible(false);
   }
 
   /**
+   * page size has a label, and the size choices...
+   *
    * @param footer
    * @return
    * @see #FacetExerciseList
    */
   private ListBox addPageSize(DivWidget footer) {
-    HTML label = new HTML(PAGE_SIZE_HEADER);
-    label.addStyleName("floatLeft");
-    label.addStyleName("topFiveMargin");
-    label.addStyleName("rightFiveMargin");
-
     pageSizeContainer = new DivWidget();
     pageSizeContainer.addStyleName("floatRight");
     pageSizeContainer.addStyleName("rightFiveMargin");
     pageSizeContainer.addStyleName("inlineFlex");
-    footer.add(pageSizeContainer);
-    pageSizeContainer.add(label);
 
+    footer.add(pageSizeContainer);
+
+    {
+      HTML label = new HTML(PAGE_SIZE_HEADER);
+      label.addStyleName("floatLeft");
+      label.addStyleName("topFiveMargin");
+      label.addStyleName("rightFiveMargin");
+      pageSizeContainer.add(label);
+    }
+
+    ListBox pagesize = getPageSizeChoices();
+    pageSizeContainer.add(pagesize);
+    return pagesize;
+  }
+
+  @NotNull
+  private ListBox getPageSizeChoices() {
     ListBox pagesize = new ListBox();
     pagesize.getElement().getStyle().clearWidth();
-    pageSizeContainer.add(pagesize);
-
     pagesize.addStyleName("floatLeft");
 
     PAGE_SIZE_CHOICES.forEach(num -> pagesize.addItem(num + ITEMS_PAGE, "" + num));
-
-    int chosenPageSize = getChosenPageIndex();
-//    logger.info("chose size " + chosenPageSize);
-    pagesize.setItemSelected(chosenPageSize, true);
+    pagesize.setItemSelected(getChosenPageIndex(), true);
     pagesize.addChangeHandler(event -> onPageSizeChange(pagesize));
 
     return pagesize;
@@ -318,7 +331,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private final boolean finished;
-  ListBox sortBoxReally;
+  private ListBox sortBoxReally;
+  ListSorting<CommonShell, CommonExercise> listSorting;
 
   @NotNull
   private DivWidget addSortBox(String language) {
@@ -333,7 +347,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     w.add(w1);
 
-    sortBoxReally = new ListSorting<>(this).getSortBox(language);
+    listSorting = new ListSorting<>(this);
+    sortBoxReally = listSorting.getSortBox();
     w.add(sortBoxReally);
     return w;
   }
@@ -418,16 +433,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return false;
   }
 
-  @Override
-  protected ExerciseListRequest getRequest(String prefix) {
-    ExerciseListRequest request = super.getRequest(prefix);
-    request.setAddFirst(false);
-    return request;
-  }
+  private Panel typeOrderContainer;
 
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
-   * @see ListInterface#getExercises
+   * @see #getExercises
    */
   @Override
   public void addWidgets() {
@@ -437,7 +447,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     restoreUIState(getSelectionState(getHistoryToken()));
   }
 
-  private Panel typeOrderContainer;
+  @Override
+  protected ExerciseListRequest getRequest(String prefix) {
+    ExerciseListRequest request = super.getRequest(prefix);
+    request.setAddFirst(false);
+    return request;
+  }
 
   /**
    * Assume for the moment that the first type has the largest elements... and every other type nests underneath it.
@@ -1069,11 +1084,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onFailure(Throwable caught) {
             if (caught instanceof DominoSessionException) {
-              logger.info("got " + caught);
+              logger.info("getTypeToValues : got " + caught);
             }
-//            else {
             controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
-            //          }
           }
 
           /**
@@ -1314,7 +1327,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @param itemID
    * @see ExerciseList#checkAndAskServer
-   *
    */
   protected void askServerForExercise(int itemID) {
     final int currentReq = incrReq();
@@ -1356,9 +1368,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
+   * @return
    * @see #askServerForExercise(int)
    * @see #makePagingContainer
-   * @return
    */
   private int incrReq() {
     return ++freqid;
@@ -1398,7 +1410,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    * @param visibleIDs
    * @param currentReq
-   * @see #askServerForExercises(int, Collection, int)
+   * @see #askServerForExercises
    */
   private void getExercises(final Collection<Integer> visibleIDs, final int currentReq) {
     if (!isDrillView()) { // no blink
@@ -1743,20 +1755,20 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       } else {
         next.getRefAudio(() -> {
           if (iterator.hasNext()) {
-       //     logger.info("\tgetRefAudio panel complete...");
+            //     logger.info("\tgetRefAudio panel complete...");
             final int reqid = next.getReq();
             if (isCurrentReq(reqid)) {
               Scheduler.get().scheduleDeferred(() -> {
                 if (isCurrentReq(reqid)) {
                   getRefAudio(iterator);
                 } else {
-                  if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req (" +reqid+
+                  if (DEBUG_STALE) logger.info("getRefAudio : 2 skip stale req (" + reqid +
                       ") for panel vs " + getCurrentExerciseReq());
                 }
               });
             }
           } else {
-         //   logger.info("\tgetRefAudio all panels complete...");
+            //   logger.info("\tgetRefAudio all panels complete...");
           }
         });
       }
@@ -1831,5 +1843,9 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       progressTooltip.setText(text);
       progressTooltip.reconfigure();
     }*/
+  }
+
+  protected void resort(List<CommonShell> toRemember) {
+    listSorting.sortLater(toRemember, sortBoxReally);
   }
 }

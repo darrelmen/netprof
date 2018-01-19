@@ -161,7 +161,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Get exercises for this user.
    *
    * @return true if we asked the server for exercises
-   * @see HistoryExerciseList#noSectionsGetExercises(long, int)
+   * @see HistoryExerciseList#noSectionsGetExercises(int)
    */
   public boolean getExercises() {
     if (DEBUG) logger.info("ExerciseList.getExercises instance " + getInstance());
@@ -268,14 +268,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
      * @param searchIfAny
      * @param exerciseID
      * @paramx setTypeAheadText
-     * @see ListInterface#getExercises()
+     * @see HistoryExerciseList#getExerciseIDs
      */
     SetExercisesCallback(String selectionID, String searchIfAny, int exerciseID, ExerciseListRequest request) {
       this.selectionID = selectionID;
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
-
       //logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
     }
 
@@ -286,16 +285,17 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
-      logger.info("onSuccess took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
+      logger.info("SetExercisesCallback.onSuccess took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
 
       showFinishedGettingExercises();
       if (DEBUG) {
         List<T> exercises = result.getExercises();
 
         exercises.forEach(exercise->logger.info("Got " + exercise.getID() + " " + exercise.getEnglish()));
-        if (exercises == null)
+        if (exercises != null)
           logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
       }
+
       if (isStaleResponse(result)) {
         if (DEBUG)
           logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
@@ -306,15 +306,23 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         checkForEmptyExerciseList(result.getExercises().isEmpty());
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
 
-        Map<Integer, Float> idToScore = result.getIdToScore();
-        for (T ex : result.getExercises()) {
-          int id = ex.getID();
-          if (idToScore.containsKey(id)) {
-            ex.getMutableShell().setScore(idToScore.get(id));
-          }
-        }
+        setScores(result);
 
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
+      }
+    }
+  }
+
+  /**
+   * TODO : Why do this here? not on server???
+   * @param result
+   */
+  private void setScores(ExerciseListWrapper<T> result) {
+    Map<Integer, Float> idToScore = result.getIdToScore();
+    for (T ex : result.getExercises()) {
+      int id = ex.getID();
+      if (idToScore.containsKey(id)) {
+        ex.getMutableShell().setScore(idToScore.get(id));
       }
     }
   }
@@ -478,6 +486,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     );
 
     exercises = rememberExercises(exercises);
+//    listeners.forEach(l->l.listChanged(exercises, selectionID));
     for (ListChangeListener<T> listener : listeners) {
       listener.listChanged(exercises, selectionID);
     }

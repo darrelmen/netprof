@@ -288,6 +288,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         annotationDAO,
         stateManager,
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
+        projectManagement,
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);
@@ -587,7 +588,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Special check for amas exercises...
    *
    * @param lessonPlanFileOnlyForImport only for import
-   * @see DatabaseServices#setInstallPath(String, ServletContext)
+   * @see #setInstallPath(String, ServletContext)
    */
   private void makeDAO(String lessonPlanFileOnlyForImport) {
     // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
@@ -1053,6 +1054,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   *
+   * TODO : NO - don't do this - use a query.
+   *
    * Add info from exercises.
    *
    * @param monitorResults
@@ -1101,12 +1105,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
       join.put(exercise.getID(), exercise);
     }
 
-    // TODO : why would we want to do this?
+/*    // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
       for (CommonExercise exercise : userExerciseDAO.getAllUserExercises(projectid)) {
         join.put(exercise.getID(), exercise);
       }
-    }
+    }*/
 
     return join;
   }

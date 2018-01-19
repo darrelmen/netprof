@@ -65,6 +65,7 @@ public class ScoreFeedbackDiv {
   /**
    * Color the feedback with same color scheme as words and phones.
    * Not the 4 color styles that come with the progress bar.
+   *
    * @param score
    */
   void showScore(double score) {
@@ -135,7 +136,7 @@ public class ScoreFeedbackDiv {
     wordTableContainer.add(getPlayButtonDiv());
 
     float hydecScore = pretestScore.getHydecScore();
-  //  logger.info("score " + hydecScore);
+    //  logger.info("score " + hydecScore);
     if (hydecScore > 0) {
       DivWidget scoreFeedbackDiv = new DivWidget();
       scoreFeedbackDiv.add(progressBar);
@@ -149,13 +150,9 @@ public class ScoreFeedbackDiv {
       playAudioPanel.setEnabled(true);
 
       wordTableContainer.add(scoreFeedbackDiv);
+
       if (hydecScore > NATIVE_THRSHOLD) {
-        Heading w = new Heading(4, getPraiseMessage());
-        w.addStyleName("leftFiveMargin");
-        w.addStyleName("correctCard");
-        DivWidget praise = new DivWidget();
-        praise.add(w);
-        wordTableContainer.add(praise);
+        wordTableContainer.add(getPraise());
       }
       //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
@@ -169,6 +166,15 @@ public class ScoreFeedbackDiv {
     wordTableContainer.add(container);
 
     return wordTableContainer;
+  }
+
+  private DivWidget getPraise() {
+    Heading w = new Heading(4, getPraiseMessage());
+    w.addStyleName("leftFiveMargin");
+    w.addStyleName("correctCard");
+    DivWidget praise = new DivWidget();
+    praise.add(w);
+    return praise;
   }
 
   private List<String> praise = Arrays.asList("Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!", "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!", "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!");

@@ -176,12 +176,6 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     return exid;
   }
 
-//  @Deprecated
-//  @Override
-//  public String getID() {
-//    return oldExID;
-//  }
-
   public AudioType getAudioType() {
     return audioType;
   }
@@ -206,6 +200,10 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     return unitToValue;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#addUnitAndChapterToResults
+   * @param unitToValue
+   */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
   }

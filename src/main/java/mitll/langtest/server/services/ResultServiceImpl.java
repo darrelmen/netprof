@@ -124,6 +124,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @param flText
    * @return
    * @see #getResults
+   * @see mitll.langtest.client.result.ResultManager#createProvider
    */
   private List<MonitorResult> getResults(int projectID, Map<String, String> unitToValue, int userid, String flText) {
     logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
@@ -137,23 +138,13 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
 
     Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
-//    Collection<MonitorResult> results = db.getMonitorResults(projectID);
 
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
       for (String type : db.getTypeOrder(projectID)) {
         if (unitToValue.containsKey(type)) {
           // make trie from results
-          Trie<MonitorResult> trie = new Trie<>();
-          trie.startMakingNodes();
-          for (MonitorResult result : results) {
-            String s = result.getUnitToValue().get(type);
-            if (s != null) {
-              trie.addEntryToTrie(new ResultWrapper(s, result));
-            }
-          }
-          trie.endMakingNodes();
-
+          Trie<MonitorResult> trie = makeUnitChapterTrieFromResults(results, type);
           results = trie.getMatchesLC(unitToValue.get(type));
         }
       }
@@ -165,34 +156,64 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
 
     // must be asking for text
-    if (flText != null && !flText.isEmpty()) { // asking for text
-      Trie<MonitorResult> trie = new Trie<>();
-      trie.startMakingNodes();
-      logger.debug("getResults filter text searching over " + results.size() + " for " + flText);
-      for (MonitorResult result : results) {
-        String foreignText = result.getForeignText();
-        if (foreignText != null) {
-          trie.addEntryToTrie(new ResultWrapper(foreignText.trim(), result));
-        }
-      }
-      trie.endMakingNodes();
-
-      results = trie.getMatchesLC(flText);
+    if (!flText.isEmpty()) { // asking for text
+      results = getTrieFromFL(flText, results).getMatchesLC(flText);
     }
     logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
     return new ArrayList<>(results);
   }
 
+  @NotNull
+  private Trie<MonitorResult> getTrieFromFL(String flText, Collection<MonitorResult> results) {
+    logger.debug("getResults filter text searching over " + results.size() + " for " + flText);
+
+    long then = System.currentTimeMillis();
+    Trie<MonitorResult> trie = new Trie<>();
+    trie.startMakingNodes();
+    for (MonitorResult result : results) {
+      String foreignText = result.getForeignText();
+      if (foreignText != null) {
+        trie.addEntryToTrie(new ResultWrapper(foreignText.trim(), result));
+      }
+    }
+    trie.endMakingNodes();
+    logger.info("getTrieFromFL took " + (System.currentTimeMillis() - then) + " to get trie");
+    return trie;
+  }
+
+  @NotNull
+  private Trie<MonitorResult> makeUnitChapterTrieFromResults(Collection<MonitorResult> results, String type) {
+    Trie<MonitorResult> trie = new Trie<>();
+    trie.startMakingNodes();
+    for (MonitorResult result : results) {
+      String s = result.getUnitToValue().get(type);
+      if (s != null) {
+        trie.addEntryToTrie(new ResultWrapper(s, result));
+      }
+    }
+    trie.endMakingNodes();
+    return trie;
+  }
+
+  /**
+   * Overkill to build another trie just for userid?
+   *
+   * @param userid
+   * @param results
+   * @return
+   */
   private Collection<MonitorResult> filterByUser(int userid, Collection<MonitorResult> results) {
     Trie<MonitorResult> trie;
-    logger.debug("making trie for userid " + userid);
+    logger.debug("filterByUser making trie for userid " + userid);
 
+    long then = System.currentTimeMillis();
     trie = new Trie<>();
     trie.startMakingNodes();
     for (MonitorResult result : results) {
       trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
     }
     trie.endMakingNodes();
+    logger.info("filterByUser took " + (System.currentTimeMillis() - then) + " to get trie");
 
     results = trie.getMatchesLC(Long.toString(userid));
     return results;

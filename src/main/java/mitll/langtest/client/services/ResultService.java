@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.result.ResultManager;
@@ -43,6 +42,10 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * All serving the result manager admin display -
+ * @see ResultManager
+ */
 @RemoteServiceRelativePath("result-manager")
 public interface ResultService extends RemoteService {
   /**

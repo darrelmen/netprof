@@ -1165,7 +1165,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
     List<CommonShell> ids = new ArrayList<>(exercises.size());
-    exercises.forEach(ex -> ids.add(ex.getShell()));
+
+    exercises.forEach(ex -> {
+      CommonShell shell = ex.getShell();
+      if (shell.getNumPhones() == 0) logger.warn("no phones for " + ex.getID());
+      ids.add(shell);
+    });
     return ids;
   }
 

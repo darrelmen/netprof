@@ -69,11 +69,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   static final String SECTION_SEPARATOR = SelectionState.SECTION_SEPARATOR;
   private HandlerRegistration handlerRegistration;
-  private long userID;
   private final FacetContainer sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_PUSH = false;
 
   /**
@@ -287,7 +286,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
             "\n\ttoken '" + historyToken +
             "' " + "\n\tcurrent has " + getSize() + " instance " + getInstance());
 
-        noSectionsGetExercises(userID, selectionState.getItem());
+        noSectionsGetExercises(selectionState.getItem());
       } else {
         logger.info("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + getInstance());
       }
@@ -413,7 +412,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       }
       if (getCreatedPanel() == null) {
         popRequest();
-        noSectionsGetExercises(controller.getUserState().getUser(), selectionState.getItem());
+        noSectionsGetExercises(selectionState.getItem());
       }
       return;
     }
@@ -502,10 +501,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +
-          "\ntype->section " + typeToSection +
-          "\nprefix        " + prefix +
-          "\nrequest       " + request +
-          "\n\tlast        " + lastSuccessfulRequest);
+          "\n\ttype->section " + typeToSection +
+          "\n\tprefix        " + prefix +
+          "\n\trequest       " + request +
+          "\n\tlast         " + lastSuccessfulRequest);
     }
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
@@ -591,12 +590,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   /**
-   * @param userID
    * @param exerciseID
    * @see PagingExerciseList#loadExercises
    * @see #pushNewSectionHistoryToken
    */
-  protected void noSectionsGetExercises(long userID, int exerciseID) {
+  protected void noSectionsGetExercises(int exerciseID) {
     // logger.info("noSectionsGetExercises " +userID);
     super.getExercises();
   }

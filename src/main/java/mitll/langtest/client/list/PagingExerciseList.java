@@ -478,30 +478,34 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
    *
-   * @param result
+   * @param toRemember
    * @see ExerciseList#rememberAndLoadFirst
-   * @see #simpleSetShuffle(boolean)
+   * @see #simpleSetShuffle
    */
   @Override
-  public List<T> rememberExercises(List<T> result) {
-    inOrderResult = result;
+  public List<T> rememberExercises(List<T> toRemember) {
+    inOrderResult = toRemember;
     if (doShuffle) {
-      // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
-      ArrayList<T> ts = new ArrayList<>(result);
-      result = ts;
+      // logger.info(getInstance() + " : rememberExercises - shuffling " + toRemember.size() + " items");
+      ArrayList<T> ts = new ArrayList<>(toRemember);
+      toRemember = ts;
       Shuffler.shuffle(ts);
     }
+    resort(toRemember);
     clear();
     //  int c = 0;
-    for (T es : result) {
-      addExercise(es);
-/*      if (c++ < 10) {
-        logger.info("# " + c + " " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
-      }*/
-    }
+    toRemember.forEach(this::addExercise);
+//    for (T es : toRemember) {
+//      addExercise(es);
+///*      if (c++ < 10) {
+//        logger.info("# " + c + " " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
+//      }*/
+//    }
     flush();
-    return result;
+    return toRemember;
   }
+
+  protected void resort(List<T> toRemember) {}
 
   @Override
   protected List<T> getInOrder() {
