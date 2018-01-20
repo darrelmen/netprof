@@ -342,6 +342,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private void showRecordingHistory(List<CorrectAndScore> scores) {
     if (scores != null) {
+
       for (CorrectAndScore score : scores) {
         miniScoreListener.addScore(score);
       }

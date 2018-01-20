@@ -427,11 +427,12 @@ public abstract class BaseResultDAO extends DAO {
    * @param language
    * @return
    */
-  public Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
-    return getCorrectAndScoreMap(exercises, userid, language);
-  }
-
-  abstract Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language);
+  public abstract  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
+//  {
+//    return getCorrectAndScoreMap(exercises, userid, language);
+//  }
+//
+//  abstract Map<Integer, CorrectAndScore> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language);
 
   /**
    * @param userID

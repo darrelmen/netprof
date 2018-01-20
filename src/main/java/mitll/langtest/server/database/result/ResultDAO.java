@@ -98,7 +98,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * @param database
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public ResultDAO(Database database) {
     super(database);
@@ -114,8 +114,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see UserManagement#populateUserToNumAnswers
-   * @see #getUserToResults
+   * @seex UserManagement#populateUserToNumAnswers
+   * @sexe #getUserToResults
    * @see Report#getResults
    */
   @Override
@@ -165,7 +165,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
     return null;
   }
 
@@ -302,7 +302,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param userid
    * @param language
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
   public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language) {
@@ -405,7 +405,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    * @throws SQLException
    * @see #getResults()
-   * @see #getResultsDevices()
+   * @seex #getResultsDevices()
    */
   private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());

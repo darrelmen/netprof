@@ -315,6 +315,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * TODO : Why do this here? not on server???
+   * @see ExerciseList.SetExercisesCallback#onSuccess
    * @param result
    */
   private void setScores(ExerciseListWrapper<T> result) {

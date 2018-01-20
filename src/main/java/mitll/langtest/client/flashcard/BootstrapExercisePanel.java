@@ -67,8 +67,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.ASRRecordAudioPanel.FIRST_STEP;
-import static mitll.langtest.client.scoring.ASRRecordAudioPanel.SECOND_STEP;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 
 /**
@@ -84,6 +82,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
   private Logger logger;
+
+  private static final int FIRST_STEP  = 35;
+  private static final int SECOND_STEP = 75;
 
   private static final double FIRST_STEP_PCT = ((double)FIRST_STEP) / 100d;
   private static final double SECOND_STEP_PCT = ((double)SECOND_STEP) / 100d;

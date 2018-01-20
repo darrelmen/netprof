@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   private int reqID;
   private List<T> exercises;
   private CommonExercise firstExercise;
-  private Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise;
+  private Map<Integer,CorrectAndScore> scoreHistoryPerExercise;
   private Map<Integer, Float> idToScore = new HashMap<>();
 
   /**
@@ -69,7 +70,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper(int reqID,
                              List<T> ids,
                              CommonExercise firstExercise,
-                             Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise
+                             Map<Integer, CorrectAndScore> scoreHistoryPerExercise
   ) {
     this.reqID = reqID;
     this.exercises = ids;
@@ -93,20 +94,24 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
    * @see mitll.langtest.client.list.FacetExerciseList#setScoreHistory
    * @return
    */
-  public Map<Integer, List<CorrectAndScore>> getScoreHistoryPerExercise() {
+  public Map<Integer, CorrectAndScore> getScoreHistoryPerExercise() {
     return scoreHistoryPerExercise;
-  }
-
-  public String toString() {
-    return "req " + reqID + " has " + exercises.size() + " exercises" +
-        (firstExercise != null ? ", first is " + firstExercise.getID() : "");
   }
 
   public Map<Integer, Float> getIdToScore() {
     return idToScore;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper(ExerciseListRequest, Collection, int)
+   * @param idToScore
+   */
   public void setIdToScore(Map<Integer, Float> idToScore) {
     this.idToScore = idToScore;
+  }
+
+  public String toString() {
+    return "req " + reqID + " has " + exercises.size() + " exercises" +
+        (firstExercise != null ? ", first is " + firstExercise.getID() : "");
   }
 }

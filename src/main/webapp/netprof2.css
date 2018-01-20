@@ -1831,6 +1831,14 @@ h1, h2, h3, h4, h5, h6 {
     transition-timing-function: ease-in;
 }
 
+.mainBlock .progress .bar {
+    font-size: 18px;
+    line-height: 25px;
+    -webkit-transition: width 1s; /* Safari */
+    transition: width 1s;
+    transition-timing-function: ease-in;
+}
+
 .playButton {
 }
 

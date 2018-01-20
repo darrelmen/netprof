@@ -1570,7 +1570,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   @NotNull
   private Map<Integer, CommonExercise> setScoreHistory(ExerciseListWrapper<CommonExercise> result) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
-    Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+    Map<Integer,  CorrectAndScore> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
     for (CommonExercise ex : result.getExercises()) {
       //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
@@ -1578,10 +1578,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 
       {
-        List<CorrectAndScore> correctAndScores = scoreHistoryPerExercise.get(id);
+        CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(id);
 
         // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
-        List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
+        List<CorrectAndScore> scoreTotal = new ArrayList<>();
+        if (correctAndScore != null) scoreTotal.add(correctAndScore);
+       // List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
         //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
         ex.getMutable().setScores(scoreTotal);
       }

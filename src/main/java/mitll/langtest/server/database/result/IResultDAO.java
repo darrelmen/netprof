@@ -113,7 +113,7 @@ public interface IResultDAO extends IDAO {
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language);
 
-  Map<Integer, List<CorrectAndScore>> getScoreHistories(int userid, Collection<Integer> exercises, String language);
+  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
 
   List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                    int id,

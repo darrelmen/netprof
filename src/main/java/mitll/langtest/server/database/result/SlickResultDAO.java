@@ -259,7 +259,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
 
-
   @Override
   public Collection<MonitorResult> getResultsDevices(int projid) {
     return getMonitorResults(dao.allDevices(projid));
@@ -272,6 +271,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * Don't return results where the exercises are not known.
+   *
    * @param projid
    * @return
    */
@@ -339,10 +339,40 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @see BaseResultDAO#getScoreHistories
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    */
-  public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
-    return getResultsForExIDInForUser(ids, userid, "", language)
+ /* public Map<Integer, List<CorrectAndScore>> getCorrectAndScoreMap(Collection<Integer> ids, int userid, String language) {
+    Map<Integer, List<CorrectAndScore>> collect = getResultsForExIDInForUser(ids, userid, "", language)
         .stream()
         .collect(Collectors.groupingBy(CorrectAndScore::getExid));
+    return collect;
+  }*/
+
+
+  /**
+   * Highest scoring attempt a student has ever recorded.
+   *
+   * @param userid
+   * @param ids
+   * @param language
+   * @return
+   */
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, String language) {
+    Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
+
+    getResultsForExIDInForUser(ids, userid, "", language)
+        .stream()
+        .collect(Collectors.groupingBy(CorrectAndScore::getExid))
+        .forEach((k, v) -> exidToMaxScoreEver.put(k,
+            v
+                .stream()
+                .max((o1, o2) -> {
+                  int compare = Float.compare(o1.getScore(), o2.getScore());
+                  if (compare == 0) compare = Long.compare(o1.getTimestamp(), o2.getTimestamp());
+                  return compare;
+                })
+                .get())
+        );
+
+    return exidToMaxScoreEver;
   }
 
   /**
@@ -370,6 +400,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * Scores for indicated exercises for user.
+   * <p>
+   * So we can pass in the exids to the query as inSet query, but that's wasteful when we just want all the scores for
+   * a person.
    *
    * @param <T>
    * @param userid
@@ -383,19 +416,22 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .map(HasID::getID)
         .collect(Collectors.toSet());
 
-    Map<Integer, SlickExerciseScore> correctAndScoresForReal;
+ //   Map<Integer, SlickExerciseScore> correctAndScoresForReal;
 
-    if (idsToFind.size() < 200 || true) {
+    if (idsToFind.size() < 2000) {
       long then = System.currentTimeMillis();
-      correctAndScoresForReal = dao.exidAndScoreWhere(userid, idsToFind);
+      Map<Integer, Float> integerFloatMap = dao.exidAndScoreWhere(userid, idsToFind);
       long now = System.currentTimeMillis();
-      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises for user " + userid);
-    }
+      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises for user " + userid + " enumerated...");
 
-    long then = System.currentTimeMillis();
-    Map<Integer, SlickExerciseScore> correctAndScoresForReal2 = dao.exidAndScore(userid);
-    long now = System.currentTimeMillis();
-    logger.info("getScores 2 took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids - "+ correctAndScoresForReal2.size());
+      return new HashMap<>(integerFloatMap);
+    } else {
+      long then = System.currentTimeMillis();
+      Map<Integer, Float> integerFloatMap = dao.exidAndScore(userid);
+      long now = System.currentTimeMillis();
+      logger.info("getScores took " + (now - then) + " millis to ask for " + idsToFind.size() + " ids - " + integerFloatMap.size());
+      return new HashMap<>(integerFloatMap);
+    }
 
     /*   else {
 
@@ -417,8 +453,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       correctAndScoresForReal = filtered;
     }*/
 
-    logger.info("getScores : for user " + userid + " checking " + exercises.size() + " exercises, found " + correctAndScoresForReal.size() + " scores");
-    return getScores2(correctAndScoresForReal);
+//    logger.info("getScores : for user " + userid + " checking " + exercises.size() + " exercises, found " + correctAndScoresForReal.size() + " scores");
+//    return getScores2(correctAndScoresForReal);
   }
 
   /**
@@ -451,14 +487,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
           "\n\tcorrect & score " + correctAndScoresForReal.size());
     }
   }*/
-  private <T extends HasID> Map<Integer, Float> getScores2(
-      Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
+
+/*  private <T extends HasID> Map<Integer, Float> getScores2(Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     Map<Integer, Float> idToScore = new HashMap<>();
     correctAndScoresForReal.forEach((k, v) -> idToScore.put(k, v.pronscore()));
     return idToScore;
-  }
-
-
+  }*/
   private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
                                                           Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     Map<Integer, Float> idToScore = new HashMap<>();
@@ -488,9 +522,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   *
    * @param slickCorrectAndScores
-   * @param language so we can fix the file path
+   * @param language              so we can fix the file path
    * @return
    */
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {

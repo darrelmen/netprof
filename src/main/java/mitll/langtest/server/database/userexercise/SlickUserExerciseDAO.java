@@ -335,6 +335,9 @@ public class SlickUserExerciseDAO
    * <p>
    * Use exercise -> phone map to determine phones per exercise...
    *
+   *
+   * Don't set phones on netprof machine???
+   *
    * @param slick
    * @param baseTypeOrder
    * @param sectionHelper
@@ -356,8 +359,8 @@ public class SlickUserExerciseDAO
                                                 List<SlickExercisePhone> pairs) {
     if (exercise.getNumPhones() < 1 &&
         lookup.hasModel() &&
-        hostName.startsWith(HYDRA) ||
-        hostAddress.contains("MITLL")) {  // for local testing
+        (hostName.startsWith(HYDRA) ||
+            hostName.contains("MITLL"))) {  // for local testing
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
 
@@ -372,6 +375,9 @@ public class SlickUserExerciseDAO
       }
 
       exercise.setNumPhones(numToUse);
+    }
+    else {
+     // logger.info("hostName " + hostName + " host addr " + hostAddress + " : " + exercise.getNumPhones() + " " + lookup.hasModel());
     }
 //    logger.info("addExerciseToSectionHelper for " + exercise.getID() + " num phones = " + numToUse);
 

@@ -15,13 +15,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/22/17.
  */
 class ListSorting<T extends CommonShell, U extends Shell> {
-  public static final String LANG_ASC = "langASC";
-  public static final String LANG_DSC = "langDSC";
   private final Logger logger = Logger.getLogger("ListSorting");
+
+  private static final String LANG_ASC = "langASC";
+  private static final String LANG_DSC = "langDSC";
 
   private static final String ASCENDING = "ascending";
   private static final String DESCENDING = "descending";
-  public static final String LIST_BOX_SETTING = "listBoxSetting";
+  private static final String LIST_BOX_SETTING = "listBoxSetting";
 
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
@@ -36,7 +37,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
 
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
-  String language;
+  private String language;
 
   /**
    * @param exerciseList
@@ -173,11 +174,15 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     int rawScore = o1.getRawScore();
     int rawScore1 = o2.getRawScore();
 
+    if (rawScore == -1 && rawScore1 == -1) {
+      return 0;
+    } else {
+
 //    if (rawScore == -1 && rawScore1 -)
-    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore1);
+//    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore1);
 
-
-    return Integer.compare(rawScore, rawScore1);
+      return Integer.compare(rawScore, rawScore1);
+    }
   }
 
   private void sortBy(List<T> toSort, Comparator<T> comp) {

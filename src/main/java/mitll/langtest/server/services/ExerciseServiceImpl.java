@@ -559,6 +559,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * <p>
    * Send the first exercise along so we don't have to ask for it after we get the initial list
    *
+   * scores should be consistent with getScoreHistoryPerExercise
+   * @see #getScoreHistoryPerExercise
    * @param exercises
    * @param projID
    * @return
@@ -603,7 +605,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(), exerciseShells1, firstExercise);
 
     if (!request.isQC()) {
+      // should be consistent with getScoreHistoryPerExercise
+      // @see #getScoreHistoryPerExercise
       Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
+
+/*
+      List<Integer> sorted = new ArrayList<>(scores.keySet());
+      Collections.sort(sorted);
+      sorted.forEach(exid -> logger.info("exids #" + exid+" -> " + scores.get(exid)));
+*/
+
       exerciseListWrapper.setIdToScore(scores);
     }
 
@@ -1170,7 +1181,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     exercises.forEach(ex -> {
       if (ex.getNumPhones() == 0) logger.warn("no phones for exercise " + ex.getID());
       CommonShell shell = ex.getShell();
-      if (shell.getNumPhones() == 0) logger.warn("no phones for shell " + ex.getID());
+      // if (shell.getNumPhones() == 0) logger.warn("no phones for shell " + ex.getID());
       ids.add(shell);
     });
     return ids;
@@ -1391,8 +1402,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
-    Map<Integer, List<CorrectAndScore>> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
+    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
     logger.info("getFullExercises found " + exercises.size() + " exercises and " + scoreHistoryPerExercise.size() + " scores");
+
+/*
+    List<Integer> sorted = new ArrayList<>(scoreHistoryPerExercise.keySet());
+    Collections.sort(sorted);
+    sorted.forEach(exid -> logger.info("correct & score : exids #" + exid+" -> " + scoreHistoryPerExercise.get(exid)));
+
+*/
+
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
     return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
   }
@@ -1468,18 +1487,24 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * Join between exercises and scores
    *
+   * Be consistent with ResultDAO.getScores
+   *
+   * @see mitll.langtest.server.database.result.SlickResultDAO#getScores
+   *
+   * @see #makeExerciseListWrapper
+   *
    * @param ids
    * @param exercises
    * @param userID
    * @see #getFullExercises
    */
-  private Map<Integer, List<CorrectAndScore>> getScoreHistoryPerExercise(Collection<Integer> ids,
-                                                                         List<CommonExercise> exercises,
-                                                                         int userID) {
+  private Map<Integer, CorrectAndScore> getScoreHistoryPerExercise(Collection<Integer> ids,
+                                                                   List<CommonExercise> exercises,
+                                                                   int userID) {
     long then = System.currentTimeMillis();
-    Map<Integer, List<CorrectAndScore>> scoreHistories = getScoreHistories(ids, exercises, userID);
+    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID);
 
-    Map<Integer, List<CorrectAndScore>> idToScores = new HashMap<>();
+/*    Map<Integer, List<CorrectAndScore>> idToScores = new HashMap<>();
 
     for (HasID exercise : exercises) {
       int id = exercise.getID();
@@ -1491,13 +1516,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         //exercise.getMutable().setScores(scoreTotal);
         idToScores.put(id, scoreTotal);
       }
-    }
+    }*/
 
     long now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
 
-    return idToScores;
+    return scoreHistories;
   }
 
   /**
@@ -1571,13 +1596,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return alignments;
   }
 
+
   private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
                                             Map<Integer, AlignmentOutput> alignments) {
     idToAudio.forEach((k, v) -> {
       AlignmentOutput alignmentOutput = alignments.get(k);
-      if (alignmentOutput == null)
-        logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
-      else v.setAlignmentOutput(alignmentOutput);
+      if (alignmentOutput == null) {
+        // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
+      } else {
+        v.setAlignmentOutput(alignmentOutput);
+      }
     });
   }
 
@@ -1678,7 +1706,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return typeToEndTimes;
   }
 
-  protected String getDisplayName(String event, Map<String, String> phoneToDisplay) {
+  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
     String displayName = phoneToDisplay.get(event);
     displayName = displayName == null ? event : displayName;
     return displayName;
@@ -1713,17 +1741,17 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
-   * @param ids
+   * @param exids
    * @param exercises
    * @param userID
    * @return
    * @see #getScoreHistoryPerExercise
    */
-  private Map<Integer, List<CorrectAndScore>> getScoreHistories(Collection<Integer> ids,
-                                                                List<CommonExercise> exercises,
-                                                                int userID) {
+  private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
+                                                          List<CommonExercise> exercises,
+                                                          int userID) {
     return (exercises.isEmpty()) ? Collections.emptyMap() :
-        db.getResultDAO().getScoreHistories(userID, ids, getLanguage(exercises.get(0)));
+        db.getResultDAO().getScoreHistories(userID, exids, getLanguage(exercises.get(0)));
   }
 
   private <T extends Shell> T getExercise(int userID, int projectID, String exid, boolean isFlashcardReq) {

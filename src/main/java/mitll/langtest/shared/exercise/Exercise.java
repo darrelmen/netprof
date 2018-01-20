@@ -34,7 +34,10 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.server.database.exercise.IPronunciationLookup;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -395,6 +398,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.english = englishSentence;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow
+   * @return
+   */
   public List<CorrectAndScore> getScores() {
     return scores;
   }
@@ -602,6 +609,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return safeToDecodeLastChecked;
   }
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addExerciseToSectionHelper(SlickExercise, Collection, ISection, Map, IPronunciationLookup, Exercise, Collection, List)
+   * @param numPhones
+   */
   public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
   }

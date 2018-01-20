@@ -81,7 +81,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    * @see MiniScoreListener#gotScore(mitll.langtest.shared.scoring.PretestScore, String)
    */
   public CorrectAndScore(float score, String path) {
-    this.score = score;
+   super(score);
     this.path = path;
   }
 
@@ -105,12 +105,11 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    */
   public CorrectAndScore(int uniqueID, int userid, int exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
+    super(uniqueID,timestamp,score);
     this.uniqueID = uniqueID;
     this.exid = exerciseID;
     this.userid = userid;
     this.correct = correct;
-    this.score = score;
-    this.timestamp = timestamp;
     this.path = path;
     this.scoreJson = scoreJson;
   }
@@ -120,18 +119,6 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   public boolean isCorrect() {
     return correct;
-  }
-
-  /**
-   * @return 0-100
-   */
-  public float getScore() {
-    return score;
-  }
-
-  public int getPercentScore() {
-    return Math.round(100f * score);
-
   }
 
   public int getExid() {
@@ -159,6 +146,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   }
 
   /**
+   * AMAS
    * TODO : maybe put this back someday
    * @return
    */

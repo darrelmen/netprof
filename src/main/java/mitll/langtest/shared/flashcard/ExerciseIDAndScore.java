@@ -4,18 +4,41 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Created by go22670 on 3/21/17.
+ *
+ * TODO : use this instead of correctAndScore in UI.
  */
 public class ExerciseIDAndScore implements IsSerializable {
   protected int exid;
-  protected float score;
+  private float score;
   protected long timestamp;
 
   public ExerciseIDAndScore() {
   }
 
-  public ExerciseIDAndScore(int exid, long timestamp, float score) {
+  ExerciseIDAndScore( float score) {
+
+    this.score = score;
+  }
+  ExerciseIDAndScore(int exid, long timestamp, float score) {
     this.exid = exid;
     this.timestamp = timestamp;
     this.score = score;
+  }
+
+//  public ExerciseIDAndScore(int exid,  float score) {
+//    this.exid = exid;
+//    this.score = score;
+//  }
+
+  /**
+   * @return 0-100
+   */
+  public float getScore() {
+    return score;
+  }
+
+  public int getPercentScore() {
+    return Math.round(100f * score);
+
   }
 }

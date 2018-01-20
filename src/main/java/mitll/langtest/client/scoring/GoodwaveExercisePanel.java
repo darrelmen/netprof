@@ -216,8 +216,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param exercise
    * @see #GoodwaveExercisePanel
    */
-  protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion, T exercise) {
+  protected abstract void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
+                                 float screenPortion, T exercise);
+/*
+  {
     DivWidget div = new DivWidget();
     div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
     ScoringAudioPanel answerWidget = getAnswerWidget(controller, screenPortion);
@@ -227,7 +229,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     addGroupingStyle(div);
     toAddTo.add(div);
   }
+*/
 
+/*
   private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget) {
 //    answerWidget.setRefAudio(refAudio);
     //  for (CorrectAndScore score : exercise.getScores()) {
@@ -236,6 +240,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 //    answerWidget.setClassAvg(exercise.getAvgScore());
     answerWidget.showChart();
   }
+*/
 
   protected abstract void addGroupingStyle(Widget div);
 /*
@@ -459,25 +464,25 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   /**
    * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
    *
-   * @param controller
-   * @param screenPortion
+   * @paramx controller
+   * @paramx screenPortion
    * @return
    * @see #addUserRecorder
    */
-  private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
+/*  private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets =
         new ASRRecordAudioPanel<>(this, controller, getLocalExercise(), options.getInstance());
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
 
     return widgets;
-  }
+  }*/
 
   protected String removePunct(String t) {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
-  protected T getLocalExercise() {
+  private T getLocalExercise() {
     return exercise;
   }
 
