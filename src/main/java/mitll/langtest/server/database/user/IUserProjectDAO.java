@@ -55,6 +55,8 @@ public interface IUserProjectDAO extends IDAO {
 
   void forgetUsersBulk(Collection<Integer> bulk);
 
+  boolean setCurrentUserToProject(int userid, int projid);
+
   /**
    * @param userid
    * @see mitll.langtest.server.database.DatabaseImpl#forgetProject

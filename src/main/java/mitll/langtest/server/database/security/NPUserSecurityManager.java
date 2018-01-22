@@ -35,7 +35,6 @@ package mitll.langtest.server.database.security;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
-import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.LoginResult;
@@ -46,9 +45,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
@@ -173,7 +169,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       // why do this?
       userDAO.getDatabase().setStartupInfo(loggedInUser);
       long now = System.currentTimeMillis();
-      if (now-then>40) {
+      if (now - then > 40) {
         log.info("took " + (now - then) + " to add session to db");
       }
     } catch (Exception e) {
@@ -228,14 +224,16 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see mitll.langtest.server.services.UserServiceImpl#logout
    */
   @Override
-  public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
+  public void logoutUser(HttpServletRequest request, int userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
     if (session != null) {
       log.info("logoutUser : Invalidating session {}", session.getId());
-      if (userId != null) {
-        userSessionDAO.removeSession(session.getId());
-      }
+///      if (killAllSessions) {
+        userSessionDAO.removeAllSessionsForUser(userId);
+//      } else {
+//        userSessionDAO.removeSession(session.getId());
+//      }
       // not strictly necessary, but ...
       session.removeAttribute(USER_SESSION_ATT);
       session.invalidate();
@@ -362,7 +360,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       if (sessUserID != -1) {
         setSessionUserAndRemember(getCurrentOrNewSession(request), sessUserID);
       } else {
-        if (DEBUG) log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
+        if (DEBUG)
+          log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
       }
 
     } else {
@@ -452,7 +451,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
     long now = System.currentTimeMillis();
 
-    if(now-then>10L) {
+    if (now - then > 10L) {
       log.info("took " + (now - then) + " to lookup user from session");
     }
 
@@ -465,12 +464,16 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
     if (session != null) {
       Integer uidI = getUserIDFromSession(session);
-      log.info("lookupUserIDFromHttpSession Lookup user from HTTP session. " +
-              //"SID={} " +
-              "Request SID={}, Session Created={}, isNew={}, result={}",
-          //session.getID(),
-          request.getRequestedSessionId(),
-          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+
+      if (DEBUG) {
+        log.info("lookupUserIDFromHttpSession Lookup user from HTTP session. " +
+                //"SID={} " +
+                "Request SID={}, Session Created={}, isNew={}, result={}",
+            //session.getID(),
+            request.getRequestedSessionId(),
+            request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+      }
+
       return uidI;
     } else if (request != null) {
       log.info("lookupUserIDFromHttpSession Lookup user from session returning null for null session. Request SID={}", request.getRequestedSessionId());

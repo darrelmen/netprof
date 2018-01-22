@@ -142,7 +142,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public void addScore(CorrectAndScore hydecScore) {
     if (currentMax == null || hydecScore.getScore() > currentMax.getScore()) {
       currentMax = hydecScore;
-      logger.info("current max now " + hydecScore);
+    //  logger.info("current max now " + hydecScore);
     }
 //    scores2.add(hydecScore);
   }

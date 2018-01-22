@@ -40,6 +40,9 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -209,9 +212,7 @@ public class InitialUI implements UILifecycle {
     contentRow.setHeight("100%");
 
 
-
     //contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
-
 
 
     verticalContainer.add(contentRow);
@@ -247,6 +248,9 @@ public class InitialUI implements UILifecycle {
     return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
 
+  /**
+   * @see UserMenu#getLogOut()
+   */
   public void logout() {
     userManager.clearUser();
 
@@ -303,12 +307,53 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().clear();   // necessary?
 
     DivWidget verticalContainer = new FluidContainer();
+    addMouseOverHandler(verticalContainer, event ->
+    {
+     // logger.info("got mouse over");
+      confirmCurrentProject();
+    });
+
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
     //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
 
     return verticalContainer;
+  }
+
+  /**
+   * So if we open multiple tabs with multiple projects, if we go back to an earlier project tab, we want to notice
+   * that and make it the current one.
+   *
+   * Also, if we log out of one tab and go to another, we'll notice here.
+   */
+  private void confirmCurrentProject() {
+    if (userManager.getCurrent() != null) {
+      ProjectStartupInfo projectStartupInfo = lifecycleSupport.getProjectStartupInfo();
+      if (projectStartupInfo != null) {
+        long then = System.currentTimeMillis();
+        controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            long now = System.currentTimeMillis();
+//            logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user ");
+            if (!result) {
+              logout();
+            }
+          }
+        });
+      }
+    }
+  }
+
+
+  private HandlerRegistration addMouseOverHandler(DivWidget container, MouseOverHandler handler) {
+    return container.addDomHandler(handler, MouseOverEvent.getType());
   }
 
   @Override
@@ -485,18 +530,7 @@ public class InitialUI implements UILifecycle {
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
       //logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
-      controller.getOpenUserService().forgetProject(new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable throwable) {
-          controller.handleNonFatalError("forgetting project for user", throwable);
-        }
-
-        @Override
-        public void onSuccess(Void aVoid) {
-          banner.setVisibleChoices(false);
-          navigation.clearCurrent();
-        }
-      });
+      forgetProjectForUser();
 
       History.newItem("");
       clearStartupInfo();
@@ -510,6 +544,21 @@ public class InitialUI implements UILifecycle {
     } else {
       logger.info("chooseProjectAgain no user --- ");
     }
+  }
+
+  private void forgetProjectForUser() {
+    controller.getOpenUserService().forgetProject(new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        controller.handleNonFatalError("forgetting project for user", throwable);
+      }
+
+      @Override
+      public void onSuccess(Void aVoid) {
+        banner.setVisibleChoices(false);
+        navigation.clearCurrent();
+      }
+    });
   }
 
   private void makeNavigation() {

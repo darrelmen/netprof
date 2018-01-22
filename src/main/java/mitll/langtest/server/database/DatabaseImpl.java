@@ -831,15 +831,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
-    return getJsonSupport(projid).getJsonScoreHistory(userid, typeToSection, sorter);
-  }
-
-  /**
-   * @param projid
-   * @return
-   */
-  private JsonSupport getJsonSupport(int projid) {
-    return getJsonSupportForProject(projid);
+    return getJsonSupportForProject(projid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
   private int projectForUser(int userid) {
@@ -873,7 +865,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
-    return getJsonSupport(projid)
+    return getJsonSupportForProject(projid)
         .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 

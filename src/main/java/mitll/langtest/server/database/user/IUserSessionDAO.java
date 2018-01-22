@@ -42,7 +42,9 @@ public interface IUserSessionDAO extends IDAO {
 
   int getUserForSV(String s, String v);
 
-  void removeSession(String session);
+//  void removeSession(String session);
+
+  void removeAllSessionsForUser(int userId);
 
   int getNumRows();
 }

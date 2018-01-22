@@ -210,6 +210,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   /**
    * Side effect is to add user exercises to lists.
+   * <p>
+   * TODO : don't do a separate query for each list.
    *
    * @param userid
    * @param projectID
@@ -219,16 +221,16 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   @Override
   public List<UserList<CommonShell>> getAllByUser(int userid, int projectID) {
     long then = System.currentTimeMillis();
-    List<UserList<CommonShell>> userExerciseLists = fromSlick(getByUser( userid, projectID));
+    List<UserList<CommonShell>> userExerciseLists = fromSlick(getByUser(userid, projectID));
     long now = System.currentTimeMillis();
 
-    logger.info("getAllByUser took " +(now-then) + " to get " + userExerciseLists.size());
+    logger.info("getAllByUser took " + (now - then) + " to get " + userExerciseLists.size());
 
     then = now;
     userExerciseLists.forEach(this::populateList);
-     now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
 
-    logger.info("getAllByUser took " +(now-then) + " to populate " + userExerciseLists.size());
+    logger.info("getAllByUser took " + (now - then) + " to populate " + userExerciseLists.size());
 
     return userExerciseLists;
   }
@@ -237,14 +239,16 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * Could get slow.
    * Why would we need to copy the exercise as in UserListDAO?
    *
+   * TODO : only want # of items on list, not complete populated list most of the time
+   *
    * @param where
    * @see IUserListDAO#getAllByUser(int, int)
    * @see #getWithExercises(int)
    * @see #populateLists(Collection, long)
    */
   private void populateList(UserList<CommonShell> where) {
-    List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
-    where.setExercises(onList);
+ //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
+    where.setExercises(userExerciseDAO.getOnList(where.getID()));
     // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
 /*
     Set<String> userExIDs = new HashSet<>();
@@ -264,8 +268,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   /**
    * Add the exercises to the list.
    *
-   * @see #getWithExercisesEx
    * @param where
+   * @see #getWithExercisesEx
    */
   private void populateListEx(UserList<CommonExercise> where) {
     where.setExercises(userExerciseDAO.getCommonExercises(where.getID()));
@@ -319,7 +323,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean remove(int unique) { return dao.markDeleted(unique);  }
+  public boolean remove(int unique) {
+    return dao.markDeleted(unique);
+  }
 
   @Override
   public void bringBack(long unique) {
@@ -335,7 +341,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public UserList<CommonExercise> getWithExercisesEx(int unique) {
-     UserList<CommonExercise> list = getList(unique);
+    UserList<CommonExercise> list = getList(unique);
     if (list == null) return null;
     else {
       populateListEx(list);
@@ -370,6 +376,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   /**
    * Don't return empty lists.
+   *
    * @param userid
    * @param projid
    * @return

@@ -74,4 +74,6 @@ public interface OpenUserServiceAsync {
    * @param async
    */
   void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
+
+  void setCurrentUserToProject(int projid, AsyncCallback<Boolean> async);
 }

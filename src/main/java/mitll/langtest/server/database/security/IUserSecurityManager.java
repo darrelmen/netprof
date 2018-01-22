@@ -16,7 +16,7 @@ public interface IUserSecurityManager {
    * The key to get/set the id of the user stored in the session
    * @see NPUserSecurityManager#getUserIDFromRequest
    * @see IUserSecurityManager#getUserIDFromSession
-   * @see NPUserSecurityManager#logoutUser
+   * @see IUserSecurityManager#logoutUser
    */
   String USER_SESSION_ATT = "user-db-id";
 
@@ -43,7 +43,7 @@ public interface IUserSecurityManager {
 
   int getLoggedInUserID(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
 
-  void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions);
+  void logoutUser(HttpServletRequest request, int userId, boolean killAllSessions);
 
   LoginResult getLoginResult(String userId,
                              String attemptedFreeTextPassword,

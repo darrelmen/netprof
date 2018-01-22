@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
@@ -94,9 +95,18 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
   }
 
+  /**
+   * @see IUserSecurityManager#logoutUser
+   * @param session
+   */
+/*
   @Override
-  public void removeSession(String session) {
-    dao.removeSession(session);
+  public void removeSession(String session) {    dao.removeSession(session);  }
+*/
+
+  @Override
+  public void removeAllSessionsForUser(int userId) {
+    dao.removeAllSessionsForUser(userId);
   }
 
   public int getNumRows() {    return dao.numRows();  }

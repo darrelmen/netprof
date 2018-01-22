@@ -72,7 +72,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private final FacetContainer sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 
   /**
@@ -504,7 +504,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
           "\n\ttype->section " + typeToSection +
           "\n\tprefix        " + prefix +
           "\n\trequest       " + request +
-          "\n\tlast         " + lastSuccessfulRequest);
+          "\n\tlast          " + lastSuccessfulRequest);
     }
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {

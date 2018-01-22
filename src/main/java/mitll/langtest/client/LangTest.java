@@ -58,6 +58,7 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.*;
 import mitll.langtest.client.instrumentation.ButtonFactory;
@@ -1170,6 +1171,9 @@ public class LangTest implements
     return startupInfo;
   }
 
+  /**
+   * @see ChangePasswordView#changePassword
+   */
   public void logout() {
     initialUI.logout();
   }

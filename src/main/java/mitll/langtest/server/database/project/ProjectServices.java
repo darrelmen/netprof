@@ -1,17 +1,37 @@
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.services.OpenUserServiceImpl;
+import mitll.langtest.shared.project.ProjectInfo;
+import net.sf.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**
  * Created by go22670 on 3/8/17.
  */
 public interface ProjectServices {
+  /**
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo)
+   * @param projectid
+   */
   void rememberProject(int projectid);
 
+  /**
+   * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
+   * @param userid
+   * @param projectid
+   */
   void rememberUsersCurrentProject(int userid, int projectid);
 
+  /**
+   * @see OpenUserServiceImpl#forgetProject
+   * @param userid
+   */
   void forgetProject(int userid);
 
   Project getProjectForUser(int userid);

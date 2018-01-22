@@ -865,9 +865,7 @@ public class SlickUserExerciseDAO
    */
   @Override
   public List<CommonShell> getOnList(int listID) {
-    List<CommonExercise> userExercises = getCommonExercises(listID);
-    List<CommonShell> userExercises2 = new ArrayList<>(userExercises);
-    return userExercises2;
+    return new ArrayList<>(getCommonExercises(listID));
   }
 
   /**
@@ -880,7 +878,7 @@ public class SlickUserExerciseDAO
     long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
     long now = System.currentTimeMillis();
-    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for " + listID );
+    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
     return getUserExercises(onList);
   }
 

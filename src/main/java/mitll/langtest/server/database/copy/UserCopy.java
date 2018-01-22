@@ -413,6 +413,8 @@ public class UserCopy {
   }
 
   /**
+   * Make sure we forget any previous user->project associations first, before adding current ones
+   *
    * @param slickUserProjectDAO
    * @param projid
    * @param added
@@ -420,7 +422,7 @@ public class UserCopy {
    */
   private void addUserProjectBinding(IUserProjectDAO slickUserProjectDAO, int projid, Map<Integer, Long> added) {
     // logger.info("addUserProjectBinding adding user->project for " + projid);
-    List<SlickUserProject> toAdd = new ArrayList<>();
+    List<SlickUserProject> toAdd = new ArrayList<>(added.size());
 
     slickUserProjectDAO.forgetUsersBulk(added.keySet());
 

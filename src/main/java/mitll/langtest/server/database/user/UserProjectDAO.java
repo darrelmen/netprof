@@ -45,13 +45,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+ */
 public class UserProjectDAO implements IUserProjectDAO {
-  //private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
   private UserProjectDAOWrapper dao;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public UserProjectDAO(DBConnection dbConnection) {
     dao = new UserProjectDAOWrapper(dbConnection);
@@ -81,11 +84,42 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.addBulk(bulk);
   }
 
+  /**
+   * @param bulk
+   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
+   */
   @Override
   public void forgetUsersBulk(Collection<Integer> bulk) {
     dao.forgetUsersBulk(bulk);
   }
 
+  /**
+   * A no-op if the current project for the user is as expected, but will switch project if not.
+   *
+   * @param userid
+   * @param projid
+   */
+  @Override
+  public boolean setCurrentUserToProject(int userid, int projid) {
+    int mostRecentByUser = mostRecentByUser(userid);
+
+    if (mostRecentByUser == -1) { // they logged out!
+      return false;
+    } else if (mostRecentByUser != projid) {
+      logger.info("switched tabs, was " + mostRecentByUser + " but now will be " + projid);
+      forget(userid);
+      add(userid, projid);
+      return true;
+    } else {
+     // logger.info("OK, just confirming current project for " + mostRecentByUser + " is " + projid);
+      return true;
+    }
+  }
+
+  /**
+   * @param userid
+   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
+   */
   @Override
   public void forget(int userid) {
     dao.forget(userid);
@@ -100,7 +134,10 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int mostRecentByUser(int user) {
+//    long then = System.currentTimeMillis();
     List<Integer> slickUserProjects = dao.mostRecentByUser(user);
+//    long now = System.currentTimeMillis();
+//    logger.info("mostRecentByUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
   }
 

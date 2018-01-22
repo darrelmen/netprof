@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.hlt.domino.server.util.ServletUtil;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.mail.EmailHelper;
@@ -159,7 +160,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       LoginResult.ResultType resultType = LoginResult.ResultType.Exists;
       if (!userByID.isValid()) {
         //logger.info("addUser user " + userByID + " resultType.");
-    //  } else {
+        //  } else {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
@@ -287,6 +288,9 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     }
   }
 
+  /**
+   * @see InitialUI#chooseProjectAgain
+   */
   @Override
   public void forgetProject() {
     try {
@@ -295,7 +299,37 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         db.forgetProject(sessionUserID);
       }
     } catch (DominoSessionException e) {
-      logger.error("got  " + e, e);
+      logger.error("forgetProject got  " + e, e);
+    }
+  }
+
+  /**
+   * If the user has two or more tabs open, and switches languages between tabs, behind the scenes
+   * we maintain the one-to-one user->project mapping by confirming the current project here and switching it
+   * in the database if it's not consistent with the UI.
+   *
+   * This should support Paul's language eval comparison. (1/22/18).
+   *
+   * @see InitialUI#confirmCurrentProject
+   * @param projid
+   * @return
+   */
+  @Override
+  public boolean setCurrentUserToProject(int projid) {
+    try {
+      long then = System.currentTimeMillis();
+      int sessionUserID = getSessionUserID();
+      boolean b = sessionUserID != -1 && db.getUserProjectDAO().setCurrentUserToProject(sessionUserID, projid);
+
+      long now = System.currentTimeMillis();
+      if (now - then > 10) {
+        logger.info("setCurrentUserToProject : took " + (now - then) + " to get current session user " + sessionUserID + " and set project to " + projid);
+      }
+
+      return b;
+    } catch (DominoSessionException e) {
+      logger.error("setCurrentUserToProject got  " + e, e);
+      return false;
     }
   }
 }

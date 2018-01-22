@@ -62,7 +62,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
-  private final UserProjectDAO userProjectDAO;
+  //private final UserProjectDAO userProjectDAO;
   private SlickProject first;
 
   /**
@@ -74,7 +74,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     super(database);
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
-    userProjectDAO = new UserProjectDAO(dbConnection);
+    //userProjectDAO = new UserProjectDAO(dbConnection);
   }
 
   public int ensureDefaultProject(int defaultUser) {
@@ -407,19 +407,4 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.byLanguage(language);
   }
 
-  /**
-   * TODOx : don't do two round trips to database.
-   *
-   * @param user
-   * @return
-   */
-/*  @Override
-  public SlickProject mostRecentByUser(int user) {
-    int i = userProjectDAO.mostRecentByUser(user);
-    if (i == -1) return null;
-    else {
-      Collection<SlickProject> slickProjectSeq = dao.byID(i);
-      return slickProjectSeq.isEmpty() ? null : slickProjectSeq.iterator().next();
-    }
-  }*/
 }
