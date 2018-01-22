@@ -87,10 +87,10 @@ class ListSorting<T extends CommonShell, U extends Shell> {
   private void makeDropDownReflectStoredValue(ListBox w1, String langASC, String langDSC) {
     String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
 
-    logger.info("makeDropDownReflectStoredValue value is " + value);
+ //   logger.info("makeDropDownReflectStoredValue value is " + value);
     if (value != null) {
       value = getNormValue(value, langASC, langDSC);
-      logger.info("makeDropDownReflectStoredValue norm value is " + value);
+   //   logger.info("makeDropDownReflectStoredValue norm value is " + value);
       w1.setSelectedValue(value);
       if (!w1.getSelectedValue().equalsIgnoreCase(value)) logger.warning("didn't set " + value);
       //  sortLater(w1, langASC, langDSC, value);
@@ -103,7 +103,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       String langDSC = getLangASC(language, DESCENDING);
       final String fvalue = getNormValue(w1.getSelectedValue(), langASC, langDSC);
 
-      logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
+     // logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
 
       sortByValue(toSort, fvalue, langASC, langDSC);
 //      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));

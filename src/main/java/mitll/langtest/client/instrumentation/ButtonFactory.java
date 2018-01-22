@@ -132,7 +132,6 @@ public class ButtonFactory implements EventLogger {
   public void logEvent(final String widgetID, final String widgetType, EventContext context) {
 //    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
     final ButtonFactory outer = this;
-    if (context.getUserid() == -1) context.setUserid(controller.getUserState().getUser());
     Scheduler.get().scheduleDeferred(() -> ifValidSendEvent(widgetID, widgetType, context, outer));
   }
 
@@ -146,6 +145,7 @@ public class ButtonFactory implements EventLogger {
 
         if (browserInfo != null) {
           //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
+          if (context.getUserid() == -1) context.setUserid(controller.getUserState().getUser());
           sendEvent(widgetID, widgetType, context, browserInfo);
         }
       }

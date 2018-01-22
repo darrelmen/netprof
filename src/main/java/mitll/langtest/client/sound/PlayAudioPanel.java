@@ -71,7 +71,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
-  private static final boolean LOCAL_TESTING = false;
+ // private static final boolean LOCAL_TESTING = false;
   protected static final IconType PLAY = IconType.PLAY;
 
   /**
@@ -134,10 +134,16 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
       addButtons(optionalToTheRight);
     }
 
+    /**
+     * If another play widget on the page is playing - stop!
+     */
     LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, authenticationEvent -> {
       if (authenticationEvent.getId() != id) {
-        // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
+        //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
         if (isPlaying()) {
+          if (DEBUG) {
+            logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
+          }
           pause();
           reinitialize();
         }
@@ -171,7 +177,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @param controller
    * @param exercise
    * @param addButtonsNow
-   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel(com.github.gwtbootstrap.client.ui.Image, com.github.gwtbootstrap.client.ui.Image, com.google.gwt.user.client.ui.Panel, String, Widget, ExerciseController, CommonExercise)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyPlayAudioPanel#MyPlayAudioPanel
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
   public PlayAudioPanel(SoundManagerAPI soundManager,
@@ -181,13 +187,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
                         ExerciseController controller,
                         CommonAudioExercise exercise, boolean addButtonsNow) {
     this(soundManager, buttonTitle, optionalToTheRight, false, controller, exercise, addButtonsNow);
-    addPlayListener(playListener);
+
+    if (playListener != null) {
+      addPlayListener(playListener);
+    }
   }
 
   public void setPlayLabel(String label) {
     this.playLabel = label;
     setText();
-    //return this;
   }
 
   protected void setText() {
@@ -208,7 +216,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   @Override
   protected void onUnload() {
-    if (DEBUG) logger.info("doing unload of play ------------------> ");
+    if (DEBUG) logger.info("onUnload : doing unload of play ------------------> ");
     super.onUnload();
 
     doPause();
@@ -266,9 +274,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
-    //if (isLarge) {
-    //   playButton.setSize(ButtonSize.LARGE);
-    // }
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
     playButton.getElement().setId("PlayAudioPanel_playButton");
     playButton.addStyleName("leftFiveMargin");
@@ -284,13 +289,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
-   * @see #addButtons(Widget)
+   * @see #makePlayButton
+   * @see #playAudio
    */
   protected void doClick() {
     //logger.info("PlayAudioPanel doClick " + playing + " " +currentPath);
     if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
         if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " + currentPath);
+        //markNotPlaying();
         pause();  // somehow get exception here?
       } else {
         if (DEBUG) logger.info("PlayAudioPanel doClick start " + playing + " " + currentPath);
@@ -299,14 +306,24 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     }
   }
 
+  /**
+   * @see #doClick
+   */
   private void startPlaying() {
-    if (LOCAL_TESTING) {
-      logger.info("startPlaying " + currentPath);
-      startSong(currentPath);
-    }
+//    if (LOCAL_TESTING) {
+//      logger.info("startPlaying " + currentPath);
+//      startSong(currentPath);
+//    }
+
+    markPlaying();
+
+    // tell other widgets to pause if they are playing audio
+
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(id));
 
-    for (PlayListener playListener : playListeners) playListener.playStarted();
+   // logger.info("startPlaying tell " + playListeners.size() + " listeners play started");
+    playListeners.forEach(PlayListener::playStarted);
+
     play();
   }
 
@@ -331,17 +348,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     this.simpleAudioListener = listener;
   }
 
-  /**
-   * @see #doClick
-   */
-  private void play() {
-    if (DEBUG || LOCAL_TESTING) {
-      logger.info("PlayAudioPanel play " + playing + " " + currentPath);
-    }
-    playing = true;
-    setPlayButtonText();
-    soundManager.play(currentSound);
-  }
 
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
@@ -349,7 +355,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     if (playing1) {
       playButton.setIcon(IconType.PAUSE);
     } else {
-      logger.info("setPlayButtonText set cursor to play ");
+//      logger.info("setPlayButtonText set cursor to play ");
       showPlayIcon(playButton);
     }
   }
@@ -366,13 +372,15 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     playButton.setEnabled(val);
   }
 
-  private boolean isPlaying() {
-    return playing;
-  }
 
+  /**
+   * @see #pause
+   * @see #resetAudio
+   */
   private void setPlayLabel() {
-    playing = false;
-    if (DEBUG) logger.info(new Date() + " setPlayLabel playing " + playing);
+    // markNotPlaying();
+
+    if (DEBUG) logger.info(new Date() + " setPlayLabel playing " + isPlaying());
     setText();
 
     showPlayIcon(playButton);
@@ -398,11 +406,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
         @Override
         public void songLoaded(double duration) {
           if (DEBUG) logger.info("playAudio - songLoaded " + currentPath + " this " + this);
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-              if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + currentPath);
-              doPlaySegment(startInSeconds, endInSeconds);
-            }
+          Scheduler.get().scheduleDeferred(() -> {
+            if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + currentPath);
+            doPlaySegment(startInSeconds, endInSeconds);
           });
         }
 
@@ -416,7 +422,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   private void doPlaySegment(float startInSeconds, float endInSeconds) {
-    playing = true;
+    markPlaying();
     setPlayButtonText();
     playSegment(startInSeconds, endInSeconds);
   }
@@ -445,9 +451,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   private void pause() {
     if (DEBUG) logger.info("PlayAudioPanel :pause");
-
+    markNotPlaying();
     setPlayLabel();
-    if (soundManager != null) soundManager.pause(currentSound);
+
+    if (soundManager != null) {
+      soundManager.pause(currentSound);
+    }
   }
 
   public void update(double position) {
@@ -459,7 +468,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   protected void playAudio() {
     if (currentPath == null) {
-      logger.warning("playAudio " + currentPath);
+      logger.warning("playAudio, current path is null?");
     } else {
       playAudio(currentPath);
     }
@@ -470,7 +479,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @seex mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
-  public void playAudio(String path) {
+  protected void playAudio(String path) {
     if (currentPath.equals(path) && currentSound != null) {
       doClick();
     } else {
@@ -486,6 +495,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
         @Override
         public void songFinished() {
+          if (DEBUG) logger.info("playAudio - songFinished " + path + " this " + this);
         }
       });
 
@@ -500,9 +510,11 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   public void loadAudio(String path) {
     if (DEBUG) logger.info("playAudio - loadAudio " + path);
+
+    doPause();
     String fixedPath = rememberAudio(path);
-    if (isPlaying()) pause();
     startSong(fixedPath);
+
     if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
   }
 
@@ -554,9 +566,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #startSong(String)
    */
   private void createSound(String song) {
-    if (LOCAL_TESTING) {
-      currentPath = song;
-    }
+//    if (LOCAL_TESTING) {
+//      currentPath = song;
+//    }
 
     currentSound = new Sound(this);
     if (DEBUG) {
@@ -584,13 +596,13 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * Does repeat audio if childCount > 0
    */
   public void reinitialize() {
-    if (DEBUG || LOCAL_TESTING) {
+    if (DEBUG /*|| LOCAL_TESTING*/) {
       logger.info("PlayAudioPanel :reinitialize " + getElement().getId());
     }
 
     resetAudio();
 
-    if (DEBUG || LOCAL_TESTING)
+    if (DEBUG /*|| LOCAL_TESTING*/)
       logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listeners);
 
     for (AudioControl listener : listeners) listener.reinitialize();
@@ -600,6 +612,9 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 //    }
   }
 
+  /**
+   * @see #reinitialize
+   */
   private void resetAudio() {
     setPlayLabel();
     update(0);
@@ -648,6 +663,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 //      logger.info("no listener for song loaded " + duration);
 //    }
     setEnabled(true);
+    if (DEBUG)  logger.info("song loaded : reinit");
     reinitialize();
   }
 
@@ -657,6 +673,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   public void songFinished() {
     if (DEBUG) logger.info("PlayAudioPanel :songFinished " + getElement().getId());
 
+    markNotPlaying();
     setPlayLabel();
 
 //    if (listener != null) {  // remember to delegate too
@@ -678,20 +695,33 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
     return playButton;
   }
 
-  public void playCurrent() {
-    if (DEBUG) logger.info("PlayAudioPanel :playCurrent " + playing);
-    playing = true;
+  /**
+   * @see #startPlaying
+   * @see #doClick
+   */
+  private void play() {
+    if (DEBUG /*|| LOCAL_TESTING*/) {
+      logger.info("PlayAudioPanel playing now = " + isPlaying() + " path " + currentPath);
+    }
+    markPlaying();
     setPlayButtonText();
     soundManager.play(currentSound);
   }
 
-  public PlayAudioPanel setPauseLabel(String pauseLabel) {
-    this.pauseLabel = pauseLabel;
-    return this;
+  private void markPlaying() {
+    playing = true;
   }
 
-  public PlayAudioPanel setMinWidth(int minWidth) {
-    // this.minWidth = minWidth;
+  private void markNotPlaying() {
+    playing = false;
+  }
+
+  private boolean isPlaying() {
+    return playing;
+  }
+
+  public PlayAudioPanel setPauseLabel(String pauseLabel) {
+    this.pauseLabel = pauseLabel;
     return this;
   }
 

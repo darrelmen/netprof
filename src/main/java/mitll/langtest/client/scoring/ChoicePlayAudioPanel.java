@@ -31,9 +31,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel extends PlayAudioPanel {
-  public static final String FAST = "Fast";
-  public static final String SLOW1 = "Slow";
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
+
+  private static final String FAST = "Fast";
+  private static final String SLOW1 = "Slow";
 
   private static final String IS_MALE = "isMale";
   private static final String IS_REG = "isReg";
@@ -56,18 +57,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       ExerciseController exerciseController,
       boolean includeContext,
       AudioChangeListener listener) {
-    super(soundManager, new PlayListener() {
-          public void playStarted() {
-//          goodwaveExercisePanel.setBusy(true);
-            // TODO put back busy thing?
-//            postAudioRecordButton1.setEnabled(false);
-          }
-
-          public void playStopped() {
-            //  goodwaveExercisePanel.setBusy(false);
-            //          postAudioRecordButton1.setEnabled(true);
-          }
-        },
+    super(soundManager,null,
         "",
         null, exerciseController, exercise, false);
     this.includeContext = includeContext;
@@ -76,10 +66,30 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     // getElement().setId("ChoicePlayAudioPanel");
     addButtons(null);
 
+/*    addPlayListener( new PlayListener() {
+      public void playStarted() {
+//          goodwaveExercisePanel.setBusy(true);
+        // TODO put back busy thing?
+//            postAudioRecordButton1.setEnabled(false);
+           gotPlayStarted();
+      }
+
+      public void playStopped() {
+        //  goodwaveExercisePanel.setBusy(false);
+        //          postAudioRecordButton1.setEnabled(true);
+      }
+    });*/
+
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
       gotAudioSelected(authenticationEvent.getExid());
     });
   }
+
+/*
+  private void gotPlayStarted() {
+    logger.info("---> got play started ");
+  }
+*/
 
   /**
    * @param optionalToTheRight
@@ -92,7 +102,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-      logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+     // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
@@ -237,7 +247,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
       // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
-        logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+     //   logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
         listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       }
       rememberAudio(toUse.getAudioRef());

@@ -1,6 +1,8 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.shared.GwtEvent;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
+import mitll.langtest.client.sound.PlayAudioPanel;
 
 /**
  * Created by go22670 on 11/18/16.
@@ -9,6 +11,12 @@ public class PlayAudioEvent extends GwtEvent<PlayAudioEventHandler> {
   public static final Type<PlayAudioEventHandler> TYPE = new Type<>();
   private final int id;
 
+  /**
+   * @see PostAudioRecordButton#startRecording
+   * @see PlayAudioPanel#startPlaying
+   * @see
+   * @param id
+   */
   public PlayAudioEvent(int id) {
     this.id = id;
   }
