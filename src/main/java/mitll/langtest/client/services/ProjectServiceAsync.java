@@ -33,7 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -54,4 +54,12 @@ public interface ProjectServiceAsync {
   void addPending(int id, AsyncCallback<DominoUpdateResponse> async);
 
   void getDominoForLanguage(String lang, AsyncCallback<List<DominoProject>> async);
+
+  void getProperty(int projid, ProjectProperty key, AsyncCallback<String> async);
+
+  void getListProperty(int projid, ProjectProperty key, AsyncCallback<List<String>> async);
+
+  void setProperty(int projid, ProjectProperty key, String newValue, AsyncCallback<Boolean> async);
+
+  void setListProperty(int projid, ProjectProperty key, List<String> newValue, AsyncCallback<Boolean> async);
 }

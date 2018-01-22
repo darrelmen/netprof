@@ -36,6 +36,7 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -209,6 +210,69 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+
+  @Override
+  public String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().getPropValue(projid, key.getName());
+    } else {
+      throw getRestricted("getProperty");
+    }
+  }
+
+/*
+  @Override
+  public Integer getIntegerProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      String propValue = getProjectDAO().getPropValue(projid, key.getName());
+      if (propValue != null) {
+        try {
+          return Integer.parseInt(propValue);
+        } catch (NumberFormatException e) {
+          return -1;
+        }
+      }
+      else return -1;
+    } else {
+      throw getRestricted("getIntegerProperty");
+    }
+  }*/
+
+  @Override
+  public List<String> getListProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      String propValue = getProjectDAO().getPropValue(projid, key.getName());
+      if (propValue != null) {
+        String[] split = propValue.split(",");
+        return new ArrayList<>(Arrays.asList(split));
+      } else {
+        return new ArrayList<>();
+      }
+    } else {
+      throw getRestricted("getListProperty");
+    }
+  }
+
+  @Override
+  public boolean setProperty(int projid, ProjectProperty key, String newValue) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().addOrUpdateProperty(projid, key, newValue);
+    } else {
+      throw getRestricted("setProperty");
+    }
+  }
+
+  @Override
+  public boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return getProjectDAO().addOrUpdateProperty(projid, key, newValue.toString().replaceAll("\\[","").replaceAll("]",""));
+    } else {
+      throw getRestricted("setProperty");
+    }
+  }
+
+
+
   private void markDeleted(int projectid) {
     SlickProject slickProject = db.getProject(projectid).getProject();
     slickProject.updateStatus(ProjectStatus.DELETED.toString());
@@ -224,4 +288,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
     return importUser;
   }
+
+
 }

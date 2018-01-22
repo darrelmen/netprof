@@ -164,9 +164,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @return
    * @see FacetExerciseList#makePagingContainer
    */
-  protected Collection<Integer> getIdsForRange(Range visibleRange) {
+  private Collection<Integer> getIdsForRange(Range visibleRange) {
   //  logger.info("getIdsForRange : range " + visibleRange);
-
     int start = visibleRange.getStart();
     int end = Math.min(getList().size(), start + visibleRange.getLength());
 

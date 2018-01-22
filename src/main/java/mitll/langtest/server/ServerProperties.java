@@ -33,8 +33,7 @@
 package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.ProjectProperty;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
@@ -53,8 +52,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-import static mitll.langtest.server.database.exercise.ProjectProperty.MODELS_DIR;
-import static mitll.langtest.server.database.exercise.ProjectProperty.WEBSERVICE_HOST_PORT;
+import static mitll.langtest.shared.project.ProjectProperty.MODELS_DIR;
+import static mitll.langtest.shared.project.ProjectProperty.WEBSERVICE_HOST_PORT;
 
 /**
  * This has a lot of overlap with the PropertyHandler set of properties.
@@ -355,7 +354,6 @@ public class ServerProperties {
     props.setProperty(CONFIG_FILE1, applicationConfPath);
 //    logger.info("setting config.file to " + applicationConfPath);
 //    logger.info("setting config.file to " + System.getProperties().get(CONFIG_FILE1));
-
     ConfigFactory.invalidateCaches();
   }
 

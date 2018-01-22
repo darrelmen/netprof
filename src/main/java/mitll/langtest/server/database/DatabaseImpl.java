@@ -94,6 +94,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -298,11 +299,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     createTables();
 
+
     userDAO.ensureDefaultUsers();
-    int defaultProject = projectDAO.ensureDefaultProject(userDAO.getBeforeLoginUser());
+    int defaultProject = getDefaultProject();
     // make sure we have a template exercise
-    int defaultExercise = userExerciseDAO.ensureTemplateExercise(defaultProject);
-    slickAudioDAO.setDefaultResult(resultDAO.ensureDefault(defaultProject, userDAO.getBeforeLoginUser(), defaultExercise));
+
+    slickAudioDAO.setDefaultResult(resultDAO.ensureDefault(defaultProject, userDAO.getBeforeLoginUser(),
+        userExerciseDAO.ensureTemplateExercise(defaultProject)));
+
     try {
       ((UserListManager) userListManager).setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
@@ -313,6 +317,28 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
 
     logger.debug("initializeDAOs : tables = " + getTables());
+  }
+
+  private int getDefaultProject() {
+    int defaultProject = projectDAO.ensureDefaultProject(userDAO.getBeforeLoginUser());
+    String propValue = projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.toString());
+
+    if (propValue == null || propValue.isEmpty()) {
+      List<String> reportEmails = serverProps.getReportEmails();
+
+
+      logger.info("default properties : " + reportEmails);
+
+      projectDAO.addOrUpdateProperty(defaultProject, ProjectProperty.REPORT_LIST,
+          reportEmails.toString()
+              .replaceAll("\\[", "").replaceAll("]", ""));
+      logger.info("default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName()));
+    }
+    else {
+      logger.info("existing default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.toString()));
+
+    }
+    return defaultProject;
   }
 
   private void setPostgresDBConnection() {
@@ -1046,9 +1072,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   *
    * TODO : NO - don't do this - use a query.
-   *
+   * <p>
    * Add info from exercises.
    *
    * @param monitorResults

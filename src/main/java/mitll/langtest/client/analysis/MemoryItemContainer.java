@@ -83,14 +83,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   private static final int ID_WIDTH = 130;
   private int idWidth = ID_WIDTH;
-  private static final int PAGE_SIZE = 11;
-  private int pageSize = PAGE_SIZE;
+  //private static final int PAGE_SIZE = 11;
+  private int pageSize;// = PAGE_SIZE;
   private final String todayYear;
   private final String todaysDate;
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
-  private int shortPageSize = 8;
+  private int shortPageSize;// = 8;
   Column<T, SafeHtml> dateCol;
 
   /**

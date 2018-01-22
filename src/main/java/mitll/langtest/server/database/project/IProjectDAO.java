@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.ProjectProperty;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
@@ -42,9 +44,6 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface IProjectDAO extends IDAO {
-  String getPropValue(int projid, String key);
-  Map<String, String> getProps(int projid);
-
   /**
    * TODO : why two calls?
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
@@ -96,16 +95,9 @@ public interface IProjectDAO extends IDAO {
    */
   int getNumProjects();
 
-  void addProperty(int projid, ProjectProperty projectProperty, String value, String propertyType, String parent);
-  void addProperty(int projid, String key, String value, String propertyType, String parent);
 
   int getByName(String name);
-
   int getByLanguage(String language);
-
-//  SlickProject mostRecentByUser(int user);
-
- // SlickProject getFirst();
 
   int ensureDefaultProject(int defaultUser);
 
@@ -133,4 +125,48 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   boolean update(int userid, ProjectInfo projectInfo);
+
+  /**
+   * @see mitll.langtest.server.database.copy.CreateProject#addModelProp
+   * @param projid
+   * @param projectProperty
+   * @param value
+   * @param propertyType
+   * @param parent
+   */
+  void addProperty(int projid, ProjectProperty projectProperty, String value, String propertyType, String parent);
+
+  /**
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo)
+   * @param projid
+   * @param key
+   * @param value
+   * @param propertyType
+   * @param parent
+   */
+  void addProperty(int projid, String key, String value, String propertyType, String parent);
+
+  /**
+   * @see
+   * @param projid
+   * @param projectProperty
+   * @param newValue
+   * @return true if changed
+   */
+  boolean addOrUpdateProperty(int projid, ProjectProperty projectProperty, String newValue);
+
+  /**
+   * @see Project#getProp
+   * @param projid
+   * @param key
+   * @return
+   */
+  String getPropValue(int projid, String key);
+
+  /**
+   * @see Project#putAllProps
+   * @param projid
+   * @return
+   */
+  Map<String, String> getProps(int projid);
 }

@@ -3,7 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.ProjectProperty;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
-import static mitll.langtest.server.database.exercise.ProjectProperty.*;
+import static mitll.langtest.shared.project.ProjectProperty.*;
 
 /**
  * Created by go22670 on 10/26/16.
@@ -164,8 +164,7 @@ public class CreateProject {
           info.getSecondType(),
           info.getDominoID());
 
-//      addHostProperty(info, projectDAO, projectID);
-      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
+       addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 

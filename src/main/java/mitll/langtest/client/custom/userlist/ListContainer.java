@@ -32,7 +32,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";
-  public static final String PUBLIC = "Public?";
+  private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
   private boolean slim = false;
 

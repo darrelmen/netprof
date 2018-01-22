@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String ITEMS = "Items";
+  private static final String ITEMS = "Items";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click on a list to learn it.";

@@ -36,6 +36,7 @@ import mitll.langtest.server.database.user.UserDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -92,22 +93,32 @@ public class EmailList {
 
   private final Properties props;
 
+  /**
+   * @see mitll.langtest.server.ServerProperties#useProperties
+   * @param props
+   */
   public EmailList(Properties props) {
     this.props = props;
 
     String property = props.getProperty(ADMINS);
+    setAdmins(property);
+
+    property = props.getProperty(REPORT_EMAILS);
+    if (property != null) {
+      logger.info("reportEmails = " + property);
+      if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
+      else reportEmails = Arrays.asList(property.split(","));
+      logger.info("reportEmails = " + reportEmails);
+    }
+  }
+
+  private void setAdmins(String property) {
     if (property != null) {
       admins = new HashSet<>(Arrays.asList(property.split(",")));
       logger.info("admins now " + admins);
     }
     else {
      // logger.debug("default admins " + admins);
-    }
-
-    property = props.getProperty(REPORT_EMAILS);
-    if (property != null) {
-      if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
-      else reportEmails = Arrays.asList(property.split(","));
     }
   }
 

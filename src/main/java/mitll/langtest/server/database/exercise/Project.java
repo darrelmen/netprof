@@ -48,6 +48,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.npdata.dao.SlickExercise;
@@ -58,7 +59,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.ProjectProperty.*;
+import static mitll.langtest.shared.project.ProjectProperty.*;
 
 /**
  * Has everything associated with a project

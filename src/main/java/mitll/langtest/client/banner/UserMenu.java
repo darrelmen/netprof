@@ -21,6 +21,7 @@ import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
+import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
@@ -35,13 +36,15 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
-  public static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
-  public static final String STATUS_REPORT_SENT = "Status report sent";
-  public static final String MANAGE_USERS = "Manage Users";
-  public static final String EVENTS = "Events";
-  public static final String DOWNLOAD_CONTEXT = "Download Context";
-  public static final String SEND_REPORT = "Send Report";
   private final Logger logger = Logger.getLogger("UserMenu");
+
+  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
+  private static final String STATUS_REPORT_SENT = "Status report sent";
+  private static final String MANAGE_USERS = "Manage Users";
+  private static final String EVENTS = "Events";
+  private static final String DOWNLOAD_CONTEXT = "Download Context";
+  private static final String SEND_REPORT = "Send Report";
+  private static final String REPORT_LIST = "Report List";
 
   private static final String ABOUT_NET_PRO_F = "About Netprof";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
@@ -86,6 +89,8 @@ public class UserMenu {
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
+    choices.add(new LinkAndTitle("Report List", new ReportListHandler()));
+
     return choices;
   }
 
@@ -112,8 +117,7 @@ public class UserMenu {
       public void onFailure(Throwable caught) {
         if (caught.getMessage().contains("504")) {
           logger.info("OK send usage timed out...");
-        }
-        else {
+        } else {
           controller.handleNonFatalError("sending usage report", caught);
         }
       }
@@ -173,8 +177,9 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
-          new EventTable().show(lazyGetService(),controller.getMessageHelper());
+          new EventTable().show(lazyGetService(), controller.getMessageHelper());
         }
       });
     }
@@ -236,6 +241,29 @@ public class UserMenu {
     }
   }
 
+  private class ReportListHandler implements ClickHandler {
+    final EventRegistration outer = lifecycleSupport;
+
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          ReportListManager reportListManager = new ReportListManager(controller);
+          reportListManager.showReportList();
+//          ResultManager resultManager = new ResultManager(
+//              props.getNameForAnswer(),
+//              lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
+//              outer,
+//              controller);
+//          resultManager.showResults();
+        }
+      });
+    }
+  }
+
 
   private void downloadFailedAlert() {
     Window.alert("Code download failed");
@@ -255,9 +283,7 @@ public class UserMenu {
           Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
           if (max.isPresent()) {
             int maxl = max.get().length();
-            props.keySet().forEach(key -> {
-                  strings.add(key + getLen(maxl - key.length()));
-                }
+            props.keySet().forEach(key -> strings.add(key + getLen(maxl - key.length()))
             );
           }
         } catch (Exception e) {

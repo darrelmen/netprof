@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
@@ -41,10 +42,10 @@ import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
 
 import java.util.List;
-import java.util.Map;
 
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
+
   boolean exists(int projectid);
 
   /**
@@ -56,6 +57,7 @@ public interface ProjectService extends RemoteService {
 
   boolean update(ProjectInfo info) throws DominoSessionException, RestrictedOperationException;
 
+
   boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
@@ -63,4 +65,13 @@ public interface ProjectService extends RemoteService {
   DominoUpdateResponse addPending(int id) throws DominoSessionException, RestrictedOperationException;
 
   List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException;
+
+
+  String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
+
+  List<String> getListProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
+
+  boolean setProperty(int projid, ProjectProperty key, String newValue) throws DominoSessionException, RestrictedOperationException;
+
+  boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException;
 }
