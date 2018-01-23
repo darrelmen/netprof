@@ -43,8 +43,8 @@ public class UserMenu {
   private static final String MANAGE_USERS = "Manage Users";
   private static final String EVENTS = "Events";
   private static final String DOWNLOAD_CONTEXT = "Download Context";
-  private static final String SEND_REPORT = "Send Report";
-  private static final String REPORT_LIST = "Report List";
+  private static final String SEND_REPORT = "Send Report to You";
+  private static final String REPORT_LIST = "Weekly Report List";
 
   private static final String ABOUT_NET_PRO_F = "About Netprof";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
@@ -89,7 +89,7 @@ public class UserMenu {
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
-    choices.add(new LinkAndTitle("Report List", new ReportListHandler()));
+    choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
 
     return choices;
   }

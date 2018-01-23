@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -43,8 +44,13 @@ public class ReportListManager {
   private static final int TOP = 56;
   private static final String CLOSE = "Close";
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  private static final String REPORT_LIST_SPREADSHEET_RECIPIENTS = "Weekly Report Spreadsheet Recipients";
   private static final int MY_LIST_HEIGHT = 300;
 
+  /**
+   * @see mitll.langtest.client.banner.UserMenu.ReportListHandler
+   * @param controller
+   */
   public ReportListManager(ExerciseController controller) {
     this.controller = controller;
   }
@@ -52,13 +58,12 @@ public class ReportListManager {
   public void showReportList() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Report List - spreadsheet recipients");
+    dialogBox.setText(REPORT_LIST_SPREADSHEET_RECIPIENTS);
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
     int left = ((Window.getClientWidth()) / 2) - 200;
-    //int top = (Window.getClientHeight()) / 200;
     dialogBox.setPopupPosition(left, TOP);
 
     final Panel dialogVPanel = new VerticalPanel();
@@ -72,8 +77,6 @@ public class ReportListManager {
 
       @Override
       public void onSuccess(List<String> recipients) {
-//        populateTable(recipients, dialogVPanel, dialogBox, getCloseButton(dialogBox));
-
         Collections.sort(recipients);
         List<MyEmail> toAdd = new ArrayList<>();
         recipients.forEach(n -> toAdd.add(new MyEmail(toAdd.size(), n)));
@@ -128,30 +131,37 @@ public class ReportListManager {
   @NotNull
   private DivWidget getAddButton() {
     final Button add = new Button("", IconType.PLUS);
-    add.addClickHandler(event -> doAdd());
-    add.setType(ButtonType.SUCCESS);
-    add.setEnabled(false);
-    addTooltip(add, "Add report recipient email.");
-    this.addButton = add;
+    {
+      add.setSize(ButtonSize.LARGE);
+
+      add.addClickHandler(event -> doAdd());
+      add.setType(ButtonType.SUCCESS);
+      add.setEnabled(false);
+      addTooltip(add, "Add report recipient email.");
+      this.addButton = add;
+    }
+
     DivWidget widgets = new DivWidget();
     widgets.addStyleName("inlineFlex");
-    email = new TextBox();
-    email.setVisibleLength(100);
-    email.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        String newEmail = email.getText();
-        add.setEnabled(!newEmail.isEmpty() &&
-            new UserDialog(controller.getProps()).isValidEmail(newEmail) &&
-            !getCurrentValues().contains(newEmail.trim()));
-      }
-    });
+    widgets.addStyleName("leftThirtyMargin");
+    {
+      email = new TextBox();
+      email.setVisibleLength(100);
+      email.addKeyUpHandler(event -> controlAddEnabled(add));
 
-    email.addStyleName("leftFiveMargin");
-    widgets.add(email);
+    //  email.addStyleName("leftFiveMargin");
+      widgets.add(email);
+    }
     widgets.add(add);
     add.addStyleName("leftFiveMargin");
     return widgets;
+  }
+
+  private void controlAddEnabled(Button add) {
+    String newEmail = email.getText();
+    add.setEnabled(!newEmail.isEmpty() &&
+        new UserDialog(controller.getProps()).isValidEmail(newEmail) &&
+        !getCurrentValues().contains(newEmail.trim()));
   }
 
   private void doAdd() {
@@ -167,12 +177,12 @@ public class ReportListManager {
 
       @Override
       public void onSuccess(Boolean result) {
-
-        int id = emails.getSize() + 1;
+        int id = emails.getSize();
         emails.addExercise(new MyEmail(id, email.getValue()));
         emails.markCurrentExercise(id);
         email.setText("");
         addButton.setEnabled(false);
+        delete.setEnabled(true);
       }
     });
 
@@ -192,6 +202,8 @@ public class ReportListManager {
   @NotNull
   private Button getRemoveButton() {
     final Button add = new Button("", IconType.MINUS);
+    add.setSize(ButtonSize.LARGE);
+
     delete = add;
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add));
@@ -208,7 +220,7 @@ public class ReportListManager {
     if (current != null) {
       delete.setEnabled(false);
       // controller.logEvent(delete, "Button", current, "Delete");
-      logger.warning("current is  " + current);
+     // logger.warning("current is  " + current);
       List<String> strings = new ArrayList<>();
       for (int i = 0; i < emails.getNumItems(); i++) {
         MyEmail myEmail = emails.getItems().get(i);
@@ -234,7 +246,7 @@ public class ReportListManager {
           }
 
          // emails.markCurrentExercise(emails.getSize());
-         // delete.setEnabled(emails.getSize() > 0);
+          delete.setEnabled(emails.getSize() > 0);
         }
       });
 
@@ -264,6 +276,7 @@ public class ReportListManager {
 
   private Button getCloseButton(final DialogBox dialogBox) {
     final Button closeButton = new Button(CLOSE);
+    closeButton.setSize(ButtonSize.LARGE);
     closeButton.setEnabled(true);
     closeButton.addStyleName("floatRight");
     closeButton.getElement().setId("closeButtonLessTopMargin");
