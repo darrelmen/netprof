@@ -60,7 +60,6 @@ import java.util.logging.Logger;
 public abstract class SimplePagingContainer<T> implements RequiresResize, ExerciseContainer<T> {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
-  private static final boolean DEBUG = false;
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
@@ -74,6 +73,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
   private SimplePager pager;
+
+  private static final boolean DEBUG = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
@@ -105,29 +106,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    */
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
-    final SimplePager pager =
-        new SimplePager(SimplePager.TextLocation.CENTER, true, true) {
-          // Override page start here to give more natural paging. Without override, the last page include extra elements
-          // I.e. on page size 100, with list of 156 entries, second page would be the last 100 entries.
-          // With the change here, the second page size is 56 entries.
-          @Override
-          public void setPageStart(int index) {
-            if (getDisplay() != null) {
-              Range range = getDisplay().getVisibleRange();
-              int pageSize = range.getLength();
-
-              // Removed the min to show fixed ranges
-              //if (isRangeLimited && display.isRowCountExact()) {
-              //  index = Math.min(index, display.getRowCount() - pageSize);
-              //}
-
-              index = Math.max(0, index);
-              if (index != range.getStart()) {
-                getDisplay().setVisibleRange(index, pageSize);
-              }
-            }
-          }
-        };
+    final SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, true, true);
 
     this.pager = pager;
     // Set the cellList as the display.
@@ -249,7 +228,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
       newList.sort(comp);
       if (DEBUG) logger.info("flush : end   sorting " + newList.size());
       dataProvider.setList(newList);
-//      getList().sort(comp);
+
     } else {
       if (DEBUG) logger.info("flush :no comparator ");
 
@@ -434,4 +413,30 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return getList().size();
   }
 
+  private static class NoFunnyPagingSimplePager extends SimplePager {
+    public NoFunnyPagingSimplePager() {
+      super(TextLocation.CENTER, true, true);
+    }
+
+    // Override page start here to give more natural paging. Without override, the last page include extra elements
+    // I.e. on page size 100, with list of 156 entries, second page would be the last 100 entries.
+    // With the change here, the second page size is 56 entries.
+    @Override
+    public void setPageStart(int index) {
+      if (getDisplay() != null) {
+        Range range = getDisplay().getVisibleRange();
+        int pageSize = range.getLength();
+
+        // Removed the min to show fixed ranges
+        //if (isRangeLimited && display.isRowCountExact()) {
+        //  index = Math.min(index, display.getRowCount() - pageSize);
+        //}
+
+        index = Math.max(0, index);
+        if (index != range.getStart()) {
+          getDisplay().setVisibleRange(index, pageSize);
+        }
+      }
+    }
+  }
 }

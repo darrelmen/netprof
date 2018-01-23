@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 
 /**
@@ -101,6 +102,8 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
   boolean onLast(HasID current);
 
   int getComplete();
+
+  void flushWith(Comparator<T> comparator);
 
   int getSize();
 

@@ -201,7 +201,7 @@ public class ClickableWords<T extends CommonExercise> {
     if (isRTL) {
       setDirection(horizontal);
     }
-    return  horizontal;
+    return horizontal;
   }
 
   /**
@@ -372,14 +372,13 @@ public class ClickableWords<T extends CommonExercise> {
       Iterator<String> hIter = highlightTokens.iterator();
       String toFind = hIter.next();
 
-    //  logger.info("getMatchingHighlightAll : find '" + toFind + "'");
+      //  logger.info("getMatchingHighlightAll : find '" + toFind + "'");
       for (int i = searchStart; i < numTokens && startIndex == -1; i++) {
         String longer = tokens.get(i);
         if (isMatch(longer, toFind)) {
           startIndex = i;
-        }
-        else {
-  //        logger.info("\tno match for '" + longer + "'");
+        } else {
+          //        logger.info("\tno match for '" + longer + "'");
         }
       }
 
@@ -415,10 +414,10 @@ public class ClickableWords<T extends CommonExercise> {
       return false;
     } else {
       String context = removePunct(longer.toLowerCase());
-      String vocab   = removePunct(shorter.toLowerCase());
+      String vocab = removePunct(shorter.toLowerCase());
       // if (DEBUG) logger.info("context " + context + " longer " + longer);
       boolean equals = context.equals(vocab);
-    //   if (DEBUG) logger.info("isMatch : context '" + context + "' vocab '" + longer +"' = " + equals);
+      //   if (DEBUG) logger.info("isMatch : context '" + context + "' vocab '" + longer +"' = " + equals);
 
       boolean b = equals || (context.contains(vocab) && !vocab.isEmpty());
 /*      if (b && DEBUG)
@@ -521,7 +520,8 @@ public class ClickableWords<T extends CommonExercise> {
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
+      //  highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
+      highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }
@@ -581,8 +581,9 @@ public class ClickableWords<T extends CommonExercise> {
    * horizontal ellipsis...
    * reverse solidus
    * aprostophe...
-   *
+   * <p>
    * right single quote
+   *
    * @param t
    * @return
    */

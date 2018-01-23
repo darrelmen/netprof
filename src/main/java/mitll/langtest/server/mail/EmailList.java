@@ -104,10 +104,10 @@ public class EmailList {
 
     property = props.getProperty(REPORT_EMAILS);
     if (property != null) {
-      logger.info("reportEmails = " + property);
+     // logger.info("reportEmails = " + property);
       if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
       else reportEmails = Arrays.asList(property.split(","));
-      logger.info("reportEmails = " + reportEmails);
+     // logger.info("reportEmails = " + reportEmails);
     }
   }
 

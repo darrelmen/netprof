@@ -215,6 +215,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       //logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
+    else {
+      logger.warning("tcheckAndAskOrFirst no exercise " + exerciseID);
+    }
   }
 
   /**

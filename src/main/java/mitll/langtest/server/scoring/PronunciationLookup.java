@@ -269,7 +269,8 @@ public class PronunciationLookup implements IPronunciationLookup {
       }*/
       dict.append(getPronStringForWord(word, apply, justPhones));
     }
-/*    logger.info("addDictMatches for" +
+
+    /*    logger.info("addDictMatches for" +
         "\n\teasyMatch " + easyMatch +
         "\n\tword " + word +
         "\n\tdict " + dict);*/

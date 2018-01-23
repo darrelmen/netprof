@@ -142,10 +142,11 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       toStore = LANG_DSC;
     }
     exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
-    //logger.info("START onChange Sort by " + selectedValue + " to sort is null "  );
+    logger.info("START onChange Sort by " + selectedValue + " to sort is null "  );
 
     sortByValue(null, selectedValue, langASC, langDSC);
-    //logger.info("END   onChange Sort by " + selectedValue + " to sort is null "  );
+    //exerciseList.flushWith();
+    logger.info("END   onChange Sort by " + selectedValue + " to sort is null "  );
   }
 
   /**
@@ -218,7 +219,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
    */
   private void sortBy(List<T> toSort, Comparator<T> comp) {
     if (toSort == null) {
-      exerciseList.sortBy(comp);
+      exerciseList.flushWith(comp);
     } else {
       toSort.sort(comp);
     }

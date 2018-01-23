@@ -451,6 +451,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     onResize();
   }
 
+  @Override
+  public void flushWith(Comparator<T> comparator) {
+    pagingContainer.setComparator(comparator);
+    flush();
+   // redraw();
+  }
+
   private List<T> inOrderResult;
 
   /**
