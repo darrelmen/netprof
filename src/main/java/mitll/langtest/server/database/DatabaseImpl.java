@@ -321,22 +321,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private int getDefaultProject() {
     int defaultProject = projectDAO.ensureDefaultProject(userDAO.getBeforeLoginUser());
-    String propValue = projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.toString());
+    String propValue = projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName());
 
-    if (propValue == null || propValue.isEmpty()) {
+    if (propValue == null) {
       List<String> reportEmails = serverProps.getReportEmails();
 
-
-      logger.info("default properties : " + reportEmails);
+//      logger.info("default properties : " + reportEmails);
 
       projectDAO.addOrUpdateProperty(defaultProject, ProjectProperty.REPORT_LIST,
           reportEmails.toString()
               .replaceAll("\\[", "").replaceAll("]", ""));
-      logger.info("default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName()));
-    }
-    else {
-      logger.info("existing default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.toString()));
-
+      //    logger.info("default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName()));
+    } else {
+      //  logger.info("existing default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.toString()));
     }
     return defaultProject;
   }
@@ -410,7 +407,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * TODO : sections are valid in the context of a project.
+   * sections are valid in the context of a project.
    *
    * @param projectid
    * @return
@@ -1117,10 +1114,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
-
-    for (CommonExercise exercise : getExercises(projectid)) {
-      join.put(exercise.getID(), exercise);
-    }
+    getExercises(projectid).forEach(exercise -> join.put(exercise.getID(), exercise));
 
 /*    // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
@@ -1131,40 +1125,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     return join;
   }
-
-  /**
-   * @param userID
-   * @param projid
-   * @param exerciseID
-   * @param audioid
-   * @param durationInMillis
-   * @param correct
-   * @param isMale
-   * @param speed
-   * @param model
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
-   */
-/*  @Override
-  public long addRefAnswer(int userID,
-                           int projid,
-                           int exerciseID,
-                           int audioid, long durationInMillis,
-                           boolean correct,
-                           DecodeAlignOutput alignOutput,
-                           DecodeAlignOutput decodeOutput,
-
-                           DecodeAlignOutput alignOutputOld,
-                           DecodeAlignOutput decodeOutputOld,
-
-                           boolean isMale,
-                           String speed,
-                           String model) {
-    return refresultDAO.addAnswer(userID, projid, exerciseID, audioid, durationInMillis, correct,
-        alignOutput, decodeOutput,
-        alignOutputOld, decodeOutputOld,
-        isMale, speed, model);
-  }*/
 
   /**
    * @see LangTestDatabaseImpl#destroy()
@@ -1477,6 +1437,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * Sends to recipient list.
+   * Won't send unless it's Sunday morning...
+   *
+   * @see ProjectProperty#REPORT_LIST
    * @see LangTestDatabaseImpl#optionalInit
    */
   @Override
@@ -1520,45 +1484,75 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param report
    * @param forceSend
-   * @param userID
+   * @param userID    if -1 uses report list property to determine recipients
    * @see #doReport
+   * @see #sendReport
    */
   private void sendReports(IReport report, boolean forceSend, int userID) {
     MailSupport mailSupport = getMailSupport();
     List<ReportStats> stats = getReportStats(report, forceSend, mailSupport);
 
     {
-      List<String> reportEmails = serverProps.getReportEmails();
-      List<String> receiverNames = reportEmails;//serverProps.getReceiverNames();
-      if (userID != -1) {
-        User byID = userDAO.getByID(userID);
-        if (byID == null) {
-          logger.error("huh? can't find user " + userID + " in db?");
-        } else {
-//          logger.info("using user email " + byID.getEmail());
-          reportEmails = Collections.singletonList(byID.getEmail());
-          receiverNames = Collections.singletonList(byID.getFullName());
-        }
-      }
-      report.sendExcelViaEmail(mailSupport, reportEmails, stats, pathHelper, receiverNames);
+      List<String> reportEmails = new ArrayList<>();
+      List<String> receiverNames = new ArrayList<>();
+
+      populateRecipients(userID, reportEmails, receiverNames);
+
+      logger.info("sendReports to" +
+          "\n\temails : " + reportEmails+
+          "\n\tnames  : " + receiverNames
+      );
+      report.sendExcelViaEmail(mailSupport, reportEmails, receiverNames, stats, pathHelper);
     }
   }
 
+  private void populateRecipients(int userID, List<String> reportEmails, List<String> receiverNames) {
+    if (userID != -1) {
+      User byID = userDAO.getByID(userID);
+      if (byID == null) {
+        logger.error("huh? can't find user " + userID + " in db?");
+      } else {
+//          logger.info("using user email " + byID.getEmail());
+        reportEmails.add(byID.getEmail());
+        receiverNames.add(byID.getFullName());
+      }
+    } else {
+      reportEmails.addAll(projectDAO.getListProp(getDefaultProject(), ProjectProperty.REPORT_LIST));
+
+      for (String email : reportEmails) {
+        String trim = email.trim();
+        String nameForEmail = userDAO.getNameForEmail(trim);
+        if (nameForEmail == null) nameForEmail = trim;
+        receiverNames.add(nameForEmail);
+      }
+    }
+  }
+
+  /**
+   * @param report
+   * @param forceSend
+   * @param mailSupport
+   * @return
+   * @see #sendReports(IReport, boolean, int)
+   */
   @NotNull
   private List<ReportStats> getReportStats(IReport report, boolean forceSend, MailSupport mailSupport) {
     List<ReportStats> stats = new ArrayList<>();
+    List<String> reportEmails = getReportEmails();
 
     getProjects().forEach(project -> {
       stats.addAll(report
           .doReport(project.getID(),
               project.getLanguage(),
               project.getProject().name(),
-              serverProps,
-              mailSupport,
               pathHelper,
               forceSend, true));
     });
     return stats;
+  }
+
+  private List<String> getReportEmails() {
+    return projectDAO.getListProp(projectDAO.getDefault(), ProjectProperty.REPORT_LIST);
   }
 
   private MailSupport getMailSupport() {
@@ -1579,10 +1573,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public IReport getReport() {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
-    Report report = new Report(resultDAO, eventDAO, audioDAO,
+    return new Report(resultDAO, eventDAO, audioDAO,
         reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(),
         serverProps.getNPServer(), this.getLogAndNotify());
-    return report;
   }
 
   /**

@@ -48,9 +48,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
@@ -209,7 +207,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   *
    * @param projid
    * @param key
    * @param type
@@ -239,6 +236,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         return propertyDAO.update(copy);
       }
     }
+  }
+
+  @Override
+  public List<String> getListProp(int projid, ProjectProperty projectProperty) {
+    if (projectProperty.getType() != PropertyType.LIST) {
+      logger.warn("getListProp " + projectProperty + " is not a list property ");
+    }
+    return Arrays.asList(getPropValue(projid, projectProperty.getName()).split(","));
   }
 
   @Override
@@ -318,21 +323,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   public int add(int userid, String name, String language, String course,
                  String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID) {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
-        //isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
-
         status,
         firstType, secondType, countryCode, displayOrder, dominoID);
   }
-
-/*
-  public SlickProject getFirst() {
-    if (first == null) {
-      List<SlickProject> all = dao.getAll();
-      first = all.isEmpty() ? null : all.iterator().next();
-    }
-    return first;
-  }
-*/
 
   /**
    * Really does delete it - could take a long time if a big project.
@@ -418,5 +411,4 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   public int getByLanguage(String language) {
     return dao.byLanguage(language);
   }
-
 }

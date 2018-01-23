@@ -34,7 +34,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.ReportStats.INFO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.excel.ReportToExcel;
@@ -129,7 +128,13 @@ public class Report implements IReport {
   private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
   private static final int ALL_YEARS = -1;
   private static final String FOOTER = "</body></head></html>";
-  private static final boolean SEND_EACH_REPORT = false;
+//  private static final boolean SEND_EACH_REPORT = false;
+
+  /**
+   * When sending all years, don't go back before this year.
+   */
+  private static final int EARLIEST_YEAR = 2015;
+  public static final String DATA = "data";
 
   /**
    * @see #getReportForProject
@@ -212,33 +217,26 @@ public class Report implements IReport {
    * Also writes the report out to the report directory... TODO : necessary?
    *
    * @see ReportingServices#doReport
+   * @see DatabaseImpl#getReportStats(IReport, boolean, MailSupport)
    */
   @Override
   public List<ReportStats> doReport(int projid,
                                     String language,
                                     String site,
 
-                                    ServerProperties serverProps,
-                                    MailSupport mailSupport,
                                     PathHelper pathHelper,
                                     boolean forceSend,
                                     boolean getAllYears) {
-    List<String> reportEmails = serverProps.getReportEmails();
-
     // check if it's a monday
-    if (!getShouldSkip() &&
-        // isTodayAGoodDay() &&
-        !reportEmails.isEmpty()) {
+    if (!getShouldSkip()) {
       int thisYear = getAllYears ? ALL_YEARS : getThisYear();
-      return writeAndSendReport(projid, language, site, mailSupport, pathHelper, reportEmails, thisYear, forceSend);
+      return writeReport(projid, language, site, pathHelper, thisYear, forceSend);
     } else {
       return Collections.emptyList();
     }
   }
 
   private boolean getShouldSkip() {
-    boolean skipReport = false;
-
  /*   try {
       InetAddress ip = InetAddress.getLocalHost();
       String hostName = ip.getHostName().toLowerCase();
@@ -252,39 +250,34 @@ public class Report implements IReport {
       logger.error("Got " + e, e);
       e.printStackTrace();
     }*/
-    return skipReport;
+    return false;
   }
 
   /**
    * @param projid
    * @param language
    * @param site
-   * @param mailSupport
    * @param pathHelper
-   * @param reportEmails who to send to
-   * @param year         which year you want data for
-   * @see IReport#doReport
+   * @param year       which year you want data for
+   * @param forceSend  if true don't check if this is sunday morning for sending report
+   * @see #doReport
    */
-  private List<ReportStats> writeAndSendReport(int projid,
-                                               String language,
-                                               String site,
-                                               MailSupport mailSupport,
-                                               PathHelper pathHelper,
-                                               List<String> reportEmails,
-                                               int year,
-                                               boolean forceSend) {
+  private List<ReportStats> writeReport(int projid,
+                                        String language,
+                                        String site,
+                                        PathHelper pathHelper,
+                                        int year,
+                                        boolean forceSend) {
     String today = new SimpleDateFormat("MM_dd_yy").format(new Date());
     File file = getReportFile(pathHelper, today, language, site, ".html");
     if (file.exists() && !forceSend) {
-      logger.debug("writeAndSendReport already did report for " + today + " : " + file.getAbsolutePath());
+      logger.debug("writeReport already did report for " + today + " : " + file.getAbsolutePath());
       return Collections.emptyList();
     } else {
-      logger.debug("writeAndSendReport Site real path " + site);
+      logger.debug("writeReport Site real path " + site);
       try {
-        ReportStats stats = new ReportStats(projid, language, site, year);
-        List<ReportStats> reportStats = writeReportToFile(file, stats);
-        if (SEND_EACH_REPORT) sendEmails(stats, mailSupport, reportEmails);
-        return reportStats;
+        // if (SEND_EACH_REPORT) sendEmails(stats, mailSupport, reportEmails);
+        return writeReportToFile(file, new ReportStats(projid, language, site, year));
       } catch (Exception e) {
         logger.error("got " + e, e);
         return Collections.emptyList();
@@ -323,7 +316,7 @@ public class Report implements IReport {
    * @param stats
    * @param mailSupport
    * @param reportEmails
-   * @see #writeAndSendReport
+   * @see #writeReport
    */
   private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails) {
     String suffix = " (" + stats.getName() + ") on " + getHostInfo();
@@ -340,19 +333,24 @@ public class Report implements IReport {
   /**
    * @param mailSupport
    * @param reportEmails
+   * @param receiverNames
    * @param reportStats
    * @param pathHelper
-   * @param receiverNames
    * @see DatabaseImpl#sendReports
    */
   @Override
-  public void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper, List<String> receiverNames) {
-    File summaryReport = getSummaryReport(reportStats, pathHelper);
+  public void sendExcelViaEmail(MailSupport mailSupport,
+                                List<String> reportEmails, List<String> receiverNames,
+                                List<ReportStats> reportStats,
+                                PathHelper pathHelper) {
+    sendReports(mailSupport, reportEmails, receiverNames, getSummaryReport(reportStats, pathHelper));
+  }
 
+  private void sendReports(MailSupport mailSupport, List<String> reportEmails, List<String> receiverNames, File summaryReport) {
     String subject = getFileName();
     String messageBody = "Hi,<br>Here is the current usage report for NetProF.<br>Thanks, Administrator";
 
-    logger.info("sending excel to " + reportEmails + " using " + summaryReport.getAbsolutePath());
+    logger.info("sending excel to recipients " + reportEmails + " using file " + summaryReport.getAbsolutePath());
 
     for (int i = 0; i < reportEmails.size(); i++) {
       String dest = reportEmails.get(i);
@@ -390,16 +388,16 @@ public class Report implements IReport {
    * @param reportStats
    * @return html of report
    * @throws IOException
-   * @see #writeAndSendReport
+   * @see #writeReport
    */
   private List<ReportStats> writeReportToFile(File file, ReportStats reportStats) throws IOException {
-    List<ReportStats> reportStats1 = doReport(reportStats);
+    List<ReportStats> reportStats1 = getReport(reportStats);
     writeHTMLFile(file, reportStats);
     return reportStats1;
   }
 
   private void writeHTMLFile(File file, ReportStats reportStats) throws IOException {
-    logger.info("writeHTMLFile to " + file.getAbsolutePath());
+    //logger.info("writeHTMLFile to " + file.getAbsolutePath());
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     writer.write(reportStats.getHtml());
     writer.close();
@@ -408,7 +406,7 @@ public class Report implements IReport {
   private File getReportPath(PathHelper pathHelper, String language, String site, String suffix) {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(MM_DD_YY);
     String today = simpleDateFormat2.format(new Date());
-    return getReportFile(pathHelper, today, language, site, suffix);//".html");
+    return getReportFile(pathHelper, today, language, site, suffix);
   }
 
   @Override
@@ -424,9 +422,8 @@ public class Report implements IReport {
   }
 
   private File getReportFile(PathHelper pathHelper, String today, String language, String site, String suffix) {
-    File reports = getReportsDir(pathHelper);
     String fileName = site + "_" + language + "_report_" + today + suffix;
-    return new File(reports, fileName);
+    return new File(getReportsDir(pathHelper), fileName);
   }
 
   @NotNull
@@ -445,12 +442,11 @@ public class Report implements IReport {
    * @return html of report
    * @see IReport#writeReportToFile
    */
-  private List<ReportStats> doReport(ReportStats reportStats) {
-    logger.info(reportStats.getLanguage() + " doReportForYear for " + reportStats.getYear());
-    //  openCSVWriter(pathHelper, language);
+/*  private List<ReportStats> doReport(ReportStats reportStats) {
+//    logger.info(reportStats.getLanguage() + " doReportForYear for " + reportStats.getYear());
     List<ReportStats> reports = getReport(reportStats);
     return reports;
-  }
+  }*/
 
   /**
    * @param projects
@@ -475,25 +471,24 @@ public class Report implements IReport {
   /**
    * @param reportStats
    * @return
-   * @see #doReport(ReportStats)
+   * @see #doReport
    */
   private List<ReportStats> getReport(ReportStats reportStats) {
     StringBuilder builder = new StringBuilder();
-    String language = reportStats.getLanguage();
-    String name = reportStats.getName();
-    builder.append(getHeader(language, name));
+    builder.append(getHeader(reportStats.getLanguage(), reportStats.getName()));
 
     List<ReportStats> reportsForProject = getReportForProject(reportStats, builder, false);
 
     builder.append(FOOTER);
-    String s = builder.toString();
-    reportStats.setHtml(s);
+    reportStats.setHtml(builder.toString());
     return reportsForProject;
   }
 
   /**
+   * @param stats                - if year = ALL_YEARS generates a sequence of reports for all years of data
    * @param builder
    * @param includeProjectHeader
+   * @return list of reports for each year requested
    * @see #getAllReports
    */
   private List<ReportStats> getReportForProject(ReportStats stats,
@@ -502,6 +497,9 @@ public class Report implements IReport {
     int projid = stats.getProjid();
     String language = stats.getLanguage();
     String projectName = stats.getName();
+    int year = stats.getYear();
+
+
     List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
     Collection<UserTimeBase> audioAttributes = audioDAO.getAudioForReport(projid);
@@ -522,10 +520,11 @@ public class Report implements IReport {
       jsonObject.put(HOST, getHostInfo());
 
       JSONArray dataArray = new JSONArray();
-      if (stats.getYear() == ALL_YEARS) {
+      if (year == ALL_YEARS) {
         int firstYear = getFirstYear(getEarliest(projid));
-        if (firstYear < 2015) firstYear = 2015;
+        if (firstYear < EARLIEST_YEAR) firstYear = EARLIEST_YEAR;
         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
+
         logger.info(language + " doReportForYear for " + firstYear + "->" + thisYear);
 
         for (int i = firstYear; i <= thisYear; i++) {
@@ -539,13 +538,12 @@ public class Report implements IReport {
         }
       } else {
         reportStats.add(stats);
-        addYear(dataArray, builder, stats.getYear(), allSlim, allDevicesSlim,
-            //exToAudio,
+        addYear(dataArray, builder, year, allSlim, allDevicesSlim,
             audioAttributes, results, resultsDevices, language,
             usersOnProject,
             stats);
       }
-      jsonObject.put("data", dataArray);
+      jsonObject.put(DATA, dataArray);
     }
     return reportStats;
   }

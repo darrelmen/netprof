@@ -57,7 +57,6 @@ public class EmailList {
   private static final String GRIMMER = "michael.grimmer1@dliflc.edu";
   private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
   private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
-  //private static final String SANDY = "sandra.wagner@dliflc.edu";
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";

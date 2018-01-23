@@ -3,28 +3,36 @@ package mitll.langtest.server.database;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ReportStats {
-  private int projid;
-  private String language;
-  private String name;
+  private final int projid;
+  private final String language;
+  private final String name;
   private int year;
-  private int recordings;
-  private JSONObject jsonObject;
+  //private int recordings;
+  private final JSONObject jsonObject;
   private String html;
+//  private final Map<INFO, String> keyToValue = new HashMap<>();
+
+  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
+
+  ;
+
+  private final Map<INFO, Integer> intKeyToValue = new HashMap<>();
+  private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
 
   public void merge(ReportStats reportStats) {
     Map<INFO, Integer> intKeyToValue = getIntKeyToValue();
     Map<INFO, Integer> otherMap = reportStats.getIntKeyToValue();
     mergeKeyToValue(intKeyToValue, otherMap);
 
-    reportStats.intMultiKeyToValue.forEach((k, v) -> {
-      intMultiKeyToValue.merge(k, v, (a, b) -> {
-        mergeKeyToValue2(a, b);
-        return a;
-      });
-    });
+    reportStats.intMultiKeyToValue.forEach((k, v) -> intMultiKeyToValue.merge(k, v, (a, b) -> {
+      mergeKeyToValue2(a, b);
+      return a;
+    }));
   }
 
   private void mergeKeyToValue(Map<INFO, Integer> intKeyToValue, Map<INFO, Integer> otherMap) {
@@ -38,15 +46,6 @@ public class ReportStats {
   public void setYear(int year) {
     this.year = year;
   }
-
-  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
-
-  ;
-
-  Map<INFO, String> keyToValue = new HashMap<>();
-  Map<INFO, Integer> intKeyToValue = new HashMap<>();
-  Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
-
 
   public ReportStats(ReportStats reportStats) {
     this(reportStats.projid,
@@ -68,12 +67,12 @@ public class ReportStats {
     this(projid, language, name, year, new JSONObject());
   }
 
-  public ReportStats(int projid, String language, String name, int year, JSONObject jsonObject) {
+  private ReportStats(int projid, String language, String name, int year, JSONObject jsonObject) {
     this.projid = projid;
     this.language = language;
     this.name = name;
     this.year = year;
-    this.recordings = recordings;
+    //s this.recordings = recordings;
     this.jsonObject = jsonObject;
   }
 
@@ -93,6 +92,7 @@ public class ReportStats {
     return year;
   }
 
+/*
   public int getRecordings() {
     return recordings;
   }
@@ -100,32 +100,37 @@ public class ReportStats {
   public void setRecordings(int recordings) {
     this.recordings = recordings;
   }
+*/
 
   public JSONObject getJsonObject() {
     return jsonObject;
   }
 
+/*
   public void setJsonObject(JSONObject jsonObject) {
     this.jsonObject = jsonObject;
   }
+*/
 
-  public void put(INFO key, String value) {
-    keyToValue.put(key, value);
-  }
+  /*
+    public void put(INFO key, String value) {
+      keyToValue.put(key, value);
+    }
 
+  */
   void putInt(INFO key, Integer value) {
     intKeyToValue.put(key, value);
   }
 
-  void putIntMulti(INFO key, String key2, Integer value) {
+/*  void putIntMulti(INFO key, String key2, Integer value) {
     Map<String, Integer> weekToValue = intMultiKeyToValue.computeIfAbsent(key, k -> new TreeMap<>());
     weekToValue.put(key2, value);
-  }
+  }*/
 
   /**
-   * @see Report#getResultsForSet
    * @param key
    * @param weekToCount
+   * @see Report#getResultsForSet
    */
   void putIntMulti(INFO key, Map<String, Integer> weekToCount) {
     intMultiKeyToValue.put(key, weekToCount);
@@ -139,15 +144,16 @@ public class ReportStats {
     return intKeyToValue;
   }
 
-  public String toString() {
-    return "stats for " + name + " : " + year + " = " + keyToValue + "/" + intKeyToValue;
-  }
-
   public String getHtml() {
     return html;
   }
 
   public void setHtml(String html) {
     this.html = html;
+  }
+
+  public String toString() {
+    return "stats for " + name + " : " + year +// " = " + keyToValue;
+        intKeyToValue;
   }
 }

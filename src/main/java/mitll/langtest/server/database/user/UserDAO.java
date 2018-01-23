@@ -257,6 +257,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public String getNameForEmail(String emailH) {
+    return null;
+  }
+
+  @Override
   public User loginUser(String userId, String attemptedPassword, String userAgent, String remoteAddr, String sessionID) {
     return null;
   }

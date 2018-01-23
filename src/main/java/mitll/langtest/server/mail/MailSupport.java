@@ -34,6 +34,7 @@ package mitll.langtest.server.mail;
 
 import com.sun.mail.util.MailConnectException;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
@@ -208,7 +209,7 @@ public class MailSupport {
    * @param toAttach
    * @param receiverName
    * @return
-   * @see Report#sendExcelViaEmail(MailSupport, List, List, PathHelper, List)
+   * @see IReport#sendExcelViaEmail(MailSupport, List, List, List, PathHelper)
    */
   public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach, String receiverName) {
     Message message = new MimeMessage(getMailSession(mailServer, testEmail));

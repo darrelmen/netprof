@@ -24,6 +24,7 @@ import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -477,7 +478,7 @@ public class ListView implements ContentView, CreateListComplete {
       listContainer.disableAll();
     } else {
       if (index == numItems) index = numItems - 1;
-      UserList<CommonShell> at = listContainer.getAt(index);
+      HasID at = listContainer.getAt(index);
       //logger.info("next is " + at.getName());
       listContainer.markCurrentExercise(at.getID());
     }

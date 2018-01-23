@@ -802,13 +802,14 @@ public class ProjectManagement implements IProjectManagement {
     return projectInfos;
   }
 
+/*
   private List<SlickProject> getProductionProjects(List<SlickProject> slickProjects) {
     return slickProjects
         .stream()
         .filter(project -> project.status()
             .equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
         .collect(Collectors.toList());
-  }
+  }*/
 
   @NotNull
   private Map<String, List<Project>> getLangToProjects() {

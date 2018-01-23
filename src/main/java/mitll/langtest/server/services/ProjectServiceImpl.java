@@ -50,6 +50,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
@@ -244,7 +245,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       String propValue = getProjectDAO().getPropValue(projid, key.getName());
       if (propValue != null) {
         String[] split = propValue.split(",");
-        return new ArrayList<>(Arrays.asList(split));
+        return Arrays.stream(split).filter(prop->!prop.isEmpty()).collect(Collectors.toList());
       } else {
         return new ArrayList<>();
       }

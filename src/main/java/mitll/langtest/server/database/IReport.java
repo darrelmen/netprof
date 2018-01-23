@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
@@ -15,8 +14,6 @@ public interface IReport {
   List<ReportStats> doReport(int projid,
                              String language,
                              String site,
-                             ServerProperties serverProps,
-                             MailSupport mailSupport,
                              PathHelper pathHelper,
                              boolean forceSend,
                              boolean getAllYears);
@@ -32,7 +29,8 @@ public interface IReport {
    */
   String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports);
 
-  void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<ReportStats> reportStats, PathHelper pathHelper, List<String> receiverNames);
+  void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<String> receiverNames,
+                         List<ReportStats> reportStats, PathHelper pathHelper);
 
   File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper);
 

@@ -33,9 +33,9 @@
 package mitll.langtest.server.database.user;
 
 import com.mongodb.MongoTimeoutException;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
-import mitll.hlt.domino.server.user.*;
+import mitll.hlt.domino.server.user.IUserServiceDelegate;
+import mitll.hlt.domino.server.user.MongoGroupDAO;
+import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
@@ -49,7 +49,6 @@ import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
-import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
@@ -74,13 +73,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gt;
 import static com.mongodb.client.model.Projections.include;
-import static mitll.hlt.domino.server.ServerInitializationManager.JSON_SERIALIZER;
-import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
-import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
+import static mitll.hlt.domino.server.ServerInitializationManager.*;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
 import static mitll.langtest.shared.user.Kind.*;
@@ -114,9 +109,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String ILR = "ILR";
   private static final String USER = "User";
   private static final String DEFAULT = "Default";
-  public static final int EST_NUM_USERS = 8000;
-  public static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-  public static final long STALE_DUR = 5L * 60L * 1000L;
+  private static final int EST_NUM_USERS = 8000;
+  private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+  private static final long STALE_DUR = 5L * 60L * 1000L;
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -243,8 +238,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     boolean b = user.isStudent() && user.getPermissions().isEmpty();
     if (b) {
       //logger.info("isStudent " + userIDFromSessionOrDB);
-    }
-    else {
+    } else {
       logger.debug("isStudent : not a student #" + userIDFromSessionOrDB);
     }
     return b;
@@ -531,10 +525,30 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return dbUser;
   }
 
+  /**
+   * @param email
+   * @return
+   * @see OpenUserServiceImpl#forgotUsername(String, String)
+   */
   @Override
   public String isValidEmail(String email) {
     List<DBUser> users = getDbUsers(getEmailFilter(email));
     return users.isEmpty() ? null : users.get(0).getUserId();
+  }
+
+  @Override
+  public Integer getIDForUserAndEmail(String user, String emailH) {
+    Set<FilterDetail<UserColumn>> emailFilter = getEmailFilter(emailH);
+    addUserID(user, emailFilter);
+    List<DBUser> users = getDbUsers(emailFilter);
+    return users.isEmpty() ? null : users.get(0).getDocumentDBID();
+  }
+
+  @Override
+  public String getNameForEmail(String emailH) {
+    Set<FilterDetail<UserColumn>> emailFilter = getEmailFilter(emailH);
+    List<DBUser> users = getDbUsers(emailFilter);
+    return users.isEmpty() ? null : users.get(0).getFullName();
   }
 
   /**
@@ -543,8 +557,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see #getIDForUserAndEmail
    */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
-    FindOptions<UserColumn> opts = new FindOptions<>(filterDetails);
-    List<DBUser> users = delegate.getUsers(-1, opts);
+    List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
     //  logger.info("getDbUsers " + opts + " = " + users);
     return users;
   }
@@ -553,15 +566,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
     filterDetails.add(new FilterDetail<>(UserColumn.Email, emailH, FilterDetail.Operator.EQ));
     return filterDetails;
-  }
-
-  @Override
-  public Integer getIDForUserAndEmail(String user, String emailH) {
-    Set<FilterDetail<UserColumn>> emailFilter = getEmailFilter(emailH);
-    addUserID(user, emailFilter);
-
-    List<DBUser> users = getDbUsers(emailFilter);
-    return users.isEmpty() ? null : users.get(0).getDocumentDBID();
   }
 
   @Override
@@ -691,7 +695,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return null;
   }
 
-  private Collection<Integer> getDeletedDocsSince(long then) {
+  /*  private Collection<Integer> getDeletedDocsSince(long then) {
     Bson query = and(
         eq("active", "false"),
         gt("updateTime", "time")
@@ -715,7 +719,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     return ids;
-  }
+  }*/
 
 
   /**
@@ -753,7 +757,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see NPUserSecurityManager#getUserForID
    */
-  public User getByID(int id) {    return getUser(lookupUser(id));  }
+  public User getByID(int id) {
+    return getUser(lookupUser(id));
+  }
 
   @Override
   public User getUserWhere(int userid) {
@@ -1111,7 +1117,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * TODO: try to avoid?
+   * TODO: try to avoid - super slow, doesn't scale...
    *
    * @return
    * @see #getMiniUsers
@@ -1122,19 +1128,24 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
     logger.warn("getAll calling get all users");
-    FindOptions<UserColumn> opts = new FindOptions<>();
-    FilterDetail<UserColumn> netProf = new FilterDetail<>(UserColumn.DLIApplications, "NetProf", FilterDetail.Operator.RegEx);
-    opts.addFilter(netProf);
+    FindOptions<UserColumn> opts = getUserColumnFindOptions();
     List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;
   }
 
+  @NotNull
+  private FindOptions<UserColumn> getUserColumnFindOptions() {
+    FindOptions<UserColumn> opts = new FindOptions<>();
+    FilterDetail<UserColumn> netProf = new FilterDetail<>(UserColumn.DLIApplications, "NetProf", FilterDetail.Operator.RegEx);
+    opts.addFilter(netProf);
+    return opts;
+  }
+
   @Override
   public MiniUser getMiniUser(int userid) {
     DBUser byID = lookupUser(userid);
-//    logger.info("getMiniUser " + userid);
     return byID == null ? null : getMini(byID);
   }
 
@@ -1157,13 +1168,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 */
 
-  private ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   /**
-   * @see Analysis#getUserInfos(Map, IUserDAO)
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
    * @param userDBIds
    * @return
+   * @see Analysis#getUserInfos(Map, IUserDAO)
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
    */
   @Override
   public Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds) {
@@ -1199,6 +1210,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Go get the user every 5 minutes...?
+   *
    * @param userDBIds
    * @param now
    * @return
@@ -1279,7 +1291,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   *
    * @param userid assumes a valid user id
    * @return
    */
@@ -1327,7 +1338,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * For taking old legacy users and adding the new netprof 2 info to them.
-   *
+   * <p>
    * user updates happen in domino UI too...
    *
    * @param toUpdate
@@ -1411,7 +1422,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return clientUserDetailSResult;
   }
 
-  private boolean isValidAsEmail(String text) {  return text.trim().toUpperCase().matches(VALID_EMAIL);  }
+  private boolean isValidAsEmail(String text) {
+    return text.trim().toUpperCase().matches(VALID_EMAIL);
+  }
 
   /**
    * @param user
@@ -1453,14 +1466,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
-  /**
-   * @see #getUserCredentials(String)
-   */
-/*
-  public Mongo getPool() {
-    return pool;
-  }
-*/
   @Override
   public DBUser getDominoAdminUser() {
     return dominoAdminUser;

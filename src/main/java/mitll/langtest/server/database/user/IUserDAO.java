@@ -81,6 +81,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   Integer getIDForUserAndEmail(String user, String emailH);
 
+  String getNameForEmail(String emailH);
+
   /**
    * @param userId
    * @param attemptedPassword

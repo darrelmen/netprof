@@ -73,7 +73,7 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   public void add(int projid, long modified, String key, String value, String propertyType, String parent) {
     SlickProjectProperty property = getProperty(projid, modified, key, value, propertyType, parent);
     int id = dao.insert(property);
-    logger.info("inserted " + property + " with id " + id);
+    logger.info("inserted property " + property + " with id " + id);
   }
 
   @NotNull
@@ -105,14 +105,10 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   }
 
   /**
-   *
    * @param property
    * @return true if actually updated the property
    */
-  public boolean update(SlickProjectProperty property) {
-    int update = dao.update(property); // num rows
-    return update>0;
-  }
+  public boolean update(SlickProjectProperty property) {  return dao.update(property) > 0;  }
 
   public Collection<SlickProjectProperty> getAll() {
     return dao.getAll();
@@ -122,10 +118,10 @@ class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   }
 
   /**
-   * @see ProjectDAO#addOrUpdateProperty(int, String, String)
    * @param projid
    * @param key
    * @return
+   * @see ProjectDAO#addOrUpdateProperty(int, String, String)
    */
   Collection<SlickProjectProperty> byProjectAndKey(int projid, String key) {
     return dao.byProjectAndKey(projid, key);

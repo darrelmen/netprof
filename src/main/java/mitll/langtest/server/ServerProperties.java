@@ -781,12 +781,6 @@ public class ServerProperties {
     return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
   }
 
-/*
-  public int getUserFinalScores() {
-    return getIntPropertyDef(ANALYSIS_NUM_FINAL_AVERAGE_SCORES, USER_FINAL_SCORES);
-  }
-*/
-
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
   }
@@ -945,11 +939,6 @@ public class ServerProperties {
   public List<Affiliation> getAffiliations() {
     return affliations;
   }
-
-  /*
-  public Set<String> getLincolnPeople() {
-    return lincoln;
-  }*/
 
   /**
    * @return

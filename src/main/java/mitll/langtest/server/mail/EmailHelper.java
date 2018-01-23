@@ -38,6 +38,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.rest.RestUserManagement;
+import mitll.langtest.server.services.OpenUserServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,7 +79,7 @@ public class EmailHelper {
 
   /**
    * @see RestUserManagement#getEmailHelper
-   * @see UserServiceImpl#getEmailHelper
+   * @see OpenUserServiceImpl#getEmailHelper
    * @param serverProperties
    * @param userDAO
    * @param mailSupport
@@ -102,11 +103,10 @@ public class EmailHelper {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
    * @param email
    * @param url
    * @param userID
-   * @see mitll.langtest.server.services.UserServiceImpl#forgotUsername
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgotUsername
    */
   public void getUserNameEmail(String email, String url, String userID) {
     url = trimURL(url);
@@ -134,6 +134,11 @@ public class EmailHelper {
         CLOSING;
   }
 
+  /**
+   * @see RestUserManagement#forgotUsername
+   * @param email
+   * @param userID
+   */
   public void getUserNameEmailDevice(String email, String userID) {
     //logger.debug("Sending user email...");
     sendEmail(null // baseURL
@@ -152,7 +157,6 @@ public class EmailHelper {
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
-   * @seex mitll.langtest.server.services.UserServiceImpl#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user + " url " + url);
@@ -210,7 +214,6 @@ public class EmailHelper {
    * @param subject
    * @param message
    * @param linkText
-   * @seex #sendUserApproval(String, String, String, String)
    * @see #resetPassword(String, String, String)
    * @see #getUserNameEmail
    */

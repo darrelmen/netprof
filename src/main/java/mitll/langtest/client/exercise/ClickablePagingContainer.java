@@ -56,8 +56,9 @@ import java.util.logging.Logger;
 public abstract class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
-  private static final boolean DEBUG = false;
   private final Map<Integer, T> idToExercise = new HashMap<>();
+
+  private static final boolean DEBUG = false;
 
   public ClickablePagingContainer(ExerciseController controller) {
     super(controller);
@@ -82,7 +83,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @param es
    * @see ListInterface#simpleRemove(int)
    */
-
   public void forgetItem(T es) {
     List<T> list = getList();
     int before = getList().size();
@@ -149,8 +149,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       } else {
         T currentSelection = getCurrentSelection();
         int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
-  //      logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
-    //    logger.info("ClickablePagingContainer.getVisibleIDs : not getting " + getIdsForRange(visibleRange));
+        //      logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
+        //    logger.info("ClickablePagingContainer.getVisibleIDs : not getting " + getIdsForRange(visibleRange));
         List<Integer> visible = new ArrayList<>();
         visible.add(id);
         return visible;
@@ -166,7 +166,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @see FacetExerciseList#makePagingContainer
    */
   private Collection<Integer> getIdsForRange(Range visibleRange) {
-  //  logger.info("getIdsForRange : range " + visibleRange);
+    //  logger.info("getIdsForRange : range " + visibleRange);
     int start = visibleRange.getStart();
     int end = Math.min(getList().size(), start + visibleRange.getLength());
 
@@ -257,13 +257,15 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise
    */
   public void markCurrentExercise(int itemID) {
-    if (getList() == null || getList().isEmpty()) return;
+    if (getList() == null || getList().isEmpty()) {
+      return;
+    }
 
     if (idToExercise.isEmpty()) {
       getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
     T found = idToExercise.get(itemID);
-   logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
+    if (DEBUG) logger.info("markCurrentExercise for " + itemID + " in " + idToExercise.size() + " found " + found);
     markCurrent(getIndex(found), found);
   }
 
@@ -307,7 +309,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void setPageSize(int pageSize) {
-  //  logger.info("setPageSize: page size is " + pageSize);
+    //  logger.info("setPageSize: page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

@@ -176,6 +176,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * This report is for on demand sending the report to the current user.
+   *
    * @see UserMenu#getProjectSpecificChoices
    */
   public void sendReport() throws DominoSessionException, RestrictedOperationException {

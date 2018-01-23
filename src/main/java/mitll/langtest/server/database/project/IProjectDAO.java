@@ -41,6 +41,7 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface IProjectDAO extends IDAO {
@@ -154,6 +155,8 @@ public interface IProjectDAO extends IDAO {
    * @return true if changed
    */
   boolean addOrUpdateProperty(int projid, ProjectProperty projectProperty, String newValue);
+
+  List<String> getListProp(int projid, ProjectProperty projectProperty);
 
   /**
    * @see Project#getProp

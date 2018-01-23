@@ -5,13 +5,8 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -44,7 +39,6 @@ import java.util.logging.Logger;
 public class ReportListManager {
   private final Logger logger = Logger.getLogger("ReportListManager");
 
-
   private final ExerciseController controller;
   private static final int TOP = 56;
   private static final String CLOSE = "Close";
@@ -58,7 +52,7 @@ public class ReportListManager {
   public void showReportList() {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Report List");
+    dialogBox.setText("Report List - spreadsheet recipients");
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -70,7 +64,6 @@ public class ReportListManager {
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
 
-
     projectServiceAsync.getListProperty(1, ProjectProperty.REPORT_LIST, new AsyncCallback<List<String>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -78,12 +71,12 @@ public class ReportListManager {
       }
 
       @Override
-      public void onSuccess(List<String> num) {
-//        populateTable(num, dialogVPanel, dialogBox, getCloseButton(dialogBox));
+      public void onSuccess(List<String> recipients) {
+//        populateTable(recipients, dialogVPanel, dialogBox, getCloseButton(dialogBox));
 
-        Collections.sort(num);
+        Collections.sort(recipients);
         List<MyEmail> toAdd = new ArrayList<>();
-        num.forEach(n -> toAdd.add(new MyEmail(toAdd.size(), n)));
+        recipients.forEach(n -> toAdd.add(new MyEmail(toAdd.size(), n)));
         ClickablePagingContainer<MyEmail> emails = new StringSimplePagingContainer(toAdd);
         Panel tableWithPager = emails.getTableWithPager(new ListOptions());
 
@@ -95,8 +88,12 @@ public class ReportListManager {
         bottom.add(getButtons(emails));
         bottom.add(getCloseButton(dialogBox));
 
+        boolean hasItems = !recipients.isEmpty();
+        delete.setEnabled(hasItems);
 
-        if (!num.isEmpty()) emails.markCurrentExercise(1);
+        logger.info("delete enabled " + delete.isEnabled() + " : " + recipients + " size " + recipients.size());
+
+        if (hasItems) emails.markCurrentExercise(emails.getSize()-1);
         dialogVPanel.add(bottom);
         tableWithPager.setHeight(300 + "px");
       }
@@ -107,7 +104,7 @@ public class ReportListManager {
     dialogBox.show();
   }
 
-  ClickablePagingContainer<MyEmail> emails;
+  private ClickablePagingContainer<MyEmail> emails;
 
   @NotNull
   private DivWidget getButtons(ClickablePagingContainer<MyEmail> emails) {
@@ -121,8 +118,8 @@ public class ReportListManager {
     return buttons;
   }
 
-  TextBox email;
-  Button addButton;
+  private TextBox email;
+  private Button addButton;
 
   /**
    * @return
@@ -143,27 +140,13 @@ public class ReportListManager {
     email.addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        //add.setEnabled(!email.getText().isEmpty());
-        // boolean validEmail = new UserDialog(controller.getProps()).isValidEmail(email.getText());
-        //logger.info("valid " + validEmail + " for " + email.getText());
         String newEmail = email.getText();
         add.setEnabled(!newEmail.isEmpty() &&
             new UserDialog(controller.getProps()).isValidEmail(newEmail) &&
             !getCurrentValues().contains(newEmail.trim()));
       }
     });
-/*
-    email.addKeyPressHandler(new KeyPressHandler() {
-      @Override
-      public void onKeyPress(KeyPressEvent event) {
-        add.setEnabled(!email.getText().isEmpty());
 
-        boolean validEmail = new UserDialog(controller.getProps()).isValidEmail(email.getText());
-
-        logger.info("valid " + validEmail + " for " + email.getText());
-        add.setEnabled(validEmail);
-      }
-    });*/
     email.addStyleName("leftFiveMargin");
     widgets.add(email);
     widgets.add(add);
@@ -188,9 +171,6 @@ public class ReportListManager {
         int id = emails.getSize() + 1;
         emails.addExercise(new MyEmail(id, email.getValue()));
         emails.markCurrentExercise(id);
-
-       // emails.redraw();
-
         email.setText("");
         addButton.setEnabled(false);
       }
@@ -207,26 +187,23 @@ public class ReportListManager {
     return strings;
   }
 
-  //private Button delete;
+  private Button delete;
 
   @NotNull
   private Button getRemoveButton() {
     final Button add = new Button("", IconType.MINUS);
-    //delete = add;
-    // add.setEnabled(false);
+    delete = add;
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add));
     add.setType(ButtonType.DANGER);
     addTooltip(add, "Remove recipient.");
-
-    // add.setEnabled(!myLists.isEmpty());
-    // myLists.addButton(add);
     return add;
   }
 
   private void gotDelete(Button delete) {
+    final MyEmail currentSelection = emails.getCurrentSelection();
     if (!emails.isEmpty()) {
-      current = emails.getCurrentSelection();
+      current = currentSelection;
     }
     if (current != null) {
       delete.setEnabled(false);
@@ -249,14 +226,35 @@ public class ReportListManager {
 
         @Override
         public void onSuccess(Boolean result) {
-          delete.setEnabled(true);
+          if (result) {
+            removeSelected(currentSelection, delete);
+          }
+          else {
+            logger.warning("huh? couldn't delete " + currentSelection);
+          }
 
-          emails.forgetItem(emails.getCurrentSelection());
-          emails.markCurrentExercise(emails.getSize());
+         // emails.markCurrentExercise(emails.getSize());
+         // delete.setEnabled(emails.getSize() > 0);
         }
       });
 
     } else logger.warning("current is null ");
+  }
+
+  private void removeSelected(MyEmail currentSelection, Button delete) {
+    int index = emails.getIndex(currentSelection);
+
+    emails.forgetItem(currentSelection);
+
+    int numItems = emails.getNumItems();
+    if (numItems == 0) {
+      delete.setEnabled(false);
+    } else {
+      if (index == numItems) index = numItems - 1;
+      HasID at = emails.getAt(index);
+      //logger.info("next is " + at.getName());
+      emails.markCurrentExercise(at.getID());
+    }
   }
 
   private void addTooltip(Widget add, String tip) {
@@ -284,7 +282,7 @@ public class ReportListManager {
     public MyEmail() {
     }
 
-    public MyEmail(int id, String value) {
+    MyEmail(int id, String value) {
       this.id = id;
       this.value = value;
     }
@@ -299,7 +297,7 @@ public class ReportListManager {
       return Integer.compare(id, o.getID());
     }
 
-    public String getValue() {
+    String getValue() {
       return value;
     }
 
@@ -314,7 +312,7 @@ public class ReportListManager {
   private class StringSimplePagingContainer extends ClickablePagingContainer<MyEmail> {
     private final List<MyEmail> num;
 
-    public StringSimplePagingContainer(List<MyEmail> num) {
+    StringSimplePagingContainer(List<MyEmail> num) {
       super(ReportListManager.this.controller);
       this.num = num;
     }
@@ -334,11 +332,11 @@ public class ReportListManager {
 
     @Override
     protected void addColumnsToTable(boolean sortEnglish) {
-      addItemID(200);
+      addItemID();
     }
 
-    protected void addItemID(int maxLength) {
-      Column<MyEmail, SafeHtml> userCol = getItemColumn(maxLength);
+    void addItemID() {
+      Column<MyEmail, SafeHtml> userCol = getItemColumn();
       userCol.setSortable(true);
       // table.setColumnWidth(userCol, getIdWidth() + "px");
       addColumn(userCol, new TextHeader("User"));
@@ -346,14 +344,16 @@ public class ReportListManager {
     }
 
 
-    private Column<MyEmail, SafeHtml> getItemColumn(int maxLength) {
+    private Column<MyEmail, SafeHtml> getItemColumn() {
       return new Column<MyEmail, SafeHtml>(new PagingContainer.ClickableCell()) {
+/*
         @Override
         public void onBrowserEvent(Cell.Context context, Element elem, MyEmail object, NativeEvent event) {
           super.onBrowserEvent(context, elem, object, event);
 
           logger.info("Got click " + object);
         }
+*/
 
         @Override
         public SafeHtml getValue(MyEmail shell) {
@@ -361,7 +361,7 @@ public class ReportListManager {
 
         }
 
-        protected SafeHtml getSafeHtml(String columnText) {
+        SafeHtml getSafeHtml(String columnText) {
           return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
         }
       };
