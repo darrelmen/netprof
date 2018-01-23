@@ -82,13 +82,14 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @param es
    * @see ListInterface#simpleRemove(int)
    */
-  //@Override
+
   public void forgetItem(T es) {
     List<T> list = getList();
     int before = getList().size();
 
     if (!list.remove(es)) {
-      if (!list.remove(getByID(es.getID()))) {
+      T byID = getByID(es.getID());
+      if (!list.remove(byID)) {
         logger.warning("forgetItem couldn't remove " + es);
 //        for (T t : list) {
 //          logger.info("\tnow has " + t.getOldID());
@@ -116,7 +117,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     verticalUnaccountedFor = v;
   }
 
-  public List<T> getExercises() {
+  public List<T> getItems() {
     return getList();
   }
 
@@ -262,7 +263,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
     T found = idToExercise.get(itemID);
-  //  logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
+   logger.info("markCurrentExercise for " + itemID + " in " +idToExercise.size() + " found " + found);
     markCurrent(getIndex(found), found);
   }
 

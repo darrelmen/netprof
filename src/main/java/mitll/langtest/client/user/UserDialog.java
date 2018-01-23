@@ -60,9 +60,9 @@ import org.jetbrains.annotations.NotNull;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class UserDialog extends BasicDialog {
-  public static final String NO_SERVER = "Can't communicate with server - check network connection.";
-  protected static final String USER_ID = "User ID";
+public class UserDialog extends BasicDialog {
+  static final String NO_SERVER = "Can't communicate with server - check network connection.";
+  static final String USER_ID = "User ID";
   static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
@@ -73,7 +73,7 @@ public abstract class UserDialog extends BasicDialog {
 
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
-  protected static final String SIGN_UP_WIDTH = 266 + "px";
+  private static final String SIGN_UP_WIDTH = 266 + "px";
 
   final PropertyHandler props;
   private KeyPressHelper enterKeyButtonHelper;
@@ -81,11 +81,12 @@ public abstract class UserDialog extends BasicDialog {
   protected final UserServiceAsync service = GWT.create(UserService.class);
   protected final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
 
+
   /**
    * @param props
    * @see SignUpForm#SignUpForm
    */
-  protected UserDialog(PropertyHandler props) {
+  public UserDialog(PropertyHandler props) {
     this.props = props;
   }
 
@@ -168,7 +169,7 @@ public abstract class UserDialog extends BasicDialog {
   }
 
   //    String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-  protected boolean isValidEmail(String text) {
+  public boolean isValidEmail(String text) {
     return text.trim().toLowerCase().matches(EMAIL_REGEX);
   }
 
@@ -266,6 +267,7 @@ public abstract class UserDialog extends BasicDialog {
 
   /**
    * On mobile this is really annoying if we don't turn it off.
+   *
    * @param useridField
    */
   protected void turnOffAutoCapitalize(FormField useridField) {
