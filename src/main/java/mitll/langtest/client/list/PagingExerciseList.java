@@ -212,7 +212,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   private T getFirstNotCompleted() {
-    for (T es : pagingContainer.getExercises()) {
+    for (T es : pagingContainer.getItems()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
         // logger.info("first unset is " + es.getID() + " state " + state);
