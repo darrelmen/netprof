@@ -133,7 +133,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     int port = getWebservicePort();
     phoneToDisplay = properties.getPhoneToDisplay(language.toLowerCase());
-
 //      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
@@ -637,19 +636,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private HTTPClient getDcodr() {
     return new HTTPClient(getWebserviceIP(), getWebservicePort(), DCODR);
   }
-
- /* private String getCleanedTranscript(String cleaned, String sep) {
-    String s = cleaned.replaceAll("\\p{Z}", sep);
-    String transcriptCleaned = sep + s.trim();
-
-    if (!transcriptCleaned.endsWith(sep)) {
-      transcriptCleaned = transcriptCleaned + sep;
-    }
-
-    String after = transcriptCleaned.replaceAll(";;", sep);
-
-    return after;
-  }*/
 
   private String getFailureMessage(String audioPath, String transcript, Collection<String> lmSentences, boolean decode) {
     String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;

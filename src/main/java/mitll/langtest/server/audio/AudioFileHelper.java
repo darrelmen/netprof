@@ -604,7 +604,9 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence,
-                                                    String transliteration, ImageOptions imageOptions, int exerciseID, PrecalcScores precalcScores, boolean usePhoneToDisplay1) {
+                                                    String transliteration, ImageOptions imageOptions, int exerciseID,
+                                                    PrecalcScores precalcScores,
+                                                    boolean usePhoneToDisplay1) {
     return getASRScoreForAudio(
         reqid,
         testAudioFile,
@@ -997,7 +999,9 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    //  logger.info("from '" + lmSentences + "' to '" + vocab +"'");
+      logger.info("getASRScoreForAudio from" +
+          "\n\tlm sentences '" + lmSentences + "'" +
+          "\n\tto '" + vocab +"'", new Exception());
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
@@ -1031,7 +1035,7 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tfor     " + theFile.getName() +
           "\n\tproject " + projid +
           "\n\texid    " + exid +
-          "\n\tenglish    " + english +
+          "\n\tenglish " + english +
           "\n\titem    " + foreignLanguage +
           "\n\tuser    " + userid);
     }
@@ -1044,6 +1048,18 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkForWebservice exists  " + theFile.exists());
       */
       if (theFile.exists()) {
+
+/*
+        if (language.equalsIgnoreCase("spanish")) {
+          logger.info("raw before " + foreignLanguage);
+          foreignLanguage = foreignLanguage
+              .replaceAll("Ud.", "usted")
+              .replaceAll("Uds.", "ustedes");
+          logger.info("raw after   " + foreignLanguage);
+        }
+*/
+
+
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, serverProps.getHydraHost());
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
@@ -1084,14 +1100,15 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
 
     if (session != null) {
-      logger.info("adding " + session);
+//      logger.info("adding " + session);
       httpClient.addRequestProperty("Cookie", session);
     }
 
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage + "'");
+
       //String trim = new SLFFile().cleanToken(foreignLanguage).trim();
-      //logger.info("getProxyScore dict     " + asrScoring.createHydraDict(trim, ""));
+      logger.info("getProxyScore dict = " + asrScoring.getHydraDict(new SLFFile().cleanToken(foreignLanguage).trim(), ""));
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
       return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
@@ -1234,7 +1251,7 @@ public class AudioFileHelper implements AlignDecode {
     String testAudioName = testDirAndName.getName();
     String testAudioDir = testDirAndName.getDir();
 
-    if (isEnglishSite()) {
+    if (isEnglish()) {
       sentence = sentence.toUpperCase();  // hack for English
     }
     sentence = sentence.replaceAll(",", " ");
@@ -1264,11 +1281,12 @@ public class AudioFileHelper implements AlignDecode {
    * Hack for percent sign in english - must be a better way.
    * Tried adding it to dict but didn't seem to work.
    *
+   *
    * @param sentence
    * @return
    */
   private String getSentenceToUse(String sentence) {
-    boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
+    boolean english = isEnglish() && sentence.equals("%") || sentence.equals("％");
     return english ? "percent" : sentence;
   }
 
@@ -1281,7 +1299,7 @@ public class AudioFileHelper implements AlignDecode {
     return language;
   }
 
-  private boolean isEnglishSite() {
+  private boolean isEnglish() {
     return getLanguage().equalsIgnoreCase("English");
   }
 
@@ -1374,12 +1392,16 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   public void runHydra(String transcript) {
-    ArrayList<String> lmSentences = new ArrayList<>();
-
+    List<String> lmSentences = new ArrayList<>();
     lmSentences.add(transcript);
     webserviceScoring.runHydra("", transcript, "", lmSentences, "", true, 1000);
   }
 
+  /**
+   * @param project
+   * @return
+   * @see #makeASRScoring
+   */
   @Nullable
   private HTKDictionary readDictionary(Project project) {
     HTKDictionary htkDictionary = null;
@@ -1405,9 +1427,8 @@ public class AudioFileHelper implements AlignDecode {
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
 
-/*    logger.info("makeDict :" +
-        "\n\tscoringDir '" + installPath + "'" +
-        "\n\tdictFile    " + dictFile);*/
+    logger.info("makeDict :" +
+        "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
@@ -1417,7 +1438,7 @@ public class AudioFileHelper implements AlignDecode {
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
       if (now - then > 300) {
-        logger.info("for " + getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+        logger.info("makeDict for " + getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
       return htkDictionary;
     } else {

@@ -38,6 +38,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
   private String language;
+  private static final boolean DEBUG = false;
 
   /**
    * @param exerciseList
@@ -87,25 +88,32 @@ class ListSorting<T extends CommonShell, U extends Shell> {
   private void makeDropDownReflectStoredValue(ListBox w1, String langASC, String langDSC) {
     String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
 
- //   logger.info("makeDropDownReflectStoredValue value is " + value);
+    //   logger.info("makeDropDownReflectStoredValue value is " + value);
     if (value != null) {
       value = getNormValue(value, langASC, langDSC);
-   //   logger.info("makeDropDownReflectStoredValue norm value is " + value);
+      //   logger.info("makeDropDownReflectStoredValue norm value is " + value);
       w1.setSelectedValue(value);
       if (!w1.getSelectedValue().equalsIgnoreCase(value)) logger.warning("didn't set " + value);
       //  sortLater(w1, langASC, langDSC, value);
     }
   }
 
+  /**
+   * @param toSort
+   * @param w1
+   * @see FacetExerciseList#resort
+   */
   public void sortLater(List<T> toSort, ListBox w1) {
     if (w1.getSelectedIndex() != 0) {
       String langASC = getLangASC(language, ASCENDING);
       String langDSC = getLangASC(language, DESCENDING);
       final String fvalue = getNormValue(w1.getSelectedValue(), langASC, langDSC);
 
-     // logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
+      // logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
 
-      sortByValue(toSort, fvalue, langASC, langDSC);
+      if (toSort.size() > 1) {
+        sortByValue(toSort, fvalue, langASC, langDSC);
+      }
 //      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));
     }
   }
@@ -134,12 +142,21 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       toStore = LANG_DSC;
     }
     exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
+    //logger.info("START onChange Sort by " + selectedValue + " to sort is null "  );
 
     sortByValue(null, selectedValue, langASC, langDSC);
+    //logger.info("END   onChange Sort by " + selectedValue + " to sort is null "  );
   }
 
+  /**
+   * @param toSort
+   * @param selectedValue
+   * @param langASC
+   * @param langDSC
+   * @see #sortLater(List, ListBox)
+   */
   private void sortByValue(List<T> toSort, String selectedValue, String langASC, String langDSC) {
-    logger.info("Sort by " + selectedValue);
+    if (DEBUG) logger.info("START Sort by " + selectedValue + " to sort is null " + (toSort == null));
 
     if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
       sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
@@ -167,7 +184,16 @@ class ListSorting<T extends CommonShell, U extends Shell> {
         int i = -1 * compareScores(o1, o2);
         return compareShells(o1, o2, i);
       });
+    } else {
+      logger.warning("sortByValue huh? no match " + selectedValue);
     }
+
+    if (toSort == null) {
+      if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort is null " + (toSort == null));
+    } else {
+      if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort has " + (toSort.size()));
+    }
+
   }
 
   private int compareScores(T o1, T o2) {
@@ -185,6 +211,11 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     }
   }
 
+  /**
+   * @param toSort
+   * @param comp
+   * @see
+   */
   private void sortBy(List<T> toSort, Comparator<T> comp) {
     if (toSort == null) {
       exerciseList.sortBy(comp);

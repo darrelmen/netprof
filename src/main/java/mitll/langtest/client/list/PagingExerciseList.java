@@ -73,6 +73,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private int unaccountedForVertical = 160;
   private boolean onlyExamples;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param currentExerciseVPanel
    * @param factory
@@ -89,13 +91,19 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     getElement().setId("PagingExerciseList_" + getInstance());
   }
 
+  /**
+   * @see ListSorting#sortBy
+   * @param comp
+   */
   void sortBy(Comparator<T> comp) {
+    if (DEBUG)     logger.info("start - sortBy ");
     scheduleWaitTimer();
 
     pagingContainer.sortBy(comp);
     loadFirst();
 
     showFinishedGettingExercises();
+    if (DEBUG) logger.info("end  - sortBy ");
   }
 
   public void loadFirst() {
@@ -106,11 +114,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void setState(int id, STATE state) {
     byID(id).setState(state);
   }
-
-//  @Override
-//  public void setSecondState(int id, STATE state) {
-//    byID(id).setSecondState(state);
-//  }
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
@@ -125,31 +128,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     addTableWithPager(makePagingContainer());
   }
 
-  /**
-   * @paramx selectionState
-   * @paramx prefix
-   * @paramx onlyWithAudioAnno
-   * @paramx onlyUnrecorded
-   * @paramx onlyDefaultUser
-   * @paramx onlyUninspected
-   * @paramx exerciseID
-   * @see HistoryExerciseList#simpleLoadExercises
-   */
-/*  void loadExercises(String selectionState,
-                     String prefix,
-                     boolean onlyWithAudioAnno,
-                     boolean onlyUnrecorded,
-                     boolean onlyDefaultUser,
-                     boolean onlyUninspected, int exerciseID) {
-    scheduleWaitTimer();
-    logger.info("PagingExerciseList.loadExercises : looking for " +
-        "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
-
-    ExerciseListRequest request = getRequest(prefix);
-    service.getExerciseIds(
-        request,
-        new SetExercisesCallback("", prefix, -1, request));
-  }*/
   private void scheduleWaitTimer() {
     waitCursorHelper.scheduleWaitTimer();
   }
@@ -491,7 +469,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       toRemember = ts;
       Shuffler.shuffle(ts);
     }
-    resort(toRemember);
+
+    toRemember = resort(toRemember);
+
     clear();
     //  int c = 0;
     toRemember.forEach(this::addExercise);
@@ -505,7 +485,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     return toRemember;
   }
 
-  protected void resort(List<T> toRemember) {}
+  protected List<T> resort(List<T> toRemember) {
+    return toRemember;
+  }
 
   @Override
   protected List<T> getInOrder() {
@@ -526,11 +508,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected T getFirst() {
     return pagingContainer.getFirst();
   }
-
-/*  @Override
-  public T byHasID(HasID hasID) {
-    return pagingContainer.byID(hasID.getID());
-  }*/
 
   @Override
   public T byID(int name) {

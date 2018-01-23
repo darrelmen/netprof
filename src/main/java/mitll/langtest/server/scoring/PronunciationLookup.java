@@ -2,6 +2,8 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import corpus.LTS;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.Project;
 import org.apache.commons.lang.StringUtils;
@@ -31,6 +33,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @param dictionary
    * @param lts
    * @param project
+   * @see ASRWebserviceScoring#ASRWebserviceScoring
    */
   PronunciationLookup(HTKDictionary dictionary, LTS lts, Project project) {
     this.htkDictionary = dictionary;
@@ -54,9 +57,10 @@ public class PronunciationLookup implements IPronunciationLookup {
    *
    * @param transcript
    * @return the dictionary for dcodr
-   * @see ASRWebserviceScoring#runHydra
+   * @see ASRWebserviceScoring#getHydraDict
+   *
    */
-  // @Override
+
   @Override
   public String createHydraDict(String transcript, String transliteration) {
     if (lts == null) {
@@ -161,7 +165,8 @@ public class PronunciationLookup implements IPronunciationLookup {
       if (!word.equals(" ") && !word.isEmpty()) {
         boolean easyMatch;
 
-        if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
+        if ((easyMatch = htkDictionary.contains(word)) ||
+            (htkDictionary.contains(word.toLowerCase()))) {
           addDictMatches(justPhones, dict, word, easyMatch);
         } else {  // not in the dictionary, let's ask LTS
           LTS lts = getLTS();
@@ -172,6 +177,8 @@ public class PronunciationLookup implements IPronunciationLookup {
               dict.append(getUnkPron(word));
             } else {
               String word1 = word.toLowerCase();
+
+            //  logger.info("no dict entry for " + word1);
               String[][] process = lts.process(word1);
 
               if (!ltsOutputOk(process)) {
@@ -262,6 +269,10 @@ public class PronunciationLookup implements IPronunciationLookup {
       }*/
       dict.append(getPronStringForWord(word, apply, justPhones));
     }
+/*    logger.info("addDictMatches for" +
+        "\n\teasyMatch " + easyMatch +
+        "\n\tword " + word +
+        "\n\tdict " + dict);*/
   }
 
   public String getCleanedTranscript(String cleaned) {
@@ -276,8 +287,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       transcriptCleaned = transcriptCleaned + sep;
     }
 
-    String after = transcriptCleaned.replaceAll(";;", sep);
-    return after;
+    return transcriptCleaned.replaceAll(";;", sep);
   }
 
   /**

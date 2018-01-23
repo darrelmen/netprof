@@ -45,6 +45,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -63,7 +64,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
-  // static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
@@ -74,7 +74,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
   private SimplePager pager;
-  //  private static final boolean debug = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
@@ -98,6 +97,12 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return getTable(listOptions);
   }
 
+  /**
+   * From Ray.
+   *
+   * @param listOptions
+   * @return
+   */
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
     final SimplePager pager =
@@ -239,7 +244,15 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public void flush() {
     if (comp != null) {
-      getList().sort(comp);
+      List<T> newList = new ArrayList<>(getList());
+      if (DEBUG) logger.info("flush : start sorting " + newList.size());
+      newList.sort(comp);
+      if (DEBUG) logger.info("flush : end   sorting " + newList.size());
+      dataProvider.setList(newList);
+//      getList().sort(comp);
+    } else {
+      if (DEBUG) logger.info("flush :no comparator ");
+
     }
     dataProvider.flush();
     table.setRowCount(getList().size());
@@ -388,18 +401,25 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private Comparator<T> comp;
 
+  public void setComparator(Comparator<T> comp) {
+    this.comp = comp;
+  }
+
   /**
    * @param comp
-   * @see mitll.langtest.client.list.PagingExerciseList#sortBy(Comparator)
+   * @see mitll.langtest.client.list.PagingExerciseList#sortBy
    */
   @Override
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
     long then = System.currentTimeMillis();
-//    logger.info("sortBy about to sort ------- ");
-    getList().sort(comp);
+    if (DEBUG) logger.info("sortBy about to sort ------- ");
+    List<T> list = getList();
+    List<T> newList = new ArrayList<>(list);
+    newList.sort(comp);
+
     long now = System.currentTimeMillis();
-  //  logger.info("sortBy finished sort in " + (now - then) + " ----- ");
+    if (DEBUG) logger.info("sortBy finished sort in " + (now - then) + " ----- ");
   }
 
   public void hide() {

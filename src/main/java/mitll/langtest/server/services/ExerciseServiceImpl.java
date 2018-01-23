@@ -1362,7 +1362,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 50)
+    if (now - then > 10)
       logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises" +
           "\n\tfor req = " + ids);
 
@@ -1385,7 +1385,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     then = System.currentTimeMillis();
     addAlignmentOutput(projectID, toAddAudioTo);
     now = System.currentTimeMillis();
-    if (now - then > 50)
+    if (now - then > 10)
       logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
 //    } else {

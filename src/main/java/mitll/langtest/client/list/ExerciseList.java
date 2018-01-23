@@ -285,20 +285,24 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
-      logger.info("SetExercisesCallback.onSuccess took " + (System.currentTimeMillis() - then) + " to get exercise ids.");
+      if (DEBUG) {
+        logger.info("SetExercisesCallback.onSuccess took " + (System.currentTimeMillis() - then) + " to get " + result.getExercises().size() +
+            " exercise ids.");
+      }
 
       showFinishedGettingExercises();
       if (DEBUG) {
         List<T> exercises = result.getExercises();
 
-        exercises.forEach(exercise->logger.info("Got " + exercise.getID() + " " + exercise.getEnglish()));
+        exercises.forEach(exercise -> logger.info("Got " + exercise.getID() + " " + exercise.getEnglish()));
         if (exercises != null)
           logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
       }
 
       if (isStaleResponse(result)) {
-        if (DEBUG)
+        if (DEBUG) {
           logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        }
         ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
@@ -315,8 +319,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * TODO : Why do this here? not on server???
-   * @see ExerciseList.SetExercisesCallback#onSuccess
+   *
    * @param result
+   * @see ExerciseList.SetExercisesCallback#onSuccess
    */
   private void setScores(ExerciseListWrapper<T> result) {
     Map<Integer, Float> idToScore = result.getIdToScore();
@@ -487,7 +492,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     );
 
     exercises = rememberExercises(exercises);
-//    listeners.forEach(l->l.listChanged(exercises, selectionID));
     for (ListChangeListener<T> listener : listeners) {
       listener.listChanged(exercises, selectionID);
     }

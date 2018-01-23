@@ -269,11 +269,22 @@ public class DecodeCorrectnessChecker {
   /**
    * Special rule for mandarin - break it up into characters
    *
+   * Added hack for spanish to replace Ud. with usted
    * @param rawRefSentence
    * @param language
    * @return
    */
   private String getPhraseToDecode(String rawRefSentence, String language) {
+    if (language.equalsIgnoreCase("spanish")) {
+ //     logger.info("raw before " + rawRefSentence);
+      rawRefSentence = rawRefSentence
+          .replaceAll("Ud.", "usted")
+          .replaceAll("Uds.", "ustedes");
+      logger.info("raw after   " + rawRefSentence);
+    }
+
+   // logger.info("raw (" +language+  ") after   " + rawRefSentence);
+
     return isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
         svd.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();

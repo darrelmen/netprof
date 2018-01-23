@@ -1080,7 +1080,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (!hasUser) return;
 
     List<Pair> pairs = getPairs(typeToSelection);
-    logger.info("getTypeToValues request " + pairs + " list " + userListID + " has user " + hasUser);
+    logger.info("getTypeToValues request " + pairs + " list " + userListID);
     final long then = System.currentTimeMillis();
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
@@ -1099,7 +1099,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
-            logger.info("took " + (System.currentTimeMillis() - then) + " to get type to values.");
+            logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get type to values.");
 
             changeSelection(response.getTypesToInclude(), typeToSelection);
             setTypeToSelection(typeToSelection);
@@ -1353,7 +1353,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
     // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
-      //   logger.info("askServerForExercises show empty -- ");
+         logger.info("askServerForExercises show empty -- ");
       //  showEmptyExercise();
     } else {
       getExercises(setVisibleForDrill(itemID, visibleIDs), currentReq);
@@ -1496,7 +1496,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
             if (result.getExercises() != null) {
               long now = System.currentTimeMillis();
               int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-              if (now - then > 1000) {
+              if (now - then > 10) {
                 logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
               }
 
@@ -1525,7 +1525,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
     result.getExercises().forEach(this::addExerciseToCached);
-    // logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
+     logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs );
 
     Collection<CommonExercise> toShow = getVisibleExercises(visibleIDs, idToEx);
 
@@ -1686,7 +1686,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
 //    logger.info("logException stack:\n" + exceptionAsString);
-    // new ListSorting<>(this).sortLater(sortBoxReally, controller.getLanguage());
   }
 
   /**
@@ -1871,7 +1870,13 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }*/
   }
 
-  protected void resort(List<CommonShell> toRemember) {
-    listSorting.sortLater(toRemember, sortBoxReally);
+  /**
+   * @see #rememberExercises
+   * @param toRemember
+   */
+  protected List<CommonShell> resort(List<CommonShell> toRemember) {
+    List<CommonShell> commonShells = new ArrayList<>(toRemember);
+    listSorting.sortLater(commonShells, sortBoxReally);
+    return commonShells;
   }
 }

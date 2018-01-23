@@ -171,6 +171,11 @@ public class ConfigFileCreator {
     return modelsDir == null ? null : getDictFile(modelsDir);
   }
 
+  /**
+   * Look for rsi-sctm-hlda dictionary.
+   * @param modelsDir
+   * @return
+   */
   private String getDictFile(String modelsDir) {
     String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
     String dictFile = modelsDir + File.separator + hldaDir + File.separator + DICT_WO_SP;
