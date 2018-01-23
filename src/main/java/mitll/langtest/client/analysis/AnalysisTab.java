@@ -156,7 +156,7 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(AnalysisReport result) {
-        useReport(result, then, userChosenID, isTeacherView, showTab, bottom, new ReqInfo(userid,minRecordings,listid));
+        useReport(result, then, userChosenID, isTeacherView, showTab, bottom, new ReqInfo(userid, minRecordings, listid));
       }
     });
   }
@@ -166,7 +166,7 @@ public class AnalysisTab extends DivWidget {
     private int minRecordings;
     private int listid;
 
-    public ReqInfo(int userid, int minRecordings, int listid) {
+    ReqInfo(int userid, int minRecordings, int listid) {
       this.userid = userid;
       this.minRecordings = minRecordings;
       this.listid = listid;
@@ -188,7 +188,6 @@ public class AnalysisTab extends DivWidget {
   private void useReport(AnalysisReport result,
                          long then,
                          String userChosenID,
-                        // int listid,
                          boolean isTeacherView,
                          ShowTab showTab, DivWidget bottom,
                          ReqInfo reqInfo) {
@@ -215,8 +214,10 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    Scheduler.get().scheduleDeferred(() ->
-        showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom,            fphoneReport,reqInfo));
+/*    Scheduler.get().scheduleDeferred(() ->
+        showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom, fphoneReport, reqInfo));*/
+
+    showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom, fphoneReport, reqInfo);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -365,7 +366,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @param wordScores
    * @param controller
    * @param analysisPlot
    * @param showTab
@@ -373,27 +373,25 @@ public class AnalysisTab extends DivWidget {
    * @param phoneReport
    * @see #useReport
    */
-  private void showWordScores(//List<WordScore> wordScores,
-                              int numScores,
-                              ExerciseController controller,
-                              AnalysisPlot analysisPlot,
-                              ShowTab showTab,
-                              Panel lowerHalf,
-                              PhoneReport phoneReport,
-                              ReqInfo reqInfo) {
+  private void showWordScores(
+      int numScores,
+      ExerciseController controller,
+      AnalysisPlot analysisPlot,
+      ShowTab showTab,
+      Panel lowerHalf,
+      PhoneReport phoneReport,
+      ReqInfo reqInfo) {
     {
       Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
       Panel tableWithPager = getWordContainer(
           reqInfo,
-          //wordScores,
           numScores,
           controller, analysisPlot, showTab, wordsTitle);
 
       tableWithPager.setWidth(WORD_WIDTH + "px");
 
       {
-        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer",
-            wordsTitle);
+        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
         wordsContainer.addStyleName("cardBorderShadow");
         lowerHalf.add(wordsContainer);
       }
@@ -408,12 +406,12 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @paramx wordScores
    * @param controller
    * @param analysisPlot
    * @param showTab
    * @param wordsTitle
    * @return
+   * @paramx wordScores
    */
   private Panel getWordContainer(//List<WordScore> wordScores,
                                  ReqInfo reqInfo,
@@ -423,7 +421,7 @@ public class AnalysisTab extends DivWidget {
                                  ShowTab showTab,
                                  Heading wordsTitle) {
     //   WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle, wordScores.size());
-    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo,controller, analysisPlot, showTab, wordsTitle, numResults, analysisServiceAsync);
+    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, showTab, wordsTitle, numResults, analysisServiceAsync);
     //   analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
     return wordContainer.getTableWithPager();///*wordScores*/);
   }

@@ -146,8 +146,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     );
 
     boolean didUpdate = easyUpdate(changed);
-    if (!didUpdate) logger.error("couldn't update " + changed);
-    boolean didChange = didUpdate || updateProperties(projectInfo);
+    if (!didUpdate) logger.error("update : couldn't update " + changed);
+    boolean updateProps = updateProperties(projectInfo);
+    boolean didChange = didUpdate || updateProps;
 
     if (didChange) {
       currentProject.clearPropCache();
@@ -170,7 +171,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     boolean didChange = addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
     didChange |= addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
     didChange |= addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
-    didChange |= addOrUpdateBooleanProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS());
+    boolean showOniOS = projectInfo.isShowOniOS();
+    didChange |= addOrUpdateBooleanProperty(projid, SHOW_ON_IOS, showOniOS);
     didChange |= addOrUpdateBooleanProperty(projid, AUDIO_PER_PROJECT, projectInfo.isAudioPerProject());
     return didChange;
   }
@@ -191,7 +193,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 //  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
 //    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
 //  }
-
 
   private boolean addOrUpdateBooleanProperty(int projid, ProjectProperty projectProperty, boolean newValue) {
     return addOrUpdateProperty(projid, projectProperty.getName(), newValue ? "true" : "false");

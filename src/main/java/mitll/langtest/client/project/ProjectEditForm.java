@@ -70,6 +70,7 @@ import java.util.logging.Logger;
 public class ProjectEditForm extends UserDialog {
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
+  private static final int LEFT_MARGIN_FOR_DOMINO = 320;
 
   private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
   private static final String SHOW_ON_I_OS = "Show On iOS";
@@ -323,7 +324,7 @@ public class ProjectEditForm extends UserDialog {
         DivWidget hDiv = getHDiv(id);
         hDiv.setWidth("100%");
         Heading domino_id = getHeading(DOMINO_ID, info.getDominoID());
-        domino_id.getElement().getStyle().setMarginLeft(340, Style.Unit.PX);
+        domino_id.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_DOMINO, Style.Unit.PX);
         hDiv.add(domino_id);
         fieldset.add(hDiv);
       } else {

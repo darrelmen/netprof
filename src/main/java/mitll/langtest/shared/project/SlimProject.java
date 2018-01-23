@@ -132,7 +132,8 @@ public class SlimProject extends ProjectInfo {
   }
 
   public String toString() {
-    return "Project #" + getID() + " " + getName() + " " + getLanguage() + " " + getStatus() +
-        " num children " + children.size() + " " + getFirstType() + " " + getSecondType();
+    return "SlimProject " + super.toString() +
+       // "\n\t#" + getID() +
+        "\n\tnum children " + children.size() ;
   }
 }

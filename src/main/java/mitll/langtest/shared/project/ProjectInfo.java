@@ -223,11 +223,12 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   public String toString() {
-    return getName() + " " + getStatus() +
+    return "#"+ getID() + "  "+ getName() + " " + getStatus() +
         "\nlang      " + language + "@" + host + ":" + port +
         "\ntypes     [" + getFirstType() + ", " + getSecondType() + "]"+
         "\ndomino    " + getDominoID()+
         "\nown audio " + audioPerProject+
+        "\nshowOniOS " + showOniOS+
         "\nimported  " + new Date(lastImport);
   }
 }

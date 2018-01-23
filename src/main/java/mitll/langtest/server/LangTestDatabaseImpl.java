@@ -82,6 +82,7 @@ import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
+
   private static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
 
   /**
@@ -102,7 +103,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
       if (property == null) {
         System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
-        logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
+        //logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
       }
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
@@ -162,6 +163,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       super.service(request, response);
     }
   }*/
+
   protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
     return super.getSectionHelper();
   }
