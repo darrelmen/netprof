@@ -78,10 +78,6 @@ public class Scores {
     this.processDur = processDur;
   }
 
-  public boolean isValid() {
-    return hydraScore > -0.01;
-  }
-
   /**
    * TODO : do we need word scores?
    *
@@ -103,9 +99,9 @@ public class Scores {
     }
   }
 
-/*  public int getProcessDur() {
-    return processDur;
-  }*/
+  public boolean isValid() {
+    return hydraScore > -0.01;
+  }
 
   public String toString() {
     return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";

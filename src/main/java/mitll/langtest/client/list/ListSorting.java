@@ -89,7 +89,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
 
     //   logger.info("makeDropDownReflectStoredValue value is " + value);
-    if (value != null) {
+    if (!value.isEmpty()) {
       value = getNormValue(value, langASC, langDSC);
       //   logger.info("makeDropDownReflectStoredValue norm value is " + value);
       w1.setSelectedValue(value);

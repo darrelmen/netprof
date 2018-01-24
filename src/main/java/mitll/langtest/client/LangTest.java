@@ -1157,13 +1157,7 @@ public class LangTest implements
     return flashRecordPanel.usingFlash();
   }
 
-/*
-  private void downloadFailedAlert() {
-    Window.alert("Code download failed");
-  }
-*/
-
-  public boolean isMicAvailable() {
+   public boolean isMicAvailable() {
     return isMicConnected;
   }
 

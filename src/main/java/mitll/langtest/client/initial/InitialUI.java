@@ -341,8 +341,8 @@ public class InitialUI implements UILifecycle {
           @Override
           public void onSuccess(Boolean result) {
             long now = System.currentTimeMillis();
-//            logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user ");
             if (!result) {
+               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
               logout();
             }
           }

@@ -73,11 +73,11 @@ public class UserProjectDAO implements IUserProjectDAO {
    * @param userid
    * @param projid
    * @return
-   * @see ProjectServices#rememberUsersCurrentProject(int, int)
+   * @see ProjectServices#rememberUsersCurrentProject
    */
   @Override
   public void add(int userid, int projid) {
-    dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
+    dao.upsert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
   public void addBulk(Collection<SlickUserProject> bulk) {
@@ -104,10 +104,10 @@ public class UserProjectDAO implements IUserProjectDAO {
     int mostRecentByUser = mostRecentByUser(userid);
 
     if (mostRecentByUser == -1) { // they logged out!
+      logger.info("setCurrentUserToProject no most recent project " + mostRecentByUser + " did they log out?");
       return false;
     } else if (mostRecentByUser != projid) {
-      logger.info("switched tabs, was " + mostRecentByUser + " but now will be " + projid);
-      forget(userid);
+      logger.info("setCurrentUserToProject switched tabs, was " + mostRecentByUser + " but now will be " + projid);
       add(userid, projid);
       return true;
     } else {

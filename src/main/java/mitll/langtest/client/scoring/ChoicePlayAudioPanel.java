@@ -349,9 +349,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private AudioAttribute getAtSpeed(Map<MiniUser, List<AudioAttribute>> malesMap, boolean isReg) {
-    Collection<List<AudioAttribute>> values = malesMap.values();
-
-    for (List<AudioAttribute> attrs : values) {
+    for (List<AudioAttribute> attrs : malesMap.values()) {
       for (AudioAttribute audioAttribute : attrs) {
         if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
           if (audioAttribute.getAudioRef().startsWith(FAST) || audioAttribute.getAudioRef().startsWith(SLOW1)) {

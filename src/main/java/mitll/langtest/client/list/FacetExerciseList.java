@@ -1351,7 +1351,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
 
     if (visibleIDs.isEmpty()) {
-      logger.warning("skipping empty visible range?");
+      logger.info("skipping empty visible range?");
     } else {
       final int currentReq = incrReq();
       askServerForVisibleExercises(itemID, visibleIDs, currentReq);

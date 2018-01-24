@@ -275,7 +275,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
-    for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.PROGRESS, VIEWS.LISTS)) {
+    for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
         choice1.addStyleName("leftTwentyMargin");
@@ -307,7 +307,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   public void showDrill() {
-    gotClickOnChoice(VIEWS.PRACTICE.toString(), viewToLink.get(VIEWS.PRACTICE));
+    gotClickOnChoice(VIEWS.DRILL.toString(), viewToLink.get(VIEWS.DRILL));
   }
 
   private void gotClickOnChoice(String instanceName, NavLink learn) {

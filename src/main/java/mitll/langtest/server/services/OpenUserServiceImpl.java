@@ -325,6 +325,14 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       if (now - then > 10) {
         logger.info("setCurrentUserToProject : took " + (now - then) + " to get current session user " + sessionUserID + " and set project to " + projid);
       }
+      if (!b) {
+        if (sessionUserID == -1) {
+          logger.info("setCurrentUserToProject : no current session user " + sessionUserID + " for " + projid);
+        }
+        else {
+          logger.info("setCurrentUserToProject : no most recent project for " + sessionUserID + ", tried " + projid);
+        }
+              }
 
       return b;
     } catch (DominoSessionException e) {

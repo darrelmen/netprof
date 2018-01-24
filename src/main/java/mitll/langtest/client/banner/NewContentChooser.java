@@ -77,6 +77,8 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
+    logger.info("currentView " + currentView);
+//    if (currentView.equalsIgnoreCase("drill")) currentView = VIEWS.DRILL.toString();
     VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
 
     List<User.Permission> requiredPerms = currentStoredView.getPerms();
@@ -114,9 +116,9 @@ public class NewContentChooser implements INavigation {
 
           learnHelper.showContent(divWidget, LEARN.toString());
           break;
-        case PRACTICE:
+        case DRILL:
           clear();
-          practiceHelper.showContent(divWidget, PRACTICE.toString());
+          practiceHelper.showContent(divWidget, DRILL.toString());
           practiceHelper.hideList();
           break;
         case PROGRESS:

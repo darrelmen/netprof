@@ -120,7 +120,7 @@ public class PrecalcScores {
 //    boolean avp = eventScores.isEmpty() ||
 //        (wordsMap.isEmpty() &&
 //            (precalcResult != null &&
-//                (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect()))
+//                (precalcResult.getAudioType() != AudioType.DRILL || precalcResult.isCorrect()))
 //        );
 //
 ////    boolean onlyUnknown = wordsMap != null && wordsMap.size() == 1 && wordsMap.containsKey(ASRWebserviceScoring.UNKNOWN_MODEL);

@@ -386,11 +386,10 @@ public class AudioExercise extends ExerciseShell {
    * @see #getMostRecentAudio
    * @see #getUserMap(boolean, boolean)
    */
-  public Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale, boolean includeContext) {
+  private Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale, boolean includeContext) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
-    Collection<AudioAttribute> byGender = getByGender(isMale);
 
-    for (AudioAttribute attribute : byGender) {
+    for (AudioAttribute attribute : getByGender(isMale)) {
       if (!attribute.getAttributeKeys().contains(CONTEXT) || includeContext) {
         List<AudioAttribute> audioAttributes1 = userToAudio.computeIfAbsent(attribute.getUser(), k -> new ArrayList<>());
         audioAttributes1.add(attribute);
@@ -428,7 +427,7 @@ public class AudioExercise extends ExerciseShell {
    * <p>
    * preferredVoices matches are more important than more recent recordings.
    * <p>
-   * TODO : somehow associated preferred voices with a project!
+   * TODO : somehow associated preferred voices with a project?
    *
    * @param isMale
    * @param preferredVoices if we find audio from preferred voices, we will use it, no matter how old it is

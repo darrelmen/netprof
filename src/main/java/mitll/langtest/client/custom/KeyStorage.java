@@ -113,6 +113,11 @@ public class KeyStorage {
     }
   }
 
+  /**
+   * @see
+   * @param name
+   * @return empty string if not item stored
+   */
   public String getValue(String name) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();

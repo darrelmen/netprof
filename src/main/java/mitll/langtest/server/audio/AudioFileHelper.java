@@ -999,9 +999,9 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-      logger.info("getASRScoreForAudio from" +
+/*      logger.info("getASRScoreForAudio from" +
           "\n\tlm sentences '" + lmSentences + "'" +
-          "\n\tto '" + vocab +"'", new Exception());
+          "\n\tto '" + vocab +"'", new Exception());*/
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 

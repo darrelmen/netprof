@@ -60,6 +60,7 @@ public interface IUserProjectDAO extends IDAO {
   /**
    * @param userid
    * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
    */
   void forget(int userid);
 
@@ -71,7 +72,6 @@ public interface IUserProjectDAO extends IDAO {
   int mostRecentByUser(int user);
 
   Map<Integer, Integer> getUserToProject();
-
 
   Collection<Integer> getUsersForProject(int projid);
 }
