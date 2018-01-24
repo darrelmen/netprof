@@ -58,7 +58,6 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @param transcript
    * @return the dictionary for dcodr
    * @see ASRWebserviceScoring#getHydraDict
-   *
    */
 
   @Override
@@ -178,7 +177,7 @@ public class PronunciationLookup implements IPronunciationLookup {
             } else {
               String word1 = word.toLowerCase();
 
-            //  logger.info("no dict entry for " + word1);
+              //  logger.info("no dict entry for " + word1);
               String[][] process = lts.process(word1);
 
               if (!ltsOutputOk(process)) {
@@ -242,11 +241,20 @@ public class PronunciationLookup implements IPronunciationLookup {
                   }
                 }*/
 
-                  String pronStringForWord = getPronStringForWord(word, pron, justPhones);
-                  if (korean) {
-                    logger.info("getPronunciationsFromDictOrLTS word " + word + " = " + pronStringForWord);
+                  boolean allValid = true;
+                  for (String p : pron) {
+                    if (p.equalsIgnoreCase(POUND)) allValid = false;
                   }
-                  dict.append(pronStringForWord);
+
+                  if (allValid) {
+                    String pronStringForWord = getPronStringForWord(word, pron, justPhones);
+                    if (korean) {
+                      logger.info("getPronunciationsFromDictOrLTS word " + word + " = " + pronStringForWord);
+                    }
+                    dict.append(pronStringForWord);
+                  } else {
+                    logger.warn("getPronunciationsFromDictOrLTS : skipping invalid pron " + Arrays.asList(pron) + " for " + word);
+                  }
                 }
               }
             }
