@@ -92,6 +92,7 @@ public class SlickUserExerciseDAO
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private String hostName;
+
   private String hostAddress = "unk";
   /**
    * @param database
@@ -116,13 +117,14 @@ public class SlickUserExerciseDAO
     }
     hostName = database.getServerProps().getHostName();
 
+    /*
     try {
       InetAddress ip = InetAddress.getLocalHost();
       hostAddress = ip.getHostAddress();
     } catch (UnknownHostException e) {
       logger.error("got " + e, e);
 
-    }
+    }*/
 //    logger.info("hostName " + hostName + "/"+hostAddress);
   }
 

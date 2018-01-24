@@ -520,8 +520,8 @@ public class ClickableWords<T extends CommonExercise> {
       highlightSegmentDiv.setClickable(false);
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      //  highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-      highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
+      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
+      //highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }

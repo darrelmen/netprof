@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.ITestSection;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -524,29 +525,30 @@ public class SectionTest extends BaseTest {
     Project project = andPopulate.getProject(byLanguage);
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+    ITestSection<CommonExercise> tsectionHelper = (ITestSection<CommonExercise>)project.getSectionHelper();
 
     logger.info("sections " + sectionHelper.getSectionNodesForTypes());
    // SectionNode unit = sectionHelper.getFirstNode("1");
 
-    SectionNode unit = sectionHelper.getNode(sectionHelper.getRoot(), "Unit", "1");
+    SectionNode unit = tsectionHelper.getNode(tsectionHelper.getRoot(), "Unit", "1");
 
     logger.info("Got for 2 = " + unit);
     if (unit != null) {
       Collection<SectionNode> children = unit.getChildren();
       for (SectionNode node:children) logger.warn("node " + node.getType() + " " + node.getName());
-      SectionNode chapter = sectionHelper.getNode(unit, "Lesson", "1");
+      SectionNode chapter = tsectionHelper.getNode(unit, "Lesson", "1");
       logger.info("unit 1 lesson 1 " +chapter);
     }
 
-    SectionNode unit2 = sectionHelper.getNode(sectionHelper.getRoot(), "Unit", "2");
+    SectionNode unit2 = tsectionHelper.getNode(tsectionHelper.getRoot(), "Unit", "2");
     if (unit2 != null) {
       Collection<SectionNode> children = unit2.getChildren();
       for (SectionNode node:children) logger.warn("node " + node.getType() + " " + node.getName());
-      SectionNode chapter = sectionHelper.getNode(unit2, "Lesson", "2");
+      SectionNode chapter = tsectionHelper.getNode(unit2, "Lesson", "2");
       logger.info("unit 2 lesson 2 " +chapter);
     }
 
-    SectionNode root = sectionHelper.getRoot();
+    SectionNode root = tsectionHelper.getRoot();
     logger.info("Got " + root);
     logger.info("depth " + root.childCount());
     logger.info("type to distinct " + sectionHelper.getTypeToDistinct());
@@ -558,10 +560,10 @@ public class SectionTest extends BaseTest {
     pairs.add(new Pair("Topic","Any"));
     pairs.add(new Pair("Dialect","Any"));
 
-    Map<String, Set<MatchInfo>> typeToMatches = sectionHelper.getTypeToMatches(pairs);
+    Map<String, Set<MatchInfo>> typeToMatches = tsectionHelper.getTypeToMatches(pairs);
     logger.info("got " +typeToMatches);
 
-    Map<String, Set<MatchInfo>> typeToMatches2 = sectionHelper.getTypeToMatches(pairs);
+    Map<String, Set<MatchInfo>> typeToMatches2 = tsectionHelper.getTypeToMatches(pairs);
     logger.info("got " +typeToMatches2);
 
     List<Pair> pairs2 =new ArrayList<>();
@@ -570,10 +572,10 @@ public class SectionTest extends BaseTest {
     pairs2.add(new Pair("Topic","Any"));
     pairs2.add(new Pair("Dialect","Any"));
 
-    Map<String, Set<MatchInfo>> typeToMatches3 = sectionHelper.getTypeToMatches(pairs2);
+    Map<String, Set<MatchInfo>> typeToMatches3 = tsectionHelper.getTypeToMatches(pairs2);
     logger.info("got " +typeToMatches3);
 
-    Map<String, Set<MatchInfo>> typeToMatches4 = sectionHelper.getTypeToMatches(pairs2);
+    Map<String, Set<MatchInfo>> typeToMatches4 = tsectionHelper.getTypeToMatches(pairs2);
     logger.info("got " +typeToMatches4);
   }
 
@@ -585,21 +587,23 @@ public class SectionTest extends BaseTest {
     Project project = andPopulate.getProject(byLanguage);
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
-    SectionNode unit = sectionHelper.getFirstNode("2");
+    ITestSection<CommonExercise> tsectionHelper = (ITestSection<CommonExercise>)project.getSectionHelper();
+
+    SectionNode unit = tsectionHelper.getFirstNode("2");
     logger.info("Got for 2 = " + unit);
-    SectionNode chapter = sectionHelper.getNode(unit, "Chapter", "2");
+    SectionNode chapter = tsectionHelper.getNode(unit, "Chapter", "2");
 
     if (chapter != null) {
       logger.info("Got " + chapter);
-      SectionNode sound = sectionHelper.getNode(chapter, "Sound", "a");
+      SectionNode sound = tsectionHelper.getNode(chapter, "Sound", "a");
       logger.info("Got " + sound);
-      SectionNode sound2 = sectionHelper.getNode(chapter, "Sound", "ng");
+      SectionNode sound2 = tsectionHelper.getNode(chapter, "Sound", "ng");
       logger.info("Got " + sound2);
     } else {
       logger.warn("nothing for chapter 2?");
     }
 
-    SectionNode root = sectionHelper.getRoot();
+    SectionNode root = tsectionHelper.getRoot();
     logger.info("Got " + root);
     logger.info("depth " + root.childCount());
     logger.info("type to distinct " + sectionHelper.getTypeToDistinct());
@@ -630,21 +634,23 @@ public class SectionTest extends BaseTest {
     }
     */
 
-    logger.info("root " + sectionHelper.getRoot());
-    logger.info("root children " + sectionHelper.getRoot().getChildren());
+    ITestSection<CommonExercise> tsectionHelper = (ITestSection<CommonExercise>)project.getSectionHelper();
+
+    logger.info("root " + tsectionHelper.getRoot());
+    logger.info("root children " + tsectionHelper.getRoot().getChildren());
     logger.info("initial values " + sectionHelper.getTypeToDistinct());
 
-    SectionNode firstNode = sectionHelper.getFirstNode("1");
+    SectionNode firstNode = tsectionHelper.getFirstNode("1");
     logger.info("Got first node for 1 " + firstNode);
     if (firstNode != null) {
-      firstNode = sectionHelper.getNode(firstNode, "Chapter", "1");
+      firstNode = tsectionHelper.getNode(firstNode, "Chapter", "1");
       logger.info("Got " + firstNode);
     }
     if (firstNode != null) {
-      firstNode = sectionHelper.getNode(firstNode, "Sound", "b");
+      firstNode = tsectionHelper.getNode(firstNode, "Sound", "b");
       logger.info("Got " + firstNode);
     }
-    Collection<CommonExercise> unit = sectionHelper.getExercisesForSelectionState("Unit", "1");
+    Collection<CommonExercise> unit = tsectionHelper.getExercisesForSelectionState("Unit", "1");
     logger.info("found " + unit.size());
 
     Map<String, Collection<String>> search = new HashMap<>();
@@ -669,34 +675,34 @@ public class SectionTest extends BaseTest {
     toMatch.add(getUnitOne());
     //toMatch.add(new Pair("Chapter", "a"));
     //toMatch.add(new Pair("Sound", "x"));
-    Map<String, Set<MatchInfo>> typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    Map<String, Set<MatchInfo>> typeToMatches = tsectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + typeToMatches);
 
     toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
     //toMatch.add(new Pair("Chapter", "a"));
     //toMatch.add(new Pair("Sound", "x"));
-    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    typeToMatches = tsectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + typeToMatches);
 
     toMatch = new ArrayList<>();
     toMatch.add(getUnitOne());
     toMatch.add(new Pair("Topic", "Basics"));
     //toMatch.add(new Pair("Sound", "x"));
-    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    typeToMatches = tsectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + typeToMatches);
 
     toMatch = new ArrayList<>();
     toMatch.add(getUnit("0"));
     toMatch.add(new Pair("Topic", "Basics"));
     //toMatch.add(new Pair("Sound", "x"));
-    typeToMatches = sectionHelper.getTypeToMatches(toMatch);
+    typeToMatches = tsectionHelper.getTypeToMatches(toMatch);
     logger.info("match for " + toMatch + " is " + typeToMatches);
 
     andPopulate.close();
   }
 
-  private void forChild(ISection<CommonExercise> sectionHelper, SectionNode type, Map<String, String> map, int level) {
+  private void forChild(ITestSection<CommonExercise> sectionHelper, SectionNode type, Map<String, String> map, int level) {
     //for (SectionNode type : sectionNodesForTypes) {
     Map<String, String> map2 = new LinkedHashMap<>();
     map2.putAll(map);
@@ -720,7 +726,7 @@ public class SectionTest extends BaseTest {
     return builder.toString();
   }
 
-  private void forChildren(ISection<CommonExercise> sectionHelper, SectionNode type, Map<String, String> map) {
+  private void forChildren(ITestSection<CommonExercise> sectionHelper, SectionNode type, Map<String, String> map) {
     Collection<SectionNode> children = type.getChildren();
     for (SectionNode sectionNode : children) {
       Map<String, String> map2 = new HashMap<>();

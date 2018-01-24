@@ -306,46 +306,34 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
     final boolean needToShowRef = req.contains(refID);
     final boolean needToShowContextRef = req.contains(contextRefID);
-    controller.getScoringService().getAlignments(
-        projectid,
-        req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("get alignments", caught);
-          }
 
-          @Override
-          public void onSuccess(Map<Integer, AlignmentOutput> result) {
-            alignments.putAll(result);
-
-            if (needToShowRef) {
-              audioChanged(refID, currentAudioAttr.getDurationInMillis());
-            }
-            if (needToShowContextRef) {
-              //logger.info("registerSegments register " + refID + " context " + contextRefID);
-              contextAudioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    if (projectStartupInfo != null && projectStartupInfo.isHasModel()) {
+      controller.getScoringService().getAlignments(
+          projectid,
+          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("get alignments", caught);
             }
 
-//            registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-            cacheOthers(listener);
-          }
-        });
+            @Override
+            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              alignments.putAll(result);
+
+              if (needToShowRef) {
+                audioChanged(refID, currentAudioAttr.getDurationInMillis());
+              }
+              if (needToShowContextRef) {
+                //logger.info("registerSegments register " + refID + " context " + contextRefID);
+                contextAudioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
+              }
+
+              cacheOthers(listener);
+            }
+          });
+    }
   }
-
- /* private void registerSegments(int refID,
-                                AudioAttribute currentAudioAttr,
-                                int contextRefID,
-                                AudioAttribute currentAudioAttr1) {
-    if (refID != -1) {
-      audioChanged(refID, currentAudioAttr.getDurationInMillis());
-    } else {
-      //logger.warning("registerSegments huh? register " + refID);
-    }
-    if (contextRefID != -1) {
-      logger.info("registerSegments register " + refID + " context " + contextRefID);
-      contextAudioChanged(contextRefID, currentAudioAttr1.getDurationInMillis());
-    }
-  }*/
 
   /**
    * @param listener

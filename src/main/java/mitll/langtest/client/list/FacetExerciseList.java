@@ -88,7 +88,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    *
    */
-  private static final boolean DEBUG_STALE = true;
+  private static final boolean DEBUG_STALE = false;
   private static final boolean DEBUG = false;
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
@@ -1081,7 +1081,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (!hasUser) return;
 
     List<Pair> pairs = getPairs(typeToSelection);
-    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    // logger.info("getTypeToValues request " + pairs + " list " + userListID);
     final long then = System.currentTimeMillis();
 
     controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
@@ -1642,8 +1642,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       } else {
         //   Scheduler.get().scheduleDeferred((Command) () -> {
         //logger.info("showExercises for check " + reqID);
-        showExerciesForCurrentReq(result, reqID);
+//        showExerciesForCurrentReq(result, reqID);
         // });
+
+        Scheduler.get().scheduleDeferred((Command) () -> showExerciesForCurrentReq(result, reqID));
 
   /*      Scheduler.get().scheduleDeferred((Command) () -> {
           if (isCurrentReq(reqID)) {

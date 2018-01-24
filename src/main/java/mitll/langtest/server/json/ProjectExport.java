@@ -12,9 +12,8 @@ import java.util.Collection;
  */
 public class ProjectExport {
   //private static final Logger logger = LogManager.getLogger(ProjectExport.class);
-
   private static final String SHOW_ON_IOS = "showOnIOS";
-  public static final String LOCALHOST = "127.0.0.1";
+  private static final String LOCALHOST = "127.0.0.1";
 
   /**
    * @param productionProjects
@@ -28,8 +27,11 @@ public class ProjectExport {
     //logger.info("toJSON converting " + productionProjects.size() + " projects");
 
     for (Project project : productionProjects) {
+
+   project.clearPropCache();
       JsonObject proj = new JsonObject();
       value.add(proj);
+
       proj.addProperty("id", project.getProject().id());
       proj.addProperty("name", project.getProject().name());
       proj.addProperty("type", "npf2");

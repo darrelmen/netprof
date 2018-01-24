@@ -52,7 +52,7 @@ import java.util.*;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T> {
+public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
   static final String TOPIC = "Topic";
@@ -292,8 +292,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
     return getTypeToMatches(typeToMatchPairs);
   }
-
-  //private boolean DEBUG =true;
 
   /**
    * Assumes a partial path implies = type=any for unmentioned?
@@ -631,14 +629,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     for (Pair pair : pairs) addExerciseToLesson(exercise, pair);
   }
 
-  @Override
-  public void addExerciseToLesson(T exercise, Pair pair) {
+//  @Override
+private void addExerciseToLesson(T exercise, Pair pair) {
     addPairEntry(exercise, pair);
     exercise.addPair(pair);
   }
 
-  @Override
-  public Pair getPairForExerciseAndLesson(T exercise, String type, String unitName) {
+  //@Override
+  private Pair getPairForExerciseAndLesson(T exercise, String type, String unitName) {
     addPairEntry(exercise, type, unitName);
     return new Pair(type, unitName);
   }
@@ -893,11 +891,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //logger.info("rememberTypes root now " + root.easy());
   }
 
-  public void rememberTypesFor(List<List<Pair>> seen) {
+  private void rememberTypesFor(List<List<Pair>> seen) {
     SectionNode child = root;
 
     for (List<Pair> pairs : seen) child = rememberOne(child, pairs);
-    recurseAndCount(root, typeToCount = new HashMap<String, Set<String>>());
+    recurseAndCount(root, typeToCount = new HashMap<>());
 
     logger.info("rememberTypesFor type->childCount " + typeToCount);
   }

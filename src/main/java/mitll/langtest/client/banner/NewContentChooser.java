@@ -114,9 +114,9 @@ public class NewContentChooser implements INavigation {
 
           learnHelper.showContent(divWidget, LEARN.toString());
           break;
-        case DRILL:
+        case PRACTICE:
           clear();
-          practiceHelper.showContent(divWidget, DRILL.toString());
+          practiceHelper.showContent(divWidget, PRACTICE.toString());
           practiceHelper.hideList();
           break;
         case PROGRESS:

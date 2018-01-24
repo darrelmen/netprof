@@ -208,6 +208,10 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   public boolean isShowOniOS() {   return showOniOS;  }
 
+  /**
+   * @see ProjectEditForm#updateProject
+   * @param showOniOS
+   */
   public void setShowOniOS(Boolean showOniOS) {
     this.showOniOS = showOniOS;
   }

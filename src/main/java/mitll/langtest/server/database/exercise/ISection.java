@@ -1,7 +1,10 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickExercise;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -15,21 +18,20 @@ public interface ISection<T> {
 
   List<String> getTypeOrder();
 
+  /**
+   * @see ExcelImport#readExercises(InputStream)
+   * @return
+   */
   boolean allKeysValid();
 
   Collection<SectionNode> getSectionNodesForTypes();
 
   /**
    * Initial map of facet to all possible values for facet
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
    * @return
    */
   Map<String, Set<MatchInfo>> getTypeToDistinct();
-
-  Collection<T> getExercisesForSimpleSelectionState(Map<String, String> simpleMap);
-
-  Collection<T> getExercisesForSelectionState(String type, String value);
-
-  Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs);
 
   Collection<T> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection);
 
@@ -42,21 +44,22 @@ public interface ISection<T> {
    * @return
    */
   Pair addExerciseToLesson(T exercise, String type, String unitName);
-  void addExerciseToLesson(T exercise, Pair pair);
-  void addPairs(T exercise, List<Pair> pair);
 
   /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    * @param exercise
-   * @param type
-   * @param unitName
-   * @return
+   * @param pair
    */
-  Pair getPairForExerciseAndLesson(T exercise, String type, String unitName);
+  void addPairs(T exercise, List<Pair> pair);
 
   boolean removeExercise(T exercise);
 
   void refreshExercise(T exercise);
 
+  /**
+   * @see DBExerciseDAO#setRootTypes
+   * @param predefinedTypeOrder
+   */
   void setPredefinedTypeOrder(List<String> predefinedTypeOrder);
 
   void report();
@@ -68,14 +71,10 @@ public interface ISection<T> {
   */
   void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen);
 
-  void rememberTypesFor(List<List<Pair>> seen);
-
-  SectionNode getRoot();
-
-  SectionNode getFirstNode(String name);
-
-  SectionNode getNode(SectionNode node, String type, String name);
-
+  /**
+   * @see DBExerciseDAO#getTypeOrderFromProject
+   * @param types
+   */
   void reorderTypes(List<String> types);
 
   /**
@@ -84,11 +83,28 @@ public interface ISection<T> {
    */
   Set<String> getRootTypes();
 
+  /**
+   * @see DBExerciseDAO#setRootTypes
+   * @param rootTypes
+   */
   void setRootTypes(Set<String> rootTypes);
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
+   * @return
+   */
   Map<String, String> getParentToChildTypes();
 
+  /**
+   * @see DBExerciseDAO#setRootTypes
+   * @param parentToChildTypes
+   */
   void setParentToChildTypes(Map<String, String> parentToChildTypes);
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
+   * @param request
+   * @return
+   */
   FilterResponse getTypeToValues(FilterRequest request);
 }

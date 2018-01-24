@@ -117,7 +117,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String ENGLISH = "english";
   public static final String LANGUAGE = "language";
   public static final String FULL = "full";
-  public static final String WIDGET_TYPE = "widgetType";
+  private static final String WIDGET_TYPE = "widgetType";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
