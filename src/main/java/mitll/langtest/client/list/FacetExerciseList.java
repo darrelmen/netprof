@@ -1220,8 +1220,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
             if (!isForSameProject) {
               logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
-              new ModalInfoDialog(LINK_FOR_CONTENT,
-                  PLEASE_CHANGE);
+/*
+              new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
+*/
             }
 
           }

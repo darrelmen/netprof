@@ -280,7 +280,7 @@ public class DecodeCorrectnessChecker {
       rawRefSentence = rawRefSentence
           .replaceAll("Ud.", "usted")
           .replaceAll("Uds.", "ustedes");
-      logger.info("raw after   " + rawRefSentence);
+     // logger.info("raw after   " + rawRefSentence);
     }
 
    // logger.info("raw (" +language+  ") after   " + rawRefSentence);
