@@ -492,7 +492,7 @@ public class PostgresTest extends BaseTest {
         ISection<CommonExercise> sectionHelper = project1.getSectionHelper();
         logger.info("type order " + sectionHelper.getTypeOrder());
         sectionHelper.report();
-
+/*
         if (false) {
           Map<String, String> choice = new HashMap<>();
           // choice.put("Unit",  "1");
@@ -515,7 +515,7 @@ public class PostgresTest extends BaseTest {
             if (c++ < 10)
               logger.info("2 found " + ex.getID() + " :\t" + ex.getForeignLanguage());
           }
-        }
+        }*/
       }
     }
   }
