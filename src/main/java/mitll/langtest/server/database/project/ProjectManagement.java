@@ -691,7 +691,7 @@ public class ProjectManagement implements IProjectManagement {
     //logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
-      userWhere.setStartupInfo(null);
+      clearStartupInfo(userWhere);
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");
@@ -703,12 +703,17 @@ public class ProjectManagement implements IProjectManagement {
       if (project != null) {
         if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
           logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
-          userWhere.setStartupInfo(null);
+          clearStartupInfo(userWhere);
         } else {
           setStartupInfoOnUser(userWhere, projid, project);
         }
       }
     }
+  }
+
+  @Override
+  public void clearStartupInfo(User userWhere) {
+    userWhere.setStartupInfo(null);
   }
 
   /**

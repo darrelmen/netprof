@@ -574,7 +574,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       for (String section : sections) {
         Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
-          logger.warn("getExercisesForSection : Couldn't find section '" + section + "' in " + type);
+          logger.warn("getExercisesForSection : Couldn't find section '" + section + "' in type " + type + " keys " + sectionToLesson.keySet());
           return Collections.emptyList();
         } else {
           Collection<T> exercises1 = lesson.getExercises();

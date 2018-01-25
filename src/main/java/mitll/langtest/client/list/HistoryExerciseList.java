@@ -90,11 +90,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected abstract FacetContainer getSectionWidgetContainer();
 
-/*  protected String getHistoryToken(int id) {
-    //  logger.info("\tgetHistoryToken " + id);
-    return getHistoryTokenFromUIState(getTypeAheadText(), id);
-  }*/
-
   protected String getInitialHistoryToken() {
     //  logger.info("\tgetInitialHistoryToken ");
     return getHistoryTokenFromUIState(getTypeAheadText(), -1);
@@ -214,8 +209,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (hasExercise(toUse)) {
       //logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
-    }
-    else {
+    } else {
       logger.warning("tcheckAndAskOrFirst no exercise " + exerciseID);
     }
   }
@@ -266,8 +260,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   /**
-   * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addClickHandlerToButton
-   * @see #pushFirstListBoxSelection
+   * @see FacetExerciseList#gotSelection
    */
   protected void pushNewSectionHistoryToken() {
     String currentToken = getHistoryToken();
@@ -382,30 +375,19 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
-    String value = event.getValue();
-    SelectionState selectionState = getSelectionState(value);
-
-    int project = selectionState.getProject();
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    if (projectStartupInfo == null) {
+    if (controller.getProjectStartupInfo() == null) {
       logger.warning("onValueChange skipping change event since no project");
       return;
     }
 
-    int currentProject = projectStartupInfo.getProjectid();
+    String value = event.getValue();
+    SelectionState selectionState = getSelectionState(value);
 
-    // logger.info("onValueChange project " + project + " vs " + currentProject);
+    maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
 
-    if (project != currentProject) {
-      if (project > DEFAULT_PROJECT_ID) {
-        //   logger.info("onValueChange project from state " + project + " != " + currentProject);
-        projectChangedTo(project);
-      }
-    }
-
-    if (DEBUG_ON_VALUE_CHANGE)
+    if (DEBUG_ON_VALUE_CHANGE || true) {
       logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
+    }
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
@@ -434,7 +416,20 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
-  void projectChangedTo(int project) {}
+  protected void maybeSwitchProject(SelectionState selectionState, int currentProject) {
+    int project = selectionState.getProject();
+    //int currentProject = projectStartupInfo.getProjectid();
+    logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
+    if (project != currentProject) {
+      if (project > DEFAULT_PROJECT_ID) {
+        logger.info("onValueChange project from state " + project + " != " + currentProject);
+        projectChangedTo(project);
+      }
+    }
+  }
+
+  void projectChangedTo(int project) {
+  }
 
   /**
    * @param selectionState
@@ -449,9 +444,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
           "'");
     }
 
-    String search = selectionState.getSearch();
+   // String search = selectionState.getSearch();
     // logger.info("restoreUIState search box should be "+search);
-    setTypeAheadText(search);
+    setTypeAheadText(selectionState.getSearch());
   }
 
   protected void simpleLoadExercises(String selectionState, String prefix, int exerciseID) {
@@ -464,14 +459,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #simpleLoadExercises
    */
   private void loadExercises(String selectionState,
-                               String prefix,
+                             String prefix,
 
 
-                               boolean onlyWithAudioAnno,
-                               boolean onlyUnrecorded,
-                               boolean onlyDefaultUser,
-                               boolean onlyUninspected,
-                               int exerciseID) {
+                             boolean onlyWithAudioAnno,
+                             boolean onlyUnrecorded,
+                             boolean onlyDefaultUser,
+                             boolean onlyUninspected,
+                             int exerciseID) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     logger.info("HistoryExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
@@ -585,7 +580,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   /**
    * @param token
    * @return object representing type=value pairs from history token
-   * @see PagingExerciseList#loadExercises
+   * @see #loadExercises
    * @see #onValueChange
    */
   protected SelectionState getSelectionState(String token) {
@@ -594,7 +589,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   /**
    * @param exerciseID
-   * @see PagingExerciseList#loadExercises
+   * @see #onValueChange
    * @see #pushNewSectionHistoryToken
    */
   protected void noSectionsGetExercises(int exerciseID) {

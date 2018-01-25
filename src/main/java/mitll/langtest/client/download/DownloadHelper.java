@@ -58,21 +58,25 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 public class DownloadHelper {
 //  private final Logger logger = Logger.getLogger("DownloadHelper");
-
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
+  public static final String ALLCONTEXT = "allcontext";
 
-  private SelectionState selectionState;
+  private SelectionState selectionState = null;
   private Collection<String> typeOrder;
 
+/*
   public DownloadHelper() {
   }
+*/
 
+/*
   public DownloadHelper(HistoryExerciseList exerciseList) {
     selectionState = exerciseList.getSelectionState();
   }
+*/
 
   /**
    * @param selectionState
@@ -85,7 +89,7 @@ public class DownloadHelper {
 
   public void downloadContext(String host) {
     String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&" +
-        "allcontext" +
+        ALLCONTEXT +
         "=true";
     new DownloadIFrame(urlForDownload);
   }
@@ -100,7 +104,7 @@ public class DownloadHelper {
     isRegular = true;
 
     DivWidget container = new DivWidget();
-    boolean empty = selectionState.isEmpty();
+    boolean empty = selectionState == null || selectionState.isEmpty();
     if (empty) {
       container.add(new Heading(3, "Download spreadsheet for whole course."));
       container.add(new Heading(4, "If you also want to download audio, select a unit or chapter."));

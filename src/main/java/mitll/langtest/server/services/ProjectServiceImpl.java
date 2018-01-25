@@ -36,7 +36,6 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -44,42 +43,49 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
-  public static final String ANY = "Any";
+
   private static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
-  public static final String ID = "_id";
-  public static final String NAME = "name";
-  public static final String LANGUAGE_NAME = "languageName";
-  public static final String CREATE_TIME = "createTime";
-  public static final boolean DEBUG = false;
-  public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  public static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+  //public static final String ANY = "Any";
+//  public static final String ID = "_id";
+//  public static final String NAME = "name";
+//  public static final String LANGUAGE_NAME = "languageName";
+//  public static final String CREATE_TIME = "createTime";
+//  public static final boolean DEBUG = false;
+//  public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+//  public static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
   }
 
   /**
-   * @param projectid
+   * @paramx projectid
    * @return
-   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
+   * @seex mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
+/*
   @Override
   public boolean exists(int projectid) {
     return getProjectDAO().exists(projectid);
   }
+*/
 
   /**
    * @param name
@@ -272,8 +278,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
-
-
   private void markDeleted(int projectid) {
     SlickProject slickProject = db.getProject(projectid).getProject();
     slickProject.updateStatus(ProjectStatus.DELETED.toString());
@@ -289,6 +293,4 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
     return importUser;
   }
-
-
 }

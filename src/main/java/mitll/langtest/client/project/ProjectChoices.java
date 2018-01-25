@@ -206,7 +206,7 @@ public class ProjectChoices {
     section.add(getHeader(result, nest));
 
     final Container flags = new Container();
-   // flags.getElement().getStyle().setMarginBottom(30, Style.Unit.PX);
+    // flags.getElement().getStyle().setMarginBottom(30, Style.Unit.PX);
 
     flags.add(addFlags(result, nest));
     section.add(flags);
@@ -831,7 +831,7 @@ public class ProjectChoices {
    * @param projectid
    * @see #getImageAnchor
    */
-  private void setProjectForUser(final int projectid) {
+/*  private void setProjectForUser(final int projectid) {
     projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -848,13 +848,13 @@ public class ProjectChoices {
         }
       }
     });
-  }
+  }*/
 
   /**
    * @param projectid
    * @see #setProjectForUser
    */
-  private void reallySetTheProject(int projectid) {
+  private void setProjectForUser(int projectid) {
     // logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
@@ -869,9 +869,13 @@ public class ProjectChoices {
         if (aUser == null) {
           logger.warning("huh? no current user? ");
         } else {
-          userNotification.setProjectStartupInfo(aUser);
-          //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
-          uiLifecycle.showInitialState();
+          if (aUser.getStartupInfo() == null) { // no project with that project id
+            lifecycleSupport.getStartupInfo();
+          } else {
+            userNotification.setProjectStartupInfo(aUser);
+            //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
+            uiLifecycle.showInitialState();
+          }
         }
       }
     });

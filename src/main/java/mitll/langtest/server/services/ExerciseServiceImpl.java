@@ -82,7 +82,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   private static final boolean DEBUG = false;
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  public static final boolean WARN_MISSING_REF_RESULT = false;
+  private static final boolean WARN_MISSING_REF_RESULT = false;
 
   /**
    * @param request
@@ -1135,6 +1135,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * On the fly we make a new section helper to do filtering of user list.
+   *
+   * TODO : include lists as just another facet for the purpose of filtering
+   * If the filter and then the list results in no exercises, unselect the list.
    *
    * @param typeToSelection
    * @param userListByID

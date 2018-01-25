@@ -894,7 +894,7 @@ public class RefResultDecoder {
     //List<Result> results = db.getRefResultDAO().getResults();
 
     //List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
-    String modelsDir = db.getProject(projid).getModelsDir();
+   // String modelsDir = db.getProject(projid).getModelsDir();
 
     List<Integer> files = db.getRefResultDAO().getAllAudioIDsForProject(projid);
 
@@ -951,12 +951,12 @@ public class RefResultDecoder {
       //  File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
         File absoluteFile =  new File(getAbsFilePath(attribute,language));
 
-        if (!audioRef.contains("context=")) {
+    //    if (!audioRef.contains("context=")) {
           //logger.debug("doing alignment -- ");
           // Do alignment...
 //          File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
           fileExists = absoluteFile.exists();
-        }
+      //  }
 
         if (fileExists) {
           double durationInSeconds = audioCheck.getDurationInSeconds(absoluteFile);
@@ -969,7 +969,7 @@ public class RefResultDecoder {
             float dnr = attribute.getDnr();
             if (dnr < 0) dnr = audioCheck.getDNR(absoluteFile);
             if (dnr > audioCheck.getMinDNR()) {
-              audioFileHelper.decodeOneAttribute(exercise, attribute, defaultUser);
+              audioFileHelper.decodeOneAttribute(exercise, attribute, defaultUser, absoluteFile);
               sleep(serverProps.getSleepBetweenDecodes());
               count++;
             } else {

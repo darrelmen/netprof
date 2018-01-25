@@ -42,6 +42,7 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -181,7 +182,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
 
-    downloadHelper = new DownloadHelper(this);
+    downloadHelper = new DownloadHelper();
 
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");
@@ -445,7 +446,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.clear();
     addTypeAhead(sectionPanel);
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
-    restoreUIState(getSelectionState(getHistoryToken()));
+    SelectionState selectionState = getSelectionState(getHistoryToken());
+
+    if (controller.getProjectStartupInfo() != null) {
+      maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
+    }
+
+    restoreUIState(selectionState);
   }
 
   @Override
@@ -1197,6 +1204,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     hidePrevNext();
   }
 
+  /**
+   * @see HistoryExerciseList##HistoryExerciseList
+   * @return
+   */
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
       /**
@@ -1223,6 +1234,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 /*
               new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
 */
+
             }
 
           }
@@ -1278,11 +1290,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   @NotNull
   private String getProjectParam() {
-    int projectid = getStartupInfo() == null ? -1 : getCurrentProject();
-    return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + projectid;
+    return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + getProjectID();
   }
 
+  private int getProjectID() {
+    return getStartupInfo() == null ? -1 : getCurrentProject();
+  }
 
+  /**
+   * @see #onValueChange
+   * @param project
+   */
   @Override
   protected void projectChangedTo(int project) {
     controller.reallySetTheProject(project);

@@ -269,17 +269,29 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   /**
+   * Assumes project id is valid.
+   * Maybe someone else has deleted it while you were looking at it?
    * @param projectid
    * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
    */
   public User setProject(int projectid) {
     try {
       User sessionUser = getSessionUser();
+
       if (sessionUser != null) { // when could this be null?
-        logger.info("setProject set project (" + projectid + ") for " + sessionUser);
-        db.getProjectManagement().configureProjectByID(projectid);
-        db.rememberUsersCurrentProject(sessionUser.getID(), projectid);
-        db.setStartupInfo(sessionUser, projectid);
+        int id = sessionUser.getID();
+
+        if (db.getProjectDAO().exists(projectid)) {
+          logger.info("setProject set project (" + projectid + ") for " + sessionUser);
+          db.getProjectManagement().configureProjectByID(projectid);
+          db.rememberUsersCurrentProject(id, projectid);
+          db.setStartupInfo(sessionUser, projectid);
+        }
+        else {
+          logger.warn("setProject : project " + projectid + " is gone....");
+          db.forgetProject(id);
+          db.getProjectManagement().clearStartupInfo(sessionUser);
+        }
       }
       return sessionUser;
     } catch (Exception e) {

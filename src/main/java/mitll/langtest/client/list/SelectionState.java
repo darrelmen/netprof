@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.list;
 
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -81,6 +83,9 @@ public class SelectionState {
     String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
     //logger.info("From '" + token + "' to '" + token1 +   "'");
     parseToken(token1);
+//
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("token " + token));
+//    logger.info("logException stack " + exceptionAsString);
   }
 
   private String unencodeToken(String token) {
@@ -100,12 +105,11 @@ public class SelectionState {
   }
 
   /**
-   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
+   * @see mitll.langtest.client.download.DownloadHelper#showDialog
    */
   public boolean isEmpty() {
     return getTypeToSection().isEmpty();
   }
-
 
   /**
    * Deals with responseType being on the URL.

@@ -400,7 +400,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
 
       logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " for exercise #" + byID.getExid() + "...");
-      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession);
+      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null);
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
       return null;

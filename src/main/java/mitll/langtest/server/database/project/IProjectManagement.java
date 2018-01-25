@@ -100,6 +100,8 @@ public interface IProjectManagement {
    */
   void configureProjectByID(int projid);
 
+  void clearStartupInfo(User userWhere);
+
   /**
    * @see LangTestDatabaseImpl#getStartupInfo
    * @return

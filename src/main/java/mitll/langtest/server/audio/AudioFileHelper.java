@@ -520,14 +520,15 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercise
    * @param attribute
    * @param userID
+   * @param absoluteFile
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
-  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID) {
+  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID, File absoluteFile) {
     if (isInDictOrLTS(exercise)) {
-      String audioRef = attribute.getAudioRef();
-      if (!audioRef.contains("context=")) {
-        decodeAndRemember(exercise, attribute, true, userID);
-      }
+      //  String audioRef = attribute.getAudioRef();
+      //if (!audioRef.contains("context=")) {
+      decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
+      // }
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
@@ -538,15 +539,18 @@ public class AudioFileHelper implements AlignDecode {
    * @param attribute
    * @param doDecode
    * @param userID
+   * @param absoluteFile
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
-  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID) {
+  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
-    logger.debug("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
+    logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
     boolean doHydec = false;
     // Do alignment...
-    File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
+    if (absoluteFile == null) {
+      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
+    }
     String absolutePath = absoluteFile.getAbsolutePath();
 
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoFlashcard(false);
@@ -696,7 +700,7 @@ public class AudioFileHelper implements AlignDecode {
    * @paramx wavPath
    * @paramx numAlignPhones
    * @seex #decodeOneAttribute(CommonExercise, AudioAttribute, int)
-   * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int)
+   * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int, File)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
@@ -963,7 +967,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int, File)
    */
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
@@ -1280,7 +1284,6 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * Hack for percent sign in english - must be a better way.
    * Tried adding it to dict but didn't seem to work.
-   *
    *
    * @param sentence
    * @return
