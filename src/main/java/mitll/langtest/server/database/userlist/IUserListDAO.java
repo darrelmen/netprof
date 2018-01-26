@@ -110,6 +110,13 @@ public interface IUserListDAO extends IDAO {
 
   Collection<SlickUserExerciseList> getByUser(int userid, int projid);
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getRawLists
+   * @see SlickUserListDAO#getVisitedLists
+   * @param userid
+   * @param projid
+   * @return
+   */
   Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);

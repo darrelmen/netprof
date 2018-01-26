@@ -406,6 +406,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)
    */
   @Override
   public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {
@@ -478,6 +479,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getNumLists
+   * @param userid
+   * @param projid
+   * @return
+   */
   @Override
   public int getNumMineAndPublic(int userid, int projid) {
     return dao.numMineAndPublic(userid, projid);
@@ -494,6 +501,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.update(toSlick(userList));
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#createTables
+   * @return
+   */
   public UserExerciseListVisitorDAOWrapper getVisitorDAOWrapper() {
     return visitorDAOWrapper;
   }

@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListLight;
@@ -41,12 +42,19 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface ListServiceAsync {
   void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
 
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
+   * @param onlyCreated
+   * @param visited
+   * @param async
+   */
   void getSimpleListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserList>> async);
 
   void getListsWithIDsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListWithIDs>> async);

@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -119,6 +121,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param onlyCreated
    * @param visited
    * @return
+   * @see mitll.langtest.client.custom.userlist.ListView#showContent
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
@@ -157,14 +160,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
+   * TODO : consider not doing it separately from other facets.
+   *
    * @param onlyCreated
    * @param visited
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
    */
   @Override
   public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
-    //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<IUserList> listsForUser = getUserListManager()
@@ -174,10 +178,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     logger.info("getSimpleListsForUser took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
     return listsForUser;
-    // } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // return Collections.emptyList();
-    // }
   }
 
   @Override

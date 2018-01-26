@@ -880,7 +880,7 @@ public class SlickUserExerciseDAO
     long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
     long now = System.currentTimeMillis();
-    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
+//    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
     return getUserExercises(onList);
   }
 

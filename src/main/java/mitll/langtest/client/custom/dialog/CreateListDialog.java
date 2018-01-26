@@ -174,7 +174,7 @@ public class CreateListDialog extends BasicDialog {
 
   //private Button submit;
 
-  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
+  private void makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
                                   final TextArea area,
                                   final FormField classBox,
                                   final RadioButton publicRadio) {
@@ -195,7 +195,7 @@ public class CreateListDialog extends BasicDialog {
       }
     });
     enterKeyButtonHelper.addKeyHandler(submit);
-    return submit;
+//    return submit;
   }
 
   public void doCreate() {

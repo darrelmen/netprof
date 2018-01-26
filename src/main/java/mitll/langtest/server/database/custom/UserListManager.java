@@ -53,6 +53,7 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
+import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -161,6 +162,8 @@ public class UserListManager implements IUserListManager {
    * @param isPrivate
    * @param projid
    * @return null if user already has a list with this name
+   * @see #addUserList
+   * @see #createFavorites
    */
   private UserList createUserList(int userid,
                                   String name,
@@ -174,7 +177,7 @@ public class UserListManager implements IUserListManager {
       return null;
     } else {
       //logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
-      List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name, projid);
+/*      List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name, projid);
       if (!byName.isEmpty()) {
         UserList<CommonShell> commonShellUserList = byName.get(0);
         if (commonShellUserList.isDeleted()) {
@@ -183,14 +186,13 @@ public class UserListManager implements IUserListManager {
         } else {
           return null;
         }
-      } else {
-        long now = System.currentTimeMillis();
-        UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-            now, "", "", projid, false);
-        userListDAO.add(e, projid);
-        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
-        return e;
-      }
+      } else {*/
+      UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+          System.currentTimeMillis(), "", "", projid, false);
+      userListDAO.add(e, projid);
+      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
+      return e;
+      //    }
     }
   }
 
@@ -297,52 +299,99 @@ public class UserListManager implements IUserListManager {
         .collect(Collectors.toSet());
   }
 
+  /**
+   * Sort returned list by time - desc - most recent first.
+   *
+   * @param userid
+   * @param projid
+   * @param listsICreated true if want to include my lists
+   * @param visitedLists true if want to include other's lists I've visited
+   * @return
+   */
   @NotNull
   private List<SlickUserExerciseList> getRawLists(int userid, int projid, boolean listsICreated, boolean visitedLists) {
     List<SlickUserExerciseList> lists = new ArrayList<>();
-    SlickUserExerciseList favorite = getCreatedAndFavorite(userid, projid, listsICreated, lists);
-    if (visitedLists) {
-      long then = System.currentTimeMillis();
-      Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
-      long now = System.currentTimeMillis();
 
-      if (now - then > 20) {
-        logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
+    if (visitedLists) {
+      {
+        long then = System.currentTimeMillis();
+        Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
+        long now = System.currentTimeMillis();
+        if (now - then > 20) {
+          logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
+        }
+        //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
+        lists.addAll(visitedBy);
       }
-      //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
-      lists.addAll(visitedBy);
+      sortByTime(getListToVisitTime(userid), lists);
     }
-    if (favorite != null) {
-      lists.remove(favorite);
-      lists.add(0, favorite);
+
+    {
+      SlickUserExerciseList favorite = listsICreated ? getCreatedAndFavorite(userid, projid, lists) : null;
+      if (favorite != null) {
+        lists.remove(favorite);
+        lists.add(0, favorite);
+      }
     }
     //logger.info("found " + lists.size() + " raw lists for " + userid + " and " + projid);
 
     return lists;
   }
 
-  private SlickUserExerciseList getCreatedAndFavorite(int userid, int projid, boolean listsICreated,
-                                                      List<SlickUserExerciseList> lists) {
+  @NotNull
+  private Map<Integer, Long> getListToVisitTime(int userid) {
+    Map<Integer, Long> listToVisitTime = new HashMap<>();
+    getVisitorDAOWrapper().allByUser(userid)
+        .forEach(slickUserExerciseListVisitor ->
+            listToVisitTime.put(slickUserExerciseListVisitor.userlistid(), slickUserExerciseListVisitor.modified().getTime()));
+    return listToVisitTime;
+  }
+
+  /**
+   * Descending - most recent first.
+   *
+   * @param listToVisitTime
+   * @param sorted
+   */
+  private void sortByTime(Map<Integer, Long> listToVisitTime, List<SlickUserExerciseList> sorted) {
+    sorted.sort((o1, o2) -> {
+      int id = o1.id();
+      int id2 = o2.id();
+
+      long t1 = listToVisitTime.getOrDefault(id, o1.modified().getTime());
+      long t2 = listToVisitTime.getOrDefault(id2, o2.modified().getTime());
+
+      return -1 * Long.compare(t1, t2);
+    });
+  }
+
+  /**
+   * TODO : A little cheesy - why copy the list?
+   *
+   * @param userid
+   * @param projid
+   * @param lists  populated
+   * @return favorites list out of all my lists
+   */
+  private SlickUserExerciseList getCreatedAndFavorite(int userid, int projid, List<SlickUserExerciseList> lists) {
     SlickUserExerciseList favorite = null;
-    if (listsICreated) {
-      long then = System.currentTimeMillis();
-      Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
-      long now = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
+    Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
+    long now = System.currentTimeMillis();
 
-      if (now - then > 20) {
-        logger.info("getCreatedAndFavorite found " + byUser.size() + " lists by " + userid + " in " + projid + " took " + (now - then));
-      }
-
-      for (SlickUserExerciseList userList : byUser) {
-        if (userList.isfavorite()) {
-          favorite = userList;
-        } else {
-          //      logger.debug("not favorite " + userList + " " + userList.getName());
-        }
-        lists.add(userList);
-      }
-
+    if (now - then > 20) {
+      logger.info("getCreatedAndFavorite found " + byUser.size() + " lists by " + userid + " in " + projid + " took " + (now - then));
     }
+
+    for (SlickUserExerciseList userList : byUser) {
+      if (userList.isfavorite()) {
+        favorite = userList;
+      } else {
+        //      logger.debug("not favorite " + userList + " " + userList.getName());
+      }
+      lists.add(userList);
+    }
+
     return favorite;
   }
 
@@ -1118,9 +1167,13 @@ public class UserListManager implements IUserListManager {
 
     String userexerciselistvisitor = "userexerciselistvisitor";
     if (!dbConnection.hasTable(userexerciselistvisitor)) {
-      (((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
+      getVisitorDAOWrapper().createTable();
       created.add(userexerciselistvisitor);
     }
+  }
+
+  private UserExerciseListVisitorDAOWrapper getVisitorDAOWrapper() {
+    return ((SlickUserListDAO) userListDAO).getVisitorDAOWrapper();
   }
 
   private void createIfNotThere(DBConnection dbConnection, IDAO slickUserDAO, List<String> created) {

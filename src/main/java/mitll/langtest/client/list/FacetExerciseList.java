@@ -652,19 +652,28 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
       @Override
       public void onSuccess(Collection<IUserList> result) {
-        logger.info("took " + (System.currentTimeMillis() - then) + " to get lists for user.");
-
-        finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
-
-        Widget favorites = liForDimensionForType.getWidget(0);
-        liForDimensionForType.clear();
-        liForDimensionForType.add(favorites);
-        //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-        liForDimensionForType.add(addChoices(finalTypeToValues, LISTS));
+        addListsAsLinks(result, then, finalTypeToValues, liForDimensionForType);
       }
     });
   }
 
+  private void addListsAsLinks(Collection<IUserList> result, long then, Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
+    logger.info("took " + (System.currentTimeMillis() - then) + " to get lists for user.");
+
+    finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
+
+    Widget favorites = liForDimensionForType.getWidget(0);
+    liForDimensionForType.clear();
+    liForDimensionForType.add(favorites);
+    //  logger.info("populateListChoices --- for " + result.size() + " lists ");
+    liForDimensionForType.add(addChoices(finalTypeToValues, LISTS));
+  }
+
+  /**
+   * @see #populateListChoices
+   * @param result
+   * @return
+   */
   @NotNull
   private Set<MatchInfo> getMatchInfoForEachList(Collection<IUserList> result) {
     Set<MatchInfo> value = new HashSet<>();
