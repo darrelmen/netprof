@@ -309,7 +309,7 @@ public class InitialUI implements UILifecycle {
     DivWidget verticalContainer = new FluidContainer();
     addMouseOverHandler(verticalContainer, event ->
     {
-     // logger.info("got mouse over");
+      // logger.info("got mouse over");
       confirmCurrentProject();
     });
 
@@ -324,7 +324,7 @@ public class InitialUI implements UILifecycle {
   /**
    * So if we open multiple tabs with multiple projects, if we go back to an earlier project tab, we want to notice
    * that and make it the current one.
-   *
+   * <p>
    * Also, if we log out of one tab and go to another, we'll notice here.
    */
   private void confirmCurrentProject() {
@@ -342,7 +342,7 @@ public class InitialUI implements UILifecycle {
           public void onSuccess(Boolean result) {
             long now = System.currentTimeMillis();
             if (!result) {
-               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
+              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
               logout();
             }
           }
@@ -499,7 +499,8 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-      //logger.info("getLangBreadcrumb got click on " + project.getName());
+     // logger.info("getLangBreadcrumb got click on " + project.getName());
+      History.newItem("");
       clearStartupInfo();
       clearContent();
       removeUntilCrumb(1);
@@ -791,6 +792,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void clickOnParentCrumb(SlimProject parent) {
+    History.newItem(""); // clear history!
     removeLastCrumb();
     addProjectChoices(1, parent);
   }

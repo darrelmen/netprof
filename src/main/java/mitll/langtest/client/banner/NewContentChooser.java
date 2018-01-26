@@ -60,6 +60,9 @@ public class NewContentChooser implements INavigation {
     divWidget.setHeight("100%");
   }
 
+  /**
+   * @see InitialUI#showInitialState
+   */
   @Override
   public void showInitialState() {
     clearCurrent();
@@ -77,7 +80,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    logger.info("currentView " + currentView);
+ //   logger.info("currentView " + currentView);
 //    if (currentView.equalsIgnoreCase("drill")) currentView = VIEWS.DRILL.toString();
     VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
 

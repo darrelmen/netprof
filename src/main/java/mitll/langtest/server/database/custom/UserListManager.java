@@ -214,7 +214,7 @@ public class UserListManager implements IUserListManager {
                                                      boolean visitedLists) {
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
 
-//    logger.info("for " + userid + " in " + projid + " found " + lists.size());
+    logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
 //    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
     Set<Integer> listIDs = getListIDs(lists);
     Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
@@ -311,13 +311,14 @@ public class UserListManager implements IUserListManager {
   @NotNull
   private List<SlickUserExerciseList> getRawLists(int userid, int projid, boolean listsICreated, boolean visitedLists) {
     List<SlickUserExerciseList> lists = new ArrayList<>();
+    SlickUserExerciseList favorite = listsICreated ? getCreatedAndFavorite(userid, projid, lists) : null;
 
     if (visitedLists) {
       {
         long then = System.currentTimeMillis();
         Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
         long now = System.currentTimeMillis();
-        if (now - then > 20) {
+        if (now - then > 0) {
           logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
         }
         //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
@@ -327,7 +328,6 @@ public class UserListManager implements IUserListManager {
     }
 
     {
-      SlickUserExerciseList favorite = listsICreated ? getCreatedAndFavorite(userid, projid, lists) : null;
       if (favorite != null) {
         lists.remove(favorite);
         lists.add(0, favorite);
@@ -486,7 +486,11 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void createFavorites(int userid, int projid) {
-    createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
+    List<UserList<CommonShell>> byName = userListDAO.getByName(userid, UserList.MY_LIST, projid);
+
+    if (byName.isEmpty()) {
+      createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
+    }
   }
 
   /**

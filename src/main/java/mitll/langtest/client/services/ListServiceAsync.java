@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.IUserList;
@@ -63,6 +64,14 @@ public interface ListServiceAsync {
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
+  /**
+   * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
+   * @param name
+   * @param description
+   * @param dliClass
+   * @param isPublic
+   * @param async
+   */
   void addUserList(String name, String description, String dliClass,
                    boolean isPublic, AsyncCallback<UserList> async);
 

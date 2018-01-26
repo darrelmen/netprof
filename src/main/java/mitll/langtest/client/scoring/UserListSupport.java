@@ -32,8 +32,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
+  private final Logger logger = Logger.getLogger("UserListSupport");
+
+
   public static final String SHARE_NETPROF = "Share netprof ";
-// private final Logger logger = Logger.getLogger("UserListSupport");
 
   private static final String ADD_TO_LIST = "Add to List";
   private static final String REMOVE_FROM_LIST = "Remove from List";
@@ -96,8 +98,8 @@ public class UserListSupport {
    *
    * @param exid
    * @param addToList
-   * @see #addListOptions(Dropdown, int)
    * @seex #wasRevealed()
+   * @see #addListOptions(Dropdown, int)
    */
   private void populateListChoices(final int exid,
                                    final DropdownBase addToList,
@@ -109,7 +111,7 @@ public class UserListSupport {
     controller.getListService().getListsWithIDsForUser(true, true, new AsyncCallback<Collection<IUserListWithIDs>>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("get list with ids for user",caught);
+        controller.handleNonFatalError("get list with ids for user", caught);
       }
 
       @Override
@@ -133,6 +135,7 @@ public class UserListSupport {
     boolean anyToRemove = false;
     int user = controller.getUser();
     for (final IUserListWithIDs ul : result) {
+      logger.info("useLists : " + ul);
       boolean isMyList = ul.getUserID() == user;
       if (isMyList) {
         knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
@@ -222,7 +225,9 @@ public class UserListSupport {
     return encode;
   }*/
 
-  public String getMailToList(IUserList ul) {  return getMailTo(ul.getID(), ul.getName());  }
+  public String getMailToList(IUserList ul) {
+    return getMailTo(ul.getID(), ul.getName());
+  }
 
   @NotNull
   private String getMailTo(int listid, String name) {
@@ -307,17 +312,17 @@ public class UserListSupport {
     widget.addClickHandler(event -> {
       controller.logEvent(addToList, "DropUp", exid, "adding_" + ul.getID() + "/" + ul.getName());
 
-     // logger.info("got click on " + ul.getID() + " " + ul.getName());
+      // logger.info("got click on " + ul.getID() + " " + ul.getName());
       controller.getListService().addItemToUserList(ul.getID(), exid, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("add item to list",caught);
+          controller.handleNonFatalError("add item to list", caught);
         }
 
         @Override
         public void onSuccess(Void result) {
           popupContainer.showPopup(ITEM_ADDED, container);
-       //   logger.info("fire event on " + ul.getID() + " " + ul.getName());
+          //   logger.info("fire event on " + ul.getID() + " " + ul.getName());
           LangTest.EVENT_BUS.fireEvent(new ListChangedEvent());
         }
       });
@@ -326,17 +331,17 @@ public class UserListSupport {
 
   @NotNull
   private NavLink getListLink(String name) {
-  //  String name = ul.getName();
+    //  String name = ul.getName();
     if (name.length() > END_INDEX) name = name.substring(0, END_INDEX) + "...";
     return new NavLink(name);
   }
 
   /**
-   * @see #useLists
    * @param ul
    * @param removeFromList
    * @param exid
    * @param container
+   * @see #useLists
    */
   private void getRemoveListLink(IUserList ul, DropdownBase removeFromList, int exid, Dropdown container) {
     final NavLink widget = getListLink(ul.getName());
@@ -347,7 +352,7 @@ public class UserListSupport {
       controller.getListService().deleteItemFromList(ul.getID(), exid, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("delete item from list",caught);
+          controller.handleNonFatalError("delete item from list", caught);
         }
 
         @Override

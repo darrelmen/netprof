@@ -133,7 +133,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     long now = System.currentTimeMillis();
 
-    logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    logger.info("getListsForUser : took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
     return listsForUser;
     // } catch (Exception e) {
     //  logger.error("Got " + e, e);
