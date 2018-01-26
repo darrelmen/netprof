@@ -80,6 +80,8 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  */
 public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+
+  private static final int KEY_PRESS_WIDTH = 125;
   private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
 
   private static final int CARD_HEIGHT = 362;//320;
@@ -90,6 +92,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
+
+  /**
+   * @see #getRightColumn
+   */
   private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip. Space to record.</i>";
 
   static final String ON = "On";
@@ -613,8 +619,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     Widget child = new HTML(ARROW_KEY_TIP);
     child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    child.setWidth(KEY_PRESS_WIDTH + "px");
     rightColumn.add(child);
     rightColumn.addStyleName("leftTenMargin");
+
     return rightColumn;
   }
 
@@ -622,13 +630,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     final Button shuffle = new Button(SHUFFLE);
     shuffle.setToggle(true);
     shuffle.setIcon(IconType.RANDOM);
-    shuffle.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        boolean shuffleOn = !shuffle.isToggled();
-        controlState.setSuffleOn(shuffleOn);
-        gotShuffleClick(shuffleOn);
-      }
+    shuffle.addClickHandler(event -> {
+      boolean shuffleOn = !shuffle.isToggled();
+      controlState.setSuffleOn(shuffleOn);
+      gotShuffleClick(shuffleOn);
     });
     shuffle.setActive(controlState.isShuffle());
     return shuffle;
@@ -736,7 +741,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     DivWidget vp = new DivWidget();
     vp.setWidth("78%");
     vp.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
-
 
     {
       int complete = exerciseList.getComplete();
@@ -1001,7 +1005,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     return div;
   }
-//  private boolean isRTLContent(String content) {
+
+  //  private boolean isRTLContent(String content) {
 //    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
 //  }
   private FocusPanel makeEnglishPhrase(String englishSentence) {
@@ -1025,7 +1030,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getQuestionContent
    */
-  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio,HasDirection.Direction dir) {
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio, HasDirection.Direction dir) {
     Panel hp = new HorizontalPanel();
     hp.add(getFLContainer(foreignSentence, dir));
 
@@ -1057,7 +1062,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   @NotNull
-  private Widget getFLContainer(String foreignSentence,HasDirection.Direction dir) {
+  private Widget getFLContainer(String foreignSentence, HasDirection.Direction dir) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
     //HTML foreignLanguageContent = new HTML(foreignSentence, dir);
 
@@ -1065,7 +1070,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     element.setId("ForeignLanguageContent");
     element.getStyle().setTextAlign(Style.TextAlign.CENTER);
     //foreignLanguageContent.addStyleName("bigflfont");
-    foreignLanguageContent.getElement().getStyle().setProperty("fontFamily","sans-serif");
+    foreignLanguageContent.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     return foreignLanguageContent;
   }
 
@@ -1224,80 +1229,4 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       return addDomHandler(handler, ClickEvent.getType());
     }
   }
-
-/*  private void addKeyListener(ExerciseController controller, final String instance) {
-    logger.info("FlashcardRecordButton.addKeyListener : for " + instance);
-    KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
-      @Override
-      public String getName() {
-        return "FlashcardPanel_" + instance;
-      }
-
-      @Override
-      public void gotPress(NativeEvent ne, boolean isKeyDown) {
-        if (isKeyDown) {
-          checkKeyDown(ne);
-        }
-      }
-
-      public String toString() {
-        return "KeyListener " + getName();
-      }
-    };
-    controller.addKeyListener(listener);
-  }*/
-
-/*  private void checkKeyDown(NativeEvent event) {
-
-    if (!shouldIgnoreKeyPress()) {
-      int keyCode = event.getKeyCode();
-      logger.info("checkKeyDown --- " + keyCode);
-      if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
-        //logger.info("key code is " + keyCode);
-      } else {
-        //logger.info("warn - key code is " + keyCode);
-        if (keyCode == KeyCodes.KEY_LEFT) {
-          exerciseList.loadPrev();
-          event.stopPropagation();
-          event.preventDefault();
-        } else if (keyCode == KeyCodes.KEY_RIGHT) {
-          if (!exerciseList.isPendingReq()) {
-            gotClickOnNext();
-          }
-          event.stopPropagation();
-          event.preventDefault();
-        } else if (keyCode == KeyCodes.KEY_UP) {
-          if (!selectShowFL()) {
-            flipCard();
-          }
-          event.stopPropagation();
-          event.preventDefault();
-        } else if (keyCode == KeyCodes.KEY_DOWN) {
-          if (!selectShowFL()) {
-            flipCard();
-          }
-          event.stopPropagation();
-          event.preventDefault();
-        } else {
-          // warnNotASpace();
-        }
-      }
-    } else {
-      logger.info("checkKeyDown ignoring key press... " + event.getKeyCode());
-    }
-  }*/
-
-/*  private boolean shouldIgnoreKeyPress() {
-    boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
-    //if (b) {
-    //logger.info("attached " + isAttached());
-    //   logger.info("hidden   " + checkHidden(getElement().getExID()));
-    //  logger.info("user     " + controller.getUser());
-    // }
-    return b;
-  }*/
-/*
-  private native boolean checkHidden(String id)  *//*-{
-      return $wnd.jQuery('#' + id).is(":hidden");
-  }-*//*;*/
 }

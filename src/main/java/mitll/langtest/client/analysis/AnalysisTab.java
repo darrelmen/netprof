@@ -238,11 +238,13 @@ public class AnalysisTab extends DivWidget {
    * Why want a nine pixel left margin?
    *
    * @return
+   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
    */
   @NotNull
   private DivWidget getBottom(boolean isTeacherView) {
     DivWidget bottom = new DivWidget();
     bottom.addStyleName("inlineFlex");
+    bottom.setWidth("100%");
     bottom.getElement().setId("bottom");
     //bottom.addStyleName("floatLeftAndClear");
     if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
@@ -397,12 +399,14 @@ public class AnalysisTab extends DivWidget {
       }
     }
 
-    DivWidget soundsDiv = getSoundsDiv();
+    {
+      DivWidget soundsDiv = getSoundsDiv();
 
-    lowerHalf.add(soundsDiv);
-    getPhoneReport(phoneReport,
-        controller,
-        soundsDiv, analysisPlot, showTab);
+      lowerHalf.add(soundsDiv);
+      getPhoneReport(phoneReport,
+          controller,
+          soundsDiv, analysisPlot, showTab);
+    }
   }
 
   /**
@@ -431,15 +435,16 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().setId("soundsDiv");
     soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
-    soundsDiv.addStyleName("floatRight");
+    //soundsDiv.addStyleName("floatRight");
     soundsDiv.addStyleName("leftFiveMargin");
+    soundsDiv.addStyleName("inlineFlex");
     return soundsDiv;
   }
 
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
-    wordsContainer.addStyleName("floatLeftAndClear");
+   // wordsContainer.addStyleName("floatLeftAndClear");
     wordsContainer.add(heading);
     wordsContainer.add(tableWithPager);
     return wordsContainer;
@@ -456,10 +461,8 @@ public class AnalysisTab extends DivWidget {
                               final ExerciseController controller,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
-                              final ShowTab showTab//,
-  ) {
-    final PhoneExampleContainer exampleContainer =
-        new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
+                              final ShowTab showTab) {
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
 
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, analysisServiceAsync, listid, userid);
@@ -477,7 +480,7 @@ public class AnalysisTab extends DivWidget {
 
     // #3 - phone plot
     phonePlot.addStyleName("topMargin");
-    phonePlot.addStyleName("floatLeftAndClear");
+   // phonePlot.addStyleName("floatLeftAndClear");
     lowerHalf.add(phonePlot);
 
     phoneContainer.showExamplesForSelectedSound();
@@ -487,7 +490,7 @@ public class AnalysisTab extends DivWidget {
     DivWidget sounds = new DivWidget();
     sounds.getElement().setId("SoundsContainer");
     sounds.add(new Heading(3, SOUNDS));
-    sounds.addStyleName("floatLeftAndClear");
+   // sounds.addStyleName("floatLeftAndClear");
     sounds.add(phones);
     return sounds;
   }

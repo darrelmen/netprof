@@ -70,9 +70,9 @@ import java.util.logging.Logger;
 public class UserContainer extends BasicUserContainer<UserInfo> {
 //  private final Logger logger = Logger.getLogger("UserContainer");
 
-  public static final int MAX_LENGTH = 11;
-  public static final int TABLE_WIDTH = 600;
-  public static final String TRYING_TO_GET_STUDENTS = "trying to get students";
+  private static final int MAX_LENGTH = 11;
+  private static final int TABLE_WIDTH = 600;
+  private static final String TRYING_TO_GET_STUDENTS = "trying to get students";
 
   private static final String FILTER_BY1 = "Filter by";
 

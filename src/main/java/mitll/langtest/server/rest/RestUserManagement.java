@@ -67,7 +67,7 @@ import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 public class RestUserManagement {
   private static final Logger logger = LogManager.getLogger(RestUserManagement.class);
 
-  private static final String HAS_USER = "hasUser";
+  //private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";
 
   /**
