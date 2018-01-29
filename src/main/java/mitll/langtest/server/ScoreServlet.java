@@ -439,7 +439,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
 
-
   /**
    * Check for a parameter to control what we send back
    *
@@ -654,7 +653,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
 
-
   @NotNull
   private String getOrUnk(HttpServletRequest request, String deviceType1) {
     String deviceType = request.getHeader(deviceType1);
@@ -723,12 +721,12 @@ public class ScoreServlet extends DatabaseServlet {
     for (GetRequest request : GetRequest.values()) {
       String prefix = request.toString().toLowerCase();
 
-      if (lcReq.startsWith(prefix) || lcReq.startsWith(prefix.replaceAll("_",""))) {
+      if (lcReq.startsWith(prefix) || lcReq.startsWith(prefix.replaceAll("_", ""))) {
         //logger.info("getGetRequest lcReq '" + lcReq + "' vs '" + prefix + "'");
         matched = request;
         break;
       } else {
-      //  logger.info("getGetRequest no match lcReq '" + lcReq + "' vs '" + prefix + "'");
+        //  logger.info("getGetRequest no match lcReq '" + lcReq + "' vs '" + prefix + "'");
       }
     }
 
@@ -982,7 +980,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param projid
    * @return
    * @see #getJsonForAudio
-   */
+   **/
   private int getProjidFromLanguage(HttpServletRequest request, int projid) {
     String language = getLanguage(request);
     //logger.debug("getJsonForAudio got langauge from request " + language);

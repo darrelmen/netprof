@@ -37,6 +37,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
@@ -98,7 +99,7 @@ public class UserListManager implements IUserListManager {
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
   private IStateManager stateManager;
-  IProjectManagement projectManagement;
+  private DatabaseServices databaseServices;
 
   /**
    * @param userDAO
@@ -114,7 +115,7 @@ public class UserListManager implements IUserListManager {
                          IAnnotationDAO annotationDAO,
                          IStateManager stateManager,
                          IUserExerciseListVisitorDAO visitorDAO,
-                         IProjectManagement projectManagement,
+                         DatabaseServices databaseServices,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -123,7 +124,7 @@ public class UserListManager implements IUserListManager {
     this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
-    this.projectManagement = projectManagement;
+    this.databaseServices = databaseServices;
   }
 
 
@@ -528,11 +529,18 @@ public class UserListManager implements IUserListManager {
   @NotNull
   private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
     List<CommonExercise> defectExercises = new ArrayList<>();
-    incorrectAnnotations.forEach(id -> {
-      CommonExercise byExID = projectManagement.getExercise(projID, id);
-      if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
-      else defectExercises.add(byExID);
-    });
+
+    IProjectManagement projectManagement = databaseServices.getProjectManagement();
+    if (projectManagement == null) {
+      logger.error("\n\n no projec management???");
+    }
+    else {
+      incorrectAnnotations.forEach(id -> {
+        CommonExercise byExID = projectManagement.getExercise(projID, id);
+        if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
+        else defectExercises.add(byExID);
+      });
+    }
     return defectExercises;
   }
 

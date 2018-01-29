@@ -138,10 +138,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public Collection<Integer> getVisibleIDs() {
-    Range visibleRange = getVisibleRange();
-
+   // Range visibleRange = getVisibleRange();
 //    logger.info("getVisibleIDs : visible range " + visibleRange);
-
+/*
     if (visibleRange.getLength() == 1) {
       if (isEmpty()) {
         // logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
@@ -155,9 +154,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
         visible.add(id);
         return visible;
       }
-    } else {
-      return getIdsForRange(visibleRange);
-    }
+    } else {*/
+      return getIdsForRange(getVisibleRange());
+  //  }
   }
 
   /**

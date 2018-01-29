@@ -167,7 +167,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private UserManagement userManagement = null;
 
-  //  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   protected PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
@@ -289,7 +288,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         annotationDAO,
         stateManager,
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
-        projectManagement,
+        this,
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);

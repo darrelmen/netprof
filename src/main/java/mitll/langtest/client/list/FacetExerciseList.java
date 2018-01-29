@@ -71,6 +71,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
@@ -97,9 +98,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #showScore
    */
   private static final String ALL_PRACTICED = "All practiced!";
-  private static final String LINK_FOR_CONTENT = "Link for content in different project.";
-  private static final String PLEASE_CHANGE = "Please change to that project if you want to see the item.";
-
   public static final String LISTS = "Lists";
 
   /**
@@ -156,6 +154,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private int freqid = 0;
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
+  private Panel typeOrderContainer;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -388,6 +387,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           protected void gotRangeChanged(final Range newRange) {
+            if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
             askServerForExercise(-1);
 //            long then = System.currentTimeMillis();
             //     logger.info("gotRangeChanged event for " + newRange);
@@ -424,6 +424,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #makePagingContainer
    */
   protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, final int currentReq) {
+    if (DEBUG) logger.info("gotVisibleRangeChanged : visible range " + idsForRange);
     askServerForVisibleExercises(-1, idsForRange, currentReq);
   }
 
@@ -435,7 +436,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return false;
   }
 
-  private Panel typeOrderContainer;
 
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
@@ -670,9 +670,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see #populateListChoices
    * @param result
    * @return
+   * @see #populateListChoices
    */
   @NotNull
   private Set<MatchInfo> getMatchInfoForEachList(Collection<IUserList> result) {
@@ -1214,8 +1214,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see HistoryExerciseList##HistoryExerciseList
    * @return
+   * @see HistoryExerciseList##HistoryExerciseList
    */
   protected FacetContainer getSectionWidgetContainer() {
     return new FacetContainer() {
@@ -1307,8 +1307,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see #onValueChange
    * @param project
+   * @see #onValueChange
    */
   @Override
   protected void projectChangedTo(int project) {
@@ -1382,6 +1382,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       logger.info("skipping empty visible range?");
     } else {
       final int currentReq = incrReq();
+      if (DEBUG) logger.info("askServerForExercise visible " + visibleIDs);
+
       askServerForVisibleExercises(itemID, visibleIDs, currentReq);
     }
   }
@@ -1631,7 +1633,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return idToEx;
   }
 
+  /**
+   * @param reqID
+   * @param toShow
+   * @see #reallyGetExercises
+   * @see #getFullExercisesSuccess
+   */
   private void gotFullExercises(final int reqID, Collection<CommonExercise> toShow) {
+    if (DEBUG) logger.info("gotFullExercises show req " + reqID + " exercises " + getIDs(toShow));
     if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {
         hidePrevNext();
@@ -1672,6 +1681,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         //logger.info("showExercises for check " + reqID);
 //        showExerciesForCurrentReq(result, reqID);
         // });
+        if (DEBUG)  logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
 
         Scheduler.get().scheduleDeferred((Command) () -> showExerciesForCurrentReq(result, reqID));
 
@@ -1685,6 +1695,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         });*/
       }
     }
+  }
+
+  private List<Integer> getIDs(Collection<CommonExercise> result) {
+    return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 
   private void showExerciesForCurrentReq(Collection<CommonExercise> result, int reqID) {
@@ -1719,7 +1733,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis");
+    if (DEBUG)  logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
 
     if (!getters.isEmpty()) {
       getRefAudio(getters.iterator());

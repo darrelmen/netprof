@@ -20,6 +20,25 @@ h1 {
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
 }
 
+
+html, body{
+    height:100%;
+}
+
+body {
+    min-height: 100vh;
+/*    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;*/
+}
+
 .headerBackground {
     background-color: #404141;
     color: #ffffff;
