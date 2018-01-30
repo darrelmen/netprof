@@ -32,9 +32,14 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -88,11 +93,12 @@ public interface IUserExerciseDAO extends IDAO {
 
   boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
+   * @see ProjectManagement#populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
+   * @param exerciseDAO
+   */
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
-
-//  CommonExercise getPredefExercise(int exid);
-
-  //void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones);
 
   int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
 

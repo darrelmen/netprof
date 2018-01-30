@@ -210,6 +210,12 @@ public class ProjectManagement implements IProjectManagement {
       // logger.info("using exercise dao from first project " + exerciseDAO);
       db.getUserExerciseDAO().setExerciseDAO(getFirstProject().getExerciseDAO());
     }
+    else {
+
+      // TODO :make it so we can begin from empty container!
+
+      //db.getUserExerciseDAO().setExerciseDAO(getExerciseDAO());
+    }
 
     configureProjects();
   }
@@ -518,15 +524,21 @@ public class ProjectManagement implements IProjectManagement {
    * @param project
    * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
-  private void setExerciseDAO(Project project) {
+  private ExerciseDAO<CommonExercise> setExerciseDAO(Project project) {
 //    logger.info("setExerciseDAO on " + project);
-    DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(
-        serverProps,
-        db.getUserListManager(),
-        ADD_DEFECTS,
-        (SlickUserExerciseDAO) db.getUserExerciseDAO(),
-        project);
+    DBExerciseDAO dbExerciseDAO = getExerciseDAO(project);
     project.setExerciseDAO(dbExerciseDAO);
+    return dbExerciseDAO;
+  }
+
+  @NotNull
+  private DBExerciseDAO getExerciseDAO(Project project) {
+    return new DBExerciseDAO(
+          serverProps,
+          db.getUserListManager(),
+          ADD_DEFECTS,
+          (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+          project);
   }
 
 
@@ -869,15 +881,22 @@ public class ProjectManagement implements IProjectManagement {
 
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
     boolean isRTL = false;
+    if (project.dominoid() > 0) {
+      info.put(DOMINO_ID, "" + project.dominoid());
+    }
+
+    isRTL = addExerciseDerivedProperties(project, info, isRTL);
+    return isRTL;
+  }
+
+  private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info, boolean isRTL) {
     if (getProjectStatus(project) != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());
 //      logger.info("got " + exercises.size() + " ex for project #" + project.id());
       //info.put("# context", "" + exercises.size());
-      if (project.dominoid() > 0) {
-        info.put(DOMINO_ID, "" + project.dominoid());
-      }
+
     }
     return isRTL;
   }

@@ -153,15 +153,20 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper) {
     this.messageHelper = messageHelper;
-    getElement().setId("AnalysisPlot");
     this.exceptionSupport = exceptionSupport;
-    int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
 
-    getElement().getStyle().setProperty("minHeight", minHeight, Style.Unit.PX);
-    getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-    getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    addStyleName("cardBorderShadow");
+    {
+      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
+
+      getElement().setId("AnalysisPlot");
+      Style style = getElement().getStyle();
+      style.setProperty("minHeight", minHeight, Style.Unit.PX);
+      style.setProperty("minWidth", 300, Style.Unit.PX);
+      style.setMarginTop(10, Style.Unit.PX);
+      style.setMarginLeft(10, Style.Unit.PX);
+      style.setMarginBottom(10, Style.Unit.PX);
+      addStyleName("cardBorderShadow");
+    }
 
     /**
      * setRawBestScores

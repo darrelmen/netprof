@@ -45,6 +45,8 @@ import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
+
   private static final String RECALC_REF = "Recalc Ref";
   private static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
 
@@ -80,7 +82,7 @@ public class ProjectChoices {
   /**
    * @see #getHeader(List, int)
    */
-  private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
+  private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet.";
 
   protected static final String LOGIN = "Login";
   private final UILifecycle uiLifecycle;
@@ -202,14 +204,13 @@ public class ProjectChoices {
     final Section section = new Section("section");
     section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
     section.setHeight("100%");
-
     section.add(getHeader(result, nest));
 
-    final Container flags = new Container();
-    // flags.getElement().getStyle().setMarginBottom(30, Style.Unit.PX);
-
-    flags.add(addFlags(result, nest));
-    section.add(flags);
+    {
+      final Container flags = new Container();
+      flags.add(addFlags(result, nest));
+      section.add(flags);
+    }
 
     return section;
   }
@@ -330,20 +331,19 @@ public class ProjectChoices {
    * @see #getHeader(List, int)
    */
   private void getEnsureAllAudioButton(DivWidget header, HTML status) {
-    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(CHECK_AUDIO);
+    com.github.gwtbootstrap.client.ui.Button checkAudio = new com.github.gwtbootstrap.client.ui.Button(CHECK_AUDIO);
 
     DivWidget right = new DivWidget();
-    right.add(w);
-    // w.addStyleName("topFiveMargin");
-    w.addStyleName("leftFiveMargin");
+    right.add(checkAudio);
+    checkAudio.addStyleName("leftFiveMargin");
 
-    w.addStyleName("floatLeft");
+    checkAudio.addStyleName("floatLeft");
     header.add(right);
 
-    w.setIcon(IconType.CHECK);
-    w.setSize(ButtonSize.LARGE);
-    w.setType(ButtonType.SUCCESS);
-    w.addClickHandler(event -> checkAudio(controller.getAllProjects(), status));
+    checkAudio.setIcon(IconType.CHECK);
+    checkAudio.setSize(ButtonSize.LARGE);
+    checkAudio.setType(ButtonType.SUCCESS);
+    checkAudio.addClickHandler(event -> checkAudio(controller.getAllProjects(), status));
   }
 
   private void checkAudio(List<SlimProject> projects, HTML status) {
@@ -654,7 +654,9 @@ public class ProjectChoices {
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.EXCHANGE);
-    w.setEnabled(false);
+
+    w.setEnabled(ALLOW_SYNC_WITH_DOMINO);
+
     w.addClickHandler(event -> {
       w.setEnabled(false);
       showImportDialog(projectForLang, w);

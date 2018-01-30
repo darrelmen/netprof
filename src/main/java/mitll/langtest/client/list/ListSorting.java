@@ -58,23 +58,27 @@ class ListSorting<T extends CommonShell, U extends Shell> {
    * @see FacetExerciseList#addSortBox
    */
   ListBox getSortBox() {
+
     ListBox w1 = new ListBox();
 
-    boolean isEnglish = language.equalsIgnoreCase("English");
-    w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
-    w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
-    String langASC = getLangASC(language, ASCENDING);
-    w1.addItem(langASC);
-    String langDSC = getLangASC(language, DESCENDING);
-    w1.addItem(langDSC);
-    w1.addItem(LENGTH_SHORT_TO_LONG);
-    w1.addItem(LENGTH_LONG_TO_SHORT);
-    w1.addItem(SCORE_LOW_TO_HIGH);
-    w1.addItem(SCORE_DSC);
+    if (language != null) {
+      boolean isEnglish = language.equalsIgnoreCase("English");
+      w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
+      w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
+      String langASC = getLangASC(language, ASCENDING);
+      w1.addItem(langASC);
+      String langDSC = getLangASC(language, DESCENDING);
+      w1.addItem(langDSC);
+      w1.addItem(LENGTH_SHORT_TO_LONG);
+      w1.addItem(LENGTH_LONG_TO_SHORT);
+      w1.addItem(SCORE_LOW_TO_HIGH);
+      w1.addItem(SCORE_DSC);
 
-    w1.addChangeHandler(event -> ListSorting.this.onChange(w1, langASC, langDSC));
+      w1.addChangeHandler(event -> ListSorting.this.onChange(w1, langASC, langDSC));
 
-    makeDropDownReflectStoredValue(w1, langASC, langDSC);
+      makeDropDownReflectStoredValue(w1, langASC, langDSC);
+    }
+
     return w1;
   }
 
@@ -142,11 +146,11 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       toStore = LANG_DSC;
     }
     exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
-    logger.info("START onChange Sort by " + selectedValue + " to sort is null "  );
+    logger.info("START onChange Sort by " + selectedValue + " to sort is null ");
 
     sortByValue(null, selectedValue, langASC, langDSC);
     //exerciseList.flushWith();
-    logger.info("END   onChange Sort by " + selectedValue + " to sort is null "  );
+    logger.info("END   onChange Sort by " + selectedValue + " to sort is null ");
   }
 
   /**
@@ -194,21 +198,26 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     } else {
       if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort has " + (toSort.size()));
     }
-
   }
 
+  /**
+   * Sort -1 items after un-practiced items.
+   * @param o1
+   * @param o2
+   * @return
+   */
   private int compareScores(T o1, T o2) {
-    int rawScore = o1.getRawScore();
-    int rawScore1 = o2.getRawScore();
+    int rawScore1 = o1.getRawScore();
+    int rawScore2 = o2.getRawScore();
 
-    if (rawScore == -1 && rawScore1 == -1) {
+    if (rawScore1 == -1 && rawScore2 == -1) {
       return 0;
     } else {
-
-//    if (rawScore == -1 && rawScore1 -)
-//    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore1);
-
-      return Integer.compare(rawScore, rawScore1);
+//    if (rawScore == -1 && rawScore2 -)
+//    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore2);
+      if (rawScore1 == -1 && rawScore2 == 0) return +1;
+      else if (rawScore1 == 0 && rawScore2 == -1) return -1;
+      else return Integer.compare(rawScore1, rawScore2);
     }
   }
 

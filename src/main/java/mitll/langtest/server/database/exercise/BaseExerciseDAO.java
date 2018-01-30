@@ -397,7 +397,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
                               IAudioDAO audioDAO,
                               int projid,
 
-                              Database database, boolean isMyProject) {
+                              Database database,
+                              boolean isMyProject) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, projid, isMyProject);

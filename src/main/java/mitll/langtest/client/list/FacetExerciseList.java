@@ -42,7 +42,6 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -50,7 +49,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.ShowEvent;
@@ -79,7 +77,6 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
-
 
   public static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
@@ -246,7 +243,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     addPageSize(pagerAndSort);
 
-    pagerAndSort.add(this.sortBox = addSortBox(controller.getLanguage()));
+    pagerAndSort.add(this.sortBox = addSortBox());
 
     return pagerAndSort;
   }
@@ -333,10 +330,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private final boolean finished;
   private ListBox sortBoxReally;
-  ListSorting<CommonShell, CommonExercise> listSorting;
+  private ListSorting<CommonShell, CommonExercise> listSorting;
 
   @NotNull
-  private DivWidget addSortBox(String language) {
+  private DivWidget addSortBox() {
     DivWidget w = new DivWidget();
     w.addStyleName("floatRight");
 

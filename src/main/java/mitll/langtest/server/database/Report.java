@@ -348,7 +348,8 @@ public class Report implements IReport {
 
   private void sendReports(MailSupport mailSupport, List<String> reportEmails, List<String> receiverNames, File summaryReport) {
     String subject = getFileName();
-    String messageBody = "Hi,<br>Here is the current usage report for NetProF.<br>Thanks, Administrator";
+    String messageBody = "Hi,<br>Here is the current usage report for NetProF on " + getHostInfo() +
+        ".<br>Thanks, Administrator";
 
     logger.info("sending excel to recipients " + reportEmails + " using file " + summaryReport.getAbsolutePath());
 
@@ -359,6 +360,10 @@ public class Report implements IReport {
         logger.warn("couldn't send email to " + dest);
       }
     }
+  }
+
+  private String getHostName() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostName();
   }
 
 
@@ -437,16 +442,6 @@ public class Report implements IReport {
     }
     return reports;
   }
-
-  /**
-   * @return html of report
-   * @see IReport#writeReportToFile
-   */
-/*  private List<ReportStats> doReport(ReportStats reportStats) {
-//    logger.info(reportStats.getLanguage() + " doReportForYear for " + reportStats.getYear());
-    List<ReportStats> reports = getReport(reportStats);
-    return reports;
-  }*/
 
   /**
    * @param projects
@@ -1478,7 +1473,7 @@ public class Report implements IReport {
               int userid = result.getUserid();
               if (students.contains(userid) || allStudents.contains(userid)) {
                 if (isResultReallyValid(result, seen)) {
-                  if (isValidUser(userid)) {
+                  if (true) {
            /*         if (WRITE_RESULTS_TO_FILE) {
                       writer.write(result.toString());
                       writer.write("\n");
@@ -1850,7 +1845,7 @@ public class Report implements IReport {
     ensureYTDEntries3(year, monthToCount2, weekToCount2);
     //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
 
-    Set<Integer> teachers = new HashSet<>();
+//    Set<Integer> teachers = new HashSet<>();
 //    int skipped = 0;
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
@@ -1861,13 +1856,13 @@ public class Report implements IReport {
       Integer creatorID = event.userid();
       long timestamp = event.modified();
       if (yearTimeRange.inYear(timestamp) && students.contains(creatorID)) {
-        if (isValidUser(creatorID)) {
+        if (true) {
           users.add(creatorID);
           statsForEvent(calendar, monthToCount, monthToCount2, weekToCount, weekToCount2, event, creatorID);
         }
       } else if (!students.contains(creatorID)) {
         //  skipped++;
-        teachers.add(creatorID);
+  //      teachers.add(creatorID);
       }
     }
     //dumpActiveUsers(activeUsers, teachers, skipped, users);
@@ -1910,16 +1905,6 @@ public class Report implements IReport {
     builder.append(yearMonthWeekTable);
 
     return users;
-  }
-
-/*  private void dumpActiveUsers(String activeUsers, Set<Long> teachers, int skipped, Set<Long> users) {
-    List<Long> longs = new ArrayList<>(users);
-    Collections.sort(longs);
-//    logger.debug(activeUsers + " getEvents skipped " + skipped + " events from teachers " + teachers + "\nusers " + longs);
-  }*/
-
-  private boolean isValidUser(long creatorID) {
-    return true;// creatorID != 1; // 1 = gvidaver
   }
 
   /**

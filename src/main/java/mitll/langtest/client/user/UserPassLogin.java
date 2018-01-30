@@ -84,7 +84,11 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
-  public static final String INSTALL_APP = "Install App?";
+
+  /**
+   *
+   */
+  private static final String INSTALL_APP = "Install App?";
 
   private final KeyPressHelper enterKeyButtonHelper;
 

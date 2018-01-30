@@ -148,7 +148,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                               AddRemoveDAO addRemoveDAO,
                               IAudioDAO audioDAO,
                               int projid,
-                              Database database, boolean isMyProject) {
+                              Database database,
+                              boolean isMyProject) {
     this.userExerciseDAO = new UserExerciseDAO(database);
     this.userExerciseDAO.setExerciseDAO(this);
     this.addRemoveDAO = addRemoveDAO;

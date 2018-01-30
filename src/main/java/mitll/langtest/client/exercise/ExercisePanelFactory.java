@@ -57,6 +57,10 @@ import static mitll.langtest.client.list.DisplayMenu.SHOW_PHONES;
 public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   private final Logger logger = Logger.getLogger("ExercisePanelFactory");
 //  private static final String SHOW_PHONES = "showPhones";
+  /**
+   * Fix for bug #115 : <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/115'>Bug #115 : Remove the transliteration </a>
+   */
+  private final PhonesChoices SHOW_CHOICE_DEFAULT = PhonesChoices.HIDE;
 
   protected final ExerciseController controller;
   protected ListInterface<T, U> exerciseList;
@@ -105,7 +109,8 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
 
   @NotNull
   public PhonesChoices getPhoneChoices() {
-    PhonesChoices choices = PhonesChoices.SHOW;
+    PhonesChoices choices = SHOW_CHOICE_DEFAULT;
+
     String show = controller.getStorage().getValue(SHOW_PHONES);
     if (show != null && !show.isEmpty()) {
       try {

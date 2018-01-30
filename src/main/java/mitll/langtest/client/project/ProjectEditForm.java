@@ -77,7 +77,7 @@ public class ProjectEditForm extends UserDialog {
   private static final String STATUS_BOX = "Status_Box";
 
   private static final String DOMINO_PROJECT = "Domino";
-  private static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
+  //  private static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
   private static final String PLEASE_WAIT = "Please wait...";
   private static final String ALIGN_REF_AUDIO = "Align ref audio";
   private static final String CHECK_AUDIO = "Check Audio";
@@ -98,7 +98,14 @@ public class ProjectEditForm extends UserDialog {
   private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
 
   private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language.";
-  private static final String PLEASE_SELECT_A_DOMINO = "Please select a domino project.";
+
+  /**
+   * @see #addDominoProject
+   */
+  private static final String PLEASE_SELECT_A_DOMINO_PROJECT = "Please select a domino project.";
+
+
+  //private static final String PLEASE_SELECT_A_DOMINO = PLEASE_SELECT_A_DOMINO_PROJECT;
   private static final String NAME = "Name";
   private static final String PROJECT_NAME = "Project Name";
   private static final String FIRST_TYPE_HINT = "(e.g. Unit)";
@@ -190,10 +197,9 @@ public class ProjectEditForm extends UserDialog {
 
     if (id != null) {
       info.setDominoID(id.getDominoID());
-      logger.info(" project domino id now " +id.getDominoID());
-    }
-    else {
-      logger.info("no project for " +dominoProjects.getSelectedValue());
+      logger.info(" project domino id now " + id.getDominoID());
+    } else {
+      logger.info("no project for " + dominoProjects.getSelectedValue());
     }
 
     setCommonFields();
@@ -267,8 +273,9 @@ public class ProjectEditForm extends UserDialog {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
-    } else if (unit.getSafeText().isEmpty()) {
-      Window.alert("Please select a domino project.");
+    } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
+      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount());
+      Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);
       return false;
     } else {
       return true;
@@ -287,19 +294,7 @@ public class ProjectEditForm extends UserDialog {
       info.setDominoID(id.getDominoID());
     }
 
-
-    logger.info("domino id is " + info.getDominoID());
-/*    info.setName(nameField.getSafeText());
-    info.setCourse(course.getSafeText());
-    info.setFirstType(unit.getSafeText());
-    info.setSecondType(chapter.getSafeText());
-    info.setModelsDir(model.getSafeText());
-
-    try {
-      info.setPort(Integer.parseInt(hydraPort.getSafeText()));
-    } catch (NumberFormatException e) {
-
-    }*/
+//    logger.info("domino id is " + info.getDominoID());
     setCommonFields();
 
     projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
@@ -340,9 +335,8 @@ public class ProjectEditForm extends UserDialog {
 
     addLanguage(info, fieldset, isNew);
 
-    // if (isNew) {
     addDominoProject(info, fieldset, isNew);
-    //}
+
     {
       course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
       course.setText(info.getCourse());
@@ -475,15 +469,19 @@ public class ProjectEditForm extends UserDialog {
     }
   }
 
+  /**
+   * @param info
+   * @param fieldset
+   * @param isNew
+   * @see #getFields
+   */
   private void addDominoProject(ProjectInfo info, Fieldset fieldset, boolean isNew) {
-    String language = DOMINO_PROJECT;
-    DivWidget name = getHDivLabel(fieldset, language);
+    DivWidget name = getHDivLabel(fieldset, DOMINO_PROJECT);
     name.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
 
     this.dominoProjects = new ListBox();
     this.dominoProjects.addStyleName("leftTenMargin");
 
-    ListBox outer = dominoProjects;
     name.add(this.dominoProjects);
 
     dominoProjects.addChangeHandler(event -> {
@@ -492,8 +490,9 @@ public class ProjectEditForm extends UserDialog {
     });
 
     if (isNew) {
-      this.dominoProjects.addItem(PLEASE_SELECT_A_DOMINO);
+      this.dominoProjects.addItem(PLEASE_SELECT_A_DOMINO_PROJECT);
     } else {
+      ListBox outer = dominoProjects;
       projectServiceAsync.getDominoForLanguage(info.getLanguage(), new AsyncCallback<List<DominoProject>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -525,13 +524,13 @@ public class ProjectEditForm extends UserDialog {
 
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-      logger.info("got " + dominoProject);
+      logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
 
-      logger.info("set unit " + dominoProject.getFirstType());
+      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
-      logger.info("no domino project for " + selectedValue);
+      logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }
   }
 
@@ -645,23 +644,22 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private void checkAudio(ProjectInfo info, Button w) {
-  //  feedback.setText("Checking audio and making mp3's...");
-
+    //  feedback.setText("Checking audio and making mp3's...");
     services
         .getAudioServiceAsyncForHost(info.getHost())
         .checkAudio(info.getID(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        w.setEnabled(true);
-        messageHelper.handleNonFatalError("check audo for project", caught);
-      }
+          @Override
+          public void onFailure(Throwable caught) {
+            w.setEnabled(true);
+            messageHelper.handleNonFatalError("check audo for project", caught);
+          }
 
-      @Override
-      public void onSuccess(Void result) {
-        w.setEnabled(true);
-        feedback.setText("Checking audio and making mp3's...");
-      }
-    });
+          @Override
+          public void onSuccess(Void result) {
+            w.setEnabled(true);
+            feedback.setText("Checking audio and making mp3's...");
+          }
+        });
   }
 
   /**

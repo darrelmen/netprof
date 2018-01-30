@@ -23,6 +23,7 @@ public class DisplayMenu {
   private static final String SHOW1 = "Options";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
+  public static final String SHOW_PRIMARY_TEXT = "Show Primary text";
 
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
@@ -55,7 +56,7 @@ public class DisplayMenu {
     view.setWidth(85 + "px");
 
     view.add(getShowSounds());
-    NavLink primary = new NavLink("Show Primary text");
+    NavLink primary = new NavLink(SHOW_PRIMARY_TEXT);
     view.add(primary);
 
     view.add(flTextChoices(primary));
@@ -71,13 +72,6 @@ public class DisplayMenu {
     download.addClickHandler(event -> LangTest.EVENT_BUS.fireEvent(new DownloadEvent()));
     return download;
   }
-
-/*  @NotNull
-  private DropdownSubmenu getViewMenu() {
-    DropdownSubmenu showChoices = new DropdownSubmenu("Show");
-    flTextChoices(showChoices);
-    return showChoices;
-  }*/
 
   private NavLink getShowSounds() {
     NavLink phoneChoice = new NavLink(SHOW_SOUNDS);
