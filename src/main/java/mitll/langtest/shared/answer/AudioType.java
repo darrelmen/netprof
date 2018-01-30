@@ -67,6 +67,7 @@ public enum AudioType implements IsSerializable {
     this.speed = speed;
   }
 
+
   @Override
   public String toString() {
     return text;
@@ -97,6 +98,6 @@ public enum AudioType implements IsSerializable {
   }
 
   private static class Constants {
-    public static final String REGULAR1 = "regular";
+    static final String REGULAR1 = "regular";
   }
 }

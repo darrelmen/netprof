@@ -319,7 +319,7 @@ public class UserListManager implements IUserListManager {
         long then = System.currentTimeMillis();
         Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
         long now = System.currentTimeMillis();
-        if (now - then > 0) {
+        if (now - then > 10) {
           logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
         }
         //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
@@ -380,7 +380,7 @@ public class UserListManager implements IUserListManager {
     Collection<SlickUserExerciseList> byUser = userListDAO.getByUser(userid, projid);
     long now = System.currentTimeMillis();
 
-    if (now - then > 20) {
+    if (now - then > 30) {
       logger.info("getCreatedAndFavorite found " + byUser.size() + " lists by " + userid + " in " + projid + " took " + (now - then));
     }
 

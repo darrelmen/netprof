@@ -54,8 +54,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,9 +74,9 @@ public class SlickUserExerciseDAO
   private static final String DEFAULT_FOR_EMPTY = ANY;
   public static final boolean ADD_SOUNDS = false;
   private static final String HYDRA = "hydra";
-  public static final int DEFAULT_PROJECT = 1;
-  public static final boolean WARN_ABOUT_MISSING_PHONES = false;
-  public static final String QUOT = "&quot;";
+  private static final int DEFAULT_PROJECT = 1;
+  private static final boolean WARN_ABOUT_MISSING_PHONES = false;
+  private static final String QUOT = "&quot;";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -91,9 +89,8 @@ public class SlickUserExerciseDAO
   public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
-  private String hostName;
+  private final String hostName;
 
-  private String hostAddress = "unk";
   /**
    * @param database
    * @param dbConnection
@@ -269,7 +266,7 @@ public class SlickUserExerciseDAO
 
   private final Timestamp never = new Timestamp(0);
 
-  private VocabFactory factory = new VocabFactory();
+  private final VocabFactory factory = new VocabFactory();
 
   /**
    * @param slick
@@ -336,8 +333,8 @@ public class SlickUserExerciseDAO
    * So we need to not put the context sentences, at least initially, under the unit-chapter hierarchy.
    * <p>
    * Use exercise -> phone map to determine phones per exercise...
-   *
-   *
+   * <p>
+   * <p>
    * Don't set phones on netprof machine???
    *
    * @param slick
@@ -377,9 +374,8 @@ public class SlickUserExerciseDAO
       }
 
       exercise.setNumPhones(numToUse);
-    }
-    else {
-     // logger.info("hostName " + hostName + " host addr " + hostAddress + " : " + exercise.getNumPhones() + " " + lookup.hasModel());
+    } else {
+      // logger.info("hostName " + hostName + " host addr " + hostAddress + " : " + exercise.getNumPhones() + " " + lookup.hasModel());
     }
 //    logger.info("addExerciseToSectionHelper for " + exercise.getID() + " num phones = " + numToUse);
 
@@ -700,13 +696,13 @@ public class SlickUserExerciseDAO
     dao.addBulk(bulk);
   }
 
-  public int getNumRows() {
+/*  public int getNumRows() {
     return dao.getNumRows();
-  }
+  }*/
 
-  public boolean isEmpty() {
+/*  public boolean isEmpty() {
     return dao.getNumRows() == 0;
-  }
+  }*/
 
   /**
    * TODO : All overkill...?  why not just look them back up from exercise dao?
@@ -884,12 +880,13 @@ public class SlickUserExerciseDAO
     return getUserExercises(onList);
   }
 
-  public int getNumOnList(int listID) {
+/*  public int getNumOnList(int listID) {
     return dao.getNumOnList(listID);
-  }
+  }*/
 
   /**
    * Pull out of the database.
+   *
    * @param exid
    * @return
    */
@@ -1035,7 +1032,9 @@ public class SlickUserExerciseDAO
     return getUserExercises(dao.byIDs(exids));
   }
 
-  public void deleteByExID(Collection<Integer> exids) {   dao.deleteByIDs(exids);  }
+  public void deleteByExID(Collection<Integer> exids) {
+    dao.deleteByIDs(exids);
+  }
 
   /**
    * TODOx : Why so complicated?
@@ -1215,17 +1214,17 @@ public class SlickUserExerciseDAO
    */
   public BothMaps getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-    Map<Integer, Integer> dominoToNew = new HashMap<>();
+//    Map<Integer, Integer> dominoToNew = new HashMap<>();
 
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
 
-    addToMap(oldToNew, allPredefByProject);
-    addToDominoMap(dominoToNew, allPredefByProject);
+    addToLegacyIdToIdMap(allPredefByProject, oldToNew);
+  //  addToDominoMap(allPredefByProject, dominoToNew);
 
     List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);
 
-    addToMap(oldToNew, allContextPredefByProject);
-    addToDominoMap(dominoToNew, allContextPredefByProject);
+    addToLegacyIdToIdMap(allContextPredefByProject, oldToNew);
+    //addToDominoMap(allContextPredefByProject, dominoToNew);
 
     logger.info("getOldToNew found for" +
         "\n\tproject #" + projectid +
@@ -1233,7 +1232,7 @@ public class SlickUserExerciseDAO
         "\n\t" + allContextPredefByProject.size() + " context predef exercises," +
         "\n\t" + oldToNew.size() + " old->new mappings");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
-    return new BothMaps(oldToNew,dominoToNew);
+    return new BothMaps(oldToNew);//, dominoToNew);
   }
 
   /**
@@ -1243,7 +1242,7 @@ public class SlickUserExerciseDAO
    * @param userExercises
    * @deprecated not needed with postgres
    */
-  void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
+/*  void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
     int c = 0;
     for (CommonExercise ue : userExercises) {
       // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getOldID() + " / " + ue.getUniqueID() + " : " + ue);
@@ -1266,7 +1265,7 @@ public class SlickUserExerciseDAO
       }
     }
     if (c > 0) logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
-  }
+  }*/
 
   /**
    * @param ue
@@ -1278,47 +1277,49 @@ public class SlickUserExerciseDAO
   }
 
   public class BothMaps {
-    private Map<String, Integer> oldToNew;
-    private Map<Integer, Integer> dominoToNew;
+    private final Map<String, Integer> oldToNew;
+  //  private final Map<Integer, Integer> dominoToNew;
 
-    BothMaps(Map<String, Integer> oldToNew, Map<Integer, Integer> dominoToNew) {
+    BothMaps(Map<String, Integer> oldToNew){//}, Map<Integer, Integer> dominoToNew) {
       this.oldToNew = oldToNew;
-      this.dominoToNew = dominoToNew;
+    //  this.dominoToNew = dominoToNew;
     }
 
     public Map<String, Integer> getOldToNew() {
       return oldToNew;
     }
 
-    public Map<Integer, Integer> getDominoToNew() {
+/*    public Map<Integer, Integer> getDominoToNew() {
       return dominoToNew;
-    }
+    }*/
   }
 
-  private void addToMap(Map<String, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
-    for (SlickExercise exercise : allPredefByProject) {
+  private void addToLegacyIdToIdMap(List<SlickExercise> allPredefByProject, Map<String, Integer> oldToNew) {
+    allPredefByProject.forEach(exercise -> {
       String exid = exercise.exid();
 
       if (!exid.isEmpty()) {
         Integer before = oldToNew.put(exid, exercise.id());
-        if (before != null)
-          logger.warn("huh? corruption : already saw an exercise with id before " +before +
+        if (before != null) {
+          logger.warn("addToLegacyIdToIdMap : huh? corruption : already saw an exercise with id before " + before +
               " '" + exid + "' replace with " + exercise);
+        }
       }
-    }
+    });
   }
 
   /**
-   *
-   * @param oldToNew
    * @param allPredefByProject
+   * @param oldToNew
+   * @see #getOldToNew
    */
-  private void addToDominoMap(Map<Integer, Integer> oldToNew, List<SlickExercise> allPredefByProject) {
-    for (SlickExercise exercise : allPredefByProject) {
-      Integer before = oldToNew.put(exercise.legacyid(), exercise.id());
-      if (before != null)
-        logger.warn("huh? already saw an exercise with id " + exercise.exid() + " replace with " + exercise);
-    }
+  private void addToDominoMap(List<SlickExercise> allPredefByProject, Map<Integer, Integer> oldToNew) {
+    allPredefByProject.forEach(exercise -> {
+      if (oldToNew.put(exercise.legacyid(), exercise.id()) != null) {
+        logger.warn("addToDominoMap : huh? already saw an exercise with id " + exercise.exid() + ", domino id " + exercise.legacyid() +
+            " replace with " + exercise);
+      }
+    });
   }
 
   /**
@@ -1389,9 +1390,9 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see ProjectSync#addPending
    * @param projectid
    * @return
+   * @see ProjectSync#addPending
    */
   public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
     return dao.getLegacyToExercise(projectid);

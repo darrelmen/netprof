@@ -69,6 +69,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -454,9 +455,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @NotNull
   private Group makePrimaryGroup(String name) {
-    LocalDateTime f = LocalDateTime.now().plusYears(30);
-    Date out = Date.from(f.atZone(ZoneId.systemDefault()).toInstant());
+    Date out = Date.from(getZonedDateThirtyYears().toInstant());
     return new Group(name, name + "Group", 365, 24 * 365, out, adminUser);
+  }
+
+  @NotNull
+  private LocalDateTime getThirtyYearsFromNow() {
+    return LocalDateTime.now().plusYears(30);
   }
 
   private final Map<String, Group> nameToGroup = new HashMap<>();
@@ -486,10 +491,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     logger.warn("getGroupOrMake making a new group " + name);
     MongoGroupDAO groupDAO1 = (MongoGroupDAO) delegate.getGroupDAO();
 
-    LocalDateTime thirtyYearsFromNow = LocalDateTime.now().plusYears(30);
-    Date out = Date.from(thirtyYearsFromNow.atZone(ZoneId.systemDefault()).toInstant());
-
-    SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser, new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
+    Date out = Date.from(getZonedDateThirtyYears().toInstant());
+    SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
 
     Group group = null;
     if (name1.isError()) {
@@ -500,6 +504,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return group;
   }
 
+  @NotNull
+  private ZonedDateTime getZonedDateThirtyYears() {
+    return getThirtyYearsFromNow().atZone(ZoneId.systemDefault());
+  }
 
   private ClientUserDetail getClientUserDetail(DBUser dbUser) {
     AccountDetail acctDtl = new AccountDetail();
@@ -594,7 +602,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param sessionID
    * @return
    * @seex #getStrictUserWithPass(String, String)
-   * @see mitll.langtest.server.services.UserServiceImpl#loginUser
+   * @see mitll.langtest.server.database.security.NPUserSecurityManager#getLoginResult
    */
   public User loginUser(String userId,
                         String attemptedTxtPass,
@@ -603,7 +611,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
                         String sessionID) {
     String encodedCurrPass = getUserCredentials(userId);
 
-    logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() + " existing credentials " + encodedCurrPass);
 
     DBUser loggedInUser =
         delegate.loginUser(
@@ -612,6 +619,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             remoteAddr,
             userAgent,
             sessionID);
+
+    logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() +
+        "\n\texisting credentials " + encodedCurrPass +
+        "\n\tyielded " + loggedInUser);
 
 /*    if (loggedInUser == null) {
       myDelegate.isMatch(encodedCurrPass, attemptedTxtPass);

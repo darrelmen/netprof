@@ -83,15 +83,15 @@ public class ImportProjectInfo {
     return name;
   }
 
-  public String toString() {
-    return dominoProjectID + " : " + name + " : " + getLanguage() + " creator " + getCreatorID() + " at " + getCreateDate() + " unit " + getUnitName() + " chapt " + getChapterName();
-  }
-
   public void setUnitName(String unitName) {
     this.unitName = unitName;
   }
 
   public void setChapterName(String chapterName) {
     this.chapterName = chapterName;
+  }
+
+  public String toString() {
+    return dominoProjectID + " : " + name + " : " + getLanguage() + " creator " + getCreatorID() + " at " + getCreateDate() + " unit " + getUnitName() + " chapt " + getChapterName();
   }
 }

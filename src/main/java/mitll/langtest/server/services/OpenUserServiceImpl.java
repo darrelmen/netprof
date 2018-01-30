@@ -271,6 +271,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   /**
    * Assumes project id is valid.
    * Maybe someone else has deleted it while you were looking at it?
+   *
    * @param projectid
    * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
    */
@@ -286,8 +287,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           db.getProjectManagement().configureProjectByID(projectid);
           db.rememberUsersCurrentProject(id, projectid);
           db.setStartupInfo(sessionUser, projectid);
-        }
-        else {
+        } else {
           logger.warn("setProject : project " + projectid + " is gone....");
           db.forgetProject(id);
           db.getProjectManagement().clearStartupInfo(sessionUser);
@@ -319,12 +319,12 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * If the user has two or more tabs open, and switches languages between tabs, behind the scenes
    * we maintain the one-to-one user->project mapping by confirming the current project here and switching it
    * in the database if it's not consistent with the UI.
-   *
+   * <p>
    * This should support Paul's language eval comparison. (1/22/18).
    *
-   * @see InitialUI#confirmCurrentProject
    * @param projid
    * @return
+   * @see InitialUI#confirmCurrentProject
    */
   @Override
   public boolean setCurrentUserToProject(int projid) {
@@ -340,11 +340,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       if (!b) {
         if (sessionUserID == -1) {
           logger.info("setCurrentUserToProject : no current session user " + sessionUserID + " for " + projid);
-        }
-        else {
+        } else {
           logger.info("setCurrentUserToProject : no most recent project for " + sessionUserID + ", tried " + projid);
         }
-              }
+      }
 
       return b;
     } catch (DominoSessionException e) {

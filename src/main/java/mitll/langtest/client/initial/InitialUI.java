@@ -307,11 +307,7 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().clear();   // necessary?
 
     DivWidget verticalContainer = new FluidContainer();
-    addMouseOverHandler(verticalContainer, event ->
-    {
-      // logger.info("got mouse over");
-      confirmCurrentProject();
-    });
+    addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
 
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
@@ -499,7 +495,7 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-     // logger.info("getLangBreadcrumb got click on " + project.getName());
+      // logger.info("getLangBreadcrumb got click on " + project.getName());
       History.newItem("");
       clearStartupInfo();
       clearContent();

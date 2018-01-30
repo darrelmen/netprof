@@ -273,8 +273,9 @@ public class ProjectEditForm extends UserDialog {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
-    } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
-      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount());
+   // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
+    } else if (unit.getSafeText().isEmpty()) {
+      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() + " unit = " + unit.getSafeText());
       Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);
       return false;
     } else {
@@ -524,11 +525,10 @@ public class ProjectEditForm extends UserDialog {
 
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-      logger.info("setUnitAndChapter got " + dominoProject);
+      //logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
-
-      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
+//      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
       logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }

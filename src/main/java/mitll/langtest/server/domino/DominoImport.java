@@ -23,7 +23,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -68,6 +68,8 @@ public class DominoImport implements IDominoImport {
    */
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser) {
+    logger.info("getImportFromDomino " + projID + " domino " + dominoID + " since " + sinceInUTC);
+
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID, dominoAdminUser);
 
     if (matches.isEmpty()) {
@@ -125,7 +127,7 @@ public class DominoImport implements IDominoImport {
         project.getCreateTime().getTime()
     );
 
-    setUnitAndChapter(id, importProjectInfo);
+    setUnitAndChapter(id, importProjectInfo, project.getContent().getParentId());
     return importProjectInfo;
   }
 
@@ -134,14 +136,24 @@ public class DominoImport implements IDominoImport {
    *
    * @param id
    * @param importProjectInfo
+   * @param parentId
+   * @see #getImportProjectInfo(ProjectDescriptor)
    */
-  private void setUnitAndChapter(int id, ImportProjectInfo importProjectInfo) {
-    ProjectWorkflow forProject = workflowDelegate.getForProject(id);
+  private void setUnitAndChapter(int id, ImportProjectInfo importProjectInfo, int parentId) {
+    ProjectWorkflow workflow = workflowDelegate.getForProject(id);
 
-    if (forProject == null) {
-      logger.warn("no workflow for project " + id);
+
+    if (workflow == null && parentId > -1) {
+      workflow = workflowDelegate.getForProject(parentId);
+      if (workflow != null) {
+        logger.info("found workflow on parent " + parentId);
+      }
+    }
+
+    if (workflow == null) {
+      logger.error("setUnitAndChapter: no workflow for project " + id + " or parent " + parentId);
     } else {
-      forProject
+      workflow
           .getTaskSpecs()
           .forEach(taskSpecification -> {
             taskSpecification
@@ -161,6 +173,19 @@ public class DominoImport implements IDominoImport {
                       });
                 });
           });
+
+      String unitName = importProjectInfo.getUnitName();
+      String chapterName = importProjectInfo.getChapterName();
+
+      if (unitName.isEmpty() && chapterName.isEmpty()) {
+        logger.warn("no unit or chapter info on " + id +
+            "\n\tworkflow " + workflow +
+            "\n\ttasks " + workflow.getTaskSpecs());
+      } else {
+        logger.info("unit/chapter info on " + id +
+            "\n\tunitName " + unitName +
+            "\n\tchapterName " + chapterName);
+      }
     }
   }
 
@@ -303,8 +328,8 @@ public class DominoImport implements IDominoImport {
    * @see #getChangedDocs(String, DBUser, ClientPMProject)
    */
   private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid) {
-//    logger.info("getDeletedDocsSince since " + sinceInUTC);
-    LocalDate sinceThen = getModifiedTime(sinceInUTC);
+    LocalDateTime sinceThen = getModifiedTime(sinceInUTC);
+    logger.info("getDeletedDocsSince since " + sinceInUTC + " or " + sinceThen);
 
     Bson query = and(
         eq("projId", projid)
@@ -330,7 +355,7 @@ public class DominoImport implements IDominoImport {
         Boolean active = doc.getBoolean("active");
         if (!active) {
           String updateTime = doc.getString("deleteTime");
-          LocalDate update = getModifiedTime(updateTime);
+          LocalDateTime update = getModifiedTime(updateTime);
           if (update.isAfter(sinceThen)) {
             logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
             ids.add(id);
@@ -350,7 +375,15 @@ public class DominoImport implements IDominoImport {
   }
 
   @NotNull
-  private LocalDate getModifiedTime(String toParse) {
-    return LocalDate.parse(toParse, DateTimeFormatter.ofPattern(MONGO_TIME));
+  private LocalDateTime getModifiedTime(String toParse) {
+    return LocalDateTime.parse(toParse,  DateTimeFormatter.ofPattern(MONGO_TIME));
+  }
+
+
+  public static void main(String [] arg) {
+    String toParse ="2018-01-30T18:43:36.719Z";
+  //  LocalDateTime parse = LocalDateTime.parse(toParse, DateTimeFormatter.ISO_INSTANT);
+    LocalDateTime parse = LocalDateTime.parse(toParse, DateTimeFormatter.ofPattern(MONGO_TIME));
+    System.err.println("got " + parse + " " +parse.toLocalTime() + " ");
   }
 }

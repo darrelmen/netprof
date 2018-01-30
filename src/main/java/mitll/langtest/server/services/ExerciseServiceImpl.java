@@ -982,6 +982,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       List<CommonExercise> exercises,
       int projid) {
     if (request.isOnlyUnrecordedByMe()) {
+      logger.info("Filter for matching gender to " + request.getUserID());
       return getUnrecordedExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
     } else {
       return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;

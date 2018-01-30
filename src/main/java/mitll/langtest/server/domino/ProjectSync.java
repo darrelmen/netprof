@@ -181,14 +181,12 @@ public class ProjectSync implements IProjectSync {
                                                                Map<Integer, SlickExercise> dominoToNonContextEx,
                                                                List<CommonExercise> newEx,
                                                                List<CommonExercise> importUpdateEx) {
-    // Map<Integer, SlickExercise> dominoToNonContextEx = slickUEDAO.getLegacyToEx(projectid);
-
     Map<String, SlickExercise> oldIDToExer = new HashMap<>();
     dominoToNonContextEx.values().forEach(slickExercise -> {
       oldIDToExer.put(slickExercise.exid(), slickExercise);
     });
 
-    logger.info("addPending found " + dominoToNonContextEx.size() + " current exercises for " + projectid);
+    logger.info("addPending found " + dominoToNonContextEx.size() + " current exercises for project #" + projectid);
 
     {
       Set<Integer> currentIDs = dominoToNonContextEx.keySet();
@@ -614,27 +612,30 @@ public class ProjectSync implements IProjectSync {
     try {
       List<Project> matches = getProjectsForSameLanguage(projectid);
 
-      logger.info("copyAudio found " + matches.size() + " source projects for project " + projectid);
+      logger.info("copyAudio found " + matches.size() + " source projects for project " + projectid + " : ex->id " +exToInt.size());
 
-      Map<String, AudioMatches> transcriptToAudioMatch = new HashMap<>();
-      Map<String, AudioMatches> transcriptToContextAudioMatch = new HashMap<>();
+//      Map<String, AudioMatches> transcriptToAudioMatch = new HashMap<>();
+//      Map<String, AudioMatches> transcriptToContextAudioMatch = new HashMap<>();
+
+      Collection<AudioMatches> copyAudioForEx = new ArrayList<>();
+      Collection<AudioMatches> copyAudioForContext = new ArrayList<>();
 
       for (Project match : matches) {
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(match.getID());
         logger.info("copyAudio for project " + match.getID() + "/" + match.getProject().name() +
-            " got " + transcriptToAudio.size() + " candidates");
+            " got " + transcriptToAudio.size() + " source candidates");
         getSlickAudios(projectid,
             newEx,
             exToInt,
             transcriptToAudio,
-            transcriptToAudioMatch,
-            transcriptToContextAudioMatch);
+            copyAudioForEx,
+            copyAudioForContext);
       }
 
       if (!matches.isEmpty()) {
-        List<SlickAudio> copies = getSlickAudios(transcriptToAudioMatch, transcriptToContextAudioMatch);
-        logger.info("CopyAudio :" +
-            "\n\tcopying " + transcriptToAudioMatch.size() + "/" + transcriptToContextAudioMatch.size() +
+        List<SlickAudio> copies = getSlickAudios(copyAudioForEx, copyAudioForContext);
+        logger.info("copyAudio :" +
+            "\n\tcopying " + copyAudioForEx + "/" +copyAudioForContext +
             "audio " + copies.size() +
             "\n\tfrom " + newEx.size() +
             "\n\tfrom " + matches.size() +
@@ -649,14 +650,17 @@ public class ProjectSync implements IProjectSync {
   }
 
   @NotNull
-  private List<SlickAudio> getSlickAudios(Map<String, AudioMatches> transcriptToAudioMatch, Map<String, AudioMatches> transcriptToContextAudioMatch) {
+  private List<SlickAudio> getSlickAudios(Collection<AudioMatches> copyAudioForEx ,
+                                          Collection<AudioMatches> copyAudioForContext) {
     List<SlickAudio> copies = new ArrayList<>();
 
-    for (AudioMatches m : transcriptToAudioMatch.values()) {
+   // Collection<AudioMatches> copyAudioForEx = transcriptToAudioMatch.values();
+    for (AudioMatches m : copyAudioForEx) {
 //          logger.info("copyAudio got transcript match " + m);
       m.deposit(copies);
     }
-    for (AudioMatches m : transcriptToContextAudioMatch.values()) {
+   // Collection<AudioMatches> copyAudioForContext = transcriptToContextAudioMatch.values();
+    for (AudioMatches m : copyAudioForContext) {
       logger.info("copyAudio got context match " + m);
       m.deposit(copies);
     }
@@ -751,10 +755,17 @@ public class ProjectSync implements IProjectSync {
   @NotNull
   private static AudioType getAudioType(SlickAudio candidate) {
     AudioType audioType = AudioType.UNSET;
+    String rawAudioType = candidate.audiotype();
     try {
-      audioType = AudioType.valueOf(candidate.audiotype().toUpperCase());
+      if (rawAudioType.equals(AudioType.CONTEXT_REGULAR.toString())) {
+        audioType = AudioType.CONTEXT_REGULAR;
+      } else if (rawAudioType.equals(AudioType.CONTEXT_SLOW.toString())) {
+        audioType = AudioType.CONTEXT_SLOW;
+      } else {
+        audioType = AudioType.valueOf(rawAudioType.toUpperCase());
+      }
     } catch (IllegalArgumentException e) {
-      logger.warn("getAudioType : got unknown audio " + candidate.audiotype());
+      logger.error("getAudioType : got unknown audio " + rawAudioType);
     }
     return audioType;
   }
@@ -811,8 +822,8 @@ public class ProjectSync implements IProjectSync {
                               List<CommonExercise> newEx,
                               Map<String, Integer> exToInt,
                               Map<String, List<SlickAudio>> transcriptToAudio,
-                              Map<String, AudioMatches> transcriptToMatches,
-                              Map<String, AudioMatches> transcriptToContextMatches) {
+                              Collection<AudioMatches> transcriptToMatches,
+                              Collection<AudioMatches> transcriptToContextMatches) {
 //    int match = 0;
 //    int nomatch = 0;
     logger.info("getSlickAudios exToInt                    " + exToInt.size());
@@ -826,13 +837,15 @@ public class ProjectSync implements IProjectSync {
     for (CommonExercise ex : newEx) {
       String oldID = ex.getOldID();
       Integer exid = exToInt.get(oldID);
-//      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid);
+      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid + " " + ex.getEnglish()+ " " + ex.getForeignLanguage());
 
       if (exid == null) {
         logger.error("getSlickAudios : huh? can't find " + oldID + " in " + exToInt.size());
       } else {
         if (ex.getAudioAttributes().isEmpty()) {
           vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
+        } else {
+          logger.info("getSlickAudios skipping " + ex.getID() + " since it already has audio : " + ex.getAudioAttributes().size());
         }
         contextCounts.add(addAudioForContext(projectid, exToInt, transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
@@ -841,30 +854,36 @@ public class ProjectSync implements IProjectSync {
   }
 
   /**
+   *
+   * Only does match on fl, not on pair of fl/english... might be better.
+   *
    * @param projectid
    * @param transcriptToAudio
-   * @param transcriptToMatches
+   * @param transcriptMatches
    * @param ex
    * @param exid
    * @return
-   * @see #getSlickAudios(int, List, Map, Map, Map, Map)
+   * @see #getSlickAudios
    */
   private MatchInfo addAudioForVocab(int projectid,
                                      Map<String, List<SlickAudio>> transcriptToAudio,
-                                     Map<String, AudioMatches> transcriptToMatches,
+                                     Collection<AudioMatches> transcriptMatches,
                                      CommonExercise ex,
                                      Integer exid) {
     int match = 0;
     int nomatch = 0;
     String fl = ex.getForeignLanguage();
 
+    logger.info("addAudioForVocab looking for match to ex " + exid + "/" + ex.getID() + " '" + ex.getEnglish() + "' = '" + fl + "'");
+
     List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
     if (audioAttributes != null) {
-      AudioMatches audioMatches = transcriptToMatches.computeIfAbsent(fl, k -> new AudioMatches());
+      AudioMatches audioMatches = new AudioMatches();//transcriptToMatches.computeIfAbsent(fl, k -> new AudioMatches());
       copyMatchingAudio(projectid, exid, audioAttributes, audioMatches);
+      transcriptMatches.add(audioMatches);
       match++;
     } else {
-      // logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
+      logger.info("addAudioForVocab vocab no match " + ex.getEnglish() + " '" + fl + "'");
       nomatch++;
     }
 
@@ -888,7 +907,7 @@ public class ProjectSync implements IProjectSync {
   private MatchInfo addAudioForContext(int projectid,
                                        Map<String, Integer> exToInt,
                                        Map<String, List<SlickAudio>> transcriptToAudio,
-                                       Map<String, AudioMatches> transcriptToContextMatches,
+                                       Collection<AudioMatches> transcriptToContextMatches,
                                        Collection<CommonExercise> contextExercises) {
     int match = 0;
     int nomatch = 0;
@@ -904,7 +923,9 @@ public class ProjectSync implements IProjectSync {
 
         logger.info("getSlickAudios context " + prefix + " old '" + coldID + "' -> '" + cexid + "'");
         if (audioAttributes != null && cexid != null) {
-          copyMatchingAudio(projectid, cexid, audioAttributes, transcriptToContextMatches.computeIfAbsent(cfl, k -> new AudioMatches()));
+          AudioMatches audioMatches = new AudioMatches();
+          copyMatchingAudio(projectid, cexid, audioAttributes, audioMatches);
+          transcriptToContextMatches.add(audioMatches);
           match++;
         } else {
           logger.info("getSlickAudios context " + prefix +
@@ -953,6 +974,7 @@ public class ProjectSync implements IProjectSync {
    * @param exid
    * @param audioAttributes
    * @param matches
+   * @see #addAudioForVocab
    */
   private void copyMatchingAudio(int projectid,
                                  int exid,
