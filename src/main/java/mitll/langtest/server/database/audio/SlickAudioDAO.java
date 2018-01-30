@@ -401,7 +401,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @NotNull
   private Set<Integer> getExercises(Set<Pair> regSpeedGenderMatch) {
-    Set<Integer> regExids = new HashSet<>();
+    Set<Integer> regExids = new HashSet<>(regSpeedGenderMatch.size());
     for (Pair p : regSpeedGenderMatch) regExids.add(p.getExid());
     return regExids;
   }

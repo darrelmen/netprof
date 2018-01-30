@@ -284,12 +284,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-//    if (hasRecordPerm(userIDFromSessionOrDB)) {
-    return db.getMaleFemaleProgress(getProjectIDFromUser(userIDFromSessionOrDB));
-//    } else {
-//      throw getRestricted("getting recording progress");
-//    }
+    return db.getMaleFemaleProgress(getProjectIDFromUser(getUserIDFromSessionOrDB()));
   }
 
   /**

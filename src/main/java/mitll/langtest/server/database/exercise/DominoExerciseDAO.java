@@ -113,16 +113,18 @@ public class DominoExerciseDAO {
             importDocs
         );
 
+    List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
+        projid,
+        projectInfo.getCreatorID(),
+        projectInfo.getUnitName(),
+        projectInfo.getChapterName(),
+
+        importDocs
+    );
+
     return new ImportInfo(projectInfo,
         changedCommonExercises,
-        getAddedCommonExercises(
-            projid,
-            projectInfo.getCreatorID(),
-            projectInfo.getUnitName(),
-            projectInfo.getChapterName(),
-
-            importDocs
-        ),
+        addedCommonExercises,
         importDocs.getDeleted2(), importDocs.getDeletedNPIDs());
   }
 
@@ -232,6 +234,12 @@ public class DominoExerciseDAO {
     return exercises;
   }*/
 
+  @NotNull
+  private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
+                                                       DominoImport.ChangedAndDeleted changedAndDeleted) {
+    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded());
+  }
+
   /**
    * @param projid
    * @param creator
@@ -245,12 +253,6 @@ public class DominoExerciseDAO {
   private List<CommonExercise> getChangedCommonExercises(int projid, int creator, String unitName, String chapterName,
                                                          DominoImport.ChangedAndDeleted changedAndDeleted) {
     return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getChanged());
-  }
-
-  @NotNull
-  private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
-                                                       DominoImport.ChangedAndDeleted changedAndDeleted) {
-    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded());
   }
 
   @NotNull

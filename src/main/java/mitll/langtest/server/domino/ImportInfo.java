@@ -18,7 +18,6 @@ public class ImportInfo {
   private final int dominoID;
 
   /**
-   *
    * @param importProjectInfo
    * @param changedExercises
    * @param deletedNPIDs
@@ -76,10 +75,11 @@ public class ImportInfo {
   }
 
   /**
-   *
    * @return
    */
-  public List<CommonExercise> getChangedExercises() {    return changedExercises;  }
+  public List<CommonExercise> getChangedExercises() {
+    return changedExercises;
+  }
 
   /**
    * @return
@@ -89,8 +89,8 @@ public class ImportInfo {
   }
 
   /**
-   * @see ProjectSync#doDelete
    * @return
+   * @see ProjectSync#doDelete
    */
   public Collection<Integer> getDeletedDominoIDs() {
     return deletedDominoIDs;
@@ -100,11 +100,13 @@ public class ImportInfo {
     return deletedNPIDs;
   }
 
-  public String toString() {
-    return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() + " num " + getChangedExercises().size() + " deleted "+ getDeletedDominoIDs().size();
-  }
-
   public List<CommonExercise> getAddedExercises() {
     return addedExercises;
+  }
+
+  public String toString() {
+    return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() +
+        " added " + getAddedExercises().size() +
+        " changed " + getChangedExercises().size() + " deleted " + getDeletedDominoIDs().size();
   }
 }

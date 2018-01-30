@@ -558,12 +558,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * ALSO - ideally this is done at the moment the wav is made.
    * <p>
    * Send the first exercise along so we don't have to ask for it after we get the initial list
-   *
+   * <p>
    * scores should be consistent with getScoreHistoryPerExercise
-   * @see #getScoreHistoryPerExercise
+   *
    * @param exercises
    * @param projID
    * @return
+   * @see #getScoreHistoryPerExercise
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
@@ -1005,47 +1006,53 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                     int projid,
                                                                     boolean onlyExamples) {
 
-    Set<Integer> allExercises = new HashSet<>();
+    Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
     for (CommonExercise exercise : exercises) {
       if (onlyExamples) {
-        for (CommonExercise dir : exercise.getDirectlyRelated()) {
-          allExercises.add(dir.getID());
-        }
+        exercise.getDirectlyRelated().forEach(dir -> unrecordedIDs.add(dir.getID()));
       } else {
-        allExercises.add(exercise.getID());
+        unrecordedIDs.add(exercise.getID());
       }
     }
 
     Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples);
-    logger.debug("getUnrecordedExercisesMatchingGender all exercises " + allExercises.size() + " for " + projid + " userid " + userID +
+    logger.debug("getUnrecordedExercisesMatchingGender all exercises " + unrecordedIDs.size() +
+        " for project #" + projid +
+        " userid # " + userID +
         " removing " + recordedBySameGender.size());
-    allExercises.removeAll(recordedBySameGender);
-    logger.debug("getUnrecordedExercisesMatchingGender after all exercises " + allExercises.size());
+    unrecordedIDs.removeAll(recordedBySameGender);
+    logger.debug("getUnrecordedExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
-    List<CommonExercise> copy = new ArrayList<>();
-    // Set<Integer> seen = new HashSet<>();
+    List<CommonExercise> unrecordedExercises = new ArrayList<>();
+
     for (CommonExercise exercise : exercises) {
-      int id = exercise.getID();
       if (onlyExamples) {
         for (CommonExercise dir : exercise.getDirectlyRelated()) {
-          if (allExercises.contains(dir.getID())) {
-            copy.add(dir);
+          if (unrecordedIDs.contains(dir.getID())) {
+            unrecordedExercises.add(dir);
           }
         }
       } else {
-        if (allExercises.contains(id)) {
-          copy.add(exercise);
+        if (unrecordedIDs.contains(exercise.getID())) {
+          unrecordedExercises.add(exercise);
         }
       }
     }
 
-    logger.debug("getUnrecordedExercisesMatchingGender to be recorded " + copy.size() + " from " + exercises.size());
+    logger.debug("getUnrecordedExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 
-    return copy;
+    return unrecordedExercises;
   }
 
+  /**
+   * @param userID
+   * @param projid
+   * @param onlyExamples
+   * @return
+   * @see #getUnrecordedExercisesMatchingGender
+   */
   private Collection<Integer> getRecordedByMatchingGender(int userID, int projid, boolean onlyExamples) {
-    logger.debug("getRecordedByMatchingGender : for " + userID + " only by same gender " + " examples only " + onlyExamples);// + " from " + exercises.size());
+    logger.debug("getRecordedByMatchingGender : for " + userID + " only by same gender examples only " + onlyExamples);// + " from " + exercises.size());
 
     return onlyExamples ?
         db.getAudioDAO().getWithContext(userID, projid) :
@@ -1136,7 +1143,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * On the fly we make a new section helper to do filtering of user list.
-   *
+   * <p>
    * TODO : include lists as just another facet for the purpose of filtering
    * If the filter and then the list results in no exercises, unselect the list.
    *
@@ -1490,16 +1497,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * Join between exercises and scores
-   *
+   * <p>
    * Be consistent with ResultDAO.getScores
-   *
-   * @see mitll.langtest.server.database.result.SlickResultDAO#getScores
-   *
-   * @see #makeExerciseListWrapper
    *
    * @param ids
    * @param exercises
    * @param userID
+   * @see mitll.langtest.server.database.result.SlickResultDAO#getScores
+   * @see #makeExerciseListWrapper
    * @see #getFullExercises
    */
   private Map<Integer, CorrectAndScore> getScoreHistoryPerExercise(Collection<Integer> ids,

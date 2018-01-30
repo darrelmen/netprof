@@ -84,7 +84,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
 
-  private static final boolean DEBUG_AUDIO_REPORT = false;
+  private static final boolean DEBUG_AUDIO_REPORT = true;
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
@@ -805,7 +805,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getRecordedByMatchingGender
    */
   public Set<Integer> getWithContext(int userid, int projid) {
     return getWithContext(userDAO.isMale(userid), projid);
@@ -816,16 +816,16 @@ public abstract class BaseAudioDAO extends DAO {
 
     //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
 
-    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
+/*    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
         male,
         AudioType.REGULAR.toString(),
         AudioType.SLOW.toString(),
         projid
     ));
 
-    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);
+    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);*/
 
-    return audioExercisesForGenderBothSpeeds;
+    return audioExercisesForGender;
   }
 
   abstract Set<Integer> getAudioExercisesForGender(boolean male,

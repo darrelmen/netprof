@@ -557,7 +557,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      if (DEBUG) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
+      if (DEBUG || true) logger.info("loadFirstExercise (" + getInstance() + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
       int firstID = findFirstID();
@@ -641,7 +641,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * goes ahead and asks the server for the next item so we don't have to wait for it.
    *
    * @param itemID
-   * @see ListInterface#checkAndAskServer(int)
+   * @see #checkAndAskServer
    */
   void askServerForExercise(int itemID) {
     if (cachedNext != null && cachedNext.getID() == itemID) {
@@ -769,7 +769,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   void removeCurrentExercise() {
 //    logger.info("removeCurrentExercise clear container --- >");
     clearExerciseContainer();
-    innerContainer.getParent().removeStyleName("shadowBorder");
+//    innerContainer.getParent().removeStyleName("shadowBorder");
+
+    showEmptySelection();
+  }
+
+  protected void showEmptySelection() {
+    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
   }
 
   void clearExerciseContainer() {
@@ -780,7 +786,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    //  logger.info("showEmptyExercise --- ");
+    logger.info("showEmptyExercise --- ");
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);

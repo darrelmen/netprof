@@ -160,8 +160,10 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
-      style.setProperty("minHeight", minHeight, Style.Unit.PX);
-      style.setProperty("minWidth", 300, Style.Unit.PX);
+
+//      style.setProperty("minHeight", minHeight, Style.Unit.PX);
+//      style.setProperty("minWidth", 300, Style.Unit.PX);
+
       style.setMarginTop(10, Style.Unit.PX);
       style.setMarginLeft(10, Style.Unit.PX);
       style.setMarginBottom(10, Style.Unit.PX);
@@ -776,7 +778,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
-    chart.setWidth("100%");
+   // chart.setWidth("100%");
   }
 
   private boolean isShort() {

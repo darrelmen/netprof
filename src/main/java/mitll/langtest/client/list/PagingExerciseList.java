@@ -426,9 +426,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @see FacetExerciseList#gotEmptyExerciseList
    */
-  void showEmptySelection() {
-    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
-  }
+//  protected void showEmptySelection() {
+//    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
+//  }
 
   String getHistoryTokenFromUIState(String search, int id) {
     return

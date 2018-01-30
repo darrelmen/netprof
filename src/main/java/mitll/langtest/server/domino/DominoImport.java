@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
@@ -227,9 +228,10 @@ public class DominoImport implements IDominoImport {
    */
   @NotNull
   private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject) {
-    List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject);
+    Set<Integer> added = new HashSet<>();
+    List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject,added);
 
-    List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject);
+    List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject,added);
 
     Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId());
 
@@ -240,12 +242,23 @@ public class DominoImport implements IDominoImport {
   }
 
   @NotNull
-  private List<ImportDoc> getChangedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
+  private List<ImportDoc> getAddedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next, Set<Integer> added) {
+    long then = System.currentTimeMillis();
+    List<HeadDocumentRevision> docsSince =
+        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false,
+            getAddedSince(sinceInUTC));
+    docsSince.forEach(headDocumentRevision -> added.add(headDocumentRevision.getId()));
+    return getImportDocs(then, docsSince);
+  }
+
+  @NotNull
+  private List<ImportDoc> getChangedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next, Set<Integer> added) {
     long then = System.currentTimeMillis();
     List<HeadDocumentRevision> changedSince =
         documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, getChangedSince(sinceInUTC));
 
-    return getImportDocs(then, changedSince);
+    List<HeadDocumentRevision> changedNotAdded = changedSince.stream().filter(headDocumentRevision -> !added.contains(headDocumentRevision.getId())).collect(Collectors.toList());
+    return getImportDocs(then, changedNotAdded);
   }
 
   @NotNull
@@ -262,16 +275,6 @@ public class DominoImport implements IDominoImport {
 
     logger.info("getImportDocs : took " + (now - then) + " to get " + importDocs.size());
     return importDocs;
-  }
-
-
-  @NotNull
-  private List<ImportDoc> getAddedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
-    long then = System.currentTimeMillis();
-    List<HeadDocumentRevision> docsSince =
-        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false,
-            getAddedSince(sinceInUTC));
-    return getImportDocs(then, docsSince);
   }
 
   /**
@@ -319,6 +322,7 @@ public class DominoImport implements IDominoImport {
      * @param changed
      * @param deleted
      * @param deleted2
+     * @see DominoImport#getChangedDocs
      */
     ChangedAndDeleted(List<ImportDoc> changed,
                       List<ImportDoc> deleted,

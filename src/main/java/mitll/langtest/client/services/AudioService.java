@@ -92,6 +92,5 @@ public interface AudioService extends RemoteService {
    * @param projectid
    */
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
-  //void ensureAllAudio() throws DominoSessionException, RestrictedOperationException;
   void recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 }
