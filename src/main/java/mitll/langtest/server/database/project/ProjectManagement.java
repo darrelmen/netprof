@@ -880,16 +880,15 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
-    boolean isRTL = false;
     if (project.dominoid() > 0) {
       info.put(DOMINO_ID, "" + project.dominoid());
     }
 
-    isRTL = addExerciseDerivedProperties(project, info, isRTL);
-    return isRTL;
+    return addExerciseDerivedProperties(project, info);
   }
 
-  private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info, boolean isRTL) {
+  private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info) {
+    boolean isRTL = false;
     if (getProjectStatus(project) != ProjectStatus.RETIRED) {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);

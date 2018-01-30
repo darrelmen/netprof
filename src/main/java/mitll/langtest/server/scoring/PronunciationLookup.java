@@ -144,11 +144,11 @@ public class PronunciationLookup implements IPronunciationLookup {
 
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
 
-    {
-      StringBuilder builder = new StringBuilder();
-      transcriptTokens.forEach(token -> builder.append(token).append(" "));
-      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
-    }
+//    {
+//      StringBuilder builder = new StringBuilder();
+//      transcriptTokens.forEach(token -> builder.append(token).append(" "));
+//      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
+//    }
 
     int numTokens = transcriptTokens.size();
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
