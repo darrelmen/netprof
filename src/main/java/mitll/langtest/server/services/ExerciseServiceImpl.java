@@ -1045,7 +1045,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private Collection<Integer> getRecordedByMatchingGender(int userID, int projid, boolean onlyExamples) {
-    logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + " examples only " + onlyExamples);// + " from " + exercises.size());
+    logger.debug("getRecordedByMatchingGender : for " + userID + " only by same gender " + " examples only " + onlyExamples);// + " from " + exercises.size());
 
     return onlyExamples ?
         db.getAudioDAO().getWithContext(userID, projid) :

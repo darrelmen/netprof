@@ -79,5 +79,4 @@ public interface DAOContainer {
   IEventDAO getEventDAO();
 
   IAudioDAO getAudioDAO();
-
 }

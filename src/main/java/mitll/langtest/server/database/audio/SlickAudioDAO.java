@@ -220,11 +220,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   Collection<AudioAttribute> getAudioAttributesForExercise(int exid, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
-    List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);
+    List<SlickAudio> byExerciseID = getAudioForExercise(exid);
     long now = System.currentTimeMillis();
     if (now - then > 20)
       logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exid);
     return toAudioAttributes(byExerciseID, idToMini);
+  }
+
+  @Override
+  public boolean hasAudio(int exid) {
+    return !getAudioForExercise(exid).isEmpty();
+  }
+
+  private List<SlickAudio> getAudioForExercise(int exid) {
+    return dao.getByExerciseID(exid);
   }
 
   /**
@@ -630,7 +639,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param all
    * @param hasProjectSpecificAudio
    * @return
-
    * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int, boolean)
    */
   private List<AudioAttribute> toAudioAttribute(Collection<SlickAudio> all, boolean hasProjectSpecificAudio) {

@@ -51,54 +51,64 @@ import java.util.Set;
 
 public interface IAudioDAO extends IDAO {
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    * @param info
    * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   AudioAttribute addOrUpdate(AudioInfo info);
 
+  /**
+   * @param projectid
+   * @param hasProjectSpecificAudio
+   * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
+   */
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid, boolean hasProjectSpecificAudio);
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
+
   List<SlickAudio> getAll(int projid);
+
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @param firstExercise
    * @param language
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    */
-  int attachAudioToExercise(CommonExercise firstExercise, String language,Map<Integer, MiniUser> idToMini);
+  int attachAudioToExercise(CommonExercise firstExercise, String language, Map<Integer, MiniUser> idToMini);
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    * @param exercises
    * @param language
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   void attachAudioToExercises(Collection<CommonExercise> exercises, String language);
 
   /**
-   * @see
    * @param firstExercise
    * @param audioAttributes
    * @param language
    * @return
+   * @see
    */
   boolean attachAudio(CommonExercise firstExercise,
                       Collection<AudioAttribute> audioAttributes,
                       String language);
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    * @param userid
    * @param projid
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
   Collection<Integer> getRecordedBySameGender(int userid, int projid);
 
   Set<Integer> getWithContext(int userid, int projid);
 
+
+  boolean hasAudio(int exid);
 
   /**
    * @param userid
@@ -123,7 +133,6 @@ public interface IAudioDAO extends IDAO {
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 
   /**
-   *
    * @param userToGender
    * @param userid
    * @param exercise
@@ -135,13 +144,13 @@ public interface IAudioDAO extends IDAO {
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
                         String language, Map<Integer, MiniUser> idToMini);
 
-  Map<String,Integer> getPairs(int projid);
+  Map<String, Integer> getPairs(int projid);
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper(int, Integer, AudioFileHelper, int)
    * @param audioID
    * @param hasProjectSpecificAudio
    * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper(int, Integer, AudioFileHelper, int)
    */
   AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio);
 

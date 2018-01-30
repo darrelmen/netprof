@@ -243,6 +243,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
+  public boolean hasAudio(int exid) {
+    return false;
+  }
+
+  @Override
   Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer,MiniUser> map) {
     return null;
   }

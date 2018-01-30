@@ -241,7 +241,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
     Map<Integer, ISlimResult> audioToResult = new HashMap<>(jsonResultsForProject.size());
     jsonResultsForProject.forEach(iSlimResult -> audioToResult.put(iSlimResult.getAudioID(), iSlimResult));
-    //for (ISlimResult slimResult : jsonResultsForProject) audioToResult.put(slimResult.getAudioID(), slimResult);
     return audioToResult;
   }
 

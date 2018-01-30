@@ -72,7 +72,7 @@ public class DominoExerciseDAO {
       setProjectInfo(importUser, readObj, projectInfo);
 
       List<CommonExercise> exercises =
-          getCommonExercises(
+          getChangedCommonExercises(
               projid,
               projectInfo.getCreatorID(),
               projectInfo.getUnitName(),
@@ -103,8 +103,8 @@ public class DominoExerciseDAO {
                                   ImportProjectInfo projectInfo,
                                   DominoImport.ChangedAndDeleted importDocs
   ) {
-    List<CommonExercise> exercises =
-        getCommonExercises(
+    List<CommonExercise> changedCommonExercises =
+        getChangedCommonExercises(
             projid,
             projectInfo.getCreatorID(),
             projectInfo.getUnitName(),
@@ -113,7 +113,17 @@ public class DominoExerciseDAO {
             importDocs
         );
 
-    return new ImportInfo(projectInfo, exercises, importDocs.getDeleted2(), importDocs.getDeletedNPIDs());
+    return new ImportInfo(projectInfo,
+        changedCommonExercises,
+        getAddedCommonExercises(
+            projid,
+            projectInfo.getCreatorID(),
+            projectInfo.getUnitName(),
+            projectInfo.getChapterName(),
+
+            importDocs
+        ),
+        importDocs.getDeleted2(), importDocs.getDeletedNPIDs());
   }
 
  /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
@@ -216,7 +226,7 @@ public class DominoExerciseDAO {
   }
 
   @NotNull
-  private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName, JsonArray docArr) {
+  private List<CommonExercise> getChangedCommonExercises(int projid, int creator, String unitName, String chapterName, JsonArray docArr) {
     List<CommonExercise> exercises = new ArrayList<>();
     docArr.forEach(docObj -> exercises.add(getExerciseFromVocabularyItem(projid, creator, unitName, chapterName, docObj)));
     return exercises;
@@ -232,9 +242,19 @@ public class DominoExerciseDAO {
    * @see #readExercises
    */
   @NotNull
-  private List<CommonExercise> getCommonExercises(int projid, int creator, String unitName, String chapterName,
-                                                  DominoImport.ChangedAndDeleted changedAndDeleted) {
-    List<ImportDoc> changed = changedAndDeleted.getChanged();
+  private List<CommonExercise> getChangedCommonExercises(int projid, int creator, String unitName, String chapterName,
+                                                         DominoImport.ChangedAndDeleted changedAndDeleted) {
+    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getChanged());
+  }
+
+  @NotNull
+  private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
+                                                       DominoImport.ChangedAndDeleted changedAndDeleted) {
+    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded());
+  }
+
+  @NotNull
+  private List<CommonExercise> getExerciseFromImport(int projid, int creator, String unitName, String chapterName, List<ImportDoc> changed) {
     List<CommonExercise> exercises = new ArrayList<>(changed.size());
 
     changed.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
@@ -245,7 +265,6 @@ public class DominoExerciseDAO {
   }
 
   /**
-   * @see #getCommonExercises
    * @param projid
    * @param creator
    * @param unitName
@@ -254,6 +273,7 @@ public class DominoExerciseDAO {
    * @param time
    * @param vocabularyItem
    * @return
+   * @see #getChangedCommonExercises
    */
   private Exercise getExerciseFromVocab(int projid,
                                         int creator,
@@ -327,7 +347,7 @@ public class DominoExerciseDAO {
                                    String npID,
                                    IDocumentComposite samples,
                                    Exercise parentExercise) {
-   // IDocumentComposite samples = vocabularyItem.getSamples();
+    // IDocumentComposite samples = vocabularyItem.getSamples();
 /*
     boolean isInt = false;
     int npInt = -1;
@@ -453,7 +473,7 @@ public class DominoExerciseDAO {
         0,
         dominoID);
 
-    logger.info("made new ex" +
+    logger.info("getExerciseFromVocabularyItem : made new ex" +
         "\n\tdominoID " + exercise.getDominoID() +
         "\n\tnpID     " + exercise.getOldID() +
         "\n\tex id    " + exercise.getID() +

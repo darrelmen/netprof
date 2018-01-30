@@ -146,7 +146,7 @@ public class DominoImport implements IDominoImport {
     if (workflow == null && parentId > -1) {
       workflow = workflowDelegate.getForProject(parentId);
       if (workflow != null) {
-        logger.info("found workflow on parent " + parentId);
+//        logger.info("found workflow on parent " + parentId);
       }
     }
 
@@ -182,9 +182,9 @@ public class DominoImport implements IDominoImport {
             "\n\tworkflow " + workflow +
             "\n\ttasks " + workflow.getTaskSpecs());
       } else {
-        logger.info("unit/chapter info on " + id +
+/*        logger.info("unit/chapter info on " + id +
             "\n\tunitName " + unitName +
-            "\n\tchapterName " + chapterName);
+            "\n\tchapterName " + chapterName);*/
       }
     }
   }
@@ -221,54 +221,95 @@ public class DominoImport implements IDominoImport {
   /**
    * @param sinceInUTC
    * @param dominoAdminUser
-   * @param next
+   * @param dominoProject
    * @return
    * @see #getImportFromDomino
    */
   @NotNull
-  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject) {
+    List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject);
+
+    List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject);
+
+    Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId());
+
+    Set<String> deletedNPIDs = getDeletedIDs(dominoAdminUser, dominoProject, deletedDocsSince);
+
+    logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
+    return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports);
+  }
+
+  @NotNull
+  private List<ImportDoc> getChangedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
     long then = System.currentTimeMillis();
+    List<HeadDocumentRevision> changedSince =
+        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, getChangedSince(sinceInUTC));
 
-    List<HeadDocumentRevision> documents1 =
-        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, getSince(sinceInUTC));
+    return getImportDocs(then, changedSince);
+  }
 
-    List<ImportDoc> docs = new ArrayList<>(documents1.size());
-    List<ImportDoc> deleted = new ArrayList<>();
+  @NotNull
+  private List<ImportDoc> getImportDocs(long then, List<HeadDocumentRevision> changedSince) {
+    List<ImportDoc> importDocs = new ArrayList<>(changedSince.size());
 
-    documents1.forEach(doc -> {
+    changedSince.forEach(doc -> {
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
-      docs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), vocabularyItem));
-      logger.info("\t getChangedDocs : found changed " + vocabularyItem);
+      importDocs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), vocabularyItem));
+      logger.info("\t getImportDocs : found changed " + vocabularyItem);
     });
 
     long now = System.currentTimeMillis();
 
-    logger.info("getChangedDocs : took " + (now - then) + " to get " + docs.size());
+    logger.info("getImportDocs : took " + (now - then) + " to get " + importDocs.size());
+    return importDocs;
+  }
 
-    Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, next.getId());
 
+  @NotNull
+  private List<ImportDoc> getAddedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next) {
+    long then = System.currentTimeMillis();
+    List<HeadDocumentRevision> docsSince =
+        documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false,
+            getAddedSince(sinceInUTC));
+    return getImportDocs(then, docsSince);
+  }
+
+  /**
+   * Get netprof ids for deleted items.
+   *
+   * @param dominoAdminUser
+   * @param next
+   * @param deletedDocsSince
+   * @return
+   */
+  @NotNull
+  private Set<String> getDeletedIDs(DBUser dominoAdminUser, ClientPMProject next, Collection<Integer> deletedDocsSince) {
     Set<String> deletedNPIDs = new TreeSet<>();
 
     deletedDocsSince.forEach(id -> {
       FindOptions<DocumentColumn> options1 = new FindOptions<>();
-      options1.addFilter(new FilterDetail<DocumentColumn>(DocumentColumn.Id, "" + id, FilterDetail.Operator.EQ));
+      options1.addFilter(new FilterDetail<>(DocumentColumn.Id, "" + id, FilterDetail.Operator.EQ));
 
       List<HeadDocumentRevision> documents2 =
           documentDelegate.getHeavyDocuments(next, dominoAdminUser, false, false, options1);
+
       if (!documents2.isEmpty()) {
         HeadDocumentRevision headDocumentRevision = documents2.get(0);
-
         IDocument document = headDocumentRevision.getDocument();
         VocabularyItem vocabularyItem = (VocabularyItem) document;
         deletedNPIDs.add(getNPId(vocabularyItem));
       }
     });
 
-    logger.info("got " + deletedNPIDs + " deleted np items");
-    return new ChangedAndDeleted(docs, deleted, deletedDocsSince, deletedNPIDs);
+    logger.info("getDeletedIDs got " + deletedNPIDs + " deleted np items");
+    return deletedNPIDs;
   }
 
+  /**
+   *
+   */
   public class ChangedAndDeleted {
+    private final List<ImportDoc> added;
     private final List<ImportDoc> changed;
     private final List<ImportDoc> deleted;
     private Collection<Integer> deleted2;
@@ -279,8 +320,12 @@ public class DominoImport implements IDominoImport {
      * @param deleted
      * @param deleted2
      */
-    ChangedAndDeleted(List<ImportDoc> changed, List<ImportDoc> deleted,
-                      Collection<Integer> deleted2, Set<String> deletedNPIDs) {
+    ChangedAndDeleted(List<ImportDoc> changed,
+                      List<ImportDoc> deleted,
+                      Collection<Integer> deleted2,
+                      Set<String> deletedNPIDs,
+                      List<ImportDoc> added) {
+      this.added = added;
       this.changed = changed;
       this.deleted = deleted;
       this.deleted2 = deleted2;
@@ -289,7 +334,7 @@ public class DominoImport implements IDominoImport {
 
     /**
      * @return
-     * @see DominoExerciseDAO#getCommonExercises(int, int, String, String, ChangedAndDeleted)
+     * @see DominoExerciseDAO#getCommonExercises
      */
     public List<ImportDoc> getChanged() {
       return changed;
@@ -309,19 +354,36 @@ public class DominoImport implements IDominoImport {
     }
 */
 
+    /**
+     * @see DominoExerciseDAO#readExercises
+     * @return
+     */
     public Set<String> getDeletedNPIDs() {
       return deletedNPIDs;
+    }
+
+    public List<ImportDoc> getAdded() {
+      return added;
     }
   }
 
   @NotNull
-  private FindOptions<DocumentColumn> getSince(String sinceInUTC) {
+  private FindOptions<DocumentColumn> getChangedSince(String sinceInUTC) {
     FindOptions<DocumentColumn> options1 = new FindOptions<>();
     options1.addFilter(new FilterDetail<>(DocumentColumn.RevisionTime, sinceInUTC, FilterDetail.Operator.GT));
     return options1;
   }
 
+  @NotNull
+  private FindOptions<DocumentColumn> getAddedSince(String sinceInUTC) {
+    FindOptions<DocumentColumn> options1 = new FindOptions<>();
+    options1.addFilter(new FilterDetail<>(DocumentColumn.CreateTime, sinceInUTC, FilterDetail.Operator.GT));
+    return options1;
+  }
+
   /**
+   * TODO : try with normal query again...
+   *
    * @param sinceInUTC
    * @param projid
    * @return
@@ -376,14 +438,14 @@ public class DominoImport implements IDominoImport {
 
   @NotNull
   private LocalDateTime getModifiedTime(String toParse) {
-    return LocalDateTime.parse(toParse,  DateTimeFormatter.ofPattern(MONGO_TIME));
+    return LocalDateTime.parse(toParse, DateTimeFormatter.ofPattern(MONGO_TIME));
   }
 
 
-  public static void main(String [] arg) {
-    String toParse ="2018-01-30T18:43:36.719Z";
-  //  LocalDateTime parse = LocalDateTime.parse(toParse, DateTimeFormatter.ISO_INSTANT);
+  public static void main(String[] arg) {
+    String toParse = "2018-01-30T18:43:36.719Z";
+    //  LocalDateTime parse = LocalDateTime.parse(toParse, DateTimeFormatter.ISO_INSTANT);
     LocalDateTime parse = LocalDateTime.parse(toParse, DateTimeFormatter.ofPattern(MONGO_TIME));
-    System.err.println("got " + parse + " " +parse.toLocalTime() + " ");
+    System.err.println("got " + parse + " " + parse.toLocalTime() + " ");
   }
 }

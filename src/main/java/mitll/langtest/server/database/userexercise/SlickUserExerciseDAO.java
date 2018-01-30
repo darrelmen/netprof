@@ -58,9 +58,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SlickUserExerciseDAO
-    extends BaseUserExerciseDAO
-    implements IUserExerciseDAO {
+public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
 
   /**
@@ -761,7 +759,7 @@ public class SlickUserExerciseDAO
 
       if (WARN_ABOUT_MISSING_PHONES) {
         if (exercise.getNumPhones() == 0 && n++ < 10) {
-          logger.info("getExercises no phones for exercise " + exercise.getID());
+          logger.info("getChangedExercises no phones for exercise " + exercise.getID());
         }
       }
 
@@ -780,17 +778,17 @@ public class SlickUserExerciseDAO
 
     long now = System.currentTimeMillis();
     if (now - then2 > 50) {
-      logger.info("getExercises took " + (now - then) + " to update # phones on " + pairs.size() + " exercises.");
+      logger.info("getChangedExercises took " + (now - then) + " to update # phones on " + pairs.size() + " exercises.");
     }
     if (now - then > 50) {
-      logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
+      logger.info("getChangedExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
     }
 
     if (addTypesToSection) {
-      //  logger.info("getExercises type order " + typeOrder);
+      //  logger.info("getChangedExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }
-    //  logger.info("getExercises created " + copy.size() + " exercises");
+    //  logger.info("getChangedExercises created " + copy.size() + " exercises");
     return copy;
   }
 
@@ -1039,6 +1037,8 @@ public class SlickUserExerciseDAO
   /**
    * TODOx : Why so complicated?
    *
+   * Maybe separately update context exercises.
+   *
    * @param userExercise
    * @param isContext
    * @param typeOrder
@@ -1052,7 +1052,7 @@ public class SlickUserExerciseDAO
     int rows = dao.update(slickUserExercise);
     boolean didIt = rows > 0;
     {
-      String idLabel = userExercise.getID() + "/" + slickUserExercise.id();
+      String idLabel = userExercise.getID() + "/" + slickUserExercise.id() + "/" + slickUserExercise.legacyid() + "/" + slickUserExercise.exid();
       if (rows == 0 /*&& createIfDoesntExist*/) {
 //      int insert = dao.insert(slickUserExercise);
 //      logger.info("update inserted exercise #" + insert);
@@ -1063,10 +1063,10 @@ public class SlickUserExerciseDAO
     }
 
     // recurse on related context exercises
-    for (CommonExercise contextEx : userExercise.getDirectlyRelated()) {
+/*    for (CommonExercise contextEx : userExercise.getDirectlyRelated()) {
       logger.info("update with context exercise " + contextEx.getID() + " context " + contextEx.getForeignLanguage() + " " + contextEx.getEnglish());
       didIt &= update(contextEx, true, typeOrder);
-    }
+    }*/
     return didIt;
   }
 
@@ -1219,7 +1219,7 @@ public class SlickUserExerciseDAO
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
 
     addToLegacyIdToIdMap(allPredefByProject, oldToNew);
-  //  addToDominoMap(allPredefByProject, dominoToNew);
+    //  addToDominoMap(allPredefByProject, dominoToNew);
 
     List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);
 
@@ -1278,11 +1278,11 @@ public class SlickUserExerciseDAO
 
   public class BothMaps {
     private final Map<String, Integer> oldToNew;
-  //  private final Map<Integer, Integer> dominoToNew;
+    //  private final Map<Integer, Integer> dominoToNew;
 
-    BothMaps(Map<String, Integer> oldToNew){//}, Map<Integer, Integer> dominoToNew) {
+    BothMaps(Map<String, Integer> oldToNew) {//}, Map<Integer, Integer> dominoToNew) {
       this.oldToNew = oldToNew;
-    //  this.dominoToNew = dominoToNew;
+      //  this.dominoToNew = dominoToNew;
     }
 
     public Map<String, Integer> getOldToNew() {
