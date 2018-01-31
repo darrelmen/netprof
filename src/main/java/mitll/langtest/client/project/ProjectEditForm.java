@@ -37,7 +37,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -52,10 +51,7 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
-import mitll.langtest.shared.project.DominoProject;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,10 +60,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
+
 /**
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String LANGUAGE = "Language";
+  public static final String LIFECYCLE = "Lifecycle";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final int LEFT_MARGIN_FOR_DOMINO = 320;
@@ -93,6 +93,7 @@ public class ProjectEditForm extends UserDialog {
    */
   private static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
 
+
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
   private static final String PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE = "Please enter a port number for the service.";
 
@@ -107,19 +108,23 @@ public class ProjectEditForm extends UserDialog {
   private static final String FIRST_TYPE_HINT = "(e.g. Unit)";
   private static final String SECOND_TYPE_HINT = "(e.g. Chapter) OPTIONAL";
 
-  private static final String LANGUAGE_MODEL = "Language Model";
+  private static final String LANGUAGE_MODEL = "Lang. Model";
+  private static final String LANGUAGE_MODEL_OPTIONAL = "Language Model (optional)";
 
   private static final int MIN_LENGTH_USER_ID = 4;
   private static final int USER_ID_MAX_LENGTH = 5;
 
   private final LifecycleSupport lifecycleSupport;
   private final MessageHelper messageHelper;
-  private ListBox statusBox;
+  private ListBox statusBox, typeBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private HTML feedback;
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
+  /**
+   * @see #addLanguage
+   */
   private ListBox language;
   private ListBox dominoProjects;
   private FormField model;
@@ -200,8 +205,8 @@ public class ProjectEditForm extends UserDialog {
 
     setCommonFields();
 
-
     info.setStatus(ProjectStatus.valueOf(statusBox.getValue()));
+    info.setProjectType(ProjectType.valueOf(typeBox.getValue()));
 
     info.setHost(hydraHost.getSafeText());
     setPort();
@@ -316,7 +321,7 @@ public class ProjectEditForm extends UserDialog {
         DivWidget hDiv = getHDiv(id);
         hDiv.setWidth("100%");
         Heading domino_id = getHeading(DOMINO_ID, info.getDominoID());
-        domino_id.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_DOMINO, Style.Unit.PX);
+        domino_id.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_DOMINO, PX);
         hDiv.add(domino_id);
         fieldset.add(hDiv);
       } else {
@@ -325,27 +330,25 @@ public class ProjectEditForm extends UserDialog {
     }
 
     {
-      nameField = getName(getHDivLabel(fieldset, NAME), info.getName(), PROJECT_NAME);
+      nameField = getName(getHDivLabel(fieldset, NAME, true), info.getName(), PROJECT_NAME);
       checkNameOnBlur(nameField);
       Scheduler.get().scheduleDeferred(() -> nameField.getWidget().setFocus(true));
     }
 
     addLanguage(info, fieldset, isNew);
-
     addDominoProject(info, fieldset, isNew);
 
     {
-      course = getName(getHDivLabel(fieldset, COURSE), info.getCourse(), COURSE_OPTIONAL);
+      course = getName(getHDivLabel(fieldset, COURSE, false), info.getCourse(), COURSE_OPTIONAL);
       course.setText(info.getCourse());
     }
 
+    // these are generally not editable
     {
-      DivWidget typesRow = getHDivLabel(fieldset, HIERARCHY);
+      DivWidget typesRow = getHDivLabel(fieldset, HIERARCHY, false);
 
       unit = getName(typesRow, info.getFirstType(), FIRST_TYPE_HINT, 150, 40, false);
       unit.setText(info.getFirstType());
-
-      // TODO : make these not editable
 
       chapter = getName(typesRow, info.getSecondType(), SECOND_TYPE_HINT, 150, 40, false);
       chapter.setText(info.getSecondType());
@@ -353,11 +356,18 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) typesRow.setVisible(false);
     }
 
-    DivWidget widgets = addLifecycle(info, fieldset);
-    if (isNew) widgets.setVisible(false);
+    {
+      DivWidget widgets = addLifecycle(info, fieldset);
+      if (isNew) widgets.setVisible(false);
+    }
 
     {
-      DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT);
+      DivWidget widgets = addProjectType(info, fieldset);
+     // if (isNew) widgets.setVisible(false);
+    }
+
+    {
+      DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT, false);
 
       hydraHost = getName(hDivLabel, info.getHost(), HYDRA_HOST_OPTIONAL, 100, 30, true);
       hydraHost.setText(info.getHost());
@@ -366,7 +376,7 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) hDivLabel.setVisible(false);
     }
 
-    DivWidget hDivLabel = getHDivLabel(fieldset, LANGUAGE_MODEL);
+    DivWidget hDivLabel = getHDivLabel(fieldset, LANGUAGE_MODEL, false);
     model = getModel(hDivLabel, info.getModelsDir());
 
     if (isNew) hDivLabel.setVisible(false);
@@ -391,8 +401,14 @@ public class ProjectEditForm extends UserDialog {
     return new Heading(4, text, "" + id1);
   }
 
+  /**
+   * @param info
+   * @param fieldset
+   * @return
+   * @see #getFields
+   */
   private DivWidget addLifecycle(ProjectInfo info, Fieldset fieldset) {
-    DivWidget lifecycle = getHDivLabel(fieldset, "Lifecycle");
+    DivWidget lifecycle = getHDivLabel(fieldset, LIFECYCLE, false);
 
     lifecycle.add(statusBox = getBox());
     {
@@ -403,8 +419,15 @@ public class ProjectEditForm extends UserDialog {
     }
 
     checkPortOnBlur(statusBox);
-    setBox(info.getStatus());
+    setBoxForStatus(statusBox, info.getStatus());
 
+    return lifecycle;
+  }
+
+  private DivWidget addProjectType(ProjectInfo info, Fieldset fieldset) {
+    DivWidget lifecycle = getHDivLabel(fieldset, "Project Type", false);
+    lifecycle.add(typeBox = getTypeBox());
+    setBoxForType(typeBox, info.getProjectType());
     return lifecycle;
   }
 
@@ -417,9 +440,8 @@ public class ProjectEditForm extends UserDialog {
    * @see #getFields
    */
   private void addLanguage(ProjectInfo info, Fieldset fieldset, boolean isNew) {
-    String language = "Language";
-    DivWidget name = getHDivLabel(fieldset, language);
-    name.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    DivWidget name = getHDivLabel(fieldset, LANGUAGE, false);
+    name.getElement().getStyle().setMarginTop(0, PX);
 
     this.language = new ListBox();
     final ListBox outer = this.language;
@@ -473,8 +495,8 @@ public class ProjectEditForm extends UserDialog {
    * @see #getFields
    */
   private void addDominoProject(ProjectInfo info, Fieldset fieldset, boolean isNew) {
-    DivWidget name = getHDivLabel(fieldset, DOMINO_PROJECT);
-    name.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    DivWidget name = getHDivLabel(fieldset, DOMINO_PROJECT, false);
+    name.getElement().getStyle().setMarginTop(0, PX);
 
     this.dominoProjects = new ListBox();
     this.dominoProjects.addStyleName("leftTenMargin");
@@ -530,14 +552,15 @@ public class ProjectEditForm extends UserDialog {
     }
   }
 
-  private DivWidget getHDivLabel(Fieldset fieldset, String name1) {
-    DivWidget name = getHDivLabel(name1);
+  private DivWidget getHDivLabel(Fieldset fieldset, String name1, boolean addTopMargin) {
+    DivWidget name = getHDivLabel(name1, addTopMargin);
     fieldset.add(name);
     return name;
   }
 
-  private DivWidget getHDivLabel(String language) {
+  private DivWidget getHDivLabel(String language, boolean addTopMargin) {
     Heading left = new Heading(5, language);
+    if (addTopMargin) left.getElement().getStyle().setMarginTop(14, PX);
     left.setWidth("100px");
     return getHDiv(left);
   }
@@ -549,17 +572,24 @@ public class ProjectEditForm extends UserDialog {
     return hdiv;
   }
 
+  /**
+   * @param fieldset
+   * @param currentName
+   * @param hint
+   * @return
+   * @see #getFields
+   */
   private FormField getName(HasWidgets fieldset, String currentName, String hint) {
     return getName(fieldset, currentName, hint, 200, 50, true);
   }
 
   private FormField getName(HasWidgets fieldset, String currentName, String hint, int width, int maxLength, boolean isEnabled) {
-    FormField userField =
-        addControlFormFieldWithPlaceholder(fieldset, false, 3, maxLength, hint);
+    FormField userField = addControlFormFieldWithPlaceholder(fieldset, false, 3, maxLength, hint);
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("name");
     userField.box.setWidth(width + "px");
+    userField.getGroup().getElement().getStyle().setMarginBottom(5, PX);
 
     userField.box.setEnabled(isEnabled);
 
@@ -617,7 +647,7 @@ public class ProjectEditForm extends UserDialog {
    */
   private FormField getModel(HasWidgets fieldset, String model) {
     FormField userField =
-        addControlFormFieldWithPlaceholder(fieldset, false, 5, 75, "Language Model (optional)");
+        addControlFormFieldWithPlaceholder(fieldset, false, 5, 75, LANGUAGE_MODEL_OPTIONAL);
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("languageModel");
     userField.box.setWidth(350 + "px");
@@ -714,12 +744,40 @@ public class ProjectEditForm extends UserDialog {
     return affBox;
   }
 
-  private void setBox(ProjectStatus statusValue) {
+  private ListBox getTypeBox() {
+    ListBox affBox = new ListBox();
+    affBox.addStyleName("leftTenMargin");
+
+    for (ProjectType status : ProjectType.values()) {
+      if (status.shouldShow()) {
+        affBox.addItem(status.name());
+      }
+    }
+
+    return affBox;
+  }
+
+  private void setBoxForStatus(ListBox statusBox, ProjectStatus statusValue) {
     int i = 0;
     boolean found = false;
 
     for (ProjectStatus status : ProjectStatus.values()) {
       if (status == statusValue) {
+        found = true;
+        break;
+      } else i++;
+    }
+
+    // first is please select.
+    statusBox.setSelectedIndex(found ? i : 0);
+  }
+
+  private void setBoxForType(ListBox statusBox, ProjectType projectType) {
+    int i = 0;
+    boolean found = false;
+
+    for (ProjectType projectType1 : ProjectType.values()) {
+      if (projectType1 == projectType) {
         found = true;
         break;
       } else i++;

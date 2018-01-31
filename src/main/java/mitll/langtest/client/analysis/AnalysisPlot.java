@@ -70,8 +70,9 @@ import java.util.logging.Logger;
  * @since 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
-  public static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
+  private static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+  private static final int WIDTH = 740;
 
   private static final int MIN_SESSION_COUNT = 50;
 
@@ -138,11 +139,12 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private final ExceptionSupport exceptionSupport;
   private Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer;
   private MessageHelper messageHelper;
+  private int width = 1365;
 
   /**
-   *
    * @param service
-   * @param userid either for yourself if you're a student or a selected student if you're a teacher
+   * @param userid        either for yourself if you're a student or a selected student if you're a teacher
+   * @param isTeacherView
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -151,13 +153,15 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
                       SoundManagerAPI soundManagerAPI,
                       Icon playFeedback,
                       ExceptionSupport exceptionSupport,
-                      MessageHelper messageHelper) {
+                      MessageHelper messageHelper, boolean isTeacherView) {
     this.messageHelper = messageHelper;
     this.exceptionSupport = exceptionSupport;
 
-    {
-      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
+    if (isTeacherView) width = WIDTH;
 
+    setWidth(width + "px");
+    {
+//      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
 
@@ -200,8 +204,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    */
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-
-    logger.info("showUserPerformance scores = " + rawBestScores.size());
+  //  logger.info("showUserPerformance scores = " + rawBestScores.size());
 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
@@ -309,7 +312,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private void showSeriesByVisible() {
     Scheduler.get().scheduleDeferred(() -> {
       if (chart != null) {
-         logger.info("showSeriesByVisible : doing deferred ---------- ");
+        logger.info("showSeriesByVisible : doing deferred ---------- ");
         for (Series series : seriesToVisible.keySet()) {
           //  String name = series.getName();
           Boolean expected = seriesToVisible.get(series);
@@ -778,7 +781,8 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
-   // chart.setWidth("100%");
+//    chart.setWidth(width + // 1378
+//        "px");
   }
 
   private boolean isShort() {
@@ -860,7 +864,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       this.lastTime = timeAndScore.getTimestamp();
 
       if (!toGet.isEmpty()) {
-         logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+        logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -870,7 +874,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
             commonShells.forEach(commonShell -> idToEx.put(commonShell.getID(), commonShell));
-           logger.info("setRawBestScores getShells got " + commonShells.size());
+            logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
       }
@@ -880,9 +884,9 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   }
 
   /**
-   * @see AudioExampleContainer#getShell
    * @param id
    * @return
+   * @see AudioExampleContainer#getShell
    */
   @Override
   public CommonShell getShell(int id) {

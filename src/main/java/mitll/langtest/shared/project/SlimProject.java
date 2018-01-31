@@ -66,6 +66,7 @@ public class SlimProject extends ProjectInfo {
                      String course,
                      String countryCode,
                      ProjectStatus status,
+                     ProjectType type,
                      int displayOrder,
 
                      boolean hasModel,
@@ -78,7 +79,7 @@ public class SlimProject extends ProjectInfo {
                      String secondType,
                      boolean showOniOS,
                      int dominoID, TreeMap<String, String> props) {
-    super(projectid, name, language, course, countryCode, status, displayOrder, created, lastImport, host, port, modelsDir,
+    super(projectid, name, language, course, countryCode, status, type, displayOrder, created, lastImport, host, port, modelsDir,
         firstType, secondType, showOniOS, dominoID);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
@@ -124,8 +125,8 @@ public class SlimProject extends ProjectInfo {
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
    * @return
+   * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
    */
   public TreeMap<String, String> getProps() {
     return props;
@@ -133,7 +134,7 @@ public class SlimProject extends ProjectInfo {
 
   public String toString() {
     return "SlimProject " + super.toString() +
-       // "\n\t#" + getID() +
-        "\n\tnum children " + children.size() ;
+        // "\n\t#" + getID() +
+        "\n\tnum children " + children.size();
   }
 }

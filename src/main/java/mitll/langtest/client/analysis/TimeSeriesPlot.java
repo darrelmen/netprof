@@ -36,14 +36,12 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.exercise.CommonShell;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,8 +50,7 @@ import java.util.logging.Logger;
  * @since 11/20/15.
  */
 class TimeSeriesPlot extends DivWidget {
-  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
-
+ // private final Logger logger = Logger.getLogger("TimeSeriesPlot");
   static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -84,7 +81,6 @@ class TimeSeriesPlot extends DivWidget {
         return getErrorBarToolTip(toolTipData, seriesName1);
       }
     } catch (Exception e) {
-      //e.printStackTrace();
       return "error " + e.getMessage();
     }
   }

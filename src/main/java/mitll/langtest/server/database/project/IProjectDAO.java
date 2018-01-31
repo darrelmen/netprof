@@ -35,9 +35,10 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;

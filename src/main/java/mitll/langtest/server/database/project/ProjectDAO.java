@@ -39,6 +39,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
@@ -135,7 +136,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         projectInfo.getName(),
         projectInfo.getLanguage(),
         projectInfo.getCourse(),
-        currentProject.getProject().kind(),
+        projectInfo.getProjectType().toString(),
         projectInfo.getStatus().toString(),
         projectInfo.getFirstType(),
         projectInfo.getSecondType(),

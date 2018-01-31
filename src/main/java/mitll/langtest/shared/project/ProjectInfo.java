@@ -35,6 +35,7 @@ package mitll.langtest.shared.project;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private String course = "";
   private String countryCode = "";
   private ProjectStatus status = ProjectStatus.DEVELOPMENT;
+  private ProjectType projectType = ProjectType.NP;
   private int displayOrder = 0;
 
   private long created = 0;
@@ -72,6 +74,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String course,
                      String countryCode,
                      ProjectStatus status,
+                     ProjectType projectType,
                      int displayOrder,
 
                      long created,
@@ -82,13 +85,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String secondType,
                      boolean showOniOS,
                      int dominoID) {
-    super(dominoID,name, first, secondType);
+    super(dominoID, name, first, secondType);
     this.language = language;
     this.id = projectid;
     this.course = course;
     this.created = created;
     this.lastImport = lastImport;
     this.status = status;
+    this.projectType = projectType;
     this.displayOrder = displayOrder;
     this.countryCode = countryCode;
     this.host = host;
@@ -106,7 +110,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   @Override
-  public int compareTo(HasID o) {
+  public int compareTo(@NotNull HasID o) {
     if (o instanceof ProjectInfo) {
       ProjectInfo otherProject = (ProjectInfo) o;
       ProjectInfo thisProject = this;
@@ -122,6 +126,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   public ProjectStatus getStatus() {
     return status;
+  }
+
+  public ProjectType getProjectType() {
+    return projectType;
+  }
+
+  public void setProjectType(ProjectType projectType) {
+    this.projectType = projectType;
   }
 
   public int getDisplayOrder() {
@@ -198,6 +210,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return host;
   }
 
+
   /**
    * @param host
    * @see ProjectEditForm#updateProject
@@ -206,17 +219,21 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.host = host;
   }
 
-  public boolean isShowOniOS() {   return showOniOS;  }
+  public boolean isShowOniOS() {
+    return showOniOS;
+  }
 
   /**
-   * @see ProjectEditForm#updateProject
    * @param showOniOS
+   * @see ProjectEditForm#updateProject
    */
   public void setShowOniOS(Boolean showOniOS) {
     this.showOniOS = showOniOS;
   }
 
-  public long getLastImport() {   return lastImport;  }
+  public long getLastImport() {
+    return lastImport;
+  }
 
   public boolean isAudioPerProject() {
     return audioPerProject;
@@ -227,12 +244,12 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   public String toString() {
-    return "#"+ getID() + "  "+ getName() + " " + getStatus() +
+    return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +
         "\nlang      " + language + "@" + host + ":" + port +
-        "\ntypes     [" + getFirstType() + ", " + getSecondType() + "]"+
-        "\ndomino    " + getDominoID()+
-        "\nown audio " + audioPerProject+
-        "\nshowOniOS " + showOniOS+
+        "\ntypes     [" + getFirstType() + ", " + getSecondType() + "]" +
+        "\ndomino    " + getDominoID() +
+        "\nown audio " + audioPerProject +
+        "\nshowOniOS " + showOniOS +
         "\nimported  " + new Date(lastImport);
   }
 }

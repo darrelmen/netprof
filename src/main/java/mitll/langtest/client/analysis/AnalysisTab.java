@@ -124,13 +124,14 @@ public class AnalysisTab extends DivWidget {
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
+    addStyleName("leftFiveMargin");
     this.controller = controller;
 
     Icon playFeedback = getPlayFeedback();
 
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
-        controller.getSoundManager(), playFeedback, controller, controller.getMessageHelper());
+        controller.getSoundManager(), playFeedback, controller, controller.getMessageHelper(),isTeacherView);
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);

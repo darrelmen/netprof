@@ -39,13 +39,19 @@ import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
 import mitll.hlt.domino.server.util.Mongo;
-import mitll.langtest.server.*;
+import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
@@ -55,16 +61,12 @@ import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.SlimProject;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.deprecated;
 
 import javax.servlet.ServletContext;
 import java.text.DateFormat;
@@ -73,8 +75,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
-import static mitll.langtest.shared.project.ProjectStatus.DELETED;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -859,6 +859,7 @@ public class ProjectManagement implements IProjectManagement {
         project.language(),
         project.course(), project.countrycode(),
         ProjectStatus.valueOf(project.status()),
+        ProjectType.valueOf(project.kind()),
         project.displayorder(),
 
         pproject.hasModel(),

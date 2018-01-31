@@ -1,3 +1,4 @@
+package mitll.langtest.shared.project;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -30,14 +31,12 @@
  *
  */
 
-package mitll.langtest.server.database.project;
-
-import mitll.langtest.shared.project.ProjectStatus;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * @see ProjectDAO#add(int, long, String, String, String, ProjectType, ProjectStatus, String, String, String, int, int)
+ * @see mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)
  */
-public enum ProjectType {
+public enum ProjectType implements IsSerializable {
   NP(true),
   //  AMAS,
   POLYGLOT(true),
