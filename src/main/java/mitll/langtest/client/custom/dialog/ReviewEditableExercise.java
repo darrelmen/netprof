@@ -204,8 +204,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @return
    */
   private Collection<AudioAttribute> getDisplayedAudio(AudioAttributeExercise exercise, boolean isMale) {
-    Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, preferredVoices, false);
+    //Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, Collections.emptyList(), false);
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
     return maleUsers.isEmpty() ? Collections.emptyList() : malesMap.get(maleUsers.get(0));
   }

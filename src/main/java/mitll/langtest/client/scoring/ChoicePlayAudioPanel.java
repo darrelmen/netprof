@@ -23,6 +23,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -57,7 +58,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       ExerciseController exerciseController,
       boolean includeContext,
       AudioChangeListener listener) {
-    super(soundManager,null,
+    super(soundManager, null,
         "",
         null, exerciseController, exercise, false);
     this.includeContext = includeContext;
@@ -102,7 +103,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-     // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+      // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
@@ -148,7 +149,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   /**
    * Shows check mark next to current audio choice.
    *
-   *
    * @param playButton     null if just getting an update event
    * @param includeContext
    * @param tellListener
@@ -162,18 +162,27 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     boolean isReg = isSpeedReg();
     boolean isSlow = !isReg;
 
-    Collection<Integer> preferredVoices = Collections.emptyList(); // bogus for now...
-    Map<MiniUser, List<AudioAttribute>> malesMap =
-        exercise.getMostRecentAudio(true, preferredVoices, includeContext);
-    Map<MiniUser, List<AudioAttribute>> femalesMap =
-        exercise.getMostRecentAudio(false, preferredVoices, includeContext);
+//
+//    Collection<Integer> preferredVoices = Collections.emptyList(); // bogus for now...
+//    Map<MiniUser, List<AudioAttribute>> malesMap =
+//        exercise.getMostRecentAudio(true, preferredVoices, includeContext);
+//    Map<MiniUser, List<AudioAttribute>> femalesMap =
+//        exercise.getMostRecentAudio(false, preferredVoices, includeContext);
 
-/*
-    logger.info("addChoices for exercise " + exercise.getID() + " " + exercise.getEnglish() + " " +
-        "\n\tmale       " + isMale +
-        "\n\tis reg     " + isReg +
-        "\n\tmale map   " + malesMap.size() +
-        "\n\tfemale map " + femalesMap.size());*/
+    List<AudioAttribute> maleAudio = exercise.getMostRecentAudioEasy(true, includeContext);
+    List<AudioAttribute> femaleAudio = exercise.getMostRecentAudioEasy(false, includeContext);
+
+    if (exercise.getID() == 8729) {
+      logger.info("addChoices for exercise " + exercise.getID() + " eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
+          "'" +
+          "\n\tmale       " + isMale +
+          "\n\tis reg     " + isReg +
+          "\n\tmale map   " + maleAudio.size() + " : " + maleAudio +
+          "\n\tfemale map " + femaleAudio.size()
+
+      );
+      exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
+    }
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -183,7 +192,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
     boolean hasPlayButton = playButton != null;
     {
-      AudioAttribute mr = getAtSpeed(malesMap, true);
+      AudioAttribute mr = simpleGetAtSpeed(maleAudio, true);
       if (mr != null) {
         allPossible.add(mr);
         if (hasPlayButton) addAudioChoice(playButton, true, true, mr);
@@ -195,7 +204,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       }
     }
 
-    AudioAttribute ms = getAtSpeed(malesMap, false);
+    AudioAttribute ms = simpleGetAtSpeed(maleAudio, false);
     if (ms != null) {
       allPossible.add(ms);
       if (hasPlayButton) addAudioChoice(playButton, true, false, ms);
@@ -204,7 +213,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       if (fallback == null) fallback = ms;
     }
 
-    AudioAttribute fr = getAtSpeed(femalesMap, true);
+    AudioAttribute fr = simpleGetAtSpeed(femaleAudio, true);
     if (fr != null) {
       allPossible.add(fr);
       if (hasPlayButton) addAudioChoice(playButton, false, true, fr);
@@ -213,7 +222,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       if (fallback == null) fallback = fr;
     }
 
-    AudioAttribute fs = getAtSpeed(femalesMap, false);
+    AudioAttribute fs = simpleGetAtSpeed(femaleAudio, false);
     if (fs != null) {
       allPossible.add(fs);
 
@@ -247,7 +256,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
       // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
-     //   logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
+        //   logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
         listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
       }
       rememberAudio(toUse.getAudioRef());
@@ -348,15 +357,24 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     LangTest.EVENT_BUS.fireEvent(new AudioSelectedEvent(exercise == null ? -1 : exercise.getID()));
   }
 
-  private AudioAttribute getAtSpeed(Map<MiniUser, List<AudioAttribute>> malesMap, boolean isReg) {
-    for (List<AudioAttribute> attrs : malesMap.values()) {
-      for (AudioAttribute audioAttribute : attrs) {
-        if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
-          if (audioAttribute.getAudioRef().startsWith(FAST) || audioAttribute.getAudioRef().startsWith(SLOW1)) {
-            logger.info("getAtSpeed Skip " + audioAttribute);
-          } else {
-            return audioAttribute;
-          }
+/*  private AudioAttribute getAtSpeed(Collection<List<AudioAttribute>> audioAttrs, boolean isReg) {
+  //  Collection<List<AudioAttribute>> audioAttrs = malesMap.values();
+    for (List<AudioAttribute> attrs : audioAttrs) {
+      AudioAttribute audioAttribute = simpleGetAtSpeed(isReg, attrs);
+      if (audioAttribute != null) return audioAttribute;
+    }
+    return null;
+  }*/
+
+  @Nullable
+  private AudioAttribute simpleGetAtSpeed(List<AudioAttribute> attrs, boolean isReg) {
+    for (AudioAttribute audioAttribute : attrs) {
+      if (isReg && audioAttribute.isRegularSpeed() || (!isReg && audioAttribute.isSlow())) {
+        String audioRef = audioAttribute.getAudioRef();
+        if (audioRef.startsWith(FAST) || audioRef.startsWith(SLOW1)) {
+          logger.info("getAtSpeed Skip " + audioAttribute);
+        } else {
+          return audioAttribute;
         }
       }
     }

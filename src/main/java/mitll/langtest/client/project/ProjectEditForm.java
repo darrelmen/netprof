@@ -77,7 +77,6 @@ public class ProjectEditForm extends UserDialog {
   private static final String STATUS_BOX = "Status_Box";
 
   private static final String DOMINO_PROJECT = "Domino";
-  //  private static final String PLEASE_ENTER_THE_FIRST_HIERARCHY = "Please enter the first hierarchy.";
   private static final String PLEASE_WAIT = "Please wait...";
   private static final String ALIGN_REF_AUDIO = "Align ref audio";
   private static final String CHECK_AUDIO = "Check Audio";
@@ -103,9 +102,6 @@ public class ProjectEditForm extends UserDialog {
    * @see #addDominoProject
    */
   private static final String PLEASE_SELECT_A_DOMINO_PROJECT = "Please select a domino project.";
-
-
-  //private static final String PLEASE_SELECT_A_DOMINO = PLEASE_SELECT_A_DOMINO_PROJECT;
   private static final String NAME = "Name";
   private static final String PROJECT_NAME = "Project Name";
   private static final String FIRST_TYPE_HINT = "(e.g. Unit)";
@@ -273,7 +269,7 @@ public class ProjectEditForm extends UserDialog {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
-   // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
+      // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
     } else if (unit.getSafeText().isEmpty()) {
       logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() + " unit = " + unit.getSafeText());
       Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);

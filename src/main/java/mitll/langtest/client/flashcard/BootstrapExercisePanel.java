@@ -452,7 +452,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       int oldID = exercise.getID();
 
       if (correct) {
-        showCorrectFeedback(score, heard, result.getPretestScore());
+        showCorrectFeedback(score, result.getPretestScore());
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
       //  logger.info("show incorrect feedback for " + heard + " score " + score);
@@ -479,9 +479,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * TODO : decide when to show what ASR "heard"
    *
    * @param score
-   * @see #receivedAudioAnswer(AudioAnswer)
+   * @see #receivedAudioAnswer
    */
-  private void showCorrectFeedback(double score, String heard, PretestScore pretestScore) {
+  private void showCorrectFeedback(double score, PretestScore pretestScore) {
     showPronScoreFeedback(true, score);
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
@@ -566,6 +566,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    // return correctPrompt;
   }
 
+  /**
+   * @see #showIncorrectFeedback
+   */
+  private void tryAgain() {
+    playIncorrect();
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        initRecordButton();
+      }
+    };
+    t.schedule(DELAY_MILLIS_LONG);
+  }
+
 
   private void showOtherText() {
     if (controlState.isEnglish()) showForeign();
@@ -596,29 +611,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     );
   }
 
-  /**
-   * @see #showIncorrectFeedback
-   */
-  private void tryAgain() {
-    playIncorrect();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        initRecordButton();
-      }
-    };
-    t.schedule(DELAY_MILLIS_LONG);
-  }
 
   /**
    * @param delay
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
    */
-/*  private void goToNextAfter(int delay) {
+  private void goToNextAfter(int delay) {
     loadNextOnTimer(delay);
   }
 
+/**
   private String getCorrectDisplay() {
     String refSentence = exercise.getForeignLanguage();
     String translit = exercise.getTransliteration().length() > 0 ? "<br/>(" + exercise.getTransliteration() + ")" : "";

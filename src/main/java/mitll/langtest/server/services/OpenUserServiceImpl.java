@@ -335,7 +335,8 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
 
       long now = System.currentTimeMillis();
       if (now - then > 10) {
-        logger.info("setCurrentUserToProject : took " + (now - then) + " to get current session user " + sessionUserID + " and set project to " + projid);
+        logger.info("setCurrentUserToProject : took " + (now - then) + " to get current session user " + sessionUserID +
+            " and set project to " + projid);
       }
       if (!b) {
         if (sessionUserID == -1) {

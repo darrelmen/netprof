@@ -32,12 +32,28 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.shared.project.ProjectStatus;
+
+/**
+ * @see ProjectDAO#add(int, long, String, String, String, ProjectType, ProjectStatus, String, String, String, int, int)
+ */
 public enum ProjectType {
-  NP,
-  AMAS,
-  DIALOG,
-  EXPERIMENTAL,
-  TESTING,
-  OTHER,
-  DEFAULT
+  NP(true),
+  //  AMAS,
+  POLYGLOT(true),
+  DIALOG(false),
+  //  EXPERIMENTAL(false),
+  // TESTING,
+//  OTHER(false),
+  DEFAULT(false);
+
+  private boolean show = false;
+
+  ProjectType(boolean show) {
+    this.show = show;
+  }
+
+  public boolean shouldShow() {
+    return show;
+  }
 }

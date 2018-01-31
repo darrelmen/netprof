@@ -759,7 +759,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
       if (WARN_ABOUT_MISSING_PHONES) {
         if (exercise.getNumPhones() == 0 && n++ < 10) {
-          logger.info("getChangedExercises no phones for exercise " + exercise.getID());
+          logger.info("getExercises no phones for exercise " + exercise.getID());
         }
       }
 
@@ -778,17 +778,17 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     long now = System.currentTimeMillis();
     if (now - then2 > 50) {
-      logger.info("getChangedExercises took " + (now - then) + " to update # phones on " + pairs.size() + " exercises.");
+      logger.info("getExercises took " + (now - then) + " to update # phones on " + pairs.size() + " exercises.");
     }
     if (now - then > 50) {
-      logger.info("getChangedExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
+      logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
     }
 
     if (addTypesToSection) {
-      //  logger.info("getChangedExercises type order " + typeOrder);
+      //  logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }
-    //  logger.info("getChangedExercises created " + copy.size() + " exercises");
+    //  logger.info("getExercises created " + copy.size() + " exercises");
     return copy;
   }
 

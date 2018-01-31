@@ -270,7 +270,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private CommentBox commentBox;
 
   /**
-   * @see BootstrapExercisePanel#nextAfterDelay(boolean, String)
+   * @see BootstrapExercisePanel#nextAfterDelay
    */
   void loadNext() {
     if (exerciseList.onLast()) {
@@ -874,7 +874,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   private Button showOnlyFL, both, showEnglish;
 
-  protected boolean selectShowFL() {
+  boolean selectShowFL() {
     if (both.isActive()) {
       showOnlyFL.click();
       showOnlyFL.setActive(true);

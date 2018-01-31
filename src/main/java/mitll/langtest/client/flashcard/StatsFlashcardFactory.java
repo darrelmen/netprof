@@ -371,7 +371,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         latestResultID = result.getResultID();
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
-
         //    logger.info("got invalid result " + result);
       }
       super.receivedAudioAnswer(result);

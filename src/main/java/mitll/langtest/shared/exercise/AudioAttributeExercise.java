@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -50,49 +49,54 @@ import java.util.Map;
  */
 public interface AudioAttributeExercise extends AudioRefExercise {
   /**
-   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    * @param preferredVoices
    * @return
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    */
   String getRefAudioWithPrefs(Collection<Integer> preferredVoices);
 
   /**
+   * @return
    * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    * @see AudioExport#copyContextAudioBothGenders
-   * @return
    */
   AudioAttribute getLatestContext(boolean isMale);
 
   /**
-   * @see AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    * @param userID
    * @param speed
    * @return
+   * @see AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    */
   AudioAttribute getRecordingsBy(long userID, String speed);
 
   AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular);
+
   AudioAttribute getAudioAttrPrefGender(boolean isMale);
+
   /**
-   * @see AudioExport#getAudioAttribute
    * @param isMale
    * @return
+   * @see AudioExport#getAudioAttribute
    */
   Collection<AudioAttribute> getByGender(boolean isMale);
 
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#ensure(String, Collection)
    * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#ensure(String, Collection)
    */
   Collection<AudioAttribute> getDefaultUserAudio();
 
   Map<String, AudioAttribute> getAudioRefToAttr();
 
   /**
-   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices(SplitDropdownButton, boolean)
    * @param isMale
    * @param preferredUsers
-   *@param includeContext  @return
+   * @param includeContext
+   * @return
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    */
   Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Integer> preferredUsers, boolean includeContext);
+
+  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext);
 }

@@ -41,6 +41,7 @@ import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -167,6 +168,10 @@ public class Project implements IPronunciationLookup {
 
   public SlickProject getProject() {
     return project;
+  }
+
+  public ProjectType getKind() {
+    return ProjectType.valueOf(project.kind());
   }
 
   private Set<ProjectStatus> toSkip = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, ProjectStatus.DELETED));
