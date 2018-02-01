@@ -46,9 +46,9 @@ import java.util.Map;
  * @since 9/13/14.
  */
 public class AVPScoreReport implements IsSerializable {
-  //private List<AVPHistoryForList> avpHistoryForLists;
   private List<ExerciseCorrectAndScore> sortedHistory;
 
+  //long timeOnServer;
   public AVPScoreReport() {}
 
   /**
@@ -56,17 +56,10 @@ public class AVPScoreReport implements IsSerializable {
    * @paramx historyForLists
    * @param sortedHistory
    */
-  public AVPScoreReport(//List<AVPHistoryForList> historyForLists,
-                        List<ExerciseCorrectAndScore> sortedHistory) {
-  //  this.avpHistoryForLists = historyForLists;
+  public AVPScoreReport(List<ExerciseCorrectAndScore> sortedHistory) {
     this.sortedHistory=sortedHistory;
   }
 
-/*
-  public List<AVPHistoryForList> getAvpHistoryForLists() {
-    return avpHistoryForLists;
-  }
-*/
 
   public List<ExerciseCorrectAndScore> getSortedHistory() {
     return sortedHistory;

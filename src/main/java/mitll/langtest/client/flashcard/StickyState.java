@@ -46,8 +46,7 @@ import java.util.logging.Logger;
  * @since 7/8/14.
  */
 class StickyState {
-  private final Logger logger = Logger.getLogger("StickyState");
-
+ // private final Logger logger = Logger.getLogger("StickyState");
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
@@ -108,7 +107,6 @@ class StickyState {
   }
 
   void resetStorage() {
-//    System.out.println("StickyState : reset storage for "+ storage);
     storage.removeValue(CORRECT1);
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);

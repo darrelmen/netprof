@@ -52,11 +52,12 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   private int id;
 
   // required for rpc
-  public ExerciseCorrectAndScore() {}
+  public ExerciseCorrectAndScore() {
+  }
 
   /**
-   * @see ResultDAO#getSortedAVPHistory
    * @param id
+   * @see ResultDAO#getSortedAVPHistory
    */
   public ExerciseCorrectAndScore(int id) {
     this.id = id;
@@ -74,15 +75,15 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   }
 
   private int compareIDs(ExerciseCorrectAndScore o) {
-    return Integer.valueOf(getId()).compareTo(o.getId());
+    return Integer.compare(getId(), o.getId());
   }
 
   /**
-   * @see ResultDAO#getSortedAVPHistory
    * @param o
    * @param fl
    * @param otherFL
    * @return
+   * @see ResultDAO#getSortedAVPHistory
    */
   public int compareTo(ExerciseCorrectAndScore o, String fl, String otherFL) {
     if (isEmpty() && o.isEmpty()) {
@@ -97,7 +98,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   private int compScores(ExerciseCorrectAndScore o) {
     int myI = getDiff();
     int oI = o.getDiff();
-    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    int i = Integer.compare(myI, oI);
     if (i == 0) {
       float myScore = getAvgScore();
       float otherScore = o.getAvgScore();
@@ -108,7 +109,9 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     }
   }
 
-  public boolean isEmpty() { return correctAndScores.isEmpty();  }
+  public boolean isEmpty() {
+    return correctAndScores.isEmpty();
+  }
 
   private int getNumCorrect() {
     int c = 0;
@@ -131,6 +134,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   /**
    * Difference in terms of # of correct over incorrect
+   *
    * @return
    */
   public int getDiff() {
@@ -164,13 +168,23 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return toUse;
   }
 
+  public float getScore() {
+    long latest = Long.MIN_VALUE;
+    float score = -1f;
+
+    for (CorrectAndScore correctAndScore : getCorrectAndScores()) {
+      if (correctAndScore.getTimestamp() > latest) score = correctAndScore.getScore();
+    }
+    return score;
+  }
+
   public int getAvgScorePercent() {
     return Math.round(getAvgScore() * 100f);
   }
 
   /**
-   * @see ResultDAO#getExerciseCorrectAndScores(List, Collection)
    * @param correctAndScore
+   * @see ResultDAO#getExerciseCorrectAndScores(List, Collection)
    */
   public void add(CorrectAndScore correctAndScore) {
     getCorrectAndScores().add(correctAndScore);
@@ -184,7 +198,9 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return id;
   }
 
-  public List<CorrectAndScore> getCorrectAndScores() { return correctAndScores;  }
+  public List<CorrectAndScore> getCorrectAndScores() {
+    return correctAndScores;
+  }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();

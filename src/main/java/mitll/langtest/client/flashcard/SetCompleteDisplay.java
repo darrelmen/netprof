@@ -234,8 +234,7 @@ public class SetCompleteDisplay {
    */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                Collection<? extends CommonShell> allExercises, ExerciseController controller) {
-    ScoreHistoryContainer scoreHistoryContainer = new ScoreHistoryContainer(controller, allExercises);
-    return scoreHistoryContainer.getTableWithPager(sortedHistory);
+    return new ScoreHistoryContainer(controller, allExercises).getTableWithPager(sortedHistory);
   }
 
    static String getScoreHistory(List<CorrectAndScore> correctAndScores) {

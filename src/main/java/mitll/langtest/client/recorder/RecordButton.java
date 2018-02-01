@@ -90,7 +90,9 @@ public class RecordButton extends Button {
 
   public interface RecordingListener {
     void startRecording();
+
     void flip(boolean first);
+
     boolean stopRecording(long duration);
   }
 
@@ -116,7 +118,7 @@ public class RecordButton extends Button {
 
     /**
      * <button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-heart"></i>
-       </button>
+     </button>
 
      */
 
@@ -283,9 +285,9 @@ public class RecordButton extends Button {
    * @see #startOrStopRecording()
    */
   protected void stop(long duration) {
-    long now = System.currentTimeMillis();
-     long duration2 = now - started;
-    logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    // long now = System.currentTimeMillis();
+    //  long duration2 = now - started;
+    //logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
   }

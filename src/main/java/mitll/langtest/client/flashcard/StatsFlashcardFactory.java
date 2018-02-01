@@ -34,6 +34,7 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -75,9 +76,12 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
+  private static final String TIMES_UP = "Times Up!";
+  public static final int MIN_SCORE = 40;
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-  private static final int TEN_SEC = 10 * 1000;
+  private static final int HEARTBEAT_INTERVAL = 1 * 1000;
+  // private static final int TEN_SEC = 10 * 1000;
   private static final int FEEDBACK_SLOTS = 4;
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 500;
@@ -86,6 +90,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   private static final String AVG_SCORE = "Pronunciation";
+  /**
+   *
+   */
   private static final String START_OVER = "Start Over";
 
   private static final String SKIP_TO_END = "See your scores";
@@ -112,7 +119,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Timer roundTimer = null;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = 0;
-  public static final int ROUND_MINUTES = 2; //10;
+  private static final int ROUND_MINUTES = 1; //10;
   private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
 
   /**
@@ -174,10 +181,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @param num
    */
   private void showPolyDialog(int num) {
-    new PolyglotDialog(ROUND_MINUTES, num, new DialogHelper.CloseListener() {
+    new PolyglotDialog(ROUND_MINUTES, num, MIN_SCORE, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
         inLightningRound = true;
+        reset();
+        currentFlashcard.loadCurrent();
         startRoundTimer();
         return true;
       }
@@ -194,8 +203,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
   }
 
-
-  boolean startRoundTimer() {
+  private void startRoundTimer() {
     if (isRoundTimerNotRunning()) {
       roundTimer = new Timer() {
         @Override
@@ -203,6 +211,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 //          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
           currentFlashcard.onSetComplete();
           cancelRoundTimer();
+          currentFlashcard.showTimeRemaining(0);
+          inLightningRound = false;
         }
       };
       roundTimer.schedule(ROUND_TIME);
@@ -210,15 +220,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       recurringTimer = new Timer() {
         @Override
         public void run() {
-          long l = roundTimeLeftMillis -= TEN_SEC;
+          long l = roundTimeLeftMillis -= HEARTBEAT_INTERVAL;
           currentFlashcard.showTimeRemaining(l);
         }
       };
-      recurringTimer.scheduleRepeating(TEN_SEC);
+      recurringTimer.scheduleRepeating(HEARTBEAT_INTERVAL);
       currentFlashcard.showTimeRemaining(roundTimeLeftMillis);
-      return true;
-    } else {
-      return false;
+
     }
   }
 
@@ -362,7 +370,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
-    public static final long ONE_MIN = (60L * 1000L);
+    private static final long ONE_MIN = (60L * 1000L);
+
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
@@ -388,6 +397,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     @Override
+    protected boolean showScoreFeedback(AudioAnswer result) {
+      return result.isSaidAnswer() || isPolyglot;
+    }
+
+    @Override
     protected void recordingStarted() {
       soundFeedback.clear();
       removePlayingHighlight();
@@ -402,8 +416,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        exerciseList.loadNextExercise(currentExercise.getID());
+        loadCurrent();
       }
+    }
+
+    public void loadCurrent() {
+      exerciseList.loadNextExercise(currentExercise.getID());
     }
 
     /**
@@ -535,6 +553,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return userListID;
     }
 
+    /**
+     * TODO: get last session...
+     * 
+     * @param sortedHistory
+     */
     private void showFeedbackCharts(final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
@@ -542,6 +565,18 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       HorizontalPanel widgets = new HorizontalPanel();
       container = widgets;
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+
+      float totalScore = 0;
+      int total = 0;
+      for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
+        float score = exerciseCorrectAndScore.getScore();
+        if (score > 0) {
+          totalScore += score;
+          total++;
+        }
+      }
+
+      scoreHistory.add(new Heading(2, "Score is " + Math.round(totalScore) + " for " + total + " items."));
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
@@ -555,7 +590,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private Panel getButtonsBelowScoreHistory() {
       Panel child = new HorizontalPanel();
 
-      final Button w = getIncorrectListButton();
+      final Button w = getSummaryStartOver();
       child.add(w);
       w.addStyleName("topFiveMargin");
       Button repeatButton = getRepeatButton();
@@ -569,16 +604,19 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return lefty;
     }
 
-    private Button getIncorrectListButton() {
+    private Button getSummaryStartOver() {
       final Button w = new Button();
       w.setType(ButtonType.SUCCESS);
       w.setText(START_OVER);
       w.setIcon(IconType.REPEAT);
 
       w.addClickHandler(event -> {
-        //   logger.info("----> click on " + START_OVER);
         w.setVisible(false);
-        doIncorrectFirst();
+        if (isPolyglot) {
+          doStartOver();
+        } else {
+          doIncorrectFirst();
+        }
       });
 
       controller.register(w, N_A);
@@ -586,7 +624,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     /**
-     * @see #getIncorrectListButton()
+     * @see #getSummaryStartOver()
      */
     void doIncorrectFirst() {
       showFlashcardDisplay();
@@ -674,6 +712,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           exerciseList.loadExercise(allExercises.iterator().next().getID());
         }
       }
+
+      checkPoly(allExercises.size());
     }
 
     private void makeFlashcardButtonsVisible() {
@@ -824,7 +864,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         g.setWidget(row, 0, pronScoreGroup);
         pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, timeLeft);
-        timeLeft.setText("0");
+        //  timeLeft.setText("0");
       }
 
       setStateFeedback();
@@ -871,8 +911,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     public void showTimeRemaining(long l) {
-      String value = "Times Up!";
-      if (l>0) {
+      String value = TIMES_UP;
+      if (l > 0) {
         long min = l / ONE_MIN;
         // if (min > 0) {
         long sec = (l - (min * ONE_MIN)) / 1000;
@@ -883,13 +923,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         // }
         if (min == 0) {
           if (sec < 30) {
+            timeLeft.setType(LabelType.IMPORTANT);
+          } else {
             timeLeft.setType(LabelType.WARNING);
           }
-          else {
-            timeLeft.setType(LabelType.INFO);
-          }
-        }
-        else {
+        } else {
           timeLeft.setType(LabelType.SUCCESS);
         }
       }

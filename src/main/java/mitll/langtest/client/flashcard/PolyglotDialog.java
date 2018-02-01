@@ -9,12 +9,13 @@ import mitll.langtest.client.dialog.DialogHelper;
 
 import java.util.Collections;
 
-public class PolyglotDialog {
+class PolyglotDialog {
   /**
    * @param num
    * @param closeListener
+   * @see StatsFlashcardFactory#showPolyDialog
    */
-  PolyglotDialog(int minutes, int num, DialogHelper.CloseListener closeListener) {
+  PolyglotDialog(int minutes, int num, int minScore, DialogHelper.CloseListener closeListener) {
     DivWidget container = new DivWidget();
 
     FluidRow row = new FluidRow();
@@ -23,7 +24,7 @@ public class PolyglotDialog {
     row.add(w);
     container.add(row);
 
-    row = getContentRow(minutes, num);
+    row = getContentRow(minutes, num,minScore);
     container.add(row);
 
     String title = "Lightning Round";
@@ -40,7 +41,7 @@ public class PolyglotDialog {
     closeButton.setEnabled(true);
   }
 
-  private FluidRow getContentRow(int minutes, int num) {
+  private FluidRow getContentRow(int minutes, int num, int minScore) {
     FluidRow row;
     row = new FluidRow();
     row.add(new Heading(5, "You have " +
@@ -50,7 +51,10 @@ public class PolyglotDialog {
     Heading w = new Heading(5, "");
     w.setWidth("100%");
     row.add(w);
-    row.add(new Heading(5, "Click start to begin."));
+    row.add(new Heading(5, "You will advance automatically to the next item when your score is above " +minScore+
+        "."));
+
+    row.add(new Heading(4, "Click start to begin -->"));
     return row;
   }
 }

@@ -366,6 +366,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
+    scoreFeedback.setHeight("25px");
     scoreFeedback.setText("Score " + percent1 + "%");
     //   scoreFeedback.setVisible(true);
 //    scoreFeedback.setColor(
@@ -511,11 +512,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see #receivedAudioAnswer
    */
   private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
+    if (showScoreFeedback(result)) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(false, score);
     }
     showOtherText();
-    //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+      logger.info("showIncorrectFeedback : said answer " +result.isSaidAnswer()+
+          "result " + result + " score " + score + " has ref " + hasRefAudio);
 
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
@@ -533,6 +535,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
 
     showRecoOutput(result.getPretestScore());
+
+    maybeAdvance(score);
+  }
+
+  protected boolean showScoreFeedback(AudioAnswer result) {
+    return result.isSaidAnswer();
   }
 
   /**
@@ -578,9 +586,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param delay
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean)
    */
+/*
   private void goToNextAfter(int delay) {
     loadNextOnTimer(delay);
   }
+*/
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
