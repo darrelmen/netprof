@@ -1190,7 +1190,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void loadFirstExercise(String searchIfAny) {
-    // logger.info("loadFirstExercise : ---");
+     logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       // logger.info("loadFirstExercise : current exercises is empty");
       //    gotEmptyExerciseList();
@@ -1240,7 +1240,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 /*
               new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
 */
-
             }
 
           }
@@ -1276,11 +1275,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
     }
     builder.append(getProjectParam());
-
     // keepSearchItem(builder);
-
     String s = builder.toString();
-
 
 //        logger.info("getHistoryToken token '" + s + "'");
     return s;
@@ -1564,10 +1560,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
-    Collection<CommonExercise> toShow = getVisibleExercises(visibleIDs, idToEx);
-
     if (isCurrentReq(reqID)) {
-      gotFullExercises(reqID, toShow);
+      gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
     } else {
       if (DEBUG_STALE)
         logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());

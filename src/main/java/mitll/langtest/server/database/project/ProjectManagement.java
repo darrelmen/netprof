@@ -760,7 +760,8 @@ public class ProjectManagement implements IProjectManagement {
         hasModel,
         sectionHelper.getTypeToDistinct(),
         sectionHelper.getRootTypes(),
-        sectionHelper.getParentToChildTypes());
+        sectionHelper.getParentToChildTypes(),
+        ProjectType.valueOf(project1.kind()));
 
     logger.info("setStartupInfo : For" +
         "\n\tUser      " + userWhere +

@@ -39,13 +39,13 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
@@ -57,6 +57,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.project.ProjectType;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -75,6 +76,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+
+  private static final int TEN_SEC = 10 * 1000;
+  private static final int FEEDBACK_SLOTS = 4;
+  private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
+  private static final int NEXT_EXERCISE_DELAY = 500;
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
@@ -101,16 +107,23 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Map<String, Collection<String>> selection = new HashMap<>();
   private final UserList ul;
   private Widget contentPanel;
+  private boolean isPolyglot = false;
+  private boolean inLightningRound = false;
+  private Timer roundTimer = null;
+  private Timer recurringTimer = null;
+  private long roundTimeLeftMillis = 0;
+  public static final int ROUND_MINUTES = 2; //10;
+  private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
 
   /**
    * @param controller
    * @param exerciseList
    * @param instance
    * @param ul
-   * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
+   * @see mitll.langtest.client.banner.PracticeHelper#getFactory
    */
   public StatsFlashcardFactory(ExerciseController controller,
-                               ListInterface<L,T> exerciseList, String instance, UserList ul) {
+                               ListInterface<L, T> exerciseList, String instance, UserList ul) {
     super(controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
@@ -141,9 +154,81 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     controlState.setStorage(storage);
     // logger.info("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
 
+    isPolyglot = isPolyglot(controller);
+
+    logger.info("is poly glot " + isPolyglot);
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
+  }
+
+  public void checkPoly(int num) {
+    if (isPolyglot) {
+      Scheduler.get().scheduleDeferred(() -> showPolyDialog(num));
+    }
+  }
+
+  /**
+   * TODO : make lightning round minutes a parameter?
+   *
+   * @param num
+   */
+  private void showPolyDialog(int num) {
+    new PolyglotDialog(ROUND_MINUTES, num, new DialogHelper.CloseListener() {
+      @Override
+      public boolean gotYes() {
+        inLightningRound = true;
+        startRoundTimer();
+        return true;
+      }
+
+      @Override
+      public void gotNo() {
+        inLightningRound = false;
+        cancelRoundTimer();
+      }
+    });
+  }
+
+  private boolean isPolyglot(ExerciseController controller) {
+    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
+  }
+
+
+  boolean startRoundTimer() {
+    if (isRoundTimerNotRunning()) {
+      roundTimer = new Timer() {
+        @Override
+        public void run() {
+//          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
+          currentFlashcard.onSetComplete();
+          cancelRoundTimer();
+        }
+      };
+      roundTimer.schedule(ROUND_TIME);
+      roundTimeLeftMillis = ROUND_TIME;
+      recurringTimer = new Timer() {
+        @Override
+        public void run() {
+          long l = roundTimeLeftMillis -= TEN_SEC;
+          currentFlashcard.showTimeRemaining(l);
+        }
+      };
+      recurringTimer.scheduleRepeating(TEN_SEC);
+      currentFlashcard.showTimeRemaining(roundTimeLeftMillis);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean isRoundTimerNotRunning() {
+    return (roundTimer == null) || !roundTimer.isRunning();
+  }
+
+  private void cancelRoundTimer() {
+    if (roundTimer != null) roundTimer.cancel();
+    if (recurringTimer != null) recurringTimer.cancel();
   }
 
   @Override
@@ -155,10 +240,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
+  private StatsPracticePanel currentFlashcard = null;
+
   /**
    * @param e
    * @return
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
+   * @see mitll.langtest.client.list.ExerciseList#addExerciseWidget
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
   @Override
   public Panel getExercisePanel(T e) {
@@ -169,11 +257,15 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 //      logger.warning("Recording is *not* enabled!");
 //    }
     boolean hasModel = controller.getProjectStartupInfo().isHasModel();
-    boolean showRecordingFlashcard = !hasModel || !recordingEnabled;
+    boolean showRecordingFlashcard = hasModel && recordingEnabled;
 
-    return showRecordingFlashcard ?
-        getNoRecordFlashcardPanel(e.getCommonAnnotatable()) :
-        new StatsPracticePanel(e.getCommonAnnotatable(), exerciseList);
+    Panel widgets = showRecordingFlashcard ?
+        currentFlashcard = new StatsPracticePanel(e.getCommonAnnotatable(), exerciseList) :
+        getNoRecordFlashcardPanel(e.getCommonAnnotatable());
+    if (!showRecordingFlashcard) {
+      currentFlashcard = null;
+    }
+    return widgets;
   }
 
   private FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
@@ -198,7 +290,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     exToCorrect.clear();
     exToScore.clear();
     latestResultID = -1;
-    //resultIDs.clear();
     sticky.clearCurrent();
   }
 
@@ -209,7 +300,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see SimpleChapterNPFHelper#getMyListLayout
+   * @see mitll.langtest.client.banner.PracticeHelper#getMyListLayout
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
@@ -271,10 +362,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
+    public static final long ONE_MIN = (60L * 1000L);
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
-    public StatsPracticePanel(CommonAnnotatable e, ListInterface<L,T> exerciseListToUse) {
+    public StatsPracticePanel(CommonAnnotatable e, ListInterface<L, T> exerciseListToUse) {
       super(e,
           StatsFlashcardFactory.this.controller,
           ADD_KEY_BINDING,
@@ -303,7 +395,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     /**
      * @see #loadNextOnTimer(int)
-     * @see #nextAfterDelay(boolean, String)
      * @see BootstrapExercisePanel#playRefAndGoToNext
      */
     @Override
@@ -341,7 +432,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
       // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
-
       if (result.getValidity() == Validity.OK) {
         //resultIDs.add(result.getResultID());
         int id = exercise.getID();
@@ -376,13 +466,20 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       super.receivedAudioAnswer(result);
     }
 
+    protected void maybeAdvance(double score) {
+      if (inLightningRound) {
+        if (score > 0.4d) {
+          loadNextOnTimer(NEXT_EXERCISE_DELAY);
+        }
+      }
+    }
+
     /**
      * Ask for history for those items that were actually practiced.
      *
      * @see #getSkipToEnd()
      * @see #gotClickOnNext()
      * @see #loadNext()
-     * @see #nextAfterDelay(boolean, String)
      */
     public void onSetComplete() {
       if (!startOver.isVisible()) return;
@@ -398,8 +495,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         sticky.storeCurrent(exercise);
       }
 
-      //final int user = controller.getUser();
-
       Set<Integer> copies = new HashSet<>(exToCorrect.keySet());
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
@@ -410,21 +505,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 //      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
 //          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
-      int userListID = ul == null ? -1 : ul.getID();
-
-      String lists = "Lists";
-      if (selection.containsKey(lists)) {
-        Collection<String> strings = selection.get(lists);
-        try {
-          if (!strings.isEmpty()) userListID = Integer.parseInt(strings.iterator().next());
-        } catch (NumberFormatException e) {
-          logger.warning("couldn't parse list id???");
-        }
-      }
-
       // TODO simplify this
-
-      controller.getService().getUserHistoryForList(copies, latestResultID, selection, userListID, new AsyncCallback<AVPScoreReport>() {
+      controller.getService().getUserHistoryForList(copies, latestResultID, selection, getUserListID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
 //          logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
@@ -438,7 +520,22 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       });
     }
 
-    private void showFeedbackCharts(/*List<AVPHistoryForList> result,*/ final List<ExerciseCorrectAndScore> sortedHistory) {
+    private int getUserListID() {
+      int userListID = ul == null ? -1 : ul.getID();
+
+      String lists = "Lists";
+      if (selection.containsKey(lists)) {
+        Collection<String> strings = selection.get(lists);
+        try {
+          if (!strings.isEmpty()) userListID = Integer.parseInt(strings.iterator().next());
+        } catch (NumberFormatException e) {
+          logger.warning("couldn't parse list id???");
+        }
+      }
+      return userListID;
+    }
+
+    private void showFeedbackCharts(final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
@@ -447,9 +544,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
-
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
-
       belowContentDiv.add(container);
     }
 
@@ -470,7 +565,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       child.add(repeatButton);
 
       DivWidget lefty = new DivWidget();
-      // lefty.addStyleName("floatLeft");
       lefty.add(child);
       return lefty;
     }
@@ -481,15 +575,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w.setText(START_OVER);
       w.setIcon(IconType.REPEAT);
 
-      w.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          //   logger.info("----> click on " + START_OVER);
-          w.setVisible(false);
-          doIncorrectFirst();
-        }
+      w.addClickHandler(event -> {
+        //   logger.info("----> click on " + START_OVER);
+        w.setVisible(false);
+        doIncorrectFirst();
       });
-
 
       controller.register(w, N_A);
       return w;
@@ -535,18 +625,15 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.setIcon(IconType.UNDO);
       w1.getElement().setId("AVP_DoWholeSetFromStart");
       w1.setType(ButtonType.PRIMARY);
-      w1.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-//          logger.info("getRepeatButton : click on " + GO_BACK);
-          w1.setVisible(false);
-          showFlashcardDisplay();
-
-          startOver();
-        }
-      });
+      w1.addClickHandler(event -> doStartOver(w1));
       controller.register(w1, N_A);
       return w1;
+    }
+
+    private void doStartOver(Button w1) {
+      w1.setVisible(false);
+      showFlashcardDisplay();
+      startOver();
     }
 
     private void showFlashcardDisplay() {
@@ -584,8 +671,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         sticky.resetStorage();
 
         if (!allExercises.isEmpty()) {
-          int first = allExercises.iterator().next().getID();
-          exerciseList.loadExercise(first);
+          exerciseList.loadExercise(allExercises.iterator().next().getID());
         }
       }
     }
@@ -593,27 +679,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private void makeFlashcardButtonsVisible() {
       contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
-      //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
-
       startOver.setVisible(true);
       startOver.setEnabled(true);
       seeScores.setVisible(true);
       setPrevNextVisible(true);
-    }
-
-    /**
-     * @param correct
-     * @param feedback
-     * @see #receivedAudioAnswer(AudioAnswer)
-     * @see #showIncorrectFeedback
-     */
-    protected void nextAfterDelay(boolean correct, String feedback) {
-      if (exerciseList.onLast()) {
-        onSetComplete();
-      } else {
-        // logger.info("nextAfterDelay " + correct);
-        loadNextOnTimer(CORRECT_DELAY);
-      }
     }
 
     private Button startOver, seeScores;
@@ -626,7 +695,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
       toAddTo.add(getSkipToEnd());
-      toAddTo.add(getStartOver());
+      toAddTo.add(startOver = getStartOver());
       belowContentDiv = toAddTo;
     }
 
@@ -646,26 +715,24 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     private Button getStartOver() {
-      startOver = new Button(START_OVER);
+      Button startOver = new Button(START_OVER);
       startOver.getElement().setId("AVP_StartOver");
 
       startOver.setType(ButtonType.SUCCESS);
       startOver.setIcon(IconType.REPEAT);
       startOver.addStyleName("floatRight");
-      startOver.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          abortPlayback();
-          sticky.clearCurrent();
-
-          startOver.setEnabled(false);
-          startOver();
-        }
-      });
+      startOver.addClickHandler(event -> doStartOver());
       new TooltipHelper().addTooltip(startOver, "Start over from the beginning.");
 
       controller.register(startOver, N_A);
       return startOver;
+    }
+
+    private void doStartOver() {
+      abortPlayback();
+      sticky.clearCurrent();
+      startOver.setEnabled(false);
+      startOver();
     }
 
     @Override
@@ -687,59 +754,78 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       seeScores.addStyleName("leftFiveMargin");
       seeScores.setType(ButtonType.PRIMARY);
       seeScores.addStyleName("floatRight");
-      seeScores.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          abortPlayback();
-          seeScores.setEnabled(false);
-          //currentExerciseID = currentExercise.getOldID();
-          onSetComplete();
-        }
-      });
+      seeScores.addClickHandler(event -> gotSeeScoresClick());
       new TooltipHelper().addTooltip(seeScores, SKIP_TO_END);
       return seeScores;
     }
 
-    private Label remain, incorrectBox, correctBox, pronScore;
+    private void gotSeeScoresClick() {
+      abortPlayback();
+      seeScores.setEnabled(false);
+      onSetComplete();
+    }
+
+    private Label remain, incorrectBox, correctBox, pronScore, timeLeft;
 
     protected Panel getLeftState() {
-      Grid g = new Grid(4, 2);
-      ControlGroup remaining = new ControlGroup(REMAINING);
-      remaining.addStyleName("topFiveMargin");
-      remain = new Label();
-      remain.setType(LabelType.INFO);
+      Grid g = new Grid(isPolyglot ? FEEDBACK_SLOTS_POLYGLOT : FEEDBACK_SLOTS, 2);
+
       int row = 0;
-      g.setWidget(row, 0, remaining);
-      g.setWidget(row++, 1, remain);
+      {
+        ControlGroup remaining = new ControlGroup(REMAINING);
+        remaining.addStyleName("topFiveMargin");
+        remain = new Label();
+        remain.setType(LabelType.INFO);
+        g.setWidget(row, 0, remaining);
+        g.setWidget(row++, 1, remain);
+      }
 
-      ControlGroup incorrect = new ControlGroup(INCORRECT);
-      incorrect.addStyleName("topFiveMargin");
+      {
+        ControlGroup incorrect = new ControlGroup(INCORRECT);
+        incorrect.addStyleName("topFiveMargin");
 
-      incorrectBox = new Label();
-      incorrectBox.setType(LabelType.WARNING);
+        incorrectBox = new Label();
+        incorrectBox.setType(LabelType.WARNING);
 
-      g.setWidget(row, 0, incorrect);
-      g.setWidget(row++, 1, incorrectBox);
+        g.setWidget(row, 0, incorrect);
+        g.setWidget(row++, 1, incorrectBox);
+      }
 
-      ControlGroup correct = new ControlGroup(CORRECT);
-      correct.addStyleName("topFiveMargin");
+      {
+        ControlGroup correct = new ControlGroup(CORRECT);
+        correct.addStyleName("topFiveMargin");
 
-      correctBox = new Label();
-      correctBox.setType(LabelType.SUCCESS);
+        correctBox = new Label();
+        correctBox.setType(LabelType.SUCCESS);
 
-      g.setWidget(row, 0, correct);
-      g.setWidget(row++, 1, correctBox);
+        g.setWidget(row, 0, correct);
+        g.setWidget(row++, 1, correctBox);
+      }
 
+      {
+        ControlGroup pronScoreGroup = new ControlGroup(AVG_SCORE);
+        pronScoreGroup.addStyleName("topFiveMargin");
 
-      ControlGroup pronScoreGroup = new ControlGroup(AVG_SCORE);
-      pronScoreGroup.addStyleName("topFiveMargin");
+        pronScore = new Label();
+        pronScore.setType(LabelType.SUCCESS);
 
-      pronScore = new Label();
-      pronScore.setType(LabelType.SUCCESS);
+        g.setWidget(row, 0, pronScoreGroup);
+        pronScoreGroup.addStyleName("rightFiveMargin");
+        g.setWidget(row++, 1, pronScore);
+      }
 
-      g.setWidget(row, 0, pronScoreGroup);
-      pronScoreGroup.addStyleName("rightFiveMargin");
-      g.setWidget(row++, 1, pronScore);
+      if (isPolyglot) {
+        ControlGroup pronScoreGroup = new ControlGroup("Time left");
+        pronScoreGroup.addStyleName("topFiveMargin");
+
+        timeLeft = new Label();
+        timeLeft.setType(LabelType.SUCCESS);
+
+        g.setWidget(row, 0, pronScoreGroup);
+        pronScoreGroup.addStyleName("rightFiveMargin");
+        g.setWidget(row++, 1, timeLeft);
+        timeLeft.setText("0");
+      }
 
       setStateFeedback();
       g.addStyleName("rightTenMargin");
@@ -771,8 +857,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
 
       // TODO : come back to the color coding ...
-      LabelType type = total > 0.8 ? LabelType.SUCCESS :
-          total > 0.5 ? LabelType.INFO : LabelType.WARNING;
+      LabelType type =
+          total > 0.8 ? LabelType.SUCCESS :
+              total > 0.5 ? LabelType.INFO :
+                  LabelType.WARNING;
       //  logger.info("type "+type + " score " + total);
       pronScore.setType(type);
 
@@ -780,6 +868,32 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       int itotal = (int) Math.ceil(total);
 
       pronScore.setText("" + itotal);
+    }
+
+    public void showTimeRemaining(long l) {
+      String value = "Times Up!";
+      if (l>0) {
+        long min = l / ONE_MIN;
+        // if (min > 0) {
+        long sec = (l - (min * ONE_MIN)) / 1000;
+        value = "0" + min + ":" + (sec < 10 ? "0" : "") + sec;
+        // } else {
+        //   long sec = l / 1000;
+        //   value = "00:" + (sec < 10 ? "0" : "") + sec;
+        // }
+        if (min == 0) {
+          if (sec < 30) {
+            timeLeft.setType(LabelType.WARNING);
+          }
+          else {
+            timeLeft.setType(LabelType.INFO);
+          }
+        }
+        else {
+          timeLeft.setType(LabelType.SUCCESS);
+        }
+      }
+      timeLeft.setText(value);
     }
   }
 }

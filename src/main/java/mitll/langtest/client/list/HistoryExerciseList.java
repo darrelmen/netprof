@@ -416,10 +416,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
-  protected void maybeSwitchProject(SelectionState selectionState, int currentProject) {
+  void maybeSwitchProject(SelectionState selectionState, int currentProject) {
     int project = selectionState.getProject();
     //int currentProject = projectStartupInfo.getProjectid();
-    logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
+ //   logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
     if (project != currentProject) {
       if (project > DEFAULT_PROJECT_ID) {
         logger.info("onValueChange project from state " + project + " != " + currentProject);

@@ -234,7 +234,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   abstract ActivityType getActivityType();
 
   /**
-   * @see ListInterface#getExercises
+   * @see #getExercises
    */
   protected abstract void showFinishedGettingExercises();
 
@@ -254,7 +254,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see ListInterface#getExercises
+   * @see #getExercises
    */
   class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String selectionID;
@@ -506,7 +506,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param exerciseID
    * @see #rememberAndLoadFirst(List, String, String, int)
    */
-  void goToFirst(String searchIfAny, int exerciseID) {
+  protected void goToFirst(String searchIfAny, int exerciseID) {
     if (exerciseID < 0) {
       loadFirstExercise(searchIfAny);
     } else {
@@ -612,7 +612,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param id
    * @see HistoryExerciseList#checkAndAskOrFirst
    */
-  //@Override
   void checkAndAskServer(int id) {
     if (DEBUG) {
       logger.info(getClass() + " : (" + getInstance() + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
@@ -626,14 +625,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  //@Override
-  boolean loadByID(int id) {
+  void loadByID(int id) {
     if (hasExercise(id)) {
       // if (DEBUG) logger.info("loading exercise " + id);
       loadExercise(id);
-      return true;
+      //return true;
     } else {
-      return false;
+      // return false;
     }
   }
 
@@ -707,13 +705,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param commonExercise
    * @see FacetExerciseList#showExercises
    */
-  void addExerciseWidget(U commonExercise) {
+  protected void addExerciseWidget(U commonExercise) {
     createdPanel = factory.getExercisePanel(commonExercise);
     // logger.info("Add exercise widget "  + commonExercise.getID());
     innerContainer.setWidget(createdPanel);
   }
 
-  public int getCurrentExerciseID() {
+  private int getCurrentExerciseID() {
     T currentExercise = getCurrentExercise();
     //   logger.info("Current exercise is " + currentExercise);
     return currentExercise != null ? currentExercise.getID() : -1;//"Unknown";

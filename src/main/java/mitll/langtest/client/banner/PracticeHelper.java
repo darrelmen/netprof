@@ -61,13 +61,15 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
-  NPFlexSectionExerciseList facetExerciseList;
+  private NPFlexSectionExerciseList facetExerciseList;
 
-  public PracticeHelper(ExerciseController controller) { super(controller);  }
+  PracticeHelper(ExerciseController controller) {
+    super(controller);
+  }
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    statsFlashcardFactory = new StatsFlashcardFactory<>( controller, exerciseList, "practice", null);
+    statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice", null);
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }
@@ -82,7 +84,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>( controller, outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       final FlexListLayout outer = this;
 
       @Override
@@ -93,10 +95,28 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
             new ListOptions(instanceName)
                 .setShowPager(false).
                 setShowTypeAhead(false), listHeader, true) {
-          @Override
+
+ /*         @Override
+          protected void loadFirstExercise(String searchIfAny) {
+            super.loadFirstExercise(searchIfAny);
+          }*/
+
+    /*      protected void addExerciseWidget(CommonExercise commonExercise) {
+            super.addExerciseWidget(commonExercise);
+            logger.info("addExerciseWidget --->  ");
+            statsFlashcardFactory.checkPoly(facetExerciseList.getSize());
+          }*/
+
+          protected void goToFirst(String searchIfAny, int exerciseID) {
+            super.goToFirst(searchIfAny, exerciseID);
+            statsFlashcardFactory.checkPoly(facetExerciseList.getSize());
+          }
+
+/*          @Override
           protected CommonShell findFirstExercise() {
+
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
-            if (currentExerciseID != -1) {//null && !currentExerciseID.trim().isEmpty()) {
+            if (currentExerciseID != -1) {
               logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
               CommonShell shell = byID(currentExerciseID);
@@ -109,11 +129,14 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                 return shell;
               }
             } else {
-              return super.findFirstExercise();
+              logger.info("findFirstExercise --->  current ex = " + currentExerciseID);
+              CommonShell firstExercise = super.findFirstExercise();
+              return firstExercise;
             }
-          }
+          }*/
 
-          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {}
+          protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {
+          }
 
           @Override
           protected void onLastItem() {
@@ -137,7 +160,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
                                                   String prefix,
                                                   int exerciseID, boolean onlyWithAudioAnno,
                                                   boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-          //  logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix + " WERE NOT USING PREFIX");
+            //  logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix + " WERE NOT USING PREFIX");
             super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }

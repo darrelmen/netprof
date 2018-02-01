@@ -92,11 +92,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see ListSorting#sortBy
    * @param comp
+   * @see ListSorting#sortBy
    */
   void sortBy(Comparator<T> comp) {
-    if (DEBUG)     logger.info("start - sortBy ");
+    if (DEBUG) logger.info("start - sortBy ");
     scheduleWaitTimer();
 
     pagingContainer.sortBy(comp);
@@ -455,7 +455,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void flushWith(Comparator<T> comparator) {
     pagingContainer.setComparator(comparator);
     flush();
-   // redraw();
+    // redraw();
   }
 
   private List<T> inOrderResult;
@@ -480,14 +480,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     toRemember = resort(toRemember);
 
     clear();
-    //  int c = 0;
     toRemember.forEach(this::addExercise);
+
+//  int c = 0;
 //    for (T es : toRemember) {
 //      addExercise(es);
 ///*      if (c++ < 10) {
 //        logger.info("# " + c + " " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
 //      }*/
 //    }
+
     flush();
     return toRemember;
   }

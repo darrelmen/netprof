@@ -55,7 +55,6 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
@@ -83,11 +82,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     implements AudioAnswerListener {
   private Logger logger;
 
-  private static final int FIRST_STEP  = 35;
+  private static final int FIRST_STEP = 35;
   private static final int SECOND_STEP = 75;
 
-  private static final double FIRST_STEP_PCT = ((double)FIRST_STEP) / 100d;
-  private static final double SECOND_STEP_PCT = ((double)SECOND_STEP) / 100d;
+  private static final double FIRST_STEP_PCT = ((double) FIRST_STEP) / 100d;
+  private static final double SECOND_STEP_PCT = ((double) SECOND_STEP) / 100d;
 
   private Panel recoOutput;
 
@@ -328,11 +327,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         };
 
         // without this, the arrow keys may go to the chapter selector
-        Scheduler.get().scheduleDeferred(new Command() {
-          public void execute() {
-            widgets.setFocus(true);
-          }
-        });
+        Scheduler.get().scheduleDeferred((Command) () -> widgets.setFocus(true));
         return widgets;
       }
     };
@@ -361,10 +356,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * TODO : use same as in learn tab or vice versa
    *
    * @param score
-   * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
-   * @paramx centerVertically
-   * @paramx useShortWidth
-   * @see BootstrapExercisePanel#showPronScoreFeedback(boolean, double)
+   * @see #showPronScoreFeedback(boolean, double)
    */
   private DivWidget showScoreFeedback(boolean correct, double score) {
     if (score < 0) score = 0;
@@ -404,7 +396,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     DivWidget scoreContainer = new DivWidget();
     scoreContainer.addStyleName("floatLeft");
-    //  scoreContainer.setWidth("300px");
 
     scoreContainer.addStyleName("topMargin");
     scoreContainer.addStyleName("leftFiveMargin");
@@ -447,16 +438,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       recoOutput.clear();
     } else {
       long round = Math.round(score * 100f);
-      String heard = result.getDecodeOutput();
-
       int oldID = exercise.getID();
 
       if (correct) {
         showCorrectFeedback(score, result.getPretestScore());
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
-      //  logger.info("show incorrect feedback for " + heard + " score " + score);
-        showIncorrectFeedback(result, score, hasRefAudio, heard);
+        //  logger.info("show incorrect feedback for " + heard + " score " + score);
+        showIncorrectFeedback(result, score, hasRefAudio);
         controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
       }
       playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()));
@@ -476,7 +465,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   /**
-   * TODO : decide when to show what ASR "heard"
+   * TODO : if polyglot, auto advance if score higher than threshold.
    *
    * @param score
    * @see #receivedAudioAnswer
@@ -485,26 +474,20 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     showPronScoreFeedback(true, score);
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
-
     showRecoOutput(pretestScore);
+
+    maybeAdvance(score);
+  }
+
+  protected void maybeAdvance(double score) {
+
+
   }
 
   private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
 
-    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), new PlayListener() {
-      public void playStarted() {
-//          goodwaveExercisePanel.setBusy(true);
-        // TODO put back busy thing?
-        // postAudioRecordButton1.setEnabled(false);
-      }
-
-      public void playStopped() {
-        //  goodwaveExercisePanel.setBusy(false);
-        // postAudioRecordButton1.setEnabled(true);
-      }
-    }, controller, exercise);
-
+    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), null, controller, exercise);
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
     downloadContainer.getDownloadContainer().setVisible(true);
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords<>().isRTL(exercise)));
@@ -527,15 +510,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param hasRefAudio
    * @see #receivedAudioAnswer
    */
-  private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
+  private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(false, score);
-      //  showHeard(heard);
     }
     showOtherText();
     //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
-    //String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
         String path = getRefAudioToPlay();
@@ -546,24 +527,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         }
       } else {
         playIncorrect();
-        //goToNextAfter(1000);
       }
     } else {
       tryAgain();
     }
 
     showRecoOutput(result.getPretestScore());
-
-/*    if (controller.getProps().isDemoMode()) {
-      correctPrompt = "Heard: " + result.getDecodeOutput() + "<p>" + correctPrompt;
-      Heading recoOutput = getRecoOutput();
-      if (recoOutput != null && controlState.isAudioFeedbackOn()) {
-        recoOutput.setText(correctPrompt);
-        recoOutput.getElement().getStyle().setColor("#000000");
-      }
-    }*/
-
-   // return correctPrompt;
   }
 
   /**
@@ -571,7 +540,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   private void tryAgain() {
     playIncorrect();
-
     Timer t = new Timer() {
       @Override
       public void run() {
@@ -580,7 +548,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     };
     t.schedule(DELAY_MILLIS_LONG);
   }
-
 
   private void showOtherText() {
     if (controlState.isEnglish()) showForeign();
@@ -604,70 +571,15 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
    */
   void removePlayingHighlight() {
-    //logger.info("removePlayingHighlight - ");
-    removePlayingHighlight(
-        //    isSiteEnglish() ? english : foreign
-        foreign
-    );
+    removePlayingHighlight(foreign);
   }
-
 
   /**
    * @param delay
-   * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
+   * @see #showIncorrectFeedback(AudioAnswer, double, boolean)
    */
   private void goToNextAfter(int delay) {
     loadNextOnTimer(delay);
-  }
-
-/**
-  private String getCorrectDisplay() {
-    String refSentence = exercise.getForeignLanguage();
-    String translit = exercise.getTransliteration().length() > 0 ? "<br/>(" + exercise.getTransliteration() + ")" : "";
-    return refSentence + translit;
-  }*/
-
-  /**
-   * TODO : whole thing is bogus - we shouldn't just flash the answer up and then move on
-   * advance to next should be separate action.
-   *
-   * @param correct
-   * @param feedback make delay dependent on how long the text is
-   * @see #receivedAudioAnswer
-   */
-  void nextAfterDelay(boolean correct, String feedback) {
-/*    if (NEXT_ON_BAD_AUDIO) {
-      logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
-      // Schedule the timer to run once in 1 seconds.
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          loadNext();
-        }
-      };
-      int incorrectDelay = DELAY_MILLIS_LONG;
-      if (!feedback.isEmpty()) {
-        int delay = getFeedbackLengthProportionalDelay(feedback);
-        incorrectDelay += delay;
-        logger.info("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
-      }
-      int delayMillis = controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay;
-      if (correct && (controlState.isEnglish() || controlState.isForeign())) {
-        delayMillis *= 2;
-      }
-      t.schedule(delayMillis);
-    } else {*/
-    //  logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
-
-    if (correct) {
-      // go to next item
-      logger.info("Bootstrap nextAfterDelay " + correct + " : " + CORRECT_DELAY);
-      loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
-    } else {
-      initRecordButton();
-      clearFeedback();
-    }
-    //  }
   }
 
   /**
@@ -696,8 +608,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       historyDiv.getElement().setId("historyDiv");
       firstRow.add(historyDiv);
       String history = SetCompleteDisplay.getScoreHistory(scores);
-      String s = "<span style='float:right;" +
-          "'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
+      String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
           "</span>";
 
       historyDiv.add(new HTML(s));

@@ -69,7 +69,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
@@ -189,26 +188,17 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     //  logger.info("After adding recording widgets to " + middleVert.getElement().getExID());
     middleVert.add(getFinalWidgets());
 
-    HTML warnNoFlash = new HTML(WARN_NO_FLASH);
-    warnNoFlash.setVisible(false);
-    inner.add(warnNoFlash);
+    {
+      HTML warnNoFlash = new HTML(WARN_NO_FLASH);
+      warnNoFlash.setVisible(false);
+      inner.add(warnNoFlash);
+    }
 
-//    getElement().setId("FlashcardPanel");
     addPrevNextWidgets(prevNextRow);
-
     addRowBelowPrevNext(lowestRow);
 
     playRefOrAutoPlay();
-
-    //  addKeyListener();
   }
-
-/*  protected void addKeyListener() {
-    if (addKeyBinding) {
-      addKeyListener(controller, instance);
-      logger.info("FlashcardPanel : " + instance + " adding keybinding ");
-    }
-  }*/
 
   private void playRefOrAutoPlay() {
     Scheduler.get().scheduleDeferred((Command) () -> {
@@ -270,7 +260,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private CommentBox commentBox;
 
   /**
-   * @see BootstrapExercisePanel#nextAfterDelay
+   * @see #loadNextOnTimer
    */
   void loadNext() {
     if (exerciseList.onLast()) {
@@ -439,15 +429,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     contentMiddle.setHeight(CARD_HEIGHT + "px");
     contentMiddle.getElement().setId("Focusable_content");
-    contentMiddle.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        boolean englishHidden = isHidden(english);
-        //  logger.info("content click " + englishHidden);
-        setAutoPlay(false);
-        controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
-        flipCard();
-      }
+    contentMiddle.addClickHandler(event -> {
+      boolean englishHidden = isHidden(english);
+      //  logger.info("content click " + englishHidden);
+      setAutoPlay(false);
+      controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
+      flipCard();
     });
     return contentMiddle;
   }
@@ -497,7 +484,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-        //    isSongPlaying = true;
         addPlayingHighlight(foreign);
         if (endListener != null) {
           endListener.songStarted();
@@ -506,8 +492,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
       @Override
       public void songEnded() {
-        //  isSongPlaying = false;
-
         if (endListener != null) endListener.songEnded();
         cancelTimer();
         if (isTabVisible()) {
@@ -540,9 +524,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * @param delay
-   * @seex BootstrapExercisePanel#goToNextAfter
-   * @see BootstrapExercisePanel#nextAfterDelay(boolean, String)
-   * @see StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
+   * @see #checkThenLoadNextOnTimer
+   * @see BootstrapExercisePanel#goToNextAfter
+   * @seex StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay
    */
   boolean loadNextOnTimer(final int delay) {
     //   logger.info("loadNextOnTimer ----> load next on " + delay);
@@ -571,6 +555,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     removePlayingHighlight(foreign);
   }
 
+  /**
+   *
+   */
   void flipCard() {
     if (clickToFlip.isVisible()) {
       boolean showEnglish = controlState.showEnglish();
@@ -727,14 +714,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     left.addStyleName("floatLeftAndClear");
     left.setSize(ButtonSize.LARGE);
     new TooltipHelper().addTooltip(left, "Left Arrow Key");
-    left.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        left.setEnabled(false);
-        exerciseList.loadPrev();
-      }
-    });
+    left.addClickHandler(event -> gotPrevClick(left));
     return left;
+  }
+
+  private void gotPrevClick(Button left) {
+    left.setEnabled(false);
+    exerciseList.loadPrev();
   }
 
   private DivWidget getProgressBarWidget() {
@@ -758,6 +744,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return vp;
   }
 
+  private void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
+    int complete = exerciseList.getComplete();
+    int i = (complete == -1 ? 1 : complete + 1);
+    double percent = 100d * ((double) i / (double) exerciseList.getSize());
+    progressBar.setPercent(percent);
+  }
+
   private Button getNextButton() {
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
@@ -778,23 +771,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     exerciseList.loadNext();
   }
 
-  private void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
-    int complete = exerciseList.getComplete();
-    int i = (complete == -1 ? 1 : complete + 1);
-    double percent = 100d * ((double) i / (double) exerciseList.getSize());
-    progressBar.setPercent(percent);
-  }
-
   /**
    * @see #getAudioGroup(mitll.langtest.client.flashcard.ControlState)
    * @see #getQuestionContent
    */
   private void playRefLater() {
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-        playRef();
-      }
-    });
+    Scheduler.get().scheduleDeferred((Command) this::playRef);
   }
 
   /**
@@ -884,7 +866,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     } else {
       return false;
     }
-    //showForeign(controlState);
   }
 
   private Button getOn(final ControlState controlState) {
@@ -892,12 +873,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     onButton.getElement().setId("Show_On_" + controller.getLanguage());
     controller.register(onButton, getID());
 
-    onButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showForeign(controlState);
-      }
-    });
+    onButton.addClickHandler(event -> showForeign(controlState));
     onButton.setActive(controlState.showForeign() && !controlState.showBoth());
     return onButton;
   }
@@ -919,17 +895,16 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     showEnglish.getElement().setId("Show_English");
     controller.register(showEnglish, getID());
 
-    showEnglish.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (!controlState.isEnglish()) {
-          controlState.setShowState(ControlState.ENGLISH);
-          showEnglishOrForeign();
-        }
-      }
-    });
+    showEnglish.addClickHandler(event -> gotClickShowEnglish(controlState));
     showEnglish.setActive(controlState.showEnglish() && !controlState.showBoth());
     return showEnglish;
+  }
+
+  private void gotClickShowEnglish(ControlState controlState) {
+    if (!controlState.isEnglish()) {
+      controlState.setShowState(ControlState.ENGLISH);
+      showEnglishOrForeign();
+    }
   }
 
   private Button getBoth(final ControlState controlState) {
@@ -996,7 +971,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       div.add(englishPhrase);
     }
 
-    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio(), getDirection(foreignSentence));
+    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio());
 
     if (!usedForeign) {
       div.add(foreign);
@@ -1006,12 +981,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return div;
   }
 
-  //  private boolean isRTLContent(String content) {
-//    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
-//  }
   private FocusPanel makeEnglishPhrase(String englishSentence) {
     Heading englishHeading = new Heading(1, englishSentence);
-    //  englishHeading.getElement().getStyle().setWidth(500, Style.Unit.PX);
     englishHeading.getElement().setId("EnglishPhrase");
     FocusPanel widgets = new FocusPanel();
     widgets.add(englishHeading);
@@ -1030,13 +1001,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getQuestionContent
    */
-  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio, HasDirection.Direction dir) {
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
     Panel hp = new HorizontalPanel();
-    hp.add(getFLContainer(foreignSentence, dir));
+    hp.add(getFLContainer(foreignSentence));
 
     Icon w = new Icon(IconType.VOLUME_UP);
     w.setSize(IconSize.TWO_TIMES);
-    //Widget toShow = w;
 
     if (!hasRefAudio) {
       w.getElement().getStyle().setColor("red");
@@ -1062,14 +1032,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   @NotNull
-  private Widget getFLContainer(String foreignSentence, HasDirection.Direction dir) {
+  private Widget getFLContainer(String foreignSentence) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
-    //HTML foreignLanguageContent = new HTML(foreignSentence, dir);
 
     Element element = foreignLanguageContent.getElement();
     element.setId("ForeignLanguageContent");
     element.getStyle().setTextAlign(Style.TextAlign.CENTER);
-    //foreignLanguageContent.addStyleName("bigflfont");
     foreignLanguageContent.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     return foreignLanguageContent;
   }
@@ -1100,7 +1068,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private void showEnglishOrForeign() {
-    //System.out.println("show english or foreign " + controlState);
     if (controlState.showBoth()) {
       showBoth();
       showOnlyEnglish = false;
@@ -1153,7 +1120,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getCardContent()
    * @see #FlashcardPanel
    */
-  protected void playRef() {
+  void playRef() {
     String refAudioToPlay = getRefAudioToPlay();
     if (isValid(refAudioToPlay)) {
       playRef(refAudioToPlay);
@@ -1162,10 +1129,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * @return
-   * @see #playRef()
+   * @see #playRef
    */
   String getRefAudioToPlay() {
-    //System.out.println(getElement().getID() + " playing audio for " +exercise.getOldID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
@@ -1225,7 +1191,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private class ClickableSimplePanel extends SimplePanel {
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
+    HandlerRegistration addClickHandler(ClickHandler handler) {
       return addDomHandler(handler, ClickEvent.getType());
     }
   }

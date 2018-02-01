@@ -62,21 +62,10 @@ public class DownloadHelper {
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
-  public static final String ALLCONTEXT = "allcontext";
+  private static final String ALLCONTEXT = "allcontext";
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
-
-/*
-  public DownloadHelper() {
-  }
-*/
-
-/*
-  public DownloadHelper(HistoryExerciseList exerciseList) {
-    selectionState = exerciseList.getSelectionState();
-  }
-*/
 
   /**
    * @param selectionState
