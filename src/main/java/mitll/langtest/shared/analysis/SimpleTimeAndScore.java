@@ -51,7 +51,7 @@ public class SimpleTimeAndScore implements Serializable {
   /**
    * @param timestamp
    * @param score
-   * @seex PhoneDAO#getPhoneTimeSeries
+   * @see TimeAndScore#TimeAndScore(int, long, float, float, WordAndScore)
    */
   SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore) {
     this.timestamp = timestamp;
@@ -94,11 +94,11 @@ public class SimpleTimeAndScore implements Serializable {
     return (int)(value* SCALE);
   }
 
-  protected float fromInt(int value) {
+  float fromInt(int value) {
     return ((float)value)/ SCALE;
   }
 
-  protected String getTimeString() {
+  String getTimeString() {
     return "" + getTimestamp();
   }
 

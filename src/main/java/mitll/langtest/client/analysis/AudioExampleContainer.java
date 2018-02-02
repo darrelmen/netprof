@@ -57,8 +57,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   /**
+   * TODO : buggy - make sure the exercise is there before asking for it...
+   *
    * @return
-   * @see SimplePagingContainer#addColumnsToTable
+   * @see #addColumnsToTable
    */
   private Column<T, SafeHtml> getPlayAudio() {
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
@@ -72,18 +74,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   /**
-   * @param id
-   * @return
-   * @see #getPlayAudio
-   */
-  protected CommonShell getShell(int id) {    return plot.getShell(id);  }
-
-  @NotNull
-  private String getTitle(CommonShell exercise) {
-    return exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-  }
-
-  /**
    * @return
    * @see #addColumnsToTable
    */
@@ -91,9 +81,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(T shell) {
-        CommonShell exercise = getShell(shell.getExid());
         //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
         if (shell.getRefAudio() != null) {
+          CommonShell exercise = getShell(shell.getExid());
           return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), getTitle(exercise));
         } else {
           //if  (exercise != null) logger.info("no native audio for " + exercise.getOldID());
@@ -102,6 +92,18 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       }
     };
   }
+
+  @NotNull
+  private String getTitle(CommonShell exercise) {
+    return exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+  }
+
+  /**
+   * @param id
+   * @return
+   * @see #getPlayAudio
+   */
+  protected CommonShell getShell(int id) {    return plot.getShell(id);  }
 
   void addPlayer() {
     Scheduler.get().scheduleDeferred(PlayAudioWidget::addPlayer);

@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Date;
@@ -50,7 +51,7 @@ import java.util.TreeMap;
  * @since 11/20/15.
  */
 class TimeSeriesPlot extends DivWidget {
- // private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+  // private final Logger logger = Logger.getLogger("TimeSeriesPlot");
   static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -60,16 +61,19 @@ class TimeSeriesPlot extends DivWidget {
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final String nowFormat = shortFormat.format(new Date());
 
+
   /**
    * @return
    * @see PhonePlot#getErrorBarChart(String)
    */
-  ToolTip getErrorBarToolTip() {  return new ToolTip().setFormatter(this::getTooltipText);  }
+  ToolTip getErrorBarToolTip() {
+    return new ToolTip().setFormatter(this::getTooltipText);
+  }
 
   /**
-   * @see #getErrorBarToolTip
    * @param toolTipData
    * @return
+   * @see #getErrorBarToolTip
    */
   private String getTooltipText(ToolTipData toolTipData) {
     try {
@@ -87,8 +91,9 @@ class TimeSeriesPlot extends DivWidget {
 
   /**
    * How can phoneSession be null? Transient?
-   *
+   * <p>
    * Show childCount in session if small - since error bars won't be displayed.
+   *
    * @param toolTipData
    * @param seriesName1
    * @return
@@ -96,8 +101,8 @@ class TimeSeriesPlot extends DivWidget {
   String getAvgTooltip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
-  //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
-    String countInfo = session == null? "": "<br/>n = " + session.getCount();
+    //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
+    String countInfo = session == null ? "" : "<br/>n = " + session.getCount();
 
     return getTooltipPrefix(seriesName1, dateToShow) +
         "Mean = " + toolTipData.getYAsLong() + "%" +
@@ -113,15 +118,15 @@ class TimeSeriesPlot extends DivWidget {
    * @param toolTipData
    * @param seriesName1
    * @return
-   * @paramx dateToShow
    * @see AnalysisPlot#getTooltip
+   * @see #getTooltipText
    */
   String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
     Point point = toolTipData.getPoint();
     String s = getSessionCount(toolTipData);
     String range = "range " + point.getLow() + "-" + point.getHigh();
-    return getTooltipPrefix(seriesName1, dateToShow) + range + "<br/>"+s;
+    return getTooltipPrefix(seriesName1, dateToShow) + range + "<br/>" + s;
   }
 
   private String getSessionCount(ToolTipData toolTipData) {
@@ -129,10 +134,7 @@ class TimeSeriesPlot extends DivWidget {
     return session == null ? "" : (" n = " + session.getCount());
   }
 
-  String getDateToShow(ToolTipData toolTipData) {
-    long xAsLong = toolTipData.getXAsLong();
-    return getDateToShow(xAsLong);
-  }
+  String getDateToShow(ToolTipData toolTipData) { return getDateToShow(toolTipData.getXAsLong());  }
 
   private String getDateToShow(long xAsLong) {
     Date date = new Date(xAsLong);
@@ -173,20 +175,20 @@ class TimeSeriesPlot extends DivWidget {
     timeToSession.clear();
     if (!phoneSessions.isEmpty()) {
       PhoneSession lastSession = getLastSession(phoneSessions);
-     // logger.info("setPhoneSessions num sessions " + phoneSessions.size());
+      // logger.info("setPhoneSessions num sessions " + phoneSessions.size());
       for (PhoneSession session : phoneSessions) {
         timeToSession.put(getSessionTime(lastSession, session), session);
       }
     }
   }
-
+x
   /**
    * @param phoneSessions
    * @param chart
    * @param seriesTitle
    * @param hidden
    * @see PhonePlot#getErrorBarChart
-   * @see AnalysisPlot#addErrorBars(UserPerformance, Chart)
+   * @see AnalysisPlot#addErrorBars
    */
   Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
     Number[][] data = new Number[phoneSessions.size()][3];
@@ -194,7 +196,7 @@ class TimeSeriesPlot extends DivWidget {
     int i = 0;
     PhoneSession lastSession = getLastSession(phoneSessions);
     for (PhoneSession ts : phoneSessions) {
-    //  logger.info("addErrorBarSeries - " + ts);
+      //  logger.info("addErrorBarSeries - " + ts);
       data[i][0] = getSessionTime(lastSession, ts);
       double mean = ts.getMean();
       double stdev = ts.getStdev();
@@ -224,15 +226,17 @@ class TimeSeriesPlot extends DivWidget {
     return series;
   }
 
-  private long getSessionTime(PhoneSession lastSession, PhoneSession ts) {
-    long middle = ts.getMiddle();
-    if (ts == lastSession &&
-        ts.getEnd() - middle > AnalysisPlot.HOUR) {
-      middle = ts.getEnd();
-    }
-    return middle;
-  }
 
+
+  /**
+   * @param iPadData
+   * @param chart
+   * @param seriesName
+   * @param hidden
+   * @return
+   * @see #addErrorBarSeries
+   * @see PhonePlot#getErrorBarChart(String, String, String, List)
+   */
   Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
     Series series = chart.createSeries()
         .setName(seriesName)
@@ -254,6 +258,15 @@ class TimeSeriesPlot extends DivWidget {
       data[i++][1] = Math.round(ts.getMean() * 100);
     }
     return data;
+  }
+
+  private long getSessionTime(PhoneSession lastSession, PhoneSession ts) {
+    long middle = ts.getMiddle();
+    if (ts == lastSession &&
+        ts.getEnd() - middle > AnalysisPlot.HOUR) {
+      middle = ts.getEnd();
+    }
+    return middle;
   }
 
   private PhoneSession getLastSession(List<PhoneSession> yValuesForUser) {

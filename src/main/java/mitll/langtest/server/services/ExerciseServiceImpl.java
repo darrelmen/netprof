@@ -1285,6 +1285,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long then2 = System.currentTimeMillis();
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
+    if (byID == null) {
+      logger.error("can't find exercise #"+  exid + " in project #" +projectID);
+      return null;
+    }
+
     byID = new Exercise(byID);
 
     long now = System.currentTimeMillis();

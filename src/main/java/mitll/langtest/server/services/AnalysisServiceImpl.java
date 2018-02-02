@@ -61,7 +61,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
    */
   @Override
-  public List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException {
+  public List<CommonShell> getShells(Collection<Integer> ids) throws DominoSessionException {
     List<CommonShell> shells = new ArrayList<>();
     int projectID = getProjectIDFromUser();
     logger.info("getShells project id from user " + projectID + " ids " + ids.size());

@@ -555,7 +555,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     /**
      * TODO: get last session...
-     * 
+     *
      * @param sortedHistory
      */
     private void showFeedbackCharts(final List<ExerciseCorrectAndScore> sortedHistory) {

@@ -50,11 +50,11 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   private WordAndScore wordAndScore;
 
   /**
-   * @see BasePhoneDAO#getAndRememberPhoneAndScore(Map, String, float, long)
    * @param pronScore
    * @param timestamp
+   * @see BasePhoneDAO#getAndRememberPhoneAndScore(Map, String, float, long)
    */
-   PhoneAndScore(float pronScore, long timestamp) {
+  PhoneAndScore(float pronScore, long timestamp) {
     this.pronScore = toInt(pronScore);
     this.timestamp = timestamp;
   }
@@ -73,14 +73,16 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   }
 
   /**
-   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries
    * @return
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries
    */
   public long getTimestamp() {
     return timestamp;
   }
 
-  public float getPronScore() { return fromInt(pronScore);  }
+  public float getPronScore() {
+    return fromInt(pronScore);
+  }
 
   public void setWordAndScore(WordAndScore wordAndScore) {
     this.wordAndScore = wordAndScore;
@@ -89,8 +91,8 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   public WordAndScore getWordAndScore() {
     return wordAndScore;
   }
-  
+
   public String toString() {
-    return ""+getPronScore();
+    return "" + getPronScore();
   }
 }

@@ -34,6 +34,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -41,8 +42,10 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -55,10 +58,6 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -69,9 +68,14 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/19/15.
  */
-public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
-  private static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
+public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private final Map<Long, Series> granToAverage = new HashMap<>();
+  protected final int userid;
+
+  private static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
+  private static final int TIME_SLACK = 60;
   private static final int WIDTH = 740;
 
   private static final int MIN_SESSION_COUNT = 50;
@@ -80,8 +84,6 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private static final String NO_RECORDINGS_YET_FOR_STUDENT = "No recordings yet made by student to analyze.";
   private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this list. Choose another list or don't filter on lists.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
-
-  private static final int X_OFFSET_LEGEND = 65;
 
   private static final long MINUTE = 60 * 1000;
   static final long HOUR = 60 * MINUTE;
@@ -94,24 +96,10 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private static final long YEAR = 52 * WEEK;
   private static final long YEARS = 20 * YEAR;
 
-  private static final String I_PAD_I_PHONE = "iPad/iPhone";
-  private static final String VOCAB_PRACTICE = "Vocab Practice";
-  private static final String LEARN = "Learn";
-  /**
-   * @see #addChart
-   */
-  private static final String CUMULATIVE_AVERAGE = "Average";
-  private final Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
-
   private static final int SHORT_THRESHOLD = 822;
   private static final int CHART_HEIGHT_SHORT = 260;
   private static final int CHART_HEIGHT = 330;
 
-  private static final int Y_OFFSET_FOR_LEGEND = 20;
-
-  private final Map<Long, Integer> timeToId = new TreeMap<>();
-  private final Map<Integer, CommonShell> idToEx = new TreeMap<>();
-  private final int userid;
   private final AnalysisServiceAsync service;
   private final PlayAudio playAudio;
   private Map<Long, String> granToLabel;
@@ -119,10 +107,8 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private final Map<Series, Boolean> seriesToVisible = new HashMap<>();
   private Map<Long, List<PhoneSession>> granularityToSessions;
   private final Map<Long, Series> granToError = new HashMap<>();
-  private final Map<Long, Series> granToAverage = new HashMap<>();
   private final List<Series> detailSeries = new ArrayList<>();
 
-  private Chart chart = null;
   private AnalysisTab.TIME_HORIZON timeHorizon;
   /**
    * @see #setRawBestScores(List)
@@ -136,10 +122,10 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private int index = 0;
 
   private TimeWidgets timeWidgets;
-  private final ExceptionSupport exceptionSupport;
   private Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer;
   private MessageHelper messageHelper;
   private int width = 1365;
+  protected Chart chart = null;
 
   /**
    * @param service
@@ -153,9 +139,11 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
                       SoundManagerAPI soundManagerAPI,
                       Icon playFeedback,
                       ExceptionSupport exceptionSupport,
-                      MessageHelper messageHelper, boolean isTeacherView) {
+                      MessageHelper messageHelper,
+                      boolean isTeacherView) {
+    super(exceptionSupport);
+    this.userid = userid;
     this.messageHelper = messageHelper;
-    this.exceptionSupport = exceptionSupport;
 
     if (isTeacherView) width = WIDTH;
 
@@ -164,10 +152,8 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 //      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
-
 //      style.setProperty("minHeight", minHeight, Style.Unit.PX);
 //      style.setProperty("minWidth", 300, Style.Unit.PX);
-
       style.setMarginTop(10, Style.Unit.PX);
       style.setMarginLeft(10, Style.Unit.PX);
       style.setMarginBottom(10, Style.Unit.PX);
@@ -178,7 +164,6 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
      * setRawBestScores
      */
     this.service = GWT.create(AnalysisService.class);
-    this.userid = userid;
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service, exceptionSupport);
@@ -204,7 +189,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    */
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-  //  logger.info("showUserPerformance scores = " + rawBestScores.size());
+    //  logger.info("showUserPerformance scores = " + rawBestScores.size());
 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
@@ -301,9 +286,8 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private String getUserName(UserPerformance userPerformance) {
     String first = userPerformance.getFirst();
     String last = userPerformance.getLast();
-    return (first == null || first.isEmpty()) && (last == null || last.isEmpty()) ? "" : " (" +
-        first + " " + last +
-        ")";
+    return (first == null || first.isEmpty()) && (last == null || last.isEmpty()) ? "" :
+        " (" + first + " " + last + ")";
   }
 
   /**
@@ -312,11 +296,9 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   private void showSeriesByVisible() {
     Scheduler.get().scheduleDeferred(() -> {
       if (chart != null) {
-        logger.info("showSeriesByVisible : doing deferred ---------- ");
-        for (Series series : seriesToVisible.keySet()) {
-          //  String name = series.getName();
-          Boolean expected = seriesToVisible.get(series);
-          if (expected) {
+        //logger.info("showSeriesByVisible : doing deferred ---------- ");
+        seriesToVisible.forEach((series, shouldShow) -> {
+          if (shouldShow) {
 //              logger.info("showSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
             if (chart.getSeries(series.getId()) == null) {
               chart.addSeries(series);
@@ -331,7 +313,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
               series.setVisible(true);
             }
           }
-        }
+        });
       }
     });
   }
@@ -344,7 +326,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    *
    * @param service
    * @param userid
-   * @see #AnalysisPlot
+   * @see AnalysisTab#useReport
    */
   public void populateExerciseMap(ExerciseServiceAsync service, int userid) {
     // logger.info("populateExerciseMap : get exercises for user " + userid);
@@ -361,13 +343,10 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
           @Override
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
-              Map<Integer, CommonShell> idToEx = getIdToEx();
+              //       Map<Integer, CommonShell> idToEx = getIdToEx();
 //              logger.info("populateExerciseMap : got back " + exerciseListWrapper.getExercises().size() +
 //                  "  exercises for user " + userid);
-
-              for (CommonShell shell : exerciseListWrapper.getExercises()) {
-                idToEx.put(shell.getID(), shell);
-              }
+              exerciseListWrapper.getExercises().forEach(commonShell -> rememberExercise(commonShell));
             }
           }
         });
@@ -382,7 +361,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @see #addChart
    */
   private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
-    final Chart chart = getChart(title);
+    final Chart chart = getHighchartChart(title);
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
@@ -393,19 +372,15 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
-    boolean shortPeriod = isShortPeriod(rawBestScores);
     addSeries(rawBestScores,
         userPerformance.getiPadTimeAndScores(),
         userPerformance.getLearnTimeAndScores(),
         userPerformance.getAvpTimeAndScores(),
         chart,
         seriesName,
-        shortPeriod);
+        isShortPeriod(rawBestScores));
 
-    // if (!shortPeriod) {
     addErrorBars(userPerformance, chart);
-    // }
-
     configureChart(chart, subtitle);
     return chart;
   }
@@ -448,7 +423,6 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     }
 
     long now = System.currentTimeMillis();
-
 //    logger.info("setVisiblity for " + new Date(now));
     setVisibility(now - YEARS, now);
   }
@@ -494,10 +468,9 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
           }
         }
 
-        String label = granToLabel.get(gran);
-        String seriesInfo = gran + "/" + label;
+        // String label = granToLabel.get(gran);
+        //String seriesInfo = gran + "/" + label;
         //   logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
-
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
           errorSeries = granToError.get(gran);
@@ -543,140 +516,8 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
   }
 
   /**
-   * @param title
-   * @return
-   * @see #getChart(String, String, String, UserPerformance)
-   */
-  private Chart getChart(String title) {
-    return new Chart()
-        .setZoomType(BaseChart.ZoomType.X)
-        .setChartTitleText(title)
-        .setMarginRight(10)
-        .setOption("/credits/enabled", false)
-        .setOption("/plotOptions/series/pointStart", 1)
-        .setOption("/legend/enabled", false)
-        .setLegend(new Legend()
-            .setLayout(Legend.Layout.VERTICAL)
-            .setAlign(Legend.Align.LEFT)
-            .setVerticalAlign(Legend.VerticalAlign.TOP)
-            .setX(X_OFFSET_LEGEND)
-            .setY(Y_OFFSET_FOR_LEGEND)
-            .setBorderWidth(1)
-            .setFloating(true)
-            .setBackgroundColor("#FFFFFF")
-        )
-        .setScatterPlotOptions(new ScatterPlotOptions()
-            .setMarker(new Marker()
-                .setRadius(5)
-                .setHoverState(new Marker()
-                    .setEnabled(true)
-                    .setLineColor(new Color(100, 100, 100))
-                )
-            )
-            .setHoverStateMarker(new Marker()
-                .setEnabled(false)
-            ))
-        .setToolTip(getToolTip())
-        .setSeriesPlotOptions(new SeriesPlotOptions()
-            .setSeriesClickEventHandler(getSeriesClickEventHandler())
-        );
-  }
-
-  private SeriesClickEventHandler getSeriesClickEventHandler() {
-    return clickEvent -> {
-      long nearestXAsLong = clickEvent.getNearestXAsLong();
-      Integer exid = timeToId.get(nearestXAsLong);
-      if (exid != null) {
-        playAudio.playLast(userid, exid, nearestXAsLong);
-      } else {
-        logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
-      }
-      return true;
-    };
-  }
-
-  /**
-   * @return
-   * @see #getChart(String)
-   */
-  private ToolTip getToolTip() {
-    return new ToolTip()
-        .setFormatter(toolTipData -> {
-          try {
-            Integer exerciseID = timeToId.get(toolTipData.getXAsLong());
-            CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-            return getTooltip(toolTipData, exerciseID, commonShell);
-          } catch (Exception e) {
-            logger.warning("getToolTip " + e.getMessage());
-            exceptionSupport.logException(e);
-            return "";
-          }
-        });
-  }
-
-  /**
-   * On mouse over, show info about the answer.
-   * <p>
-   * So this tooltip could either be for a group or an exercise
+   * TODO: remove distinction between learn vs avp
    *
-   * @param toolTipData
-   * @param exid
-   * @param commonShell
-   * @return
-   * @see #getToolTip()
-   */
-  private String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
-    String seriesName = toolTipData.getSeriesName();
-
-    if (granToLabel.values().contains(seriesName)) {
-      Series series = chart.getSeries(toolTipData.getSeriesId());
-
-      if (granToAverage.values().contains(series)) {
-        return getAvgTooltip(toolTipData, seriesName);
-      } else {
-        return getErrorBarToolTip(toolTipData, seriesName);
-      }
-    } else {
-      //else {
-      //logger.info("getTooltip series is " + seriesName + " not in " + values);
-      // }
-      return getExerciseTooltip(toolTipData, exid, commonShell, seriesName);
-    }
-  }
-
-  @NotNull
-  private String getExerciseTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell, String seriesName) {
-    boolean showEx = toShowExercise.contains(seriesName);
-
-    String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
-    String english = commonShell == null ? "" : commonShell.getEnglish();
-    if (english.equalsIgnoreCase(foreignLanguage) &&
-        commonShell != null &&
-        !commonShell.getMeaning().isEmpty())
-      english = commonShell.getMeaning();
-
-    String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
-    String dateToShow = getDateToShow(toolTipData);
-
-    return
-        "<b>" + seriesName + "</b>" +
-            "<br/>" +
-            dateToShow +
-            (showEx ?
-                "<br/>Exercise " + exid + "<br/>" +
-                    "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
-                    englishTool
-                : "")
-            +
-            "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
-            (showEx ?
-                "<br/>" + "<b>Click to hear</b>"
-                : "")
-        ;
-  }
-
-  /**
    * @param yValuesForUser
    * @param chart
    * @param seriesTitle
@@ -703,12 +544,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       data[i++][1] = ts.getCumulativeAverage() * 100;
     }
 
-    Series series = chart.createSeries()
-        .setName(seriesTitle)
-        .setPoints(data)
-        .setType(Series.Type.SPLINE);
-
-    recordVisible(isVisible, series);
+    recordVisible(isVisible, getSplineSeries(chart, seriesTitle, data));
   }
 
   private void recordVisible(boolean isVisible, Series series) {
@@ -733,13 +569,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       Number[][] data = getDataForTimeAndScore(browserData);
 
       String prefix = isAVP ? VOCAB_PRACTICE : LEARN;
-
-      Series series = chart.createSeries()
-          .setName(prefix)
-          .setPoints(data)
-          .setType(Series.Type.SCATTER);
-
-      recordVisible(isVisible, series);
+      recordVisible(isVisible, getScatterSeries(chart, data, prefix));
     }
   }
 
@@ -762,10 +592,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @see #getChart
    */
   private void configureChart(Chart chart, String title) {
-    chart.getYAxis()
-        .setAxisTitleText(title)
-        .setMin(0)
-        .setMax(100);
+    configureYAxis(chart, title);
 
     chart.getXAxis()
         .setStartOnTick(true)
@@ -824,32 +651,29 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     }
   }
 
-/*
-  private String getFormat(long start) {
-    return shortFormat.format(new Date(start));
-  }
-*/
-
   /**
    * Remember time window of data (x-axis).
    * <p>
    * TODO : When would we ever need to go talk to the server to get the exercises?
+   * <p>
+   * TODO : audio exaample table needs to show fl/english for items... somehow we're getting them here...
    *
    * @param rawBestScores
    * @see #addChart
    */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
-    List<Integer> toGet = new ArrayList<>();
+    Set<Integer> toGet = new HashSet<>();
 
-    Map<Integer, CommonShell> idToEx = getIdToEx();
+    // Map<Integer, CommonShell> idToEx = getIdToEx();
     // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size());
 
     for (TimeAndScore timeAndScore : rawBestScores) {
       Integer id = timeAndScore.getExid();
-      timeToId.put(timeAndScore.getTimestamp(), id);
-      if (!idToEx.containsKey(id)) {
-        toGet.add(id);
-      }
+      addTimeToExID(timeAndScore.getTimestamp(), id);
+//      timeToId.put(timeAndScore.getTimestamp(), id);
+      // if (!isKnown(id)) {
+      toGet.add(id);
+      // }
     }
 /*
     if (toGet.isEmpty()) {
@@ -858,10 +682,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 */
 
     if (!rawBestScores.isEmpty()) {
-      TimeAndScore timeAndScore = rawBestScores.get(rawBestScores.size() - 1);
-
-      this.firstTime = rawBestScores.get(0).getTimestamp();
-      this.lastTime = timeAndScore.getTimestamp();
+      setTimeRange(rawBestScores);
 
       if (!toGet.isEmpty()) {
         logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
@@ -873,7 +694,7 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
 
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
-            commonShells.forEach(commonShell -> idToEx.put(commonShell.getID(), commonShell));
+            commonShells.forEach(commonShell -> rememberExercise(commonShell));
             logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
@@ -883,23 +704,20 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     //}
   }
 
+  private void setTimeRange(List<TimeAndScore> rawBestScores) {
+    this.firstTime = rawBestScores.get(0).getTimestamp();
+    this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+  }
+
   /**
    * @param id
    * @return
    * @see AudioExampleContainer#getShell
    */
-  @Override
+/*  @Override
   public CommonShell getShell(int id) {
     return getIdToEx().get(id);
-  }
-
-  /**
-   * @return
-   * @see WordContainer#getShell
-   */
-  private Map<Integer, CommonShell> getIdToEx() {
-    return idToEx;
-  }
+  }*/
 
   /**
    * @param timeHorizon
@@ -918,7 +736,6 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
    */
   private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
-    //this.timeHorizon = timeHorizon;
     // logger.info("goToLast set time from " + new Date(firstTime) + " to " + new Date(lastTime));
     XAxis xAxis;
     try {
@@ -928,52 +745,65 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
       return 0L;
     }
 
-    int slack = 60;
-    long lastPlusHour = lastTime + slack;
+    long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
       case WEEK:
-        long prevWeek = lastTime - WEEK;
-        xAxis.setExtremes(prevWeek, lastPlusHour);
-
-        int lastWeekIndex = weeks.size() - 1;
-        Long lastWeek = weeks.get(lastWeekIndex);
-        this.index = lastWeekIndex;
-
-        timeWidgets.prevButton.setEnabled(weeks.size() > 1);
-        timeWidgets.nextButton.setEnabled(false);
-        timeWidgets.display.setText(getShortDate(lastWeek));
-
-        timeChanged(prevWeek, lastPlusHour);
-        return prevWeek;
+        return showLastWeek(xAxis, lastPlusSlack);
       case MONTH:
-        long startOfPrevMonth = lastTime - MONTH;
-        xAxis.setExtremes(startOfPrevMonth, lastPlusHour);
-
-        int lastMonthIndex = months.size() - 1;
-        Long lastMonth = months.get(lastMonthIndex);
-        this.index = lastMonthIndex;
-
-        timeWidgets.prevButton.setEnabled(months.size() > 1);
-        timeWidgets.nextButton.setEnabled(false);
-        timeWidgets.display.setText(getShortDate(lastMonth));
-
-        /*
-        logger.info("from lastMonth        " + getShortDate(lastMonth));
-        logger.info("from startOfPrevMonth " + getShortDate(startOfPrevMonth));
-        logger.info("to lastTime           " + getShortDate(lastTime));*/
-
-        timeChanged(startOfPrevMonth, lastPlusHour);
-
-        return startOfPrevMonth;
+        return showLastMonth(xAxis, lastPlusSlack);
       case ALL:
-        long min = firstTime - slack;
-        xAxis.setExtremes(min, lastPlusHour);
-        setTimeWindowControlsToAll();
-        timeChanged(min, lastPlusHour);
-
-        return firstTime;
+        return showAll(xAxis, lastPlusSlack);
     }
     return null;
+  }
+
+  /**
+   * logger.info("from lastMonth        " + getShortDate(lastMonth));
+   * logger.info("from startOfPrevMonth " + getShortDate(startOfPrevMonth));
+   * logger.info("to lastTime           " + getShortDate(lastTime));
+   **/
+  private long showLastWeek(XAxis xAxis, long lastPlusSlack) {
+    return showLastPeriod(xAxis, lastPlusSlack, WEEK, this.weeks);
+  }
+
+  @NotNull
+  private Long showLastMonth(XAxis xAxis, long lastPlusSlack) {
+    return showLastPeriod(xAxis, lastPlusSlack, MONTH, this.months);
+  }
+
+  @NotNull
+  private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long offset, List<Long> timePeriods) {
+    long startOfPrevMonth = lastTime - offset;
+    xAxis.setExtremes(startOfPrevMonth, lastPlusSlack);
+
+    int lastMonthIndex = timePeriods.size() - 1;
+    Long lastMonth = timePeriods.get(lastMonthIndex);
+    this.index = lastMonthIndex;
+
+    timeWidgets.prevButton.setEnabled(timePeriods.size() > 1);
+    timeWidgets.nextButton.setEnabled(false);
+    timeWidgets.display.setText(getShortDate(lastMonth));
+
+    timeChanged(startOfPrevMonth, lastPlusSlack);
+
+    return startOfPrevMonth;
+  }
+
+  /**
+   * TODO: Good idea to mess with time window with slack?
+   *
+   * @param xAxis
+   * @param lastPlusSlack
+   * @return
+   */
+  @NotNull
+  private Long showAll(XAxis xAxis, long lastPlusSlack) {
+    long min = firstTime - TIME_SLACK;
+    xAxis.setExtremes(min, lastPlusSlack);
+    setTimeWindowControlsToAll();
+    timeChanged(min, lastPlusSlack);
+
+    return firstTime;
   }
 
   private void setTimeWindowControlsToAll() {
@@ -1041,12 +871,20 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
     timeChanged(aLong, end);
   }
 
+  /**
+   * @param timeWidgets
+   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
+   */
   void setTimeWidgets(TimeWidgets timeWidgets) {
     this.timeWidgets = timeWidgets;
   }
 
   private final Set<TimeChangeListener> listeners = new HashSet<>();
 
+  /**
+   * @param listener
+   * @see AnalysisTab#getPhoneReport(PhoneReport, ExerciseController, Panel, AnalysisPlot, ShowTab)
+   */
   void addListener(TimeChangeListener listener) {
     listeners.add(listener);
   }
@@ -1057,30 +895,57 @@ public class AnalysisPlot extends TimeSeriesPlot implements ExerciseLookup {
    * @see #gotExtremes
    */
   private void timeChanged(long from, long to) {
-    for (TimeChangeListener listener : listeners) listener.timeChanged(from, to);
+    listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
   }
 
-  void setExerciseToTimeToAnswer(Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer) {
+/*  void setExerciseToTimeToAnswer(Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer) {
     this.exerciseToTimeToAnswer = exerciseToTimeToAnswer;
-  }
+  }*/
 
   /**
-   * @param exid
-   * @param timestamp
+   * @paramx exid
+   * @paramx timestamp
    * @return
-   * @see PlayAudio#playLast(int, long)
+   * @seez PlayAudio#playLast(int, long)
    */
+/*
   @Override
   public WordScore getAnswerPath(int exid, long timestamp) {
     return exerciseToTimeToAnswer.get(exid).get(timestamp);
   }
+*/
 
   public interface TimeChangeListener {
     /**
      * @param from
      * @param to
-     * @see WordContainer#timeChanged
+     * @see #timeChanged
      */
     void timeChanged(long from, long to);
+  }
+
+
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+    // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+    String seriesName = toolTipData.getSeriesName();
+
+    if (granToLabel.values().contains(seriesName)) {
+      Series series = chart.getSeries(toolTipData.getSeriesId());
+
+      if (granToAverage.values().contains(series)) {
+        return getAvgTooltip(toolTipData, seriesName);
+      } else {
+        return getErrorBarToolTip(toolTipData, seriesName);
+      }
+    } else {
+      //else {
+      //logger.info("getTooltip series is " + seriesName + " not in " + values);
+      // }
+      return super.getTooltip(toolTipData, exid, commonShell);
+    }
+  }
+
+  protected void gotClickOnExercise(int exid, long nearestXAsLong) {
+    playAudio.playLast(userid, exid, nearestXAsLong);
   }
 }

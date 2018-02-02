@@ -44,8 +44,7 @@ import java.util.logging.Logger;
  * @since 12/4/15.
  */
 class TimeWidgets {
-  private final Logger logger = Logger.getLogger("TimeWidgets");
-
+  //private final Logger logger = Logger.getLogger("TimeWidgets");
   final Button prevButton;
   final Button nextButton;
   private final Button all;

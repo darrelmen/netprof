@@ -56,6 +56,7 @@ class PhonePlot extends TimeSeriesPlot {
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
   private static final int NARROW_WIDTH_REALLY = 320;
+  static final int NARROW_THRESHOLD = 1450;
   public static final String NO_RECORDINGS_YET = "No Recordings yet to analyze. Please record yourself.";
 
   /**
@@ -175,7 +176,7 @@ class PhonePlot extends TimeSeriesPlot {
    * @see #getErrorBarChart(String, String, String, List)
    */
   private void configureWidth(Chart chart) {
-    int narrowWidth = (Window.getClientWidth() < WordContainer.NARROW_THRESHOLD) ? NARROW_WIDTH_REALLY : NARROW_WIDTH;
+    int narrowWidth = (Window.getClientWidth() < NARROW_THRESHOLD) ? NARROW_WIDTH_REALLY : NARROW_WIDTH;
     chart.setWidth(narrowWidth);
   }
 }

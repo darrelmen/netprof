@@ -52,7 +52,7 @@ public interface AnalysisServiceAsync {
    * @param ids
    * @param async
    */
-  void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
+  void getShells(Collection<Integer> ids, AsyncCallback<List<CommonShell>> async);
 
   void getPerformanceReportForUser(int id, int minRecordings, int listid, AsyncCallback<AnalysisReport> async);
 

@@ -54,7 +54,7 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores
    */
-  List<CommonShell> getShells(List<Integer> ids) throws DominoSessionException;
+  List<CommonShell> getShells(Collection<Integer> ids) throws DominoSessionException;
 
   AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) throws DominoSessionException, RestrictedOperationException;
 
