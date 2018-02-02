@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
@@ -296,6 +297,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             super.stop(duration);
           }
 
+          /**
+           * @see FlashcardRecordButton#checkKeyDown
+           */
           @Override
           protected void gotLeftArrow() {
             exerciseList.loadPrev();
@@ -581,16 +585,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void removePlayingHighlight() {
     removePlayingHighlight(foreign);
   }
-
-  /**
-   * @param delay
-   * @see #showIncorrectFeedback(AudioAnswer, double, boolean)
-   */
-/*
-  private void goToNextAfter(int delay) {
-    loadNextOnTimer(delay);
-  }
-*/
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback

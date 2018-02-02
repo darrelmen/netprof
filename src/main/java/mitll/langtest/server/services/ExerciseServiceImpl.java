@@ -1286,7 +1286,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
     if (byID == null) {
-      logger.error("can't find exercise #"+  exid + " in project #" +projectID);
+      logger.error("getAnnotatedExercise : can't find exercise #"+  exid + " in project #" +projectID);
       return null;
     }
 

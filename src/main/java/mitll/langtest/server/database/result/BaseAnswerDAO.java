@@ -39,7 +39,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.scoring.AudioContext;
 
 public abstract class BaseAnswerDAO extends DAO {
-  protected BaseAnswerDAO(Database database) {
+  BaseAnswerDAO(Database database) {
     super(database);
   }
 
@@ -54,6 +54,7 @@ public abstract class BaseAnswerDAO extends DAO {
    * @param timeSpent
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
+   * @deprecated old call for AMAS
    */
   public int addTextAnswer(AudioContext audioContext,
                            String answer,
@@ -68,8 +69,9 @@ public abstract class BaseAnswerDAO extends DAO {
         new AudioCheck.ValidityAndDur(0),"");
 
     return addAnswer(
-        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0), ""));
+        new AnswerInfo(answerInfo,
+            new AnswerInfo.ScoreInfo(correct, pronScore, "", 0), ""), System.currentTimeMillis());
   }
 
-  abstract int addAnswer(AnswerInfo answerInfo);
+  abstract int addAnswer(AnswerInfo answerInfo, long timestamp);
 }

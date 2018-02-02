@@ -47,8 +47,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
-  private static final String POUND = "#";
   private final Logger logger = Logger.getLogger("SelectionState");
+
+  private static final String POUND = "#";
 
   public static final String ITEM = "item";
   public static final String SEARCH = "search";

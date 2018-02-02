@@ -57,8 +57,7 @@ import java.util.logging.Logger;
  * @since 2/4/16.
  */
 public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("PracticeHelper");
-
+  //private final Logger logger = Logger.getLogger("PracticeHelper");
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
   private NPFlexSectionExerciseList facetExerciseList;

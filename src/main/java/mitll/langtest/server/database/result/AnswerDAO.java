@@ -55,11 +55,12 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
   /**
    * @param answerInfo
+   * @param timestamp
    * @return id of new row in result table
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
   @Override
-  public int addAnswer(AnswerInfo answerInfo) {
+  public int addAnswer(AnswerInfo answerInfo, long timestamp) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -159,7 +160,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @param connection
    * @param info
    * @throws java.sql.SQLException
-   * @see AnswerDAO#addAnswer
+   * @see BaseAnswerDAO#addAnswer
    */
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
     long newID = -1;

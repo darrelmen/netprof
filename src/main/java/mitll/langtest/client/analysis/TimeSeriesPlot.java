@@ -181,7 +181,7 @@ class TimeSeriesPlot extends DivWidget {
       }
     }
   }
-x
+
   /**
    * @param phoneSessions
    * @param chart

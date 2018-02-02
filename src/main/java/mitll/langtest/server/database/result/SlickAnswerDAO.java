@@ -59,20 +59,21 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * Cheesy thing where audio file path is actually in the audio file slot and not the answer.
    *
    * @param answerInfo
+   * @param timestamp
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
-  public int addAnswer(AnswerInfo answerInfo) {
+  public int addAnswer(AnswerInfo answerInfo, long timestamp) {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
     String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
+   // long time = System.currentTimeMillis();
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
         answerInfo.getId(),
-        new Timestamp(System.currentTimeMillis()),
-        // answerInfo.getQuestionID(),
+        new Timestamp(timestamp),
         answerInfo.getAudioType().toString(),
         answerInserted,
         answerInfo.isValid(),

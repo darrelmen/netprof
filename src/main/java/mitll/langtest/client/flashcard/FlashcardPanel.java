@@ -751,6 +751,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     progressBar.setPercent(percent);
   }
 
+  /**
+   * @see #addPrevNextWidgets
+   * @return
+   */
   private Button getNextButton() {
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);

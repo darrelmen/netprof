@@ -506,8 +506,10 @@ public class AudioFileHelper implements AlignDecode {
         new AnswerInfo.ScoreInfo(answer.isCorrect(), (float) answer.getScore(),
             new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
-    int answerID = db.getAnswerDAO().addAnswer(info);
+    long timestamp = System.currentTimeMillis();
+    int answerID = db.getAnswerDAO().addAnswer(info, timestamp);
     answer.setResultID(answerID);
+    answer.setTimestamp(timestamp);
 
 
     // do this db write later
@@ -810,7 +812,7 @@ public class AudioFileHelper implements AlignDecode {
           new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), modelsDir);
 
       answer.setTranscript(exercise.getForeignLanguage());
-      int answerID = db.getAnswerDAO().addAnswer(info);
+      int answerID = db.getAnswerDAO().addAnswer(info,System.currentTimeMillis());
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);

@@ -18,8 +18,12 @@ import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MatchInfo;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -72,6 +76,7 @@ public class NewContentChooser implements INavigation {
   /**
    * So it could be that you've lost a permssion, so the view you were on before isn't allowed for you any more.
    * In which case we have to drop down to an allowed view.
+   *
    * @return
    * @see NewBanner#checkProjectSelected
    * @see #showInitialState
@@ -80,15 +85,19 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
- //   logger.info("currentView " + currentView);
+    //   logger.info("currentView " + currentView);
 //    if (currentView.equalsIgnoreCase("drill")) currentView = VIEWS.DRILL.toString();
-    VIEWS currentStoredView = (currentView.isEmpty()) ? LEARN : VIEWS.valueOf(currentView);
+    VIEWS initialView = isPolyglot() ?
+        DRILL :
+        LEARN;
 
-    List<User.Permission> requiredPerms = currentStoredView.getPerms();
+    VIEWS currentStoredView = (currentView.isEmpty()) ? initialView : VIEWS.valueOf(currentView);
+
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
 //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+    List<User.Permission> requiredPerms = currentStoredView.getPerms();
     userPerms.retainAll(requiredPerms);
 
 //    logger.info("user userPerms " + userPerms + " overlap =  " + userPerms);
@@ -101,10 +110,15 @@ public class NewContentChooser implements INavigation {
     return currentStoredView;
   }
 
+  private boolean isPolyglot() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
+  }
+
 
   @Override
   public void showView(VIEWS view) {
-    // logger.info("Got showView " + view  );
+    logger.info("showView : show " + view  );
     if (currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
     } else {
@@ -121,6 +135,21 @@ public class NewContentChooser implements INavigation {
           break;
         case DRILL:
           clear();
+
+          if (isPolyglot()) {
+            List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+            if (!typeOrder.isEmpty()) {
+              String s = typeOrder.get(0);
+              logger.info("First " + s);
+              Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
+              if (!matchInfos.isEmpty()) {
+                MatchInfo next = matchInfos.iterator().next();
+                String value = next.getValue();
+                logger.info("First " + s + " = "+ value);
+                History.newItem(s + "="+value);
+              }
+            }
+          }
           practiceHelper.showContent(divWidget, DRILL.toString());
           practiceHelper.hideList();
           break;
@@ -210,8 +239,8 @@ public class NewContentChooser implements INavigation {
   }
 
   /**
-   * @see InitialUI#showNavigation
    * @return
+   * @see InitialUI#showNavigation
    */
   @Override
   public Widget getNavigation() {
@@ -258,5 +287,7 @@ public class NewContentChooser implements INavigation {
   }
 
   @Override
-  public void clearCurrent() {   currentSection = NONE;  }
+  public void clearCurrent() {
+    currentSection = NONE;
+  }
 }

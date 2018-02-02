@@ -361,7 +361,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see #addChart
    */
   private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
-    final Chart chart = getHighchartChart(title);
+    final Chart chart = getHighchartChart(title, true);
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
@@ -710,16 +710,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   /**
-   * @param id
-   * @return
-   * @see AudioExampleContainer#getShell
-   */
-/*  @Override
-  public CommonShell getShell(int id) {
-    return getIdToEx().get(id);
-  }*/
-
-  /**
    * @param timeHorizon
    * @return
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
@@ -897,23 +887,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void timeChanged(long from, long to) {
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
   }
-
-/*  void setExerciseToTimeToAnswer(Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer) {
-    this.exerciseToTimeToAnswer = exerciseToTimeToAnswer;
-  }*/
-
-  /**
-   * @paramx exid
-   * @paramx timestamp
-   * @return
-   * @seez PlayAudio#playLast(int, long)
-   */
-/*
-  @Override
-  public WordScore getAnswerPath(int exid, long timestamp) {
-    return exerciseToTimeToAnswer.get(exid).get(timestamp);
-  }
-*/
 
   public interface TimeChangeListener {
     /**

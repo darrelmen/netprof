@@ -41,9 +41,11 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -51,6 +53,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
@@ -59,6 +62,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.ProjectType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -119,7 +123,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Timer roundTimer = null;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = 0;
+  private static final int DRY_RUN_MINUTES = 1; //10;
   private static final int ROUND_MINUTES = 1; //10;
+  private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
 
   /**
@@ -181,22 +187,27 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @param num
    */
   private void showPolyDialog(int num) {
-    new PolyglotDialog(ROUND_MINUTES, num, MIN_SCORE, new DialogHelper.CloseListener() {
-      @Override
-      public boolean gotYes() {
-        inLightningRound = true;
-        reset();
-        currentFlashcard.loadCurrent();
-        startRoundTimer();
-        return true;
-      }
+    boolean selectionMade = !new SelectionState(History.getToken(), false).getTypeToSection().isEmpty();
 
-      @Override
-      public void gotNo() {
-        inLightningRound = false;
-        cancelRoundTimer();
-      }
-    });
+    if (selectionMade) {
+      int minutes = num < 50 ? DRY_RUN_MINUTES : ROUND_MINUTES;
+      new PolyglotDialog(minutes, num, MIN_SCORE, new DialogHelper.CloseListener() {
+        @Override
+        public boolean gotYes() {
+          inLightningRound = true;
+          reset();
+          currentFlashcard.reallyStartOver();
+          startRoundTimer();
+          return true;
+        }
+
+        @Override
+        public void gotNo() {
+          inLightningRound = false;
+          cancelRoundTimer();
+        }
+      });
+    }
   }
 
   private boolean isPolyglot(ExerciseController controller) {
@@ -299,6 +310,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     exToScore.clear();
     latestResultID = -1;
     sticky.clearCurrent();
+
   }
 
   public int getCurrentExerciseID() {
@@ -366,11 +378,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     this.contentPanel = contentPanel;
   }
 
+  private PolyglotChart polyglotChart;
+
   /**
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
     private static final long ONE_MIN = (60L * 1000L);
+    public static final int CHART_HEIGHT = 120;
 
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
@@ -477,6 +492,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         setStateFeedback();
 
         latestResultID = result.getResultID();
+
+        polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
         //    logger.info("got invalid result " + result);
@@ -576,7 +593,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       }
 
-      scoreHistory.add(new Heading(2, "Score is " + Math.round(totalScore) + " for " + total + " items."));
+      float fround = Math.round(totalScore * 100);
+      scoreHistory.add(new Heading(2, "Score is " + (fround /100f) + " for " + total + " items."));
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
@@ -663,13 +681,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.setIcon(IconType.UNDO);
       w1.getElement().setId("AVP_DoWholeSetFromStart");
       w1.setType(ButtonType.PRIMARY);
-      w1.addClickHandler(event -> doStartOver(w1));
+      w1.addClickHandler(event -> doGoBack(w1));
       controller.register(w1, N_A);
       return w1;
     }
 
-    private void doStartOver(Button w1) {
+    private void doGoBack(Button w1) {
       w1.setVisible(false);
+      sticky.clearCurrent();
       showFlashcardDisplay();
       startOver();
     }
@@ -692,28 +711,27 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     void startOver() {
       makeFlashcardButtonsVisible();
 
-//      String lastID = "";
       int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
-//      for (L ex : allExercises) {
-//        lastID = ex.getOldID();
-//      }
-//      String lastID = allExercises.get(allExercises.size() - 1).getOldID();
       int currentExerciseID = sticky.getCurrentExerciseID();
-
       //  logger.info("startOver : current " + currentExerciseID);
 
       if (currentExerciseID != -1 && currentExerciseID != lastID) {
         exerciseList.loadExercise(currentExerciseID);
       } else {
-        reset();
-        sticky.resetStorage();
-
-        if (!allExercises.isEmpty()) {
-          exerciseList.loadExercise(allExercises.iterator().next().getID());
-        }
+        reallyStartOver();
       }
 
       checkPoly(allExercises.size());
+      polyglotChart = null;
+    }
+
+    private void reallyStartOver() {
+      reset();
+      sticky.resetStorage();
+
+      if (!allExercises.isEmpty()) {
+        exerciseList.loadExercise(allExercises.iterator().next().getID());
+      }
     }
 
     private void makeFlashcardButtonsVisible() {
@@ -734,9 +752,39 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      */
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
-      toAddTo.add(getSkipToEnd());
-      toAddTo.add(startOver = getStartOver());
+      PolyglotChart polyglotChart = getChart();
+
+      toAddTo.add(polyglotChart);
+
+      DivWidget buttons = new DivWidget();
+      buttons.setWidth("100%");
+      toAddTo.add(buttons);
+
+      buttons.add(getSkipToEnd());
+      buttons.add(startOver = getStartOver());
+
       belowContentDiv = toAddTo;
+    }
+
+    @NotNull
+    private PolyglotChart getChart() {
+      if (polyglotChart != null) {  // factory level chart
+        polyglotChart.setExtremes();
+        return polyglotChart;
+      }
+
+      PolyglotChart pChart = new PolyglotChart(controller);
+
+      logger.info("getChart ");
+      pChart.addStyleName("topFiveMargin");
+      pChart.addStyleName("bottomFiveMargin");
+      pChart.addChart();
+      pChart.setWidth("100%");
+      pChart.setHeight(CHART_HEIGHT + "px");
+      pChart.addStyleName("floatLeftAndClear");
+
+      polyglotChart = pChart;
+      return pChart;
     }
 
     /**

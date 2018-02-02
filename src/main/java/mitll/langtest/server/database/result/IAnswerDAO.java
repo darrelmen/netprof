@@ -44,7 +44,7 @@ public interface IAnswerDAO {
                     float classifierScore,
                     String session, long timeSpent);
 
-  int addAnswer(AnswerInfo answerInfo);
+  int addAnswer(AnswerInfo answerInfo, long timestamp);
 
   void addRoundTrip(int resultID, int roundTrip);
 

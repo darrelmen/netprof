@@ -36,33 +36,25 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   protected final ExceptionSupport exceptionSupport;
 
 
-  protected BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
+  public BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
     this.exceptionSupport = exceptionSupport;
   }
 
   /**
    * @param title
+   * @param addLegend
    * @return
    * @see AnalysisPlot#getChart(String, String, String, UserPerformance)
    */
-  protected Chart getHighchartChart(String title) {
-    return new Chart()
+   Chart getHighchartChart(String title, boolean addLegend) {
+    Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setChartTitleText(title)
         .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
-        .setLegend(new Legend()
-            .setLayout(Legend.Layout.VERTICAL)
-            .setAlign(Legend.Align.LEFT)
-            .setVerticalAlign(Legend.VerticalAlign.TOP)
-            .setX(X_OFFSET_LEGEND)
-            .setY(Y_OFFSET_FOR_LEGEND)
-            .setBorderWidth(1)
-            .setFloating(true)
-            .setBackgroundColor("#FFFFFF")
-        )
+
         .setScatterPlotOptions(new ScatterPlotOptions()
             .setMarker(new Marker()
                 .setRadius(5)
@@ -78,6 +70,19 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
         .setSeriesPlotOptions(new SeriesPlotOptions()
             .setSeriesClickEventHandler(getSeriesClickEventHandler())
         );
+    if (addLegend) {
+      chart.setLegend(new Legend()
+          .setLayout(Legend.Layout.VERTICAL)
+          .setAlign(Legend.Align.LEFT)
+          .setVerticalAlign(Legend.VerticalAlign.TOP)
+          .setX(X_OFFSET_LEGEND)
+          .setY(Y_OFFSET_FOR_LEGEND)
+          .setBorderWidth(1)
+          .setFloating(true)
+          .setBackgroundColor("#FFFFFF")
+      );
+    }
+    return chart;
   }
 
   private SeriesClickEventHandler getSeriesClickEventHandler() {
@@ -99,7 +104,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
   /**
    * @return
-   * @see #getHighchartChart(String)
+   * @see #getHighchartChart(String, boolean)
    */
   private ToolTip getToolTip() {
     return new ToolTip()

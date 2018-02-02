@@ -51,6 +51,7 @@ public class AudioAnswer implements IsSerializable {
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
   private double dynamicRange;
+  private long timestamp;
 
   public double getDynamicRange() {
     return dynamicRange;
@@ -68,7 +69,6 @@ public class AudioAnswer implements IsSerializable {
    * @param validity
    * @param reqid
    * @param duration
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public AudioAnswer(String path, Validity validity, int reqid, long duration) {
@@ -198,17 +198,25 @@ public class AudioAnswer implements IsSerializable {
     this.transcript = transcript;
   }
 
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
   public String toString() {
     return "Answer id " + getResultID() +
         " : audio attr " + audioAttribute +
-        " Path " + path +
-        " duration " + durationInMillis +
-        " id " + reqid +
-        " validity " + validity +
-        " correct " + correct +
-        " score " + score +
-        " said answer " + saidAnswer +
-        " pretest " + pretestScore +
-        " transcript " + transcript;
+        "\n\tPath " + path +
+        "\n\tduration " + durationInMillis +
+        "\n\tid " + reqid +
+        "\n\tvalidity " + validity +
+        "\n\tcorrect " + correct +
+        "\n\tscore " + score +
+        "\n\tsaid answer " + saidAnswer +
+        "\n\tpretest " + pretestScore +
+        "\n\ttranscript " + transcript;
   }
 }
