@@ -57,12 +57,14 @@ public interface IProjectDAO extends IDAO {
    * @param secondType
    * @param countryCode
    * @param displayOrder
+   * @param projectType
    * @param status
    * @param dominoID
    * @return
    */
   int add(int userid, String name, String language, String course,
-          String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID);
+          String firstType, String secondType, String countryCode, int displayOrder,
+          ProjectType projectType, ProjectStatus status, int dominoID);
 
   /**
    * @see ProjectDAO#add(int, long, String, String, String, ProjectType, ProjectStatus, String, String, String, int, int)

@@ -80,12 +80,12 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
-  private static final String TIMES_UP = "Times Up!";
-  public static final int MIN_SCORE = 40;
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
+  private static final String TIMES_UP = "Times Up!";
+  private static final int MIN_SCORE = 35;
   private static final int HEARTBEAT_INTERVAL = 1 * 1000;
-  // private static final int TEN_SEC = 10 * 1000;
+
   private static final int FEEDBACK_SLOTS = 4;
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 500;
@@ -123,8 +123,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Timer roundTimer = null;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = 0;
-  private static final int DRY_RUN_MINUTES = 1; //10;
-  private static final int ROUND_MINUTES = 1; //10;
+  private static final int DRY_RUN_MINUTES = 1;
+  private static final int ROUND_MINUTES = 10;
   private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
 
@@ -169,7 +169,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     isPolyglot = isPolyglot(controller);
 
-    logger.info("is poly glot " + isPolyglot);
+//    logger.info("is poly glot " + isPolyglot);
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
@@ -190,14 +190,15 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     boolean selectionMade = !new SelectionState(History.getToken(), false).getTypeToSection().isEmpty();
 
     if (selectionMade) {
-      int minutes = num < 50 ? DRY_RUN_MINUTES : ROUND_MINUTES;
+      boolean isDry = num < 50;
+      int minutes = isDry ? DRY_RUN_MINUTES : ROUND_MINUTES;
       new PolyglotDialog(minutes, num, MIN_SCORE, new DialogHelper.CloseListener() {
         @Override
         public boolean gotYes() {
           inLightningRound = true;
           reset();
           currentFlashcard.reallyStartOver();
-          startRoundTimer();
+          startRoundTimer(isDry);
           return true;
         }
 
@@ -214,7 +215,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
   }
 
-  private void startRoundTimer() {
+  private void startRoundTimer(boolean isDry) {
     if (isRoundTimerNotRunning()) {
       roundTimer = new Timer() {
         @Override
@@ -226,8 +227,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           inLightningRound = false;
         }
       };
-      roundTimer.schedule(ROUND_TIME);
-      roundTimeLeftMillis = ROUND_TIME;
+      int delayMillis = isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
+      roundTimer.schedule(delayMillis);
+      roundTimeLeftMillis = delayMillis;
       recurringTimer = new Timer() {
         @Override
         public void run() {
@@ -594,7 +596,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
 
       float fround = Math.round(totalScore * 100);
-      scoreHistory.add(new Heading(2, "Score is " + (fround /100f) + " for " + total + " items."));
+      Heading child = new Heading(2, "Score is " + (fround / 100f) + " for " + total + " items.");
+      child.addStyleName("topFiveMargin");
+      scoreHistory.add(child);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
@@ -855,6 +859,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     private Label remain, incorrectBox, correctBox, pronScore, timeLeft;
 
+    /**
+     *
+     * @return
+     */
     protected Panel getLeftState() {
       Grid g = new Grid(isPolyglot ? FEEDBACK_SLOTS_POLYGLOT : FEEDBACK_SLOTS, 2);
 
@@ -898,21 +906,22 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         pronScore.setType(LabelType.SUCCESS);
 
         g.setWidget(row, 0, pronScoreGroup);
-        pronScoreGroup.addStyleName("rightFiveMargin");
+        //pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, pronScore);
       }
 
       if (isPolyglot) {
         ControlGroup pronScoreGroup = new ControlGroup("Time left");
-        pronScoreGroup.addStyleName("topFiveMargin");
+        //pronScoreGroup.addStyleName("topFiveMargin");
 
         timeLeft = new Label();
         timeLeft.setType(LabelType.SUCCESS);
+        timeLeft.setWidth("40px");
 
         g.setWidget(row, 0, pronScoreGroup);
-        pronScoreGroup.addStyleName("rightFiveMargin");
+        //pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, timeLeft);
-        //  timeLeft.setText("0");
+        // timeLeft.setText("0");
       }
 
       setStateFeedback();

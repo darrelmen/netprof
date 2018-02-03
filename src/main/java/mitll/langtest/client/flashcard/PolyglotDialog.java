@@ -10,6 +10,9 @@ import mitll.langtest.client.dialog.DialogHelper;
 import java.util.Collections;
 
 class PolyglotDialog {
+  private static final int HSIZE = 4;
+  public static final String LIGHTNING_ROUND = "Lightning Round!";
+
   /**
    * @param num
    * @param closeListener
@@ -19,19 +22,17 @@ class PolyglotDialog {
     DivWidget container = new DivWidget();
 
     FluidRow row = new FluidRow();
-    Heading w = new Heading(4, "Lightning Round!");
-    w.addStyleName("blueColor");
-    row.add(w);
+    // Heading w = new Heading(4, "Lightning Round!");
+    //  w.addStyleName("blueColor");
+    // row.add(w);
     container.add(row);
 
-    row = getContentRow(minutes, num,minScore);
+    row = getContentRow(minutes, num, minScore);
     container.add(row);
-
-    String title = "Lightning Round";
 
     Button closeButton = new DialogHelper(true)
         .show(
-            title,
+            LIGHTNING_ROUND,
             Collections.emptyList(),
             container,
             "Start!",
@@ -44,17 +45,19 @@ class PolyglotDialog {
   private FluidRow getContentRow(int minutes, int num, int minScore) {
     FluidRow row;
     row = new FluidRow();
-    row.add(new Heading(5, "You have " +
+    row.add(new Heading(HSIZE, "You have " +
         minutes +
-        " minutes to try to complete all " + num + " items."));
-    row.add(new Heading(5, "You are not required to complete all the items, but your final score combines both pronunciation quality and number attempted."));
+        " minute" +
+        (minutes > 1 ? "s" : "") +
+        " to <i>try</i> to complete all " + num + " items."));
+    row.add(new Heading(HSIZE, "You are not required to complete all the items, but your final score combines both pronunciation quality and number attempted."));
     Heading w = new Heading(5, "");
     w.setWidth("100%");
     row.add(w);
-    row.add(new Heading(5, "You will advance automatically to the next item when your score is above " +minScore+
+    row.add(new Heading(HSIZE, "You will advance automatically to the next item when your score is above " + minScore +
         "."));
 
-    row.add(new Heading(4, "Click start to begin -->"));
+    row.add(new Heading(HSIZE - 1, "Click start to begin."));
     return row;
   }
 }

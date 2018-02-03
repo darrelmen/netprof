@@ -59,7 +59,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
-  private SlickProject first;
+ // private SlickProject first;
 
   /**
    * @param database
@@ -317,14 +317,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param secondType
    * @param countryCode
    * @param displayOrder
+   * @param projectType
    * @param dominoID
    * @return
    * @paraxm isDev
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
    */
   public int add(int userid, String name, String language, String course,
-                 String firstType, String secondType, String countryCode, int displayOrder, ProjectStatus status, int dominoID) {
-    return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
+                 String firstType, String secondType, String countryCode, int displayOrder,
+                 ProjectType projectType, ProjectStatus status, int dominoID) {
+    return add(userid, System.currentTimeMillis(), name, language, course, projectType,
         status,
         firstType, secondType, countryCode, displayOrder, dominoID);
   }

@@ -64,6 +64,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.*;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -168,7 +169,7 @@ public class CopyToPostgres<T extends CommonShell> {
       ProjectStatus status = getProjectStatus(isEval, hasModel);
 
       String cc = getCreateProject(serverProps).getCC(language);
-      copyToPostgres.copyOneConfig(databaseLight, cc, nameToUse, displayOrder, status, skipRefResult);
+      copyToPostgres.copyOneConfig(databaseLight, cc, nameToUse, displayOrder, ProjectType.NP, status, skipRefResult);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -321,6 +322,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db            to read from
    * @param cc            country code
    * @param optName       non-default name (not language) - null OK
+   * @param projectType
    * @param status        i.e. not production
    * @param skipRefResult
    * @see #copyOneConfigCommand
@@ -329,6 +331,7 @@ public class CopyToPostgres<T extends CommonShell> {
                             String cc,
                             String optName,
                             int displayOrder,
+                            ProjectType projectType,
                             ProjectStatus status,
                             boolean skipRefResult) throws Exception {
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
@@ -339,7 +342,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\ttype order          " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
-    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, status);  // TODO : course?
+    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, projectType, status);  // TODO : course?
 
     logger.info("copyOneConfig" +
         "\n\tproject #             " + projectID +
@@ -428,9 +431,10 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optName,
                                        int displayOrder,
                                        Collection<String> typeOrder,
+                                       ProjectType projectType,
                                        ProjectStatus status) {
     return getCreateProject(db.getServerProps())
-        .createProjectIfNotExists(db, cc, optName, "", displayOrder, typeOrder, status);
+        .createProjectIfNotExists(db, cc, optName, "", displayOrder, typeOrder, projectType, status);
   }
 
   /**

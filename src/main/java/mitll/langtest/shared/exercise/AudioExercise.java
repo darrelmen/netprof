@@ -434,10 +434,9 @@ public class AudioExercise extends ExerciseShell {
 
       for (AudioAttribute audioAttribute : userToAudioForUser.getValue()) {
         if (!audioAttribute.isValid()) {
-          logger.warning("skip invalid audio " + audioAttribute);
+          logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
           continue;
         }
-        //System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
 
         if (audioAttribute.isRegularSpeed()) reg = true;
         if (audioAttribute.isSlow()) slow = true;
@@ -445,9 +444,7 @@ public class AudioExercise extends ExerciseShell {
         long candidateTimestamp = audioAttribute.getTimestamp();
 
         if (reg && slow && bothTimestamp < candidateTimestamp) {
-          //  System.out.println("\t\tlatest is " + new Date(candidateTimestamp));
           bothTimestamp = candidateTimestamp;
-          //           logger.info("\t\t\tlatest is " + new Date(bothTimestamp));
           bothLatestUser = audioAttribute.getUserid();
         }
 
@@ -470,11 +467,11 @@ public class AudioExercise extends ExerciseShell {
       if (latestReg != null) {
         ret.add(latestReg);
       }
-      else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
+     // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
       if (latestSlow != null) {
         ret.add(latestSlow);
       }
-      else logger.warning("getMostRecentAudioEasy no slow speed audio for " + getID());
+     // else logger.warning("getMostRecentAudioEasy no slow speed audio for " + getID());
 
     } else {
       ret = userToAudio.get(bothLatestUser);

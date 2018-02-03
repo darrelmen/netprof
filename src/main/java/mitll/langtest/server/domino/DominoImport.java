@@ -268,7 +268,7 @@ public class DominoImport implements IDominoImport {
     changedSince.forEach(doc -> {
       VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
       importDocs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), vocabularyItem));
-      logger.info("\t getImportDocs : found changed " + vocabularyItem);
+//      logger.info("\t getImportDocs : found changed " + vocabularyItem);
     });
 
     long now = System.currentTimeMillis();

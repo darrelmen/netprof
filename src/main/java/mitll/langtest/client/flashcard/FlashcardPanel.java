@@ -382,11 +382,20 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                                     Panel contentMiddle,
                                     DivWidget belowDiv,
                                     DivWidget lowestRow) {
-    Panel horiz = new HorizontalPanel();
+    //Panel horiz = new HorizontalPanel();
+    DivWidget horiz = new DivWidget();
+    horiz.addStyleName("inlineFlex");
     horiz.getElement().setId("left-content-right_container");
 
     leftState = getLeftState();
-    if (leftState != null) horiz.add(leftState);
+    //leftState.addStyleName("floatLeft");
+
+    if (leftState != null) {
+      DivWidget leftC = new DivWidget();
+      leftC.setWidth("140px");
+      leftC.add(leftState);
+      horiz.add(leftC);
+    }
 
     int basicNumRows = 2;
     int rows = lowestRow != null ? basicNumRows + 1 : basicNumRows;
@@ -398,6 +407,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     horiz.add(grid);
 
     rightColumn = getRightColumn(controlState);
+    //rightColumn.addStyleName("floatLeft");
     horiz.add(rightColumn);
     return horiz;
   }
@@ -517,15 +527,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     if (controlState.isAutoPlay()) {
       //   logger.info("checkThenLoadNextOnTimer " + delayMillis);
       boolean b = loadNextOnTimer(delayMillis);
-    } else {
-      //   logger.info("checkThenLoadNextOnTimer NOT AUTO PLAY " + delayMillis);
     }
   }
 
   /**
    * @param delay
    * @see #checkThenLoadNextOnTimer
-   * @see BootstrapExercisePanel#goToNextAfter
+   * @seex BootstrapExercisePanel#goToNextAfter
    * @seex StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay
    */
   boolean loadNextOnTimer(final int delay) {

@@ -8,6 +8,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +39,7 @@ public class CreateProject {
    * @param countryCode
    * @param course
    * @param typeOrder
+   * @param projectType
    * @param status
    * @return
    * @see CopyToPostgres#copyOneConfig
@@ -47,7 +49,8 @@ public class CreateProject {
                                       String optName,
                                       String course,
                                       int displayOrder,
-                                      Collection<String> typeOrder, ProjectStatus status) {
+                                      Collection<String> typeOrder,
+                                      ProjectType projectType, ProjectStatus status) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
@@ -58,7 +61,7 @@ public class CreateProject {
       logger.info("createProjectIfNotExists checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, typeOrder, status);
+      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, typeOrder, projectType, status);
       db.rememberProject(byName);
     } else {
       logger.info("createProjectIfNotExists found project " + byName + " for language '" + oldLanguage + "'");
@@ -77,7 +80,8 @@ public class CreateProject {
    * @param course
    * @param displayOrder
    * @param typeOrder
-   * @param status - eval = audio per project
+   * @param projectType
+   * @param status       - eval = audio per project
    * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db,
@@ -87,7 +91,7 @@ public class CreateProject {
                             String course,
                             int displayOrder,
                             Collection<String> typeOrder,
-                            ProjectStatus status) {
+                            ProjectType projectType, ProjectStatus status) {
     Iterator<String> iterator = typeOrder.iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -101,6 +105,7 @@ public class CreateProject {
             language,
             course,
             countryCode,
+            projectType,
             status,
             displayOrder,
             firstType,
@@ -158,13 +163,14 @@ public class CreateProject {
           info.getLanguage(),
           info.getCourse(),
           info.getCountryCode().isEmpty() ? getCC(info.getLanguage()) : info.getCountryCode(),
+          info.getProjectType(),
           ProjectStatus.DEVELOPMENT,
           info.getDisplayOrder(),
           info.getFirstType(),
           info.getSecondType(),
           info.getDominoID());
 
-       addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
+      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 
@@ -195,7 +201,12 @@ public class CreateProject {
                          String language,
                          String course,
                          String countryCode,
-                         ProjectStatus status, int displayOrder, String firstType, String secondType, int dominoID) {
+                         ProjectType projectType,
+                         ProjectStatus status,
+                         int displayOrder,
+                         String firstType,
+                         String secondType,
+                         int dominoID) {
     return projectDAO.add(
         beforeLoginUser,
         name,
@@ -205,6 +216,7 @@ public class CreateProject {
         secondType,
         countryCode,
         displayOrder,
+        projectType,
         status,
         dominoID);
   }
