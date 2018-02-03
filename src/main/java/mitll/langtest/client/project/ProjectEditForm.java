@@ -206,7 +206,6 @@ public class ProjectEditForm extends UserDialog {
     setCommonFields();
 
     info.setStatus(ProjectStatus.valueOf(statusBox.getValue()));
-    info.setProjectType(ProjectType.valueOf(typeBox.getValue()));
 
     info.setHost(hydraHost.getSafeText());
     setPort();
@@ -240,6 +239,7 @@ public class ProjectEditForm extends UserDialog {
     info.setFirstType(unit.getSafeText());
     info.setSecondType(chapter.getSafeText());
     info.setModelsDir(model.getSafeText());
+    info.setProjectType(ProjectType.valueOf(typeBox.getValue()));
     setPort();
   }
 
