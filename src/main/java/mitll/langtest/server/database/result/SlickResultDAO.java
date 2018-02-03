@@ -122,31 +122,26 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
+   * NOTE : WE can't add any more columns to this table.
+   *
    * @param shared
    * @param projid
    * @param transcript
    * @return
-   * @paramx exToInt
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyResult
    */
   public SlickResult toSlick(Result shared,
                              int projid,
-                             // Map<String, Integer> exToInt,
                              Integer realExID,
                              String transcript) {
-//    Integer realExID = exToInt.get(shared.getOldExID());
-//
-//    if (realExID == null) {
-//      return null;
-//    }
-//    else {
+
     String model = shared.getModel();
     if (model == null) model = "";
     return new SlickResult(-1,
         shared.getUserid(),
         realExID,
         new Timestamp(shared.getTimestamp()),
-        //shared.getQid(),
+
         shared.getAudioType().toString(),
         shared.getAnswer(),
         shared.isValid(),
@@ -161,13 +156,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         checkNull(shared.getJsonScore()),
         shared.isWithFlash(),
         shared.getDynamicRange(),
-        //    getLanguage(),
         transcript,
         shared.getUniqueID(),
         projid,
         model
     );
-//    }
+
   }
 
   private String checkNull(String deviceType) {

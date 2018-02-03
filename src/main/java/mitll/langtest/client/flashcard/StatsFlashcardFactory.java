@@ -101,6 +101,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
+   */
   private static final String GO_BACK = "Go back";
   private static final String N_A = "N/A";
 
@@ -152,8 +155,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void listChanged(List<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-          //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+          logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
+          cancelRoundTimer();
         }
       });
     }
@@ -206,6 +210,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void gotNo() {
           inLightningRound = false;
           cancelRoundTimer();
+
         }
       });
     }
@@ -250,6 +255,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private void cancelRoundTimer() {
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
+    roundTimeLeftMillis = 0;
   }
 
   @Override
@@ -312,7 +318,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     exToScore.clear();
     latestResultID = -1;
     sticky.clearCurrent();
-
   }
 
   public int getCurrentExerciseID() {
@@ -388,6 +393,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
     private static final long ONE_MIN = (60L * 1000L);
     public static final int CHART_HEIGHT = 120;
+    public static final String TRY_AGAIN = "Try Again?";
 
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
@@ -503,6 +509,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       super.receivedAudioAnswer(result);
     }
 
+    protected boolean isCorrect(boolean correct, double score) {
+      boolean b = isPolyglot ? score * 100 >= MIN_SCORE : correct;
+      logger.info("isCorrect " + correct + "  " + score + " " + b);
+      return b;
+    }
+
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
         if (score > 0.4d) {
@@ -615,11 +627,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       final Button w = getSummaryStartOver();
       child.add(w);
       w.addStyleName("topFiveMargin");
-      Button repeatButton = getRepeatButton();
-      repeatButton.addStyleName("topFiveMargin");
-      repeatButton.addStyleName("leftFiveMargin");
 
-      child.add(repeatButton);
+      if (!isPolyglot) {
+        Button repeatButton = getRepeatButton();
+        repeatButton.addStyleName("topFiveMargin");
+        repeatButton.addStyleName("leftFiveMargin");
+        child.add(repeatButton);
+      }
 
       DivWidget lefty = new DivWidget();
       lefty.add(child);
@@ -629,7 +643,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private Button getSummaryStartOver() {
       final Button w = new Button();
       w.setType(ButtonType.SUCCESS);
-      w.setText(START_OVER);
+      w.setText(TRY_AGAIN);
       w.setIcon(IconType.REPEAT);
 
       w.addClickHandler(event -> {
@@ -779,7 +793,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       PolyglotChart pChart = new PolyglotChart(controller);
 
-      logger.info("getChart ");
+
       pChart.addStyleName("topFiveMargin");
       pChart.addStyleName("bottomFiveMargin");
       pChart.addChart();
@@ -854,13 +868,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private void gotSeeScoresClick() {
       abortPlayback();
       seeScores.setEnabled(false);
+      cancelRoundTimer();
       onSetComplete();
     }
 
     private Label remain, incorrectBox, correctBox, pronScore, timeLeft;
 
     /**
-     *
      * @return
      */
     protected Panel getLeftState() {

@@ -445,7 +445,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       long round = Math.round(score * 100f);
       int oldID = exercise.getID();
 
-      if (correct) {
+      if (isCorrect(correct, score)) {
         showCorrectFeedback(score, result.getPretestScore());
         controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
@@ -455,6 +455,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       }
       playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()));
     }
+  }
+
+  protected  boolean isCorrect(boolean correct, double score) {
+    return correct;
   }
 
   private void clearFeedback() {

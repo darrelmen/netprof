@@ -19,7 +19,6 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   private Series series;
 
   public void addChart() {
-    logger.info("addChart ---");
     clear();
 
     chart = getChart("", "");
@@ -35,18 +34,18 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
         .setType(Series.Type.SCATTER);
   }
 
-  long startTime = System.currentTimeMillis();
+  private long startTime = System.currentTimeMillis();
 
   public void addPoint(long time, float score) {
     boolean isEmpty = series.getPoints().length == 0;
     if (isEmpty) {
-     // setExtremes(time);
+      // setExtremes(time);
       startTime = time;
     }
 
     series.addPoint(time, score * 100);//,false,false,false);
 
-   // setExtremes();
+    // setExtremes();
 
     Number min = chart.getXAxis().getExtremes().getMin();
     Number max = chart.getXAxis().getExtremes().getMax();
@@ -55,13 +54,13 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   }
 
   public void setExtremes() {
-   // setExtremes(startTime);
+    // setExtremes(startTime);
   }
 
   private void setExtremes(long time) {
     long start = time - 60;
     long end = time + (10 * 60 * 1000);
-    chart.getXAxis().setExtremes(start, end,true,false);
+    chart.getXAxis().setExtremes(start, end, true, false);
     logger.info("xAxis from " + new Date(start) + " - " + new Date(end));
   }
 

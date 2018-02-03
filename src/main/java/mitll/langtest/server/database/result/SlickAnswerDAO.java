@@ -69,7 +69,6 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
     String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
-   // long time = System.currentTimeMillis();
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
         answerInfo.getId(),

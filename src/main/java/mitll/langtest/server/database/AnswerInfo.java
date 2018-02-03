@@ -66,6 +66,7 @@ public class AnswerInfo {
   private String transcript = "";
   private final double snr;
   private String model = "";
+  private int session = 0;
 
   public int getProjid() {
     return projid;
@@ -73,6 +74,14 @@ public class AnswerInfo {
 
   public String getModel() {
     return model;
+  }
+
+  public int getSession() {
+    return session;
+  }
+
+  public void setSession(int session) {
+    this.session = session;
   }
 
   public static class RecordingInfo {
