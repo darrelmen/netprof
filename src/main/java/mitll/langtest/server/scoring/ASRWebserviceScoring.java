@@ -304,6 +304,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     Object[] cached = useCache ? (decode ?
         decodeAudioToScore.getIfPresent(filePath) :
         alignAudioToScore.getIfPresent(filePath)) : null;
+
+    if (cached != null) {
+      logger.info("scoreRepeatExercise : using cached score for " + filePath);
+    }
     Scores scores = null;
     String phoneLab = "";
     String wordLab = "";
@@ -504,7 +508,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
         phoneToDisplay = this.phoneToDisplay;
-       // logger.info("using " + phoneToDisplay.size());
+        // logger.info("using " + phoneToDisplay.size());
       }
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores, phoneToDisplay),

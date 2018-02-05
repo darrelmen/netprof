@@ -411,7 +411,7 @@ public class AudioFileHelper implements AlignDecode {
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "");
 
-    return options.isDoFlashcard() ?
+    return options.shouldDoDecoding() ?
         getAudioAnswerDecoding(exercise,
             audioContext,
             recordingInfo,
@@ -555,7 +555,7 @@ public class AudioFileHelper implements AlignDecode {
     }
     String absolutePath = absoluteFile.getAbsolutePath();
 
-    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoFlashcard(false);
+    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
     PrecalcScores precalcScores =
         checkForWebservice(
@@ -579,10 +579,10 @@ public class AudioFileHelper implements AlignDecode {
 
     // Do decoding, and record alignment info we just got in the database ...
     long durationInMillis = attribute.getDurationInMillis();
-    AudioAnswer decodeAnswer = doDecode ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false) : new AudioAnswer();
+    AudioAnswer decodeAnswer = doDecode ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis) : new AudioAnswer();
 
     DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
-    options.setUseOldSchool(doHydec);
+    //options.setUseOldSchool(doHydec);
     PretestScore alignmentScoreOld = /*doHydec ? getAlignmentScore(exercise, absolutePath, options) :*/ new PretestScore();
     DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
@@ -622,7 +622,7 @@ public class AudioFileHelper implements AlignDecode {
         "" + exerciseID,
         precalcScores,
         new DecoderOptions()
-            .setDoFlashcard(false)
+            .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
             .setUsePhoneToDisplay(usePhoneToDisplay1)
     );
@@ -652,7 +652,7 @@ public class AudioFileHelper implements AlignDecode {
 
     if (result.getAudioType() == AudioType.PRACTICE) {//.equals("flashcard") || result.getAudioType().equals("avp")) {
       long durationInMillis = result.getDurationInMillis();
-      AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
+      AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis);
 /*//      db.getPhoneDAO().removePhones(uniqueID);
 //      db.getWordDAO().removeWords(uniqueID);
       db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
@@ -745,17 +745,16 @@ public class AudioFileHelper implements AlignDecode {
   private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
                                       String wavPath,
                                       File file,
-                                      long duration,
-                                      boolean useOldSchool) {
+                                      long duration) {
     return getAudioAnswer(1,
         exercise1,
         wavPath, file, new AudioCheck.ValidityAndDur(duration),
 
         new DecoderOptions()
-            .setDoFlashcard(true)
+            .setDoDecode(true)
             .setCanUseCache(false)
             .setAllowAlternates(false)
-            .setUseOldSchool(useOldSchool),
+        ,
         db.getUserDAO().getBeforeLoginUser());
   }
 
@@ -933,7 +932,7 @@ public class AudioFileHelper implements AlignDecode {
           null,
 
           new DecoderOptions()
-              .setDoFlashcard(false)
+              .setDoDecode(false)
               .setCanUseCache(serverProps.useScoreCache())
               .setUsePhoneToDisplay(usePhoneToDisplay));
 
@@ -1000,7 +999,7 @@ public class AudioFileHelper implements AlignDecode {
                                           PrecalcScores precalcScores) {
     List<String> unk = new ArrayList<>();
 
-    if (isMacOrWin() || useOldSchoolServiceOnly || options.isUseOldSchool()) {  // i.e. NOT using cool new jcodr webservice
+    if (isMacOrWin() || useOldSchoolServiceOnly) {  // i.e. NOT using cool new jcodr webservice
       unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
 
@@ -1229,7 +1228,7 @@ public class AudioFileHelper implements AlignDecode {
                                            String prefix,
                                            PrecalcScores precalcScores,
                                            DecoderOptions options) {
-    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (options.isDoFlashcard() ? " Decoding " : " Aligning ") +
+    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (options.shouldDoDecoding() ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
@@ -1270,7 +1269,7 @@ public class AudioFileHelper implements AlignDecode {
         sentence, lmSentences, transliteration,
 
         pathHelper.getImageOutDir(language.toLowerCase()), imageOptions,
-        options.isDoFlashcard(), options.isCanUseCache(), prefix,
+        options.shouldDoDecoding(), options.isCanUseCache(), prefix,
         precalcScores,
         options.isUsePhoneToDisplay());
 
@@ -1331,7 +1330,7 @@ public class AudioFileHelper implements AlignDecode {
                                      DecoderOptions decoderOptions,
                                      int userID) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
-    if (decoderOptions.isDoFlashcard()) {
+    if (decoderOptions.shouldDoDecoding()) {
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),

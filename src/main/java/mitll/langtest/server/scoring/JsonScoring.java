@@ -90,7 +90,7 @@ public class JsonScoring {
       return jsonForScore;
     }
     boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
-    options.setDoFlashcard(doFlashcard);
+    options.setDoDecode(doFlashcard);
     AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
         options);
     long now = System.currentTimeMillis();
@@ -156,8 +156,8 @@ public class JsonScoring {
                                      DecoderOptions options) {
     AudioAnswer answer;
 
-    if (options.isDoFlashcard()) {
-      options.setDoFlashcard(true);
+    if (options.shouldDoDecoding()) {
+      options.setDoDecode(true);
       answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
           options
       );
@@ -168,7 +168,7 @@ public class JsonScoring {
           options.isUsePhoneToDisplay(),
           exercise.getProjectID());
 
-      options.setDoFlashcard(false);
+      options.setDoDecode(false);
 
       answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
           deviceType, device,
@@ -203,7 +203,7 @@ public class JsonScoring {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
         null,
         new DecoderOptions()
-            .setDoFlashcard(false)
+            .setDoDecode(false)
             .setCanUseCache(db.getServerProps().useScoreCache())
             .setUsePhoneToDisplay(usePhoneToDisplay));
   }
@@ -241,7 +241,7 @@ public class JsonScoring {
     int projectID = exercise.getProjectID();
     AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
-            0, options.isDoFlashcard() ? AudioType.PRACTICE : AudioType.LEARN);
+            0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
 
     AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
     AudioAnswer answer = audioFileHelper.getAnswer(exercise,

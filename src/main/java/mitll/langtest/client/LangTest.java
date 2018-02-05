@@ -798,7 +798,7 @@ public class LangTest implements
    *
    * @param user
    * @see LangTest#gotUser
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
@@ -1033,6 +1033,11 @@ public class LangTest implements
     return audioServiceAsync == null ? defaultAudioService : audioServiceAsync;
   }
 
+  /**
+   * Find host-specific scoring service - e.g. msa is on hydra2
+   *
+   * @return
+   */
   public ScoringServiceAsync getScoringService() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo == null) {

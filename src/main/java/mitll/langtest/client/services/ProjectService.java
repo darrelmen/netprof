@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
@@ -52,9 +53,22 @@ public interface ProjectService extends RemoteService {
    */
   boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException;
 
+  /**
+   * @see ProjectEditForm#updateProject
+   * @param info
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   boolean update(ProjectInfo info) throws DominoSessionException, RestrictedOperationException;
 
-
+  /**
+   * @see ProjectEditForm#newProject
+   * @param newProject
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;

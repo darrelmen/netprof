@@ -784,7 +784,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Compare with google response for this state.
    */
   void showEmptyExercise() {
-    logger.info("showEmptyExercise --- ");
+  //  logger.info("showEmptyExercise --- ");
+
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);

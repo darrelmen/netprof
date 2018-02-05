@@ -222,7 +222,18 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Boolean result) {
         lifecycleSupport.refreshStartupInfo(true);
-      }
+
+        services.getScoringService().configureAndRefresh(info.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            messageHelper.handleNonFatalError("Updating project on hydra server.", caught);
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            logger.info("updateProject did update on project #" + info.getID() + " on hydra server (maybe h2).");
+          }
+        });}
     });
   }
 

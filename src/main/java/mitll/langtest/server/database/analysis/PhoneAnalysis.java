@@ -53,14 +53,14 @@ public class PhoneAnalysis {
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-  //  private static final long FIVEMIN = 5 * MINUTE;
+  private static final long TENMIN = 10 * MINUTE;
   private static final long DAY = 24 * HOUR;
   //  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
   //  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
-      //FIVEMIN,
+      TENMIN,
       HOUR,
       //    QUARTER,
       DAY,

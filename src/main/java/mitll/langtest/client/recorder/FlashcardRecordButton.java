@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
-  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
+//  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
   //private static final String PROMPT2 = "Press and hold";//"Click/space and hold to record";
   /**
@@ -171,15 +171,9 @@ public class FlashcardRecordButton extends RecordButton {
           } else if (keyCode == KeyCodes.KEY_DOWN) {
             stopProp(event);
             gotDownArrow();
-          } else {
-//            if (WARN_NOT_A_SPACE) {
-//              warnNotASpace();
-//            }
           }
         }
       }
-    } else {
-      //  logger.info("checkKeyDown ignoring key press... " + listener);
     }
   }
 
@@ -202,9 +196,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
-      boolean isSpace = checkIsSpace(event);
-
-      if (isSpace) {
+      if (checkIsSpace(event)) {
         mouseDown = false;
         doClick();
       }
@@ -233,14 +225,16 @@ public class FlashcardRecordButton extends RecordButton {
   /**
    * @see #checkKeyDown(com.google.gwt.dom.client.NativeEvent)
    */
-  private void warnNotASpace() {
+/*  private void warnNotASpace() {
     logger.warning("warnNotASpace --- ");
     showPopup(NO_SPACE_WARNING);
-  }
+  }*/
 
+/*
   private void showPopup(String html) {
     new PopupHelper().showPopup(html);
   }
+*/
 
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();

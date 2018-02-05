@@ -101,6 +101,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //    logger.debug("\n\n\nlanguage is " + language);
   }
 
+  public Set<Integer> getIDs() {
+    synchronized (idToExercise) {
+      return idToExercise.keySet();
+    }
+  }
+
   /**
    * Only for AMAS.
    *
@@ -108,12 +114,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   public int getNumExercises() {
     return getRawExercises().size();
-  }
-
-  public Set<Integer> getIDs() {
-    synchronized (idToExercise) {
-      return idToExercise.keySet();
-    }
   }
 
   /**
@@ -133,23 +133,25 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * Mainly to support reading from Domino after edits in Domino
    *
-   * @see DatabaseImpl#reloadExercises(int)
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
    */
   public void reload() {
-    exercises = null;
-    idToExercise.clear();
-    oldidToExercise.clear();
-    sectionHelper.clear();
-    getRawExercises();
-  }
+    synchronized (idToExercise) {
+      logger.info("START : reloading exercises ");
 
-  @Override
-  public List<String> getTypeOrder() {
-    return getSectionHelper().getTypeOrder();
+      exercises = null;
+      idToExercise.clear();
+      oldidToExercise.clear();
+      sectionHelper.clear();
+      getRawExercises();
+
+      logger.info("END   : reloading exercises ");
+    }
   }
 
   /**
    * Do steps after reading the exercises.
+   * @see #getRawExercises
    */
   private void afterReadingExercises() {
     addAlternatives(exercises);
@@ -169,8 +171,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
     // add new items
     addNewExercises();
+  }
 
-    // attachAudio();
+  @Override
+  public List<String> getTypeOrder() {
+    return getSectionHelper().getTypeOrder();
   }
 
   /**

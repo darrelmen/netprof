@@ -34,19 +34,14 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -122,5 +117,7 @@ public interface ScoringService extends RemoteService {
    */
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
-  void recalcAllAlignments()throws DominoSessionException, RestrictedOperationException;
+  void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException;
+
+  void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 }

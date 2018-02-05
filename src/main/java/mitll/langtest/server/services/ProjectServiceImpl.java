@@ -59,33 +59,12 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
 
-  private static final String UPDATING_PROJECT_INFO = "updating project info";
+  public static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
-  //public static final String ANY = "Any";
-//  public static final String ID = "_id";
-//  public static final String NAME = "name";
-//  public static final String LANGUAGE_NAME = "languageName";
-//  public static final String CREATE_TIME = "createTime";
-//  public static final boolean DEBUG = false;
-//  public static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-//  public static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
-
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
   }
-
-  /**
-   * @paramx projectid
-   * @return
-   * @seex mitll.langtest.client.project.ProjectChoices#setProjectForUser
-   */
-/*
-  @Override
-  public boolean exists(int projectid) {
-    return getProjectDAO().exists(projectid);
-  }
-*/
 
   /**
    * @param name
@@ -114,24 +93,37 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
           "\n\tuser    " + userIDFromSessionOrDB + " update" +
           "\n\tproject " + info);
       boolean update = getProjectDAO().update(userIDFromSessionOrDB, info);
-      int id = info.getID();
-      if (update) {
-/*
-        logger.info("update for " +
-            "\n\tuser              " + userIDFromSessionOrDB +
-            "\n\tconfigure project " + id);
-            */
-        db.configureProject(db.getProject(id), true);
-      } else {
-        logger.info("update for " +
-            "\n\tuser                    " + userIDFromSessionOrDB +
-            "\n\tNOT configuring project " + id);
-      }
-      db.getProjectManagement().refreshProjects();
+      configureAndRefresh(userIDFromSessionOrDB, info.getID(), update);
       return update;
     } else {
       throw getRestricted(UPDATING_PROJECT_INFO);
     }
+  }
+
+/*
+  public void configureAndRefresh(boolean update, int projID) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      configureAndRefresh(userIDFromSessionOrDB, projID, update);
+    } else {
+      throw getRestricted(UPDATING_PROJECT_INFO);
+    }
+  }
+*/
+  private void configureAndRefresh(int userIDFromSessionOrDB, int projID, boolean update) {
+    if (update) {
+/*
+      logger.info("update for " +
+          "\n\tuser              " + userIDFromSessionOrDB +
+          "\n\tconfigure project " + projID);
+          */
+      db.configureProject(db.getProject(projID), true);
+    } else {
+      logger.info("update for " +
+          "\n\tuser                    " + userIDFromSessionOrDB +
+          "\n\tNOT configuring project " + projID);
+    }
+    db.getProjectManagement().refreshProjects();
   }
 
   /**
@@ -251,7 +243,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       String propValue = getProjectDAO().getPropValue(projid, key.getName());
       if (propValue != null) {
         String[] split = propValue.split(",");
-        return Arrays.stream(split).filter(prop->!prop.isEmpty()).collect(Collectors.toList());
+        return Arrays.stream(split).filter(prop -> !prop.isEmpty()).collect(Collectors.toList());
       } else {
         return new ArrayList<>();
       }
@@ -272,7 +264,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return getProjectDAO().addOrUpdateProperty(projid, key, newValue.toString().replaceAll("\\[","").replaceAll("]",""));
+      return getProjectDAO().addOrUpdateProperty(projid, key, newValue.toString().replaceAll("\\[", "").replaceAll("]", ""));
     } else {
       throw getRestricted("setProperty");
     }
@@ -286,7 +278,6 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   private int getImportUser() throws DominoSessionException {
     int importUser = getUserIDFromSessionOrDB();
-    //logger.info("addPending import user = " + importUser);
     if (importUser == -1) {
       logger.info("\t addPending import user now = " + importUser);
       importUser = db.getUserDAO().getImportUser();

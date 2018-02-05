@@ -66,14 +66,16 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.services.ProjectServiceImpl.UPDATING_PROJECT_INFO;
+
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
   private static final Logger logger = LogManager.getLogger(ScoringServiceImpl.class);
 
-  private static final boolean DEBUG = true;
+  // private static final boolean DEBUG = true;
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
-  public static final boolean USE_PHONE_TO_DISPLAY = true;
+  private static final boolean USE_PHONE_TO_DISPLAY = true;
 
   /**
    * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...
@@ -141,7 +143,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
               getPrecalcScores(serverProps.usePhoneToDisplay(), result, language),
 
               new DecoderOptions()
-                  .setDoFlashcard(false)
+                  .setDoDecode(false)
                   .setCanUseCache(serverProps.useScoreCache())
                   .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
         }
@@ -595,7 +597,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         "" + exerciseID,
         precalcScores,
         new DecoderOptions()
-            .setDoFlashcard(false)
+            .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
             .setUsePhoneToDisplay(usePhoneToDisplay1)
     );
@@ -702,5 +704,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
+  }
+
+  @Override
+  public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      db.configureProject(db.getProject(projID), true);
+      db.getProjectManagement().refreshProjects();
+    } else {
+      throw getRestricted(UPDATING_PROJECT_INFO);
+    }
   }
 }

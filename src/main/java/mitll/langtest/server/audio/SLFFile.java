@@ -35,6 +35,7 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -61,7 +62,6 @@ public class SLFFile {
 
   // private static final String LINK_WEIGHT = "-1.00";
   private static final float EQUAL_LINK_CONSTANT = -1.00f;
-  // public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
   private static final String STANDARD_WEIGHT = "-1.00";
   private static final String SIL = "SIL";
@@ -263,10 +263,12 @@ public class SLFFile {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
   public String cleanToken(String token) {
-    return token
+    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")
-        .replaceAll("\\p{P}", "")
+        .replaceAll("\\p{P}", "");
+
+    return StringUtils.stripAccents(s)
         .toLowerCase();
   }
 }

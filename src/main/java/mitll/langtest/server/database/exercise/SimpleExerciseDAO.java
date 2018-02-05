@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.List;
 import java.util.Set;
@@ -51,7 +52,7 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
    * @return
    * @see DatabaseImpl#getExercise
    * @see DatabaseImpl#makeDAO
-   * @see UserManagement#getUsers
+   * @see Project#getRawExercises
    */
   List<T> getRawExercises();
 
@@ -66,11 +67,27 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
 
   ISection<T> getSectionHelper();
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
+   */
   void reload();
 
+  /**
+   * ONLY FROM excel
+   * @see ExcelImport#readFromSheet
+   * @return
+   */
   List<String> getTypeOrder();
 
+  /**
+   * @see DatabaseImpl#getIDs
+   * @return
+   */
   Set<Integer> getIDs();
 
+  /**
+   * @see Project#isConfigured
+   * @return
+   */
   boolean isConfigured();
 }

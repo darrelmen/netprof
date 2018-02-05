@@ -80,6 +80,4 @@ public interface AudioServiceAsync {
    * @param asyncCallback
    */
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
-
-//  void ensureAllAudio(AsyncCallback<Void> async);
 }

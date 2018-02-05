@@ -1190,7 +1190,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void loadFirstExercise(String searchIfAny) {
-     logger.info("loadFirstExercise : ---");
+   //  logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       // logger.info("loadFirstExercise : current exercises is empty");
       //    gotEmptyExerciseList();

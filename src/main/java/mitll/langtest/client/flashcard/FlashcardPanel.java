@@ -470,7 +470,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param path
    * @param delayMillis
    * @param useCheck
-   * @paramx correctPrompt
    * @see #playRefAndGoToNextIfSet
    */
   private void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {

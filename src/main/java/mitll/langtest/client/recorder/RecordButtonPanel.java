@@ -79,7 +79,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private Panel panel;
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-  private boolean doFlashcardAudio = false;
+  private boolean doFlashcardAudio;
   private boolean allowAlternates = false;
   private final AudioType audioType;
 
@@ -299,7 +299,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   /**
    * @param result
    * @param outer
-   * @see mitll.langtest.client.amas.PressAndHoldExercisePanel#getAnswerWidget
+   * @see RecordButtonPanel#postAudioFile
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
 

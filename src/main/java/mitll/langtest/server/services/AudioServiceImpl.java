@@ -166,7 +166,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     DecoderOptions options = new DecoderOptions()
         .setRecordInResults(recordInResults)
-        .setDoFlashcard(doFlashcard)
+        .setDoDecode(doFlashcard)
         .setRefRecording(addToAudioTable)
         .setAllowAlternates(allowAlternates);
 

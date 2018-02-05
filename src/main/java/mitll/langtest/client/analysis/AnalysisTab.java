@@ -51,6 +51,7 @@ import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -131,7 +132,9 @@ public class AnalysisTab extends DivWidget {
 
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
-        controller.getSoundManager(), playFeedback, controller, controller.getMessageHelper(),isTeacherView);
+        controller.getSoundManager(), playFeedback, controller,
+        controller.getMessageHelper(),isTeacherView,
+        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);

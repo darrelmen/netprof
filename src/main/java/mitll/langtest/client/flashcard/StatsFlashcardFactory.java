@@ -84,7 +84,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private static final String TIMES_UP = "Times Up!";
   private static final int MIN_SCORE = 35;
-  private static final int HEARTBEAT_INTERVAL = 1 * 1000;
+  private static final float MIN_SCORE_F = ((float)MIN_SCORE)/100f;
+  private static final int HEARTBEAT_INTERVAL = 1000;
 
   private static final int FEEDBACK_SLOTS = 4;
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
@@ -155,7 +156,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void listChanged(List<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-          logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+     //     logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
           cancelRoundTimer();
         }
@@ -517,7 +518,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
-        if (score > 0.4d) {
+        if (score >= MIN_SCORE_F) {
           loadNextOnTimer(NEXT_EXERCISE_DELAY);
         }
       }

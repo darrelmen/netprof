@@ -89,7 +89,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   static final long HOUR = 60 * MINUTE;
   private static final long QUARTER = 6 * HOUR;
 
-  private static final long FIVEMIN = 5 * MINUTE;
+//  private static final long FIVEMIN = 5 * MINUTE;
+  private static final long TENMIN = 10 * MINUTE;
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
@@ -116,6 +117,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private long firstTime;
   private long lastTime;
 
+  private final List<Long> minutes = new ArrayList<>();
+
+  /**
+   *
+   */
   private final List<Long> weeks = new ArrayList<>();
   private final List<Long> months = new ArrayList<>();
 
@@ -126,6 +132,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private MessageHelper messageHelper;
   private int width = 1365;
   protected Chart chart = null;
+  boolean isPolyglot;
 
   /**
    * @param service
@@ -140,11 +147,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                       Icon playFeedback,
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
-                      boolean isTeacherView) {
+                      boolean isTeacherView,
+                      boolean isPolyglot) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
-
+    this.isPolyglot = isPolyglot;
     if (isTeacherView) width = WIDTH;
 
     setWidth(width + "px");
@@ -177,7 +185,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     granToLabel.put(WEEK, "Week");
     granToLabel.put(MONTH, "Month");
     granToLabel.put(YEAR, "Year");
-    granToLabel.put(FIVEMIN, "Minute");
+    granToLabel.put(TENMIN, "Minute");
+//    granToLabel.put(FIVEMIN, "Minute");
   }
 
   /**
@@ -194,11 +203,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
-      List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-      weeks.addAll(getPeriods(phoneSessions, WEEK, last));
-
-      List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
-      months.addAll(getPeriods(phoneSessions1, MONTH, last));
+      if (isPolyglot) {
+        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TENMIN);
+        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+      }
+      {
+        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
+        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+      }
+      {
+        List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
+        months.addAll(getPeriods(phoneSessions1, MONTH, last));
+      }
     }
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
@@ -840,7 +856,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   @NotNull
   private List<Long> getPeriods() {
-    return timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
+    return
+        timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ?
+            weeks :
+            months;
   }
 
   /**

@@ -6,22 +6,35 @@ package mitll.langtest.server.audio;
 public class DecoderOptions {
   private boolean isRefRecording = false;
   private boolean recordInResults = true;
-  private boolean doFlashcard = false;
+  private boolean doDecode = false;
   private boolean canUseCache = true;
   private boolean allowAlternates = false;
-  private boolean useOldSchool = false;
+ // private boolean useOldSchool = false;
   private boolean usePhoneToDisplay = false;
 
   public DecoderOptions() {}
+
+  /**
+   *
+   * @param isRefRecording
+   * @param recordInResults
+   * @param doDecode
+   * @param canUseCache
+   * @param allowAlternates
+   * @param usePhoneToDisplay
+   */
   public DecoderOptions(boolean isRefRecording,
-                        boolean recordInResults, boolean doFlashcard, boolean canUseCache, boolean allowAlternates, boolean useOldSchool,
+                        boolean recordInResults,
+                        boolean doDecode,
+                        boolean canUseCache,
+                        boolean allowAlternates,
                         boolean usePhoneToDisplay) {
     this.isRefRecording = isRefRecording;
     this.recordInResults = recordInResults;
-    this.doFlashcard = doFlashcard;
+    this.doDecode = doDecode;
     this.canUseCache = canUseCache;
     this.allowAlternates = allowAlternates;
-    this.useOldSchool = useOldSchool;
+ //   this.useOldSchool = useOldSchool;
     this.usePhoneToDisplay = usePhoneToDisplay;
   }
 
@@ -34,12 +47,12 @@ public class DecoderOptions {
     return this;
   }
 
-  public boolean isDoFlashcard() {
-    return doFlashcard;
+  public boolean shouldDoDecoding() {
+    return doDecode;
   }
 
-  public DecoderOptions setDoFlashcard(boolean val) {
-    this.doFlashcard = val;
+  public DecoderOptions setDoDecode(boolean val) {
+    this.doDecode = val;
     return this;
   }
 
@@ -60,7 +73,7 @@ public class DecoderOptions {
     this.allowAlternates = val;
     return this;
   }
-
+/*
   public boolean isUseOldSchool() {
     return useOldSchool;
   }
@@ -69,6 +82,7 @@ public class DecoderOptions {
     this.useOldSchool = val;
     return this;
   }
+*/
 
   public boolean isRecordInResults() {
     return recordInResults;
@@ -97,9 +111,10 @@ public class DecoderOptions {
     return "Decoder options " +
         (isRefRecording() ? "add to audio table " : "") +
         (recordInResults ? "add to results table " : "") +
-        (doFlashcard ? "decoding " : "alignment ") +
+        (doDecode ? "decoding " : "alignment ") +
         (canUseCache ? "use score cache " : "") +
-        (allowAlternates ? "allow alternates paths in decoding " : "") +
-        (useOldSchool ? "use hydec " : "use hydra");
+        (allowAlternates ? "allow alternates paths in decoding " : "")
+       // +        (useOldSchool ? "use hydec " : "use hydra")
+        ;
   }
 }

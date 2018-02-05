@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IPronunciationLookup {
-
   String createHydraDict(String transcript, String transliteration);
 
   int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration);

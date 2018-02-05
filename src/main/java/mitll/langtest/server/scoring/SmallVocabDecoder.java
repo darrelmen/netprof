@@ -33,6 +33,7 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +64,7 @@ public class SmallVocabDecoder {
   public static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char ZERO = '0';
+  private static final String P_Z = "\\p{Z}+";
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {
@@ -120,7 +122,7 @@ public class SmallVocabDecoder {
    */
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
-    final Map<String, Integer> sc = new HashMap<String, Integer>();
+    final Map<String, Integer> sc = new HashMap<>();
     sentences.forEach(sent -> getTokens(sent).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
@@ -177,12 +179,12 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
+    List<String> all = new ArrayList<>();
     // logger.debug("initial " + sentence);
     String trimmedSent = getTrimmed(sentence);
     // logger.debug("after  trim " + trimmedSent);
 
-    for (String untrimedToken : trimmedSent.split("\\p{Z}+")) { // split on spaces
+    for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
@@ -224,11 +226,19 @@ public class SmallVocabDecoder {
         .trim();
   }
 
+  /**
+   * No accents - french accents especially...
+   *
+   * @param sentence
+   * @return
+   * @see #getTrimmed
+   * @see mitll.langtest.server.trie.ExerciseTrie#getTrimmed
+   */
   public String getTrimmedLeaveLastSpace(String sentence) {
-    return sentence
+    String s = sentence
         .replaceAll(REMOVE_ME, " ")
         //   .replaceAll("", " ")
-        .replaceAll("\\p{Z}+", " ")  // normalize all whitespace
+        .replaceAll(P_Z, " ")  // normalize all whitespace
         // .replaceAll(";", " ")
         // .replaceAll("~", " ")
         //  .replaceAll("\\u2191", " ")
@@ -236,6 +246,7 @@ public class SmallVocabDecoder {
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
         .replaceAll("\\p{P}", " ");
+    return StringUtils.stripAccents(s);
   }
 
   /**
@@ -246,8 +257,8 @@ public class SmallVocabDecoder {
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in
 
-  boolean DEBUG = false;
-  boolean DEBUG_SEGMENT = false;
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_SEGMENT = false;
 
   /**
    * @param phrase
@@ -259,7 +270,7 @@ public class SmallVocabDecoder {
     String s = longest_prefix(phrase, 0, phraseToPrefix);
     boolean failedToSegment = s.trim().isEmpty();
     if (failedToSegment) {
-     if (DEBUG_SEGMENT) logger.info("couldn't segment " + phrase + " fall back to character based segmentation.");
+      if (DEBUG_SEGMENT) logger.info("couldn't segment " + phrase + " fall back to character based segmentation.");
       StringBuilder builder = new StringBuilder();
 
       List<Character> characters = new ArrayList<>(phrase.length());
@@ -275,7 +286,7 @@ public class SmallVocabDecoder {
         if (third != null) {
           String trigram = String.valueOf(first) + second + third;
           if (inDict(trigram)) {
-            if (DEBUG_SEGMENT)  logger.info("match trigram " + trigram);
+            if (DEBUG_SEGMENT) logger.info("match trigram " + trigram);
             builder.append(trigram).append(" ");
             i++;
             i++;
@@ -287,7 +298,7 @@ public class SmallVocabDecoder {
           if (second != null) {
             String bigram = String.valueOf(first) + second;
             if (inDict(bigram)) {
-              if (DEBUG_SEGMENT)  logger.info("match bigram " + bigram);
+              if (DEBUG_SEGMENT) logger.info("match bigram " + bigram);
               builder.append(bigram).append(" ");
               i++;
             } else {
@@ -300,7 +311,7 @@ public class SmallVocabDecoder {
       }
 
       String result = builder.toString();
-      if (DEBUG_SEGMENT)  logger.info("phrase " + phrase + " = " + result);
+      if (DEBUG_SEGMENT) logger.info("phrase " + phrase + " = " + result);
       return result;
     } else {
       return s;

@@ -445,7 +445,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Collection<String> types = (sectionHelper == null) ? Collections.emptyList() : sectionHelper.getTypeOrder();
 
     if (types.isEmpty()) {
-      logger.error("\n\n\ngetTypeOrder : " + projectid + " = " + types);
+      logger.error("getTypeOrder empty type order : " + projectid + " = " + types);
     }
     return types;
   }

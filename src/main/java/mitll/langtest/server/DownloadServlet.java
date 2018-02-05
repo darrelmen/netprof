@@ -392,7 +392,7 @@ public class DownloadServlet extends DatabaseServlet {
     CommonExercise exercise1 = db.getExercise(projid, exercise);
 
     if (exercise1 == null) {
-      logger.error("couldn't find exercise " + exercise + " for '" + useridString + "' and " + language);
+      logger.error("getFilenameForDownload couldn't find exercise #" + exercise + " for user '" + useridString + "' and language " + language + " for project #"+projid);
       return "Unknown_Exercise";
     } else {
       return getPrettyFileName(db, useridString, language, exercise1);
