@@ -345,6 +345,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.delete(id) > 0;
   }
 
+  public boolean deleteAllBut(int id) {
+    // logger.info("delete project #" + id);
+    return dao.deleteAllBut(id) > 0;
+  }
+
   /**
    * TODO : consider adding lts class
    * TODO : consider adding domino project id

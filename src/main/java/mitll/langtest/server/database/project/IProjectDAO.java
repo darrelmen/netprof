@@ -86,6 +86,7 @@ public interface IProjectDAO extends IDAO {
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder, int dominoID);
 
   boolean delete(int id);
+  boolean deleteAllBut(int id);
 
   /**
    * @return
@@ -98,7 +99,6 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   int getNumProjects();
-
 
   int getByName(String name);
   int getByLanguage(String language);

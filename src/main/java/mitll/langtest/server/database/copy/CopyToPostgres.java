@@ -100,7 +100,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
   enum ACTION {
-    COPY("c"), DROP("d"), DROPALL("a"), UPDATEUSER("u"), UNKNOWN("k");
+    COPY("c"), DROP("d"), DROPALL("a"), DROPALLBUT("b"), UPDATEUSER("u"), UNKNOWN("k");
 
     private String value;
 
@@ -201,27 +201,43 @@ public class CopyToPostgres<T extends CommonShell> {
     return new CreateProject(serverProps.getHydra2Languages());
   }
 
-  private void dropOneConfig(String config) {
+  private void dropOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
     IProjectDAO projectDAO = database.getProjectDAO();
-    int byName = projectDAO.getByName(config);
-    if (byName == -1) {
-      logger.warn("\n\n\ncouldn't find config " + config);
-    } else {
-      logger.info("Dropping " + config + " please wait...");
+    if (projectDAO.exists(projid)) {
+      logger.info("Dropping #" + projid + " please wait...");
       long then = System.currentTimeMillis();
-      projectDAO.delete(byName);
-      long now = System.currentTimeMillis();
-
-      Collection<SlickProject> all = projectDAO.getAll();
-      logger.info("Took " + (now - then) + " millis to drop " + config + ", now there are " + all.size() + " projects:");
-
-      for (SlickProject project : all) {
-        logger.info(" " + project);
-      }
-
+      projectDAO.delete(projid);
+      reportAfterDelete(projid, projectDAO, then, "drop");
+    } else {
+      logger.error("no project with that id");
     }
+
     database.close();
+  }
+
+  private void dropAllButOneConfig(Integer projid) {
+    DatabaseImpl database = getDatabase();
+    IProjectDAO projectDAO = database.getProjectDAO();
+    if (projectDAO.exists(projid)) {
+      logger.info("Dropping ALL PROJECTS except #" + projid + " please wait... might be awhile...");
+      long then = System.currentTimeMillis();
+      projectDAO.deleteAllBut(projid);
+      reportAfterDelete(projid, projectDAO, then, "drop all but ");
+    } else {
+      logger.error("no project with that id");
+    }
+
+    database.close();
+  }
+
+  private void reportAfterDelete(int config, IProjectDAO projectDAO, long then, String drop) {
+    long now = System.currentTimeMillis();
+
+    Collection<SlickProject> all = projectDAO.getAll();
+    logger.info("Took " + (now - then) + " millis to " + drop + " #" + config + ", now there are " + all.size() + " projects:");
+
+    all.forEach(project -> logger.info("\t" + project));
   }
 
   private static DatabaseImpl getDatabase() {
@@ -988,6 +1004,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     ACTION action = UNKNOWN;
     String config = null;
+    int projID = -1;
     String dropConfirm = null;
     String updateUsersFile = null;
     String optName = null;
@@ -999,7 +1016,24 @@ public class CopyToPostgres<T extends CommonShell> {
       config = cmd.getOptionValue(COPY.toLower());
     } else if (cmd.hasOption(DROP.toLower())) {
       action = DROP;
-      config = cmd.getOptionValue(DROP.toLower());
+      String optionValue = cmd.getOptionValue(DROP.toLower());
+      try {
+        projID = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        logger.error("couldn't parse " + DROP + " = " + optionValue);
+        formatter.printHelp("drop", options);
+        return;
+      }
+    } else if (cmd.hasOption(DROPALLBUT.toLower())) {
+      action = DROPALLBUT;
+      String optionValue = cmd.getOptionValue(DROPALLBUT.toLower());
+      try {
+        projID = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        logger.error("couldn't parse " + DROPALLBUT + " = " + optionValue);
+        formatter.printHelp("drop", options);
+        return;
+      }
     } else if (cmd.hasOption(DROPALL.toLower())) {
       action = DROPALL;
       dropConfirm = cmd.getOptionValue(DROPALL.toLower());
@@ -1038,9 +1072,17 @@ public class CopyToPostgres<T extends CommonShell> {
         formatter.printHelp("copy", options);
         break;
       case DROP:
-        logger.info("drop " + config);
+        logger.info("drop project #" + config);
         try {
-          copyToPostgres.dropOneConfig(config);
+          copyToPostgres.dropOneConfig(projID);
+        } catch (Exception e) {
+          logger.error("couldn't drop config " + config, e);
+        }
+        break;
+      case DROPALLBUT:
+        logger.info("drop all but #" + config);
+        try {
+          copyToPostgres.dropAllButOneConfig(projID);
         } catch (Exception e) {
           logger.error("couldn't drop config " + config, e);
         }
@@ -1100,8 +1142,14 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     {
-      Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this config from netprof database");
+      Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this project from netprof database");
       drop.setRequired(false);
+      options.addOption(drop);
+    }
+
+    {
+      Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
+      drop.setRequired(true);
       options.addOption(drop);
     }
 
@@ -1177,7 +1225,7 @@ public class CopyToPostgres<T extends CommonShell> {
     try {
       logger.warn("Mapping old user ids to new user ids.");
       database = getDatabase();
-    //  database.setInstallPath("");
+      //  database.setInstallPath("");
       //database = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
 
       long then = System.currentTimeMillis();
