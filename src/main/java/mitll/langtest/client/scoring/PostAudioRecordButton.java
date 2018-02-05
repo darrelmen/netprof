@@ -45,6 +45,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 
 import java.util.logging.Logger;
 
@@ -169,6 +170,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
 //    logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 
+    DecoderOptions decoderOptions = new DecoderOptions()
+        .setDoDecode(scoreAudioNow)
+        .setRecordInResults(recordInResults)
+        .setRefRecording(shouldAddToAudioTable())
+        .setAllowAlternates(false);
+
     controller.getAudioService().writeAudioFile(
         base64EncodedWavFile,
         audioContext,
@@ -176,11 +183,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         controller.usingFlashRecorder(),
         "browser",
         controller.getBrowserInfo(),
-        scoreAudioNow, // do flashcard
-        recordInResults,
-        shouldAddToAudioTable(),
-        false, // allow alternates
 
+//        scoreAudioNow, // do flashcard
+//        recordInResults,
+//        shouldAddToAudioTable(),
+//        false, // allow alternates
+
+        decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             onPostFailure(then, user,getExceptionAsString(caught));

@@ -43,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
@@ -55,7 +54,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends ScoringAudioPanel<T> {
-  private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+  //private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
@@ -65,7 +64,6 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
 
   /**
    * @param refSentence
-   * @param gaugePanel
    * @param playButtonSuffix
    * @param exercise
    * @param instance
@@ -75,7 +73,6 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
   ASRScoringAudioPanel(String refSentence,
                        String transliteration,
                        ExerciseController controller,
-                       ScoreListener gaugePanel,
                        String playButtonSuffix,
                        T exercise,
                        String instance) {

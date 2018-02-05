@@ -42,6 +42,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 
 /**
@@ -56,10 +57,10 @@ public interface AudioService extends RemoteService {
    * @param recordedWithFlash
    * @param deviceType
    * @param device
-   * @param doFlashcard
-   * @param recordInResults
-   * @param addToAudioTable
-   * @param allowAlternates
+   * @paramx doFlashcard
+   * @paramx recordInResults
+   * @paramx addToAudioTable
+   * @paramx allowAlternates
    * @return
    */
   AudioAnswer writeAudioFile(String base64EncodedString,
@@ -67,10 +68,7 @@ public interface AudioService extends RemoteService {
                              boolean recordedWithFlash,
                              String deviceType,
                              String device,
-                             boolean doFlashcard,
-                             boolean recordInResults,
-                             boolean addToAudioTable,
-                             boolean allowAlternates) throws DominoSessionException;
+                             DecoderOptions decoderOptions) throws DominoSessionException;
 
   /**
    * TODO : why exerciseID a String

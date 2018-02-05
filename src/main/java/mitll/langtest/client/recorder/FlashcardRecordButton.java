@@ -65,7 +65,6 @@ import java.util.logging.Logger;
 public class FlashcardRecordButton extends RecordButton {
 //  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
-  //private static final String PROMPT2 = "Press and hold";//"Click/space and hold to record";
   /**
    * @see #initRecordButton
    */
@@ -73,7 +72,6 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to start recording, release to stop.";
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
-  //private static final boolean WARN_NOT_A_SPACE = false;
 
   private boolean warnUserWhenNotSpace;
   private final boolean addKeyBinding;

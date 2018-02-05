@@ -76,7 +76,9 @@ public interface ScoringService extends RemoteService {
                                    String sentence,
                                    String transliteration,
 
-                                   ImageOptions imageOptions, int exerciseID, boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
+                                   ImageOptions imageOptions,
+                                   int exerciseID,
+                                   boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @param base64EncodedString

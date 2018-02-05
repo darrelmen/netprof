@@ -81,7 +81,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final String textToAlign;
   private final String transliteration;
   private final String identifier;
-  protected AudioAnswer lastResult;
+  private AudioAnswer lastResult;
 
   /**
    * Make a record button that returns the alignment and score.

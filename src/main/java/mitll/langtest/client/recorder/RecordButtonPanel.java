@@ -41,13 +41,12 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.initial.PopupHelper;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import mitll.langtest.shared.scoring.DecoderOptions;
 
 import java.util.logging.Logger;
 
@@ -177,7 +176,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
-      controller.stopRecording(bytes -> postAudioFile(getPanel(), 1, bytes));
+      controller.stopRecording(bytes -> postAudioFile(getPanel(), bytes));
       return true;
     } else {
       initRecordButton();
@@ -196,83 +195,81 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * TODO : add timeSpent, typeToSelection
    *
    * @param outer
-   * @param tries
    * @param base64EncodedWavFile
+   * @see #postAudioFile
+   * @see #stopRecording
    */
-  private void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
-    //System.out.println("RecordButtonPanel : postAudioFile " );
-    final long then = System.currentTimeMillis();
+  private void postAudioFile(final Panel outer, final String base64EncodedWavFile) {
     reqid++;
-    // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
-    String device = controller.getBrowserInfo();
-    final int len = base64EncodedWavFile.length();
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    final int len = base64EncodedWavFile.length();
 
     AudioContext audioContext = new AudioContext(reqid,
         controller.getUser(),
-        projectStartupInfo.getProjectid(),
-        projectStartupInfo.getLanguage(),
+        controller.getProjectStartupInfo().getProjectid(),
+        controller.getProjectStartupInfo().getLanguage(),
         exerciseID,
         index,
         audioType);
 
+    DecoderOptions decoderOptions = new DecoderOptions()
+        .setDoDecode(doFlashcardAudio)
+        .setRecordInResults(true)
+        .setRefRecording(false)
+        .setAllowAlternates(allowAlternates);
+
+    final long then = System.currentTimeMillis();
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
-        controller.usingFlashRecorder(), "browser", device,
-        doFlashcardAudio,
-        true,
-        false,
-        allowAlternates,
+        controller.usingFlashRecorder(),
+        "browser",
+        getDevice(),
+//        doFlashcardAudio,
+//        true,
+//        false,
+//        allowAlternates,
+        decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
-            controller.logException(caught);
-            if (tries > 0) {
-              postAudioFile(outer, tries - 1, base64EncodedWavFile); // TODO : try one more time...  ???
-            } else {
-              recordButton.setEnabled(true);
-              // receivedAudioFailure();
-              String stackTrace = getExceptionAsString(caught);
-              logMessage("postAudioFile : failed to post " + getLog(then) + "\n" + stackTrace, true);
-              Window.alert("postAudioFile : Couldn't post audio for exercise.");
-              new ExceptionHandlerDialog(caught);
-            }
+            onPostFailure(caught, then, len);
           }
 
           public void onSuccess(AudioAnswer result) {
-            //System.out.println("postAudioFile : onSuccess " + result);
-            if (reqid != result.getReqid()) {
-//              System.out.println("ignoring old answer " + result);
-              return;
-            }
-            long now = System.currentTimeMillis();
-            long diff = now - then;
-
-            controller.getScoringService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                controller.handleNonFatalError("adding round trip to recording", caught);
-              }
-
-              @Override
-              public void onSuccess(Void result) {
-              }
-            });
-            recordButton.setEnabled(true);
-            receivedAudioAnswer(result, outer);
-
-            if (diff > 1000) {
-              logMessage("posted " + getLog(then), false);
-            }
-          }
-
-          private String getLog(long then) {
-            long now = System.currentTimeMillis();
-            long diff = now - then;
-            return "audio for user " + controller.getUser() + " for exercise " + exerciseID + " took " + diff + " millis to post " +
-                len + " characters or " + (len / diff) + " char/milli";
+            onPostSuccess(result, then, outer, len);
           }
         });
+  }
+
+  protected String getDevice() {
+    return controller.getBrowserInfo();
+  }
+
+  private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
+    //System.out.println("postAudioFile : onSuccess " + result);
+    if (reqid != result.getReqid()) {
+//              System.out.println("ignoring old answer " + result);
+      return;
+    }
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+
+    recordButton.setEnabled(true);
+    receivedAudioAnswer(result, outer);
+
+    controller.getScoringService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("adding round trip to recording", caught);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
+
+    if (diff > 1000) {
+      logMessage("posted " + getLog(then, len), false);
+    }
   }
 
   private void logMessage(String message, boolean sendEmail) {
@@ -286,6 +283,27 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
       public void onSuccess(Void result) {
       }
     });
+  }
+
+  private void onPostFailure(Throwable caught, long then, int len) {
+    controller.logException(caught);
+//            if (tries > 0) {
+//              postAudioFile(outer, base64EncodedWavFile); // TODO : try one more time...  ???
+//            } else {
+    recordButton.setEnabled(true);
+    // receivedAudioFailure();
+    String stackTrace = getExceptionAsString(caught);
+    logMessage("postAudioFile : failed to post " + getLog(then, len) + "\n" + stackTrace, true);
+    Window.alert("postAudioFile : Couldn't post audio for exercise.");
+    new ExceptionHandlerDialog(caught);
+  }
+
+
+  private String getLog(long then, int len) {
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    return "audio for user " + controller.getUser() + " for exercise " + exerciseID + " took " + diff + " millis to post " +
+        len + " characters or " + (len / diff) + " char/milli";
   }
 
   public Widget getRecordButton() {

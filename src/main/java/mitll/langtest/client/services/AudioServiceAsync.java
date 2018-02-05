@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 
 public interface AudioServiceAsync {
@@ -45,10 +46,7 @@ public interface AudioServiceAsync {
                       boolean recordedWithFlash,
                       String deviceType,
                       String device,
-                      boolean doFlashcard,
-                      boolean recordInResults,
-                      boolean addToAudioTable,
-                      boolean allowAlternates,
+                      DecoderOptions decoderOptions,
 
                       AsyncCallback<AudioAnswer> async);
 
