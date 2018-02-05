@@ -170,10 +170,13 @@ public class CopyToPostgres<T extends CommonShell> {
 
       String nameToUse = optionalName == null ? language : optionalName;
 
-      ProjectStatus status = getProjectStatus(isEval, hasModel);
-
-      String cc = getCreateProject(serverProps).getCC(language);
-      copyToPostgres.copyOneConfig(databaseLight, cc, nameToUse, displayOrder, ProjectType.NP, status, skipRefResult);
+      copyToPostgres.copyOneConfig(databaseLight,
+          getCreateProject(serverProps).getCC(language),
+          nameToUse,
+          displayOrder,
+          ProjectType.NP,
+          getProjectStatus(isEval, hasModel),
+          skipRefResult);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -1138,8 +1141,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     {
-      Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file");
-      // mapFile.setRequired(false);
+      Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file (two column csv)");
       options.addOption(mapFile);
     }
 
@@ -1174,7 +1176,9 @@ public class CopyToPostgres<T extends CommonShell> {
     DatabaseImpl database = null;
     try {
       logger.warn("Mapping old user ids to new user ids.");
-      database = getSimpleDatabase();
+      database = getDatabase();
+    //  database.setInstallPath("");
+      //database = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
 
       long then = System.currentTimeMillis();
 
@@ -1182,11 +1186,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
       final DatabaseImpl fd = database;
       oldToNew.forEach((k, v) -> {
-        fd.getAudioDAO().updateUser(k, v);
-        fd.getAnswerDAO().updateUser(k, v);
-        fd.getEventDAO().updateUser(k, v);
-        fd.getReviewedDAO().updateUser(k, v);
-        fd.getSecondStateDAO().updateUser(k, v);
+        logger.warn("doUpdateUser : update  " + k + "->" + v);
+        updateUserIDForAllTables(fd, k, v);
       });
 
       long now = System.currentTimeMillis();
@@ -1208,9 +1209,21 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
+  private static void updateUserIDForAllTables(DatabaseImpl fd, Integer k, Integer v) {
+    fd.getAudioDAO().updateUser(k, v);
+    fd.getAnswerDAO().updateUser(k, v);
+    fd.getEventDAO().updateUser(k, v);
+    fd.getReviewedDAO().updateUser(k, v);
+    fd.getSecondStateDAO().updateUser(k, v);
+  }
+
   @NotNull
   private static Map<Integer, Integer> getUserMapFromFile(String filename) throws IOException {
-    Stream<String> lines = Files.lines(new File(filename).toPath());
+    File file = new File(filename);
+    if (!file.exists()) {
+      logger.warn("can't find file " + file.getAbsolutePath());
+    }
+    Stream<String> lines = Files.lines(file.toPath());
     Map<Integer, Integer> oldToNew = new HashMap<>();
     lines.forEach(line -> {
       String[] split = line.split(",");
@@ -1234,6 +1247,8 @@ public class CopyToPostgres<T extends CommonShell> {
         oldToNew.put(i, i1);
       }
     });
+
+    logger.info("Map has " + oldToNew.size() + " : " + oldToNew);
     return oldToNew;
   }
 }
