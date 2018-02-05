@@ -69,6 +69,11 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   private static final String MODIFIED = "modified";
   private static final String EXERCISEID = "exerciseid";
 
+  @Override
+  public void updateUser(int old, int newUser) {
+
+  }
+
   private final String tableName;
 
   public ReviewedDAO(Database database, String tableName) {

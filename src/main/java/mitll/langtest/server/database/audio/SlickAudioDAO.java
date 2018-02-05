@@ -669,6 +669,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     dao.addBulk(bulk);
   }
 
+  @Override
+  public void updateUser(int old, int newUser) {
+    dao.updateUser(old, newUser);
+  }
+
   public void setDefaultResult(int defaultResult) {
     this.defaultResult = defaultResult;
   }

@@ -884,6 +884,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
+  public void updateUser(int old, int newUser) {
+
+  }
+
+  @Override
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
   }
 

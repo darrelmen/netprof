@@ -25,4 +25,6 @@ public interface IEventDAO extends IDAO {
   Number getNumRows(int projid);
 
   void addPlayedMarkings(int userID, CommonExercise firstExercise);
+
+  void updateUser(int old, int newUser);
 }

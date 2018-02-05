@@ -51,4 +51,6 @@ public interface IAnswerDAO {
   void addUserScore(int id, float score);
 
   void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect);
+
+  void updateUser(int oldUser, int newUser);
 }

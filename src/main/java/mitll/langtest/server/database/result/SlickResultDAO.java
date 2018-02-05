@@ -65,7 +65,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private final ResultDAOWrapper dao;
   private SlickResult defaultResult;
-  ServerProperties serverProps;
+  private ServerProperties serverProps;
 
   /**
    * @param database

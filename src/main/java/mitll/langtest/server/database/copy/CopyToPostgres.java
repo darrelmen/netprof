@@ -73,8 +73,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Stream;
 
+import static mitll.langtest.server.ServerProperties.DEFAULT_NETPROF_AUDIO_DIR;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
 
@@ -96,7 +100,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
   enum ACTION {
-    COPY("c"), DROP("d"), DROPALL("a"), UNKNOWN("u");
+    COPY("c"), DROP("d"), DROPALL("a"), UPDATEUSER("u"), UNKNOWN("k");
 
     private String value;
 
@@ -130,7 +134,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  public static final String OPT_NETPROF_ROOT = "/opt/netprof";
+  private static final String OPT_NETPROF_ROOT = DEFAULT_NETPROF_AUDIO_DIR;
   private static final String NETPROF_PROPERTIES_FULL = OPT_NETPROF_ROOT + File.separator + "config/netprof.properties";
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
@@ -190,7 +194,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   @NotNull
-  private CreateProject getCreateProject( ServerProperties serverProps) {
+  private CreateProject getCreateProject(ServerProperties serverProps) {
     return new CreateProject(serverProps.getHydra2Languages());
   }
 
@@ -302,7 +306,6 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #getDatabaseLight(String, boolean, boolean, String, String)
    */
   private static ServerProperties getServerProperties(String config, String propsFile, String installPath) {
-    //String war = "war";
     String configDir = config.isEmpty() ? config : config + File.separator;
     File file = new File(installPath + File.separator +
         "config" + File.separator +
@@ -983,6 +986,7 @@ public class CopyToPostgres<T extends CommonShell> {
     ACTION action = UNKNOWN;
     String config = null;
     String dropConfirm = null;
+    String updateUsersFile = null;
     String optName = null;
     String optConfigValue = null;
     int displayOrderValue = 0;
@@ -996,6 +1000,9 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(DROPALL.toLower())) {
       action = DROPALL;
       dropConfirm = cmd.getOptionValue(DROPALL.toLower());
+    } else if (cmd.hasOption(UPDATEUSER.toLower())) {
+      action = UPDATEUSER;
+      updateUsersFile = cmd.getOptionValue(UPDATEUSER.toLower());
     }
 
     if (cmd.hasOption(NAME.toLower())) {
@@ -1070,6 +1077,10 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.info("please check with Gordon or Ray or somebody like that before doing this.");
         }
         break;
+      case UPDATEUSER:
+        logger.info("map old user ids to new user ids");
+        doUpdateUser(updateUsersFile);
+        break;
       default:
         formatter.printHelp("copy", options);
     }
@@ -1079,31 +1090,41 @@ public class CopyToPostgres<T extends CommonShell> {
   private static Options getOptions() {
     Options options = new Options();
 
-    Option copy = new Option(COPY.getValue(), COPY.toLower(), true, "copy this config or language into netprof");
-    copy.setRequired(false);
-    options.addOption(copy);
+    {
+      Option copy = new Option(COPY.getValue(), COPY.toLower(), true, "copy this config or language into netprof");
+      copy.setRequired(false);
+      options.addOption(copy);
+    }
 
-    Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this config from netprof database");
-    drop.setRequired(false);
-    options.addOption(drop);
+    {
+      Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this config from netprof database");
+      drop.setRequired(false);
+      options.addOption(drop);
+    }
 
-    Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
-    dropAll.setRequired(false);
-    options.addOption(dropAll);
+    {
+      Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
+      dropAll.setRequired(false);
+      options.addOption(dropAll);
+    }
 
+    {
+      Option optConfig = new Option(OPTCONFIG.getValue(), OPTCONFIG.toLower(), true, "optional properties file within config directory (e.g. for pashto)");
+      optConfig.setRequired(false);
+      options.addOption(optConfig);
+    }
 
-    Option optConfig = new Option(OPTCONFIG.getValue(), OPTCONFIG.toLower(), true, "optional properties file within config directory (e.g. for pashto)");
-    optConfig.setRequired(false);
-    options.addOption(optConfig);
+    {
+      Option name = new Option(NAME.getValue(), NAME.toLower(), true, "optional name for the project (different from config)");
+      name.setRequired(false);
+      options.addOption(name);
+    }
 
-    Option name = new Option(NAME.getValue(), NAME.toLower(), true, "optional name for the project (different from config)");
-    name.setRequired(false);
-    options.addOption(name);
-
-    Option eval = new Option(EVAL.getValue(), EVAL.toLower(), false, "mark the imported project as at the eval step and use project specific audio");
-    eval.setRequired(false);
-    options.addOption(eval);
-
+    {
+      Option eval = new Option(EVAL.getValue(), EVAL.toLower(), false, "mark the imported project as at the eval step and use project specific audio");
+      eval.setRequired(false);
+      options.addOption(eval);
+    }
 
     {
       Option displayOrder = new Option(ORDER.getValue(), ORDER.toLower(), true, "display order among projects of the same language");
@@ -1115,6 +1136,13 @@ public class CopyToPostgres<T extends CommonShell> {
       skip.setRequired(false);
       options.addOption(skip);
     }
+
+    {
+      Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file");
+      // mapFile.setRequired(false);
+      options.addOption(mapFile);
+    }
+
     return options;
   }
 
@@ -1140,5 +1168,72 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.error("Got " + e, e);
       }
     }
+  }
+
+  private static void doUpdateUser(String filename) {
+    DatabaseImpl database = null;
+    try {
+      logger.warn("Mapping old user ids to new user ids.");
+      database = getSimpleDatabase();
+
+      long then = System.currentTimeMillis();
+
+      Map<Integer, Integer> oldToNew = getUserMapFromFile(filename);
+
+      final DatabaseImpl fd = database;
+      oldToNew.forEach((k, v) -> {
+        fd.getAudioDAO().updateUser(k, v);
+        fd.getAnswerDAO().updateUser(k, v);
+        fd.getEventDAO().updateUser(k, v);
+        fd.getReviewedDAO().updateUser(k, v);
+        fd.getSecondStateDAO().updateUser(k, v);
+      });
+
+      long now = System.currentTimeMillis();
+
+      logger.warn("Updated  " + oldToNew.size() + " user ids in " + (now - then) + " millis.");
+
+    } catch (Exception e) {
+      logger.error("couldn't update all tables, got " + e, e);
+      String concat = database == null ? "" : database.getTables().concat(",\n");
+      logger.info("tables : now there are " + concat);
+    } finally {
+      try {
+        if (database != null) {
+          database.close();
+        }
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+      }
+    }
+  }
+
+  @NotNull
+  private static Map<Integer, Integer> getUserMapFromFile(String filename) throws IOException {
+    Stream<String> lines = Files.lines(new File(filename).toPath());
+    Map<Integer, Integer> oldToNew = new HashMap<>();
+    lines.forEach(line -> {
+      String[] split = line.split(",");
+      String old = split[0];
+      String newUser = split[1];
+      int i = -1;
+      try {
+        i = Integer.parseInt(old);
+      } catch (NumberFormatException e) {
+        logger.error("couldn't parse line " + oldToNew.size() + " : " + line);
+        throw new IllegalArgumentException("bad file " + filename);
+      }
+      int i1 = -1;
+      try {
+        i1 = Integer.parseInt(newUser);
+      } catch (NumberFormatException e) {
+        logger.error("couldn't parse line " + oldToNew.size() + " : " + line);
+        throw new IllegalArgumentException("bad file " + filename);
+      }
+      if (i != -1 && i1 != -1) {
+        oldToNew.put(i, i1);
+      }
+    });
+    return oldToNew;
   }
 }

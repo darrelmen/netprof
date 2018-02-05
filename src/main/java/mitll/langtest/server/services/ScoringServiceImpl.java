@@ -39,7 +39,7 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ISlimResult;

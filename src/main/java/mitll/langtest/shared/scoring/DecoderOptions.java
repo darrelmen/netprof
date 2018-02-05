@@ -1,9 +1,11 @@
-package mitll.langtest.server.audio;
+package mitll.langtest.shared.scoring;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Created by go22670 on 11/15/16.
  */
-public class DecoderOptions {
+public class DecoderOptions implements IsSerializable {
   private boolean isRefRecording = false;
   private boolean recordInResults = true;
   private boolean doDecode = false;

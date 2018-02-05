@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.scoring.PretestScore;
 

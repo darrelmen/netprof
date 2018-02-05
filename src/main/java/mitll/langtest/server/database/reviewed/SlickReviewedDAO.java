@@ -181,4 +181,9 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
   }
+
+  @Override
+  public void updateUser(int old, int newUser) {
+    dao.updateUser(old, newUser);
+  }
 }

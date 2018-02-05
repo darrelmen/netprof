@@ -52,4 +52,6 @@ public interface IReviewedDAO extends IDAO {
   Collection<Integer> getInspectedExercises();
 
   int getCount();
+
+  void updateUser(int old, int newUser);
 }

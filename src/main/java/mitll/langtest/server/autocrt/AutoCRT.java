@@ -36,7 +36,7 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.autocrt.export.ExerciseExport;
 import mitll.langtest.server.autocrt.export.ResponseAndGrade;
 import mitll.langtest.server.database.export.Export;

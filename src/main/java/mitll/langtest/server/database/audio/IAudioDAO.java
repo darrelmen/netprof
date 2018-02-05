@@ -130,6 +130,8 @@ public interface IAudioDAO extends IDAO {
 
   boolean didFindAnyAudioFiles(int projectid);
 
+  void updateUser(int old, int newUser);
+
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 
   /**

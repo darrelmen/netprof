@@ -330,6 +330,11 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     }
   }
 
+  @Override
+  public void updateUser(int oldUser, int newUser) {
+
+  }
+
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
   }

@@ -256,4 +256,9 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   public int getNumRows() {
     return eventDAOWrapper.getNumRows();
   }
+
+  @Override
+  public void updateUser(int old, int newUser) {
+    eventDAOWrapper.updateUser(old, newUser);
+  }
 }

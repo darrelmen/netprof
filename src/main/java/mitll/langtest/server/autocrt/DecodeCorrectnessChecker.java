@@ -33,7 +33,7 @@
 package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.PrecalcScores;

@@ -37,6 +37,7 @@ import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;

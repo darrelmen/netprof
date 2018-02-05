@@ -51,6 +51,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
@@ -394,8 +395,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param score
    * @param options
    * @return
-   * @paramx doFlashcard     determines whether we do decoding or alignment
-   * @paramx allowAlternates
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   public AudioAnswer getAnswer(
@@ -1340,7 +1339,8 @@ public class AudioFileHelper implements AlignDecode {
               userID,
               file);
 
-      PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(exercise,
+      PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(
+          exercise,
           file,
           audioAnswer,
           language,
@@ -1369,12 +1369,6 @@ public class AudioFileHelper implements AlignDecode {
   private ASR getASRScoring() {
     return webserviceScoring;
   }
-
-/*
-  private boolean isWebservice(ASR asr) {
-    return asr == webserviceScoring;
-  }
-*/
 
   private boolean isMacOrWin() {
     String property = System.getProperty("os.name").toLowerCase();

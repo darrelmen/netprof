@@ -145,7 +145,6 @@ public class ServerProperties {
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   // private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
-  private static final String APPLICATION_CONF = "/opt/netprof/config/application.conf";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
@@ -203,8 +202,10 @@ public class ServerProperties {
   /**
    * Note netprof is all lower case.
    */
-  private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
+  public static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
   private static final String DEFAULT_DCODR_DIR = "/opt/dcodr/";
+  private static final String APPLICATION_CONF = DEFAULT_NETPROF_AUDIO_DIR +"/config/application.conf";
+
   public static final String BEST_AUDIO = "bestAudio";
   private static final String ANSWERS = "answers";
 

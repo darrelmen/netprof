@@ -47,6 +47,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -98,9 +99,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param deviceType
    * @param device
    * @param doFlashcard         true if called from practice (flashcard) and we want to do decode and not align
-   * @param recordInResults     if true, record in results table -- only when recording in a learn or practice tab
-   * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
-   * @param allowAlternates
+   * @paramx recordInResults     if true, record in results table -- only when recording in a learn or practice tab
+   * @paramx addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
+   * @paramx allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
@@ -113,10 +114,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     String deviceType,
                                     String device,
 
-                                    boolean doFlashcard,
-                                    boolean recordInResults,
-                                    boolean addToAudioTable,
-                                    boolean allowAlternates) throws DominoSessionException {
+//                                    boolean doFlashcard,
+//                                    boolean recordInResults,
+//                                    boolean addToAudioTable,
+//                                    boolean allowAlternates,
+
+                                    DecoderOptions decoderOptions
+  ) throws DominoSessionException {
     int projectID = getProjectIDFromUser();
     Project project = db.getProject(projectID);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
@@ -135,8 +139,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         "\n\tpayload bytes   " + base64EncodedString.length());
 */
 
-    if (addToAudioTable && !recordInResults) { // we have a foreign key from audio into result table - must record in results
-      recordInResults = true;
+    if (decoderOptions.isRefRecording() && !decoderOptions.isRecordInResults()) { // we have a foreign key from audio into result table - must record in results
+      decoderOptions.setRecordInResults(true);
     }
     boolean amas = serverProps.isAMAS();
 
@@ -164,11 +168,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript);
 
-    DecoderOptions options = new DecoderOptions()
+/*    DecoderOptions options = new DecoderOptions()
         .setRecordInResults(recordInResults)
         .setDoDecode(doFlashcard)
         .setRefRecording(addToAudioTable)
-        .setAllowAlternates(allowAlternates);
+        .setAllowAlternates(allowAlternates);*/
 
 //    logger.info("writeAudioFile recording info " + recordingInfo);
     AudioAnswer audioAnswer = amas ?
@@ -179,14 +183,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             audioContext,
             recordingInfo,
 
-            options);
+            decoderOptions);
 
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
 
-    if (addToAudioTable && audioAnswer.isValid()) {
+    if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
-//      commonExercise.clearAudio();
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
     // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they

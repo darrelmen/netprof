@@ -54,8 +54,13 @@ import java.util.*;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class EventDAO extends DAO implements IEventDAO {
+class EventDAO extends DAO implements IEventDAO {
   private static final Logger logger = LogManager.getLogger(EventDAO.class);
+
+  @Override
+  public void updateUser(int old, int newUser) {
+
+  }
 
   private static final String EVENT = "event";
   private static final String CREATORID = "creatorid";
@@ -63,18 +68,18 @@ public class EventDAO extends DAO implements IEventDAO {
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
   private static final String DEVICE = "device";
-  public static final String WIDGETID = "widgetid";
-  public static final String CONTEXT = "context";
-  long defectDetector = -1;
-  public static final String MODIFIED = "modified";
-  public static final String WHERE_DEVICE = " where length(device)=36";
+  private static final String WIDGETID = "widgetid";
+  private static final String CONTEXT = "context";
+  private long defectDetector = -1;
+  private static final String MODIFIED = "modified";
+  private static final String WHERE_DEVICE = " where length(device)=36";
 
   /**
    * @param database
    * @param defectDetector
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public EventDAO(Database database, long defectDetector) {
+  private EventDAO(Database database, long defectDetector) {
     super(database);
     this.defectDetector = defectDetector;
     //  this.userDAO = userDAO;

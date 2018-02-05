@@ -33,7 +33,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.report.ReportingServices;
