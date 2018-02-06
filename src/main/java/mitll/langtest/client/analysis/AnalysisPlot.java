@@ -205,7 +205,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
       if (isPolyglot) {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TENMIN);
-        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+        minutes.addAll(getPeriods(phoneSessions, TENMIN, last));
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);

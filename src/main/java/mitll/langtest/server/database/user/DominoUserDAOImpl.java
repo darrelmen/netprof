@@ -1364,7 +1364,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       dbUser.setFirstName(toUpdate.getFirst());
       dbUser.setLastName(toUpdate.getLast());
       String affiliation = toUpdate.getAffiliation();
-      logger.info("update Set affiliation '" + affiliation + "' for " + toUpdate.getID());
+      //logger.info("update Set affiliation '" + affiliation + "' for " + toUpdate.getID());
       dbUser.setAffiliation(affiliation);
       setGender(toUpdate, dbUser);
 
@@ -1405,7 +1405,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
     else if (updateUser.getAffiliation().isEmpty()) {
-      logger.warn("updateUser empty affiliation for " + updateUser);
+      //logger.warn("updateUser empty affiliation for " + updateUser);
     }
 
     ClientUserDetail clientUserDetail1 = getClientUserDetail(updateUser);

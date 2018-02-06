@@ -182,12 +182,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
-  @Override
-  public Panel getTableWithPager(Collection<UserInfo> users) {
-    Panel tableWithPager = super.getTableWithPager(users);
-    tableWithPager.getElement().getStyle().setProperty("minHeight", "317px");
-    return tableWithPager;
-  }
+  // TODO : why did I want a min height for the table? It messes with the view on the laptop.
+//  @Override
+//  public Panel getTableWithPager(Collection<UserInfo> users) {
+//    Panel tableWithPager = super.getTableWithPager(users);
+// //   tableWithPager.getElement().getStyle().setProperty("minHeight", "317px");
+//    return tableWithPager;
+//  }
 
   private boolean showOnlyMine() {
     return controller.getStorage().isTrue("mineOnly");

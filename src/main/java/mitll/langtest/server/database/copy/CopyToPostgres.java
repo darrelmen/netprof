@@ -1149,7 +1149,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     {
       Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
-      drop.setRequired(true);
+      drop.setRequired(false);
       options.addOption(drop);
     }
 

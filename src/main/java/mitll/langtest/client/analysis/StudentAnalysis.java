@@ -61,7 +61,6 @@ import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
 public class StudentAnalysis extends DivWidget {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
- // private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS + " or more recordings";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
