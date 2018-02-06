@@ -35,6 +35,7 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.scoring.ASR;
@@ -70,12 +71,14 @@ public class RecordWordAndPhone {
   }
 
   /**
+   *
+   * @param projID
    * @param answer
    * @param answerID
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
-   * @see DatabaseImpl#recordWordAndPhoneInfo(AudioAnswer, long)
+   * @see DatabaseServices#recordWordAndPhoneInfo(int, AudioAnswer, long)
    */
-  public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+  public void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID) {
     PretestScore pretestScore = answer.getPretestScore();
 
     if (DEBUG) {
@@ -86,26 +89,34 @@ public class RecordWordAndPhone {
       }
     }
 
-    recordWordAndPhoneInfo(answerID, pretestScore);
+    recordWordAndPhoneInfo(projID, answerID, pretestScore);
   }
 
   /**
+   *
+   * @param projID
    * @param answerID
    * @param pretestScore
-   * @see DatabaseImpl#rememberScore
+   * @see DatabaseServices#rememberScore
    */
-  public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
+  public void recordWordAndPhoneInfo(int projID,
+                                     int answerID,
+                                     PretestScore pretestScore) {
     if (pretestScore != null) {
-      recordWordAndPhoneInfo(answerID, pretestScore.getTypeToSegments());
+      recordWordAndPhoneInfo(projID, answerID, pretestScore.getTypeToSegments());
     }
   }
 
   /**
+   *
+   * @param projID
    * @param answerID
    * @param netPronImageTypeListMap
-   * @see #recordWordAndPhoneInfo(long, PretestScore)
+   * @see #recordWordAndPhoneInfo(int, int, PretestScore)
    */
-  private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+  private void recordWordAndPhoneInfo(int projID,
+                                      int answerID,
+                                      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
@@ -117,7 +128,7 @@ public class RecordWordAndPhone {
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
         if (keepEvent(event)) {
-          long wid = wordDAO.addWord(new Word(answerID, event, windex++, segment.getScore()));
+          int wid = wordDAO.addWord(new Word(projID, answerID, event, windex++, segment.getScore()));
 
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
@@ -127,7 +138,7 @@ public class RecordWordAndPhone {
                 if (duration == 0) {
                   logger.warn("zero duration for " + answerID + " wid " + wid + " event " + pevent);
                 }
-                Phone phone = new Phone(answerID, wid, pevent, pindex++, pseg.getScore(), duration);
+                Phone phone = new Phone(projID, answerID, wid, pevent, pindex++, pseg.getScore(), duration);
                 toAdd.add(phone);
               }
             }
@@ -136,7 +147,7 @@ public class RecordWordAndPhone {
       }
 
       logger.info("recordWordAndPhoneInfo for " + answerID+ " adding " + windex + " words and " + toAdd.size() + " phones");
-      phoneDAO.addBulkPhones(toAdd);
+      phoneDAO.addBulkPhones(toAdd, projID);
     }
   }
 

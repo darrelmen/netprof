@@ -12,9 +12,7 @@ import java.util.List;
  * Created by go22670 on 3/29/16.
  */
 public interface IPhoneDAO<T>  extends IDAO {
-  void addBulkPhones(List<Phone> bulk);
-
-  //boolean addPhone(T phone);
+  void addBulkPhones(List<Phone> bulk, int projID);
 
   /**
    * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
@@ -37,4 +35,6 @@ public interface IPhoneDAO<T>  extends IDAO {
   PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to);
 
   void removeForResult(int resultid);
+
+  void deleteForProject(int projID);
 }

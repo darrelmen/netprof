@@ -44,7 +44,6 @@ import mitll.langtest.shared.scoring.AudioContext;
  */
 public class AnswerInfo {
 //  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
-
   private final int userid;
   private final int id;
   private final int projid;

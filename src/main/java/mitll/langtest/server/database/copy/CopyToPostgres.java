@@ -94,7 +94,6 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
-  //  private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
@@ -413,10 +412,10 @@ public class CopyToPostgres<T extends CommonShell> {
         if (oldToNewResult.isEmpty()) {
           logger.error("\n\n\nold to new result is EMPTY!");
         }
-        Map<Integer, Integer> oldToNewWordID = copyWordsAndGetIDMap(db, oldToNewResult);
+        Map<Integer, Integer> oldToNewWordID = copyWordsAndGetIDMap(db, oldToNewResult, projectID);
 
         // phone DAO
-        copyPhone(db, oldToNewResult, oldToNewWordID);
+        copyPhone(db, oldToNewResult, oldToNewWordID, projectID);
       }
 
       // anno DAO
@@ -429,14 +428,22 @@ public class CopyToPostgres<T extends CommonShell> {
     }
     long now = System.currentTimeMillis();
 
-    logger.info("copyOneConfig took " + ((now-then)/1000) + " seconds to load " + optName);
+    logger.info("copyOneConfig took " + ((now - then) / 1000) + " seconds to load " + optName);
   }
 
+  /**
+   * TODO : will get slower every time...
+   *
+   * @param db
+   * @param oldToNewResult
+   * @param projID
+   * @return
+   */
   @NotNull
-  private Map<Integer, Integer> copyWordsAndGetIDMap(DatabaseImpl db, Map<Integer, Integer> oldToNewResult) {
+  private Map<Integer, Integer> copyWordsAndGetIDMap(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, int projID) {
     logger.info("copyWordsAndGetIDMap oldToNewResult " + oldToNewResult.size());
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
-    copyWord(db, oldToNewResult, slickWordDAO);
+    copyWord(db, oldToNewResult, slickWordDAO, projID);
 
     Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
     logger.info("copyWordsAndGetIDMap old to new word id  " + oldToNewWordID.size());
@@ -617,29 +624,34 @@ public class CopyToPostgres<T extends CommonShell> {
     annotationDAO.addBulk(bulk);
   }
 
-  private void copyPhone(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, Map<Integer, Integer> oldToNewWordID) {
+  private void copyPhone(DatabaseImpl db,
+                         Map<Integer, Integer> oldToNewResult,
+                         Map<Integer, Integer> oldToNewWordID,
+                         int projID) {
     SlickPhoneDAO slickPhoneAO = (SlickPhoneDAO) db.getPhoneDAO();
+    PhoneDAO phoneDAO = new PhoneDAO(db);
+
     List<SlickPhone> bulk = new ArrayList<>();
     int c = 0;
     int d = 0;
-    // int added = 0;
-    Set<Long> missingrids = new TreeSet<>();
-    Set<Long> missingwids = new TreeSet<>();
-    for (Phone phone : new PhoneDAO(db).getAll()) {
-      long rid1 = phone.getRid();
-      Integer rid = oldToNewResult.get((int) rid1);
+
+    Set<Integer> missingrids = new TreeSet<>();
+    Set<Integer> missingwids = new TreeSet<>();
+    for (Phone phone : phoneDAO.getAll(projID)) {
+      int rid1 = phone.getRid();
+      Integer rid = oldToNewResult.get(rid1);
       if (rid == null) {
         if (c++ < 50 && missingrids.add(rid1)) logger.warn("copyPhone phone : no rid " + rid1);
       } else {
-        long wid1 = phone.getWid();
-        Integer wid = oldToNewWordID.get((int) wid1);
+        int wid1 = phone.getWid();
+        Integer wid = oldToNewWordID.get(wid1);
 
         if (wid == null) {
           if (d++ < 50 && missingwids.add(wid1)) logger.warn("copyPhone phone : no word id " + wid1);
         } else {
           phone.setRID(rid);
           phone.setWID(wid);
-          bulk.add(slickPhoneAO.toSlick(phone));
+          bulk.add(slickPhoneAO.toSlick(phone, projID));
         }
       }
     }
@@ -652,20 +664,21 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyPhone added  " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis() - then) + " millis.");
   }
 
-  private final Set<Long> missingRIDs = new HashSet<>();
+  private final Set<Integer> missingRIDs = new HashSet<>();
 
   /**
    * @param db
    * @param oldToNewResult
    * @param slickWordDAO
+   * @param projID
    * @see #copyOneConfig
    */
-  private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
-
-   long then =System.currentTimeMillis();
+  private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult,
+                        SlickWordDAO slickWordDAO, int projID) {
+    long then = System.currentTimeMillis();
     int c = 0;
     List<SlickWord> bulk = new ArrayList<>();
-    for (Word word : new WordDAO(db).getAll()) {
+    for (Word word : new WordDAO(db).getAll(projID)) {
       Integer rid = oldToNewResult.get((int) word.getRid());
       if (rid == null) {
         boolean add = missingRIDs.add(word.getRid());
@@ -679,9 +692,9 @@ public class CopyToPostgres<T extends CommonShell> {
     if (missingRIDs.size() > 0) logger.warn("word : missing " + missingRIDs.size() + " result id fk references");
 
     slickWordDAO.addBulk(bulk);
-    long now =System.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
-    logger.info("copy word - complete in " + (now-then)/1000 + " seconds.");
+    logger.info("copy word - complete in " + (now - then) / 1000 + " seconds.");
   }
 
   /**
@@ -852,7 +865,7 @@ public class CopyToPostgres<T extends CommonShell> {
 //          missing++;
 //        } else {
       bulk.add(e);
-      if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
+      if (bulk.size() % 50000 == 0) logger.debug("copyResult : made " + bulk.size() + " results...");
       //   }
       //}
 
@@ -862,15 +875,17 @@ public class CopyToPostgres<T extends CommonShell> {
 //          "  results b/c of exercise id fk missing");
 //    }
     if (missing2 > 0) {
-      logger.warn("skipped " + missing2 + "/" + results.size() +
+      logger.warn("copyResult : skipped " + missing2 + "/" + results.size() +
           "  results b/c of exercise id fk missing (old->new ids)");
     }
     if (!missingUserIDs.isEmpty()) {
       logger.warn("found " + missingUserIDs.size() + " missing users " + missingUserIDs);
     }
-    logger.debug("adding " + bulk.size() + " results...");
+    logger.debug("copyResult adding " + bulk.size() + " results...");
+    long then = System.currentTimeMillis();
     slickResultDAO.addBulk(bulk);
-    logger.debug("added  " + bulk.size() + " results...");
+    long now = System.currentTimeMillis();
+    logger.debug("copyResult added  " + bulk.size() + " results in " + (now - then) / 1000 + " seconds.");
     //}
   }
 

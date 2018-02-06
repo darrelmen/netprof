@@ -560,7 +560,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 /*&& cachedResult == null*/) { // alignment has two steps : 1) post the audio, then 2) do alignment
-      db.rememberScore(resultID, asrScoreForAudio, true);
+      db.rememberScore(projID, resultID, asrScoreForAudio, true);
       Project project = db.getProjectManagement().getProject(projID);
       project.addAnswerToUser(testAudioFile, userIDFromSessionOrDB);
       project.addAnswerToUser(absPath, userIDFromSessionOrDB);

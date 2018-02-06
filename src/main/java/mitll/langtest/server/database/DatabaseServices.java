@@ -53,7 +53,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
 import java.text.CollationKey;
 import java.util.Collection;
 import java.util.List;
@@ -115,9 +114,9 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid);
 
-  void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect);
+  void rememberScore(int projID, int resultID, PretestScore asrScoreForAudio, boolean isCorrect);
 
-  void recordWordAndPhoneInfo(AudioAnswer answer, long answerID);
+  void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID);
 
   ServerProperties getServerProps();
 

@@ -469,7 +469,8 @@ public class AudioFileHelper implements AlignDecode {
 //    logger.info("getAudioAnswerDecoding wavPath " + wavPath);
 //    logger.info("getAudioAnswerDecoding file " + file.getName());
 
-    AudioAnswer answer = getAudioAnswer(context.getReqid(), exercise, wavPath, file, validity, decoderOptions, context.getUserid());
+    AudioAnswer answer = getAudioAnswer(context.getReqid(), exercise, wavPath, file, validity,
+        decoderOptions, context.getUserid());
 
     if (decoderOptions.isRecordInResults()) {
       double maxMinRange = validity.getMaxMinRange();
@@ -512,7 +513,7 @@ public class AudioFileHelper implements AlignDecode {
 
 
     // do this db write later
-    new Thread(() -> db.recordWordAndPhoneInfo(answer, answerID)).start();
+    new Thread(() -> db.recordWordAndPhoneInfo(context.getProjid(), answer, answerID)).start();
   }
 
   /**
@@ -665,13 +666,13 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);*/
       db.getPhoneDAO().removeForResult(uniqueID);
       db.getWordDAO().removeForResult(uniqueID);
-      db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
+      db.rememberScore(exercise.getProjectID(), uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
       logger.info("rememberScore for result " + uniqueID + " : decode " /* +decodeAnswer.getPretestScore()*/);
     } else {
       PretestScore alignmentScore = getEasyAlignment(exercise, absoluteFile.getAbsolutePath());
       db.getPhoneDAO().removeForResult(uniqueID);
       db.getWordDAO().removeForResult(uniqueID);
-      db.rememberScore(uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      db.rememberScore(exercise.getProjectID(), uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
       logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);
     }
     return true;

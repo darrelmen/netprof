@@ -1,33 +1,38 @@
 package mitll.langtest.server.database.phone;
 
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.npdata.dao.SlickPhone;
-
-import java.util.Map;
 
 /**
  * Created by go22670 on 3/29/16.
  */
 public class Phone {
+  private int projid;
+
   private int duration;
 
-  private long wid;
-  private long rid;
+  private int wid;
+  private int rid;
   private String phone;
   private int seq;
   private float score;
-  public Phone() {}
+
+  public Phone() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo
-   * @see SlickPhoneDAO#fromSlick(SlickPhone)
+   * @param projid
    * @param rid
    * @param wid
    * @param phone
    * @param seq
    * @param score
    * @param duration
+   * @see DatabaseServices#recordWordAndPhoneInfo
+   * @see SlickPhoneDAO#fromSlick(SlickPhone)
    */
-  public Phone(long rid, long wid, String phone, int seq, float score, int duration) {
+  public Phone(int projid, int rid, int wid, String phone, int seq, float score, int duration) {
+    this.projid = projid;
     this.rid = rid;
     this.wid = wid;
     this.phone = phone;
@@ -36,12 +41,15 @@ public class Phone {
     this.duration = duration;
   }
 
+  public int getProjid() {
+    return projid;
+  }
 
-  public long getWid() {
+  public int getWid() {
     return wid;
   }
 
-  public long getRid() {
+  public int getRid() {
     return rid;
   }
 
@@ -61,14 +69,16 @@ public class Phone {
     this.rid = RID;
   }
 
-  public void setWID(Integer WID) { this.wid = WID;  }
+  public void setWID(Integer WID) {
+    this.wid = WID;
+  }
 
   public int getDuration() {
     return duration;
   }
 
   public String toString() {
-    return // "# " + id +
+    return " proj " + projid +
         " rid " + rid + " wid " + wid + " : " + phone + " at " + seq + " score " + score;
   }
 }

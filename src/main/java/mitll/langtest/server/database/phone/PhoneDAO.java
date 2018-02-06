@@ -6,6 +6,7 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
@@ -31,18 +32,21 @@ import java.util.*;
  */
 public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(PhoneDAO.class);
-  //  private static final int MAX_EXAMPLES = 30;
-
   private static final String RID = "rid";
   private static final String WID = "wid";
 
   /**
    * @param database
-   * @see DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
    */
   public PhoneDAO(Database database) {
     super(database);
     initialSetup(database);
+  }
+
+  @Override
+  public void deleteForProject(int projID) {
+
   }
 
   private void initialSetup(Database database) {
@@ -93,15 +97,16 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public void addBulkPhones(List<Phone> bulk) {  }
+  public void addBulkPhones(List<Phone> bulk, int projID) {
+  }
 
   /**
    * <p>
    *
    * @param phone
-   * @see DatabaseImpl#recordWordAndPhoneInfo
+   * @see DatabaseServices#recordWordAndPhoneInfo
    */
- // @Override
+  // @Override
   public boolean addPhone(Phone phone) {
     Connection connection = getConnection();
     boolean val = true;
@@ -340,10 +345,10 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    *
    * @return
    */
-  public Collection<Phone> getAll() {
+  public Collection<Phone> getAll(int projid) {
     Connection connection = getConnection();
 
-    List<Phone> all = new ArrayList<>();
+    List<Phone> all = new ArrayList<>(1000000);
     try {
       String sql = "SELECT * FROM " + PHONE;
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -362,7 +367,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           durationSeconds = 0;
         }
         int durationMillis = Float.valueOf(durationSeconds * 1000f).intValue();
-        all.add(new Phone(rid, wid, phone, seq, phoneScore, durationMillis));
+        all.add(new Phone(projid, (int) rid, (int) wid, phone, seq, phoneScore, durationMillis));
       }
       finish(connection, statement, rs, sql);
     } catch (SQLException e) {

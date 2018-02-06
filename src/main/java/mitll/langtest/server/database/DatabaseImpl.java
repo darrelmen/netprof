@@ -250,19 +250,39 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     then = now;
     // result table.
+    logger.info("start deleting from phone table...");
+    getPhoneDAO().deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from phones for #" + projID);
+
+    then = now;
+    // result table.
+    logger.info("start deleting from word table...");
+    getWordDAO().deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from words for #" + projID);
+
+
+
+    then = now;
+    // result table.
+    logger.info("start deleting from result table...");
     getAnswerDAO().deleteForProject(projID);
     now = System.currentTimeMillis();
-    logger.info("took " + (now - then) + " to delete from audio dao for #" + projID);
+    logger.info("took " + (now - then) + " to delete from result for #" + projID);
+
 
 
     then = now;
     // event table.
+    logger.info("start deleting from event table...");
     getEventDAO().deleteForProject(projID);
     now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " to delete from event dao for #" + projID);
 
     then = now;
     // exercise table.
+    logger.info("start deleting from exercise table...");
     userExerciseDAO.deleteForProject(projID);
     now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " to delete from exercise dao for #" + projID);
@@ -1672,27 +1692,29 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }*/
 
   /**
+   * @param projID
    * @param resultID
    * @param asrScoreForAudio
    * @param isCorrect
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
   @Override
-  public void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
+  public void rememberScore(int projID, int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
-    recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
+    recordWordAndPhone.recordWordAndPhoneInfo(projID, resultID, asrScoreForAudio);
   }
 
   /**
+   * @param projID
    * @param answer
    * @param answerID
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
 
   @Override
-  public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+  public void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID) {
     long then = System.currentTimeMillis();
-    recordWordAndPhone.recordWordAndPhoneInfo(answer, answerID);
+    recordWordAndPhone.recordWordAndPhoneInfo(projID, answer, answerID);
     long now = System.currentTimeMillis();
     logger.info("recordWordAndPhoneInfo took " + (now - then) + " millis");
   }
@@ -1812,15 +1834,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-  public String toString() {
-    return "Database : " + this.getClass().toString();
-  }
-
   public DominoExerciseDAO getDominoExerciseDAO() {
     return dominoExerciseDAO;
   }
 
   public boolean isHasValidDB() {
     return hasValidDB;
+  }
+
+  public String toString() {
+    return "Database : " + this.getClass().toString();
   }
 }

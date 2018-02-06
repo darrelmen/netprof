@@ -202,7 +202,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return new MonitorResult(slick.id(),
         slick.userid(),
         "",
-        // slick.qid(),
         getRelativePath(slick),
         slick.valid(),
         slick.modified().getTime(),
@@ -211,7 +210,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.correct(),
         slick.pronscore(),
         simpleDevice,
-        //slick.devicetype(),
         slick.processdur(),
         slick.roundtripdur(),
         slick.withflash(),
@@ -380,7 +378,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession, String language) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
-
 
   @Override
   List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {

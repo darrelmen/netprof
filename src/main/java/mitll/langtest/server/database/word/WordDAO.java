@@ -34,7 +34,7 @@ package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.result.ResultDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,10 +63,15 @@ public class WordDAO extends DAO implements IWordDAO {
   private static final String RID1 = "RID";
   private static final String ID = "ID";
 
+  @Override
+  public void deleteForProject(int projID) {
+
+  }
+
   /**
    * @param database
    * @paramx
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public WordDAO(Database database) {
     super(database);
@@ -111,9 +116,9 @@ public class WordDAO extends DAO implements IWordDAO {
 
   /**
    * @return id of new row
-   * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo
+   * @see DatabaseServices#recordWordAndPhoneInfo
    */
-  public long addWord(Word word) {
+  public int addWord(Word word) {
     Connection connection = getConnection();
     try {
       // there are much better ways of doing this...
@@ -146,7 +151,7 @@ public class WordDAO extends DAO implements IWordDAO {
       }
 
       statement.close();
-      return id;
+      return (int)id;
     } catch (SQLException ee) {
       logger.error("trying to add event " + word + " got " + ee, ee);
       logAndNotify.logAndNotifyServerException(ee);
@@ -162,19 +167,19 @@ public class WordDAO extends DAO implements IWordDAO {
   }
 
   /**
-   * @see DatabaseImpl#putBackWordAndPhone
    * @return
+   * @seex DatabaseImpl#putBackWordAndPhone
    */
-  public boolean removeWords(long resultid) {
+/*  public boolean removeWords(long resultid) {
     Connection connection = getConnection();
     boolean val = true;
     try {
       PreparedStatement statement = connection.prepareStatement(
           "DELETE FROM " + WORD +
               " WHERE " +
-              RID + "="+resultid
-              );
-  //    int i = 1;
+              RID + "=" + resultid
+      );
+      //    int i = 1;
 //      statement.setLong(i++, resultid);
       int j = statement.executeUpdate();
 
@@ -192,11 +197,12 @@ public class WordDAO extends DAO implements IWordDAO {
       database.closeConnection(connection);
     }
     return val;
-  }
+  }*/
 
-  public List<Word> getAll() {
+
+  public List<Word> getAll(int projID) {
     try {
-      return getWords("SELECT * from " + WORD);
+      return getWords("SELECT * from " + WORD, projID);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       logAndNotify.logAndNotifyServerException(ee);
@@ -204,7 +210,7 @@ public class WordDAO extends DAO implements IWordDAO {
     return Collections.emptyList();
   }
 
-  private List<Word> getWords(String sql) throws SQLException {
+  private List<Word> getWords(String sql, int projID) throws SQLException {
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -212,8 +218,9 @@ public class WordDAO extends DAO implements IWordDAO {
 
     while (rs.next()) {
       lists.add(new Word(
-              rs.getLong(ID),
-              rs.getLong(RID1),
+              (int) rs.getLong(ID),
+              projID,
+              (int) rs.getLong(RID1),
               rs.getString(WORD),
               rs.getInt(SEQ),
               rs.getFloat(SCORE)

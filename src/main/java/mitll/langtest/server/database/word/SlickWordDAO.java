@@ -33,22 +33,18 @@
 package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.HasID;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickWord;
 import mitll.npdata.dao.word.WordDAOWrapper;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
- // private static final Logger logger = LogManager.getLogger(SlickWordDAO.class);
+  // private static final Logger logger = LogManager.getLogger(SlickWordDAO.class);
 
   private final WordDAOWrapper dao;
 
@@ -66,18 +62,25 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
     return dao.dao().name();
   }
 
+  /**
+   * @param shared
+   * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyWord
+   */
   public SlickWord toSlick(Word shared) {
     return new SlickWord(-1,
-        (int) shared.getRid(),
+        shared.getProjid(),
+        shared.getRid(),
         shared.getWord(),
         shared.getSeq(),
         shared.getScore(),
-        (int) shared.getId());
+        shared.getId());
   }
 
   public Word fromSlick(SlickWord slick) {
     return new Word(
         slick.id(),
+        slick.projid(),
         slick.rid(),
         slick.word(),
         slick.seq(),
@@ -93,7 +96,7 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
   }
 
   @Override
-  public long addWord(Word word) {
+  public int addWord(Word word) {
     return dao.insert(toSlick(word));
   }
 
@@ -102,11 +105,21 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
     dao.removeForResult(resultid);
   }
 
+  /**
+   * TODO : gah - will get slower every time...?
+   * @return
+   */
   public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
     for (SlickWord word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
     return oldToNew;
   }
+
+  @Override
+  public void deleteForProject(int projID) {
+    dao.deleteForProject(projID);
+  }
+
 
   public boolean isEmpty() {
     return dao.getNumRows() == 0;

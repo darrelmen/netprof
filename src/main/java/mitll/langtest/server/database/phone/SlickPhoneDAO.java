@@ -33,10 +33,11 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
@@ -72,13 +73,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   /**
    * @param shared
+   * @param projID
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone(DatabaseImpl, Map, Map)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
    */
-  public SlickPhone toSlick(Phone shared) {
+  public SlickPhone toSlick(Phone shared, int projID) {
     return new SlickPhone(-1,
-        (int) shared.getRid(),
-        (int) shared.getWid(),
+        projID,
+        shared.getRid(),
+        shared.getWid(),
         shared.getPhone(),
         shared.getSeq(),
         shared.getScore(),
@@ -87,7 +90,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   public Phone fromSlick(SlickPhone slick) {
     return new Phone(
-        (long) slick.rid(),
+        slick.projid(),
+        slick.rid(),
         slick.wid(),
         slick.phone(),
         slick.seq(),
@@ -95,14 +99,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         slick.duration());
   }
 
-/*
-  public void insert(SlickPhone word) {
-    dao.insert(word);
-  }
-*/
-
   /**
-   *
    * @param bulk
    */
   public void addBulk(List<SlickPhone> bulk) {
@@ -110,9 +107,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public void addBulkPhones(List<Phone> bulk) {
-    List<SlickPhone> sbulk = new ArrayList<>();
-    bulk.forEach(phone -> sbulk.add(toSlick(phone)));
+  public void addBulkPhones(List<Phone> bulk, int projID) {
+    List<SlickPhone> sbulk = new ArrayList<>(bulk.size());
+    bulk.forEach(phone -> sbulk.add(toSlick(phone, projID)));
     dao.addBulk(sbulk);
   }
 
@@ -142,12 +139,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises(userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, false, true,
         userid, project);
-     logger.info("getWorstPhonesJson phone report for" +
-         "\n\tuser " +
-         userid +
-         "\n\texids " +
-         exids.size() +
-         " report : \n\t" + report);
+    logger.info("getWorstPhonesJson phone report for" +
+        "\n\tuser " +
+        userid +
+        "\n\texids " +
+        exids.size() +
+        " report : \n\t" + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
@@ -292,6 +289,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
+   * @param resultid
+   */
   public void removeForResult(int resultid) {
     dao.removeForResult(resultid);
   }
@@ -300,7 +301,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return dao.getNumRows();
   }
 
+/*
   public boolean isEmpty() {
     return getNumRows() == 0;
   }
+*/
+
+  @Override
+  public void deleteForProject(int projID) {
+    dao.deleteForProject(projID);
+  }
+
 }

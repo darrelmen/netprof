@@ -505,7 +505,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         latestResultID = result.getResultID();
 
-        polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
+        if (polyglotChart != null) {
+          polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
+        }
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
         //    logger.info("got invalid result " + result);

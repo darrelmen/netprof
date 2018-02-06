@@ -32,18 +32,13 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.sql.*;
 
 /**
@@ -308,7 +303,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @param processDur
    * @param isCorrect
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore, boolean)
+   * @see DatabaseServices#rememberScore(int, int, PretestScore, boolean)
    */
   @Override
   public void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect) {

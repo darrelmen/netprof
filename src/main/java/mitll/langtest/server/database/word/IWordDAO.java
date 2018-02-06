@@ -6,6 +6,7 @@ import mitll.langtest.server.database.IDAO;
  * Created by go22670 on 3/29/16.
  */
 public interface IWordDAO  extends IDAO  {
-  long addWord(Word word);
+  int addWord(Word word);
   void removeForResult(int resultid);
+  void deleteForProject(int projID);
 }

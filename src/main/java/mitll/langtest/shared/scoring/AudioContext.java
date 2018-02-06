@@ -142,7 +142,6 @@ public class AudioContext implements IsSerializable {
             "\n\tuser   " + userid +
             "\n\tprojid " + projid +
             "\n\texid   " + exid +
-            //" q " + questionID +
             "\n\treq    " + reqid +
             "\n\ttype   " + audioType;
   }

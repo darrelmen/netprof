@@ -60,7 +60,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String EMAIL = "Email Item";
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
-  static final int CONTEXT_INDENT = 50;
+  static final int CONTEXT_INDENT = 45;//50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
@@ -1320,7 +1320,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
-    englishWidget.addStyleName("leftFiveMargin");
+    //englishWidget.addStyleName("leftFiveMargin");
     englishWidget.setWidth("90%");
     return englishWidget;
   }

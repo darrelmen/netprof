@@ -801,7 +801,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   public void deleteForProject(int projID) {
-dao.deleteForProject(projID);
+    dao.deleteForProject(projID);
   }
 
 }
