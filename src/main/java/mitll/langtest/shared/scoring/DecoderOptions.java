@@ -9,15 +9,16 @@ public class DecoderOptions implements IsSerializable {
   private boolean isRefRecording = false;
   private boolean recordInResults = true;
   private boolean doDecode = false;
+  private boolean doAlign = false;
   private boolean canUseCache = true;
   private boolean allowAlternates = false;
- // private boolean useOldSchool = false;
+  // private boolean useOldSchool = false;
   private boolean usePhoneToDisplay = false;
 
-  public DecoderOptions() {}
+  public DecoderOptions() {
+  }
 
   /**
-   *
    * @param isRefRecording
    * @param recordInResults
    * @param doDecode
@@ -36,7 +37,7 @@ public class DecoderOptions implements IsSerializable {
     this.doDecode = doDecode;
     this.canUseCache = canUseCache;
     this.allowAlternates = allowAlternates;
- //   this.useOldSchool = useOldSchool;
+    //   this.useOldSchool = useOldSchool;
     this.usePhoneToDisplay = usePhoneToDisplay;
   }
 
@@ -58,6 +59,15 @@ public class DecoderOptions implements IsSerializable {
     return this;
   }
 
+  public boolean shouldDoAlignment() {
+    return doAlign;
+  }
+
+  public DecoderOptions setDoAlignment(boolean val) {
+    this.doAlign = val;
+    return this;
+  }
+
   public boolean isCanUseCache() {
     return canUseCache;
   }
@@ -75,25 +85,15 @@ public class DecoderOptions implements IsSerializable {
     this.allowAlternates = val;
     return this;
   }
-/*
-  public boolean isUseOldSchool() {
-    return useOldSchool;
-  }
-
-  public DecoderOptions setUseOldSchool(boolean val) {
-    this.useOldSchool = val;
-    return this;
-  }
-*/
 
   public boolean isRecordInResults() {
     return recordInResults;
   }
 
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @param val
    * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   public DecoderOptions setRecordInResults(boolean val) {
     this.recordInResults = val;
@@ -116,7 +116,7 @@ public class DecoderOptions implements IsSerializable {
         (doDecode ? "decoding " : "alignment ") +
         (canUseCache ? "use score cache " : "") +
         (allowAlternates ? "allow alternates paths in decoding " : "")
-       // +        (useOldSchool ? "use hydec " : "use hydra")
+        // +        (useOldSchool ? "use hydec " : "use hydra")
         ;
   }
 }

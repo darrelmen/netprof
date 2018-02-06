@@ -242,7 +242,10 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   public void configureProjectByID(int projid) {
-    configureProject(getProject(projid), false, false);
+    Project project = getProject(projid);
+    if (project != null) {
+      configureProject(project, false, false);
+    }
   }
 
   /**
@@ -258,6 +261,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
     long then = System.currentTimeMillis();
+
     boolean skipRetired = project.isRetired() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (!forceReload) {

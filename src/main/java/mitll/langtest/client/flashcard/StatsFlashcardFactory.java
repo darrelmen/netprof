@@ -84,7 +84,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private static final String TIMES_UP = "Times Up!";
   private static final int MIN_SCORE = 35;
-  private static final float MIN_SCORE_F = ((float)MIN_SCORE)/100f;
+  private static final float MIN_SCORE_F = ((float) MIN_SCORE) / 100f;
   private static final int HEARTBEAT_INTERVAL = 1000;
 
   private static final int FEEDBACK_SLOTS = 4;
@@ -134,6 +134,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private static final int ROUND_MINUTES = 10;
   private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
+//  List<AudioAnswer> answers = new ArrayList<>();
+
+  private Map<Integer, AudioAnswer> exToLatest = new LinkedHashMap<>();
 
   /**
    * @param controller
@@ -159,7 +162,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void listChanged(List<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-     //     logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+          //     logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
           cancelRoundTimer();
         }
@@ -198,7 +201,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     boolean selectionMade = !new SelectionState(History.getToken(), false).getTypeToSection().isEmpty();
 
     if (selectionMade) {
-      boolean isDry = num < 50;
+      boolean isDry = getIsDry(num);
       int minutes = isDry ? DRY_RUN_MINUTES : ROUND_MINUTES;
       new PolyglotDialog(minutes, num, MIN_SCORE, new DialogHelper.CloseListener() {
         @Override
@@ -218,6 +221,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       });
     }
+  }
+
+  private boolean getIsDry(int num) {
+    return num < 50;
   }
 
   private boolean isPolyglot(ExerciseController controller) {
@@ -260,6 +267,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     roundTimeLeftMillis = 0;
+    exToLatest.clear();
   }
 
   @Override
@@ -478,10 +486,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     public void receivedAudioAnswer(final AudioAnswer result) {
       // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
       if (result.getValidity() == Validity.OK) {
-        //resultIDs.add(result.getResultID());
-        int id = exercise.getID();
+         int id = exercise.getID();
         exToScore.put(id, result.getScore());
-        exToCorrect.put(id, result.isCorrect());
+        exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
 
         StringBuilder builder = new StringBuilder();
         StringBuilder builder2 = new StringBuilder();
@@ -505,9 +512,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         latestResultID = result.getResultID();
 
-        if (polyglotChart != null) {
-          polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
-        }
+        exToLatest.put(id, result);
+//        if (polyglotChart != null) {
+//          polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
+//        }
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
         //    logger.info("got invalid result " + result);
@@ -537,7 +545,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see #loadNext()
      */
     public void onSetComplete() {
-     // if (!startOver.isVisible()) return;
+      // if (!startOver.isVisible()) return;
       startOver.setVisible(false);
       seeScores.setVisible(false);
       setPrevNextVisible(false);
@@ -602,20 +610,30 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       container = widgets;
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
 
-      float totalScore = 0;
+      float totalScore = 0f;
       int total = 0;
+      float possible = 0f;
       for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
         float score = exerciseCorrectAndScore.getScore();
         if (score > 0) {
           totalScore += score;
           total++;
         }
+        possible += 1f;
       }
 
       if (isPolyglot) {
-        float fround = Math.round(totalScore * 100);
+        //  logger.info("total " + totalScore);
+        // logger.info("possible " + possible);
+        float v = totalScore / possible;
+        // logger.info("ratio " + v);
+        float fround = Math.round(v * 100);
+        // logger.info("fround " + fround);
 
-        Heading child = new Heading(2, "Score is " + (fround / 100f) + " for " + total + " items.");
+        int fround1 = (int) (fround);
+//        logger.info("fround1 " + fround1);
+
+        Heading child = new Heading(2, "Score is " + fround1 + "%");
         child.addStyleName("topFiveMargin");
 
         scoreHistory.add(child);
@@ -623,6 +641,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
+      belowContentDiv.clear();
+
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
       belowContentDiv.add(container);
     }
@@ -782,7 +802,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
       if (isPolyglot) {
         logger.info("adding polyglot chart");
-        toAddTo.add(getChart());
+        toAddTo.add(getChart(getIsDry(exerciseList.getSize()) ? DRY_RUN_ROUND_TIME : ROUND_TIME));
       }
 
       DivWidget buttons = new DivWidget();
@@ -796,18 +816,16 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     @NotNull
-    private PolyglotChart getChart() {
-      if (polyglotChart != null) {  // factory level chart
-        polyglotChart.setExtremes();
-        return polyglotChart;
-      }
-
+    private PolyglotChart getChart(long duration) {
+//      if (polyglotChart != null) {  // factory level chart
+//        polyglotChart.setExtremes();
+//        return polyglotChart;
+//      }
       PolyglotChart pChart = new PolyglotChart(controller);
-
 
       pChart.addStyleName("topFiveMargin");
       pChart.addStyleName("bottomFiveMargin");
-      pChart.addChart();
+      pChart.addChart(exToLatest.values(), duration);
       pChart.setWidth("100%");
       pChart.setHeight(CHART_HEIGHT + "px");
       pChart.addStyleName("floatLeftAndClear");
@@ -877,7 +895,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     private void gotSeeScoresClick() {
-    //  startOver.setVisible(false);
+      //  startOver.setVisible(false);
       abortPlayback();
       seeScores.setEnabled(false);
       cancelRoundTimer();

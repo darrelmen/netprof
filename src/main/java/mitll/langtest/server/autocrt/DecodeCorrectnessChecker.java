@@ -274,7 +274,7 @@ public class DecodeCorrectnessChecker {
    * @param language
    * @return
    */
-  private String getPhraseToDecode(String rawRefSentence, String language) {
+  public String getPhraseToDecode(String rawRefSentence, String language) {
     if (language.equalsIgnoreCase("spanish")) {
  //     logger.info("raw before " + rawRefSentence);
       rawRefSentence = rawRefSentence

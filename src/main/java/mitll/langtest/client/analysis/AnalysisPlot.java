@@ -680,16 +680,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
     Set<Integer> toGet = new HashSet<>();
 
-    // Map<Integer, CommonShell> idToEx = getIdToEx();
-    // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size());
-
     for (TimeAndScore timeAndScore : rawBestScores) {
       Integer id = timeAndScore.getExid();
       addTimeToExID(timeAndScore.getTimestamp(), id);
-//      timeToId.put(timeAndScore.getTimestamp(), id);
-      // if (!isKnown(id)) {
       toGet.add(id);
-      // }
     }
 /*
     if (toGet.isEmpty()) {

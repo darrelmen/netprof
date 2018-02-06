@@ -811,7 +811,7 @@ public class AudioFileHelper implements AlignDecode {
           new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), modelsDir);
 
       answer.setTranscript(exercise.getForeignLanguage());
-      int answerID = db.getAnswerDAO().addAnswer(info,System.currentTimeMillis());
+      int answerID = db.getAnswerDAO().addAnswer(info, System.currentTimeMillis());
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
@@ -999,7 +999,7 @@ public class AudioFileHelper implements AlignDecode {
                                           PrecalcScores precalcScores) {
     List<String> unk = new ArrayList<>();
 
-    if (isMacOrWin() || useOldSchoolServiceOnly) {  // i.e. NOT using cool new jcodr webservice
+    if (isMacOrWin()) {  // i.e. NOT using cool new jcodr webservice
       unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
 
@@ -1330,7 +1330,35 @@ public class AudioFileHelper implements AlignDecode {
                                      DecoderOptions decoderOptions,
                                      int userID) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
-    if (decoderOptions.shouldDoDecoding()) {
+    if (decoderOptions.shouldDoAlignment()) {
+      PrecalcScores precalcScores =
+          checkForWebservice(
+              exercise.getID(),
+              exercise.getEnglish(),
+              exercise.getForeignLanguage(),
+              project.getID(),
+              userID,
+              file);
+
+//      getASRScoreForAudio(reqid,)
+//
+//      PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(
+//          exercise,
+//          file,
+//          audioAnswer,
+//          language,
+//          decoderOptions,
+//          precalcScores);
+
+      String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(exercise.getForeignLanguage(), language);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(file,
+          Collections.singleton(phraseToDecode), "",
+          decoderOptions, precalcScores);
+
+      audioAnswer.setPretestScore(asrScoreForAudio);
+
+      return audioAnswer;
+    } else if (decoderOptions.shouldDoDecoding()) {
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),

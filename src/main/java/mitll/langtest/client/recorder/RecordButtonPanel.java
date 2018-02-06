@@ -44,7 +44,6 @@ import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 
@@ -78,7 +77,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private Panel panel;
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-  private boolean doFlashcardAudio;
+  private boolean doFlashcardAudio,doAlignment;
   private boolean allowAlternates = false;
   private final AudioType audioType;
 
@@ -92,11 +91,12 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
                               final int index,
                               boolean doFlashcardAudio,
                               AudioType audioType,
-                              String recordButtonTitle) {
+                              String recordButtonTitle, boolean doAlignment) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
+    this.doAlignment = doAlignment;
     this.audioType = audioType;
     layoutRecordButton(recordButton = makeRecordButton(controller, recordButtonTitle));
   }
@@ -214,6 +214,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(doFlashcardAudio)
+        .setDoAlignment(doAlignment)
         .setRecordInResults(true)
         .setRefRecording(false)
         .setAllowAlternates(allowAlternates);
@@ -224,10 +225,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
         controller.usingFlashRecorder(),
         "browser",
         getDevice(),
-//        doFlashcardAudio,
-//        true,
-//        false,
-//        allowAlternates,
         decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
