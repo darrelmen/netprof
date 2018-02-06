@@ -33,11 +33,9 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.list.DisplayMenu;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.ShowChoices;
 import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
 

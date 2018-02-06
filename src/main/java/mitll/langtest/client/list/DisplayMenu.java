@@ -20,13 +20,17 @@ import java.util.logging.Logger;
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 public class DisplayMenu {
+  private final Logger logger = Logger.getLogger("DisplayMenu");
+
   private static final String SHOW1 = "Options";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
-  public static final String SHOW_PRIMARY_TEXT = "Show Primary text";
+  private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
 
-  private final Logger logger = Logger.getLogger("DisplayMenu");
 
+  /**
+   *
+   */
   private static final String SHOW_SOUNDS = "Show Sounds";
 
   public static final String SHOW_PHONES = "showPhones";
@@ -193,7 +197,7 @@ public class DisplayMenu {
    */
   @NotNull
   private PhonesChoices getPhonesDisplay() {
-    PhonesChoices choices = PhonesChoices.SHOW;
+    PhonesChoices choices = PhonesChoices.HIDE;
     String show = storage.getValue(SHOW_PHONES);
     if (show != null && !show.isEmpty()) {
       try {

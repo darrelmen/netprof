@@ -39,7 +39,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
   BasicUserContainer(ExerciseController controller,
                      String selectedUserKey,
                      String header) {
-    super(controller, selectedUserKey, header, 10, 10);
+    super(controller, selectedUserKey, header, 10, 8);
   }
 
   /**

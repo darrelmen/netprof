@@ -80,7 +80,7 @@ public class AnalysisTab extends DivWidget {
    */
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
-  private static final String SUBTITLE = "";//scores > 20";
+  private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
 

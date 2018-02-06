@@ -100,6 +100,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    */
   private static final String START_OVER = "Start Over";
 
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#getSkipToEnd()
+   */
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
   /**
@@ -532,8 +535,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see #loadNext()
      */
     public void onSetComplete() {
-      if (!startOver.isVisible()) return;
-
+     // if (!startOver.isVisible()) return;
       startOver.setVisible(false);
       seeScores.setVisible(false);
       setPrevNextVisible(false);
@@ -608,10 +610,15 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       }
 
-      float fround = Math.round(totalScore * 100);
-      Heading child = new Heading(2, "Score is " + (fround / 100f) + " for " + total + " items.");
-      child.addStyleName("topFiveMargin");
-      scoreHistory.add(child);
+      if (isPolyglot) {
+        float fround = Math.round(totalScore * 100);
+
+        Heading child = new Heading(2, "Score is " + (fround / 100f) + " for " + total + " items.");
+        child.addStyleName("topFiveMargin");
+
+        scoreHistory.add(child);
+      }
+
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
 //      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
@@ -771,9 +778,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      */
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
-      PolyglotChart polyglotChart = getChart();
-
-      toAddTo.add(polyglotChart);
+      if (isPolyglot) {
+        logger.info("adding polyglot chart");
+        toAddTo.add(getChart());
+      }
 
       DivWidget buttons = new DivWidget();
       buttons.setWidth("100%");
@@ -867,6 +875,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     private void gotSeeScoresClick() {
+    //  startOver.setVisible(false);
       abortPlayback();
       seeScores.setEnabled(false);
       cancelRoundTimer();
