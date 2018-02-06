@@ -368,6 +368,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     userExerciseDAO.getDao().updatePhonesBulk(pairs);
   }
 
+  @Override
+  public void deleteForProject() {
+
+  }
+
   public String toString() {
     return "DBExerciseDAO for " + project;
   }

@@ -103,4 +103,6 @@ public interface IUserExerciseDAO extends IDAO {
   int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
 
   int getUnknownExerciseID();
+
+  void deleteForProject(int projID);
 }

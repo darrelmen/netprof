@@ -53,4 +53,6 @@ public interface IAnswerDAO {
   void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect);
 
   void updateUser(int oldUser, int newUser);
+
+  void deleteForProject(int projID);
 }

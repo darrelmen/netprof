@@ -58,6 +58,9 @@ public class AudioExercise extends ExerciseShell {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
+  /**
+   * TODO: shouldn't be here.
+   */
   String altfl = "";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
@@ -175,6 +178,11 @@ public class AudioExercise extends ExerciseShell {
    */
   public Collection<AudioAttribute> getAudioAttributes() {
     return audioAttributes.values();
+  }
+
+  public Collection<Integer> getAudioIDs() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 
   /**
@@ -467,11 +475,11 @@ public class AudioExercise extends ExerciseShell {
       if (latestReg != null) {
         ret.add(latestReg);
       }
-     // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
+      // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
       if (latestSlow != null) {
         ret.add(latestSlow);
       }
-     // else logger.warning("getMostRecentAudioEasy no slow speed audio for " + getID());
+      // else logger.warning("getMostRecentAudioEasy no slow speed audio for " + getID());
 
     } else {
       ret = userToAudio.get(bothLatestUser);
@@ -481,7 +489,6 @@ public class AudioExercise extends ExerciseShell {
 
   private Map<Integer, List<AudioAttribute>> simpleByGenderByContext(boolean isMale, boolean isContext) {
     Map<Integer, List<AudioAttribute>> userToAudio = new HashMap<>();
-    // List<AudioAttribute> audioAttributes1 = new ArrayList<AudioAttribute>();
     for (AudioAttribute attribute : simpleByGender(isMale)) {
       boolean contextAudio = attribute.isContextAudio();
       if ((contextAudio && isContext) ||
@@ -523,7 +530,6 @@ public class AudioExercise extends ExerciseShell {
     for (Map.Entry<MiniUser, List<AudioAttribute>> pair : userToAudio.entrySet()) {
       boolean reg = false, slow = false;
       for (AudioAttribute audioAttribute : pair.getValue()) {
-
 
         if (!audioAttribute.isValid()) {
           logger.warning("skip invalid audio " + audioAttribute);
@@ -665,7 +671,6 @@ public class AudioExercise extends ExerciseShell {
         " project " + projectid +
         " audio attr (" + getAudioAttributes().size() +
         ") :" + getAudioAttributes() + " and " +
-        fieldToAnnotation + " annotations";//, unit/lesson " + getUnitToValue();
+        fieldToAnnotation + " annotations";
   }
-
 }

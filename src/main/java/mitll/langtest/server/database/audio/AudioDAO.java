@@ -70,6 +70,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final Connection connection;
   private final IUserDAO userDAO;
 
+  @Override
+  public void deleteForProject(int projID) {
+
+  }
+
   /**
    * @param database
    * @param userDAO

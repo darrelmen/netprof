@@ -86,4 +86,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @param pairs
    */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
+
+  void deleteForProject();
 }

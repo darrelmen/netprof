@@ -1377,9 +1377,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return unknownExercise;
   }
 
-  public ExerciseDAOWrapper getDao() {
-    return dao;
-  }
+  public ExerciseDAOWrapper getDao() {  return dao;  }
 
   public void addBulkAttributeJoins(List<SlickExerciseAttributeJoin> joins) {
     attributeJoinDAOWrapper.addBulk(joins);
@@ -1405,5 +1403,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   @Override
   public int getUnknownExerciseID() {
     return unknownExerciseID;
+  }
+
+  @Override
+  public void deleteForProject(int projID) {
+    relatedExerciseDAOWrapper.deleteForProject(projID);
+    dao.deleteForProject(projID);
   }
 }

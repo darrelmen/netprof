@@ -132,4 +132,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   public void updateUser(int oldUser, int newUser) {
     dao.updateUser(oldUser, newUser);
   }
+
+  @Override
+  public void deleteForProject(int projID) { dao.deleteForProject(projID); }
 }

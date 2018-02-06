@@ -27,4 +27,6 @@ public interface IEventDAO extends IDAO {
   void addPlayedMarkings(int userID, CommonExercise firstExercise);
 
   void updateUser(int old, int newUser);
+
+  void deleteForProject(int projID);
 }

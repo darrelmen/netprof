@@ -23,7 +23,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   private EventDAOWrapper eventDAOWrapper;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public SlickEventImpl(DBConnection dbConnection) {
     eventDAOWrapper = new EventDAOWrapper(dbConnection);
@@ -36,6 +36,11 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   @Override
   public String getName() {
     return eventDAOWrapper.dao().name();
+  }
+
+  @Override
+  public void deleteForProject(int projID) {
+    eventDAOWrapper.deleteForProject(projID);
   }
 
   /**

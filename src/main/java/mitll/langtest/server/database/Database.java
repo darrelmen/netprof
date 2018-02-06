@@ -70,6 +70,8 @@ public interface Database extends AutoCloseable {
 
   Project getProject(int projectid);
 
+  void dropProject(int projID);
+
   LogAndNotify getLogAndNotify();
 
   Collection<String> getTypeOrder(int projectid);

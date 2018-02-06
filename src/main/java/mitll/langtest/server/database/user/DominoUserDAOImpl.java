@@ -1413,7 +1413,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     {
       String affiliation = clientUserDetail1.getAffiliation();
       if (affiliation == null || affiliation.isEmpty()) {
-        logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
+       // logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
       }
     }
 

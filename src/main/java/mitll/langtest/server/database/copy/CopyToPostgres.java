@@ -357,6 +357,7 @@ public class CopyToPostgres<T extends CommonShell> {
                             ProjectType projectType,
                             ProjectStatus status,
                             boolean skipRefResult) throws Exception {
+    long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
     logger.info("copyOneConfig" +
@@ -426,6 +427,9 @@ public class CopyToPostgres<T extends CommonShell> {
     } else {
       logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
+    long now = System.currentTimeMillis();
+
+    logger.info("copyOneConfig took " + ((now-then)/1000) + " seconds to load " + optName);
   }
 
   @NotNull
@@ -657,6 +661,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #copyOneConfig
    */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
+
+   long then =System.currentTimeMillis();
     int c = 0;
     List<SlickWord> bulk = new ArrayList<>();
     for (Word word : new WordDAO(db).getAll()) {
@@ -673,7 +679,9 @@ public class CopyToPostgres<T extends CommonShell> {
     if (missingRIDs.size() > 0) logger.warn("word : missing " + missingRIDs.size() + " result id fk references");
 
     slickWordDAO.addBulk(bulk);
-    logger.info("copy word - complete");
+    long now =System.currentTimeMillis();
+
+    logger.info("copy word - complete in " + (now-then)/1000 + " seconds.");
   }
 
   /**

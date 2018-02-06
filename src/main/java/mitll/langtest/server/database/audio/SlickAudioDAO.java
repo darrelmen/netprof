@@ -797,4 +797,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Collection<SlickAudio> byID = dao.getByID(audioID);
     return byID.isEmpty() ? null : toAudioAttribute(byID, hasProjectSpecificAudio).iterator().next();
   }
+
+
+  @Override
+  public void deleteForProject(int projID) {
+dao.deleteForProject(projID);
+  }
+
 }

@@ -32,12 +32,18 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.sql.*;
 
 /**
@@ -53,11 +59,17 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
   public AnswerDAO(Database database) { super(database);  }
 
+  @Override
+  public void deleteForProject(int projID) {
+
+  }
+
   /**
    * @param answerInfo
    * @param timestamp
    * @return id of new row in result table
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults
    */
   @Override
   public int addAnswer(AnswerInfo answerInfo, long timestamp) {

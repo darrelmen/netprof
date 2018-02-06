@@ -174,7 +174,7 @@ public abstract class BaseAudioDAO extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAudioAttributesForExercises(exerciseIDs, new HashMap<>());
     long now = System.currentTimeMillis();
-    logger.info("attachAudioToExercises took " + (now-then) + " millis to get audio attributes for " + exerciseIDs.size());
+    logger.info("attachAudioToExercises took " + (now - then) + " millis to get audio attributes for " + exerciseIDs.size());
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
 
@@ -211,7 +211,7 @@ public abstract class BaseAudioDAO extends DAO {
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
                                CommonExercise exercise) {
     int id = exercise.getID();
-    boolean doDEBUG =  DEBUG_ATTACH;
+    boolean doDEBUG = DEBUG_ATTACH;
 
     List<AudioAttribute> onlyContextFromParent = exercise.getAudioAttributes()
         .stream()
@@ -244,6 +244,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * Get the audio references from the database
+   *
    * @param exids
    * @param idToMini
    * @return
@@ -316,10 +317,11 @@ public abstract class BaseAudioDAO extends DAO {
   public boolean attachAudio(CommonExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
-    Set<Integer> currentIDs = firstExercise.getAudioAttributes().stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
+    boolean allSucceeded = true;
+
+    Collection<Integer> currentIDs = getAudioIDs(firstExercise);
 
     String mediaDir = database.getServerProps().getMediaDir();
-    boolean allSucceeded = true;
     boolean doDebug = /*firstExercise.getID() == 25921 || firstExercise.getID() == 30219 ||*/ DEBUG_ATTACH;
 
     for (AudioAttribute attr : audioAttributes) {
@@ -350,11 +352,13 @@ public abstract class BaseAudioDAO extends DAO {
           allSucceeded = false;
         }
       }
-//      }
-      //}
     }
 
     return allSucceeded;
+  }
+
+  private Collection<Integer> getAudioIDs(CommonExercise firstExercise) {
+    return firstExercise.getAudioIDs();
   }
 
   /**

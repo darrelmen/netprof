@@ -182,8 +182,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   @Override
   public List<Result> getResults() {
-    List<Result> results = new ArrayList<>();
-    for (SlickRefResult refResult : dao.getAll()) results.add(fromSlick(refResult));
+    List<SlickRefResult> all = dao.getAll();
+    List<Result> results = new ArrayList<>(all.size());
+    all.forEach(slickRefResult -> results.add(fromSlick(slickRefResult)));
     return results;
   }
 
@@ -289,7 +290,5 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @see RefResultDecoder#writeRefDecode
    */
   @Override
-  public void deleteForProject(int projid) {
-    dao.deleteForProject(projid);
-  }
+  public void deleteForProject(int projid) {  dao.deleteForProject(projid);  }
 }

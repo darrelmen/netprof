@@ -664,11 +664,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   }
 
-//  @Override
-//  public void useExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
-//
-//  }
-
   @Override
   public int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute) {
     return 0;
@@ -677,6 +672,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public int getUnknownExerciseID() {
     return 0;
+  }
+
+  @Override
+  public void deleteForProject(int projID) {
+
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {

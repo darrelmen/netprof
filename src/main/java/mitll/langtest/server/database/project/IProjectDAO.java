@@ -85,6 +85,12 @@ public interface IProjectDAO extends IDAO {
   int add(int userid, long modified, String name, String language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder, int dominoID);
 
+  /**
+   * Deprecated - this doesn't really work in practice - takes forever, locks database while it's running.
+   * It's like a suicide pill.
+   * @param id
+   * @return
+   */
   boolean delete(int id);
   boolean deleteAllBut(int id);
 
@@ -175,4 +181,5 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   Map<String, String> getProps(int projid);
+
 }

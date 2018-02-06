@@ -161,4 +161,6 @@ public interface IAudioDAO extends IDAO {
   Collection<UserTimeBase> getAudioForReport(int projid);
 
   Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises);
+
+  void deleteForProject(int projID);
 }

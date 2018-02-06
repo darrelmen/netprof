@@ -62,6 +62,11 @@ class EventDAO extends DAO implements IEventDAO {
 
   }
 
+  @Override
+  public void deleteForProject(int projID) {
+
+  }
+
   private static final String EVENT = "event";
   private static final String CREATORID = "creatorid";
   private static final String WIDGETTYPE = "widgettype";

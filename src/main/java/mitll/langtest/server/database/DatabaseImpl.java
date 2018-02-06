@@ -233,6 +233,49 @@ public class DatabaseImpl implements Database, DatabaseServices {
     hasValidDB = true;
   }
 
+  @Override
+  public void dropProject(int projID) {
+    logger.info("drop project #" + projID);
+    long then = System.currentTimeMillis();
+    long initial = then;
+    getRefResultDAO().deleteForProject(projID);
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to delete from ref result dao for #" + projID);
+
+    then = now;
+    getAudioDAO().deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from audio dao for #" + projID);
+
+    then = now;
+    // result table.
+    getAnswerDAO().deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from audio dao for #" + projID);
+
+
+    then = now;
+    // event table.
+    getEventDAO().deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from event dao for #" + projID);
+
+    then = now;
+    // exercise table.
+    userExerciseDAO.deleteForProject(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from exercise dao for #" + projID);
+
+    then = now;
+    // project table.
+    getProjectDAO().delete(projID);
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " to delete from project dao for #" + projID);
+
+    logger.info("took " + (now - initial) + " to drop #" + projID);
+
+  }
 
   /**
    * @see DatabaseImpl#makeDAO
@@ -1498,7 +1541,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       populateRecipients(userID, reportEmails, receiverNames);
 
       logger.info("sendReports to" +
-          "\n\temails : " + reportEmails+
+          "\n\temails : " + reportEmails +
           "\n\tnames  : " + receiverNames
       );
       report.sendExcelViaEmail(mailSupport, reportEmails, receiverNames, stats, pathHelper);

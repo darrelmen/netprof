@@ -1434,6 +1434,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
       hp.addStyleName("inlineFlex");
+      hp.addStyleName("leftFiveMargin");
       hp.getElement().setId("contentContainer");
 
       hp.add(getSpacer());
