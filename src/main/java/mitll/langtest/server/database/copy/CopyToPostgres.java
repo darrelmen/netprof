@@ -207,7 +207,8 @@ public class CopyToPostgres<T extends CommonShell> {
     if (projectDAO.exists(projid)) {
       logger.info("Dropping #" + projid + " please wait...");
       long then = System.currentTimeMillis();
-      projectDAO.delete(projid);
+      //projectDAO.delete(projid);
+      database.dropProject(projid);
       reportAfterDelete(projid, projectDAO, then, "drop");
     } else {
       logger.error("no project with that id");
@@ -1020,8 +1021,7 @@ public class CopyToPostgres<T extends CommonShell> {
       try {
         projID = Integer.parseInt(optionValue);
       } catch (NumberFormatException e) {
-        logger.error("couldn't parse " + DROP + " = " + optionValue);
-        formatter.printHelp("drop", options);
+        warnParse(options, formatter, optionValue, DROP);
         return;
       }
     } else if (cmd.hasOption(DROPALLBUT.toLower())) {
@@ -1030,8 +1030,7 @@ public class CopyToPostgres<T extends CommonShell> {
       try {
         projID = Integer.parseInt(optionValue);
       } catch (NumberFormatException e) {
-        logger.error("couldn't parse " + DROPALLBUT + " = " + optionValue);
-        formatter.printHelp("drop", options);
+        warnParse(options, formatter, optionValue, DROPALLBUT);
         return;
       }
     } else if (cmd.hasOption(DROPALL.toLower())) {
@@ -1129,6 +1128,11 @@ public class CopyToPostgres<T extends CommonShell> {
       default:
         formatter.printHelp("copy", options);
     }
+  }
+
+  private static void warnParse(Options options, HelpFormatter formatter, String optionValue, ACTION drop) {
+    logger.error("couldn't parse " + drop + " = " + optionValue);
+    formatter.printHelp("drop", options);
   }
 
   @NotNull
