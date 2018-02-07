@@ -244,12 +244,13 @@ public class Project implements IPronunciationLookup {
    *
    */
   private <T extends CommonShell> void buildExerciseTrie() {
-    List<CommonExercise> rawExercises = getRawExercises();
+
+    final List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
-    //logger.info("build trie from " + rawExercises.size() + " exercises");
+    logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
     fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
-    logger.info("for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
+    logger.info("buildExerciseTrie : for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
 
     new Thread(() -> {
       long then1 = System.currentTimeMillis();
@@ -258,8 +259,13 @@ public class Project implements IPronunciationLookup {
         logger.warn("buildExerciseTrie : rebuilding full context trie for " + rawExercises.size() + " exercises.");
       }
 
-      fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
-      logger.info("for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
+      logger.info("buildExerciseTrie : START context for " + project.id() + " for " + rawExercises.size() + " exercises.");
+      List<CommonExercise> copy = new ArrayList<>(rawExercises);
+      if (copy.size() > 1000) {
+        copy = copy.subList(0, 1000);
+      }
+      fullContextTrie = new ExerciseTrie<>(copy, project.language(), smallVocabDecoder, false);
+      logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
     }).start();
   }
 
