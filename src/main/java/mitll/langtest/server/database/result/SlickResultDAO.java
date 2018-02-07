@@ -237,7 +237,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   public List<Result> getResults() {
-    return getResults(getAll());
+    return Collections.emptyList();
   }
 
   private List<Result> getResults(Collection<SlickResult> all) {
@@ -245,11 +245,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     for (SlickResult result : all) copy.add(fromSlick(result));
     return copy;
   }
-
-  private List<SlickResult> getAll() {
-    return dao.getAll();
-  }
-
 
   @Override
   public Collection<MonitorResult> getResultsDevices(int projid) {
@@ -553,9 +548,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return correctAndScore;
   }
 
-  public Map<Integer, Integer> getOldToNew() {
-    Map<Integer, Integer> oldToNew = new HashMap<>();
-    for (SlickResult user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
+  public Map<Integer, Integer> getOldToNew(int projID) {
+    List<SlickResult> allByProject = dao.getAllByProject(projID);
+    Map<Integer, Integer> oldToNew = new HashMap<>(allByProject.size());
+    allByProject.forEach(slickResult -> oldToNew.put(slickResult.legacyid(), slickResult.id()));
+    logger.info("getOldToNew for  " + projID + " -> found " + oldToNew.size());
     return oldToNew;
   }
 

@@ -407,7 +407,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
       // copy results, words, and phones
       {
-        Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew();
+        Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew(projectID);
 
         if (oldToNewResult.isEmpty()) {
           logger.error("\n\n\nold to new result is EMPTY!");
