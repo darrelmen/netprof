@@ -255,7 +255,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-  //  wordScoreCellTable.setWidth("100%", false);
+    //  wordScoreCellTable.setWidth("100%", false);
 
     addPlayer();
 
@@ -509,7 +509,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private void gotClickOnItem(final WordScore e) {
-    learnTab.showLearnAndItem(e.getExid());
+    if (learnTab != null) {
+      learnTab.showLearnAndItem(e.getExid());
+    }
   }
 
   private SafeHtml getSafeHtml(String columnText) {

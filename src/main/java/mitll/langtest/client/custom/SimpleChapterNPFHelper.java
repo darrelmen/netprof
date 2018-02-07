@@ -83,7 +83,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * Add npf widget to content of a tab - here marked tabAndContent
    *
    * @param instanceName flex, review, etc.
-   * @see mitll.langtest.client.banner.NewContentChooser#showView
+   * @see INavigation#showView
    */
   public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
@@ -134,7 +134,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see mitll.langtest.client.banner.NewContentChooser#showView(INavigation.VIEWS)
+   * @see INavigation#showView(INavigation.VIEWS, boolean)
    */
   @Override
   public void hideList() {

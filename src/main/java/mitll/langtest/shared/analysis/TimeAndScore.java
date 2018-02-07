@@ -38,9 +38,8 @@ import java.util.List;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/19/15.
- *
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
+ * @since 10/19/15.
  */
 
 public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
@@ -69,6 +68,10 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
     this.cumulativeAverage = toInt(cumulativeAverage);
   }
 
+  public TimeAndScore(long timestamp) {
+    super(timestamp, 0f, null);
+  }
+
   public TimeAndScore() {
   }
 
@@ -77,7 +80,9 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
     return Long.compare(getTimestamp(), o.getTimestamp());
   }
 
-  public float getCumulativeAverage() {   return fromInt(cumulativeAverage);  }
+  public float getCumulativeAverage() {
+    return fromInt(cumulativeAverage);
+  }
 
   /**
    * @return

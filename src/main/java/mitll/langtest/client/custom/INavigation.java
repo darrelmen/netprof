@@ -48,7 +48,7 @@ public interface INavigation {
   @NotNull
   VIEWS getCurrentView();
 
-  void showView(VIEWS view);
+  void showView(VIEWS view, boolean isFirstTime);
 
   void showInitialState();
 

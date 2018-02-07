@@ -134,7 +134,9 @@ class TimeSeriesPlot extends DivWidget {
     return session == null ? "" : (" n = " + session.getCount());
   }
 
-  String getDateToShow(ToolTipData toolTipData) { return getDateToShow(toolTipData.getXAsLong());  }
+  String getDateToShow(ToolTipData toolTipData) {
+    return getDateToShow(toolTipData.getXAsLong());
+  }
 
   private String getDateToShow(long xAsLong) {
     Date date = new Date(xAsLong);
@@ -143,10 +145,10 @@ class TimeSeriesPlot extends DivWidget {
     return toUse.format(date);
   }
 
-  String getShortDate(long xAsLong) {
+  String getShortDate(long xAsLong, boolean showHour) {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
-    DateTimeFormat toUse = sameYear(shortForDate) ? superShortFormat : shortFormat;
+    DateTimeFormat toUse = showHour ? noYearFormat : sameYear(shortForDate) ? superShortFormat : shortFormat;
     return toUse.format(date);
   }
 
@@ -225,7 +227,6 @@ class TimeSeriesPlot extends DivWidget {
 
     return series;
   }
-
 
 
   /**

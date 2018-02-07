@@ -32,17 +32,18 @@
 
 package mitll.langtest.shared.analysis;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/19/15.
- *
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
+ * @since 10/19/15.
  */
-public class SimpleTimeAndScore implements Serializable {
+public class SimpleTimeAndScore implements Serializable {//}, Comparable<SimpleTimeAndScore> {
   public static final int SCALE = 1000;
   private long timestamp;
   private int score;
@@ -60,9 +61,9 @@ public class SimpleTimeAndScore implements Serializable {
   }
 
   /**
-   * @see BestScore#BestScore
    * @param timestamp
    * @param score
+   * @see BestScore#BestScore
    */
   SimpleTimeAndScore( long timestamp, float score) {
     this.timestamp = timestamp;
@@ -91,21 +92,34 @@ public class SimpleTimeAndScore implements Serializable {
   }
 
   protected int toInt(float value) {
-    return (int)(value* SCALE);
+    return (int) (value * SCALE);
   }
 
   float fromInt(int value) {
-    return ((float)value)/ SCALE;
+    return ((float) value) / SCALE;
   }
 
   String getTimeString() {
     return "" + getTimestamp();
   }
 
-  public String toString() {
-    return "at\t" + getTimeString() + " avg score for " +
-        //childCount + "\t" +
-        "=\t" + score;
+  @Override
+  public boolean equals(Object obj) {
+    SimpleTimeAndScore other = (SimpleTimeAndScore) obj;
+    return getTimestamp() == other.getTimestamp() && getScore() == other.getScore();
   }
 
+  /**
+   * Overkill - can't have more than on response at the same time.
+   * @param o
+   * @return
+   */
+  public int compareTo(@NotNull SimpleTimeAndScore o) {
+    int compare = Long.compare(getTimestamp(), o.getTimestamp());
+    return compare == 0 ? Float.compare(getScore(), o.getScore()) : compare;
+  }
+
+  public String toString() {
+    return "at\t" + getTimeString() + " avg score for " + "=\t" + score;
+  }
 }

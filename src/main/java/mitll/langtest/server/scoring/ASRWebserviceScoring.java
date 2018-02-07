@@ -609,7 +609,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
-      logger.debug(language + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
+      logger.debug("runHydra " + language + " : took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
           " hydra on " + audioPath + " - score: " + split[0] + " raw reply : " + resultsStr);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {

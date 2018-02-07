@@ -33,6 +33,7 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.ui.HTML;
 
 import java.util.logging.Logger;
@@ -49,30 +50,48 @@ class TimeWidgets {
   final Button nextButton;
   private final Button all;
   private final Button week;
+  private final Button minute;
   private final Button month;
-  final HTML display;
+  private final HTML display;
+  private final Heading score;
 
   /**
-   * @see AnalysisTab#getTimeWindowStepper
    * @param prevButton
    * @param nextButton
    * @param display
    * @param all
    * @param week
    * @param month
+   * @see AnalysisTab#getTimeWindowStepper
    */
-  TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {
+  TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month, Button minute, Heading score) {
     this.prevButton = prevButton;
     this.nextButton = nextButton;
     this.display = display;
     this.all = all;
     this.week = week;
     this.month = month;
+    this.minute = minute;
+    this.score = score;
+  }
+
+  void setDisplay(String text) {
+    this.display.setText(text);
+  }
+
+  void setScore(String text) {
+    if (this.score != null) {
+      this.score.setText(text);
+    }
   }
 
   public void reset() {
     all.setActive(true);
     week.setActive(false);
     month.setActive(false);
+
+    if (minute != null) {
+      minute.setActive(false);
+    }
   }
 }

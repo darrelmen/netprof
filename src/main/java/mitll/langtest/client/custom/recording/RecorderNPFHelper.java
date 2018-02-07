@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -83,7 +84,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   /**
    * @param controller
    * @param doNormalRecording
-   * @see mitll.langtest.client.banner.NewContentChooser#showView
+   * @see INavigation#showView
    */
   public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording) {
     super(controller);

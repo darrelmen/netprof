@@ -45,16 +45,15 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -83,8 +82,9 @@ public class AnalysisTab extends DivWidget {
   private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
+  private Heading scoreHeader;
 
-  enum TIME_HORIZON {WEEK, MONTH, ALL}
+  enum TIME_HORIZON {TENMIN, WEEK, MONTH, ALL}
 
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
@@ -92,25 +92,32 @@ public class AnalysisTab extends DivWidget {
   private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
   private final int listid;
 
+  private final boolean isPolyglot;
+
   /**
    * @param controller
    * @param showTab
+   * @param isPolyglot
+   * @see NewContentChooser#showProgress
    */
-  public AnalysisTab(ExerciseController controller, final ShowTab showTab) {
+  public AnalysisTab(ExerciseController controller, final ShowTab showTab, boolean isPolyglot, int possible) {
     this(controller,
         showTab,
         1,
         null,
         controller.getUser(),
         controller.getUserManager().getUserID(),
-        -1);
+        -1,
+        isPolyglot, possible);
   }
 
   /**
    * @param controller
    * @param userid
    * @param listid
-   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab)
+   * @param isPolyglot
+   * @param possible
+   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, boolean, int)
    * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final ExerciseController controller,
@@ -119,9 +126,12 @@ public class AnalysisTab extends DivWidget {
                      DivWidget overallBottom,
                      int userid,
                      String userChosenID,
-                     int listid) {
+                     int listid,
+                     boolean isPolyglot,
+                     int possible) {
     this.userid = userid;
     this.listid = listid;
+    this.isPolyglot = isPolyglot;
 
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
@@ -133,8 +143,8 @@ public class AnalysisTab extends DivWidget {
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
-        controller.getMessageHelper(),isTeacherView,
-        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
+        controller.getMessageHelper(), isTeacherView,
+        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT, possible);
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);
@@ -242,7 +252,7 @@ public class AnalysisTab extends DivWidget {
    * Why want a nine pixel left margin?
    *
    * @return
-   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
+   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int, boolean, int)
    */
   @NotNull
   private DivWidget getBottom(boolean isTeacherView) {
@@ -280,7 +290,16 @@ public class AnalysisTab extends DivWidget {
     Button nextButton = getNextButton();
     stepper.add(nextButton);
 
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice);
+    if (isPolyglot) {
+      Heading scoreHeader = new Heading(3);
+      scoreHeader.addStyleName("leftFiveMargin");
+      scoreHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+      scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+      stepper.add(this.scoreHeader = scoreHeader);
+  //    logger.info("add score header");
+    }
+
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice, minuteChoice, scoreHeader);
     return stepper;
   }
 
@@ -295,7 +314,8 @@ public class AnalysisTab extends DivWidget {
 
   private HTML getCurrentTimeWindow() {
     HTML currentDate = new HTML();
-    currentDate.setWidth("80px");
+    currentDate.setWidth(130 +
+        "px");
     currentDate.addStyleName("boxShadow");
     currentDate.addStyleName("leftFiveMargin");
     currentDate.addStyleName("topFiveMargin");
@@ -323,6 +343,7 @@ public class AnalysisTab extends DivWidget {
 
   private Button allChoice;
   private Button weekChoice;
+  private Button minuteChoice;
   private Button monthChoice;
 
   /**
@@ -336,12 +357,21 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.addStyleName("topMargin");
     buttonGroup.addStyleName("leftTenMargin");
     buttonGroup.setToggle(ToggleType.RADIO);
+    if (isPolyglot) {
+      buttonGroup.add(minuteChoice = getMinuteChoice());
+      minuteChoice.setActive(true);
+
+    }
     buttonGroup.add(weekChoice = getWeekChoice());
     buttonGroup.add(monthChoice = getMonthChoice());
     allChoice = getAllChoice();
     buttonGroup.add(allChoice);
 
     return buttonGroup;
+  }
+
+  private Button getMinuteChoice() {
+    return getButton(controller, getClickHandler(TIME_HORIZON.TENMIN), "Minute");
   }
 
   private Button getWeekChoice() {
@@ -363,13 +393,11 @@ public class AnalysisTab extends DivWidget {
 
   private Button getAllChoice() {
     Button all = getButton(controller, getClickHandler(TIME_HORIZON.ALL), "All");
-    all.setActive(true);
+    all.setActive(!isPolyglot);
     return all;
   }
 
-  private ClickHandler getClickHandler(final TIME_HORIZON month) {
-    return event -> analysisPlot.setTimeHorizon(month);
-  }
+  private ClickHandler getClickHandler(final TIME_HORIZON month) { return event -> analysisPlot.setTimeHorizon(month);  }
 
   /**
    * @param controller
@@ -448,7 +476,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
-   // wordsContainer.addStyleName("floatLeftAndClear");
+    // wordsContainer.addStyleName("floatLeftAndClear");
     wordsContainer.add(heading);
     wordsContainer.add(tableWithPager);
     return wordsContainer;
@@ -474,7 +502,10 @@ public class AnalysisTab extends DivWidget {
     showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer, phonePlot);
   }
 
-  private void showPhoneReport(PhoneReport phoneReport, PhoneContainer phoneContainer, Panel lowerHalf, PhoneExampleContainer exampleContainer, PhonePlot phonePlot) {
+  private void showPhoneReport(PhoneReport phoneReport,
+                               PhoneContainer phoneContainer, Panel lowerHalf,
+                               PhoneExampleContainer exampleContainer,
+                               PhonePlot phonePlot) {
     // #1 - phones
     Panel phones = phoneContainer.getTableWithPager(phoneReport);
     lowerHalf.add(getSoundsContainer(phones));
@@ -482,10 +513,13 @@ public class AnalysisTab extends DivWidget {
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
 
-    // #3 - phone plot
-    phonePlot.addStyleName("topMargin");
-   // phonePlot.addStyleName("floatLeftAndClear");
-    lowerHalf.add(phonePlot);
+    if (!isPolyglot) {
+      // #3 - phone plot
+      phonePlot.addStyleName("topMargin");
+      // phonePlot.addStyleName("floatLeftAndClear");
+      lowerHalf.add(phonePlot);
+      logger.info("adding phone plot");
+    }
 
     phoneContainer.showExamplesForSelectedSound();
   }
@@ -494,7 +528,6 @@ public class AnalysisTab extends DivWidget {
     DivWidget sounds = new DivWidget();
     sounds.getElement().setId("SoundsContainer");
     sounds.add(new Heading(3, SOUNDS));
-   // sounds.addStyleName("floatLeftAndClear");
     sounds.add(phones);
     return sounds;
   }

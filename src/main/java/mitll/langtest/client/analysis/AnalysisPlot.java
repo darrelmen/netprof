@@ -41,7 +41,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
@@ -51,7 +50,10 @@ import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.TimeAndScore;
+import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -89,7 +91,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   static final long HOUR = 60 * MINUTE;
   private static final long QUARTER = 6 * HOUR;
 
-//  private static final long FIVEMIN = 5 * MINUTE;
+  //  private static final long FIVEMIN = 5 * MINUTE;
   private static final long TENMIN = 10 * MINUTE;
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
@@ -128,16 +130,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private int index = 0;
 
   private TimeWidgets timeWidgets;
-  private Map<Integer, Map<Long, WordScore>> exerciseToTimeToAnswer;
   private MessageHelper messageHelper;
   private int width = 1365;
   protected Chart chart = null;
-  boolean isPolyglot;
+  private boolean isPolyglot;
+  private SortedSet<TimeAndScore> rawBestScores;
+  private float possible;
 
   /**
    * @param service
    * @param userid        either for yourself if you're a student or a selected student if you're a teacher
    * @param isTeacherView
+   * @param possible
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -148,14 +152,20 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean isTeacherView,
-                      boolean isPolyglot) {
+                      boolean isPolyglot, int possible) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
-    if (isTeacherView) width = WIDTH;
+    if (isTeacherView) {
+      width = WIDTH;
+    }
 
-    setWidth(width + "px");
+    this.possible = (float) possible;
+
+    if (!isPolyglot) {
+      setWidth(width + "px");
+    }
     {
 //      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
       getElement().setId("AnalysisPlot");
@@ -198,6 +208,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    */
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+    this.rawBestScores = new TreeSet<>(rawBestScores);
     //  logger.info("showUserPerformance scores = " + rawBestScores.size());
 
     if (!rawBestScores.isEmpty()) {
@@ -217,6 +228,39 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       }
     }
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
+  }
+
+  private String getScoreText(long start, long end) {
+    float totalScore = 0f;
+    int total = 0;
+    //float possible = 0f;
+    SortedSet<TimeAndScore> simpleTimeAndScores = start == -1 ? rawBestScores : rawBestScores.subSet(new TimeAndScore(start), new TimeAndScore(end));
+    logger.info("getScoreText : found " + simpleTimeAndScores.size());
+    for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
+      float score = exerciseCorrectAndScore.getScore();
+      if (score > 0) {
+        totalScore += score;
+        total++;
+      }
+      //possible += 1f;
+    }
+
+    //  logger.info("total " + totalScore);
+    // logger.info("possible " + possible);
+    float v = totalScore / possible;
+    // logger.info("ratio " + v);
+    float fround = Math.round(v * 100);
+    // logger.info("fround " + fround);
+
+    int fround1 = (int) (fround);
+//        logger.info("fround1 " + fround1);
+
+    String text = "Score is " + fround1 + "%";
+    return text;
+    // timeWidgets.setScore(text);
+//    Heading child = new Heading(2, text);
+//    child.addStyleName("topFiveMargin");
+    //return child;
   }
 
   /**
@@ -289,6 +333,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     }
     setRawBestScores(rawBestScores);
     showSeriesByVisible();
+
+    if (isPolyglot) {
+      setTimeHorizon(AnalysisTab.TIME_HORIZON.TENMIN);
+    }
   }
 
   @NotNull
@@ -751,6 +799,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         return showLastWeek(xAxis, lastPlusSlack);
       case MONTH:
         return showLastMonth(xAxis, lastPlusSlack);
+      case TENMIN:
+        return showLastPeriod(xAxis, lastPlusSlack, TENMIN, this.minutes);
       case ALL:
         return showAll(xAxis, lastPlusSlack);
     }
@@ -782,8 +832,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     timeWidgets.prevButton.setEnabled(timePeriods.size() > 1);
     timeWidgets.nextButton.setEnabled(false);
-    timeWidgets.display.setText(getShortDate(lastMonth));
-
+    timeWidgets.setDisplay(getShortDate(lastMonth, offset == TENMIN));
+    timeWidgets.setScore(getScoreText(startOfPrevMonth, lastPlusSlack));
     timeChanged(startOfPrevMonth, lastPlusSlack);
 
     return startOfPrevMonth;
@@ -809,11 +859,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void setTimeWindowControlsToAll() {
     timeWidgets.prevButton.setEnabled(false);
     timeWidgets.nextButton.setEnabled(false);
-    HTML display = timeWidgets.display;
-    if (display == null) logger.warning("huh? no display on " + timeWidgets);
-    else {
-      display.setText("");
-    }
+    timeWidgets.setDisplay("");
+    timeWidgets.setScore(getScoreText(-1, -1));
     timeWidgets.reset();
     timeChanged(firstTime, lastTime);
   }
@@ -845,15 +892,16 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   private long getOffset() {
-    return timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
+    return
+        timeHorizon == AnalysisTab.TIME_HORIZON.TENMIN ? TENMIN :
+            (timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH);
   }
 
   @NotNull
   private List<Long> getPeriods() {
     return
-        timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ?
-            weeks :
-            months;
+        timeHorizon == AnalysisTab.TIME_HORIZON.TENMIN ? minutes :
+            timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
   }
 
   /**
@@ -863,20 +911,22 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see #gotPrevClick
    */
   private void showTimePeriod(long offset, List<Long> periods) {
-    Long aLong = periods.get(index);
-    timeWidgets.display.setText(getShortDate(aLong));
-    long end = aLong + offset;
-    //  logger.info("showTimePeriod From  " + getShortDate(aLong));
+    Long periodStart = periods.get(index);
+    timeWidgets.setDisplay(getShortDate(periodStart, offset == TENMIN));
+    long end = periodStart + offset;
+    //  logger.info("showTimePeriod From  " + getShortDate(periodStart));
     //  logger.info("showTimePeriod to    " + getShortDate(end));
     // logger.info("showTimePeriod offset    " + offset);
-    chart.getXAxis().setExtremes(aLong, end);
+    chart.getXAxis().setExtremes(periodStart, end);
 
-    timeChanged(aLong, end);
+    timeWidgets.setScore(getScoreText(periodStart, end));
+
+    timeChanged(periodStart, end);
   }
 
   /**
    * @param timeWidgets
-   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int)
+   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int, boolean, boolean)
    */
   void setTimeWidgets(TimeWidgets timeWidgets) {
     this.timeWidgets = timeWidgets;
@@ -899,6 +949,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    */
   private void timeChanged(long from, long to) {
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
+
+    timeWidgets.setScore(getScoreText(from, to));
+
   }
 
   public interface TimeChangeListener {

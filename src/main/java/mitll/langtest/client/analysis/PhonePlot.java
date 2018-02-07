@@ -57,7 +57,7 @@ class PhonePlot extends TimeSeriesPlot {
   private static final int NARROW_WIDTH = 330;
   private static final int NARROW_WIDTH_REALLY = 320;
   static final int NARROW_THRESHOLD = 1450;
-  public static final String NO_RECORDINGS_YET = "No Recordings yet to analyze. Please record yourself.";
+  private static final String NO_RECORDINGS_YET = "No Recordings yet to analyze. Please record yourself.";
 
   /**
    * @see AnalysisTab#getPhoneReport
@@ -76,12 +76,11 @@ class PhonePlot extends TimeSeriesPlot {
     if (rawBestScores.isEmpty()) {
       add(new Label(NO_RECORDINGS_YET));
     } else {
-      Chart chart = getErrorBarChart(
+      add(getErrorBarChart(
           "<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,
           "Average score and range",
           "Range",
-          rawBestScores);
-      add(chart);
+          rawBestScores));
     }
     setPhoneSessions(rawBestScores);
   }
@@ -100,7 +99,7 @@ class PhonePlot extends TimeSeriesPlot {
 
     if (rawBestScores.size() == 1) {
       PhoneSession next = rawBestScores.iterator().next();
- //     logger.info("getErrorBarChart Got " + next);
+      //     logger.info("getErrorBarChart Got " + next);
       start = next.getStart();
       end = next.getEnd();
     }

@@ -85,10 +85,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String ID = "id";
   private static final String WORD = "word";
   private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
+
   private static final String UNIT = "unit";
   private static final String BOOK = "book";
+
   private static final String CHAPTER = "chapter";
   private static final String LESSON = "lesson";
+  private static final String MODULE = "Module";
+
   private static final String OTHER = "Other";
   private static final String EN_TRANSLATION = "EN Translation";
   private static final String ENGLISH = "English";
@@ -345,7 +349,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unitName = null, chapterName = null, weekName = null;
 
     List<String> typeOrder = getTypeOrder();
-    String first = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String first  = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     logger.info("readFromSheet initial type order First '" + first + "' second '" + second + "'");
@@ -791,7 +795,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     boolean b = !colNormalized.isEmpty() &&
         (colNormalized.equalsIgnoreCase(typeSpecified) ||
             colNormalized.contains(CHAPTER) ||
-            colNormalized.contains(LESSON));
+            colNormalized.contains(LESSON) ||
+            colNormalized.contains(MODULE)
+        );
     logger.info("check '" + colNormalized + "' vs '" + typeSpecified + "' = " + b);
     return b;
   }

@@ -18,7 +18,6 @@ import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
@@ -70,7 +69,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showInitialState() {
     clearCurrent();
-    showView(getCurrentView());
+    showView(getCurrentView(), true);
   }
 
   /**
@@ -87,9 +86,7 @@ public class NewContentChooser implements INavigation {
     String currentView = getCurrentStoredView();
     //   logger.info("currentView " + currentView);
 //    if (currentView.equalsIgnoreCase("drill")) currentView = VIEWS.DRILL.toString();
-    VIEWS initialView = isPolyglot() ?
-        DRILL :
-        LEARN;
+    VIEWS initialView = isPolyglot() ? DRILL : LEARN;
 
     VIEWS currentStoredView = (currentView.isEmpty()) ? initialView : VIEWS.valueOf(currentView);
 
@@ -117,8 +114,9 @@ public class NewContentChooser implements INavigation {
 
 
   @Override
-  public void showView(VIEWS view) {
-    logger.info("showView : show " + view  );
+  public void showView(VIEWS view, boolean isFirstTime) {
+    String currentStoredView = getCurrentStoredView();
+    logger.info("showView : show " + view + " current " + currentStoredView);
     if (currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
     } else {
@@ -131,24 +129,15 @@ public class NewContentChooser implements INavigation {
           divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
           divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
 
+          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+
           learnHelper.showContent(divWidget, LEARN.toString());
           break;
         case DRILL:
           clear();
 
           if (isPolyglot()) {
-            List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-            if (!typeOrder.isEmpty()) {
-              String s = typeOrder.get(0);
-              logger.info("First " + s);
-              Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
-              if (!matchInfos.isEmpty()) {
-                MatchInfo next = matchInfos.iterator().next();
-                String value = next.getValue();
-                logger.info("First " + s + " = "+ value);
-                History.newItem(s + "="+value);
-              }
-            }
+            pushFirstUnit();
           }
           practiceHelper.showContent(divWidget, DRILL.toString());
           practiceHelper.hideList();
@@ -182,6 +171,21 @@ public class NewContentChooser implements INavigation {
           break;
         default:
           logger.warning("huh? unknown view " + view);
+      }
+    }
+  }
+
+  private void pushFirstUnit() {
+    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+    if (!typeOrder.isEmpty()) {
+      String s = typeOrder.get(0);
+      //  logger.info("First " + s);
+      Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
+      if (!matchInfos.isEmpty()) {
+        MatchInfo next = matchInfos.iterator().next();
+        String value = next.getValue();
+        //  logger.info("First " + s + " = "+ value);
+        History.newItem(s + "=" + value);
       }
     }
   }
@@ -222,7 +226,7 @@ public class NewContentChooser implements INavigation {
 
     divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab));
+        new AnalysisTab(controller, showTab, false,0));
 
     currentSection = PROGRESS;
   }
@@ -283,7 +287,7 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showPreviousState() {
-    showView(getCurrentView());
+    showView(getCurrentView(), false);
   }
 
   @Override

@@ -59,7 +59,6 @@ import mitll.langtest.shared.custom.IUserListLight;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -735,7 +734,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     enableButtons();
     rightSide.clear();
     rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom,
-        selectedUser.getID(), selectedUser.getUserID(), listid));
+        selectedUser.getID(), selectedUser.getUserID(), listid, false, 10));
   }
 
   public Button getAdd() {

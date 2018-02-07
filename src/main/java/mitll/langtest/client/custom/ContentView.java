@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Panel;
  */
 public interface ContentView {
   /**
-   * @see mitll.langtest.client.banner.NewContentChooser#showView
+   * @see INavigation#showView
    * @param listContent
    * @param instanceName
    */

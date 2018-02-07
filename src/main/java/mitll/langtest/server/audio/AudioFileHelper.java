@@ -84,6 +84,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false, false);
   private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
+  public static final String OGG = "ogg";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -797,6 +798,7 @@ public class AudioFileHelper implements AlignDecode {
             .setCanUseCache(true)
             .setAllowAlternates(false),
         context.getUserid());
+    logger.debug("getAudioAnswerAlignment 1 answer " + answer);
 
     if (options.isRecordInResults()) {
       int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
@@ -1035,6 +1037,7 @@ public class AudioFileHelper implements AlignDecode {
                                           int userid,
                                           File theFile) {
     boolean available = isHydraAvailable();
+    String hydraHost = serverProps.getHydraHost();
     if (!available) {
       logger.debug("checkForWebservice local webservice not available" +
           "\n\tfor     " + theFile.getName() +
@@ -1042,9 +1045,11 @@ public class AudioFileHelper implements AlignDecode {
           "\n\texid    " + exid +
           "\n\tenglish " + english +
           "\n\titem    " + foreignLanguage +
-          "\n\tuser    " + userid);
+          "\n\tuser    " + userid+
+          "\n\thost    " + hydraHost
+      );
     }
-    if (!available && !theFile.getName().endsWith("ogg") && serverProps.isLaptop()) {
+    if (!available && !theFile.getName().endsWith(OGG) && serverProps.isLaptop()) {
  /*
       logger.info("checkForWebservice exid    " + exid);
       logger.info("checkForWebservice projid  " + projid);
@@ -1065,7 +1070,7 @@ public class AudioFileHelper implements AlignDecode {
 */
 
 
-        PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, serverProps.getHydraHost());
+        PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost);
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
         return null;
@@ -1096,10 +1101,10 @@ public class AudioFileHelper implements AlignDecode {
       session = getSession(hydraHost, project.getID());
     }
     HTTPClient httpClient = getHttpClient(hydraHost);
-    httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.PostRequest.ALIGN.toString());
+    ScoreServlet.PostRequest requestToServer = ScoreServlet.PostRequest.ALIGN;
+    httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
     httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
     httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
-    // USE THE LANGUAGE INSTEAD
     httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
     httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
     httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
@@ -1110,7 +1115,9 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     try {
-      logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to decode '" + english + "'='" + foreignLanguage + "'");
+      logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to " +
+          requestToServer +
+          " '" + english + "' = '" + foreignLanguage + "'");
 
       //String trim = new SLFFile().cleanToken(foreignLanguage).trim();
       logger.info("getProxyScore dict = " + asrScoring.getHydraDict(new SLFFile().cleanToken(foreignLanguage).trim(), ""));
@@ -1228,7 +1235,9 @@ public class AudioFileHelper implements AlignDecode {
                                            String prefix,
                                            PrecalcScores precalcScores,
                                            DecoderOptions options) {
-    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (options.shouldDoDecoding() ? " Decoding " : " Aligning ") +
+    // alignment trumps decoding
+    boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
+    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
@@ -1263,20 +1272,23 @@ public class AudioFileHelper implements AlignDecode {
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-//    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    logger.info("getASRScoreForAudio : precalcScore " +precalcScores);
+
     PretestScore pretestScore = getASRScoring().scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
 
         pathHelper.getImageOutDir(language.toLowerCase()), imageOptions,
-        options.shouldDoDecoding(), options.isCanUseCache(), prefix,
+        shouldDoDecoding,
+        options.isCanUseCache(), prefix,
         precalcScores,
         options.isUsePhoneToDisplay());
 
     pretestScore.setReqid(reqid);
 
     String json = new ScoreToJSON().asJson(pretestScore);
-    // logger.info("json for preset score " +pretestScore + " " + json);
+    logger.info("getASRScoreForAudio : json for preset score " +pretestScore + " " + json);
     pretestScore.setJson(json);
 
     return pretestScore;
@@ -1339,16 +1351,6 @@ public class AudioFileHelper implements AlignDecode {
               project.getID(),
               userID,
               file);
-
-//      getASRScoreForAudio(reqid,)
-//
-//      PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(
-//          exercise,
-//          file,
-//          audioAnswer,
-//          language,
-//          decoderOptions,
-//          precalcScores);
 
       String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(exercise.getForeignLanguage(), language);
       PretestScore asrScoreForAudio = getASRScoreForAudio(file,

@@ -392,7 +392,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     if (leftState != null) {
       DivWidget leftC = new DivWidget();
-      leftC.setWidth("140px");
+      leftC.setWidth(140 + "px");
       leftC.add(leftState);
       horiz.add(leftC);
     }
@@ -588,8 +588,15 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return english.getElement().getStyle().getVisibility().equals("hidden");
   }
 
+  /**
+   *
+   * @param vis
+   */
   void setMainContentVisible(boolean vis) {
-    if (leftState != null) leftState.setVisible(vis);
+    if (leftState != null) {
+      leftState.setVisible(vis);
+      leftState.getParent().setVisible(vis);
+    }
     mainContainer.setVisible(vis);
     rightColumn.setVisible(vis);
   }
