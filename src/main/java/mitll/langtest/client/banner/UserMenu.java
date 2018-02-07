@@ -9,15 +9,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.initial.InitialUI;
-import mitll.langtest.client.initial.LifecycleSupport;
-import mitll.langtest.client.initial.PropertyHandler;
-import mitll.langtest.client.initial.UILifecycle;
+import mitll.langtest.client.initial.*;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
@@ -37,6 +35,7 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private final Logger logger = Logger.getLogger("UserMenu");
+  private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
 
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   private static final String STATUS_REPORT_SENT = "Status report sent";
@@ -94,13 +93,14 @@ public class UserMenu {
     return choices;
   }
 
-  List<LinkAndTitle> getProjectSpecificChoices() {
+  List<LinkAndTitle> getProjectSpecificChoices(Widget menu) {
     List<LinkAndTitle> choices = new ArrayList<>();
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle(EVENTS, new EventsClickHandler()));
-    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT, new DownloadContentsClickHandler()));
+    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Female", new DownloadContentsClickHandler(menu,false)));
+    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Male", new DownloadContentsClickHandler(menu,true)));
     return choices;
   }
 
@@ -207,14 +207,28 @@ public class UserMenu {
   }
 
   private class DownloadContentsClickHandler implements ClickHandler {
+    Widget menu;
+    boolean isMale;
+
+    /**
+     *
+     * @param menu
+     * @param isMale
+     */
+    public DownloadContentsClickHandler(Widget menu, boolean isMale) {
+      this.menu = menu;
+      this.isMale = isMale;
+    }
+
     public void onClick(ClickEvent event) {
+      new PopupHelper().showPopup(PLEASE_WAIT, menu, 5000);
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
 
         public void onSuccess() {
-          new DownloadHelper().downloadContext(controller.getHost());
+          new DownloadHelper().downloadContext(controller.getHost(), isMale);
         }
       });
     }

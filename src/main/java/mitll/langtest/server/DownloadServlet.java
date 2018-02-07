@@ -257,24 +257,32 @@ public class DownloadServlet extends DatabaseServlet {
    * @param queryString
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString,
-                             int projid, String language) {
-    // logger.debug("request " +  " query " + queryString);
+  private void writeAudioZip(HttpServletResponse response,
+                             DatabaseImpl db,
+                             String queryString,
+                             int projid,
+                             String language) {
+    logger.debug("writeAudioZip : request " + projid + " " + language+ " query " + queryString);
     String[] split1 = queryString.split(REGEXAMPERSAND);
 
+    // TODO : super buggy - what if we don't have a unit/chapter hierarchy???
     String unitChapter = "";
     for (String arg : split1) {
       if (arg.startsWith("unit=")) unitChapter = arg.split("unit=")[1];
     }
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExportOptions audioExportOptions = getAudioExportOptions(split1, db.getProject(projid).hasProjectSpecificAudio());
+    AudioExportOptions audioExportOptions =
+        getAudioExportOptions(split1, db.getProject(projid).hasProjectSpecificAudio());
 
     audioExportOptions.setSkip(typeToSection.isEmpty() && !audioExportOptions.isAllContext());
-    String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
 
-    //logger.info("writeAudioZip zip file name " + zipFileName);
-    setHeader(response, zipFileName);
+    {
+      String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
+      //logger.info("writeAudioZip zip file name " + zipFileName);
+      setHeader(response, zipFileName);
+    }
+
     writeZip(response, typeToSection, projid, audioExportOptions);
   }
 

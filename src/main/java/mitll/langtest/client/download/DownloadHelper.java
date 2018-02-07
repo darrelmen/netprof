@@ -48,7 +48,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
@@ -57,7 +56,7 @@ import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 public class DownloadHelper {
-//  private final Logger logger = Logger.getLogger("DownloadHelper");
+  //  private final Logger logger = Logger.getLogger("DownloadHelper");
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
@@ -76,10 +75,11 @@ public class DownloadHelper {
     this.typeOrder = typeOrder;
   }
 
-  public void downloadContext(String host) {
+  public void downloadContext(String host, boolean isMale) {
     String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&" +
-        ALLCONTEXT +
-        "=true";
+        ALLCONTEXT + "=true" +
+        "&" +
+        "male=" + isMale;
     new DownloadIFrame(urlForDownload);
   }
 
@@ -384,13 +384,13 @@ public class DownloadHelper {
 
   /**
    * Map comma and ampersand to encoded versions so they make it through parsing the url in the download servlet.
-   *
+   * <p>
    * Probably better ways to do this...
    *
-   * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
    * @param request
    * @param typeToSection
    * @return
+   * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
    */
   private String getURL(String request, Map<String, Collection<String>> typeToSection) {
     Map<String, Collection<String>> ts = new HashMap<>();

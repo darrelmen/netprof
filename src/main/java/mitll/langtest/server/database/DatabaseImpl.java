@@ -525,6 +525,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return projectManagement.getExercise(projectid, id);
   }
 
+  /**
+   * @see ScoreServlet#getJSONForExercises
+   * @see ScoreServlet#getJsonNestedChapters
+   * @param projectid
+   * @return
+   */
   public JsonExport getJSONExport(int projectid) {
     getExercises(projectid);
 
@@ -1329,15 +1335,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     String language = getLanguage(project);
 
-    if (!typeToSection.isEmpty()) {
+//    if (!typeToSection.isEmpty()) {
       logger.info("writeZip for project " + projectid +
           " ensure audio for " + exercisesForSelectionState.size() +
-          " exercises for " + project.getLanguage() +
+          " exercises for " + language +
           " selection " + typeToSection);
 
-      audioDAO.attachAudioToExercises(exercisesForSelectionState, project.getLanguage());
-      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, project.getLanguage());
-    }
+      audioDAO.attachAudioToExercises(exercisesForSelectionState,language);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+  //  }
 
     new AudioExport(getServerProps())
         .writeZip(out,
@@ -1426,10 +1432,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * Expensive ?
+   * TODO : Expensive ?
    *
    * @param projectid
-   * @see DatabaseImpl#getJSONExport
+   * @see #getJSONExport
    */
   private void attachAllAudio(int projectid) {
     long then = System.currentTimeMillis();
@@ -1438,13 +1444,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     Project project = getProject(projectid);
     String language = project.getLanguage();
-    String name = project.getProject().name();
 
     getAudioDAO().attachAudioToExercises(exercises, language);
 
-    logger.info(name + "/" + language +
-        " took " + (System.currentTimeMillis() - then) +
-        " millis to attachAllAudio to " + exercises.size() + " exercises");
+    {
+      String name = project.getProject().name();
+      logger.info("attachAllAudio " + name + "/" + language +
+          " took " + (System.currentTimeMillis() - then) +
+          " millis to attachAllAudio to " + exercises.size() + " exercises");
+    }
   }
 
   public String getUserListName(int listid) {

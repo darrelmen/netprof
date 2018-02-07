@@ -209,7 +209,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
       userMenu.getCogMenuChoicesForAdmin().forEach(lt -> cog.add(lt.makeNewLink()));
 
-      hasProjectChoices = userMenu.getProjectSpecificChoices();
+      hasProjectChoices = userMenu.getProjectSpecificChoices(cog);
       hasProjectChoices.forEach(lt -> cog.add(lt.makeNewLink()));
 
       rnav.add(cog);

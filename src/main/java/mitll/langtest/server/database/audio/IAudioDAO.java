@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
@@ -44,6 +45,7 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +84,8 @@ public interface IAudioDAO extends IDAO {
   /**
    * @param exercises
    * @param language
+   * @see mitll.langtest.server.database.DatabaseImpl#attachAllAudio
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   void attachAudioToExercises(Collection<CommonExercise> exercises, String language);

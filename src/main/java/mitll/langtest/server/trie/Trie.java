@@ -76,23 +76,21 @@ public class Trie<T> {
    */
   private List<EmitValue<T>> getEmits(String toMatch) {
     TrieNode<T> start = root;
-    List<String> chars = getChars(toMatch);
-    for (String c : chars) {
+
+    for (String c : getChars(toMatch)) {
 //      logger.info("char " + toMatch+ " = '" +c +"'");
-      TrieNode<T> nextState = start.getNextState(c);
-  //    logger.info(" explain "+ start.explain(c));
-      start = nextState;
+      //TrieNode<T> nextState = start.getNextState(c);
+      //    logger.info(" explain "+ start.explain(c));
+      start = start.getNextState(c);
       if (start == null) break;
     }
-    if (start == null) {
-      return Collections.emptyList();
-    } else {
-      return start.getEmitsBelow();
-    }
+
+    return (start == null) ? Collections.emptyList() : start.getEmitsBelow();
   }
 
   /**
    * Start building
+   *
    * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder, boolean)
    */
   public void startMakingNodes() {
@@ -127,7 +125,7 @@ public class Trie<T> {
     String normalizedValue = textEntityDescription.getNormalizedValue();
 //    logger.info("addEntryToTrie adding '" + normalizedValue + "'");
     //List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
-    List<String> split =   getChars(normalizedValue);
+    List<String> split = getChars(normalizedValue);
 
     int n = split.size();
 /*    if (n == 1 && USE_SINGLE_TOKEN_MAP) {
@@ -139,11 +137,11 @@ public class Trie<T> {
     TrieNode<T> currentState = root;
     for (String aSplit : split) {
       String upperCaseToken = convertToUpper ? aSplit.toUpperCase() : aSplit;
-   //   logger.info("addEntryToTrie upperCaseToken '" + upperCaseToken + "'");
+      //   logger.info("addEntryToTrie upperCaseToken '" + upperCaseToken + "'");
 
       // avoid keeping references to duplicate strings
       String uniqueCopy = getUnique(stringCache, upperCaseToken);
-   //   logger.info("addEntryToTrie uniqueCopy '" + uniqueCopy + "'");
+      //   logger.info("addEntryToTrie uniqueCopy '" + uniqueCopy + "'");
 
       TrieNode<T> nextState = currentState.getNextState(uniqueCopy);
 
@@ -167,10 +165,20 @@ public class Trie<T> {
     return uniqueCopy;
   }
 
+  /**
+   * @param entry
+   * @return
+   * @see #addEntryToTrie(TextEntityValue, Map)
+   * @see #getEmits
+   */
   private List<String> getChars(String entry) {
     List<String> toAdd = new ArrayList<>();
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < entry.length(); i++) {
+
+    int length = entry.length();
+    if (length > 500) logger.warn("getChars adding entry " + entry + " length " + entry.length());
+
+    for (int i = 0; i < length; i++) {
       char c = entry.charAt(i);
       if (!Character.isWhitespace(c) || SPACES_ARE_OK) {
         builder.append(c);
@@ -183,8 +191,8 @@ public class Trie<T> {
   /**
    * Faster to use this than a pattern by approximately 12%.
    *
-   * @param normalizedValue
    * @return list of tokens
+   * @paramx normalizedValue
    */
 /*  private List<String> getSpaceSeparatedTokens(String normalizedValue) {
     int findex = 0;
@@ -204,7 +212,6 @@ public class Trie<T> {
     }
     return split;
   }*/
-
   private void computeFailureFunction() {
     // computeFailureFunction is a method to implement algorithm 3 here from
     // AC paper after the tree is built
@@ -216,7 +223,7 @@ public class Trie<T> {
     while (!queue.isEmpty()) {
       TrieNode<T> r = queue.remove();
       Collection<String> transitionLabels = r.getTransitionLabels();
-     // logger.info("computeFailureFunction transition "+ transitionLabels.size());
+      // logger.info("computeFailureFunction transition "+ transitionLabels.size());
       for (String a : transitionLabels) {
         // a is transition label
         // r is current node
@@ -249,21 +256,22 @@ public class Trie<T> {
   }
 
   /**
-   * @see mitll.langtest.server.services.ResultServiceImpl#getResultAlternatives
-   * @see mitll.langtest.server.services.ResultServiceImpl#getResults
    * @param toMatch
    * @return
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResultAlternatives
+   * @see mitll.langtest.server.services.ResultServiceImpl#getResults
    */
-  public Collection<T> getMatchesLC(String toMatch) { return getMatches(toMatch.toLowerCase());  }
+  public Collection<T> getMatchesLC(String toMatch) {
+    return getMatches(toMatch.toLowerCase());
+  }
 
   /**
-   *
    * @param lc
    * @return
    * @see ExerciseTrie#getExercises(String)
    * @see Trie#getMatchesLC(String)
    */
-   List<T> getMatches(String lc) {
+  List<T> getMatches(String lc) {
     List<EmitValue<T>> emits = getEmits(lc);
     Set<T> unique = new HashSet<>();
     List<T> ids = new ArrayList<>();
@@ -275,7 +283,7 @@ public class Trie<T> {
       }
     }
 
-  //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
+    //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
     return ids;
   }
 }
