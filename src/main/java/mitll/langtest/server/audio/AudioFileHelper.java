@@ -1006,14 +1006,16 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-/*      logger.info("getASRScoreForAudio from" +
+      logger.info("getASRScoreForAudio from" +
           "\n\tlm sentences '" + lmSentences + "'" +
-          "\n\tto '" + vocab +"'", new Exception());*/
+          "\n\tto vocab '" + vocab +"'");
+
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
-    //  logger.info("getASRScoreForAudio audio file path is " + path);
-    return getASRScoreForAudio(0, path, vocab, lmSentences, transliteration,
+    String next = lmSentences.iterator().next();
+      logger.info("getASRScoreForAudio audio file path is " + path + " " + next);
+    return getASRScoreForAudio(0, path, next, lmSentences, transliteration,
         DEFAULT, prefix, precalcScores,
         options);
   }
@@ -1237,7 +1239,7 @@ public class AudioFileHelper implements AlignDecode {
                                            DecoderOptions options) {
     // alignment trumps decoding
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
-    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
+    logger.info("getASRScoreForAudio (" + getLanguage() + ")" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
@@ -1272,7 +1274,7 @@ public class AudioFileHelper implements AlignDecode {
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
     logger.info("getASRScoreForAudio : precalcScore " +precalcScores);
 
     PretestScore pretestScore = getASRScoring().scoreRepeat(

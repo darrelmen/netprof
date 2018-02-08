@@ -265,6 +265,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            String prefix,
                                            PrecalcScores precalcScores,
                                            boolean usePhoneToDisplay) {
+    logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
