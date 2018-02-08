@@ -195,11 +195,10 @@ public class Trie<T> {
       boolean moreThanMax = size > MAX_WINDOW;
       if (moreThanMax || (size > WINDOW_SIZE && Character.isWhitespace(c))) {
 
-          if (moreThanMax) {
-            logger.warn("max vs " + length+ " : '" + getWindow(slidingWindow) + "'");
-          }
-          else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
-            logger.warn("break '" + getWindow(slidingWindow) + "'");
+        if (moreThanMax) {
+          logger.warn("max vs " + length + " : '" + getWindow(slidingWindow) + "'");
+        } else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
+          logger.warn("break '" + getWindow(slidingWindow) + "'");
 
         Character first = slidingWindow.peekFirst();
         while (
@@ -209,7 +208,6 @@ public class Trie<T> {
         }
       }
       String window = getWindow(slidingWindow);
-
 
       //
 //      if (DEBUG && length > WINDOW_SIZE) {

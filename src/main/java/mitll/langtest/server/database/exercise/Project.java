@@ -267,10 +267,11 @@ public class Project implements IPronunciationLookup {
         copy = copy.subList(0, 1000);
       }
 */
-      logMemory();
+      long before = logMemory();
       fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
-      logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
-      logMemory();
+      long after = logMemory();
+      logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() +
+          " exercises, used " + (after - before) + " MB");
     }).start();
   }
 

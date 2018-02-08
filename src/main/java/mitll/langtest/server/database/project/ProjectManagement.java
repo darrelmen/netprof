@@ -479,8 +479,8 @@ public class ProjectManagement implements IProjectManagement {
         isMyProject);
   }
 
-  public static void logMemory() {
-    int MB = (1024 * 1024);
+  public static long logMemory() {
+    long MB = (1024L * 1024L);
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
@@ -489,6 +489,8 @@ public class ProjectManagement implements IProjectManagement {
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
     logger.debug("logMemory : current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+
+    return used / MB;
   }
 
   private Project getProjectOrFirst(int projectid) {
