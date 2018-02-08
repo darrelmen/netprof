@@ -48,7 +48,6 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
@@ -77,7 +76,8 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel {
+public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel implements TimerListener {
+  public static final int ADVANCE_DELAY = 2000;
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   private static final int KEY_PRESS_WIDTH = 125;
@@ -111,7 +111,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final String SHUFFLE = "Shuffle";
 
   final T exercise;
-  private Timer currentTimer = null;
+
   private Widget english;
   Widget foreign;
 
@@ -127,6 +127,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
+  protected FlashcardTimer timer;
 
   /**
    * @see #setAutoPlay
@@ -156,7 +157,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.endListener = endListener;
     this.instance = instance;
     this.exerciseList = exerciseList;
-
+    this.timer = new FlashcardTimer(this);
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;
@@ -208,7 +209,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private void wasHidden() {
-    cancelTimer();
+    timer.cancelTimer();
     getSoundFeedback().clear();
   }
 
@@ -260,7 +261,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private CommentBox commentBox;
 
   /**
-   * @see #loadNextOnTimer
+   * @see FlashcardTimer#scheduleIn
    */
   void loadNext() {
     if (exerciseList.onLast()) {
@@ -462,7 +463,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       //   logger.info("setAutoPlay false");
       autoPlay.setActive(false);
       controlState.setAutoPlayOn(false);
-      cancelTimer();
+      timer.cancelTimer();
     }
   }
 
@@ -484,7 +485,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       if (controlState.isAudioOn()) {
         playAudioAndAdvance(path, delayMillis, useCheck);
       } else {
-        loadNextOnTimer(2000);
+        timer.scheduleIn(ADVANCE_DELAY);
       }
     }
   }
@@ -502,13 +503,14 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       @Override
       public void songEnded() {
         if (endListener != null) endListener.songEnded();
-        cancelTimer();
+        timer.cancelTimer();
+
         if (isTabVisible()) {
           if (delayMillis > 0) {
             if (useCheck) {
               checkThenLoadNextOnTimer(delayMillis);
             } else {
-              loadNextOnTimer(delayMillis);
+              timer.scheduleIn(delayMillis);
             }
           } else {
             loadNext();
@@ -525,42 +527,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private void checkThenLoadNextOnTimer(int delayMillis) {
     if (controlState.isAutoPlay()) {
       //   logger.info("checkThenLoadNextOnTimer " + delayMillis);
-      boolean b = loadNextOnTimer(delayMillis);
+      // boolean b =
+      timer.scheduleIn(delayMillis);
     }
   }
 
-  /**
-   * @param delay
-   * @see #checkThenLoadNextOnTimer
-   * @seex BootstrapExercisePanel#goToNextAfter
-   * @seex StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay
-   */
-  boolean loadNextOnTimer(final int delay) {
-    //   logger.info("loadNextOnTimer ----> load next on " + delay);
-    if (isTimerNotRunning()) {
-      currentTimer = new Timer() {
-        @Override
-        public void run() {
-//          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
-          loadNext();
-        }
-      };
-      currentTimer.schedule(delay);
-      return true;
-    } else {
-      //    logger.info("loadNextOnTimer ----> ignoring next current timer is running");
-      return false;
-    }
-  }
-
-  private boolean isTimerNotRunning() {
-    return (currentTimer == null) || !currentTimer.isRunning();
-  }
-
-  void cancelTimer() {
-    if (currentTimer != null) currentTimer.cancel();
-    removePlayingHighlight(foreign);
-  }
 
   /**
    *
@@ -589,7 +560,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   /**
-   *
    * @param vis
    */
   void setMainContentVisible(boolean vis) {
@@ -691,7 +661,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   void gotAutoPlay(boolean b) {
     if (b) playRefAndGoToNextIfSet();
-    else cancelTimer();
+    else timer.cancelTimer();
   }
 
   void playRefAndGoToNextIfSet() {
@@ -766,8 +736,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   /**
-   * @see #addPrevNextWidgets
    * @return
+   * @see #addPrevNextWidgets
    */
   private Button getNextButton() {
     final Button right = new Button();
@@ -1206,6 +1176,16 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    */
   boolean otherReasonToIgnoreKeyPress() {
     return commentBox.isPopupShowing();
+  }
+
+  @Override
+  public void timerFired() {
+    loadNext();
+  }
+
+  @Override
+  public void timerCancelled() {
+    removePlayingHighlight(foreign);
   }
 
   private class ClickableSimplePanel extends SimplePanel {

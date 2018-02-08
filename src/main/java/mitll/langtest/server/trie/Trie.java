@@ -54,11 +54,17 @@ import java.util.*;
 public class Trie<T> {
   private static final Logger logger = LogManager.getLogger(Trie.class);
 
-  private static final boolean SPLIT_ON_CHARACTERS = true;
-  public static final boolean SPACES_ARE_OK = true;
+  //  private static final boolean SPLIT_ON_CHARACTERS = true;
+  // private static final boolean SPACES_ARE_OK = true;
+  private static final int WINDOW_SIZE = 20;
+  private static final int MAX_WINDOW = WINDOW_SIZE * 2;
+  private static final int MIN_WINDOW = WINDOW_SIZE / 2;
+
   private final TrieNode<T> root;
   private Map<String, String> tempCache;
   private boolean convertToUpper = true;
+
+  private static final boolean DEBUG = false;
 
   public Trie() {
     this(false);
@@ -105,8 +111,8 @@ public class Trie<T> {
     computeFailureFunction();
   }
 
-  public boolean addEntryToTrie(TextEntityValue<T> textEntityDescription) {
-    return addEntryToTrie(textEntityDescription, tempCache);
+  public void addEntryToTrie(TextEntityValue<T> textEntityDescription) {
+    addEntryToTrie(textEntityDescription, tempCache);
   }
 
   /**
@@ -166,6 +172,8 @@ public class Trie<T> {
   }
 
   /**
+   * This is nutty - need sliding window.
+   *
    * @param entry
    * @return
    * @see #addEntryToTrie(TextEntityValue, Map)
@@ -173,19 +181,51 @@ public class Trie<T> {
    */
   private List<String> getChars(String entry) {
     List<String> toAdd = new ArrayList<>();
-    StringBuilder builder = new StringBuilder();
 
     int length = entry.length();
     if (length > 500) logger.warn("getChars adding entry " + entry + " length " + entry.length());
+    if (DEBUG && length > WINDOW_SIZE) logger.info("getChars : " + entry);
 
+    Deque<Character> slidingWindow = new LinkedList<>();
     for (int i = 0; i < length; i++) {
       char c = entry.charAt(i);
-      if (!Character.isWhitespace(c) || SPACES_ARE_OK) {
-        builder.append(c);
-        toAdd.add(builder.toString());
+
+      slidingWindow.addLast(c);
+      int size = slidingWindow.size();
+      boolean moreThanMax = size > MAX_WINDOW;
+      if (moreThanMax || (size > WINDOW_SIZE && Character.isWhitespace(c))) {
+
+          if (moreThanMax) {
+            logger.warn("max vs " + length+ " : '" + getWindow(slidingWindow) + "'");
+          }
+          else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
+            logger.warn("break '" + getWindow(slidingWindow) + "'");
+
+        Character first = slidingWindow.peekFirst();
+        while (
+            slidingWindow.size() > MAX_WINDOW ||
+                (slidingWindow.size() > MIN_WINDOW && !Character.isWhitespace(first))) {
+          first = slidingWindow.removeFirst();
+        }
       }
+      String window = getWindow(slidingWindow);
+
+
+      //
+//      if (DEBUG && length > WINDOW_SIZE) {
+//        logger.info("adding : " + window);
+//      }
+
+      toAdd.add(window);
+      // }
     }
     return toAdd;
+  }
+
+  String getWindow(Deque<?> window) {
+    StringBuilder sb = new StringBuilder();
+    window.forEach(sb::append);
+    return sb.toString();
   }
 
   /**

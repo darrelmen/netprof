@@ -487,7 +487,7 @@ public class ProjectManagement implements IProjectManagement {
     long max = rt.maxMemory();
 
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
+    logger.debug("logMemory : current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 

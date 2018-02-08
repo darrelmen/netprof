@@ -60,6 +60,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.project.ProjectManagement.logMemory;
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
 /**
@@ -260,12 +261,16 @@ public class Project implements IPronunciationLookup {
       }
 
       logger.info("buildExerciseTrie : START context for " + project.id() + " for " + rawExercises.size() + " exercises.");
-      List<CommonExercise> copy = new ArrayList<>(rawExercises);
+//      List<CommonExercise> copy = new ArrayList<>(rawExercises);
+/*
       if (copy.size() > 1000) {
         copy = copy.subList(0, 1000);
       }
-      fullContextTrie = new ExerciseTrie<>(copy, project.language(), smallVocabDecoder, false);
+*/
+      logMemory();
+      fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
       logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() + " exercises");
+      logMemory();
     }).start();
   }
 

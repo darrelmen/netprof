@@ -587,7 +587,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   /**
-   * @see #cancelTimer()
+   * @see #timerCancelled
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
    */
   void removePlayingHighlight() {
@@ -597,10 +597,17 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
    */
+/*
   void cancelTimer() {
     super.cancelTimer();
     removePlayingHighlight();
   }
+*/
+/*
+  @Override
+  public void timerCancelled() {
+    removePlayingHighlight(foreign);
+  }*/
 
   private void initRecordButton() {
     answerWidget.initRecordButton();

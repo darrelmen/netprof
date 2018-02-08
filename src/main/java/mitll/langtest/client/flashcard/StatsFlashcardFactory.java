@@ -81,6 +81,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
+  public static final String LISTS = "Lists";
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final String TIMES_UP = "Times Up!";
@@ -90,12 +91,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private static final int FEEDBACK_SLOTS = 4;
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
-  private static final int NEXT_EXERCISE_DELAY = 500;
+  private static final int NEXT_EXERCISE_DELAY = 750;
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
-  private static final String CORRECT = "Correct";
+  private static final String CORRECT   = "Correct";
   private static final String AVG_SCORE = "Pronunciation";
+
   /**
    *
    */
@@ -444,13 +446,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     /**
-     * @see #loadNextOnTimer(int)
+     * @see #timerFired
      * @see BootstrapExercisePanel#playRefAndGoToNext
      */
     @Override
     protected void loadNext() {
       if (exerciseList.onLast()) {
-        cancelTimer();
+        timer.cancelTimer();
         cancelRoundTimer();
         onSetComplete();
       } else {
@@ -535,11 +537,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
         if (score >= MIN_SCORE_F) {
-          loadNextOnTimer(NEXT_EXERCISE_DELAY);
+          timer.scheduleIn(NEXT_EXERCISE_DELAY);
         }
       }
     }
 
+    /**
+     * Turn off for now?
+     */
     protected void playCorrectDing() {
      // getSoundFeedback().queueSong(SoundFeedback.CORRECT);
     }
@@ -592,9 +597,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private int getUserListID() {
       int userListID = ul == null ? -1 : ul.getID();
 
-      String lists = "Lists";
-      if (selection.containsKey(lists)) {
-        Collection<String> strings = selection.get(lists);
+      if (selection.containsKey(LISTS)) {
+        Collection<String> strings = selection.get(LISTS);
         try {
           if (!strings.isEmpty()) userListID = Integer.parseInt(strings.iterator().next());
         } catch (NumberFormatException e) {
@@ -619,11 +623,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       scoreHistory = isPolyglot ?
           new AnalysisTab(controller, null, true, exerciseList.getSize()) :
           completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
-
-//      if (isPolyglot) {
-//      //  getScoreWidget(sortedHistory);
-//        scoreHistory.add(getScoreWidget(sortedHistory));
-//      }
 
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
@@ -858,7 +857,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     @Override
     protected void abortPlayback() {
-      cancelTimer();
+      timer.cancelTimer();
       soundFeedback.clear();
     }
 
