@@ -482,10 +482,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private void showCorrectFeedback(double score, PretestScore pretestScore) {
     showPronScoreFeedback(true, score);
     showOtherText();
-    getSoundFeedback().queueSong(SoundFeedback.CORRECT);
+    playCorrectDing();
     showRecoOutput(pretestScore);
 
     maybeAdvance(score);
+  }
+
+  protected void playCorrectDing() {
+    getSoundFeedback().queueSong(SoundFeedback.CORRECT);
   }
 
   protected void maybeAdvance(double score) {

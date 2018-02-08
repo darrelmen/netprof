@@ -84,7 +84,7 @@ public class AnalysisTab extends DivWidget {
   private final int userid;
   private Heading scoreHeader;
 
-  enum TIME_HORIZON {TENMIN, WEEK, MONTH, ALL}
+  enum TIME_HORIZON {ONEMIN, TENMIN, WEEK, MONTH, ALL}
 
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;

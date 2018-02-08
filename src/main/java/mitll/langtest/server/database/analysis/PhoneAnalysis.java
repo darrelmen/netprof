@@ -60,6 +60,7 @@ public class PhoneAnalysis {
   private static final long MONTH = 4 * WEEK;
   //  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
+      MINUTE,
       TENMIN,
       HOUR,
       //    QUARTER,

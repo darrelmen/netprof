@@ -450,6 +450,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void loadNext() {
       if (exerciseList.onLast()) {
+        cancelTimer();
+        cancelRoundTimer();
         onSetComplete();
       } else {
         loadCurrent();
@@ -526,7 +528,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     protected boolean isCorrect(boolean correct, double score) {
       boolean b = isPolyglot ? score * 100 >= MIN_SCORE : correct;
-      logger.info("isCorrect " + correct + "  " + score + " " + b);
+     // logger.info("isCorrect " + correct + "  " + score + " " + b);
       return b;
     }
 
@@ -536,6 +538,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           loadNextOnTimer(NEXT_EXERCISE_DELAY);
         }
       }
+    }
+
+    protected void playCorrectDing() {
+     // getSoundFeedback().queueSong(SoundFeedback.CORRECT);
     }
 
     /**
@@ -945,6 +951,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         g.setWidget(row, 0, pronScoreGroup);
         //pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, timeLeft);
+        showTimeRemaining(roundTimeLeftMillis);
         // timeLeft.setText("0");
       }
 

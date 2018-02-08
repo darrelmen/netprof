@@ -138,22 +138,7 @@ public class ScoreFeedbackDiv {
     float hydecScore = pretestScore.getHydecScore();
     //  logger.info("score " + hydecScore);
     if (hydecScore > 0) {
-      DivWidget scoreFeedbackDiv = new DivWidget();
-      scoreFeedbackDiv.add(progressBar);
-
-      Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
-      scoreFeedbackDiv.add(new WordTable()
-          .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
-
-      playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
-      // so it will play on drill tab...
-      playAudioPanel.setEnabled(true);
-
-      wordTableContainer.add(scoreFeedbackDiv);
-
-      if (hydecScore > NATIVE_THRSHOLD) {
-        wordTableContainer.add(getPraise());
-      }
+      showScoreFeedback(pretestScore, isRTL, wordTableContainer, hydecScore);
       //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
     } else {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
@@ -166,6 +151,27 @@ public class ScoreFeedbackDiv {
     wordTableContainer.add(container);
 
     return wordTableContainer;
+  }
+
+  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer, float hydecScore) {
+    DivWidget scoreFeedbackDiv = new DivWidget();
+    scoreFeedbackDiv.add(progressBar);
+
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
+
+
+    scoreFeedbackDiv.add(new WordTable()
+        .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
+
+    playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+    // so it will play on drill tab...
+    playAudioPanel.setEnabled(true);
+
+    wordTableContainer.add(scoreFeedbackDiv);
+
+    if (hydecScore > NATIVE_THRSHOLD) {
+      wordTableContainer.add(getPraise());
+    }
   }
 
   private DivWidget getPraise() {

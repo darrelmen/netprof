@@ -116,7 +116,7 @@ public class WordTable {
     transcriptSegments.forEach(word -> {
       float score = word.getScore();
       String color = getColor(score);
-   //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
+      //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
       builder.append("<th style='text-align:center; background-color:").append(color).append("'>");
       builder.append(word.getEvent());
       builder.append("</th>");
@@ -195,7 +195,7 @@ public class WordTable {
     String event = word.getEvent().equals(UNKNOWNMODEL) ? LOW_SCORE : word.getEvent();
     // if (event.equals("UNKNOWNMODEL")) event = LOW_SCORE;
     String coloredSpan = getColoredSpan(event, word.getScore());
-   // logger.info("getColoredSpanForWord : span '" + word.getEvent() + "' " + word.getScore() + " = " + getColor(word.getScore()));
+    // logger.info("getColoredSpanForWord : span '" + word.getEvent() + "' " + word.getScore() + " = " + getColor(word.getScore()));
     return coloredSpan;
   }
 
@@ -250,6 +250,8 @@ public class WordTable {
     Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries =
         getWordToPhones(netPronImageTypeToEndTime).entrySet();
 
+    netPronImageTypeToEndTime.forEach((k, v) -> logger.info("getDivWord : type " + k + " = " + v));
+
     if (isRTL) {
       List<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries1 = new ArrayList<>(entries);
       Collections.reverse(entries1);
@@ -270,6 +272,7 @@ public class WordTable {
 
   /**
    * inline flex on phones expands to fill space.
+   *
    * @param audioControl
    * @param words
    * @param phoneMap
@@ -288,9 +291,9 @@ public class WordTable {
     words.put(word, header);
     addClickHandler(audioControl, word, header.getClickable());
 
-   // String color =
-        setColorClickable(word, header);
- //   logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
+    // String color =
+    setColorClickable(word, header);
+    //   logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
@@ -302,10 +305,10 @@ public class WordTable {
   }
 
   /**
-   * @see #getDivForWord
    * @param id
    * @param wordLabel
    * @return
+   * @see #getDivForWord
    */
   @NotNull
   private HighlightSegment getWordLabel(int id, String wordLabel) {
