@@ -35,6 +35,8 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
@@ -52,13 +54,18 @@ import java.util.logging.Logger;
  */
 public class DialogHelper {
   private final Logger logger = Logger.getLogger("DialogHelper");
+
   private final boolean doYesAndNo;
   private Modal dialogBox;
+
+  private Button closeButton;
 
   public interface CloseListener {
     boolean gotYes();
 
     void gotNo();
+
+    void gotHidden();
   }
 
   public DialogHelper(boolean doYesAndNo) {
@@ -123,11 +130,12 @@ public class DialogHelper {
   }
 
   @NotNull
-  public Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
-                           CloseListener listener, int maxHeight, Button closeButton,
-                           boolean isBig) {
+  private Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
+                            CloseListener listener, int maxHeight, Button closeButton,
+                            boolean isBig) {
     dialogBox = new Modal();
 
+    this.closeButton = closeButton;
     if (isBig) {
       dialogBox.addStyleName("big-modal");
       dialogBox.addStyleName("domino-modal");
@@ -168,16 +176,7 @@ public class DialogHelper {
     }
     container.add(row);
 
-/*
-    {
-      FluidRow w = new FluidRow();
-      w.add(new Column(12, new Heading(6)));
-      container.add(w);
-    }
-*/
     closeButton.addClickHandler(event -> {
-      //dialogBox.hide();
-     // logger.info("clicked on close");
       boolean shouldHide = true;
       if (listener != null) shouldHide = listener.gotYes();
       if (shouldHide) {
@@ -185,6 +184,7 @@ public class DialogHelper {
       }
     });
 
+    dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
     dialogBox.add(container);
     dialogBox.show();
 
@@ -202,6 +202,10 @@ public class DialogHelper {
     closeButton.setType(ButtonType.PRIMARY);
     closeButton.setFocus(true);
     return closeButton;
+  }
+
+  public void setCloseEnabled(boolean enabled) {
+    closeButton.setEnabled(enabled);
   }
 
   @NotNull

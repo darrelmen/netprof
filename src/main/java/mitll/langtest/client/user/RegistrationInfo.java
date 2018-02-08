@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.user.MiniUser;
@@ -50,7 +51,6 @@ import mitll.langtest.shared.user.MiniUser;
  */
 class RegistrationInfo extends BasicDialog {
   private static final String YOUR_AGE = "Your age";
-  private static final String GENDER_GROUP = "GenderGroup";
   private static final String CHOOSE_A_GENDER = "Choose male or female.";
   private static final String DIALECT = "Dialect";
   private static final String PLEASE_ENTER_YOUR_AGE = "Please enter your age.";
@@ -58,20 +58,25 @@ class RegistrationInfo extends BasicDialog {
 
   private final FormField ageEntryGroup;
   private FormField dialectGroup;
+
+  /**
+   *
+   */
+  private static final String GENDER_GROUP = "GenderGroup";
   private final RadioButton male = new RadioButton(GENDER_GROUP, "Male");
   private final RadioButton female = new RadioButton(GENDER_GROUP, "Female");
+
   private final Panel genders;
   private static final Boolean ADD_AGE = false;
-  // private MiniUser.Gender gender;
 
   RegistrationInfo(ComplexWidget toAddTo, boolean includeDialect) {
     genders = new HorizontalPanel();
     genders.add(male);
     male.addStyleName("topFiveMargin");
 
-    female.addStyleName("leftFiveMargin");
     genders.add(female);
     genders.addStyleName("leftTenMargin");
+    female.addStyleName("leftFiveMargin");
     female.addStyleName("topFiveMargin");
 
     toAddTo.add(genders);
@@ -177,13 +182,17 @@ class RegistrationInfo extends BasicDialog {
     return dialectGroup;
   }
 
-  public RadioButton getMale() {
+  void addFocusHandler(FocusHandler f) {
+    male.addFocusHandler(f);
+    female.addFocusHandler(f);
+  }
+/*  private RadioButton getMale() {
     return male;
   }
 
-  public RadioButton getFemale() {
+  private RadioButton getFemale() {
     return female;
-  }
+  }*/
 
   public void setGender(MiniUser.Gender gender) {
     if (gender == MiniUser.Gender.Male) male.setValue(true);

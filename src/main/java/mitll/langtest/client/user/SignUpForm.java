@@ -454,8 +454,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     if (dialectGroup != null) {
       dialectGroup.box.addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
     }
-    registrationInfo.getMale().addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
-    registrationInfo.getFemale().addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
+
+    registrationInfo.addFocusHandler(event -> userPassLogin.clearSignInHasFocus());
   }
 
   /**

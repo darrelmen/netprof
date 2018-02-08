@@ -428,6 +428,11 @@ public class ProjectChoices {
       @Override
       public void gotNo() {
       }
+
+      @Override
+      public void gotHidden() {
+
+      }
     };
 
     new DialogHelper(true).show(
@@ -686,6 +691,11 @@ public class ProjectChoices {
       @Override
       public void gotNo() {
       }
+
+      @Override
+      public void gotHidden() {
+
+      }
     };
     new DialogHelper(true).show(
         "Edit " + projectForLang.getName(),
@@ -766,6 +776,11 @@ public class ProjectChoices {
 
       @Override
       public void gotNo() {
+      }
+
+      @Override
+      public void gotHidden() {
+
       }
     };
     Heading contents = new Heading(2, "Are you sure?");

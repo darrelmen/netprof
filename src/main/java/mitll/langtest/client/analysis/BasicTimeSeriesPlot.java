@@ -16,13 +16,13 @@ import java.util.logging.Logger;
 public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
-  protected static final String I_PAD_I_PHONE = "iPad/iPhone";
-  protected static final String VOCAB_PRACTICE = "Vocab Practice";
-  protected static final String LEARN = "Learn";
+  static final String I_PAD_I_PHONE = "iPad/iPhone";
+  static final String VOCAB_PRACTICE = "Vocab Practice";
+  protected static final String LEARN = "Last Recording";
   /**
    * @see AnalysisPlot#addChart
    */
-  protected static final String CUMULATIVE_AVERAGE = "Average";
+  static final String CUMULATIVE_AVERAGE = "Average";
 
   private final Set<String> toShowExercise =
       new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
@@ -33,10 +33,9 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private final Map<Long, Integer> timeToId = new TreeMap<>();
   private final Map<Integer, CommonShell> idToEx = new TreeMap<>();
 
-  protected final ExceptionSupport exceptionSupport;
+  final ExceptionSupport exceptionSupport;
 
-
-  public BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
+  BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
     this.exceptionSupport = exceptionSupport;
   }
 
@@ -46,7 +45,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @return
    * @see AnalysisPlot#getChart(String, String, String, UserPerformance)
    */
-   Chart getHighchartChart(String title, boolean addLegend) {
+  Chart getHighchartChart(String title, boolean addLegend) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setChartTitleText(title)
@@ -121,21 +120,25 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
         });
   }
 
-  protected void configureYAxis(Chart chart, String title) {
+  void configureYAxis(Chart chart, String title) {
     chart.getYAxis()
         .setAxisTitleText(title)
         .setMin(0)
         .setMax(100);
   }
 
-  protected Series getSplineSeries(Chart chart, String seriesTitle, Number[][] data) {
+  void setYAxisTitle(Chart chart, String title) {
+    chart.getYAxis().setAxisTitleText(title);
+  }
+
+  Series getSplineSeries(Chart chart, String seriesTitle, Number[][] data) {
     return chart.createSeries()
         .setName(seriesTitle)
         .setPoints(data)
         .setType(Series.Type.SPLINE);
   }
 
-  protected Series getScatterSeries(Chart chart, Number[][] data, String prefix) {
+  Series getScatterSeries(Chart chart, Number[][] data, String prefix) {
     return chart.createSeries()
         .setName(prefix)
         .setPoints(data)
@@ -201,11 +204,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return idToEx.containsKey(exid);
   }
 
-  public void addTimeToExID(long time, int id) {
+  void addTimeToExID(long time, int id) {
     timeToId.put(time, id);
   }
 
-  public void rememberExercise(CommonShell commonShell) {
+  void rememberExercise(CommonShell commonShell) {
     idToEx.put(commonShell.getID(), commonShell);
   }
 

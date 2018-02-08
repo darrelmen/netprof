@@ -235,12 +235,24 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
 
-  private String getScoreText(long start, long end) {
+  private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores) {
+    int fround1 = getPercentScore(simpleTimeAndScores);
+//        logger.info("fround1 " + fround1);
+
+    String text = "Score is " + fround1 + "%";
+    return text;
+    // timeWidgets.setScore(text);
+//    Heading child = new Heading(2, text);
+//    child.addStyleName("topFiveMargin");
+    //return child;
+  }
+
+  private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
     float totalScore = 0f;
     int total = 0;
     //float possible = 0f;
-    SortedSet<TimeAndScore> simpleTimeAndScores = start == -1 ? rawBestScores : rawBestScores.subSet(new TimeAndScore(start), new TimeAndScore(end));
-    logger.info("getScoreText : found " + simpleTimeAndScores.size());
+    //  SortedSet<TimeAndScore> simpleTimeAndScores = getTimeAndScoresInRange(start, end);
+   // logger.info("getScoreText : found " + simpleTimeAndScores.size());
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
       if (score > 0) {
@@ -257,15 +269,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     float fround = Math.round(v * 100);
     // logger.info("fround " + fround);
 
-    int fround1 = (int) (fround);
-//        logger.info("fround1 " + fround1);
+    return (int) (fround);
+  }
 
-    String text = "Score is " + fround1 + "%";
-    return text;
-    // timeWidgets.setScore(text);
-//    Heading child = new Heading(2, text);
-//    child.addStyleName("topFiveMargin");
-    //return child;
+  private SortedSet<TimeAndScore> getTimeAndScoresInRange(long start, long end) {
+    return start == -1 ? rawBestScores : rawBestScores.subSet(new TimeAndScore(start), new TimeAndScore(end));
   }
 
   /**
@@ -333,7 +341,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       add(new Label(text));
     } else {
       chart = getChart("<b>" + userChosenID + " " + getUserName(userPerformance) + "</b>" + SCORE_SUFFIX,
-          getSubtitle(userPerformance, rawBestScores), CUMULATIVE_AVERAGE, userPerformance);
+          getSubtitle(userPerformance, rawBestScores),
+          CUMULATIVE_AVERAGE,
+          userPerformance);
       add(chart);
     }
     setRawBestScores(rawBestScores);
@@ -348,7 +358,13 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private String getSubtitle(UserPerformance userPerformance, List<TimeAndScore> rawBestScores) {
     float percentAvg = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();
-    return "Score and average : " + rawTotal + " items, avg " + (int) percentAvg + " %";
+    //  return "Score and average : " + rawTotal + " items, avg " + (int) percentAvg + " %";
+    return getChartSubtitle((int) percentAvg, rawTotal);
+  }
+
+  @NotNull
+  private String getChartSubtitle(int percentAvg, int rawTotal) {
+    return "Average : " + percentAvg + "% for " + rawTotal + " items";
   }
 
   @NotNull
@@ -758,7 +774,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
             commonShells.forEach(commonShell -> rememberExercise(commonShell));
-           // logger.info("setRawBestScores getShells got " + commonShells.size());
+            // logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
       }
@@ -809,7 +825,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         return showLastMonth(xAxis, lastPlusSlack);
       case TENMIN:
         return showLastPeriod(xAxis, lastPlusSlack, TENMIN, this.tenMinutes);
-      case ONEMIN :
+      case ONEMIN:
         return showLastPeriod(xAxis, lastPlusSlack, ONEMIN, this.oneMinutes);
       case ALL:
         return showAll(xAxis, lastPlusSlack);
@@ -842,8 +858,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     timeWidgets.prevButton.setEnabled(timePeriods.size() > 1);
     timeWidgets.nextButton.setEnabled(false);
+
     timeWidgets.setDisplay(getShortDate(lastMonth, shouldShowHour(offset)));
-    timeWidgets.setScore(getScoreText(startOfPrevMonth, lastPlusSlack));
+    setTitleScore(startOfPrevMonth, lastPlusSlack);
+
     timeChanged(startOfPrevMonth, lastPlusSlack);
 
     return startOfPrevMonth;
@@ -870,7 +888,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.prevButton.setEnabled(false);
     timeWidgets.nextButton.setEnabled(false);
     timeWidgets.setDisplay("");
-    timeWidgets.setScore(getScoreText(-1, -1));
+    setTitleScore(-1, -1);
     timeWidgets.reset();
     timeChanged(firstTime, lastTime);
   }
@@ -948,7 +966,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     // logger.info("showTimePeriod offset    " + offset);
     chart.getXAxis().setExtremes(periodStart, end);
 
-    timeWidgets.setScore(getScoreText(periodStart, end));
+    setTitleScore(periodStart, end);
 
     timeChanged(periodStart, end);
   }
@@ -959,7 +977,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   /**
    * @param timeWidgets
-   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int, boolean, boolean)
+   * @see AnalysisTab#AnalysisTab
    */
   void setTimeWidgets(TimeWidgets timeWidgets) {
     this.timeWidgets = timeWidgets;
@@ -982,9 +1000,13 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    */
   private void timeChanged(long from, long to) {
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
+    setTitleScore(from, to);
+  }
 
-    timeWidgets.setScore(getScoreText(from, to));
-
+  private void setTitleScore(long from, long to) {
+    SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);
+    timeWidgets.setScore(getScoreText(timeAndScoresInRange));
+    setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
   public interface TimeChangeListener {
@@ -995,7 +1017,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
      */
     void timeChanged(long from, long to);
   }
-
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
     // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());

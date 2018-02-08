@@ -105,7 +105,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   @Override
   public void showContent(Panel listContent, String instanceName) { listContent.add(doNPF(instanceName));  }
 
-
   /**
    * Make the instance name uses the unique id for the list.
    *
@@ -167,6 +166,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
       this.outer = outer;
     }
 
+    /**
+     *
+     * @param exerciseList
+     * @return
+     * @see FlexListLayout#makeNPFExerciseList
+     */
     @Override
     protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
       return outer.getFactory(exerciseList);

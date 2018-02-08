@@ -1190,7 +1190,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void loadFirstExercise(String searchIfAny) {
-   //  logger.info("loadFirstExercise : ---");
+    //  logger.info("loadFirstExercise : ---");
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       // logger.info("loadFirstExercise : current exercises is empty");
       //    gotEmptyExerciseList();
@@ -1523,7 +1523,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
           @Override
           public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-            //                    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+
+            logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
             if (result.getExercises() != null) {
               long now = System.currentTimeMillis();
               int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
@@ -1672,7 +1673,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         //logger.info("showExercises for check " + reqID);
 //        showExerciesForCurrentReq(result, reqID);
         // });
-        if (DEBUG)  logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
+        if (DEBUG) logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
 
         Scheduler.get().scheduleDeferred((Command) () -> showExerciesForCurrentReq(result, reqID));
 
@@ -1724,7 +1725,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    if (DEBUG)  logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
+    if (DEBUG)
+      logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
 
     if (!getters.isEmpty()) {
       getRefAudio(getters.iterator());

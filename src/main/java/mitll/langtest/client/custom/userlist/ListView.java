@@ -306,6 +306,11 @@ public class ListView implements ContentView, CreateListComplete {
           }
 
           @Override
+          public void gotHidden() {
+
+          }
+
+          @Override
           public void gotNo() {
 
           }
@@ -515,6 +520,11 @@ public class ListView implements ContentView, CreateListComplete {
           @Override
           public void gotNo() {
           }
+
+          @Override
+          public void gotHidden() {
+
+          }
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
@@ -549,6 +559,11 @@ public class ListView implements ContentView, CreateListComplete {
 
           @Override
           public void gotNo() {
+          }
+
+          @Override
+          public void gotHidden() {
+
           }
         }, 550);
 

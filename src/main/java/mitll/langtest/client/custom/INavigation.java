@@ -56,6 +56,8 @@ public interface INavigation {
 
   void showDrillList(int listid);
 
+  void showDrill();
+
   Widget getNavigation();
 
   void onResize();

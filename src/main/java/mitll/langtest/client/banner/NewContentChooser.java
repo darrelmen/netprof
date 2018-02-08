@@ -15,9 +15,12 @@ import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
@@ -27,6 +30,7 @@ import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -42,12 +46,25 @@ public class NewContentChooser implements INavigation {
   private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
-  private final ExerciseListContent practiceHelper;
+  private final PracticeHelper practiceHelper;
   private final ExerciseController controller;
   private final IBanner banner;
   private final ListView listView;
 
   private VIEWS currentSection = VIEWS.NONE;
+
+  private static final int DRY_RUN_MINUTES = 1;
+  private static final int ROUND_MINUTES = 10;
+//  private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
+ // private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
+
+  private static final String LISTS = "Lists";
+  private static final int DRY_NUM = 10;
+  private static final int COMP_NUM = 100;
+
+ // private static final String TIMES_UP = "Times Up!";
+  public static final int MIN_POLYGLOT_SCORE = 35;
+ // private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
 
   /**
    * @param controller
@@ -112,14 +129,14 @@ public class NewContentChooser implements INavigation {
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
 
-
   @Override
   public void showView(VIEWS view, boolean isFirstTime) {
     String currentStoredView = getCurrentStoredView();
-    logger.info("showView : show " + view + " current " + currentStoredView);
-    if (currentSection.equals(view)) {
+    //   logger.info("showView : show " + view + " current " + currentStoredView);
+
+    if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
-    } else {
+      //} else {
       currentSection = view;
       storeValue(view);
       switch (view) {
@@ -134,13 +151,7 @@ public class NewContentChooser implements INavigation {
           learnHelper.showContent(divWidget, LEARN.toString());
           break;
         case DRILL:
-          clear();
-
-          if (isPolyglot()) {
-            pushFirstUnit();
-          }
-          practiceHelper.showContent(divWidget, DRILL.toString());
-          practiceHelper.hideList();
+          showDrill();
           break;
         case PROGRESS:
           clear();
@@ -175,6 +186,65 @@ public class NewContentChooser implements INavigation {
     }
   }
 
+  @Override
+  public void showDrill() {
+    clear();
+
+    if (isPolyglot()) {
+      showPolyDialog();
+    } else {
+      showPractice();
+    }
+  }
+
+  /**
+   *
+   */
+  private void showPolyDialog() {
+    mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+
+    new PolyglotDialog(
+        DRY_RUN_MINUTES, DRY_NUM,
+        ROUND_MINUTES, COMP_NUM,
+
+        MIN_POLYGLOT_SCORE, new DialogHelper.CloseListener() {
+      @Override
+      public boolean gotYes() {
+        mode = candidateMode;
+        if (mode == PolyglotDialog.MODE_CHOICE.DRY_RUN) {
+          pushFirstUnit();
+        } else if (mode == PolyglotDialog.MODE_CHOICE.POLYGLOT) {
+          pushSecondUnit();
+        } else {
+          return false;
+        }
+
+        return true;
+      }
+
+      @Override
+      public void gotNo() {
+        showPractice();
+      }
+
+      @Override
+      public void gotHidden() {
+        showPractice();
+      }
+    },
+        choice -> candidateMode = choice);
+  }
+
+  private void showPractice() {
+    practiceHelper.setMode(mode);
+    practiceHelper.setNavigation(this);
+    practiceHelper.showContent(divWidget, DRILL.toString());
+    practiceHelper.hideList();
+  }
+
+  private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+
   private void pushFirstUnit() {
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
     if (!typeOrder.isEmpty()) {
@@ -183,6 +253,24 @@ public class NewContentChooser implements INavigation {
       Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
       if (!matchInfos.isEmpty()) {
         MatchInfo next = matchInfos.iterator().next();
+        String value = next.getValue();
+        //  logger.info("First " + s + " = "+ value);
+        History.newItem(s + "=" + value);
+      }
+    }
+  }
+
+  private void pushSecondUnit() {
+    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+    if (!typeOrder.isEmpty()) {
+      String s = typeOrder.get(0);
+      //  logger.info("First " + s);
+      Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
+      if (!matchInfos.isEmpty()) {
+        Iterator<MatchInfo> iterator = matchInfos.iterator();
+
+        MatchInfo next = iterator.next();
+        if (iterator.hasNext()) next = iterator.next();
         String value = next.getValue();
         //  logger.info("First " + s + " = "+ value);
         History.newItem(s + "=" + value);
@@ -226,7 +314,7 @@ public class NewContentChooser implements INavigation {
 
     divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
         new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab, false,0));
+        new AnalysisTab(controller, showTab, false, 0));
 
     currentSection = PROGRESS;
   }

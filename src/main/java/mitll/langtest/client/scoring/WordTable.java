@@ -250,7 +250,9 @@ public class WordTable {
     Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries =
         getWordToPhones(netPronImageTypeToEndTime).entrySet();
 
+/*
     netPronImageTypeToEndTime.forEach((k, v) -> logger.info("getDivWord : type " + k + " = " + v));
+*/
 
     if (isRTL) {
       List<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries1 = new ArrayList<>(entries);

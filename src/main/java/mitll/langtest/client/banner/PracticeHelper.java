@@ -40,6 +40,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -57,15 +58,27 @@ import java.util.logging.Logger;
  * @since 2/4/16.
  */
 public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  //private final Logger logger = Logger.getLogger("PracticeHelper");
+  private final Logger logger = Logger.getLogger("PracticeHelper");
+
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
   private NPFlexSectionExerciseList facetExerciseList;
+  private PolyglotDialog.MODE_CHOICE mode;
+  private NewContentChooser navigation;
 
+  /**
+   * @param controller
+   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
+   */
   PracticeHelper(ExerciseController controller) {
     super(controller);
   }
 
+  /**
+   * @param exerciseList
+   * @return
+   * @see SimpleChapterNPFHelper.MyFlexListLayout#getFactory
+   */
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice", null);
@@ -93,46 +106,23 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
         return facetExerciseList = new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
             new ListOptions(instanceName)
                 .setShowPager(false).
-                setShowTypeAhead(false), listHeader, true) {
-
- /*         @Override
-          protected void loadFirstExercise(String searchIfAny) {
-            super.loadFirstExercise(searchIfAny);
-          }*/
-
-    /*      protected void addExerciseWidget(CommonExercise commonExercise) {
-            super.addExerciseWidget(commonExercise);
-            logger.info("addExerciseWidget --->  ");
-            statsFlashcardFactory.checkPoly(facetExerciseList.getSize());
-          }*/
+                setShowTypeAhead(false),
+            listHeader,
+            true // TODO : horrible hack
+        ) {
 
           protected void goToFirst(String searchIfAny, int exerciseID) {
             super.goToFirst(searchIfAny, exerciseID);
-            statsFlashcardFactory.checkPoly(facetExerciseList.getSize());
-          }
-
-/*          @Override
-          protected CommonShell findFirstExercise() {
-
-            int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
-            if (currentExerciseID != -1) {
-              logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
-
-              CommonShell shell = byID(currentExerciseID);
-
-              if (shell == null) {
-                logger.warning("huh? can't find " + currentExerciseID);
-                return super.findFirstExercise();
-              } else {
-                statsFlashcardFactory.populateCorrectMap();
-                return shell;
-              }
+            //      statsFlashcardFactory.checkPoly();
+            logger.info("goToFirst : start over? " + mode);
+            statsFlashcardFactory.setMode(mode);
+            statsFlashcardFactory.setNavigation(navigation);
+         /*   if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
+              statsFlashcardFactory.stopTimedRun();
             } else {
-              logger.info("findFirstExercise --->  current ex = " + currentExerciseID);
-              CommonShell firstExercise = super.findFirstExercise();
-              return firstExercise;
-            }
-          }*/
+              statsFlashcardFactory.startTimedRun();
+            }*/
+          }
 
           protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {
           }
@@ -172,5 +162,20 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
         outerBottomRow = bottomRow;
       }
     };
+  }
+
+  public void setMode(PolyglotDialog.MODE_CHOICE mode) {
+    this.mode = mode;
+    if (statsFlashcardFactory != null) {
+      statsFlashcardFactory.setMode(mode);
+    }
+  }
+
+  public PolyglotDialog.MODE_CHOICE getMode() {
+    return mode;
+  }
+
+  public void setNavigation(NewContentChooser navigation) {
+    this.navigation = navigation;
   }
 }

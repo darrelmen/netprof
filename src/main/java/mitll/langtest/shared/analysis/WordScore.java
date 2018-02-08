@@ -33,9 +33,7 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
-import mitll.langtest.client.analysis.WordContainer;
 import mitll.langtest.shared.instrumentation.SlimSegment;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.io.Serializable;

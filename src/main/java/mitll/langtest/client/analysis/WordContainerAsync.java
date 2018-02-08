@@ -98,11 +98,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   /**
    * Hack for spanish to make it upper case. Why?
    */
-  private final boolean spanish;
-  @Deprecated
-  private List<WordScore> sortedHistory;
+//  private final boolean spanish;
+//  @Deprecated
+  // private List<WordScore> sortedHistory;
 
-  private SortedSet<WordScore> byTime;
+//  private SortedSet<WordScore> byTime;
   private final String todayYear;
   private final String todaysDate;
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
@@ -110,9 +110,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
   // private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
 
-//  private Map<Integer, Map<Long, String>> exToTimeToAnswer = new HashMap<>();
+  private WordTable wordTable = new WordTable();
 
-  int numWords;
+  private int numWords;
 
   TableSortHelper tableSortHelper = new TableSortHelper();
   AnalysisServiceAsync analysisServiceAsync;
@@ -134,8 +134,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      AnalysisServiceAsync analysisServiceAsync) {
     super(controller, plot);
     this.reqInfo = reqInfo;
-    spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
-    //  sorter = new ExerciseComparator();
+    // spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     plot.addListener(this);
     this.learnTab = learnTab;
     this.heading = w;
@@ -479,15 +478,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       public SafeHtml getValue(WordScore shell) {
         Map<NetPronImageType, List<SlimSegment>> transcript = shell.getTranscript();
 
+        String columnText;
         if (transcript == null) {
           logger.warning("getItemColumn no transcript for " + shell);
+          columnText = "";
         } else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
           logger.warning("getItemColumn no word transcript for " + shell);
+          columnText = "";
+        } else {
+          columnText = wordTable.makeColoredTableReally(transcript);
         }
 
-        String columnText = new WordTable().makeColoredTableReally(transcript);
-
-   /*     if (columnText.isEmpty()) {
+     /*     if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
            logger.warning("getItemColumn : column text empty for id " +
                shell.getExid() + " and found ex " + exercise);

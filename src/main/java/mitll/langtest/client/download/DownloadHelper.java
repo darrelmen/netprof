@@ -151,6 +151,11 @@ public class DownloadHelper {
           public void gotNo() {
 
           }
+
+          @Override
+          public void gotHidden() {
+
+          }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(empty);
