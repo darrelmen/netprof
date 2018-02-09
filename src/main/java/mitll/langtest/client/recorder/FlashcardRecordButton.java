@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
-//  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
+  private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
   /**
    * @see #initRecordButton
@@ -125,6 +125,7 @@ public class FlashcardRecordButton extends RecordButton {
       public String getName() {
         return "FlashcardRecordButton_" + instance;
       }
+
       @Override
       public void gotPress(NativeEvent ne, boolean isKeyDown) {
         if (isKeyDown) {
@@ -144,34 +145,39 @@ public class FlashcardRecordButton extends RecordButton {
   private void checkKeyDown(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
-      //logger.info("checkKeyDown got key press...");
       if (isSpace) {
+        logger.info("checkKeyDown got space");
         if (!mouseDown) {
           mouseDown = true;
           doClick();
         }
-      } else if (warnUserWhenNotSpace) {
+      } else {//if (warnUserWhenNotSpace) {
         int keyCode = event.getKeyCode();
 //        logger.info("checkKeyDown key code is " + keyCode);
-        if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
+     /*   if (keyCode == KeyCodes.KEY_ALT ||
+            keyCode == KeyCodes.KEY_CTRL ||
+            keyCode == KeyCodes.KEY_ESCAPE ||
+            keyCode == KeyCodes.KEY_WIN_KEY) {
           //logger.info("key code is " + keyCode);
-        } else {
-          //logger.info("warn - key code is " + keyCode);
-          if (keyCode == KeyCodes.KEY_LEFT) {
-            stopProp(event);
-            gotLeftArrow();
-          } else if (keyCode == KeyCodes.KEY_RIGHT) {
-            stopProp(event);
-            gotRightArrow();
-          } else if (keyCode == KeyCodes.KEY_UP) {
-            stopProp(event);
-            gotUpArrow();
-          } else if (keyCode == KeyCodes.KEY_DOWN) {
-            stopProp(event);
-            gotDownArrow();
-          }
+        } else {*/
+        //logger.info("warn - key code is " + keyCode);
+        if (keyCode == KeyCodes.KEY_LEFT) {
+          stopProp(event);
+          gotLeftArrow();
+        } else if (keyCode == KeyCodes.KEY_RIGHT) {
+          stopProp(event);
+          gotRightArrow();
+        } else if (keyCode == KeyCodes.KEY_UP) {
+          stopProp(event);
+          gotUpArrow();
+        } else if (keyCode == KeyCodes.KEY_DOWN) {
+          stopProp(event);
+          gotDownArrow();
         }
+        // }
       }
+    } else {
+      logger.info("ignore key down.");
     }
   }
 
@@ -198,12 +204,13 @@ public class FlashcardRecordButton extends RecordButton {
         mouseDown = false;
         doClick();
       }
+    } else {
+      logger.info("ignore key up.");
     }
   }
 
   private boolean checkIsSpace(NativeEvent event) {
-    int keyCode = event.getKeyCode();
-    return keyCode == KeyCodes.KEY_SPACE;
+    return event.getKeyCode() == KeyCodes.KEY_SPACE;
   }
 
   protected boolean shouldIgnoreKeyPress() {
@@ -233,7 +240,6 @@ public class FlashcardRecordButton extends RecordButton {
     new PopupHelper().showPopup(html);
   }
 */
-
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();
     return true;

@@ -149,7 +149,8 @@ public class AnalysisTab extends DivWidget {
         controller.getUser(),
         controller.getUserManager().getUserID(),
         -1,
-        isPolyglot, possible);
+        isPolyglot,
+        possible);
   }
 
   /**
@@ -244,7 +245,8 @@ public class AnalysisTab extends DivWidget {
                          long then,
                          String userChosenID,
                          boolean isTeacherView,
-                         ShowTab showTab, DivWidget bottom,
+                         ShowTab showTab,
+                         DivWidget bottom,
                          ReqInfo reqInfo) {
     long now = System.currentTimeMillis();
 

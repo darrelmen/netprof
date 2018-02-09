@@ -461,7 +461,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected String getDeviceValue() {
       String s = isPolyglot ? "" + sessionStartMillis : controller.getBrowserInfo();
-      logger.info("getDeviceValue  " + s);
+ //     logger.info("getDeviceValue  " + s);
       return s;
     }
 

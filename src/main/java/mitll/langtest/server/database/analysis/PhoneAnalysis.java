@@ -58,12 +58,13 @@ public class PhoneAnalysis {
   //  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
-  public static final long SESSION = -1L;
+  private static final long SESSION = -1L;
+
   //  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
       SESSION,
-      MINUTE,
-      TENMIN,
+//      MINUTE,
+  //    TENMIN,
       HOUR,
       //    QUARTER,
       DAY,
@@ -284,5 +285,4 @@ public class PhoneAnalysis {
     }
     return toUse;
   }
-
 }

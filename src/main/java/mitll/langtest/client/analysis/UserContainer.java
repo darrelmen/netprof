@@ -56,6 +56,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -733,14 +734,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super.gotClickOnItem(selectedUser);
     enableButtons();
     rightSide.clear();
+    boolean isPolyglot = controller.getProjectStartupInfo().getProjectType()== ProjectType.POLYGLOT;
     rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom,
-        selectedUser.getID(), selectedUser.getUserID(), listid, false, 10));
+        selectedUser.getID(), selectedUser.getUserID(), listid, isPolyglot, 10));
   }
 
   public Button getAdd() {
     return add;
   }
-
   public Button getRemove() {
     return remove;
   }

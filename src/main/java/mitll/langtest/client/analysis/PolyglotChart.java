@@ -28,9 +28,6 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
 
     chart = getChart("", "");
 
-    //  series = getScatterSeries(chart, "Score");
-
-
     Number[][] data = new Number[answers.size()][2];
     int i = 0;
     long first = -1;
@@ -88,7 +85,7 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     long start = time - 60;
     long end = time + duration + (60);//(10 * 60 * 1000);
     chart.getXAxis().setExtremes(start, end, true, false);
-    logger.info("xAxis from " + new Date(start) + " - " + new Date(end) + " duration  " + duration);
+  //  logger.info("xAxis from " + new Date(start) + " - " + new Date(end) + " duration  " + duration);
   }
 
   private Chart getChart(String title, String subtitle) {

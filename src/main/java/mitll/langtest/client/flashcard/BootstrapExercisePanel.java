@@ -282,8 +282,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
         // logger.info("makeRecordButton : using " + instance);
-        final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
-            addKeyBinding, controller,
+        final FlashcardRecordButton widgets = new FlashcardRecordButton(
+            controller.getRecordTimeout(),
+            this,
+            true,
+            addKeyBinding,
+            controller,
             BootstrapExercisePanel.this.instance) {
           @Override
           protected void start() {
@@ -599,12 +603,17 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         });
   }
 
-  protected void disableRecord() {
+  void disableRecord() {
     realRecordButton.setEnabled(false);
   }
 
-  protected void enableRecord() {
+  void enableRecord() {
     realRecordButton.setEnabled(true);
+  }
+
+  @Override
+  boolean otherReasonToIgnoreKeyPress() {
+    return super.otherReasonToIgnoreKeyPress() || !realRecordButton.isEnabled();
   }
 
   protected void abortPlayback() {

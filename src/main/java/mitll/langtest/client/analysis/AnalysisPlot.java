@@ -89,19 +89,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this list. Choose another list or don't filter on lists.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
 
-//  private static final long MINUTE = 60 * 1000;
-//  static final long HOUR = 60 * MINUTE;
-//  private static final long QUARTER = 6 * HOUR;
-
-  //  private static final long FIVEMIN = 5 * MINUTE;
-//  private static final long ONEMIN = MINUTE;
-//  private static final long TENMIN = 10 * MINUTE;
-//  private static final long DAY = 24 * HOUR;
-//  private static final long WEEK = 7 * DAY;
-//  private static final long MONTH = 4 * WEEK;
-//  private static final long YEAR = 52 * WEEK;
-//  private static final long YEARS = 20 * YEAR;
-
   private static final int SHORT_THRESHOLD = 822;
   private static final int CHART_HEIGHT_SHORT = 260;
   private static final int CHART_HEIGHT = 330;
@@ -122,8 +109,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private long firstTime;
   private long lastTime;
 
-  //  private final List<Long> oneMinutes = new ArrayList<>();
-//  private final List<Long> tenMinutes = new ArrayList<>();
   private final List<Long> sessions = new ArrayList<>();
 
   /**
@@ -220,7 +205,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         //  tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN.getDuration()), TENMIN.getDuration(), last));
         //   oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        logger.info("got sessions " + phoneSessions);
+   //     logger.info("got sessions " + phoneSessions);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
