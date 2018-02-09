@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import com.google.gwt.user.cellview.client.CellTable;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
@@ -139,6 +140,21 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
             permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
+  /**
+   *
+   * @param userid
+   * @param minRecordings
+   * @param listid
+   * @param fromTime
+   * @param toTime
+   * @param rangeStart
+   * @param rangeEnd
+   * @param sort
+   * @param reqid
+   * @return
+   * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
+   */
   @Override
   public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
                                             long fromTime, long toTime,

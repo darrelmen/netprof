@@ -57,7 +57,7 @@ public class Trie<T> {
   //  private static final boolean SPLIT_ON_CHARACTERS = true;
   // private static final boolean SPACES_ARE_OK = true;
   private static final int WINDOW_SIZE = 20;
-  private static final int MAX_WINDOW = WINDOW_SIZE * 2;
+  private static final int MAX_WINDOW = WINDOW_SIZE;// * 2;
   private static final int MIN_WINDOW = WINDOW_SIZE / 2;
 
   private final TrieNode<T> root;
@@ -196,7 +196,7 @@ public class Trie<T> {
       if (moreThanMax || (size > WINDOW_SIZE && Character.isWhitespace(c))) {
 
         if (moreThanMax) {
-          logger.warn("max vs " + length + " : '" + getWindow(slidingWindow) + "'");
+          if (DEBUG) logger.warn("max vs " + length + " : '" + getWindow(slidingWindow) + "'");
         } else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
           logger.warn("break '" + getWindow(slidingWindow) + "'");
 

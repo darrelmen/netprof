@@ -130,6 +130,8 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   /**
+   * Don't strip accents from tokens used in dictionary lookup - like for French precisement.
+   *
    * @param transcript
    * @param transliteration
    * @param justPhones      true if just want the phones
@@ -142,7 +144,9 @@ public class PronunciationLookup implements IPronunciationLookup {
     StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
+//    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
+ //   logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
 
 //    {
 //      StringBuilder builder = new StringBuilder();
@@ -164,10 +168,13 @@ public class PronunciationLookup implements IPronunciationLookup {
       if (!word.equals(" ") && !word.isEmpty()) {
         boolean easyMatch;
 
+       // logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
         if ((easyMatch = htkDictionary.contains(word)) ||
             (htkDictionary.contains(word.toLowerCase()))) {
+          logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "'");
           addDictMatches(justPhones, dict, word, easyMatch);
         } else {  // not in the dictionary, let's ask LTS
+          logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'");
           LTS lts = getLTS();
           if (lts == null) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");
@@ -228,8 +235,9 @@ public class PronunciationLookup implements IPronunciationLookup {
                   dict.append(getUnkPron(word));
                 }
               } else { // it's ok -use it
-                if (process.length > 50)
+                if (process.length > 50) {
                   logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in " + transcript);
+                }
                 int max = MAX_FROM_ANY_TOKEN;
                 for (String[] pron : process) {
                   if (max-- == 0) break;

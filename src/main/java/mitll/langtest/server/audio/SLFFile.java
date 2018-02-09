@@ -255,6 +255,7 @@ public class SLFFile {
   }
 
   /**
+   * NOPE don't want to strip accents.
    * Redundant with SmallVocabDecoder...
    *
    * @param token
@@ -268,7 +269,7 @@ public class SLFFile {
         .replaceAll("\\p{Z}+", " ")
         .replaceAll("\\p{P}", "");
 
-    return StringUtils.stripAccents(s)
-        .toLowerCase();
+   // return StringUtils.stripAccents(s).toLowerCase();
+    return s.toLowerCase();
   }
 }

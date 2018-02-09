@@ -87,12 +87,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   public Panel getTableWithPager(ListOptions listOptions) {
-    // logger.info("getTableWithPager " +listOptions);
     makeCellTable(listOptions.isSort());
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
-    // logger.info("still setting up... starting");
 
     // Create a SimplePager.
     return getTable(listOptions);
@@ -413,7 +411,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return getList().size();
   }
 
-  private static class NoFunnyPagingSimplePager extends SimplePager {
+/*  private static class NoFunnyPagingSimplePager extends SimplePager {
     public NoFunnyPagingSimplePager() {
       super(TextLocation.CENTER, true, true);
     }
@@ -438,5 +436,5 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
         }
       }
     }
-  }
+  }*/
 }

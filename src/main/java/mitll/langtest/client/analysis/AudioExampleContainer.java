@@ -43,8 +43,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   void addAudioColumns() {
     Column<T, SafeHtml> column = getPlayAudio();
-    SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY +
-        "</span>");
+    SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY + "</span>");
 
     table.addColumn(column, header);
     table.setColumnWidth(column, PLAY_WIDTH + "px");

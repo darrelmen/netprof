@@ -77,10 +77,9 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
-  // public static final String WORD = "WORD";
   private final Logger logger = Logger.getLogger("WordContainer");
 
-  static final int NARROW_THRESHOLD = 1450;
+  private static final int NARROW_THRESHOLD = 1450;
 
   private static final int ROWS_TO_SHOW = 8;
 
@@ -92,17 +91,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private static final int SIGNED_UP = 95;
   private static final String DATE = "Date";
 
-  //  private final ExerciseComparator sorter;
   private final ShowTab learnTab;
   private final Heading heading;
-  /**
-   * Hack for spanish to make it upper case. Why?
-   */
-//  private final boolean spanish;
-//  @Deprecated
-  // private List<WordScore> sortedHistory;
 
-//  private SortedSet<WordScore> byTime;
   private final String todayYear;
   private final String todaysDate;
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
@@ -134,7 +125,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      AnalysisServiceAsync analysisServiceAsync) {
     super(controller, plot);
     this.reqInfo = reqInfo;
-    // spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     plot.addListener(this);
     this.learnTab = learnTab;
     this.heading = w;
@@ -158,7 +148,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * @param numResults
    * @param cellTable
    * @return
-   * @see #getTableWithPager()
+   * @see #getTableWithPager
    */
   private void createProvider(
       final int numResults,
@@ -546,28 +536,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   public void timeChanged(long from, long to) {
     if (from == 0) {
       heading.setSubtext("");
-
-
-      redraw();
     } else {
 //       logger.info("Starting from " +from + " : " +to);
 //      logger.info("timeChanged : from " + yearShortFormat2.format(new Date(from)) + " to " + yearShortFormat2.format(new Date(to)));
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
       this.from = from;
       this.to = to;
-
-      redraw();
-
-/*
-      SortedSet<WordScore> wordScores = byTime.subSet(new WordScore(from + 1), new WordScore(to + 1));
-      //    logger.info("wordScores found " +wordScores.size());
-
-//      logger.info("timeChanged : wordScores " + wordScores.size());
-      List<WordScore> filtered = new ArrayList<>(wordScores);
-      filtered.sort((o1, o2) -> -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp()));
-      //Collections.sort(filtered); // put sort back to by score first?
-      addItems(filtered);
-*/
     }
+
+    redraw();
   }
 }

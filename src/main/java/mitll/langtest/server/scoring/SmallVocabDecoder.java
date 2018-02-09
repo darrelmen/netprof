@@ -175,7 +175,7 @@ public class SmallVocabDecoder {
   /**
    * @param sentence
    * @return
-   * @see ASRWebserviceScoring#getPronunciationsFromDictOrLTS
+   * @see PronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
@@ -227,7 +227,8 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * No accents - french accents especially...
+   * We want to keep accents - french accents especially...
+   * They are in the dictionary.
    *
    * @param sentence
    * @return
@@ -246,7 +247,7 @@ public class SmallVocabDecoder {
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
         .replaceAll("\\p{P}", " ");
-    return StringUtils.stripAccents(s);
+    return s;//StringUtils.stripAccents(s);
   }
 
   /**

@@ -82,16 +82,9 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
 
   @Override
   public int compareTo(BestScore o) {
-    int c = Integer.valueOf(getExId()).compareTo(o.getExId());
-    if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
+    int c = Integer.compare(getExId(), o.getExId());
+    if (c == 0) return -1 * Long.compare(getTimestamp(), o.getTimestamp());
     else return c;
-  }
-
-  public String toString() {
-    return "ex " + getExId() + "/ res " + getResultID() +
-        " : " + new Date(getTimestamp()) + " # " +
-        //childCount +
-        " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
 
   public int getExId() {
@@ -124,6 +117,13 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
    */
   public String getNativeAudio() {
     return nativeAudio;
+  }
+
+  public String toString() {
+    return "ex " + getExId() + "/ res " + getResultID() +
+        " : " + new Date(getTimestamp()) + " # " +
+        //childCount +
+        " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
 
 }

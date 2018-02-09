@@ -37,7 +37,6 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordAndScore;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -63,7 +62,7 @@ public interface AnalysisServiceAsync {
    * @param from
    * @param to
    * @param async
-   * @see PhoneContainer#clickOnPhone2
+   * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
    */
   void getPerformanceReportForUserForPhone(int id, int listid, String phone, long from, long to,
                                            AsyncCallback<List<WordAndScore>> async);

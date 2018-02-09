@@ -120,6 +120,18 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return analysisReport;
   }
 
+  /**
+   * @param userid
+   * @param minRecordings
+   * @param listid
+   * @param from
+   * @param to
+   * @param rangeStart
+   * @param rangeEnd
+   * @param sort
+   * @return
+   * @see AnalysisServiceImpl#getWordScoresForUser(int, int, int, long, long, int, int, String, int)
+   */
   @Override
   public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
                                             long from, long to,
@@ -132,7 +144,18 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
   }
 
-  private WordsAndTotal getWordScoresForPeriod(Collection<UserInfo> userInfos, long from, long to,
+  /**
+   * @param userInfos
+   * @param from
+   * @param to
+   * @param rangeStart
+   * @param rangeEnd
+   * @param sortInfo
+   * @return
+   * @see #getWordScoresForUser(int, int, int, long, long, int, int, String)
+   */
+  private WordsAndTotal getWordScoresForPeriod(Collection<UserInfo> userInfos,
+                                               long from, long to,
                                                int rangeStart, int rangeEnd,
 
                                                String sortInfo) {
@@ -157,11 +180,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       List<WordScore> wordScore = getWordScore(inTime, false);
       int totalSize = wordScore.size();
-      logger.info("getWordScoresForUser got " + totalSize + " word and score ");
+      //logger.info("getWordScoresForUser got " + totalSize + " word and score ");
 
       // sublist is not serializable!
       int min = Math.min(wordScore.size(), rangeEnd);
-      wordScore = new ArrayList<>(wordScore.subList(rangeStart, min));
+
+      // prevent sublist range error
+      int startToUse = min < rangeStart ? 0 : rangeStart;
+
+
+      wordScore = new ArrayList<>(wordScore.subList(startToUse, min));
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScore " + totalSize);
       }

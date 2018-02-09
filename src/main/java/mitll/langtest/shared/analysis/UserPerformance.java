@@ -136,8 +136,9 @@ public class UserPerformance implements Serializable {
       float moving = total / count;
 
       TimeAndScore timeAndScore = new TimeAndScore(bs, moving);
-      System.err.println("time " + timeAndScore + " " + timeAndScore.getSessionStart());
-            rawTimeAndScores.add(timeAndScore);
+      //System.err.println("time " + timeAndScore + " " + timeAndScore.getSessionStart());
+
+      rawTimeAndScores.add(timeAndScore);
       if (bs.isiPad()) {
         iPadTimeAndScores.add(timeAndScore);
       } else {
@@ -151,7 +152,6 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   *
    * @return
    */
   public List<TimeAndScore> getRawBestScores() {
@@ -187,16 +187,16 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
    */
   public String getFirst() {
     return first;
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#addChart
    */
   public String getLast() {
     return last;

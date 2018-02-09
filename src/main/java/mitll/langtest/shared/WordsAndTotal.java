@@ -37,6 +37,7 @@ import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.result.MonitorResult;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -51,6 +52,11 @@ public class WordsAndTotal implements IsSerializable {
   private int req;
   public WordsAndTotal() {}
 
+  /**
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getWordScoresForPeriod
+   * @param results
+   * @param n
+   */
   public WordsAndTotal(List<WordScore> results, int n) {
     this.results = results;
     this.numTotal = n;
