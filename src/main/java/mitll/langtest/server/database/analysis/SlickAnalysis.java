@@ -375,8 +375,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int learn = 0;
     int count = 0;
     int missing = 0;
-    //Set<String> missingAudio = new TreeSet<>();
-    Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
     // logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
@@ -389,6 +388,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     then = System.currentTimeMillis();
 
     Map<Integer, MiniUser> idToMini = new HashMap<>();
+
+    Map<String,Long> sessionToLong = new HashMap<>();
 
     for (SlickPerfResult perf : perfs) {
       count++;
@@ -409,6 +410,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         emptyCount++;
       }
       String device = perf.devicetype();
+      Long sessionTime = getSessionTime(sessionToLong, perf.device());
       String path = perf.answer();
 
       boolean isiPad = device != null && device.startsWith("i");
@@ -437,9 +439,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           trimPathForWebPage(path);
 
       //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
+
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
           filePath,
-          nativeAudio);
+          nativeAudio,
+          sessionTime);
+
+//      if (e.getSessionStart()> 0) {
+//        logger.info("id " + id + " = " + e.getSessionStart());
+//      }
+
       results.add(e);
     }
 
@@ -458,6 +467,22 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     return userToBest;
+  }
+
+  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+    Long parsedTime = sessionToLong.get(device);
+
+    if (parsedTime == null) {
+      try {
+        parsedTime = Long.parseLong(device);
+        logger.info("getSessionTime " +parsedTime);
+      } catch (NumberFormatException e) {
+        logger.info("can't parse " +device);
+        parsedTime =-1L;
+      }
+      sessionToLong.put(device,parsedTime);
+    }
+    return parsedTime;
   }
 
   /**

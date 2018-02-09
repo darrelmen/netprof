@@ -224,7 +224,7 @@ public class NewContentChooser implements INavigation {
 
       @Override
       public void gotNo() {
-        showPractice();
+
       }
 
       @Override

@@ -85,14 +85,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     implements RequiresResize {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-
   private static final String LISTS = "Lists";
-//  private static final int DRY_NUM = 10;
-//  private static final int COMP_NUM = 100;
-
   private static final String TIMES_UP = "Times Up!";
 
-  public static final int MIN_POLYGLOT_SCORE = 35;
+  static final int MIN_POLYGLOT_SCORE = 35;
 
   private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
   private static final int HEARTBEAT_INTERVAL = 1000;
@@ -141,6 +137,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Timer roundTimer = null;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = 0;
+  private long sessionStartMillis = 0;
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
   private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
@@ -199,8 +196,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  public void startTimedRun() {
-
+  private void startTimedRun() {
     if (!inLightningRound) {
       logger.info("StartTimedRun: START ");
       inLightningRound = true;
@@ -215,7 +211,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  public void stopTimedRun() {
+  private void stopTimedRun() {
     inLightningRound = false;
     cancelRoundTimer();
   }
@@ -242,9 +238,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           inLightningRound = false;
         }
       };
-      int delayMillis = isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
-      roundTimer.schedule(delayMillis);
-      roundTimeLeftMillis = delayMillis;
+
+      {
+        int delayMillis = isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
+        roundTimer.schedule(delayMillis);
+        roundTimeLeftMillis = delayMillis;
+        sessionStartMillis = System.currentTimeMillis();
+      }
+
       recurringTimer = new Timer() {
         @Override
         public void run() {
@@ -257,7 +258,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       if (currentFlashcard != null) {
         currentFlashcard.showTimeRemaining(roundTimeLeftMillis);
-      } else logger.warning("no current flashcard?");
+      } else {
+        logger.warning("no current flashcard?");
+      }
     }
   }
 
@@ -408,8 +411,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     this.contentPanel = contentPanel;
   }
 
-  private PolyglotChart polyglotChart;
-
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
   }
@@ -435,7 +436,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
-  private   int count;
+    private int count;
 
     public StatsPracticePanel(CommonAnnotatable e, ListInterface<L, T> exerciseListToUse) {
       super(e,
@@ -458,10 +459,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       });
 
       this.count = counter++;
-
-      //  startTimedRun();
     }
 
+    @Override
+    protected String getDeviceValue() {
+      String s = isPolyglot ? "" + sessionStartMillis : controller.getBrowserInfo();
+      logger.info("getDeviceValue  " + s);
+      return s;
+    }
 
     public int getCounter() {
       return count;
@@ -797,8 +802,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         stopTimedRun();
         startTimedRun();
       }
-
-      polyglotChart = null;
     }
 
     private void reallyStartOver() {
@@ -856,8 +859,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       pChart.setWidth("100%");
       pChart.setHeight(CHART_HEIGHT + "px");
       pChart.addStyleName("floatLeftAndClear");
-
-      polyglotChart = pChart;
       return pChart;
     }
 
@@ -896,8 +897,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       startOver.setEnabled(false);
       if (isPolyglot) {
         navigation.showDrill();
-      }
-      else {
+      } else {
         startOver();
       }
     }

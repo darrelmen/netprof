@@ -203,8 +203,11 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     };
   }
 
+  // TODO : put back learn tab ref
   private void gotClickOnItem(final WordAndScore e) {
-    learnTab.showLearnAndItem(e.getExid());
+    if (learnTab != null) {
+      learnTab.showLearnAndItem(e.getExid());
+    }
   }
 
   private SafeHtml getSafeHtml(String columnText) {

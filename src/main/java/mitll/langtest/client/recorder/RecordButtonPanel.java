@@ -238,7 +238,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   protected String getDevice() {
-    return controller.getBrowserInfo();
+    String browserInfo = controller.getBrowserInfo();
+    logger.info("GetDevice " + browserInfo);
+    return browserInfo;
   }
 
   private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {

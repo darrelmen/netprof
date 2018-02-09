@@ -33,9 +33,11 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.analysis.Analysis;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -45,7 +47,6 @@ import java.util.*;
  */
 
 public class UserPerformance implements Serializable {
-  //  private transient final Logger logger = LogManager.getLogger("UserPerformance");
   private static final int TOSHOW = 2;
   /**
    * CAN'T be final
@@ -135,7 +136,8 @@ public class UserPerformance implements Serializable {
       float moving = total / count;
 
       TimeAndScore timeAndScore = new TimeAndScore(bs, moving);
-      rawTimeAndScores.add(timeAndScore);
+      System.err.println("time " + timeAndScore + " " + timeAndScore.getSessionStart());
+            rawTimeAndScores.add(timeAndScore);
       if (bs.isiPad()) {
         iPadTimeAndScores.add(timeAndScore);
       } else {

@@ -276,6 +276,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
 
+      protected String getDevice() {
+        return getDeviceValue();
+      }
+
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
         // logger.info("makeRecordButton : using " + instance);
@@ -296,6 +300,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             outer.setAllowAlternates(showOnlyEnglish);
             super.stop(duration);
           }
+
 
           /**
            * @see FlashcardRecordButton#checkKeyDown
@@ -341,6 +346,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see #getAnswerWidget
    */
   void recordingStarted() {
+  }
+
+  protected String getDeviceValue() {
+    return controller.getBrowserInfo();
   }
 
   /**
@@ -528,8 +537,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       showPronScoreFeedback(false, score);
     }
     showOtherText();
+
+/*
       logger.info("showIncorrectFeedback : said answer " +result.isSaidAnswer()+
-          "result " + result + " score " + score + " has ref " + hasRefAudio);
+          "result " + result + " score " + score + " has ref " + hasRefAudio);*/
 
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
@@ -580,7 +591,27 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   private void playIncorrect() {
-    getSoundFeedback().queueSong(SoundFeedback.INCORRECT);
+    getSoundFeedback().queueSong(SoundFeedback.INCORRECT,
+        new SoundFeedback.EndListener() {
+          @Override
+          public void songStarted() {
+            incorrectStarted();
+          }
+
+          @Override
+          public void songEnded() {
+            incorrectEnded();
+
+          }
+        });
+  }
+
+  private void incorrectStarted() {
+    realRecordButton.setEnabled(false);
+  }
+
+  private void incorrectEnded() {
+    realRecordButton.setEnabled(true);
   }
 
   protected void abortPlayback() {
@@ -593,21 +624,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void removePlayingHighlight() {
     removePlayingHighlight(foreign);
   }
-
-  /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
-   */
-/*
-  void cancelTimer() {
-    super.cancelTimer();
-    removePlayingHighlight();
-  }
-*/
-/*
-  @Override
-  public void timerCancelled() {
-    removePlayingHighlight(foreign);
-  }*/
 
   private void initRecordButton() {
     answerWidget.initRecordButton();

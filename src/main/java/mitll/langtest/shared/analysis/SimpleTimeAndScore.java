@@ -43,8 +43,9 @@ import java.io.Serializable;
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
  * @since 10/19/15.
  */
-public class SimpleTimeAndScore implements Serializable {//}, Comparable<SimpleTimeAndScore> {
+public class SimpleTimeAndScore implements Serializable {
   public static final int SCALE = 1000;
+  private long sessionStart;
   private long timestamp;
   private int score;
   private transient WordAndScore wordAndScore;
@@ -54,10 +55,11 @@ public class SimpleTimeAndScore implements Serializable {//}, Comparable<SimpleT
    * @param score
    * @see TimeAndScore#TimeAndScore(int, long, float, float, WordAndScore)
    */
-  SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore) {
+  SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore, long sessionStart) {
     this.timestamp = timestamp;
     this.score = toInt(score);
     this.wordAndScore = wordAndScore;
+    this.sessionStart = sessionStart;
   }
 
   /**
@@ -65,10 +67,11 @@ public class SimpleTimeAndScore implements Serializable {//}, Comparable<SimpleT
    * @param score
    * @see BestScore#BestScore
    */
-  SimpleTimeAndScore( long timestamp, float score) {
+  SimpleTimeAndScore(long timestamp, float score, long sessionStart) {
     this.timestamp = timestamp;
     this.score = toInt(score);
     this.wordAndScore = null;
+    this.sessionStart = sessionStart;
   }
 
   public SimpleTimeAndScore() {
@@ -117,6 +120,10 @@ public class SimpleTimeAndScore implements Serializable {//}, Comparable<SimpleT
   public int compareTo(@NotNull SimpleTimeAndScore o) {
     int compare = Long.compare(getTimestamp(), o.getTimestamp());
     return compare == 0 ? Float.compare(getScore(), o.getScore()) : compare;
+  }
+
+  public long getSessionStart() {
+    return sessionStart;
   }
 
   public String toString() {

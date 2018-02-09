@@ -1372,12 +1372,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
 
     if (visibleIDs.isEmpty()) {
-      logger.info("skipping empty visible range?");
+      if (DEBUG) logger.info("askServerForExercise skipping empty visible range?");
     } else {
-      final int currentReq = incrReq();
       if (DEBUG) logger.info("askServerForExercise visible " + visibleIDs);
-
-      askServerForVisibleExercises(itemID, visibleIDs, currentReq);
+      askServerForVisibleExercises(itemID, visibleIDs, incrReq());
     }
   }
 
@@ -1393,11 +1391,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
       if (DEBUG) logger.info("askServerForVisibleExercises item " + itemID + " and " + visibleIDs.size());
-      getExercises(setVisibleForDrill(itemID, visibleIDs), currentReq);
+      getExercises(getVisibleForDrill(itemID, visibleIDs), currentReq);
     }
   }
 
-  private Collection<Integer> setVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+  private Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
     if (isDrillView() && itemID > 0) {
       visibleIDs = new ArrayList<>();
       visibleIDs.add(itemID);
@@ -1524,7 +1522,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
           @Override
           public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
 
-            logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
+        if (DEBUG)    logger.info("reallyGetExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
             if (result.getExercises() != null) {
               long now = System.currentTimeMillis();
               int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();

@@ -203,7 +203,7 @@ public class MakePhoneReport {
       count++;
       float moving = total / count;
 
-      TimeAndScore timeAndScore = new TimeAndScore(-1, bs.getTimestamp(), pronScore, moving, bs.getWordAndScore());
+      TimeAndScore timeAndScore = new TimeAndScore(-1, bs.getTimestamp(), pronScore, moving, bs.getWordAndScore(),0L);
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;

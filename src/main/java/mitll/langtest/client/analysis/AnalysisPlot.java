@@ -63,6 +63,7 @@ import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -217,11 +218,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
       if (isPolyglot) {
-        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TENMIN);
-        tenMinutes.addAll(getPeriods(phoneSessions, TENMIN, last));
-
-        //List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TENMIN);
+        tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN), TENMIN, last));
         oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
+        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
+        logger.info("got sessions "+ phoneSessions);
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);

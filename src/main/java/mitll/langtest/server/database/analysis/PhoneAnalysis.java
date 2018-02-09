@@ -58,8 +58,10 @@ public class PhoneAnalysis {
   //  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
+  public static final long SESSION = -1L;
   //  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
+      SESSION,
       MINUTE,
       TENMIN,
       HOUR,
@@ -104,7 +106,8 @@ public class PhoneAnalysis {
   <T extends SimpleTimeAndScore> Map<Long, List<PhoneSession>> getGranularityToSessions(List<T> answersForUser) {
     Map<Long, List<PhoneSession>> serial = new HashMap<>();
     getGranularityToSessions(answersForUser, GRANULARITIES)
-        .forEach((k, v) -> serial.put(k, getPhoneSessions(OVERALL, v, false)));
+        .forEach((k, v) -> serial.put(k,
+            getPhoneSessions(OVERALL, v, false)));
     return serial;
   }
 
@@ -118,7 +121,8 @@ public class PhoneAnalysis {
    */
   private List<PhoneSession> getPhoneSessionsWithPrune(String key,
                                                        List<TimeAndScore> answersForUser,
-                                                       List<Long> times, boolean shouldPrune) {
+                                                       List<Long> times,
+                                                       boolean shouldPrune) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, times);
     List<PhoneSessionInternal> toUse = chooseSession(times, granularityToSessions);
     return getPhoneSessions(key, toUse, shouldPrune);
@@ -143,7 +147,9 @@ public class PhoneAnalysis {
    * @see #getGranularityToSessions(List)
    * @see #getPhoneSessions(String, List, boolean)
    */
-  private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
+  private List<PhoneSession> getPhoneSessions(String key,
+                                              List<PhoneSessionInternal> toUse,
+                                              boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
 
     if (toUse == null) {
@@ -178,7 +184,7 @@ public class PhoneAnalysis {
           ));
 
         } else {
-          logger.warn("\tgetPhoneSessions: for " + key+
+          logger.warn("\tgetPhoneSessions: for " + key +
               "skipping session " + internal);
         }
       }
@@ -204,24 +210,53 @@ public class PhoneAnalysis {
                                                         Map<Long, PhoneSessionInternal> granToCurrent) {
     long last = 0;
 
+    long lastSession = 0;
+
     for (T r : answersForUser) { // sorted by time
       long timestamp = r.getTimestamp();
 
-      for (Long time : times) {
-        PhoneSessionInternal phoneSessionInternal = granToCurrent.get(time);
-        long gran = (timestamp / time) * time;
-        long diff = timestamp - last;
-        if ((phoneSessionInternal == null) ||
-            (diff > time /*&& phoneSessionInternal.getN() > MIN_SESSION_SIZE*/)
-            ) {
-          phoneSessionInternal = new PhoneSessionInternal(gran);
-          granularityToSessions.get(time).add(phoneSessionInternal);
-          granToCurrent.put(time, phoneSessionInternal);
+      for (Long granularity : times) {
+        if (granularity == SESSION) {
+
+          PhoneSessionInternal phoneSessionInternal = granToCurrent.get(granularity);
+
+          long sessionStart = r.getSessionStart();
+//          if (sessionStart> 0 || sessionStart == -1) {
+//            logger.info("granularity " + granularity + " Current " + phoneSessionInternal + " session " + sessionStart + " for " + r.getTimestamp() + " " + r.getScore());
+//          }
+
+          if ((phoneSessionInternal == null) || (lastSession != sessionStart)) {
+            phoneSessionInternal = new PhoneSessionInternal(lastSession);
+            granularityToSessions.get(granularity).add(phoneSessionInternal);
+            granToCurrent.put(granularity, phoneSessionInternal);
+
+      //      logger.info("new session granularity " +granularity+ " Current " + phoneSessionInternal + " last " + lastSession + " now " + sessionStart);
+
+            lastSession = sessionStart;
+
+
+          } else {
+            //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
+          }
+          phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
+
         } else {
-          //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
+          PhoneSessionInternal phoneSessionInternal = granToCurrent.get(granularity);
+          long gran = (timestamp / granularity) * granularity;
+          long diff = timestamp - last;
+          if ((phoneSessionInternal == null) ||
+              (diff > granularity /*&& phoneSessionInternal.getN() > MIN_SESSION_SIZE*/)
+              ) {
+            phoneSessionInternal = new PhoneSessionInternal(gran);
+            granularityToSessions.get(granularity).add(phoneSessionInternal);
+            granToCurrent.put(granularity, phoneSessionInternal);
+          } else {
+            //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
+          }
+          phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
         }
-        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
       }
+
 
       last = timestamp;
     }

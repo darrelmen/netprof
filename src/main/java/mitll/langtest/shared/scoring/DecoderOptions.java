@@ -1,6 +1,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.Panel;
 
 /**
  * Created by go22670 on 11/15/16.
@@ -12,7 +13,6 @@ public class DecoderOptions implements IsSerializable {
   private boolean doAlign = false;
   private boolean canUseCache = true;
   private boolean allowAlternates = false;
-  // private boolean useOldSchool = false;
   private boolean usePhoneToDisplay = false;
 
   public DecoderOptions() {
@@ -37,7 +37,6 @@ public class DecoderOptions implements IsSerializable {
     this.doDecode = doDecode;
     this.canUseCache = canUseCache;
     this.allowAlternates = allowAlternates;
-    //   this.useOldSchool = useOldSchool;
     this.usePhoneToDisplay = usePhoneToDisplay;
   }
 
@@ -63,6 +62,11 @@ public class DecoderOptions implements IsSerializable {
     return doAlign;
   }
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
+   * @param val
+   * @return
+   */
   public DecoderOptions setDoAlignment(boolean val) {
     this.doAlign = val;
     return this;
