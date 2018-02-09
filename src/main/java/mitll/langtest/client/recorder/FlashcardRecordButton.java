@@ -177,7 +177,7 @@ public class FlashcardRecordButton extends RecordButton {
         // }
       }
     } else {
-      logger.info("ignore key down.");
+      //logger.info("ignore key down.");
     }
   }
 
@@ -205,7 +205,7 @@ public class FlashcardRecordButton extends RecordButton {
         doClick();
       }
     } else {
-      logger.info("ignore key up.");
+      //logger.info("ignore key up.");
     }
   }
 
