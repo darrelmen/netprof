@@ -1155,6 +1155,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private void addPlayingHighlight(Widget textWidget) {
     //  logger.info("addPlayingHighlight add playing highlight");
     textWidget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
+
   }
 
   /**

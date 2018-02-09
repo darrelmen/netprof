@@ -261,10 +261,17 @@ class TimeSeriesPlot extends DivWidget {
     return data;
   }
 
+  /**
+   * ? what is this doing ?
+   *
+   * @param lastSession
+   * @param ts
+   * @return
+   */
   private long getSessionTime(PhoneSession lastSession, PhoneSession ts) {
     long middle = ts.getMiddle();
     if (ts == lastSession &&
-        ts.getEnd() - middle > AnalysisPlot.HOUR) {
+        ts.getEnd() - middle > AnalysisTab.HOUR) {
       middle = ts.getEnd();
     }
     return middle;

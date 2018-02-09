@@ -165,7 +165,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScore " + totalSize);
       }
-      logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/"+ min);
+      logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/" + min);
 
 
       return new WordsAndTotal(wordScore, totalSize);
@@ -272,7 +272,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       return new ArrayList<>();
     } else {
 
-      logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+      if (DEBUG) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
 
       SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
       // examples.addAll(wordAndScores);
@@ -375,7 +375,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int learn = 0;
     int count = 0;
     int missing = 0;
-     Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
+    Map<Integer, MiniUser.Gender> userToGender = new HashMap<>();
     // logger.info("getUserToResults for " + perfs.size() + " results");
 
     int emptyCount = 0;
@@ -389,7 +389,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
-    Map<String,Long> sessionToLong = new HashMap<>();
+    Map<String, Long> sessionToLong = new HashMap<>();
 
     for (SlickPerfResult perf : perfs) {
       count++;
@@ -475,12 +475,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     if (parsedTime == null) {
       try {
         parsedTime = Long.parseLong(device);
-        logger.info("getSessionTime " +parsedTime);
+        logger.info("getSessionTime " + parsedTime);
       } catch (NumberFormatException e) {
-        logger.info("can't parse " +device);
-        parsedTime =-1L;
+        logger.info("can't parse " + device);
+        parsedTime = -1L;
       }
-      sessionToLong.put(device,parsedTime);
+      sessionToLong.put(device, parsedTime);
     }
     return parsedTime;
   }
@@ -504,8 +504,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (exid == UNKNOWN_EXERCISE) {
         logger.info("getNativeAudio skipping " + perf.id() + " for unknonw exercise by " + perf.userid() + " : " + perf.answer());
         skipped.add(perf.id());
-      }
-      else {
+      } else {
         CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, exid);
         if (customOrPredefExercise != null &&
             customOrPredefExercise.getProjectID() != DEFAULT_PROJECT) {
@@ -514,7 +513,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
     });
 
-    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size()+
+    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size() +
         " skipped) and project " + projid);
 
     audioDAO.attachAudioToExercises(exercises, language);

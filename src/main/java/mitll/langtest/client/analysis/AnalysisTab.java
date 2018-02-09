@@ -63,6 +63,10 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  //  public static final String WEEK = "Week";
+//  public static final String MINUTE = "Minute";
+//  public static final String MONTH = "Month";
+//  public static final String ALL = "All";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private static final int MIN_HEIGHT = 325;
   /**
@@ -84,7 +88,44 @@ public class AnalysisTab extends DivWidget {
   private final int userid;
   private Heading scoreHeader;
 
-  enum TIME_HORIZON {ONEMIN, TENMIN, WEEK, MONTH, ALL}
+  private static final long MINUTE = 60 * 1000;
+  static final long HOUR = 60 * MINUTE;
+  static final long QUARTER = 6 * HOUR;
+
+  //  private static final long FIVEMIN = 5 * MINUTE;
+  //private static final long ONEMIN = MINUTE;
+  private static final long TENMIN_DUR = 10 * MINUTE;
+  static final long DAY_DUR = 24 * HOUR;
+  private static final long WEEK_DUR = 7 * DAY_DUR;
+  private static final long MONTH_DUR = 4 * WEEK_DUR;
+  static final long YEAR_DUR = 52 * WEEK_DUR;
+  private static final long YEARS = 20 * YEAR_DUR;
+
+
+  enum TIME_HORIZON {
+    SESSION("Session", -1),
+    //    ONEMIN("Minute", MINUTE),
+    TENMIN("Minute", TENMIN_DUR),
+    WEEK("Week", WEEK_DUR),
+    MONTH("Month", MONTH_DUR),
+    ALL("All", YEARS);
+
+    private String display;
+    private long offset;
+
+    TIME_HORIZON(String display, long offset) {
+      this.display = display;
+      this.offset = offset;
+    }
+
+    public String getDisplay() {
+      return display;
+    }
+
+    public long getDuration() {
+      return offset;
+    }
+  }
 
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
@@ -296,10 +337,12 @@ public class AnalysisTab extends DivWidget {
       scoreHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
       scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
       stepper.add(this.scoreHeader = scoreHeader);
-  //    logger.info("add score header");
+      //    logger.info("add score header");
     }
 
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice, minuteChoice, scoreHeader);
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice,
+        sessionChoice,
+        scoreHeader);
     return stepper;
   }
 
@@ -314,8 +357,7 @@ public class AnalysisTab extends DivWidget {
 
   private HTML getCurrentTimeWindow() {
     HTML currentDate = new HTML();
-    currentDate.setWidth(130 +
-        "px");
+    currentDate.setWidth(130 + "px");
     currentDate.addStyleName("boxShadow");
     currentDate.addStyleName("leftFiveMargin");
     currentDate.addStyleName("topFiveMargin");
@@ -343,7 +385,8 @@ public class AnalysisTab extends DivWidget {
 
   private Button allChoice;
   private Button weekChoice;
-  private Button minuteChoice;
+  // private Button minuteChoice;
+  private Button sessionChoice;
   private Button monthChoice;
 
   /**
@@ -357,25 +400,28 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.addStyleName("topMargin");
     buttonGroup.addStyleName("leftTenMargin");
     buttonGroup.setToggle(ToggleType.RADIO);
-    if (isPolyglot) {
-      buttonGroup.add(minuteChoice = getMinuteChoice());
-      minuteChoice.setActive(true);
 
+    if (isPolyglot) {
+      buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION));
+      sessionChoice.setActive(true);
     }
-    buttonGroup.add(weekChoice = getWeekChoice());
-    buttonGroup.add(monthChoice = getMonthChoice());
+
+    buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
+    buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
     allChoice = getAllChoice();
     buttonGroup.add(allChoice);
 
     return buttonGroup;
   }
 
-  private Button getMinuteChoice() {
-    return getButton(controller, getClickHandler(TIME_HORIZON.TENMIN), "Minute");
+  private Button getButtonChoice(TIME_HORIZON week) {
+    return getButton(controller, getClickHandler(week), week.getDisplay());
   }
 
-  private Button getWeekChoice() {
-    return getButton(controller, getClickHandler(TIME_HORIZON.WEEK), "Week");
+  private Button getAllChoice() {
+    Button all = getButtonChoice(TIME_HORIZON.ALL);
+    all.setActive(!isPolyglot);
+    return all;
   }
 
   private Button getButton(ExerciseController controller, ClickHandler handler, String week) {
@@ -387,17 +433,9 @@ public class AnalysisTab extends DivWidget {
     return onButton;
   }
 
-  private Button getMonthChoice() {
-    return getButton(controller, getClickHandler(TIME_HORIZON.MONTH), "Month");
+  private ClickHandler getClickHandler(final TIME_HORIZON month) {
+    return event -> analysisPlot.setTimeHorizon(month);
   }
-
-  private Button getAllChoice() {
-    Button all = getButton(controller, getClickHandler(TIME_HORIZON.ALL), "All");
-    all.setActive(!isPolyglot);
-    return all;
-  }
-
-  private ClickHandler getClickHandler(final TIME_HORIZON month) { return event -> analysisPlot.setTimeHorizon(month);  }
 
   /**
    * @param controller

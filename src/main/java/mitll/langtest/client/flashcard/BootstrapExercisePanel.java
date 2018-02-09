@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
@@ -497,14 +496,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     maybeAdvance(score);
   }
 
-  protected void playCorrectDing() {
-    getSoundFeedback().queueSong(SoundFeedback.CORRECT);
-  }
+  protected void playCorrectDing() {   getSoundFeedback().queueSong(SoundFeedback.CORRECT);  }
 
-  protected void maybeAdvance(double score) {
-
-
-  }
+  protected void maybeAdvance(double score) {}
 
   private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
@@ -595,22 +589,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         new SoundFeedback.EndListener() {
           @Override
           public void songStarted() {
-            incorrectStarted();
+            disableRecord();
           }
 
           @Override
           public void songEnded() {
-            incorrectEnded();
-
+            enableRecord();
           }
         });
   }
 
-  private void incorrectStarted() {
+  protected void disableRecord() {
     realRecordButton.setEnabled(false);
   }
 
-  private void incorrectEnded() {
+  protected void enableRecord() {
     realRecordButton.setEnabled(true);
   }
 

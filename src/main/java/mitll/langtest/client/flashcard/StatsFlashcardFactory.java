@@ -39,24 +39,18 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
@@ -101,6 +95,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
   private static final String AVG_SCORE = "Pronunciation";
+  private static final boolean DEBUG = false;
 
   /**
    *
@@ -313,7 +308,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       logger.info("startTimedRun is " + mode);
       startTimedRun();
     } else {
-      logger.info("mode is " + mode);
+     if (DEBUG) logger.info("mode is " + mode);
     }
 
     //  logger.info("Current is "+currentFlashcard);
@@ -450,10 +445,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       soundFeedback.setEndListener(new SoundFeedback.EndListener() {
         @Override
         public void songStarted() {
+          disableRecord();
         }
 
         @Override
         public void songEnded() {
+          enableRecord();
           removePlayingHighlight();
         }
       });
@@ -576,12 +573,25 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return b;
     }
 
+    private int wrongCount = 0;
+
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
-        if (score >= MIN_SCORE_F) {
+        if (isCorrect(score)) {
           timer.scheduleIn(NEXT_EXERCISE_DELAY);
+          wrongCount = 0;
+        } else {
+          wrongCount++;
+          if (wrongCount > 3) {
+            timer.scheduleIn(NEXT_EXERCISE_DELAY);
+            wrongCount = 0;
+          }
         }
       }
+    }
+
+    private boolean isCorrect(double score) {
+      return score >= MIN_SCORE_F;
     }
 
     /**
@@ -617,7 +627,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           copies.add(t.getID());
         }
       }
-
 //      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
 //          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
@@ -669,8 +678,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
       belowContentDiv.clear();
-
-//      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
       belowContentDiv.add(container);
     }
 
@@ -832,11 +839,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
       if (isPolyglot) {
-//        logger.info("adding polyglot chart ");
-
         // String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
         //  logger.info("logException stack " + exceptionAsString);
-
         toAddTo.add(getChart(getIsDry() ? DRY_RUN_ROUND_TIME : ROUND_TIME));
       }
 
@@ -868,7 +872,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void gotClickOnNext() {
       abortPlayback();
-      //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {

@@ -57,6 +57,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
   private final PhoneDAOWrapper dao;
 
+  private static final boolean DEBUG = false;
+
   public SlickPhoneDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new PhoneDAOWrapper(dbConnection);
@@ -224,8 +226,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     String language = project.getLanguage();
-    logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
-    logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
+
+    if (DEBUG) {
+      logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
+      logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
+    }
 
     float totalScore = 0;
 
@@ -283,7 +288,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    logger.info("getPhoneReport added " + num + " transcripts");
+
+    if (DEBUG) logger.info("getPhoneReport added " + num + " transcripts");
 
     return new MakePhoneReport()
         .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
@@ -301,15 +307,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return dao.getNumRows();
   }
 
-/*
-  public boolean isEmpty() {
-    return getNumRows() == 0;
-  }
-*/
-
   @Override
   public void deleteForProject(int projID) {
     dao.deleteForProject(projID);
   }
-
 }

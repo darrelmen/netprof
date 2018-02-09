@@ -34,7 +34,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -63,7 +62,9 @@ import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
+import static mitll.langtest.client.analysis.AnalysisTab.*;
+import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -88,18 +89,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this list. Choose another list or don't filter on lists.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
 
-  private static final long MINUTE = 60 * 1000;
-  static final long HOUR = 60 * MINUTE;
-  private static final long QUARTER = 6 * HOUR;
+//  private static final long MINUTE = 60 * 1000;
+//  static final long HOUR = 60 * MINUTE;
+//  private static final long QUARTER = 6 * HOUR;
 
   //  private static final long FIVEMIN = 5 * MINUTE;
-  private static final long ONEMIN = MINUTE;
-  private static final long TENMIN = 10 * MINUTE;
-  private static final long DAY = 24 * HOUR;
-  private static final long WEEK = 7 * DAY;
-  private static final long MONTH = 4 * WEEK;
-  private static final long YEAR = 52 * WEEK;
-  private static final long YEARS = 20 * YEAR;
+//  private static final long ONEMIN = MINUTE;
+//  private static final long TENMIN = 10 * MINUTE;
+//  private static final long DAY = 24 * HOUR;
+//  private static final long WEEK = 7 * DAY;
+//  private static final long MONTH = 4 * WEEK;
+//  private static final long YEAR = 52 * WEEK;
+//  private static final long YEARS = 20 * YEAR;
 
   private static final int SHORT_THRESHOLD = 822;
   private static final int CHART_HEIGHT_SHORT = 260;
@@ -121,8 +122,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private long firstTime;
   private long lastTime;
 
-  private final List<Long> oneMinutes = new ArrayList<>();
-  private final List<Long> tenMinutes = new ArrayList<>();
+  //  private final List<Long> oneMinutes = new ArrayList<>();
+//  private final List<Long> tenMinutes = new ArrayList<>();
+  private final List<Long> sessions = new ArrayList<>();
 
   /**
    *
@@ -134,7 +136,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private TimeWidgets timeWidgets;
   private MessageHelper messageHelper;
-  private int width = 1365;
   protected Chart chart = null;
   private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
@@ -160,9 +161,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
-    if (isTeacherView) {
-      width = WIDTH;
-    }
+    int width = isTeacherView ? WIDTH : 1365;
 
     this.possible = (float) possible;
 
@@ -194,12 +193,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.granToLabel = new HashMap<>();
     granToLabel.put(HOUR, "Hour");
     granToLabel.put(QUARTER, "6 Hours");
-    granToLabel.put(DAY, "Day");
-    granToLabel.put(WEEK, "Week");
-    granToLabel.put(MONTH, "Month");
-    granToLabel.put(YEAR, "Year");
-    granToLabel.put(TENMIN, "Ten Minutes");
-    granToLabel.put(ONEMIN, "Minute");
+    granToLabel.put(DAY_DUR, "Day");
+    granToLabel.put(WEEK.getDuration(), "Week");
+    granToLabel.put(MONTH.getDuration(), "Month");
+    granToLabel.put(AnalysisTab.YEAR_DUR, "Year");
+    granToLabel.put(TENMIN.getDuration(), "Ten Minutes");
+    // granToLabel.put(ONEMIN, "Minute");
   }
 
   /**
@@ -218,18 +217,19 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
       if (isPolyglot) {
-        tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN), TENMIN, last));
-        oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
+        //  tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN.getDuration()), TENMIN.getDuration(), last));
+        //   oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        logger.info("got sessions "+ phoneSessions);
+        logger.info("got sessions " + phoneSessions);
+        sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
-        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK.getDuration());
+        weeks.addAll(getPeriods(phoneSessions, WEEK.getDuration(), last));
       }
       {
-        List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
-        months.addAll(getPeriods(phoneSessions1, MONTH, last));
+        List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH.getDuration());
+        months.addAll(getPeriods(phoneSessions1, MONTH.getDuration(), last));
       }
     }
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
@@ -237,29 +237,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores) {
     int fround1 = getPercentScore(simpleTimeAndScores);
-//        logger.info("fround1 " + fround1);
-
-    String text = "Score is " + fround1 + "%";
+    String text = simpleTimeAndScores.size() > 100 ? "" : "Score is " + fround1 + "%";
     return text;
-    // timeWidgets.setScore(text);
-//    Heading child = new Heading(2, text);
-//    child.addStyleName("topFiveMargin");
-    //return child;
   }
 
   private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
     float totalScore = 0f;
-    int total = 0;
-    //float possible = 0f;
-    //  SortedSet<TimeAndScore> simpleTimeAndScores = getTimeAndScoresInRange(start, end);
-   // logger.info("getScoreText : found " + simpleTimeAndScores.size());
+
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
       if (score > 0) {
         totalScore += score;
-        total++;
       }
-      //possible += 1f;
     }
 
     //  logger.info("total " + totalScore);
@@ -315,10 +304,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         }
       }
     }
+
     PhoneSession first = phoneSessions.get(0);
     if (first.getStart() < start) {
       months2.add(start);
     }
+    return months2;
+  }
+
+  private SortedSet<Long> getEasyPeriods(List<PhoneSession> sessions) {
+    SortedSet<Long> months2 = new TreeSet<>();
+    sessions.forEach(phoneSession -> months2.add(phoneSession.getStart()));
     return months2;
   }
 
@@ -350,7 +346,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     showSeriesByVisible();
 
     if (isPolyglot) {
-      setTimeHorizon(possible < 50 ? AnalysisTab.TIME_HORIZON.ONEMIN : AnalysisTab.TIME_HORIZON.TENMIN);
+      //setTimeHorizon(possible < 50 ? AnalysisTab.TIME_HORIZON.ONEMIN : TENMIN);
+      setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     }
   }
 
@@ -509,7 +506,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     long now = System.currentTimeMillis();
 //    logger.info("setVisiblity for " + new Date(now));
-    setVisibility(now - YEARS, now);
+    setVisibility(now - AnalysisTab.TIME_HORIZON.ALL.getDuration(), now);
   }
 
   @NotNull
@@ -725,7 +722,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
-        setVisibility(end - YEARS, end);
+        setVisibility(end - ALL.getDuration(), end);
         setTimeWindowControlsToAll();
       }
       showSeriesByVisible();
@@ -794,9 +791,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
-    if (possible < 50 && timeHorizon == AnalysisTab.TIME_HORIZON.TENMIN) {
-      timeHorizon = AnalysisTab.TIME_HORIZON.ONEMIN;
-    }
+//    if (possible < 50 && timeHorizon == TENMIN) {
+//      timeHorizon = AnalysisTab.TIME_HORIZON.ONEMIN;
+//    }
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon);
     return (x != null) ? x : 0;
@@ -819,14 +816,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
+      case SESSION:
+        Long lastSessionStart = sessions.get(sessions.size() - 1);
+        return showLastTimePeriod(xAxis, SESSION.getDuration(), this.sessions, lastSessionStart, lastPlusSlack);
       case WEEK:
         return showLastWeek(xAxis, lastPlusSlack);
       case MONTH:
         return showLastMonth(xAxis, lastPlusSlack);
-      case TENMIN:
-        return showLastPeriod(xAxis, lastPlusSlack, TENMIN, this.tenMinutes);
-      case ONEMIN:
-        return showLastPeriod(xAxis, lastPlusSlack, ONEMIN, this.oneMinutes);
+//      case TENMIN:
+//        return showLastPeriod(xAxis, lastPlusSlack, TENMIN, this.tenMinutes);
+//      case ONEMIN:
+//        return showLastPeriod(xAxis, lastPlusSlack, ONEMIN, this.oneMinutes);
       case ALL:
         return showAll(xAxis, lastPlusSlack);
     }
@@ -839,32 +839,45 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * logger.info("to lastTime           " + getShortDate(lastTime));
    **/
   private long showLastWeek(XAxis xAxis, long lastPlusSlack) {
-    return showLastPeriod(xAxis, lastPlusSlack, WEEK, this.weeks);
+    return showLastPeriod(xAxis, lastPlusSlack, WEEK.getDuration(), this.weeks);
   }
 
   @NotNull
   private Long showLastMonth(XAxis xAxis, long lastPlusSlack) {
-    return showLastPeriod(xAxis, lastPlusSlack, MONTH, this.months);
+    return showLastPeriod(xAxis, lastPlusSlack, MONTH.getDuration(), this.months);
   }
 
   @NotNull
-  private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long offset, List<Long> timePeriods) {
-    long startOfPrevMonth = lastTime - offset;
-    xAxis.setExtremes(startOfPrevMonth, lastPlusSlack);
+  private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long duration, List<Long> timePeriods) {
+    return showLastTimePeriod(xAxis, duration, timePeriods, lastTime - duration, lastPlusSlack);
+  }
 
-    int lastMonthIndex = timePeriods.size() - 1;
-    Long lastMonth = timePeriods.get(lastMonthIndex);
-    this.index = lastMonthIndex;
 
-    timeWidgets.prevButton.setEnabled(timePeriods.size() > 1);
+  @NotNull
+  private Long showLastTimePeriod(XAxis xAxis,
+                                  long duration,
+                                  List<Long> timePeriods,
+                                  long startOfPrevPeriod,
+                                  long lastPlusSlack) {
+    xAxis.setExtremes(startOfPrevPeriod, lastPlusSlack);
+
+    int numPeriods = timePeriods.size();
+    int lastPeriodIndex = numPeriods - 1;
+    Long lastPeriod = timePeriods.get(lastPeriodIndex);
+    this.index = lastPeriodIndex;
+
+    timeWidgets.prevButton.setEnabled(numPeriods > 1);
+    disableNext();
+
+    timeWidgets.setDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
+    setTitleScore(startOfPrevPeriod, lastPlusSlack);
+    timeChanged(startOfPrevPeriod, lastPlusSlack);
+
+    return startOfPrevPeriod;
+  }
+
+  private void disableNext() {
     timeWidgets.nextButton.setEnabled(false);
-
-    timeWidgets.setDisplay(getShortDate(lastMonth, shouldShowHour(offset)));
-    setTitleScore(startOfPrevMonth, lastPlusSlack);
-
-    timeChanged(startOfPrevMonth, lastPlusSlack);
-
-    return startOfPrevMonth;
   }
 
   /**
@@ -886,7 +899,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private void setTimeWindowControlsToAll() {
     timeWidgets.prevButton.setEnabled(false);
-    timeWidgets.nextButton.setEnabled(false);
+    disableNext();
     timeWidgets.setDisplay("");
     setTitleScore(-1, -1);
     timeWidgets.reset();
@@ -897,12 +910,29 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see AnalysisTab#getPrevButton
    */
   void gotPrevClick() {
+
     index--;
 
     timeWidgets.prevButton.setEnabled(index > 0);
     timeWidgets.nextButton.setEnabled(true);
 
-    showTimePeriod(getOffset(), getPeriods());
+    long offset = getOffsetPerSession();
+    showTimePeriod(offset, getPeriods());
+  }
+
+  private long getOffsetPerSession() {
+    long offset = getOffset();
+    if (isPolyglot && timeHorizon == SESSION) {
+      Long thisPeriodStart = getPeriods().get(index);
+
+      List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
+      PhoneSession currentSession = phoneSessions.get(index);
+
+//      logger.info("current "+ currentSession);
+
+      offset = currentSession.getEnd() + 1 - thisPeriodStart;
+    }
+    return offset;
   }
 
   /**
@@ -916,32 +946,39 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.prevButton.setEnabled(true);
     timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
 
-    showTimePeriod(getOffset(), periods);
+    long offset = getOffsetPerSession();
+//    if (isPolyglot && timeHorizon == SESSION) {
+//      Long thisPeriodStart = getPeriods().get(index);
+//      Long nextPeriodStart = getPeriods().get(index + 1);
+//      offset = nextPeriodStart - thisPeriodStart;
+//    }
+    showTimePeriod(offset, periods);
   }
 
   private long getOffset() {
     switch (timeHorizon) {
-      case ONEMIN:
-        return ONEMIN;
-      case TENMIN:
-        return TENMIN;
-      case WEEK:
-        return WEEK;
-      case MONTH:
-        return MONTH;
-      default:
-        return MONTH;
-    }
+//      case ONEMIN:
+//        return ONEMIN;
+      //   case TENMIN:
+      case SESSION:
 
+      case WEEK:
+      case MONTH:
+        return timeHorizon.getDuration();
+      default:
+        return AnalysisTab.TIME_HORIZON.ALL.getDuration();
+    }
   }
 
   @NotNull
   private List<Long> getPeriods() {
     switch (timeHorizon) {
-      case ONEMIN:
-        return oneMinutes;
-      case TENMIN:
-        return tenMinutes;
+//      case ONEMIN:
+//        return oneMinutes;
+//      case TENMIN:
+//        return tenMinutes;
+      case SESSION:
+        return sessions;
       case WEEK:
         return weeks;
       case MONTH:
@@ -965,14 +1002,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     //  logger.info("showTimePeriod to    " + getShortDate(end));
     // logger.info("showTimePeriod offset    " + offset);
     chart.getXAxis().setExtremes(periodStart, end);
-
     setTitleScore(periodStart, end);
-
     timeChanged(periodStart, end);
   }
 
   private boolean shouldShowHour(long offset) {
-    return offset <= TENMIN;
+    return offset <= TENMIN.getDuration();
   }
 
   /**

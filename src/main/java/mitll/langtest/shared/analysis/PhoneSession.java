@@ -52,11 +52,10 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private int stdev;
   private long meanTime;
   private long count = 0;
-  //private long bin;
+
   private long start;
   private long end;
   private String phone;
-//  private List<WordAndScore> examples;
 
   private static final int SCALE = 1000;
 
