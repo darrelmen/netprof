@@ -246,7 +246,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void run() {
           long l = roundTimeLeftMillis -= HEARTBEAT_INTERVAL;
           //     logger.info("show time remaining on " + currentFlashcard);
-          currentFlashcard.showTimeRemaining(l);
+          if (currentFlashcard != null) {
+            currentFlashcard.showTimeRemaining(l);
+          }
         }
       };
       recurringTimer.scheduleRepeating(HEARTBEAT_INTERVAL);
@@ -306,9 +308,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       currentFlashcard = null;
     } else if (mode != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       logger.info("startTimedRun is " + mode);
-      startTimedRun();
+      if (isPolyglot) startTimedRun();
     } else {
-     if (DEBUG) logger.info("mode is " + mode);
+      if (DEBUG) logger.info("mode is " + mode);
     }
 
     //  logger.info("Current is "+currentFlashcard);
@@ -461,7 +463,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected String getDeviceValue() {
       String s = isPolyglot ? "" + sessionStartMillis : controller.getBrowserInfo();
- //     logger.info("getDeviceValue  " + s);
+      //     logger.info("getDeviceValue  " + s);
       return s;
     }
 
@@ -803,12 +805,15 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         reallyStartOver();
       }
 
-      if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
-        stopTimedRun();
-      } else {
-        stopTimedRun();
-        startTimedRun();
+      if (isPolyglot) {
+        if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
+          stopTimedRun();
+        } else {
+          stopTimedRun();
+          startTimedRun();
+        }
       }
+
     }
 
     private void reallyStartOver() {
