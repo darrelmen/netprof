@@ -98,7 +98,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   /**
    * @see #getFeedbackGroup(ControlState)
    */
-  private static final String FEEDBACK = "PLAY ON MISTAKE";
+  private static final String PLAY_ON_MISTAKE = "PLAY ON MISTAKE";
   private static final String AVP_RECORD_BUTTON = "AVP_RecordButton";
 
   /**
@@ -129,7 +129,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   @Override
   protected ControlGroup getFeedbackGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup(FEEDBACK);
+    ControlGroup group = new ControlGroup(PLAY_ON_MISTAKE);
     ButtonToolbar w = new ButtonToolbar();
     group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -157,7 +157,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
-    onButton.getElement().setId(FEEDBACK + "_" + title);
+    onButton.getElement().setId(PLAY_ON_MISTAKE + "_" + title);
     controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
@@ -588,7 +588,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     else if (controlState.isForeign()) showForeign();
   }
 
-  private void playIncorrect() {
+  protected void playIncorrect() {
     getSoundFeedback().queueSong(SoundFeedback.INCORRECT,
         new SoundFeedback.EndListener() {
           @Override

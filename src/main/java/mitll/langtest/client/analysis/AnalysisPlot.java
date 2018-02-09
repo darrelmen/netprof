@@ -90,8 +90,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
 
   private static final int SHORT_THRESHOLD = 822;
-  private static final int CHART_HEIGHT_SHORT = 260;
-  private static final int CHART_HEIGHT = 330;
+  private static final int CHART_HEIGHT_SHORT = 225;//260;
+  /**
+   * @see #configureChart
+   */
+  private static final int CHART_HEIGHT = 295;
 
   private final AnalysisServiceAsync service;
   private final PlayAudio playAudio;
@@ -124,7 +127,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   protected Chart chart = null;
   private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
-  private float possible;
+  // private float possible;
 
   /**
    * @param service
@@ -141,14 +144,15 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean isTeacherView,
-                      boolean isPolyglot, int possible) {
+                      boolean isPolyglot,
+                      int possible) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
     int width = isTeacherView ? WIDTH : 1365;
 
-    this.possible = (float) possible;
+    //  this.possible = (float) possible;
 
     if (!isPolyglot) {
       setWidth(width + "px");
@@ -205,7 +209,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         //  tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN.getDuration()), TENMIN.getDuration(), last));
         //   oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-   //     logger.info("got sessions " + phoneSessions);
+        //     logger.info("got sessions " + phoneSessions);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
@@ -222,7 +226,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores) {
     int fround1 = getPercentScore(simpleTimeAndScores);
-    String text = simpleTimeAndScores.size() > 100 ? "" : "Score is " + fround1 + "%";
+    int n = simpleTimeAndScores.size();
+    int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
+
+
+    String text = simpleTimeAndScores.size() > 100 ? "" : "Score : " + fround1 + "% out of " + denom + " items.";
     return text;
   }
 
@@ -238,7 +246,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     //  logger.info("total " + totalScore);
     // logger.info("possible " + possible);
-    float v = totalScore / possible;
+    int n = simpleTimeAndScores.size();
+    float denom = (float) (n <= 10 ? 10 : n <= 100 ? 100 : n);
+    float v = totalScore / denom;
     // logger.info("ratio " + v);
     float fround = Math.round(v * 100);
     // logger.info("fround " + fround);

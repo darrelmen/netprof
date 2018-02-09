@@ -368,7 +368,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     table.setWidth("100%", true);
 
-    new TooltipHelper().addTooltip(table, "Click on an item to review.");
+    new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
   }
 
   private Column<WordScore, SafeHtml> getDateColumn() {
@@ -376,9 +376,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        gotClick(object, event);
       }
 
       @Override
@@ -492,18 +490,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         return getSafeHtml(columnText);
       }
     };
-  }
-
-  private void gotClick(WordScore object, NativeEvent event) {
-    if (BrowserEvents.CLICK.equals(event.getType())) {
-      gotClickOnItem(object);
-    }
-  }
-
-  private void gotClickOnItem(final WordScore e) {
-    if (learnTab != null) {
-      learnTab.showLearnAndItem(e.getExid());
-    }
   }
 
   private SafeHtml getSafeHtml(String columnText) {

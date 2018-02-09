@@ -482,14 +482,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     clear();
     toRemember.forEach(this::addExercise);
 
-//  int c = 0;
-//    for (T es : toRemember) {
-//      addExercise(es);
-///*      if (c++ < 10) {
-//        logger.info("# " + c + " " + es.getID() + " " + es.getEnglish() + " " + es.getForeignLanguage());
-//      }*/
-//    }
-
     flush();
     return toRemember;
   }

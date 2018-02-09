@@ -193,7 +193,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private void startTimedRun() {
     if (!inLightningRound) {
-      logger.info("StartTimedRun: START ");
+      //logger.info("StartTimedRun: START ");
       inLightningRound = true;
       reset();
 
@@ -294,9 +294,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
-//    if (!recordingEnabled) {
-//      logger.warning("Recording is *not* enabled!");
-//    }
+
     boolean hasModel = controller.getProjectStartupInfo().isHasModel();
     boolean showRecordingFlashcard = hasModel && recordingEnabled;
 
@@ -307,13 +305,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       logger.info("getExercisePanel no recording ");
       currentFlashcard = null;
     } else if (mode != PolyglotDialog.MODE_CHOICE.NOT_YET) {
-      logger.info("startTimedRun is " + mode);
+      // logger.info("startTimedRun is " + mode);
       if (isPolyglot) startTimedRun();
     } else {
       if (DEBUG) logger.info("mode is " + mode);
     }
-
-    //  logger.info("Current is "+currentFlashcard);
 
     return widgets;
   }
@@ -429,6 +425,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private static final long ONE_MIN = (60L * 1000L);
     private static final int CHART_HEIGHT = 120;
     private static final String TRY_AGAIN = "Try Again?";
+    public static final String TIME_LEFT = "Time left";
 
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
@@ -465,6 +462,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       String s = isPolyglot ? "" + sessionStartMillis : controller.getBrowserInfo();
       //     logger.info("getDeviceValue  " + s);
       return s;
+    }
+
+    @Override
+    protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
+      if (!isPolyglot) super.addControlsBelowAudio(controlState, rightColumn);
     }
 
     public int getCounter() {
@@ -604,6 +606,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     /**
+     * Don't play the incorrect sound.
+     */
+    protected void playIncorrect() {
+      if (!isPolyglot) super.playIncorrect();
+    }
+
+    /**
      * Ask for history for those items that were actually practiced.
      *
      * @see #getSkipToEnd()
@@ -670,7 +679,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
-      HorizontalPanel widgets = new HorizontalPanel();
+
+     // Panel widgets = new HorizontalPanel();
+      Panel widgets = new DivWidget();
+
       container = widgets;
 
       scoreHistory = isPolyglot ?
@@ -995,19 +1007,16 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
 
       if (isPolyglot) {
-        ControlGroup pronScoreGroup = new ControlGroup("Time left");
-        //pronScoreGroup.addStyleName("topFiveMargin");
+        ControlGroup pronScoreGroup = new ControlGroup(TIME_LEFT);
 
         timeLeft = new Label();
-        logger.info("time left " + timeLeft);
         timeLeft.setType(LabelType.SUCCESS);
         timeLeft.setWidth("40px");
 
         g.setWidget(row, 0, pronScoreGroup);
-        //pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, timeLeft);
+
         showTimeRemaining(roundTimeLeftMillis);
-        // timeLeft.setText("0");
       }
 
       setStateFeedback();

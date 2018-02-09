@@ -183,7 +183,11 @@ public class Trie<T> {
     List<String> toAdd = new ArrayList<>();
 
     int length = entry.length();
-    if (length > 500) logger.warn("getChars adding entry " + entry + " length " + entry.length());
+    if (length > 500) {
+      int orig = entry.length();
+      entry = entry.substring(0, 500);
+      logger.warn("getChars adding entry " + entry + " length " + orig);
+    }
     if (DEBUG && length > WINDOW_SIZE) logger.info("getChars : " + entry);
 
     Deque<Character> slidingWindow = new LinkedList<>();

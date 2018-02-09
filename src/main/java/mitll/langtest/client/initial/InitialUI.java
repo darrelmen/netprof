@@ -211,10 +211,6 @@ public class InitialUI implements UILifecycle {
     contentRow.getElement().setId("InitialUI_contentRow");
     contentRow.setHeight("100%");
 
-
-    //contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
-
-
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
 
@@ -322,6 +318,7 @@ public class InitialUI implements UILifecycle {
    * that and make it the current one.
    * <p>
    * Also, if we log out of one tab and go to another, we'll notice here.
+   * @see #getRootContainer
    */
   private void confirmCurrentProject() {
     if (userManager.getCurrent() != null) {

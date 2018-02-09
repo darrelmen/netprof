@@ -238,6 +238,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected abstract void showFinishedGettingExercises();
 
+  /**
+   * @see #rememberAndLoadFirst(List, String, String, int)
+   * @see ExerciseList.SetExercisesCallbackWithID#useExercises
+   * @param result
+   * @return
+   */
   protected abstract List<T> rememberExercises(List<T> result);
 
   Panel getCreatedPanel() {
@@ -294,9 +300,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) {
         List<T> exercises = result.getExercises();
 
-        exercises.forEach(exercise -> logger.info("Got " + exercise.getID() + " " + exercise.getEnglish()));
-        if (exercises != null)
+        if (exercises != null) {
           logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
+          exercises.forEach(exercise -> logger.info("SetExercisesCallback.onSuccess: got " + exercise.getID() + " " + exercise.getEnglish()));
+        }
       }
 
       if (isStaleResponse(result)) {

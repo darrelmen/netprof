@@ -76,9 +76,10 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends HorizontalPanel implements TimerListener {
-  public static final int ADVANCE_DELAY = 2000;
+public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends DivWidget implements TimerListener {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+
+  private static final int ADVANCE_DELAY = 2000;
 
   private static final int KEY_PRESS_WIDTH = 125;
   private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
@@ -383,7 +384,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                                     Panel contentMiddle,
                                     DivWidget belowDiv,
                                     DivWidget lowestRow) {
-    //Panel horiz = new HorizontalPanel();
     DivWidget horiz = new DivWidget();
     horiz.addStyleName("inlineFlex");
     horiz.getElement().setId("left-content-right_container");
@@ -398,13 +398,17 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       horiz.add(leftC);
     }
 
+    // TODO : lose the grid here...
+
     int basicNumRows = 2;
     int rows = lowestRow != null ? basicNumRows + 1 : basicNumRows;
+
     Grid grid = new Grid(rows, 1);
     int row = 0;
     grid.setWidget(row++, 0, contentMiddle);
     grid.setWidget(row++, 0, belowDiv);
     if (lowestRow != null) grid.setWidget(row++, 0, lowestRow);
+
     horiz.add(grid);
 
     rightColumn = getRightColumn(controlState);
@@ -461,7 +465,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void setAutoPlay(boolean b) {
     if (!b) {
       //   logger.info("setAutoPlay false");
-      autoPlay.setActive(false);
+      if (autoPlay != null) autoPlay.setActive(false);
       controlState.setAutoPlayOn(false);
       timer.cancelTimer();
     }
@@ -577,9 +581,15 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getThreePartContent(ControlState, Panel, DivWidget, DivWidget)
    */
   private Panel getRightColumn(final ControlState controlState) {
-    Panel rightColumn = new VerticalPanel();
-
+    Panel rightColumn = new DivWidget();
+    rightColumn.addStyleName("leftTenMargin");
     rightColumn.add(getAudioGroup(controlState));
+    addControlsBelowAudio(controlState, rightColumn);
+
+    return rightColumn;
+  }
+
+  protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
     rightColumn.add(getShowGroup(controlState));
 
     Widget feedbackGroup = getFeedbackGroup(controlState);
@@ -592,9 +602,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
     child.setWidth(KEY_PRESS_WIDTH + "px");
     rightColumn.add(child);
-    rightColumn.addStyleName("leftTenMargin");
-
-    return rightColumn;
   }
 
   private Button getShuffleButton(final ControlState controlState) {

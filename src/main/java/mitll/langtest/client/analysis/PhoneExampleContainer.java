@@ -67,7 +67,7 @@ import java.util.logging.Logger;
 public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
-  private static final String CLICK_ON = "Click on an item to review.";
+  static final String CLICK_ON = "Click on an item to review.";
   private static final String EXAMPLES_OF_SOUND = "Examples of sound";
 
   private static final String WORDS_USING = "Vocabulary with ";
@@ -185,9 +185,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        gotClick(object,event);
+//        if (BrowserEvents.CLICK.equals(event.getType())) {
+//          gotClickOnItem(object);
+//        }
       }
 
       @Override
@@ -202,13 +203,12 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       }
     };
   }
-
-  // TODO : put back learn tab ref
+/*  // TODO : put back learn tab ref
   private void gotClickOnItem(final WordAndScore e) {
     if (learnTab != null) {
       learnTab.showLearnAndItem(e.getExid());
     }
-  }
+  }*/
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();

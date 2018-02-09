@@ -104,5 +104,10 @@ public interface OpenUserService extends RemoteService {
    */
   void forgetProject();
 
+  /**
+   *
+   * @param projid
+   * @return
+   */
   boolean setCurrentUserToProject(int projid);
 }

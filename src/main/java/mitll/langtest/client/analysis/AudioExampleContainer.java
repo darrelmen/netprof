@@ -3,6 +3,8 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -11,6 +13,8 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.flashcard.MySoundFeedback;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -43,16 +47,21 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   void addAudioColumns() {
     Column<T, SafeHtml> column = getPlayAudio();
-    SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY + "</span>");
 
-    table.addColumn(column, header);
-    table.setColumnWidth(column, PLAY_WIDTH + "px");
-    column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    {
+      SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY + "</span>");
 
-    column = getPlayNativeAudio();
-    table.addColumn(column, NATIVE);
-    table.setColumnWidth(column, NATIVE_WIDTH + "px");
-    column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+      table.addColumn(column, header);
+      table.setColumnWidth(column, PLAY_WIDTH + "px");
+      column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    }
+
+    {
+      column = getPlayNativeAudio();
+      table.addColumn(column, NATIVE);
+      table.setColumnWidth(column, NATIVE_WIDTH + "px");
+      column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    }
   }
 
   /**
@@ -70,6 +79,12 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
       }
     };
+  }
+
+  private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
+
+  void playAudio(T wordScore) {
+    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()));
   }
 
   /**
@@ -127,6 +142,19 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       o = GWT.create(TableResources.class);
     }
     return o;
+  }
+
+  void gotClick(T object, NativeEvent event) {
+    if (BrowserEvents.CLICK.equals(event.getType())) {
+      gotClickOnItem(object);
+    }
+  }
+
+  protected void gotClickOnItem(final T wordScore) {
+/*    if (learnTab != null) {
+      learnTab.showLearnAndItem(e.getExid());
+    }*/
+    playAudio(wordScore);
   }
 
   public interface TableResources extends CellTable.Resources {

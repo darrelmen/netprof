@@ -41,7 +41,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/2/16.
  */
-class MySoundFeedback extends SoundFeedback {
+public class MySoundFeedback extends SoundFeedback {
 //  private final Logger logger = Logger.getLogger("MySoundFeedback");
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
