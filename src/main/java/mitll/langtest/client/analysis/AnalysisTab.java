@@ -186,7 +186,7 @@ public class AnalysisTab extends DivWidget {
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(), isTeacherView,
-        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT, possible);
+        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
 
     Panel timeControls = getTimeControls(playFeedback);
     analysisPlot.setTimeWidgets(timeWidgets);

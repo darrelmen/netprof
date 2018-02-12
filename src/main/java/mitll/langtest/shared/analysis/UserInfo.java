@@ -39,10 +39,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -51,8 +48,8 @@ import java.util.Map;
  * @since 10/29/15.
  */
 public class UserInfo implements HasID {
-//  private int finalScores;
   private int current;
+  private int lastSession;
   private int num;
   private long startTime;
 
@@ -79,9 +76,27 @@ public class UserInfo implements HasID {
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
 
 //    List<BestScore> initialScores = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
- //   List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
+    //   List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
 //    this.finalScores = getPercent(finalScores);
     setCurrent(getPercent(bestScores));
+
+    setLastSession(bestScores);
+  }
+
+  private void setLastSession(List<BestScore> bestScores) {
+    long maxSession = Long.MIN_VALUE;
+    Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
+    for (BestScore bestScore : bestScores) {
+      long sessionStart = bestScore.getSessionStart();
+      if (sessionStart > maxSession) {
+        maxSession = sessionStart;
+      }
+      List<BestScore> bestScores1 = sessionToScores.computeIfAbsent(sessionStart, k -> new ArrayList<>());
+      bestScores1.add(bestScore);
+    }
+    List<BestScore> bestScores1 = sessionToScores.get(maxSession);
+
+    lastSession = getPercent(bestScores1);
   }
 
   private int getPercent(List<BestScore> bestScores1) {
@@ -101,24 +116,20 @@ public class UserInfo implements HasID {
   }
 
   /**
-   * @see UserContainer#getCurrent
    * @return
+   * @see UserContainer#getCurrent
    */
   public int getCurrent() {
     return current;
   }
-
-//  private int getDiff() {
-//    return getFinalScores() -  getCurrent();
-//  }
 
   public int getNum() {
     return num;
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getUserPerformance
    * @return
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserPerformance
    */
   public List<BestScore> getBestScores() {
     return bestScores;
@@ -139,8 +150,8 @@ public class UserInfo implements HasID {
 
 
   /**
-   * @see UserContainer#addTable(Collection, DivWidget)
    * @return
+   * @see UserContainer#addTable(Collection, DivWidget)
    */
   @Override
   public int getID() {
@@ -170,8 +181,8 @@ public class UserInfo implements HasID {
 */
 
   /**
-   * @see Analysis#getUserInfos
    * @param first
+   * @see Analysis#getUserInfos
    */
   public void setFirst(String first) {
     this.first = first;
@@ -192,5 +203,9 @@ public class UserInfo implements HasID {
   public String toString() {
     //MiniUser user = getUser();
     return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
+  }
+
+  public int getLastSession() {
+    return lastSession;
   }
 }

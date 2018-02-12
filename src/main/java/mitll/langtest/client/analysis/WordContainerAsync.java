@@ -59,6 +59,7 @@ import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.util.Date;
@@ -165,7 +166,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-        //   logger.info("got " + builder.toString());
+      //  logger.info("createProvider sort " + builder.toString());
 
         analysisServiceAsync.getWordScoresForUser(
             reqInfo.getUserid(),
@@ -243,7 +244,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     tableWithPager.addStyleName("floatLeftAndClear");
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
-    wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
+
+
+    if (!isPolyglot()) {
+      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
+    } else {
+      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
+    }
+
     //  wordScoreCellTable.setWidth("100%", false);
 
     addPlayer();
@@ -349,7 +357,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       addColumn(dateCol, new TextHeader(DATE));
       table.setColumnWidth(dateCol, SIGNED_UP + "px");
 //      table.addColumnSortHandler(getDateSorter(dateCol, getList()));
-      table.getColumnSortList().push(dateCol);
+
+      if (!isPolyglot()) {
+        table.getColumnSortList().push(dateCol);
+      }
       tableSortHelper.rememberColumn(dateCol, TIMESTAMP);
     }
 
@@ -359,6 +370,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
       scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
       scoreColumn.setSortable(true);
+      if (isPolyglot()) {
+        table.getColumnSortList().push(scoreColumn);
+      }
       table.setColumnWidth(scoreColumn, SCORE_WIDTH + "px");
       //    table.addColumnSortHandler(getScoreSorter(scoreColumn, getList()));
       tableSortHelper.rememberColumn(scoreColumn, SCORE);
@@ -371,6 +385,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
   }
 
+  private boolean isPolyglot() {
+    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
+  }
+
   private Column<WordScore, SafeHtml> getDateColumn() {
     return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -378,14 +396,17 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         super.onBrowserEvent(context, elem, object, event);
         gotClick(object, event);
       }
+/*
 
       @Override
       public boolean isDefaultSortAscending() {
-        return false;
+        return true;
       }
+*/
 
       @Override
       public SafeHtml getValue(WordScore shell) {
+        if (shell == null) return getSafeHtml("");
         return getSafeHtml(getVariableInfoDateStamp(shell));
       }
     };
@@ -464,18 +485,22 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
       @Override
       public SafeHtml getValue(WordScore shell) {
-        Map<NetPronImageType, List<SlimSegment>> transcript = shell.getTranscript();
-
-        String columnText;
-        if (transcript == null) {
-          logger.warning("getItemColumn no transcript for " + shell);
-          columnText = "";
-        } else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
-          logger.warning("getItemColumn no word transcript for " + shell);
-          columnText = "";
+        if (shell == null) {
+          logger.warning("huh? shell is null for item column?");
+          return getSafeHtml("");
         } else {
-          columnText = wordTable.makeColoredTableReally(transcript);
-        }
+          Map<NetPronImageType, List<SlimSegment>> transcript = shell.getTranscript();
+
+          String columnText;
+          if (transcript == null) {
+            logger.warning("getItemColumn no transcript for " + shell);
+            columnText = "";
+          } else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
+            logger.warning("getItemColumn no word transcript for " + shell);
+            columnText = "";
+          } else {
+            columnText = wordTable.makeColoredTableReally(transcript);
+          }
 
      /*     if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getExid());
@@ -487,22 +512,26 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         } else {
           //logger.info("getItemColumn : Got item id " + shell.getExID() + " "+ columnText );
         }*/
-        return getSafeHtml(columnText);
+          return getSafeHtml(columnText);
+        }
       }
     };
-  }
-
-  private SafeHtml getSafeHtml(String columnText) {
-    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
   private Column<WordScore, SafeHtml> getScoreColumn() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordScore shell) {
+        if (shell == null) return getSafeHtml("");
+
         float v = shell.getPronScore() * 100;
         String s = "<span " + "style='" + "margin-left:10px;" + "'" + ">" + ((int) v) + "</span>";
-        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+        return getSafeHtml(s);
+      }
+
+      @Override
+      public boolean isDefaultSortAscending() {
+        return false;
       }
     };
   }

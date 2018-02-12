@@ -74,6 +74,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(T shell) {
+        if (shell == null) return getSafeHtml("");
         CommonShell exercise = getShell(shell.getExid());
         // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
         return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
@@ -95,6 +96,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return new Column<T, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(T shell) {
+        if (shell == null) return getSafeHtml("");
+
         //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
         if (shell.getRefAudio() != null) {
           CommonShell exercise = getShell(shell.getExid());
@@ -155,6 +158,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       learnTab.showLearnAndItem(e.getExid());
     }*/
     playAudio(wordScore);
+  }
+
+  protected SafeHtml getSafeHtml(String columnText) {
+    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
   public interface TableResources extends CellTable.Resources {

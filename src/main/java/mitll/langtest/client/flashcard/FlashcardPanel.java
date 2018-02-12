@@ -128,6 +128,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
+
   protected FlashcardTimer timer;
 
   /**
@@ -150,7 +151,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                  final ControlState controlState,
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
-                 String instance, ListInterface exerciseList) {
+                 String instance,
+                 ListInterface exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -210,7 +212,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private void wasHidden() {
-    timer.cancelTimer();
+    cancelAdvanceTimer();
     getSoundFeedback().clear();
   }
 
@@ -467,7 +469,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       //   logger.info("setAutoPlay false");
       if (autoPlay != null) autoPlay.setActive(false);
       controlState.setAutoPlayOn(false);
-      timer.cancelTimer();
+      cancelAdvanceTimer();
     }
   }
 
@@ -507,7 +509,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       @Override
       public void songEnded() {
         if (endListener != null) endListener.songEnded();
-        timer.cancelTimer();
+        cancelAdvanceTimer();
 
         if (isTabVisible()) {
           if (delayMillis > 0) {
@@ -668,7 +670,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   void gotAutoPlay(boolean b) {
     if (b) playRefAndGoToNextIfSet();
-    else timer.cancelTimer();
+    else cancelAdvanceTimer();
+  }
+
+  protected void cancelAdvanceTimer() {
+    timer.cancelTimer();
   }
 
   void playRefAndGoToNextIfSet() {

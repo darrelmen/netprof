@@ -133,7 +133,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @param service
    * @param userid        either for yourself if you're a student or a selected student if you're a teacher
    * @param isTeacherView
-   * @param possible
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -144,8 +143,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean isTeacherView,
-                      boolean isPolyglot,
-                      int possible) {
+                      boolean isPolyglot) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
@@ -163,9 +161,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       Style style = getElement().getStyle();
 //      style.setProperty("minHeight", minHeight, Style.Unit.PX);
 //      style.setProperty("minWidth", 300, Style.Unit.PX);
-      style.setMarginTop(10, Style.Unit.PX);
-      style.setMarginLeft(10, Style.Unit.PX);
-      style.setMarginBottom(10, Style.Unit.PX);
+//      style.setMarginTop(10, Style.Unit.PX);
+//      style.setMarginLeft(10, Style.Unit.PX);
+//      style.setMarginBottom(10, Style.Unit.PX);
+      style.setMargin(10, Style.Unit.PX);
       addStyleName("cardBorderShadow");
     }
 
@@ -224,13 +223,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
 
+  /**
+   * @see #setTitleScore
+   * @param simpleTimeAndScores
+   * @return
+   */
   private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores) {
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
     int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
 
-
-    String text = simpleTimeAndScores.size() > 100 ? "" : "Score : " + fround1 + "% out of " + denom + " items.";
+    String text = simpleTimeAndScores.size() > 100 ? "" : "Score : " + fround1 + "/" +(10*denom)+ " for " + denom + " items.";
     return text;
   }
 

@@ -33,11 +33,9 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.analysis.Analysis;
-import org.apache.logging.log4j.LogManager;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

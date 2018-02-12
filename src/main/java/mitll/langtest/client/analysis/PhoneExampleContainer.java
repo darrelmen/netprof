@@ -210,10 +210,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     }
   }*/
 
-  private SafeHtml getSafeHtml(String columnText) {
-    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
-  }
-
   /**
    * Must be public
    */

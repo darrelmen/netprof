@@ -172,12 +172,18 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
     // add normal speed recording widget
     boolean normalRecord = isNormalRecord();
-    AudioType regular = normalRecord ? AudioType.REGULAR : AudioType.CONTEXT_REGULAR;
-    addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular);
+
+    {
+      AudioType regular = normalRecord ? AudioType.REGULAR : AudioType.CONTEXT_REGULAR;
+      addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular);
+    }
     // add slow speed recording widget
-    AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
-    VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
-    widgets.addStyleName("topFiveMargin");
+
+    if (!exercise.isContext()) {
+      AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
+      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
+      widgets.addStyleName("topFiveMargin");
+    }
 
     return vp;
   }

@@ -55,16 +55,12 @@ public class NewContentChooser implements INavigation {
 
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
-//  private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * 60 * 1000;
- // private static final int ROUND_TIME = ROUND_MINUTES * 60 * 1000;
 
   private static final String LISTS = "Lists";
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 
- // private static final String TIMES_UP = "Times Up!";
   public static final int MIN_POLYGLOT_SCORE = 35;
- // private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
 
   /**
    * @param controller
@@ -312,7 +308,7 @@ public class NewContentChooser implements INavigation {
   public void showProgress() {
     ShowTab showTab = getShowTab();
 
-  //  logger.info("is poly "+ isPolyglot());
+    //  logger.info("is poly "+ isPolyglot());
     divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
         new StudentAnalysis(controller, showTab) :
         new AnalysisTab(controller, showTab, isPolyglot(), 0));

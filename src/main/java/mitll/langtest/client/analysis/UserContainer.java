@@ -68,7 +68,7 @@ import java.util.*;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-//  private final Logger logger = Logger.getLogger("UserContainer");
+  //  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int MAX_LENGTH = 11;
   private static final int TABLE_WIDTH = 600;
@@ -83,6 +83,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private static final String NO_LIST = "(No List)";
   private static final int FILTER_BY = 19;
   private static final String CURRENT = "Avg";
+  private static final String POLY = "Poly";
   private static final int CURRENT_WIDTH = 60;
   /*
     private static final int DIFF_WIDTH = 55;
@@ -95,6 +96,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    *
    */
   private static final String STUDENT = "Student";
+  public static final String MY_STUDENT = "My Student";
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -130,6 +132,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
+
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
@@ -165,7 +168,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         @Override
         public void onSuccess(Set<Integer> result) {
           myStudents = result;
-          mineOnly.setEnabled(!myStudents.isEmpty());
+          if (mineOnly != null) {
+            mineOnly.setEnabled(!myStudents.isEmpty());
+          }
 
 //          Panel tableWithPager = getTableWithPager(users);
 //          leftSide.add(tableWithPager);
@@ -206,9 +211,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     buttons.addStyleName("floatLeft");
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
-    buttons.add(new HTML("My Student"));
-    buttons.add(add = getAddButton());
-    buttons.add(remove = getRemoveButton());
+    if (!isPolyglot()) {
+      buttons.add(new HTML(MY_STUDENT));
+
+      buttons.add(add = getAddButton());
+      buttons.add(remove = getRemoveButton());
+    }
 
     return buttons;
   }
@@ -248,8 +256,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     UserInfo currentSelection = getCurrentSelection();
 
     boolean onMyList = myStudents.contains(currentSelection.getID());
-    add.setEnabled(!onMyList);
-    remove.setEnabled(onMyList);
+    if (add != null) {
+      add.setEnabled(!onMyList);
+      remove.setEnabled(onMyList);
+    }
   }
 
   @NotNull
@@ -263,7 +273,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       controller.getDLIClassService().remove(id, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("removing a student from my students",caught);
+          controller.handleNonFatalError("removing a student from my students", caught);
         }
 
         @Override
@@ -300,21 +310,25 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterContainer.addStyleName("floatRight");
     filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
 
-    HTML w1 = new HTML(FILTER_BY1);
+    if (!isPolyglot()) {
 
-    w1.addStyleName("floatLeft");
-    w1.addStyleName("rightFiveMargin");
-    w1.addStyleName("topFiveMargin");
+      HTML w1 = new HTML(FILTER_BY1);
 
-    // mimic style of subtext on headers
-    w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
-    w1.getElement().getStyle().setColor("#999");
+      w1.addStyleName("floatLeft");
+      w1.addStyleName("rightFiveMargin");
+      w1.addStyleName("topFiveMargin");
 
-    filterContainer.add(w1);
+      // mimic style of subtext on headers
+      w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
+      w1.getElement().getStyle().setColor("#999");
 
-    filterContainer.add(getListBox());
-    filterContainer.addStyleName("leftFiveMargin");
-    filterContainer.add(mineOnly = getMyStudents());
+      filterContainer.add(w1);
+
+      filterContainer.add(getListBox());
+      filterContainer.addStyleName("leftFiveMargin");
+      filterContainer.add(mineOnly = getMyStudents());
+    }
+
 
     return filterContainer;
   }
@@ -427,15 +441,25 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
     addNumber(list);
     addCurrent(list);
-    addMine(list);
+
+    if (!isPolyglot()) {
+      addMine(list);
+    }
+    if (isPolyglot()) {
+      Column<?, ?> lastSession = addLastSession(list);
+      table.getColumnSortList().push(lastSession);
+    }
     //addFinalScore();
     //addDate();
 
-    table.getColumnSortList().push(dateCol);
+    if (!isPolyglot()) {
+      table.getColumnSortList().push(dateCol);
+    }
     table.setWidth("100%", true);
 
     addTooltip();
   }
+
 
   private void addFirstName(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -504,6 +528,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     table.setColumnWidth(current, CURRENT_WIDTH + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
+  }
+
+  private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
+    Column<UserInfo, SafeHtml> current = getLastSession();
+    current.setSortable(true);
+    addColumn(current, new TextHeader(POLY));
+    table.setColumnWidth(current, CURRENT_WIDTH + "px");
+
+    table.addColumnSortHandler(getLastSessionSorter(current, list));
+    return current;
   }
 
   private void addMine(List<UserInfo> list) {
@@ -606,6 +640,27 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
+  private ColumnSortEvent.ListHandler<UserInfo> getLastSessionSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                                     List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Integer.compare(o1.getLastSession(), o2.getLastSession());
+            }
+          }
+          return -1;
+        });
+    return columnSortHandler;
+  }
+
   private ColumnSortEvent.ListHandler<UserInfo> getMineSorter(Column<UserInfo, SafeHtml> englishCol,
                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -662,6 +717,26 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public SafeHtml getValue(UserInfo shell) {
         return getSafeHtml("" + shell.getCurrent());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getLastSession() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public boolean isDefaultSortAscending() {
+        return false;
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml("" + shell.getLastSession());
       }
     };
   }
@@ -734,14 +809,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     super.gotClickOnItem(selectedUser);
     enableButtons();
     rightSide.clear();
-    boolean isPolyglot = controller.getProjectStartupInfo().getProjectType()== ProjectType.POLYGLOT;
+    boolean isPolyglot = isPolyglot();
     rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom,
         selectedUser.getID(), selectedUser.getUserID(), listid, isPolyglot, 10));
+  }
+
+  private boolean isPolyglot() {
+    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
   }
 
   public Button getAdd() {
     return add;
   }
+
   public Button getRemove() {
     return remove;
   }

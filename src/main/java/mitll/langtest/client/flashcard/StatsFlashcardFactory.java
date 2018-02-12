@@ -227,6 +227,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         @Override
         public void run() {
 //          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
+          currentFlashcard.cancelAdvanceTimer();
           currentFlashcard.onSetComplete();
           cancelRoundTimer();
           currentFlashcard.showTimeRemaining(0);
