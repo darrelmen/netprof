@@ -85,18 +85,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private static final String CURRENT = "Avg";
   private static final String POLY = "Poly";
   private static final int CURRENT_WIDTH = 60;
-  /*
-    private static final int DIFF_WIDTH = 55;
-    private static final int INITIAL_SCORE_WIDTH = 75;
-    private static final String DIFF_COL_HEADER = "+/-";
-    */
+
   private static final int MIN_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS;
 
   /**
    *
    */
   private static final String STUDENT = "Student";
-  public static final String MY_STUDENT = "My Student";
+  private static final String MY_STUDENT = "My Student";
+  private static final int NUM_WIDTH = 50;
+  public static final String FIRST = "First";
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -132,53 +130,46 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
-
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
 
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
-    if (showOnlyMine()) {
-      controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.getMessageHelper().handleNonFatalError(TRYING_TO_GET_STUDENTS, caught);
-        }
+    controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.getMessageHelper().handleNonFatalError(TRYING_TO_GET_STUDENTS, caught);
+      }
 
-        @Override
-        public void onSuccess(Set<Integer> result) {
-          myStudents = result;
-
-          remembered = new ArrayList<>(users);
-          List<UserInfo> filtered = new ArrayList<>();
-          remembered.forEach(userInfo -> {
-            if (myStudents.contains(userInfo.getID())) filtered.add(userInfo);
-          });
-          getTableWithButtons(filtered, leftSide);
+      @Override
+      public void onSuccess(Set<Integer> result) {
+        if (showOnlyMine()) {
+          showMyStudents(result, users, leftSide);
+        } else {
+          showAllStudents(result, users, leftSide);
         }
-      });
-    } else {
-      controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.getMessageHelper().handleNonFatalError(TRYING_TO_GET_STUDENTS, caught);
-        }
+      }
+    });
+  }
 
-        @Override
-        public void onSuccess(Set<Integer> result) {
-          myStudents = result;
-          if (mineOnly != null) {
-            mineOnly.setEnabled(!myStudents.isEmpty());
-          }
-
-//          Panel tableWithPager = getTableWithPager(users);
-//          leftSide.add(tableWithPager);
-//          ((Panel) tableWithPager.getParent()).add(getButtons());
-          getTableWithButtons(users, leftSide);
-        }
-      });
+  private void showAllStudents(Set<Integer> result, Collection<UserInfo> users, DivWidget leftSide) {
+    myStudents = result;
+    if (mineOnly != null) {
+      mineOnly.setEnabled(!myStudents.isEmpty());
     }
+    getTableWithButtons(users, leftSide);
+  }
+
+  private void showMyStudents(Set<Integer> result, Collection<UserInfo> users, DivWidget leftSide) {
+    myStudents = result;
+
+    remembered = new ArrayList<>(users);
+    List<UserInfo> filtered = new ArrayList<>();
+    remembered.forEach(userInfo -> {
+      if (myStudents.contains(userInfo.getID())) filtered.add(userInfo);
+    });
+    getTableWithButtons(filtered, leftSide);
   }
 
   private void getTableWithButtons(Collection<UserInfo> filtered, DivWidget leftSide) {
@@ -211,9 +202,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     buttons.addStyleName("floatLeft");
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
+
     if (!isPolyglot()) {
       buttons.add(new HTML(MY_STUDENT));
-
       buttons.add(add = getAddButton());
       buttons.add(remove = getRemoveButton());
     }
@@ -311,7 +302,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
 
     if (!isPolyglot()) {
-
       HTML w1 = new HTML(FILTER_BY1);
 
       w1.addStyleName("floatLeft");
@@ -442,19 +432,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     addNumber(list);
     addCurrent(list);
 
-    if (!isPolyglot()) {
+    boolean polyglot = isPolyglot();
+    if (!polyglot) {
       addMine(list);
     }
-    if (isPolyglot()) {
-      Column<?, ?> lastSession = addLastSession(list);
-      table.getColumnSortList().push(lastSession);
-    }
-    //addFinalScore();
-    //addDate();
 
-    if (!isPolyglot()) {
+    if (polyglot) {
+      table.getColumnSortList().push(addLastSession(list));
+      addPolyNumber(list);
+    }
+
+    if (!polyglot) {
       table.getColumnSortList().push(dateCol);
     }
+
     table.setWidth("100%", true);
 
     addTooltip();
@@ -476,7 +467,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     };
     userCol.setSortable(true);
     table.setColumnWidth(userCol, FIRST_WIDTH + "px");
-    addColumn(userCol, new TextHeader("First"));
+    addColumn(userCol, new TextHeader(FIRST));
     table.addColumnSortHandler(getFirstSorter(userCol, list));
   }
 
@@ -513,14 +504,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-/*  private void addDate() {
-    Column<UserInfo, SafeHtml> diff = getDiff();
-    diff.setSortable(true);
-    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
-    table.addColumnSortHandler(getDiffSorter(diff, getList()));
-    table.setColumnWidth(diff, DIFF_WIDTH + "px");
-  }*/
-
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
@@ -554,18 +537,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     num.setSortable(true);
     addColumn(num, new TextHeader("#"));
     table.addColumnSortHandler(getNumSorter(num, list));
-    table.setColumnWidth(num, 50 + "px");
+    table.setColumnWidth(num, NUM_WIDTH + "px");
   }
 
-/*
-  private void addFinalScore() {
-    Column<UserInfo, SafeHtml> start = getFinal();
-    start.setSortable(true);
-    addColumn(start, new TextHeader("Latest"));
-    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
-    table.addColumnSortHandler(getFinalSorter(start, getList()));
+  private void addPolyNumber(List<UserInfo> list) {
+    Column<UserInfo, SafeHtml> num = getPolyNum();
+    num.setSortable(true);
+    addColumn(num, new TextHeader("P #"));
+    table.addColumnSortHandler(getPolyNumSorter(num, list));
+    table.setColumnWidth(num, 60 + "px");
   }
-*/
 
   /**
    * @param englishCol
@@ -573,6 +554,30 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    * @return
    */
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                             List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+
+
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              int compare = Integer.compare(o1.getNum(), o2.getNum());
+              return compare == 0 ? getDateCompare(o1, o2) : compare;
+            }
+          }
+          return -1;
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getPolyNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
 
@@ -797,6 +802,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       @Override
       public SafeHtml getValue(UserInfo shell) {
         return getSafeHtml("" + shell.getNum());
+      }
+    };
+  }
+
+
+  private Column<UserInfo, SafeHtml> getPolyNum() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml("" + shell.getLastSessionNum());
       }
     };
   }

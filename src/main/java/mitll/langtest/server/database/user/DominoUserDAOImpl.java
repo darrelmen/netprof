@@ -1213,7 +1213,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       long now2 = System.currentTimeMillis();
       logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
       idToUserD.forEach((k, v) -> {
-        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getFirstName(), now, "");// v.getAffiliation());
+        FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getLastName(), now, "");// v.getAffiliation());
         idToFirstLastCache.put(k, value);
       });
     }

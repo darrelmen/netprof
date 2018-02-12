@@ -35,6 +35,7 @@ package mitll.langtest.shared.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +51,7 @@ import java.util.*;
 public class UserInfo implements HasID {
   private int current;
   private int lastSession;
+  private int lastSessionNum;
   private int num;
   private long startTime;
 
@@ -74,12 +76,7 @@ public class UserInfo implements HasID {
 
     // done on server
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
-
-//    List<BestScore> initialScores = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
-    //   List<BestScore> finalScores = bestScores.subList(num - Math.min(finalSamples, num), num);
-//    this.finalScores = getPercent(finalScores);
     setCurrent(getPercent(bestScores));
-
     setLastSession(bestScores);
   }
 
@@ -97,6 +94,7 @@ public class UserInfo implements HasID {
     List<BestScore> bestScores1 = sessionToScores.get(maxSession);
 
     lastSession = getPercent(bestScores1);
+    lastSessionNum = bestScores1.size();
   }
 
   private int getPercent(List<BestScore> bestScores1) {
@@ -162,11 +160,15 @@ public class UserInfo implements HasID {
     this.id = id;
   }
 
+  /**
+   * @see Analysis#getUserInfos(Map, IUserDAO)
+   * @param firstLastUser
+   */
   public void setFrom(FirstLastUser firstLastUser) {
     setId(firstLastUser.getID()); // necessary?
     setUserID(firstLastUser.getUserID());
-    setFirst(firstLastUser.getFirst());
-    setLast(firstLastUser.getLast());
+    this.first = firstLastUser.getFirst();
+    this.last = firstLastUser.getLast();
   }
 
   @Override
@@ -174,38 +176,34 @@ public class UserInfo implements HasID {
     return Integer.compare(id, o.getID());
   }
 
-/*
-  private int getFinalScores() {
-    return finalScores;
-  }
-*/
-
   /**
-   * @param first
+   * @paramx first
    * @see Analysis#getUserInfos
    */
-  public void setFirst(String first) {
-    this.first = first;
-  }
-
+//  public void setFirst(String first) {
+//    this.first = first;
+//  }
   public String getFirst() {
     return first;
   }
 
-  public void setLast(String last) {
-    this.last = last;
-  }
+//  public void setLast(String last) {
+//    this.last = last;
+//  }
 
   public String getLast() {
     return last;
   }
 
-  public String toString() {
-    //MiniUser user = getUser();
-    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
-  }
-
   public int getLastSession() {
     return lastSession;
+  }
+
+  public int getLastSessionNum() {
+    return lastSessionNum;
+  }
+
+  public String toString() {
+    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 }

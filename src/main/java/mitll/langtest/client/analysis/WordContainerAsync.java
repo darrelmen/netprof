@@ -222,29 +222,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * @paramx sortedHistory
    * @see AnalysisTab#getWordContainer
    */
-  public Panel getTableWithPager(
-  ) {
-    //  Panel tableWithPager = getTableWithPager(new ListOptions());
-
+  public Panel getTableWithPager() {
     // logger.info("getTableWithPager " +listOptions);
     CellTable<WordScore> wordScoreCellTable = makeCellTable(new ListOptions().isSort());
-
-
     createProvider(numWords, wordScoreCellTable);
-
-    // Connect the table to the data provider.
-    // dataProvider.addDataDisplay(table);
-    // logger.info("still setting up... starting");
 
     // Create a SimplePager.
     Panel tableWithPager = getTable(new ListOptions());
-
 
     tableWithPager.getElement().setId("WordContainerScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
-
 
     if (!isPolyglot()) {
       wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
@@ -252,100 +241,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
     }
 
-    //  wordScoreCellTable.setWidth("100%", false);
-
     addPlayer();
 
     return tableWithPager;
   }
 
-//  protected void addSelectionModel() {
-//    table.setSelectionModel(selectionModel);
-//  }
-
-/*  Map<Integer, Map<Long, WordScore>> getExToTimeToAnswer(List<WordScore> sortedHistory) {
-    Map<Integer, Map<Long, WordScore>> exToTimeToAnswer = new HashMap<>();
-    for (WordScore wordScore : sortedHistory) {
-      Map<Long, WordScore> timeToAnswer = exToTimeToAnswer.computeIfAbsent(wordScore.getExid(), k -> new HashMap<>());
-      timeToAnswer.computeIfAbsent(wordScore.getTimestamp(), k -> wordScore);
-    }
-    return exToTimeToAnswer;
-  }*/
-
-/*  @NotNull
-  private Comparator<WordScore> getWordScoreTimeComparator() {
-    return Comparator.comparingLong(WordScore::getTimestamp).thenComparingInt(WordScore::getExid);
-  }
-
-  @NotNull
-  private Comparator<WordScore> getWordScoreTimeComparatorDesc() {
-    return (o1, o2) -> {
-      int i = -1 * Long.compare(o1.getTimestamp(), o2.getTimestamp());
-      return i == 0 ? Integer.compare(o1.getExid(), o2.getExid()) : i;
-    };
-  }*/
-
-/*
-  private void addItems(Collection<WordScore> sortedHistory) {
-    clear();
-    sortedHistory.forEach(this::addItem);
-    flush();
-  }
-*/
-
-/*  private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
-                                                                  List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0;
-          }
-
-          // Compare the name columns.
-          if (o1 != null) {
-            if (o2 == null) return 1;
-            else {
-              CommonShell shell1 = getShell(o1.getExid());
-              CommonShell shell2 = getShell(o2.getExid());
-              return sorter.compareStrings(shell1.getForeignLanguage(), shell2.getForeignLanguage());
-            }
-          }
-          return -1;
-        });
-    return columnSortHandler;
-  }*/
-
- /* private ColumnSortEvent.ListHandler<WordScore> getScoreSorter(Column<WordScore, SafeHtml> scoreCol,
-                                                                List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(scoreCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0;
-          }
-
-          if (o1 != null) {
-            if (o2 == null) {
-              logger.warning("------- o2 is null?");
-              return -1;
-            } else {
-              int i = Float.compare(o1.getPronScore(), o2.getPronScore());
-              // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
-              if (i == 0) {
-                return Long.compare(o1.getTimestamp(), o2.getTimestamp());
-              } else {
-                return i;
-              }
-            }
-          } else {
-            logger.warning("------- o1 is null?");
-
-            return -1;
-          }
-        });
-    return columnSortHandler;
-  }*/
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -396,13 +296,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         super.onBrowserEvent(context, elem, object, event);
         gotClick(object, event);
       }
-/*
-
-      @Override
-      public boolean isDefaultSortAscending() {
-        return true;
-      }
-*/
 
       @Override
       public SafeHtml getValue(WordScore shell) {
@@ -424,32 +317,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     }
     return signedUp;
   }
-/*
-
-  private ColumnSortEvent.ListHandler<WordScore> getDateSorter(Column<WordScore, SafeHtml> englishCol,
-                                                               List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, this::getDateCompare);
-    return columnSortHandler;
-  }
-*/
-
-/*
-  private int getDateCompare(WordScore o1, WordScore o2) {
-    if (o1 == o2) {
-      return 0;
-    }
-
-    // Compare the name columns.
-    if (o1 != null) {
-      if (o2 == null) return 1;
-      else {
-        return Long.compare(o1.getTimestamp(), o2.getTimestamp());
-      }
-    }
-    return -1;
-  }
-  */
 
   private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
@@ -463,8 +330,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     addColumn(itemCol, new TextHeader(headerForFL));
 
     tableSortHelper.rememberColumn(itemCol, WORD);
-
-//    table.addColumnSortHandler(getEnglishSorter(itemCol, getList()));
   }
 
   private boolean isNarrow() {
@@ -502,16 +367,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
             columnText = wordTable.makeColoredTableReally(transcript);
           }
 
-     /*     if (columnText.isEmpty()) {
-          CommonShell exercise = getShell(shell.getExid());
-           logger.warning("getItemColumn : column text empty for id " +
-               shell.getExid() + " and found ex " + exercise);
-          String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
-          if (spanish) foreignLanguage = foreignLanguage.toUpperCase();
-          columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
-        } else {
-          //logger.info("getItemColumn : Got item id " + shell.getExID() + " "+ columnText );
-        }*/
           return getSafeHtml(columnText);
         }
       }
@@ -523,7 +378,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       @Override
       public SafeHtml getValue(WordScore shell) {
         if (shell == null) return getSafeHtml("");
-
         float v = shell.getPronScore() * 100;
         String s = "<span " + "style='" + "margin-left:10px;" + "'" + ">" + ((int) v) + "</span>";
         return getSafeHtml(s);

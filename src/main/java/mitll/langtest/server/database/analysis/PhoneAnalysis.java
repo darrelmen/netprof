@@ -167,9 +167,6 @@ public class PhoneAnalysis {
           if (internal.getEnd() == 0) {
             logger.error("getPhoneSessions got 0 end time " + internal);
           }
-//          List<WordAndScore> examples = new ArrayList<>();
-//          examples.addAll(internal.getQueue());
-
           double mean = internal.getMean();
           double stdev1 = internal.getStdev();
           long meanTime = internal.getMeanTime();
@@ -217,10 +214,8 @@ public class PhoneAnalysis {
       long timestamp = r.getTimestamp();
 
       for (Long granularity : times) {
+        PhoneSessionInternal phoneSessionInternal = granToCurrent.get(granularity);
         if (granularity == SESSION) {
-
-          PhoneSessionInternal phoneSessionInternal = granToCurrent.get(granularity);
-
           long sessionStart = r.getSessionStart();
 //          if (sessionStart> 0 || sessionStart == -1) {
 //            logger.info("granularity " + granularity + " Current " + phoneSessionInternal + " session " + sessionStart + " for " + r.getTimestamp() + " " + r.getScore());
@@ -230,32 +225,26 @@ public class PhoneAnalysis {
             phoneSessionInternal = new PhoneSessionInternal(lastSession);
             granularityToSessions.get(granularity).add(phoneSessionInternal);
             granToCurrent.put(granularity, phoneSessionInternal);
-
       //      logger.info("new session granularity " +granularity+ " Current " + phoneSessionInternal + " last " + lastSession + " now " + sessionStart);
 
             lastSession = sessionStart;
-
-
           } else {
             //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
           }
-          phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
-
         } else {
-          PhoneSessionInternal phoneSessionInternal = granToCurrent.get(granularity);
-          long gran = (timestamp / granularity) * granularity;
-          long diff = timestamp - last;
           if ((phoneSessionInternal == null) ||
-              (diff > granularity /*&& phoneSessionInternal.getN() > MIN_SESSION_SIZE*/)
+              (timestamp - last > granularity /*&& phoneSessionInternal.getN() > MIN_SESSION_SIZE*/)
               ) {
+            long gran = (timestamp / granularity) * granularity;
             phoneSessionInternal = new PhoneSessionInternal(gran);
             granularityToSessions.get(granularity).add(phoneSessionInternal);
             granToCurrent.put(granularity, phoneSessionInternal);
           } else {
             //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
           }
-          phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
         }
+
+        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
       }
 
 

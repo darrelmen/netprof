@@ -63,8 +63,7 @@ public class PhoneReport implements Serializable {
    */
   public PhoneReport(int overallPercent,
                      Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
-                     Map<String, PhoneStats> phoneToAvgSorted
-  ) {
+                     Map<String, PhoneStats> phoneToAvgSorted) {
     this.overallPercent = overallPercent;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;

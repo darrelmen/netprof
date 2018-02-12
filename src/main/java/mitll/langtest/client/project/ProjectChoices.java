@@ -238,7 +238,7 @@ public class ProjectChoices {
 
   @NotNull
   private String capitalize(String language) {
-    return language.substring(0, 1).toUpperCase() + language.substring(1);
+    return language.equalsIgnoreCase("msa") ? "MSA" : language.substring(0, 1).toUpperCase() + language.substring(1);
   }
 
   private void sortLanguages(final int nest, List<SlimProject> languages) {

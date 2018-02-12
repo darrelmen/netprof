@@ -34,11 +34,9 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -47,14 +45,12 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -73,7 +69,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private static final String WORDS_USING = "Vocabulary with ";
 
   private static final int ITEM_WIDTH = 200;
-  private final ShowTab learnTab;
+
   private String phone;
   private final boolean isSpanish;
   private final TextHeader header = new TextHeader(EXAMPLES_OF_SOUND);
@@ -83,9 +79,8 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param controller
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading heading) {
+  PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, Heading heading) {
     super(controller, plot);
-    this.learnTab = learnTab;
     isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     this.heading = heading;
   }
@@ -119,7 +114,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param phone
    * @param sortedHistory
    * @param maxExamples
-   * @see PhoneContainer#clickOnPhone
+   * @see PhoneContainer#clickOnPhone2
    */
   void addItems(String phone, Collection<WordAndScore> sortedHistory, int maxExamples) {
     this.phone = phone;
@@ -186,9 +181,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       public void onBrowserEvent(Cell.Context context, Element elem, WordAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         gotClick(object,event);
-//        if (BrowserEvents.CLICK.equals(event.getType())) {
-//          gotClickOnItem(object);
-//        }
       }
 
       @Override
@@ -203,12 +195,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       }
     };
   }
-/*  // TODO : put back learn tab ref
-  private void gotClickOnItem(final WordAndScore e) {
-    if (learnTab != null) {
-      learnTab.showLearnAndItem(e.getExid());
-    }
-  }*/
 
   /**
    * Must be public

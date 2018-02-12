@@ -21,13 +21,12 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 /**
  * Created by go22670 on 1/20/17.
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
- // private final Logger logger = Logger.getLogger("AudioExampleContainer");
+  // private final Logger logger = Logger.getLogger("AudioExampleContainer");
+
   private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -84,9 +83,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
-  void playAudio(T wordScore) {
-    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()));
-  }
 
   /**
    * @return
@@ -120,7 +116,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
    * @return
    * @see #getPlayAudio
    */
-  protected CommonShell getShell(int id) {    return plot.getShell(id);  }
+  protected CommonShell getShell(int id) {
+    return plot.getShell(id);
+  }
 
   void addPlayer() {
     Scheduler.get().scheduleDeferred(PlayAudioWidget::addPlayer);
@@ -154,13 +152,15 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   protected void gotClickOnItem(final T wordScore) {
-/*    if (learnTab != null) {
-      learnTab.showLearnAndItem(e.getExid());
-    }*/
     playAudio(wordScore);
   }
 
-  protected SafeHtml getSafeHtml(String columnText) {
+
+  void playAudio(T wordScore) {
+    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()));
+  }
+
+  SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 

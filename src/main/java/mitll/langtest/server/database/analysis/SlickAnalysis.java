@@ -503,9 +503,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     if (parsedTime == null) {
       try {
         parsedTime = Long.parseLong(device);
-        logger.info("getSessionTime " + parsedTime);
+//        logger.info("getSessionTime " + parsedTime);
       } catch (NumberFormatException e) {
-        logger.info("can't parse " + device);
+  //      logger.info("can't parse " + device);
         parsedTime = -1L;
       }
       sessionToLong.put(device, parsedTime);

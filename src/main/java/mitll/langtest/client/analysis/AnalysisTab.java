@@ -63,10 +63,6 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  //  public static final String WEEK = "Week";
-//  public static final String MINUTE = "Minute";
-//  public static final String MONTH = "Month";
-//  public static final String ALL = "All";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private static final int MIN_HEIGHT = 325;
   /**
@@ -86,14 +82,15 @@ public class AnalysisTab extends DivWidget {
   private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
+  /**
+   *
+   */
   private Heading scoreHeader;
 
   private static final long MINUTE = 60 * 1000;
   static final long HOUR = 60 * MINUTE;
   static final long QUARTER = 6 * HOUR;
 
-  //  private static final long FIVEMIN = 5 * MINUTE;
-  //private static final long ONEMIN = MINUTE;
   private static final long TENMIN_DUR = 10 * MINUTE;
   static final long DAY_DUR = 24 * HOUR;
   private static final long WEEK_DUR = 7 * DAY_DUR;
@@ -104,7 +101,6 @@ public class AnalysisTab extends DivWidget {
 
   enum TIME_HORIZON {
     SESSION("Session", -1),
-    //    ONEMIN("Minute", MINUTE),
     TENMIN("Minute", TENMIN_DUR),
     WEEK("Week", WEEK_DUR),
     MONTH("Month", MONTH_DUR),
@@ -342,7 +338,9 @@ public class AnalysisTab extends DivWidget {
       //    logger.info("add score header");
     }
 
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice,
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice,
+        weekChoice,
+        monthChoice,
         sessionChoice,
         scoreHeader);
     return stepper;
@@ -408,8 +406,10 @@ public class AnalysisTab extends DivWidget {
       sessionChoice.setActive(true);
     }
 
-    buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
-    buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
+    if (!isPolyglot) {
+      buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
+      buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
+    }
     allChoice = getAllChoice();
     buttonGroup.add(allChoice);
 
@@ -477,7 +477,7 @@ public class AnalysisTab extends DivWidget {
       lowerHalf.add(soundsDiv);
       getPhoneReport(phoneReport,
           controller,
-          soundsDiv, analysisPlot, showTab);
+          soundsDiv, analysisPlot);
     }
   }
 
@@ -526,19 +526,19 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param lowerHalf
    * @param analysisPlot
-   * @param showTab
    * @see #showWordScores
    */
   private void getPhoneReport(PhoneReport phoneReport,
                               final ExerciseController controller,
                               final Panel lowerHalf,
-                              AnalysisPlot analysisPlot,
-                              final ShowTab showTab) {
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab, exampleHeader);
+                              AnalysisPlot analysisPlot) {
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
 
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, analysisServiceAsync, listid, userid);
+
     analysisPlot.addListener(phoneContainer);
+
     showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer, phonePlot);
   }
 
@@ -547,8 +547,8 @@ public class AnalysisTab extends DivWidget {
                                PhoneExampleContainer exampleContainer,
                                PhonePlot phonePlot) {
     // #1 - phones
-    Panel phones = phoneContainer.getTableWithPager(phoneReport);
-    lowerHalf.add(getSoundsContainer(phones));
+   // Panel phones = phoneContainer.getTableWithPager(phoneReport);
+    lowerHalf.add(getSoundsContainer(phoneContainer.getTableWithPager(phoneReport)));
 
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));

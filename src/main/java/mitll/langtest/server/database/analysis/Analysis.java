@@ -121,7 +121,7 @@ public abstract class Analysis extends DAO {
   }
 
   /**
-   * Filter out everyone with a lincoln affiliation
+   * For now, don't filter out everyone with a lincoln affiliation
    *
    * @param idToUserInfo
    * @return
@@ -134,29 +134,32 @@ public abstract class Analysis extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
-    Set<String> lincoln = getLincolnAffiliations();
-
-    Set<String> skipped = new TreeSet<>();
+   // Set<String> lincoln = getLincolnAffiliations();
+  //  Set<String> skipped = new TreeSet<>();
 
     idToUserInfo.forEach((userid, value) -> {
       FirstLastUser miniUser = firstLastUsers.get(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-        //String userChosenID = miniUser.getUserID();
-        boolean isLL = lincoln.contains(miniUser.getAffiliation().toLowerCase());//database.getServerProps().getLincolnPeople().contains(userChosenID);
-        if (isLL) {
-          skipped.add(miniUser.getUserID());
-        } else {
+//        boolean isLL = lincoln.contains(miniUser.getAffiliation().toLowerCase());
+//        if (isLL) {
+//          skipped.add(miniUser.getUserID());
+//          logger.info("getUserInfos skip " + miniUser);
+//        } else {
           value.setFrom(miniUser);
+          logger.info("getUserInfos got " + value.getID() + " " + value.getFirst() + " " + value.getLast());
+
           userInfos.add(value);
-        }
+//        }
       }
     });
     long now = System.currentTimeMillis();
 
     if (now - then > 100) {
-      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos, skipped " + skipped);
+      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos"
+         // +         ", skipped " + skipped
+      );
     }
     return userInfos;
   }

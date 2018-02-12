@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.ui.HTML;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -75,6 +76,10 @@ class TimeWidgets {
     this.score = score;
   }
 
+  /**
+   * @see AnalysisPlot#showTimePeriod
+   * @param text
+   */
   void setDisplay(String text) {
     this.display.setText(text);
   }
@@ -87,8 +92,8 @@ class TimeWidgets {
 
   public void reset() {
     all.setActive(true);
-    week.setActive(false);
-    month.setActive(false);
+    if (week != null) week.setActive(false);
+    if (month != null) month.setActive(false);
 
     if (minute != null) {
       minute.setActive(false);

@@ -323,25 +323,6 @@ public class User extends MiniUser implements ReportUser {
     return permissions;
   }
 
-  /**
-   * @return
-   * @seex mitll.langtest.server.database.excel.UserDAOToExcel#getSpreadsheet
-   */
-/*
-  public int getNumResults() {
-    return numResults;
-  }
-*/
-
-  /**
-   * @param numResults
-   * @seex mitll.langtest.server.database.DatabaseImpl#getUsers
-   */
-/*
-  public void setNumResults(int numResults) {
-    this.numResults = numResults;
-  }
-*/
 
   /**
    * @return
@@ -350,44 +331,7 @@ public class User extends MiniUser implements ReportUser {
   public boolean isAdmin() {
     return admin;
   }
-/*
-  public void setRate(float rate) {
-    this.rate = rate;
-  }*/
 
-/*
-  public float getRate() {
-    return rate;
-  }
-*/
-
-/*
-  public boolean isComplete() {
-    return complete;
-  }
-*/
-
-/*
-  public void setComplete(boolean complete) {
-    this.complete = complete;
-  }
-*/
-
-/*
-  public float getCompletePercent() {
-    return completePercent;
-  }
-*/
-
-  /**
-   * @paramx completePercent
-   * @seex mitll.langtest.server.database.DatabaseImpl#getUsers
-   */
-/*
-  public void setCompletePercent(float completePercent) {
-    this.completePercent = completePercent;
-  }
-*/
   public int getExperience() {
     return experience;
   }

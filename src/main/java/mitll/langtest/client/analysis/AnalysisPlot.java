@@ -127,7 +127,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   protected Chart chart = null;
   private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
-  // private float possible;
 
   /**
    * @param service
@@ -156,14 +155,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       setWidth(width + "px");
     }
     {
-//      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
+
+      //      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
 //      style.setProperty("minHeight", minHeight, Style.Unit.PX);
 //      style.setProperty("minWidth", 300, Style.Unit.PX);
-//      style.setMarginTop(10, Style.Unit.PX);
-//      style.setMarginLeft(10, Style.Unit.PX);
-//      style.setMarginBottom(10, Style.Unit.PX);
       style.setMargin(10, Style.Unit.PX);
       addStyleName("cardBorderShadow");
     }
@@ -224,16 +221,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   /**
-   * @see #setTitleScore
    * @param simpleTimeAndScores
+   * @param index
    * @return
+   * @see #setTitleScore
    */
-  private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores) {
+  private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores, int index) {
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
     int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
 
-    String text = simpleTimeAndScores.size() > 100 ? "" : "Score : " + fround1 + "/" +(10*denom)+ " for " + denom + " items.";
+    String text = simpleTimeAndScores.size() > 100 ? "" :
+        "Sess. #" + (index + 1) + " : score " + fround1 + "/" + (10 * denom) + " for " + n + " items";
     return text;
   }
 
@@ -789,9 +788,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
-//    if (possible < 50 && timeHorizon == TENMIN) {
-//      timeHorizon = AnalysisTab.TIME_HORIZON.ONEMIN;
-//    }
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon);
     return (x != null) ? x : 0;
@@ -868,7 +864,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     disableNext();
 
     timeWidgets.setDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
-    setTitleScore(startOfPrevPeriod, lastPlusSlack);
+    setTitleScore(startOfPrevPeriod, lastPlusSlack, index);
     timeChanged(startOfPrevPeriod, lastPlusSlack);
 
     return startOfPrevPeriod;
@@ -899,7 +895,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.prevButton.setEnabled(false);
     disableNext();
     timeWidgets.setDisplay("");
-    setTitleScore(-1, -1);
+    setTitleScore(-1, -1, index);
     timeWidgets.reset();
     timeChanged(firstTime, lastTime);
   }
@@ -944,22 +940,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.prevButton.setEnabled(true);
     timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
 
-    long offset = getOffsetPerSession();
-//    if (isPolyglot && timeHorizon == SESSION) {
-//      Long thisPeriodStart = getPeriods().get(index);
-//      Long nextPeriodStart = getPeriods().get(index + 1);
-//      offset = nextPeriodStart - thisPeriodStart;
-//    }
-    showTimePeriod(offset, periods);
+    showTimePeriod(getOffsetPerSession(), periods);
   }
 
   private long getOffset() {
     switch (timeHorizon) {
-//      case ONEMIN:
-//        return ONEMIN;
-      //   case TENMIN:
       case SESSION:
-
       case WEEK:
       case MONTH:
         return timeHorizon.getDuration();
@@ -971,10 +957,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   @NotNull
   private List<Long> getPeriods() {
     switch (timeHorizon) {
-//      case ONEMIN:
-//        return oneMinutes;
-//      case TENMIN:
-//        return tenMinutes;
       case SESSION:
         return sessions;
       case WEEK:
@@ -1000,7 +982,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     //  logger.info("showTimePeriod to    " + getShortDate(end));
     // logger.info("showTimePeriod offset    " + offset);
     chart.getXAxis().setExtremes(periodStart, end);
-    setTitleScore(periodStart, end);
+    setTitleScore(periodStart, end, index);
     timeChanged(periodStart, end);
   }
 
@@ -1033,12 +1015,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    */
   private void timeChanged(long from, long to) {
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
-    setTitleScore(from, to);
+    setTitleScore(from, to, index);
   }
 
-  private void setTitleScore(long from, long to) {
+  private void setTitleScore(long from, long to, int index) {
     SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);
-    timeWidgets.setScore(getScoreText(timeAndScoresInRange));
+    timeWidgets.setScore(getScoreText(timeAndScoresInRange, index));
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 

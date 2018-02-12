@@ -98,9 +98,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private long from;
   private long to;
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
-  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy");
+  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final AnalysisServiceAsync analysisServiceAsync;
 
   /**
@@ -150,7 +150,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   public Panel getTableWithPager(PhoneReport phoneReport) {
     from = 0;
-    to = System.currentTimeMillis();
+    to   = System.currentTimeMillis();
     this.phoneReport = phoneReport;
     return getTableWithPagerForHistory(getPhoneAndStatsList(from, to));
   }
@@ -162,7 +162,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (DEBUG) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    if (DEBUG || true) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
 
     this.from = from;
     this.to = to;
@@ -176,7 +176,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         getPhoneAndStatsListForPeriod(phoneReport.getPhoneToAvgSorted(), from, to);
   }
 
-  private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted, long first, long last) {
+  private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted,
+                                                            long first,
+                                                            long last) {
     if (DEBUG)
       logger.info("getPhoneAndStatsListForPeriod From " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
 
@@ -201,7 +203,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @param last
    * @see #timeChanged
    */
-  private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
+  private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses,
+                                Map<String, PhoneStats> phoneToAvgSorted,
                                 long first, long last) {
     if (DEBUG) {
       logger.info("getPhoneStatuses From    " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
@@ -226,7 +229,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         float overall = avg / total;
 
         int v = Float.valueOf(overall * 100).intValue();
-        if (DEBUG) logger.info("overall " + overall + " avg " + avg + " total " + total + " report " + v);
+        if (DEBUG) logger.info("getPhoneStatuses : overall " + overall + " avg " + avg + " total " + total + " report " + v);
 //        int current = value.getAvg(filtered);
         int count = value.getCount(filtered);
 
@@ -260,7 +263,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getPhoneStatuses(List, Map, long, long)
    */
   private List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
-    // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
+    logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last) +
+        " over " + value.getSessions().size() + " sessions");
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
 
@@ -296,9 +300,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         //logger.info("Exclude " +window);
       }
     }
-/*    if (DEBUG) {
-      logger.info("getFiltered : found " + filtered.size());
-    }*/
+    if (DEBUG) {
+      logger.info("getFiltered : over " + orig.size() +
+          " From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) +
+          " window dur " + (last - first) + " found " +filtered.size());
+//      logger.info("getFiltered : found " + filtered.size());
+    }
     return filtered;
   }
 
