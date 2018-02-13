@@ -98,22 +98,24 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param userid
    * @param minRecordings
    * @param listid
+   * @param req
    * @return
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser(int, int, int)
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
   @Override
-  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid) {
+  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
 
     Collection<UserInfo> userInfos = bestForUser.values();
-    UserInfo next = bestForUser.isEmpty() ? null : userInfos.iterator().next();
+    UserInfo firstUser = bestForUser.isEmpty() ? null : userInfos.iterator().next();
 
     long then = System.currentTimeMillis();
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
         //  getWordScores(bestForUser.values()),
-        getPhoneReport(userid, next, project),
-        getCount(userInfos));
+        getPhoneReport(userid, firstUser, project),
+        getCount(userInfos),
+        req);
 
     long now = System.currentTimeMillis();
     logger.info("Return (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
@@ -321,7 +323,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @param listid
    * @return
-   * @see #getPerformanceReportForUser(int, int, int)
+   * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
    * @see #getPhoneReportFor(int, int, String, long, long)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
@@ -505,7 +507,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         parsedTime = Long.parseLong(device);
 //        logger.info("getSessionTime " + parsedTime);
       } catch (NumberFormatException e) {
-  //      logger.info("can't parse " + device);
+        //      logger.info("can't parse " + device);
         parsedTime = -1L;
       }
       sessionToLong.put(device, parsedTime);
@@ -530,7 +532,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       int exid = perf.exid();
 
       if (exid == UNKNOWN_EXERCISE) {
-        logger.info("getNativeAudio skipping " + perf.id() + " for unknonw exercise by " + perf.userid() + " : " + perf.answer());
+        logger.info("getNativeAudio skipping " + perf.id() + " for unknown exercise by " + perf.userid() + " : " + perf.answer());
         skipped.add(perf.id());
       } else {
         CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, exid);

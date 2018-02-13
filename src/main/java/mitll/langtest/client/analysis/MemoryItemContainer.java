@@ -269,16 +269,20 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        //logger.info("Selected user found  "+ selectedUser + " at " +index);
+        logger.info("populateTable Selected user found  "+ selectedUser + " at " +index + " out of " + users.size());
       }
       i++;
     }
 
     flush();
 
-    if (index > 0) {
+   // if (index > 0) {
+      logger.info("populateTable scroll to " +index);
       scrollIntoView(index, false);
-    }
+   // }
+  //  else {
+  //    logger.info("populateTable index = " +index);
+   // }
 
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);

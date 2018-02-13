@@ -52,8 +52,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.shared.analysis.WordScore.*;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -67,7 +65,7 @@ public abstract class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   static final String EMPTY_JSON = "{}";
-  protected final ParseResultJson parseResultJson;
+  final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
 
   /**
@@ -184,7 +182,7 @@ public abstract class Analysis extends DAO {
    * @param id
    * @param best
    * @return
-   * @see SlickAnalysis#getPerformanceReportForUser
+   * @see IAnalysis#getPerformanceReportForUser
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -212,7 +210,7 @@ public abstract class Analysis extends DAO {
   /**
    * @return
    * @paramx best
-   * @see SlickAnalysis#getPerformanceReportForUser
+   * @see IAnalysis#getPerformanceReportForUser
    */
   List<WordScore> getWordScores(Collection<UserInfo> values) {
     //Collection<UserInfo> values = best.values();
@@ -312,7 +310,7 @@ public abstract class Analysis extends DAO {
    * @param next
    * @param project
    * @return
-   * @see SlickAnalysis#getPerformanceReportForUser
+   * @see IAnalysis#getPerformanceReportForUser
    */
   PhoneReport getPhoneReport(int userid, UserInfo next, Project project) {
     //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
@@ -333,17 +331,25 @@ public abstract class Analysis extends DAO {
 
       long diff = now - then;
       if (DEBUG || diff > 100) {
-        logger.debug(" getPhonesForUser " + userid + " took " + diff + " millis to phone report");
+        logger.debug("getPhonesForUser " + userid + " took " + diff + " millis to phone report");
       }
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
-            /*phonesForUser.size() +*/ " phones");
+            /*phonesForUser.size() +*/ " phones for " + resultIDs.isEmpty() + " result ids ");
       }
 
-      setSessions(phoneReport.getPhoneToAvgSorted());
+      Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+      if (phoneToAvgSorted.isEmpty()) {
+        logger.warn("getPhonesForUser : no phones for " + userid + "?");
+      }
+      else {
+        logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
+      }
+
+      setSessions(phoneToAvgSorted);
 
       return phoneReport;
     }

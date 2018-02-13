@@ -1,11 +1,14 @@
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.analysis.IAnalysis;
+
 import java.io.Serializable;
 
 /**
  * @see mitll.langtest.client.analysis.AnalysisTab#useReport
  */
 public class AnalysisReport implements Serializable {
+  private int req;
   private UserPerformance userPerformance;
   private PhoneReport phoneReport;
   private int numScores;
@@ -13,17 +16,19 @@ public class AnalysisReport implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPerformanceReportForUser(int, int, int)
+   * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
    * @param userPerformance
    * @paramx wordScores
    * @param phoneReport
    */
   public AnalysisReport(UserPerformance userPerformance,
                         PhoneReport phoneReport,
-                        int numScores) {
+                        int numScores,
+                        int req) {
     this.userPerformance = userPerformance;
     this.phoneReport = phoneReport;
     this.numScores = numScores;
+    this.req=req;
   }
 
   public UserPerformance getUserPerformance() {
@@ -36,6 +41,10 @@ public class AnalysisReport implements Serializable {
 
   public int getNumScores() {
     return numScores;
+  }
+
+  public int getReq() {
+    return req;
   }
 
   public String toString() {

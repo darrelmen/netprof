@@ -108,18 +108,18 @@ public class EasyAnalysisTest extends BaseTest {
 //    return debugShortFormat.format(new Date(first));
   }
 
-  public AnalysisReport getPerformanceReportForUser(DatabaseImpl db, int projectID, int id, int minRecordings, int listid) {
+  private AnalysisReport getPerformanceReportForUser(DatabaseImpl db, int projectID, int id, int minRecordings, int listid) {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
       SlickAnalysis slickAnalysis = getSlickAnalysis(db, projectID);
 
-      return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid);
+      return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid, 0);
     }
   }
 
-  public List<WordAndScore> getPerformanceReportForUser2(DatabaseImpl db, int projectID, int id, String phone) {
+  private List<WordAndScore> getPerformanceReportForUser2(DatabaseImpl db, int projectID, int id, String phone) {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     if (projectID == -1) {
       return new ArrayList<>();

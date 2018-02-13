@@ -249,7 +249,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     //  logger.info("total " + totalScore);
     // logger.info("possible " + possible);
     int n = simpleTimeAndScores.size();
-    float denom = (float) (n <= 10 ? 10 : n <= 100 ? 100 : n);
+    float denom = (float) n;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
     float v = totalScore / denom;
     // logger.info("ratio " + v);
     float fround = Math.round(v * 100);

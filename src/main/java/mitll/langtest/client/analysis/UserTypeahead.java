@@ -15,36 +15,43 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserTypeahead {
+  private final Logger logger = Logger.getLogger("UserTypeahead");
+
   private static final int DISPLAY_ITEMS = 15;
   private static final int BOX_WIDTH = 150;
   private static final String HINT = "user id or name";
   private static final int SEARCH_FONT = 14;
   private final TextBox box;
-  private Collection<UserInfo> choices;
+  //private Collection<UserInfo> choices;
+  TypeaheadListener listener;
 
-  UserTypeahead() {
+  UserTypeahead(TypeaheadListener listener) {
     TextBox box = getTextBox();
     box.setPlaceholder(HINT);
 
-    //   box.addKeyUpHandler(event -> rememberAndFilterTo(getMatches(box)));
-    Typeahead typeahead = new Typeahead(new SuggestOracle() {
+      box.addKeyUpHandler(event -> listener.gotKey(box.getText()));
+/*
+    Typeahead typeahead = new Typeahead(new MultiWordSuggestOracle() {
       @Override
       public void requestSuggestions(Request request, Callback callback) {
         List<UserInfo> matches = getMatches(box);
+
         callback.onSuggestionsReady(request, getResponse(request, matches, matches.size(), 10));
       }
     });
 
     addCallbacks(typeahead);
-    getTypeahead(box, typeahead);
+*/
+//    getTypeahead(box, typeahead);
     this.box = box;
   }
 
-  public void setChoices(Collection<UserInfo> choices) {
+/*  public void setChoices(Collection<UserInfo> choices) {
     this.choices = choices;
-  }
+  }*/
 
   Widget getSearch() {
     Panel flow = new DivWidget();
@@ -63,7 +70,7 @@ public class UserTypeahead {
     return flow;
   }
 
-  @NotNull
+ /* @NotNull
   private void getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> true);
@@ -77,12 +84,13 @@ public class UserTypeahead {
     textBox.getElement().setId("TextBox_user");
     typeahead.setWidget(textBox);
     //return typeahead;
-  }
-
+  }*/
+/*
   @NotNull
   private List<UserInfo> getMatches(TextBox box) {
     String text = box.getText();
 
+    logger.info("getMatches for " + text);
     List<UserInfo> matches = new ArrayList<>();
 
     for (UserInfo user : choices) {
@@ -91,10 +99,13 @@ public class UserTypeahead {
       }
     }
     return matches;
-  }
+  }*/
 
-  @NotNull
-  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<UserInfo> users, int size, int limit) {
+  /*@NotNull
+  private SuggestOracle.Response getResponse(SuggestOracle.Request request,
+                                             List<UserInfo> users,
+                                             int size,
+                                             int limit) {
     int numberTruncated = Math.max(0, size - limit);
     //  logger.info("trunc " + numberTruncated);
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), users));
@@ -107,12 +118,12 @@ public class UserTypeahead {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
     users.forEach(resp -> suggestions.add(new UserSuggestion(query, resp)));
     return suggestions;
-  }
+  }*/
 /*  public TextBox getBox() {
     return box;
   }*/
 
-  private static class UserSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
+/*  private static class UserSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
     private UserInfo userInfo;
     String repl;
 
@@ -126,11 +137,11 @@ public class UserTypeahead {
       return repl;
     }
 
-    /**
+    *//**
      * @param repl
      * @param userInfo
      * @see
-     */
+     *//*
     UserSuggestion(String repl, UserInfo userInfo) {
       super(repl, userInfo.getFirst() + " " + userInfo.getLast());
       this.repl = repl;
@@ -143,7 +154,7 @@ public class UserTypeahead {
     public UserInfo getUserInfo() {
       return userInfo;
     }
-  }
+  }*/
 
   private TextBox getTextBox() {
     TextBox quickAddText = new TextBox();
@@ -160,14 +171,14 @@ public class UserTypeahead {
   }
 
 
-  private void addCallbacks(final Typeahead user) {
+  /*private void addCallbacks(final Typeahead user) {
     user.setUpdaterCallback(getUpdaterCallback());
   }
 
   private Typeahead.UpdaterCallback getUpdaterCallback() {
     return selectedSuggestion -> {
       String replacementString = selectedSuggestion.getReplacementString();
-      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
+        logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
       // NOTE : we need both a redraw on key up and one on selection!
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -179,6 +190,6 @@ public class UserTypeahead {
 
       return replacementString;
     };
-  }
+  }*/
 
 }

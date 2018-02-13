@@ -63,6 +63,7 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  public static final String REPORT_FOR_USER = "getting performance report for user";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private static final int MIN_HEIGHT = 325;
   /**
@@ -82,6 +83,8 @@ public class AnalysisTab extends DivWidget {
   private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
+  private final ReqCounter reqCounter;
+
   /**
    *
    */
@@ -133,20 +136,22 @@ public class AnalysisTab extends DivWidget {
 
   /**
    * @param controller
-   * @param showTab
    * @param isPolyglot
+   * @paramx showTab
    * @see NewContentChooser#showProgress
    */
-  public AnalysisTab(ExerciseController controller, final ShowTab showTab, boolean isPolyglot, int possible) {
+  public AnalysisTab(ExerciseController controller,
+                     boolean isPolyglot,
+                     int req,
+                     ReqCounter reqCounter) {
     this(controller,
-        showTab,
         1,
         null,
         controller.getUser(),
         controller.getUserManager().getUserID(),
         -1,
         isPolyglot,
-        possible);
+        req, reqCounter);
   }
 
   /**
@@ -154,23 +159,23 @@ public class AnalysisTab extends DivWidget {
    * @param userid
    * @param listid
    * @param isPolyglot
-   * @param possible
-   * @see AnalysisTab#AnalysisTab(ExerciseController, ShowTab, boolean, int)
+   * @param req
+   * @see AnalysisTab#AnalysisTab
    * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final ExerciseController controller,
-                     final ShowTab showTab,
                      int minRecordings,
                      DivWidget overallBottom,
                      int userid,
                      String userChosenID,
                      int listid,
                      boolean isPolyglot,
-                     int possible) {
+                     int req,
+                     ReqCounter reqCounter) {
     this.userid = userid;
     this.listid = listid;
     this.isPolyglot = isPolyglot;
-
+    this.reqCounter = reqCounter;
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
@@ -200,15 +205,19 @@ public class AnalysisTab extends DivWidget {
 
     final long then = System.currentTimeMillis();
 
-    analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, new AsyncCallback<AnalysisReport>() {
+    analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, req, new AsyncCallback<AnalysisReport>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting performance report for user", caught);
+        controller.handleNonFatalError(REPORT_FOR_USER, caught);
       }
 
       @Override
       public void onSuccess(AnalysisReport result) {
-        useReport(result, then, userChosenID, isTeacherView, showTab, bottom, new ReqInfo(userid, minRecordings, listid));
+        if (reqCounter.getReq() != result.getReq() + 1) {
+          logger.info("skip " + reqCounter.getReq() + " vs " + result.getReq());
+        } else {
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid));
+        }
       }
     });
   }
@@ -237,18 +246,30 @@ public class AnalysisTab extends DivWidget {
     }
   }
 
+  /**
+   * @see #AnalysisTab(ExerciseController, int, DivWidget, int, String, int, boolean, int, ReqCounter)
+   * @param result
+   * @param then
+   * @param userChosenID
+   * @param isTeacherView
+   * @param bottom
+   * @param reqInfo
+   */
   private void useReport(AnalysisReport result,
                          long then,
                          String userChosenID,
                          boolean isTeacherView,
-                         ShowTab showTab,
                          DivWidget bottom,
                          ReqInfo reqInfo) {
     long now = System.currentTimeMillis();
 
     PhoneReport phoneReport = result.getPhoneReport();
-    if (phoneReport == null) phoneReport = new PhoneReport();
-    if (now - then > 200) {
+    if (phoneReport == null) {
+      logger.warning("useReport : phone report is null?");
+      phoneReport = new PhoneReport();
+    }
+
+    if (now - then > 2) {
       logger.info("useReport took " + (now - then) + " to get report" +
           "\n\tfor    " + userid + " " + userChosenID +
           "\n\twords  " + result.getNumScores() +
@@ -270,7 +291,7 @@ public class AnalysisTab extends DivWidget {
 /*    Scheduler.get().scheduleDeferred(() ->
         showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom, fphoneReport, reqInfo));*/
 
-    showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom, fphoneReport, reqInfo);
+    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, fphoneReport, reqInfo);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -291,7 +312,7 @@ public class AnalysisTab extends DivWidget {
    * Why want a nine pixel left margin?
    *
    * @return
-   * @see #AnalysisTab(ExerciseController, ShowTab, int, DivWidget, int, String, int, boolean, int)
+   * @see #AnalysisTab
    */
   @NotNull
   private DivWidget getBottom(boolean isTeacherView) {
@@ -442,7 +463,7 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param controller
    * @param analysisPlot
-   * @param showTab
+   * @paramx showTab
    * @param lowerHalf
    * @param phoneReport
    * @see #useReport
@@ -451,7 +472,7 @@ public class AnalysisTab extends DivWidget {
       int numScores,
       ExerciseController controller,
       AnalysisPlot analysisPlot,
-      ShowTab showTab,
+      //  ShowTab showTab,
       Panel lowerHalf,
       PhoneReport phoneReport,
       ReqInfo reqInfo) {
@@ -460,7 +481,9 @@ public class AnalysisTab extends DivWidget {
       Panel tableWithPager = getWordContainer(
           reqInfo,
           numScores,
-          controller, analysisPlot, showTab, wordsTitle);
+          controller, analysisPlot,
+          //showTab,
+          wordsTitle);
 
       tableWithPager.setWidth(WORD_WIDTH + "px");
 
@@ -484,9 +507,9 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param controller
    * @param analysisPlot
-   * @param showTab
    * @param wordsTitle
    * @return
+   * @paramx showTab
    * @paramx wordScores
    */
   private Panel getWordContainer(//List<WordScore> wordScores,
@@ -494,7 +517,7 @@ public class AnalysisTab extends DivWidget {
                                  int numResults,
                                  ExerciseController controller,
                                  AnalysisPlot analysisPlot,
-                                 ShowTab showTab,
+
                                  Heading wordsTitle) {
     //   WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle, wordScores.size());
     WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle, numResults, analysisServiceAsync);
@@ -547,7 +570,7 @@ public class AnalysisTab extends DivWidget {
                                PhoneExampleContainer exampleContainer,
                                PhonePlot phonePlot) {
     // #1 - phones
-   // Panel phones = phoneContainer.getTableWithPager(phoneReport);
+    // Panel phones = phoneContainer.getTableWithPager(phoneReport);
     lowerHalf.add(getSoundsContainer(phoneContainer.getTableWithPager(phoneReport)));
 
     // #2 - word examples

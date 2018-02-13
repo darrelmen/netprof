@@ -75,7 +75,7 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
-  private final Logger logger = Logger.getLogger("WordContainer");
+  private final Logger logger = Logger.getLogger("WordContainerAsync");
 
   private static final int NARROW_THRESHOLD = 1450;
 
@@ -351,10 +351,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
           String columnText;
           if (transcript == null) {
-            logger.warning("getItemColumn no transcript for " + shell);
+//            logger.warning("getItemColumn no transcript for " + shell);
             columnText = "";
           } else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
-            logger.warning("getItemColumn no word transcript for " + shell);
+          //  logger.warning("getItemColumn no word transcript for " + shell);
             columnText = "";
           } else {
             columnText = wordTable.makeColoredTableReally(transcript);

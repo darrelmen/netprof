@@ -44,6 +44,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
+import mitll.langtest.client.analysis.ReqCounter;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -681,13 +682,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
 
-     // Panel widgets = new HorizontalPanel();
       Panel widgets = new DivWidget();
 
       container = widgets;
 
       scoreHistory = isPolyglot ?
-          new AnalysisTab(controller, null, true, exerciseList.getSize()) :
+          new AnalysisTab(controller, true, -1, () -> 0) :
           completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
 
       scoreHistory.add(getButtonsBelowScoreHistory());

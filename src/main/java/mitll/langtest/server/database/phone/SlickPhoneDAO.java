@@ -165,6 +165,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                               Collection<Integer> ids,
                                               Project project) {
     long then = System.currentTimeMillis();
+    logger.info("getWorstPhonesForResults " + userid + " project " + project.getID()+ " ids " + ids);
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
     long now = System.currentTimeMillis();
     if (now - then > 0)

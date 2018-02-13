@@ -39,7 +39,7 @@ import mitll.langtest.shared.analysis.*;
 import java.util.List;
 
 public interface IAnalysis {
-  AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid);
+  AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid, int req);
 
   WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
                                      long from, long to,

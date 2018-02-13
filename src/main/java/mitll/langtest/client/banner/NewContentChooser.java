@@ -20,7 +20,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
@@ -310,8 +309,8 @@ public class NewContentChooser implements INavigation {
 
     //  logger.info("is poly "+ isPolyglot());
     divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
-        new StudentAnalysis(controller, showTab) :
-        new AnalysisTab(controller, showTab, isPolyglot(), 0));
+        new StudentAnalysis(controller) :
+        new AnalysisTab(controller,  isPolyglot(), 0, ()->1));
 
     currentSection = PROGRESS;
   }

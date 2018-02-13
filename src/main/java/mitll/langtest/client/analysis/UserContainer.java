@@ -34,35 +34,27 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.dialog.SearchTypeahead;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -74,9 +66,10 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
  */
-public class UserContainer extends BasicUserContainer<UserInfo> {
-  public static final String MINE_ONLY = "Mine Only";
+public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
   private final Logger logger = Logger.getLogger("UserContainer");
+
+  public static final String MINE_ONLY = "Mine Only";
 
   private static final int MAX_LENGTH = 11;
   private static final int TABLE_WIDTH = 600;
@@ -107,7 +100,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private static final int NUM_WIDTH = 50;
   public static final String FIRST = "First";
 
-  private final ShowTab learnTab;
+  //private final ShowTab learnTab;
+
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
   /**
@@ -118,7 +112,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private Button add;
   private Button remove;
   private Button mineOnly;
-  private UserTypeahead userTypeahead = new UserTypeahead();
+  private UserTypeahead userTypeahead = new UserTypeahead(this);
+  private List<UserInfo> remembered;
+  private Collection<UserInfo> orig;
 
   /**
    * @param controller
@@ -128,12 +124,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   UserContainer(ExerciseController controller,
                 DivWidget rightSide,
                 DivWidget overallBottom,
-                ShowTab learnTab,
+                //ShowTab learnTab,
                 String selectedUserKey
   ) {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
-    this.learnTab = learnTab;
+    //this.learnTab = learnTab;
     // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
     myStudents = new HashSet<>();
@@ -154,7 +150,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
-    userTypeahead.setChoices(users);
+    orig = users;
     controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -341,9 +337,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
       DivWidget c = new DivWidget();
       c.addStyleName("leftFiveMargin");
       c.addStyleName("floatRight");
-      //c.getElement().getStyle().setMarginTop(8, Style.Unit.PX);
-      c.add(getFilterLabel());
-      c.add(getListBox());
+
+ //     c.add(getFilterLabel());
+ //     c.add(getListBox());
+
       filterContainer.add(c);
     }
     return filterContainer;
@@ -363,7 +360,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return filterLabel;
   }
 
-  private List<UserInfo> remembered;
 
   @NotNull
   private Button getMyStudents() {
@@ -403,8 +399,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterUsers();
   }
 
-//  private void rememberAndFilterTo(List<UserInfo> matches) {
-//    // remembered = new ArrayList<>(getList());
+//  private void rememberAndFilterTo(Collection<UserInfo> matches) {
 //    populateTable(matches);
 //  }
 
@@ -461,7 +456,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
         listid = listID;
       }
 
-      gotClickOnItem(getSelected());
+      changeSelectedUser(getSelected());
+
     });
   }
 
@@ -826,17 +822,40 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     };
   }
 
+  private int req = 0;
+
+  @Override
+  public int getReq() {
+    return req;
+  }
+
+  private UserInfo lastSelected = null;
+
   /**
    * @param selectedUser
    */
   public void gotClickOnItem(final UserInfo selectedUser) {
-//    logger.info("gotClickOnItem " + selectedUser.getUserID());
+    if (lastSelected != selectedUser) {
+      //logger.info("gotClickOnItem " + selectedUser.getUserID());
+      lastSelected = selectedUser;
+      changeSelectedUser(selectedUser);
+    }
+  }
+
+  private void changeSelectedUser(UserInfo selectedUser) {
     super.gotClickOnItem(selectedUser);
     enableButtons();
     rightSide.clear();
-    boolean isPolyglot = isPolyglot();
-    rightSide.add(new AnalysisTab(controller, learnTab, listid == -1 ? MIN_RECORDINGS : 0, overallBottom,
-        selectedUser.getID(), selectedUser.getUserID(), listid, isPolyglot, 10));
+
+    rightSide.add(new AnalysisTab(controller,
+        listid == -1 ? MIN_RECORDINGS : 0,
+        overallBottom,
+        selectedUser.getID(),
+        selectedUser.getUserID(),
+        listid,
+        isPolyglot(),
+        req++,
+        this));
   }
 
   private boolean isPolyglot() {
@@ -849,5 +868,38 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   public Button getRemove() {
     return remove;
+  }
+
+  @Override
+  public void gotKey(String text) {
+    //logger.info("gotKey '" + text +"'");
+    boolean onlyOne = getList().size() == 1;
+    Collection<UserInfo> matches = getMatches(text);
+
+    if (onlyOne && matches.size() == 1 &&
+        getList().get(0).getID() == matches.iterator().next().getID()) {
+      logger.info("skip...");
+    } else {
+      populateTable(matches);
+    }
+    //  table.redraw();
+  }
+
+  @NotNull
+  private Collection<UserInfo> getMatches(String text) {
+    //  logger.info("getMatches for " + text);
+    List<UserInfo> matches = new ArrayList<>();
+
+    String prefix = text.toLowerCase();
+
+    for (UserInfo user : orig) {
+      if (user.getUserID().toLowerCase().startsWith(prefix)
+          || user.getFirst().toLowerCase().startsWith(prefix)
+          || user.getLast().toLowerCase().startsWith(prefix)
+          ) {
+        matches.add(user);
+      }
+    }
+    return matches.isEmpty() ? orig : matches;
   }
 }

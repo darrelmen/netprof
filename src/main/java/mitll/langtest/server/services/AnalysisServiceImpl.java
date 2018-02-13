@@ -32,7 +32,8 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.user.cellview.client.CellTable;
+import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
@@ -102,11 +103,12 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @param userid
    * @param minRecordings
    * @param listid
+   * @param req
    * @return
-   * @seex mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, ShowTab, boolean, int)
    */
   @Override
-  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid)
+  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
       throws DominoSessionException, RestrictedOperationException {
     // logger.info("getPerformanceForUser " +userid+ " list " + listid + " min " + minRecordings);
     int projectID = getProjectIDFromUser();
@@ -116,10 +118,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       if (hasTeacherPerm(userid)) {
         long then = System.currentTimeMillis();
         AnalysisReport performanceReportForUser = getSlickAnalysis(projectID)
-            .getPerformanceReportForUser(userid, minRecordings, listid);
+            .getPerformanceReportForUser(userid, minRecordings, listid, req);
         long now = System.currentTimeMillis();
 
-        logger.info("Returning " + performanceReportForUser + " took " + (now - then) + " millis");
+        logger.info("getPerformanceReportForUser : " + performanceReportForUser + " took " + (now - then) + " millis");
         return performanceReportForUser;
       } else {
         throw getRestricted("performance report");

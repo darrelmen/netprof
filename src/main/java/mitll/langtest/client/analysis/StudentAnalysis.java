@@ -35,9 +35,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -66,11 +64,10 @@ public class StudentAnalysis extends DivWidget {
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   /**
-   * @see NewContentChooser#showProgress
    * @param controller
-   * @param showTab
+   * @see NewContentChooser#showProgress
    */
-  public StudentAnalysis(final ExerciseController controller, final ShowTab showTab) {
+  public StudentAnalysis(final ExerciseController controller) {
     //logger.info("StudentAnalysis got here " + appTitle);
 //    getElement().setId("StudentAnalysis");
 
@@ -94,7 +91,7 @@ public class StudentAnalysis extends DivWidget {
 //        logger.info("onSuccess bottom " + bottom.getElement().getId());
         clear();
 
-        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, showTab, selectedUserKey);
+        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, selectedUserKey);
         add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
         add(bottom);
         //   logger.info("onSuccess added top and bottom " + top.getElement().getId());
@@ -105,6 +102,7 @@ public class StudentAnalysis extends DivWidget {
 
   /**
    * TODO : use common key storage
+   *
    * @param controller
    * @return
    */
@@ -122,7 +120,6 @@ public class StudentAnalysis extends DivWidget {
   }
 
   /**
-   *
    * @param leftSide
    * @param rightSide
    * @return
@@ -131,7 +128,7 @@ public class StudentAnalysis extends DivWidget {
     DivWidget top = new DivWidget();
     top.addStyleName("inlineFlex");
     top.setWidth("100%");
-   // top.getElement().getStyle().setMarginRight(70, Style.Unit.PX );
+    // top.getElement().getStyle().setMarginRight(70, Style.Unit.PX );
 
     top.getElement().setId("top");
     top.add(leftSide);

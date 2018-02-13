@@ -80,7 +80,7 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid) {
+  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid, int req) {
     return null;
   }
 

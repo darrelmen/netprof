@@ -198,7 +198,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase("spanish");
     int id = 71;
     //int id = 535;   // tiffany
-    AnalysisReport performanceReportForUser = database.getAnalysis(-1).getPerformanceReportForUser(id, 1, -1);
+    AnalysisReport performanceReportForUser = database.getAnalysis(-1).getPerformanceReportForUser(id, 1, -1, 0);
     UserPerformance performanceForUser = performanceReportForUser.getUserPerformance();
 
     logger.info("perf " + performanceForUser);
