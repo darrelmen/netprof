@@ -33,9 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -255,7 +253,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 //          gotTypeAheadEvent(text, false);
           pushNewItem(text, -1);
 
-          controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
+          controller.logEvent(getTypeAheadBox(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
         }
       };
     }

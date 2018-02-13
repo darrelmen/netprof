@@ -40,8 +40,6 @@ import com.github.gwtbootstrap.client.ui.base.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -83,7 +81,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   private void checkFocus(boolean hasFirstFocus) {
     if (hasFirstFocus) {
-      Scheduler.get().scheduleDeferred((Command) () -> getTypeAhead().setFocus(true));
+      Scheduler.get().scheduleDeferred((Command) () -> getTypeAheadBox().setFocus(true));
     }
   }
 
@@ -98,35 +96,24 @@ public abstract class TypeAhead implements ITypeAhead {
   }
 
   /**
-   * @return
-   * @see PagingExerciseList#showEmptySelection
-   */
-//  @Override
-//  public Widget getWidget() {
-//    return typeAhead;
-//  }
-
-  /**
    * On key up, do something, like go get a new list given a search term.
    */
   private void makeTypeAhead() {
     typeAhead.setWidth(WIDTH + "px");
     typeAhead.setHeight(24 + "px");
     typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
-   // getTypeAhead().getElement().setId("TypeAhead");
+   // getTypeAheadBox().getElement().setId("TypeAhead");
 
-    getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
-    getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        //  logger.info("got key up " + event);
-        String current = getTypeAhead().getText();
+    getTypeAheadBox().setDirectionEstimator(true);   // automatically detect whether text is RTL
+    getTypeAheadBox().addKeyUpHandler(event -> {
+      //  logger.info("got key up " + event);
+      String current = getTypeAheadBox().getText();
 
-        if (previous.equals(current) && !previous.isEmpty()) {
-        //  logger.info("makeTypeAhead prev = current '" + previous + "'");
-        } else {
-          gotTypeAheadEntry(current);
-          previous = current;
-        }
+      if (previous.equals(current) && !previous.isEmpty()) {
+      //  logger.info("makeTypeAhead prev = current '" + previous + "'");
+      } else {
+        gotTypeAheadEntry(current);
+        previous = current;
       }
     });
   }
@@ -142,7 +129,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   private Widget getControlGroup(Widget waitCursor, String title) {
     Panel flow = new HorizontalPanel();
-    flow.add(getTypeAhead());
+    flow.add(getTypeAheadBox());
     flow.add(waitCursor);
     configureWaitCursor(waitCursor);
 
@@ -162,7 +149,7 @@ public abstract class TypeAhead implements ITypeAhead {
     style.setMarginRight(RIGHT_MARIGN_FOR_SEARCH, Style.Unit.PX);
     style.setColor("gray");
     flow.add(child);
-    flow.add(getTypeAhead());
+    flow.add(getTypeAheadBox());
     flow.add(waitCursor);
     return flow;
   }
@@ -193,7 +180,7 @@ public abstract class TypeAhead implements ITypeAhead {
    * @return
    * @see PagingExerciseList#addTypeAhead(Panel)
    */
-  TextBox getTypeAhead() {
+  TextBox getTypeAheadBox() {
     return typeAhead;
   }
 }

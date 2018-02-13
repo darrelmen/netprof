@@ -254,9 +254,8 @@ public class SignInForm extends UserDialog implements SignIn {
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
 
-    logger.warning("checking using "+ openUserService);
-
-    logger.warning("checking using "+ openUserService.getClass());
+  //  logger.warning("checking using "+ openUserService);
+ //   logger.warning("checking using "+ openUserService.getClass());
 
     openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
       @Override
@@ -424,7 +423,6 @@ public class SignInForm extends UserDialog implements SignIn {
 //      eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
 //      storeUser(foundUser, userManager, freeTextPassword);
 //    } else {
-
 
     //logger.info("foundExistingUser bad pass  " + freeTextPassword);
     //  logger.info("admin " + Md5Hash.getHash("adm!n"));

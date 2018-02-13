@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
 /**
@@ -146,7 +147,7 @@ public class CreateProject {
    * @param projectServices
    * @param info
    * @return false if name already exists
-   * @see mitll.langtest.server.services.ProjectServiceImpl#create(ProjectInfo)
+   * @see mitll.langtest.server.services.ProjectServiceImpl#create
    */
   public boolean createProject(DAOContainer daoContainer,
                                ProjectServices projectServices,
@@ -170,7 +171,15 @@ public class CreateProject {
           info.getSecondType(),
           info.getDominoID());
 
-      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, info.getHost());
+      String host = info.getHost();
+      if (host.isEmpty()) {
+        host = h2Languages.contains(info.getLanguage()) ? "h2" : WEBSERVICE_HOST_DEFAULT;
+        logger.info("createProject choosing host for " + info.getLanguage() + " = " + host);
+      }
+      else {
+        logger.info("createProject host=" + host);
+      }
+      addModelProp(projectDAO, projectID, WEBSERVICE_HOST, host);
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 

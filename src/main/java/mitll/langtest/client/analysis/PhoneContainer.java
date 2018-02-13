@@ -100,7 +100,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private final AnalysisServiceAsync analysisServiceAsync;
 
   /**
@@ -162,7 +162,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (DEBUG || true) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    if (DEBUG) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
 
     this.from = from;
     this.to = to;
@@ -263,8 +263,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getPhoneStatuses(List, Map, long, long)
    */
   private List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
-    logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last) +
-        " over " + value.getSessions().size() + " sessions");
+    if (DEBUG) {
+      logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last) +
+          " over " + value.getSessions().size() + " sessions");
+    }
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
 

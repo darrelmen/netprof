@@ -175,18 +175,23 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    * @see #getAddButtonContainer
    */
   private Typeahead getTypeahead(Button add) {
-    quickAddText = new TextBox();
-    quickAddText.setMaxLength(100);
-    quickAddText.setVisibleLength(40);
-    quickAddText.addStyleName("topMargin");
-    quickAddText.setWidth(235 + "px");
-    quickAddText.getElement().getStyle().setProperty("fontFamily","sans-serif");
-    quickAddText.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    quickAddText = getEntryTextBox();
     //quickAddText.addStyleName("bigflfont");
 
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
+  }
+
+  private TextBox getEntryTextBox() {
+    TextBox quickAddText = new TextBox();
+    quickAddText.setMaxLength(100);
+    quickAddText.setVisibleLength(40);
+    quickAddText.addStyleName("topMargin");
+    quickAddText.setWidth(235 + "px");
+    quickAddText.getElement().getStyle().setProperty("fontFamily", "sans-serif");
+    quickAddText.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    return quickAddText;
   }
 
   private HTML getFeedback() {
@@ -246,6 +251,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   /**
    * TODO : this should be simpler - does the exercise exist or not - we don't create new exercises anymore.
+   *
    * @param add
    * @param safeText
    */

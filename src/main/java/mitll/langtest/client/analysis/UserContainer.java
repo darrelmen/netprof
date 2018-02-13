@@ -34,32 +34,39 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.dialog.SearchTypeahead;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -68,7 +75,7 @@ import java.util.*;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  //  private final Logger logger = Logger.getLogger("UserContainer");
+  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int MAX_LENGTH = 11;
   private static final int TABLE_WIDTH = 600;
@@ -130,12 +137,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
+
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
 
+  /**
+   * @param users
+   * @param leftSide
+   * @see #getTable(Collection, String, String)
+   */
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
+    this.rememberedTypeahead = new ArrayList<>(users);
+
     controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -165,6 +180,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     myStudents = result;
 
     remembered = new ArrayList<>(users);
+
     List<UserInfo> filtered = new ArrayList<>();
     remembered.forEach(userInfo -> {
       if (myStudents.contains(userInfo.getID())) filtered.add(userInfo);
@@ -302,28 +318,182 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
 
     if (!isPolyglot()) {
-      HTML w1 = new HTML(FILTER_BY1);
-
-      w1.addStyleName("floatLeft");
-      w1.addStyleName("rightFiveMargin");
-      w1.addStyleName("topFiveMargin");
-
-      // mimic style of subtext on headers
-      w1.getElement().getStyle().setFontSize(14, Style.Unit.PX);
-      w1.getElement().getStyle().setColor("#999");
-
-      filterContainer.add(w1);
+      {
+        filterContainer.add(getFilterLabel());
+      }
 
       filterContainer.add(getListBox());
-      filterContainer.addStyleName("leftFiveMargin");
+
       filterContainer.add(mineOnly = getMyStudents());
+
+      filterContainer.addStyleName("leftFiveMargin");
     }
 
+    TextBox box = getBox();
+    box.setPlaceholder("user id or name");
 
+
+    box.addKeyUpHandler(event -> rememberAndFilterTo(getMatches(box)));
+    Typeahead typeahead = new Typeahead(new SuggestOracle() {
+      @Override
+      public void requestSuggestions(Request request, Callback callback) {
+        List<UserInfo> matches = getMatches(box);
+        callback.onSuggestionsReady(request, getResponse(request, matches, matches.size(), 10));
+
+      }
+    });
+    getTypeahead(box, typeahead);
+
+    filterContainer.add(box);
     return filterContainer;
   }
 
+  private static final int DISPLAY_ITEMS = 15;
+
+  @NotNull
+  private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
+    typeahead.setDisplayItemCount(DISPLAY_ITEMS);
+    typeahead.setMatcherCallback((query, item) -> true);
+    typeahead.setUpdaterCallback(selectedSuggestion -> {
+//      currentExercise = ((SearchTypeahead.ExerciseSuggestion) selectedSuggestion).getShell();
+//      add.setEnabled(currentExercise != null);
+
+      return selectedSuggestion.getReplacementString();
+    });
+
+    textBox.getElement().setId("TextBox_user");
+    typeahead.setWidget(textBox);
+    return typeahead;
+  }
+
+  @NotNull
+  private List<UserInfo> getMatches(TextBox box) {
+    String text = box.getText();
+
+    List<UserInfo> matches = new ArrayList<>();
+
+    for (UserInfo user : rememberedTypeahead) {
+      if (user.getUserID().toLowerCase().startsWith(text.toLowerCase())) {
+        matches.add(user);
+      }
+    }
+    return matches;
+  }
+
+  @NotNull
+  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<UserInfo> users, int size, int limit) {
+    int numberTruncated = Math.max(0, size - limit);
+    //  logger.info("trunc " + numberTruncated);
+    SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), users));
+    response.setMoreSuggestionsCount(numberTruncated);
+    return response;
+  }
+
+  @NotNull
+  private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<UserInfo> exercises) {
+    Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
+    exercises.forEach(resp -> suggestions.add(new UserSuggestion(query, resp)));
+    return suggestions;
+  }
+
+  /**
+   * What to show for each trie search result - if match in vocab item, show it, if in context sentence, show that.
+   *
+   * @paramx xquery
+   * @paramx resp
+   * @return
+   * @paramx searchWords
+   */
+//  private UserSuggestion getSuggestion(String query, UserInfo resp) {
+//    // logger.info(resp.getID() + " displayString " + displayString);
+//    return new UserSuggestion(query, resp);
+//  }
+
+  private static class UserSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
+    private UserInfo userInfo;
+    String repl;
+
+    @Override
+    public String getDisplayString() {
+      return userInfo.getFirst() + " " + userInfo.getLast();
+    }
+
+    @Override
+    public String getReplacementString() {
+      return repl;
+    }
+
+    /**
+     * @param repl
+     * @param userInfo
+     * @see
+     */
+    UserSuggestion(String repl, UserInfo userInfo) {
+      super(repl, userInfo.getFirst() + " " + userInfo.getLast());
+      this.repl = repl;
+      this.userInfo = userInfo;
+    }
+
+    public UserSuggestion() {
+    }
+
+    public UserInfo getUserInfo() {
+      return userInfo;
+    }
+  }
+
+  private TextBox getBox() {
+    TextBox quickAddText = new TextBox();
+    quickAddText.setMaxLength(100);
+    quickAddText.setVisibleLength(40);
+    quickAddText.addStyleName("topMargin");
+    quickAddText.setWidth(235 + "px");
+    quickAddText.getElement().getStyle().setProperty("fontFamily", "sans-serif");
+    quickAddText.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    //quickAddText.addStyleName("bigflfont");
+
+    return quickAddText;
+  }
+
+/*
+  private void addCallbacks(final Typeahead user) {
+    user.setUpdaterCallback(getUpdaterCallback());
+  }
+*/
+
+  private Typeahead.UpdaterCallback getUpdaterCallback() {
+    return selectedSuggestion -> {
+      String replacementString = selectedSuggestion.getReplacementString();
+      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
+
+      // NOTE : we need both a redraw on key up and one on selection!
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        public void execute() {
+          //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
+          redraw();
+        }
+      });
+
+      return replacementString;
+    };
+  }
+
+  @NotNull
+  private HTML getFilterLabel() {
+    HTML filterLabel = new HTML(FILTER_BY1);
+
+    filterLabel.addStyleName("floatLeft");
+    filterLabel.addStyleName("rightFiveMargin");
+    filterLabel.addStyleName("topFiveMargin");
+
+    // mimic style of subtext on headers
+    filterLabel.getElement().getStyle().setFontSize(14, Style.Unit.PX);
+    filterLabel.getElement().getStyle().setColor("#999");
+    return filterLabel;
+  }
+
   private List<UserInfo> remembered;
+  private List<UserInfo> rememberedTypeahead;
 
   @NotNull
   private Button getMyStudents() {
@@ -356,9 +526,17 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     controller.getStorage().setBoolean("mineOnly", val);
   }
 
+  /**
+   * @see #getMyStudents
+   */
   private void rememberAndFilter() {
     remembered = new ArrayList<>(getList());
     filterUsers();
+  }
+
+  private void rememberAndFilterTo(List<UserInfo> matches) {
+    // remembered = new ArrayList<>(getList());
+    populateTable(matches);
   }
 
   private void filterUsers() {
@@ -578,7 +756,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getPolyNumSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                             List<UserInfo> dataList) {
+                                                                 List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
 
 

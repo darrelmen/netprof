@@ -66,9 +66,11 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String PROJECT_TYPE = "Project Type";
+  private final Logger logger = Logger.getLogger("ProjectEditForm");
+
   public static final String LANGUAGE = "Language";
   public static final String LIFECYCLE = "Lifecycle";
-  private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final int LEFT_MARGIN_FOR_DOMINO = 320;
 
@@ -233,7 +235,8 @@ public class ProjectEditForm extends UserDialog {
           public void onSuccess(Void result) {
             logger.info("updateProject did update on project #" + info.getID() + " on hydra server (maybe h2).");
           }
-        });}
+        });
+      }
     });
   }
 
@@ -278,6 +281,8 @@ public class ProjectEditForm extends UserDialog {
   }
 
   boolean isValid() {
+    logger.info("isValid unit " + unit.getSafeText());
+
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
       return false;
@@ -287,7 +292,8 @@ public class ProjectEditForm extends UserDialog {
       return false;
       // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
     } else if (unit.getSafeText().isEmpty()) {
-      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() + " unit = " + unit.getSafeText());
+      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() +
+          " unit = '" + unit.getSafeText() +"'");
       Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);
       return false;
     } else {
@@ -373,16 +379,22 @@ public class ProjectEditForm extends UserDialog {
     }
 
     {
-      DivWidget widgets = addProjectType(info, fieldset);
-     // if (isNew) widgets.setVisible(false);
+      /*DivWidget widgets =*/
+      addProjectType(info, fieldset);
+      // if (isNew) widgets.setVisible(false);
     }
 
     {
       DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT, false);
 
-      hydraHost = getName(hDivLabel, info.getHost(), HYDRA_HOST_OPTIONAL, 100, 30, true);
-      hydraHost.setText(info.getHost());
+      String currentName = isNew ? "" : info.getHost();
 
+      hydraHost = getName(hDivLabel, currentName, HYDRA_HOST_OPTIONAL, 100, 30, true);
+      String safeText = hydraHost.getSafeText();
+      logger.info("host " + safeText);
+      // hydraHost.setText(info.getHost());
+
+      if (isNew) info.setHost("");
       hydraPort = getHydraPort(hDivLabel, info.getPort());
       if (isNew) hDivLabel.setVisible(false);
     }
@@ -436,7 +448,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private DivWidget addProjectType(ProjectInfo info, Fieldset fieldset) {
-    DivWidget lifecycle = getHDivLabel(fieldset, "Project Type", false);
+    DivWidget lifecycle = getHDivLabel(fieldset, PROJECT_TYPE, false);
     lifecycle.add(typeBox = getTypeBox());
     setBoxForType(typeBox, info.getProjectType());
     return lifecycle;

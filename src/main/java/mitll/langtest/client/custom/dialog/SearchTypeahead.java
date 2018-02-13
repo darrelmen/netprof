@@ -80,13 +80,11 @@ public class SearchTypeahead {
       }
     };
 
-    return getTypeAhead(textBox, oracle);
+    return getTypeahead(textBox, new Typeahead(oracle));
   }
 
   @NotNull
-  private Typeahead getTypeAhead(TextBox textBox, SuggestOracle oracle) {
-    Typeahead typeahead = new Typeahead(oracle);
-
+  private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> true);
     typeahead.setUpdaterCallback(selectedSuggestion -> {
@@ -122,13 +120,16 @@ public class SearchTypeahead {
       exercises = exercises.subList(0, limit);
     }
 
-    SuggestOracle.Response response = getResponse(request, exercises, size, limit);
-
     try {
-      callback.onSuggestionsReady(request, response);
+      callback.onSuggestionsReady(request, getResponse(request, exercises, size, limit));
     } catch (Exception e) {
       logger.warning("got " + e);
     }
+  }
+
+  void clearCurrentExercise() {
+    currentExercise = null;
+    add.setEnabled(false);
   }
 
   @NotNull
@@ -138,11 +139,6 @@ public class SearchTypeahead {
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
     response.setMoreSuggestionsCount(numberTruncated);
     return response;
-  }
-
-  void clearCurrentExercise() {
-    currentExercise = null;
-    add.setEnabled(false);
   }
 
   @NotNull

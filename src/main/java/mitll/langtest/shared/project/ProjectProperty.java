@@ -17,10 +17,10 @@ public enum ProjectProperty implements IsSerializable {
   private String name;
   private PropertyType type;
 
-  ProjectProperty(String name) {
+/*  ProjectProperty(String name) {
     this.name = name;
     this.type = PropertyType.STRING;
-  }
+  }*/
 
   ProjectProperty(String name, PropertyType type) {
     this.name = name;
