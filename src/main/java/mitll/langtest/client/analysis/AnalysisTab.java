@@ -497,7 +497,7 @@ public class AnalysisTab extends DivWidget {
                                  ShowTab showTab,
                                  Heading wordsTitle) {
     //   WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle, wordScores.size());
-    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, showTab, wordsTitle, numResults, analysisServiceAsync);
+    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle, numResults, analysisServiceAsync);
     //   analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
     return wordContainer.getTableWithPager();///*wordScores*/);
   }

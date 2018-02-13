@@ -148,8 +148,7 @@ public abstract class Analysis extends DAO {
 //          logger.info("getUserInfos skip " + miniUser);
 //        } else {
           value.setFrom(miniUser);
-          logger.info("getUserInfos got " + value.getID() + " " + value.getFirst() + " " + value.getLast());
-
+//          logger.info("getUserInfos got " + value.getID() + " " + value.getFirst() + " " + value.getLast());
           userInfos.add(value);
 //        }
       }

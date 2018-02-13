@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.Controls;
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -45,8 +46,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.logging.Logger;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -54,15 +53,16 @@ import java.util.logging.Logger;
  * @since 9/25/14.
  */
 public abstract class TypeAhead implements ITypeAhead {
-  private final Logger logger = Logger.getLogger("TypeAhead");
+  //private final Logger logger = Logger.getLogger("TypeAhead");
 
   /**
    * @see #makeTypeAhead
    */
   private static final int WIDTH = 180 - 32;
-  private static final int RIGHT_MARIGN_FOR_SEARCH = 10;
+  private static final int RIGHT_MARGIN_FOR_SEARCH = 10;
   private final TextBox typeAhead = new TextBox();
   private final WaitCursorHelper waitCursorHelper;
+  private String previous = "";
 
   /**
    * @param column
@@ -118,7 +118,6 @@ public abstract class TypeAhead implements ITypeAhead {
     });
   }
 
-  private String previous = "";
 
   /**
    * Subclass please.
@@ -144,14 +143,23 @@ public abstract class TypeAhead implements ITypeAhead {
   private Widget getSearch(Widget waitCursor) {
     Panel flow = new HorizontalPanel();
     Icon child = new Icon(IconType.SEARCH);
+    child.setIconSize(IconSize.TWO_TIMES);
 
     Style style = child.getElement().getStyle();
-    style.setMarginRight(RIGHT_MARIGN_FOR_SEARCH, Style.Unit.PX);
+    style.setMarginRight(RIGHT_MARGIN_FOR_SEARCH, Style.Unit.PX);
     style.setColor("gray");
     flow.add(child);
     flow.add(getTypeAheadBox());
     flow.add(waitCursor);
     return flow;
+  }
+
+  /**
+   * @return
+   * @see PagingExerciseList#addTypeAhead(Panel)
+   */
+  TextBox getTypeAheadBox() {
+    return typeAhead;
   }
 
   private void configureWaitCursor(Widget waitCursor) {
@@ -174,13 +182,5 @@ public abstract class TypeAhead implements ITypeAhead {
     controls.add(user);
     userGroup.add(controls);
     return userGroup;
-  }
-
-  /**
-   * @return
-   * @see PagingExerciseList#addTypeAhead(Panel)
-   */
-  TextBox getTypeAheadBox() {
-    return typeAhead;
   }
 }

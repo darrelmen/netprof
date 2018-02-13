@@ -69,7 +69,6 @@ public class NPFHelper implements RequiresResize {
 
   public static final String LIST_COMPLETE = "List complete!";
   public static final String COMPLETE = "Complete";
-//  private boolean madeNPFContent = false;
 
   final ExerciseController controller;
 
@@ -137,14 +136,10 @@ public class NPFHelper implements RequiresResize {
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + ul);
     } else {
-      addExerciseListOnLeftSide(left, npfExerciseList.getExerciseListOnLeftSide());
+      left.add(npfExerciseList.getExerciseListOnLeftSide());
     }
 
     return hp;
-  }
-
-  private void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
-    left.add(exerciseListOnLeftSide);
   }
 
   private Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
@@ -243,5 +238,4 @@ public class NPFHelper implements RequiresResize {
       //logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
   }
- // public void setContentPanel(DivWidget content) {}
 }

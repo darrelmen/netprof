@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/6/17.
  */
 public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
-  private final Logger logger = Logger.getLogger("ListContainer");
+  //private final Logger logger = Logger.getLogger("ListContainer");
 
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
@@ -59,7 +59,6 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
-
   void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }
@@ -75,11 +74,6 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
   @Override
   protected void setMaxWidth() {
-  }
-
-  @Override
-  protected IsWidget getRightOfHeader() {
-    return null;
   }
 
   @Override

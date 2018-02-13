@@ -75,6 +75,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
+  public static final String MINE_ONLY = "Mine Only";
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int MAX_LENGTH = 11;
@@ -99,6 +100,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    *
    */
   private static final String STUDENT = "Student";
+  /**
+   * @see #getButtons
+   */
   private static final String MY_STUDENT = "My Student";
   private static final int NUM_WIDTH = 50;
   public static final String FIRST = "First";
@@ -114,6 +118,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   private Button add;
   private Button remove;
   private Button mineOnly;
+  private UserTypeahead userTypeahead = new UserTypeahead();
 
   /**
    * @param controller
@@ -149,8 +154,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
    */
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
-    this.rememberedTypeahead = new ArrayList<>(users);
-
+    userTypeahead.setChoices(users);
     controller.getDLIClassService().getStudents(new AsyncCallback<Set<Integer>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -194,13 +198,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
-  // TODO : why did I want a min height for the table? It messes with the view on the laptop.
-//  @Override
-//  public Panel getTableWithPager(Collection<UserInfo> users) {
-//    Panel tableWithPager = super.getTableWithPager(users);
-// //   tableWithPager.getElement().getStyle().setProperty("minHeight", "317px");
-//    return tableWithPager;
-//  }
+  // why did I want a min height for the table? It messes with the view on the laptop.
+
+  /**
+   * Min height is so that when the table is only a few rows, the buttons below the table don't roll up.
+   *
+   * @param users
+   * @return
+   */
+  @Override
+  public Panel getTableWithPager(Collection<UserInfo> users) {
+    Panel tableWithPager = super.getTableWithPager(users);
+    tableWithPager.getElement().getStyle().setProperty("minHeight", 250 + "px");
+    return tableWithPager;
+  }
 
   private boolean showOnlyMine() {
     return controller.getStorage().isTrue("mineOnly");
@@ -221,8 +232,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
     if (!isPolyglot()) {
       buttons.add(new HTML(MY_STUDENT));
-      buttons.add(add = getAddButton());
-      buttons.add(remove = getRemoveButton());
+      DivWidget addC = new DivWidget();
+      addC.add(add = getAddButton());
+      buttons.add(addC);
+      DivWidget removeC = new DivWidget();
+      removeC.add(remove = getRemoveButton());
+      buttons.add(removeC);
+      buttons.add(mineOnly = getMyStudents());
     }
 
     return buttons;
@@ -307,175 +323,30 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
 
   /**
+   * TODO : consider how to make this work for IE - inlineFlex doesn't
+   *
    * @return
    * @see MemoryItemContainer#getTable
    */
   @Override
-  protected IsWidget getRightOfHeader() {
+  protected IsWidget getBelowHeader() {
     DivWidget filterContainer = new DivWidget();
-
-    filterContainer.addStyleName("floatRight");
+    filterContainer.setWidth("100%");
     filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
+    filterContainer.addStyleName("leftFiveMargin");
+
+    filterContainer.add(userTypeahead.getSearch());
 
     if (!isPolyglot()) {
-      {
-        filterContainer.add(getFilterLabel());
-      }
-
-      filterContainer.add(getListBox());
-
-      filterContainer.add(mineOnly = getMyStudents());
-
-      filterContainer.addStyleName("leftFiveMargin");
+      DivWidget c = new DivWidget();
+      c.addStyleName("leftFiveMargin");
+      c.addStyleName("floatRight");
+      //c.getElement().getStyle().setMarginTop(8, Style.Unit.PX);
+      c.add(getFilterLabel());
+      c.add(getListBox());
+      filterContainer.add(c);
     }
-
-    TextBox box = getBox();
-    box.setPlaceholder("user id or name");
-
-
-    box.addKeyUpHandler(event -> rememberAndFilterTo(getMatches(box)));
-    Typeahead typeahead = new Typeahead(new SuggestOracle() {
-      @Override
-      public void requestSuggestions(Request request, Callback callback) {
-        List<UserInfo> matches = getMatches(box);
-        callback.onSuggestionsReady(request, getResponse(request, matches, matches.size(), 10));
-
-      }
-    });
-    getTypeahead(box, typeahead);
-
-    filterContainer.add(box);
     return filterContainer;
-  }
-
-  private static final int DISPLAY_ITEMS = 15;
-
-  @NotNull
-  private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
-    typeahead.setDisplayItemCount(DISPLAY_ITEMS);
-    typeahead.setMatcherCallback((query, item) -> true);
-    typeahead.setUpdaterCallback(selectedSuggestion -> {
-//      currentExercise = ((SearchTypeahead.ExerciseSuggestion) selectedSuggestion).getShell();
-//      add.setEnabled(currentExercise != null);
-
-      return selectedSuggestion.getReplacementString();
-    });
-
-    textBox.getElement().setId("TextBox_user");
-    typeahead.setWidget(textBox);
-    return typeahead;
-  }
-
-  @NotNull
-  private List<UserInfo> getMatches(TextBox box) {
-    String text = box.getText();
-
-    List<UserInfo> matches = new ArrayList<>();
-
-    for (UserInfo user : rememberedTypeahead) {
-      if (user.getUserID().toLowerCase().startsWith(text.toLowerCase())) {
-        matches.add(user);
-      }
-    }
-    return matches;
-  }
-
-  @NotNull
-  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<UserInfo> users, int size, int limit) {
-    int numberTruncated = Math.max(0, size - limit);
-    //  logger.info("trunc " + numberTruncated);
-    SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), users));
-    response.setMoreSuggestionsCount(numberTruncated);
-    return response;
-  }
-
-  @NotNull
-  private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<UserInfo> exercises) {
-    Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
-    exercises.forEach(resp -> suggestions.add(new UserSuggestion(query, resp)));
-    return suggestions;
-  }
-
-  /**
-   * What to show for each trie search result - if match in vocab item, show it, if in context sentence, show that.
-   *
-   * @paramx xquery
-   * @paramx resp
-   * @return
-   * @paramx searchWords
-   */
-//  private UserSuggestion getSuggestion(String query, UserInfo resp) {
-//    // logger.info(resp.getID() + " displayString " + displayString);
-//    return new UserSuggestion(query, resp);
-//  }
-
-  private static class UserSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
-    private UserInfo userInfo;
-    String repl;
-
-    @Override
-    public String getDisplayString() {
-      return userInfo.getFirst() + " " + userInfo.getLast();
-    }
-
-    @Override
-    public String getReplacementString() {
-      return repl;
-    }
-
-    /**
-     * @param repl
-     * @param userInfo
-     * @see
-     */
-    UserSuggestion(String repl, UserInfo userInfo) {
-      super(repl, userInfo.getFirst() + " " + userInfo.getLast());
-      this.repl = repl;
-      this.userInfo = userInfo;
-    }
-
-    public UserSuggestion() {
-    }
-
-    public UserInfo getUserInfo() {
-      return userInfo;
-    }
-  }
-
-  private TextBox getBox() {
-    TextBox quickAddText = new TextBox();
-    quickAddText.setMaxLength(100);
-    quickAddText.setVisibleLength(40);
-    quickAddText.addStyleName("topMargin");
-    quickAddText.setWidth(235 + "px");
-    quickAddText.getElement().getStyle().setProperty("fontFamily", "sans-serif");
-    quickAddText.getElement().getStyle().setFontSize(18, Style.Unit.PX);
-    //quickAddText.addStyleName("bigflfont");
-
-    return quickAddText;
-  }
-
-/*
-  private void addCallbacks(final Typeahead user) {
-    user.setUpdaterCallback(getUpdaterCallback());
-  }
-*/
-
-  private Typeahead.UpdaterCallback getUpdaterCallback() {
-    return selectedSuggestion -> {
-      String replacementString = selectedSuggestion.getReplacementString();
-      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
-
-      // NOTE : we need both a redraw on key up and one on selection!
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
-          redraw();
-        }
-      });
-
-      return replacementString;
-    };
   }
 
   @NotNull
@@ -493,15 +364,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   private List<UserInfo> remembered;
-  private List<UserInfo> rememberedTypeahead;
 
   @NotNull
   private Button getMyStudents() {
-    Button mineOnly = new Button("Mine Only");
+    Button mineOnly = new Button(MINE_ONLY);
     mineOnly.setToggle(true);
     mineOnly.setSize(ButtonSize.MINI);
     mineOnly.addStyleName("leftFiveMargin");
-    mineOnly.addStyleName("topFiveMargin");
 
     mineOnly.setActive(showOnlyMine());
 
@@ -534,10 +403,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     filterUsers();
   }
 
-  private void rememberAndFilterTo(List<UserInfo> matches) {
-    // remembered = new ArrayList<>(getList());
-    populateTable(matches);
-  }
+//  private void rememberAndFilterTo(List<UserInfo> matches) {
+//    // remembered = new ArrayList<>(getList());
+//    populateTable(matches);
+//  }
 
   private void filterUsers() {
     List<UserInfo> filtered = new ArrayList<>();
@@ -629,7 +498,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     addTooltip();
   }
 
-
   private void addFirstName(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -640,7 +508,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(shell.getFirst());
+        // logger.info("shell " + (shell == null));
+        String first = shell.getFirst();
+        // logger.info("first " + first);
+        return getSafeHtml(first);
       }
     };
     userCol.setSortable(true);
@@ -779,29 +650,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-
-/*  private ColumnSortEvent.ListHandler<UserInfo> getFinalSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                               List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0;
-          }
-
-          // Compare the name columns.
-          if (o1 != null) {
-            if (o2 == null) return 1;
-            else {
-              int compare = Integer.compare(o1.getFinalScores(), o2.getFinalScores());
-              return compare == 0 ? getDateCompare(o1, o2) : compare;
-            }
-          }
-          return -1;
-        });
-    return columnSortHandler;
-  }*/
-
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -866,28 +714,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     return columnSortHandler;
   }
 
-/*
-  private ColumnSortEvent.ListHandler<UserInfo> getDiffSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                              List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0;
-          }
-
-          // Compare the name columns.
-          if (o1 != null) {
-            if (o2 == null) return 1;
-            else {
-              int compare = Integer.compare(o1.getDiff(), o2.getDiff());
-              return compare;
-            }
-          }
-          return -1;
-        });
-    return columnSortHandler;
-  }*/
 
   private Column<UserInfo, SafeHtml> getCurrent() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {

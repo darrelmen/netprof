@@ -35,12 +35,10 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -65,7 +63,6 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
@@ -89,10 +86,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  private static final int SIGNED_UP = 95;
+  private static final int SIGNED_UP_WIDTH = 100;
   private static final String DATE = "Date";
 
-  private final ShowTab learnTab;
   private final Heading heading;
 
   private final String todayYear;
@@ -102,13 +98,13 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
   // private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
 
-  private WordTable wordTable = new WordTable();
+  private final WordTable wordTable = new WordTable();
 
-  private int numWords;
+  private final int numWords;
 
-  TableSortHelper tableSortHelper = new TableSortHelper();
-  AnalysisServiceAsync analysisServiceAsync;
-  AnalysisTab.ReqInfo reqInfo;
+  private final TableSortHelper tableSortHelper = new TableSortHelper();
+  private final AnalysisServiceAsync analysisServiceAsync;
+  private final AnalysisTab.ReqInfo reqInfo;
 
   /**
    * What sort order do we want?
@@ -120,14 +116,12 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   WordContainerAsync(AnalysisTab.ReqInfo reqInfo,
                      ExerciseController controller,
                      AnalysisPlot plot,
-                     ShowTab learnTab,
                      Heading w,
                      int numWords,
                      AnalysisServiceAsync analysisServiceAsync) {
     super(controller, plot);
     this.reqInfo = reqInfo;
     plot.addListener(this);
-    this.learnTab = learnTab;
     this.heading = w;
 
     this.numWords = numWords;
@@ -255,8 +249,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       Column<WordScore, SafeHtml> dateCol = getDateColumn();
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(DATE));
-      table.setColumnWidth(dateCol, SIGNED_UP + "px");
-//      table.addColumnSortHandler(getDateSorter(dateCol, getList()));
+      table.setColumnWidth(dateCol, SIGNED_UP_WIDTH + "px");
 
       if (!isPolyglot()) {
         table.getColumnSortList().push(dateCol);

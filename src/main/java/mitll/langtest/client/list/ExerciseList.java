@@ -273,7 +273,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
      * @param selectionID
      * @param searchIfAny
      * @param exerciseID
-     * @paramx setTypeAheadText
      * @see HistoryExerciseList#getExerciseIDs
      */
     SetExercisesCallback(String selectionID, String searchIfAny, int exerciseID, ExerciseListRequest request) {

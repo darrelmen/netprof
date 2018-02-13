@@ -116,19 +116,26 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   DivWidget getTable(Collection<T> users, String title, String subtitle) {
-    Heading students = getStudentsHeader(title, subtitle);
-
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
     leftSide.addStyleName("floatLeft");
-    DivWidget headerRow = new DivWidget();
-    if (!title.isEmpty()) {
-      headerRow.add(students);
-    }
-    leftSide.add(headerRow);
-    IsWidget rightOfHeader = getRightOfHeader();
-    if (rightOfHeader != null) {
-      headerRow.add(rightOfHeader);
+
+    {
+      DivWidget headerRow = new DivWidget();
+      headerRow.setWidth("100%");
+      if (!title.isEmpty()) {
+        headerRow.add(getStudentsHeader(title, subtitle));
+      }
+      leftSide.add(headerRow);
+
+      IsWidget rightOfHeader = getRightOfHeader();
+      if (rightOfHeader != null) {
+        headerRow.add(rightOfHeader);
+      }
+      IsWidget belowHeader = getBelowHeader();
+      if (belowHeader != null) {
+        leftSide.add(belowHeader);
+      }
     }
 
     addTable(users, leftSide);
@@ -147,6 +154,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
     students.addStyleName("floatLeft");
+    students.setWidth("100%");
     return students;
   }
 
@@ -154,7 +162,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return null;
   }
 
-  protected String truncate(String columnText) {  return truncate(columnText, getMaxLengthId());  }
+  protected IsWidget getBelowHeader() {
+    return null;
+  }
+
+  protected String truncate(String columnText) {
+    return truncate(columnText, getMaxLengthId());
+  }
 
   @NotNull
   protected String truncate(String columnText, int maxLengthId) {
@@ -192,7 +206,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
-   *
    * @param list
    * @param maxLength
    */
@@ -204,7 +217,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.addColumnSortHandler(getUserSorter(userCol, list));
   }
 
-  protected void addDateCol( List<T> list) {
+  protected void addDateCol(List<T> list) {
     dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
@@ -239,8 +252,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
-   * @see #getTableWithPager
    * @param users
+   * @see #getTableWithPager
    */
   void populateTable(Collection<T> users) {
     int i = 0;
@@ -412,14 +425,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   private String getTruncatedItemLabel(T shell, int maxLength) {
-    return truncate(getItemLabel(shell),maxLength);
+    return truncate(getItemLabel(shell), maxLength);
   }
 
   protected abstract String getItemLabel(T shell);
 
   /**
-   * @see #addDateCol
    * @return
+   * @see #addDateCol
    */
   private Column<T, SafeHtml> getDateColumn() {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -446,7 +459,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
           signedUp = signedUp.substring(0, signedUp.length() - 4);
         }
 
-        return getSafeHtml("<span style='white-space:nowrap;'>"+signedUp+"</span>");
+        return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
       }
     };
   }
