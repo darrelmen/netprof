@@ -802,11 +802,11 @@ public class LangTest implements
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
-    //   logger.info("setProjectStartupInfo project startup " + projectStartupInfo);
+    if (projectStartupInfo == null) {
+      logger.warning("setProjectStartupInfo project startup " + projectStartupInfo + " for " + user);
+    }
     initialUI.showCogMenu();
   }
-
-
 
   /**
    * So if during history changes we see the project has changed, we have to react to it here.
@@ -831,7 +831,7 @@ public class LangTest implements
           logger.warning("huh? no current user? ");
         } else {
           setProjectStartupInfo(aUser);
-          //   logger.info("setProjectForUser set project for " + aUser + " show initial state ");
+          logger.info("reallySetTheProject :  set project for " + aUser + " show initial state ");
           initialUI.showInitialState();
           initialUI.addBreadcrumbs();
         }
@@ -1026,7 +1026,13 @@ public class LangTest implements
   public AudioServiceAsync getAudioService() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo == null) {
-      logger.warning("\n\n\ngetAudioService has no project yet...");
+      logger.warning("\ngetAudioService has no project yet... using default audio service...?");
+      if (userManager.getCurrent() != null) {
+        setProjectStartupInfo(userManager.getCurrent());
+      }
+      if (getProjectStartupInfo() == null) {
+        logger.warning("\n after getting user ... getAudioService has no project yet... using default audio service...?");
+      }
     }
     AudioServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultAudioService : projectToAudioService.get(projectStartupInfo.getProjectid());
     if (audioServiceAsync == null) logger.warning("getAudioService no audio service for " + projectStartupInfo);
@@ -1162,7 +1168,7 @@ public class LangTest implements
     return flashRecordPanel.usingFlash();
   }
 
-   public boolean isMicAvailable() {
+  public boolean isMicAvailable() {
     return isMicConnected;
   }
 

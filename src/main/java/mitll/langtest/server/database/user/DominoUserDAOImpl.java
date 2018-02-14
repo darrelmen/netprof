@@ -1211,7 +1211,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
 //      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();
-      logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
+
+      if (now2 - then > 100)
+        logger.info("getFirstLastFor ask for " + toAskFor.size() + " users from " + userDBIds.size() + " took " + (now2 - then) + " millis");
+
       idToUserD.forEach((k, v) -> {
         FirstLastUser value = new FirstLastUser(k, v.getUserId(), v.getFirstName(), v.getLastName(), now, "");// v.getAffiliation());
         idToFirstLastCache.put(k, value);
@@ -1413,7 +1416,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     {
       String affiliation = clientUserDetail1.getAffiliation();
       if (affiliation == null || affiliation.isEmpty()) {
-       // logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
+        // logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
       }
     }
 

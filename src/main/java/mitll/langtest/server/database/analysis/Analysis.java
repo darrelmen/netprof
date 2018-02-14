@@ -321,9 +321,8 @@ public abstract class Analysis extends DAO {
       if (phoneToAvgSorted.isEmpty()) {
         logger.warn("getPhonesForUser : no phones for " + userid + "?");
       } else {
-        logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
+        if (DEBUG) logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
       }
-
 
       new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, project.getKind() == ProjectType.POLYGLOT);
       return phoneReport;

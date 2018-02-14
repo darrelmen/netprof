@@ -153,11 +153,11 @@ public class CreateProject {
                                ProjectServices projectServices,
                                ProjectInfo info) {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
-    int byName = projectDAO.getByName(info.getName());
+    int byName = projectDAO.getByLanguageAndName(info.getLanguage(),info.getName());
 
-    logger.info("createProject : Create new " + info);
 
     if (byName == -1) {
+      logger.info("createProject : Create new " + info);
       int projectID = addProject(projectDAO,
           daoContainer.getUserDAO().getBeforeLoginUser(),
           info.getName(),
@@ -189,6 +189,7 @@ public class CreateProject {
       projectServices.rememberProject(projectID);
       return true;
     } else {
+      logger.info("createProject : PROJECT EXISTS with name " + info.getName()+" : create new " + info);
       return false;
     }
   }

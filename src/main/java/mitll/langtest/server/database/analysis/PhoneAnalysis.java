@@ -139,9 +139,8 @@ public class PhoneAnalysis {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, possibleGrans);
 
 //    granularityToSessions.forEach((k, v) -> logger.info("getPhoneSessionsWithPrune " + k + " = " + v.size()));
-
     List<PhoneSessionInternal> toUse = useSessionGran ? granularityToSessions.get(SESSION) : chooseSession(possibleGrans, granularityToSessions);
-    logger.info("getPhoneSessionsWithPrune phone '" + phone + "' use " + useSessionGran + " got " + toUse.size());
+//    logger.info("getPhoneSessionsWithPrune phone '" + phone + "' use " + useSessionGran + " got " + toUse.size());
     return getPhoneSessions(phone, toUse, shouldPrune);
   }
 

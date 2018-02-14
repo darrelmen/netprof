@@ -332,8 +332,4 @@ public class UserManager {
   public Collection<User.Permission> getPermissions() {
     return current.getPermissions();
   }
-
-//  public OpenUserServiceAsync getOpenUserService() {
-//    return openUserService;
-//  }
 }

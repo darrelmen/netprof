@@ -49,10 +49,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
@@ -147,18 +144,27 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   private void setDefaultsIfMissing(ProjectInfo newProject) {
     try {
-      Project max = db.getProjectManagement().getProductionProjects().stream()
-          .filter(project -> project.getLanguage().equals(newProject.getLanguage()) && project.getModelsDir() != null)
+      String language = newProject.getLanguage();
+
+      logger.info("setDefaultsIfMissing for " + newProject);
+      logger.info("setDefaultsIfMissing for language " + language);
+
+      Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
+
+      logger.info("setDefaultsIfMissing examing " + productionProjects.size()+ " production projects.");
+
+      Project mostRecent = productionProjects.stream()
+          .filter(project -> project.getLanguage().equalsIgnoreCase(language) && project.getModelsDir() != null)
           .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()))
           .get();
 
-      newProject.setModelsDir(max.getModelsDir());
+      newProject.setModelsDir(mostRecent.getModelsDir());
 
       if (newProject.getPort() == -1) {
-        newProject.setPort(max.getWebservicePort());
+        newProject.setPort(mostRecent.getWebservicePort());
       }
     } catch (Exception e) {
-      logger.info("Got " + e);
+      logger.info("Got " + e, e);
     }
   }
 

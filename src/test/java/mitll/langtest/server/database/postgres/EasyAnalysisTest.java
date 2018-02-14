@@ -155,7 +155,7 @@ public class EasyAnalysisTest extends BaseTest {
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
         db.getProject(projectID).getLanguage(),
-        projectID
-    );
+        projectID,
+        false);
   }
 }

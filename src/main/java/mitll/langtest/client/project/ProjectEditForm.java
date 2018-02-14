@@ -200,7 +200,7 @@ public class ProjectEditForm extends UserDialog {
 
     if (id != null) {
       info.setDominoID(id.getDominoID());
-      logger.info(" project domino id now " + id.getDominoID());
+      //logger.info(" project domino id now " + id.getDominoID());
     } else {
       logger.info("no project for " + dominoProjects.getSelectedValue());
     }
@@ -398,8 +398,9 @@ public class ProjectEditForm extends UserDialog {
       String currentName = isNew ? "" : info.getHost();
 
       hydraHost = getName(hDivLabel, currentName, HYDRA_HOST_OPTIONAL, 100, 30, true);
-      String safeText = hydraHost.getSafeText();
-      logger.info("host " + safeText);
+
+      //String safeText = hydraHost.getSafeText();
+      //  logger.info("host " + safeText);
       // hydraHost.setText(info.getHost());
 
       if (isNew) info.setHost("");
