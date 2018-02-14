@@ -83,7 +83,6 @@ public class AnalysisTab extends DivWidget {
   private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
-  private final ReqCounter reqCounter;
 
   /**
    *
@@ -175,8 +174,7 @@ public class AnalysisTab extends DivWidget {
     this.userid = userid;
     this.listid = listid;
     this.isPolyglot = isPolyglot;
-    this.reqCounter = reqCounter;
-    getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
@@ -214,7 +212,7 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(AnalysisReport result) {
         if (reqCounter.getReq() != result.getReq() + 1) {
-          logger.info("skip " + reqCounter.getReq() + " vs " + result.getReq());
+          logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
           useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid));
         }

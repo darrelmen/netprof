@@ -101,7 +101,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final String MY_STUDENT = "My Student";
   private static final int NUM_WIDTH = 50;
-  public static final String FIRST = "First";
+  private static final String FIRST = "First";
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;

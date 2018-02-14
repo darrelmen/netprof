@@ -48,6 +48,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
@@ -78,8 +79,8 @@ public class DownloadHelper implements IShowStatus {
   private Collection<String> typeOrder;
   private SpeedChoices speedChoices;
 
-  public DownloadHelper() {
-    this.speedChoices = new SpeedChoices(this);
+  public DownloadHelper(ExerciseController controller) {
+    this.speedChoices = new SpeedChoices(controller.getStorage(),this);
   }
 
   /**

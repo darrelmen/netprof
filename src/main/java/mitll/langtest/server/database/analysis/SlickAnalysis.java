@@ -63,8 +63,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
   private static final int MAX_TO_SEND = 25;
-  public static final int DEFAULT_PROJECT = 1;
-  public static final int UNKNOWN_EXERCISE = 2;
+  private static final int DEFAULT_PROJECT = 1;
+  private static final int UNKNOWN_EXERCISE = 2;
   private final SlickResultDAO resultDAO;
   private final String language;
   private final int projid;
@@ -78,7 +78,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param phoneDAO
    * @param projid
    * @see ProjectServices#configureProject
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser(int, int, int)
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
@@ -118,7 +118,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         req);
 
     long now = System.currentTimeMillis();
-    logger.info("Return (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
+    logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
   }
 
@@ -167,14 +167,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     } else {
       List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
 
-      logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
+      if (DEBUG) logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
 
       List<BestScore> inTime =
           resultsForQuery
               .stream()
               .filter(bestScore -> from <= bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
               .collect(Collectors.toList());
-      logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
+      if (DEBUG)
+        logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
 
       //if (DEBUG) logger.warn("getWordScoresForUser " + resultsForQuery.size());
 
@@ -195,8 +196,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScore " + totalSize);
       }
-      logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/" + min);
-
+      if (DEBUG) logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/" + min);
 
       return new WordsAndTotal(wordScore, totalSize);
     }
@@ -235,7 +235,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           int comp = 0;
           switch (field) {
             case WORD:
-
               comp = scoreToFL.get(o1).compareTo(scoreToFL.get(o2));
               if (comp == 0) {
                 comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
@@ -333,7 +332,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         resultDAO.getPerfForUserOnList(id, listid);
     long now = System.currentTimeMillis();
 
-    logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
+    if (DEBUG)  logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
         " were " + perfForUser.size());
 
     long diff = now - then;
@@ -482,7 +481,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       results.add(e);
     }
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       long now = System.currentTimeMillis();
 
       logger.info("getUserToResults" +

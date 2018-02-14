@@ -32,7 +32,10 @@
 
 package mitll.langtest.server.database.analysis;
 
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.SimpleTimeAndScore;
+import mitll.langtest.shared.analysis.TimeAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,11 +52,10 @@ public class PhoneAnalysis {
 
   private static final int DESIRED_NUM_SESSIONS = 15;
   private static final int MIN_SESSION_SIZE = 9;
-  //private static final int REAL_MIN_SESSION_SIZE = MIN_SESSION_SIZE;
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-  private static final long TENMIN = 10 * MINUTE;
+  //  private static final long TENMIN = 10 * MINUTE;
   private static final long DAY = 24 * HOUR;
   //  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
@@ -73,15 +75,16 @@ public class PhoneAnalysis {
       //YEAR
   );
   private static final String OVERALL = "overall";
+  private static final boolean DEBUG = false;
 
   /**
    * @param phoneToAvgSorted
    * @param useSessionGran
-   * @see Analysis#setSessions
-   * @see mitll.langtest.server.database.phone.MakePhoneReport#setSessions
+   * @see Analysis#getPhoneReport
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport(Map, Map, float, float, boolean, boolean)
    */
   public void setSessionsWithPrune(Map<String, PhoneStats> phoneToAvgSorted, boolean useSessionGran) {
-    logger.info("setSessionsWithPrune " + useSessionGran);
+    // logger.info("setSessionsWithPrune " + useSessionGran);
     phoneToAvgSorted.forEach((phone, stats) ->
         stats.setSessions(partitionWithPrune(phone, stats.getTimeSeries(), useSessionGran)));
   }
@@ -96,7 +99,7 @@ public class PhoneAnalysis {
    * @param key
    * @param answersForUser
    * @return
-   * @see PhoneAnalysis#setSessionsWithPrune(Map, boolean)
+   * @see #setSessionsWithPrune
    */
   private List<PhoneSession> partitionWithPrune(String key,
                                                 List<TimeAndScore> answersForUser,
@@ -135,7 +138,8 @@ public class PhoneAnalysis {
                                                        boolean useSessionGran) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, possibleGrans);
 
-    granularityToSessions.forEach((k,v)->logger.info("getPhoneSessionsWithPrune " + k + " = " + v.size()));
+//    granularityToSessions.forEach((k, v) -> logger.info("getPhoneSessionsWithPrune " + k + " = " + v.size()));
+
     List<PhoneSessionInternal> toUse = useSessionGran ? granularityToSessions.get(SESSION) : chooseSession(possibleGrans, granularityToSessions);
     logger.info("getPhoneSessionsWithPrune phone '" + phone + "' use " + useSessionGran + " got " + toUse.size());
     return getPhoneSessions(phone, toUse, shouldPrune);
@@ -150,7 +154,7 @@ public class PhoneAnalysis {
 
     partition(answersForUser, times, granularityToSessions, granToCurrent);
 
-    logger.info("getGranularityToSessions # sessions " + granularityToSessions.get(SESSION).size());
+    if (DEBUG) logger.info("getGranularityToSessions # sessions " + granularityToSessions.get(SESSION).size());
 
     return granularityToSessions;
   }
@@ -197,8 +201,7 @@ public class PhoneAnalysis {
           ));
 
         } else {
-          logger.warn("\tgetPhoneSessions: for " + thePhone +
-              "skipping session " + internal);
+          logger.warn("\tgetPhoneSessions: for " + thePhone + "skipping session " + internal);
         }
       }
     }
@@ -223,7 +226,9 @@ public class PhoneAnalysis {
                                                         Map<Long, PhoneSessionInternal> granToCurrent) {
     long last = 0;
 
-    long lastSession = 0;
+    long currentSession = 0;
+
+    if (DEBUG) logger.info("partition " + answersForUser.size());
 
     for (T r : answersForUser) { // sorted by time
       long timestamp = r.getTimestamp();
@@ -236,15 +241,16 @@ public class PhoneAnalysis {
 //            logger.info("granularity " + granularity + " Current " + phoneSessionInternal + " session " + sessionStart + " for " + r.getTimestamp() + " " + r.getScore());
 //          }
 
-          if ((phoneSessionInternal == null) || (lastSession != sessionStart)) {
-            phoneSessionInternal = new PhoneSessionInternal(lastSession);
+          if ((phoneSessionInternal == null) || (currentSession != sessionStart)) {
+            phoneSessionInternal = new PhoneSessionInternal(sessionStart);
             granularityToSessions.get(granularity).add(phoneSessionInternal);
             granToCurrent.put(granularity, phoneSessionInternal);
-            logger.info("partition : new session granularity current session " + phoneSessionInternal + " last " + lastSession + " now " + sessionStart);
+            if (DEBUG)
+              logger.info("partition : new session granularity current session " + phoneSessionInternal + " last " + currentSession + " now " + sessionStart);
 
-            lastSession = sessionStart;
+            currentSession = sessionStart;
           } else {
-            //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
+            if (DEBUG) logger.info("partition for " + r + " current " + currentSession + " vs this " + sessionStart);
           }
         } else {
           if ((phoneSessionInternal == null) ||
@@ -262,11 +268,8 @@ public class PhoneAnalysis {
         phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
       }
 
-
       last = timestamp;
     }
-
-
   }
 
   /**

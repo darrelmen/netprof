@@ -183,7 +183,7 @@ public abstract class Analysis extends DAO {
    * @param id
    * @param best
    * @return
-   * @see IAnalysis#getPerformanceReportForUser
+   * @see SlickAnalysis#getPerformanceReportForUser
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -352,7 +352,7 @@ public abstract class Analysis extends DAO {
         logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
       }
 
-      //setSessions(phoneToAvgSorted);
+
       new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, project.getKind() == ProjectType.POLYGLOT);
       return phoneReport;
     }
@@ -436,6 +436,8 @@ public abstract class Analysis extends DAO {
       int last = -1;
 
       long lastTimestamp = 0;
+      long currentSession = 0;
+
       BestScore lastBest = null;
       Set<Integer> seen = new HashSet<>();
 
@@ -454,7 +456,12 @@ public abstract class Analysis extends DAO {
         }
 
         // So the purpose here is to skip over multiple tries for an item within a sort session (5 minutes)
-        if ((last != -1 && last != exid) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
+        long sessionStart = bs.getSessionStart();
+        if ((last != -1 && last != exid) ||
+            (currentSession > 0 && sessionStart != currentSession) ||
+            (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)
+
+            ) {
           if (seen.contains(id)) {
             logger.warn("getBestForQuery skipping " + id); // surprising if this were true
           } else {
@@ -468,6 +475,7 @@ public abstract class Analysis extends DAO {
         if (lastTimestamp == 0) lastTimestamp = time;
         last = exid;
         lastBest = bs;
+        currentSession = sessionStart;
       }
 
       if (lastBest != null) {

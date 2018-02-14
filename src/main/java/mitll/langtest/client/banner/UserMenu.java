@@ -228,7 +228,7 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new DownloadHelper().downloadContext(controller.getHost(), isMale);
+          new DownloadHelper(controller).downloadContext(controller.getHost(), isMale);
         }
       });
     }

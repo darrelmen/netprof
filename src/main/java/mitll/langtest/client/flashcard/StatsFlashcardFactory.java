@@ -472,7 +472,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
       if (isPolyglot) {
-        speedChoices = new SpeedChoices();
+        speedChoices = new SpeedChoices(controller.getStorage());
         rightColumn.add(speedChoices.getSpeedChoices());
       } else {
         super.addControlsBelowAudio(controlState, rightColumn);

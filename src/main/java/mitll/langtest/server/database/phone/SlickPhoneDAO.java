@@ -188,15 +188,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Collection<SlickPhoneReport> phoneReportByResult =
         dao.getPhoneReportByResultForPhone(userid, ids, phone, new Timestamp(from), new Timestamp(to));
     long now = System.currentTimeMillis();
-    if (now - then > 0)
+    if (now - then > 200 || DEBUG)
       logger.info("getWorstPhonesForResultsForPhone took " + (now - then) + " to get " + phoneReportByResult.size());
-
-//    then = System.currentTimeMillis();
-//    Collection<SlickPhoneReport> phoneReportByResult2 = dao.getPhoneReportByResultForUser(userid, ids);
-//    now = System.currentTimeMillis();
-//    if (now - then > 1) {
-//      logger.info("getWorstPhonesForResults getPhoneReportByResultForUser took " + (now - then) + " to get " + phoneReportByResult2.size());
-//    }
 
     return getPhoneReport(phoneReportByResult, true, false, userid, project);
   }
@@ -228,7 +221,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     boolean useSessionGran = project.getKind() == ProjectType.POLYGLOT;
     String language = project.getLanguage();
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
       logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
     }

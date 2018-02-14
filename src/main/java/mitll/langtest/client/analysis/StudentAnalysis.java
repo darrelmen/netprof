@@ -70,9 +70,7 @@ public class StudentAnalysis extends DivWidget {
   public StudentAnalysis(final ExerciseController controller) {
     //logger.info("StudentAnalysis got here " + appTitle);
 //    getElement().setId("StudentAnalysis");
-
-    final String selectedUserKey = getRememberedSelectedUser(controller);
-
+//    final String selectedUserKey = getRememberedSelectedUser(controller);
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -82,20 +80,20 @@ public class StudentAnalysis extends DivWidget {
 
       @Override
       public void onSuccess(Collection<UserInfo> users) {
-        DivWidget rightSide = getRightSide();
         DivWidget bottom = new DivWidget();
         bottom.addStyleName("floatLeft");
         bottom.getElement().setId("StudentAnalysis_bottom");
 
-//        logger.info("onSuccess get users " + users.size());
-//        logger.info("onSuccess bottom " + bottom.getElement().getId());
         clear();
 
-        UserContainer userContainer = new UserContainer(controller, rightSide, bottom, selectedUserKey);
-        add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
+        {
+          DivWidget rightSide = getRightSide();
+          UserContainer userContainer = new UserContainer(controller, rightSide, bottom,
+              getRememberedSelectedUser(controller));
+          add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
+        }
         add(bottom);
-        //   logger.info("onSuccess added top and bottom " + top.getElement().getId());
-        //   logger.info("onSuccess added top and bottom " + bottom.getElement().getId());
+
       }
     });
   }
@@ -128,8 +126,6 @@ public class StudentAnalysis extends DivWidget {
     DivWidget top = new DivWidget();
     top.addStyleName("inlineFlex");
     top.setWidth("100%");
-    // top.getElement().getStyle().setMarginRight(70, Style.Unit.PX );
-
     top.getElement().setId("top");
     top.add(leftSide);
     top.add(rightSide);
