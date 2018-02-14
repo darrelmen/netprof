@@ -62,19 +62,21 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
+
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
   }
 
   /**
+   * @param languageChoice
    * @param name
    * @return
    * @see ProjectEditForm#checkNameOnBlur
    */
   @Override
-  public boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException {
+  public boolean existsByName(String languageChoice, String name) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return getProjectDAO().getByName(name) != -1;
+      return getProjectDAO().getByLanguageAndName(languageChoice, name) != -1;
     } else {
       throw getRestricted("exists by name");
     }
@@ -100,16 +102,16 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
-/*
-  public void configureAndRefresh(boolean update, int projID) throws DominoSessionException, RestrictedOperationException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    if (hasAdminPerm(userIDFromSessionOrDB)) {
-      configureAndRefresh(userIDFromSessionOrDB, projID, update);
-    } else {
-      throw getRestricted(UPDATING_PROJECT_INFO);
+  /*
+    public void configureAndRefresh(boolean update, int projID) throws DominoSessionException, RestrictedOperationException {
+      int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+      if (hasAdminPerm(userIDFromSessionOrDB)) {
+        configureAndRefresh(userIDFromSessionOrDB, projID, update);
+      } else {
+        throw getRestricted(UPDATING_PROJECT_INFO);
+      }
     }
-  }
-*/
+  */
   private void configureAndRefresh(int userIDFromSessionOrDB, int projID, boolean update) {
     if (update) {
 /*

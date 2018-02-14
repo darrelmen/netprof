@@ -121,17 +121,21 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     leftSide.addStyleName("floatLeft");
 
     {
+/*
       DivWidget headerRow = new DivWidget();
       headerRow.setWidth("100%");
       if (!title.isEmpty()) {
         headerRow.add(getStudentsHeader(title, subtitle));
       }
       leftSide.add(headerRow);
+*/
 
+/*
       IsWidget rightOfHeader = getRightOfHeader();
       if (rightOfHeader != null) {
         headerRow.add(rightOfHeader);
       }
+      */
       IsWidget belowHeader = getBelowHeader();
       if (belowHeader != null) {
         leftSide.add(belowHeader);
@@ -158,7 +162,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return students;
   }
 
-  protected IsWidget getRightOfHeader() {
+  private IsWidget getRightOfHeader() {
     return null;
   }
 

@@ -574,7 +574,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     protected boolean isCorrect(boolean correct, double score) {
-      boolean b = isPolyglot ? score * 100 >= MIN_POLYGLOT_SCORE : correct;
+      boolean b = isPolyglot ? (score * 100D) >= MIN_POLYGLOT_SCORE : correct;
       // logger.info("isCorrect " + correct + "  " + score + " " + b);
       return b;
     }
@@ -584,6 +584,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
         if (isCorrect(score)) {
+          disableRecord();
           timer.scheduleIn(NEXT_EXERCISE_DELAY);
           wrongCount = 0;
         } else {

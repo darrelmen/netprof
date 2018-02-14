@@ -21,6 +21,7 @@ public class MakePhoneReport {
    * @param totalScore
    * @param totalItems
    * @param sortByLatestExample
+   * @param useSessionGran
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
@@ -28,7 +29,8 @@ public class MakePhoneReport {
                                     Map<String, List<WordAndScore>> phoneToWordAndScore,
                                     float totalScore,
                                     float totalItems,
-                                    boolean sortByLatestExample) {
+                                    boolean sortByLatestExample,
+                                    boolean useSessionGran) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
     if (DEBUG) {
@@ -44,7 +46,8 @@ public class MakePhoneReport {
     if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     // set sessions on each phone stats
-    setSessions(phoneToAvg);
+    //  setSessions(phoneToAvg, useSessionGran);
+    new PhoneAnalysis().setSessionsWithPrune(phoneToAvg, useSessionGran);
 
     if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
@@ -75,7 +78,7 @@ public class MakePhoneReport {
       if (DEBUG) {
         logger.warn("getPhoneReport phone->words for " + phone + " : " + value.size());
         for (WordAndScore wordAndScore : value) {
-          logger.warn("getPhoneReport for " + phone+ " got " + wordAndScore);
+          logger.warn("getPhoneReport for " + phone + " got " + wordAndScore);
         }
       }
       phoneToWordAndScoreSorted.put(phone, value);
@@ -89,8 +92,8 @@ public class MakePhoneReport {
   }
 
   /**
-   *
    * Compare by score for phone, then by phone name.
+   *
    * @param phoneToAvg
    * @param sorted
    * @see #getPhoneReport
@@ -166,7 +169,7 @@ public class MakePhoneReport {
   /**
    * @param phoneToScores
    * @return
-   * @see #getPhoneReport(Map, Map, float, float, boolean)
+   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
    */
   private Map<String, PhoneStats> getPhoneToPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
     final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
@@ -182,28 +185,31 @@ public class MakePhoneReport {
 
   /**
    * @param phoneToAvgSorted
-   * @see #getPhoneReport(Map, Map, float, float, boolean)
+   * @param useSessionGran
+   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
    */
-  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted);
-  }
+//  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted, boolean useSessionGran) {
+//    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, useSessionGran);
+//  }
 
   /**
-   * @param rawBestScores
+   * @param phoneAndScores
    * @return
-   * @see #getPhoneReport(Map, Map, float, float, boolean)
+   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
    */
-  private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> rawBestScores) {
+  private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> phoneAndScores) {
     float total = 0;
     float count = 0;
     List<TimeAndScore> phoneTimeSeries = new ArrayList<>();
-    for (PhoneAndScore bs : rawBestScores) {
-      float pronScore = bs.getPronScore();
+    for (PhoneAndScore phoneAndScore : phoneAndScores) {
+      float pronScore = phoneAndScore.getPronScore();
       total += pronScore;
       count++;
       float moving = total / count;
 
-      TimeAndScore timeAndScore = new TimeAndScore(-1, bs.getTimestamp(), pronScore, moving, bs.getWordAndScore(),0L);
+      TimeAndScore timeAndScore =
+          new TimeAndScore(-1, phoneAndScore.getTimestamp(), pronScore, moving,
+              phoneAndScore.getWordAndScore(), phoneAndScore.getSessionStart());
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;

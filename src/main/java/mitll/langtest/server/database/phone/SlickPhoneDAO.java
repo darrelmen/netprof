@@ -34,11 +34,10 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.DBConnection;
@@ -138,8 +137,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        Collection<Integer> exids,
                                        String language,
                                        Project project) {
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises(userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByResult, false, true,
+    PhoneReport report = getPhoneReport(dao.getPhoneReportByExercises(userid, exids), false, true,
         userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser " +
@@ -165,7 +163,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                               Collection<Integer> ids,
                                               Project project) {
     long then = System.currentTimeMillis();
-    logger.info("getWorstPhonesForResults " + userid + " project " + project.getID()+ " ids " + ids);
+    logger.info("getWorstPhonesForResults " + userid + " project " + project.getID() + " ids " + ids);
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
     long now = System.currentTimeMillis();
     if (now - then > 0)
@@ -209,6 +207,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * <p>
    * Why get native audio here?
    *
+   * TODO : add transcript in smarter way!
+   *
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
    * @param userid
@@ -225,10 +225,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                      Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
-
+    boolean useSessionGran = project.getKind() == ProjectType.POLYGLOT;
     String language = project.getLanguage();
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
       logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
     }
@@ -273,6 +273,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             report.answer(),
             scoreJson,
             report.modified(),
+            report.device(),
             report.wseq(),
             report.word(),
             report.rid(),
@@ -293,12 +294,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     if (DEBUG) logger.info("getPhoneReport added " + num + " transcripts");
 
     return new MakePhoneReport()
-        .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample);
+        .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample, useSessionGran);
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    * @param resultid
+   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
   public void removeForResult(int resultid) {
     dao.removeForResult(resultid);

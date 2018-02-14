@@ -495,7 +495,7 @@ public abstract class BaseAudioDAO extends DAO {
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
 
-    int context = 0;
+   // int context = 0;
     Map<Integer, String> exToTranscript = new HashMap<>();
     Map<Integer, String> exToContextTranscript = new HashMap<>();
 
@@ -509,7 +509,7 @@ public abstract class BaseAudioDAO extends DAO {
         exToTranscript.put(exid, shell.getForeignLanguage());
       }
       {
-        if (shell.hasContext()) context++;
+      //  if (shell.hasContext()) context++;
         shell.getDirectlyRelated().forEach(commonExercise ->
             exToContextTranscript.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
 //        if (context == 20) logger.info("getMaleFemaleProgress " + exToContextTranscript);

@@ -5,7 +5,6 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
@@ -275,8 +274,8 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       try {
         WordAndScore wordAndScore = getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
             Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
-            wseq, word,
-            rid, phone, seq, phoneScore, database.getLanguage());
+            "", wseq, word,
+            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
           addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
@@ -291,7 +290,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
     finish(connection, statement, rs, sql);
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
+    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample, false);
   }
 
   /**

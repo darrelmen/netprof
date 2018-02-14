@@ -75,6 +75,8 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
+  public static final String PREFIX = "#";//"Sess. #";
+
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
 
@@ -149,18 +151,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.isPolyglot = isPolyglot;
     int width = isTeacherView ? WIDTH : 1365;
 
-    //  this.possible = (float) possible;
-
     if (!isPolyglot) {
       setWidth(width + "px");
     }
     {
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
-
-      //      int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
-//      style.setProperty("minHeight", minHeight, Style.Unit.PX);
-//      style.setProperty("minWidth", 300, Style.Unit.PX);
       style.setMargin(10, Style.Unit.PX);
       addStyleName("cardBorderShadow");
     }
@@ -183,7 +179,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     granToLabel.put(MONTH.getDuration(), "Month");
     granToLabel.put(AnalysisTab.YEAR_DUR, "Year");
     granToLabel.put(TENMIN.getDuration(), "Ten Minutes");
-    // granToLabel.put(ONEMIN, "Minute");
   }
 
   /**
@@ -205,7 +200,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         //  tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN.getDuration()), TENMIN.getDuration(), last));
         //   oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        //     logger.info("got sessions " + phoneSessions);
+
+             logger.info("showUserPerformance got sessions " + phoneSessions);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
@@ -232,7 +228,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
 
     String text = simpleTimeAndScores.size() > 100 ? "" :
-        "Sess. #" + (index + 1) + " : score " + fround1 + "/" + (10 * denom) + " for " + n + " items";
+        PREFIX + (index + 1) + " : score " + fround1 +
+            //"/" + (10 * denom) +
+            "%"+
+            " for " + n + " items";
     return text;
   }
 
@@ -1002,7 +1001,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   /**
    * @param listener
-   * @see AnalysisTab#getPhoneReport(PhoneReport, ExerciseController, Panel, AnalysisPlot, ShowTab)
+   * @see AnalysisTab#getPhoneReport
    */
   void addListener(TimeChangeListener listener) {
     listeners.add(listener);

@@ -34,6 +34,7 @@ package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -60,25 +61,6 @@ public class PhoneStats implements Serializable {
     this.timeSeries = timeSeries;
   }
 
-  /**
-   * @return
-   * @deprecatedx not really doing this anymore
-   */
-/*
-  public int getInitial() {
-    List<PhoneSession> sessions = getSessions();
-    return getInitial(sessions);
-  }
-*/
-
-/*
-  public int getInitial(List<PhoneSession> sessions) {
-    if (sessions == null || sessions.isEmpty()) return 0;
-
-    PhoneSession next = sessions.iterator().next();
-    return toHundred(next.getMean());
-  }
-*/
   public float getAvg() {
     if (sessions == null) return 0f;
     else {
@@ -93,23 +75,6 @@ public class PhoneStats implements Serializable {
       return total > 0 ? avg / total : 0;
     }
   }
-
-  private int toHundred(double mean) {
-    return (int) Math.round(100 * mean);
-  }
-
-/*  public int getCurrent() {
-    return getCurrent(getSessions());
-  }
-
-  public int getCurrent(List<PhoneSession> sessions2) {
-    if (sessions2 == null || sessions2.isEmpty()) return 0;
-    return toHundred(sessions2.get(sessions2.size() - 1).getMean());
-  }*/
-
-/*  public int getDiff() {
-    return getCurrent() - getInitial();
-  }*/
 
   public int getCount() {
     return count;
@@ -126,6 +91,10 @@ public class PhoneStats implements Serializable {
     return timeSeries;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#setSessionsWithPrune
+   * @param sessions
+   */
   public void setSessions(List<PhoneSession> sessions) {
     this.sessions = sessions;
   }

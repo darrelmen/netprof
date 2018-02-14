@@ -240,11 +240,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return Collections.emptyList();
   }
 
-  private List<Result> getResults(Collection<SlickResult> all) {
+/*  private List<Result> getResults(Collection<SlickResult> all) {
     List<Result> copy = new ArrayList<>();
     for (SlickResult result : all) copy.add(fromSlick(result));
     return copy;
-  }
+  }*/
 
   @Override
   public Collection<MonitorResult> getResultsDevices(int projid) {

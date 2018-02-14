@@ -39,6 +39,8 @@ import java.util.Map;
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 /**
+ * Only internal to server - not sent to client.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -47,16 +49,18 @@ import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 public class PhoneAndScore implements Comparable<PhoneAndScore> {
   private long timestamp;
   private int pronScore;
+  private long sessionStart;
   private WordAndScore wordAndScore;
 
   /**
    * @param pronScore
    * @param timestamp
-   * @see BasePhoneDAO#getAndRememberPhoneAndScore(Map, String, float, long)
+   * @see BasePhoneDAO#getAndRememberPhoneAndScore
    */
-  PhoneAndScore(float pronScore, long timestamp) {
+  PhoneAndScore(float pronScore, long timestamp, long sessionStart) {
     this.pronScore = toInt(pronScore);
     this.timestamp = timestamp;
+    this.sessionStart = sessionStart;
   }
 
   private int toInt(float value) {
@@ -92,7 +96,11 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
     return wordAndScore;
   }
 
+  public long getSessionStart() {
+    return sessionStart;
+  }
+
   public String toString() {
-    return "" + getPronScore();
+    return sessionStart + " : " + getPronScore();
   }
 }

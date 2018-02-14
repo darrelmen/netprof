@@ -44,6 +44,7 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
+import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -400,6 +401,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         displayOrder));
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getReport
+   * @return
+   */
   @Override
   public Collection<SlickProject> getAll() {
     return dao.getAll();
@@ -413,6 +418,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   @Override
   public int getByName(String name) {
     return dao.byName(name);
+  }
+
+  @Override
+  public int getByLanguageAndName(String language, String name) {
+    return dao.byLanguageAndName(language, name);
   }
 
   @Override

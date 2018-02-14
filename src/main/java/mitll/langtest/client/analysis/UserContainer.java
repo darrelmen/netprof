@@ -69,7 +69,10 @@ import java.util.logging.Logger;
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  public static final String MINE_ONLY = "Mine Only";
+  private static final boolean SHOW_MY_STUDENTS = false;
+  private static final String Y = "Y";
+
+  private static final String MINE_ONLY = "Mine Only";
 
   private static final int MAX_LENGTH = 11;
   private static final int TABLE_WIDTH = 600;
@@ -82,7 +85,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private static final int LAST_WIDTH = 110;
 
   private static final String NO_LIST = "(No List)";
-  private static final int FILTER_BY = 19;
+  //private static final int FILTER_BY = 19;
   private static final String CURRENT = "Avg";
   private static final String POLY = "Poly";
   private static final int CURRENT_WIDTH = 60;
@@ -99,8 +102,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private static final String MY_STUDENT = "My Student";
   private static final int NUM_WIDTH = 50;
   public static final String FIRST = "First";
-
-  //private final ShowTab learnTab;
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
@@ -124,7 +125,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   UserContainer(ExerciseController controller,
                 DivWidget rightSide,
                 DivWidget overallBottom,
-                //ShowTab learnTab,
                 String selectedUserKey
   ) {
     super(controller, selectedUserKey, STUDENT);
@@ -138,7 +138,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
-
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
@@ -210,7 +209,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 
   private boolean showOnlyMine() {
-    return controller.getStorage().isTrue("mineOnly");
+    return SHOW_MY_STUDENTS && controller.getStorage().isTrue("mineOnly");
   }
 
   /**
@@ -226,7 +225,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
 
-    if (!isPolyglot()) {
+    if (!isPolyglot() && SHOW_MY_STUDENTS) {
       buttons.add(new HTML(MY_STUDENT));
       DivWidget addC = new DivWidget();
       addC.add(add = getAddButton());
@@ -243,7 +242,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   @NotNull
   private Button getAddButton() {
-    final Button add = new Button("Y", IconType.PLUS);
+    final Button add = new Button(Y, IconType.PLUS);
     add.addStyleName("leftFiveMargin");
     add.setSize(ButtonSize.MINI);
 
@@ -328,7 +327,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected IsWidget getBelowHeader() {
     DivWidget filterContainer = new DivWidget();
     filterContainer.setWidth("100%");
-    filterContainer.getElement().getStyle().setMarginTop(FILTER_BY, Style.Unit.PX);
+//    filterContainer.getElement().getStyle().setMarginTop(FILTER_BY_TOP, Style.Unit.PX);
     filterContainer.addStyleName("leftFiveMargin");
 
     filterContainer.add(userTypeahead.getSearch());
@@ -338,8 +337,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       c.addStyleName("leftFiveMargin");
       c.addStyleName("floatRight");
 
- //     c.add(getFilterLabel());
- //     c.add(getListBox());
+      //     c.add(getFilterLabel());
+      //     c.add(getListBox());
 
       filterContainer.add(c);
     }
@@ -398,10 +397,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     remembered = new ArrayList<>(getList());
     filterUsers();
   }
-
-//  private void rememberAndFilterTo(Collection<UserInfo> matches) {
-//    populateTable(matches);
-//  }
 
   private void filterUsers() {
     List<UserInfo> filtered = new ArrayList<>();
@@ -477,12 +472,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     boolean polyglot = isPolyglot();
     if (!polyglot) {
-      addMine(list);
+      if (SHOW_MY_STUDENTS) addMine(list);
     }
 
     if (polyglot) {
-      table.getColumnSortList().push(addLastSession(list));
       addPolyNumber(list);
+      table.getColumnSortList().push(addLastSession(list));
     }
 
     if (!polyglot) {
@@ -602,7 +597,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
 
-
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
           if (o1 == o2) {
@@ -637,7 +631,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              int compare = Integer.compare(o1.getNum(), o2.getNum());
+              int compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
               return compare == 0 ? getDateCompare(o1, o2) : compare;
             }
           }
@@ -756,40 +750,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml((myStudents.contains(shell.getID()) ? "Y" : "N"));
+        return getSafeHtml((myStudents.contains(shell.getID()) ? Y : "N"));
       }
     };
   }
-
-/*  private Column<UserInfo, SafeHtml> getFinal() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getFinalScores());
-      }
-    };
-  }
-
-  private Column<UserInfo, SafeHtml> getDiff() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getDiff());
-      }
-    };
-  }*/
 
   private Column<UserInfo, SafeHtml> getNum() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -805,7 +769,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       }
     };
   }
-
 
   private Column<UserInfo, SafeHtml> getPolyNum() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {

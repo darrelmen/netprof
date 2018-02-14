@@ -286,14 +286,14 @@ public class ProjectEditForm extends UserDialog {
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
       return false;
-    } else if (language.getValue().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE)) {
+    } else if (isLanguageNotValid()) {
       //markErrorNoGrab(language, PLEASE_SELECT_A_LANGUAGE);
       Window.alert(PLEASE_SELECT_A_LANGUAGE);
       return false;
       // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
     } else if (unit.getSafeText().isEmpty()) {
       logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() +
-          " unit = '" + unit.getSafeText() +"'");
+          " unit = '" + unit.getSafeText() + "'");
       Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);
       return false;
     } else {
@@ -301,11 +301,19 @@ public class ProjectEditForm extends UserDialog {
     }
   }
 
+  private boolean isLanguageNotValid() {
+    return getLanguageChoice().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE);
+  }
+
+  private String getLanguageChoice() {
+    return language.getValue();
+  }
+
   /**
    * @see ProjectChoices#showNewProjectDialog
    */
   void newProject() {
-    info.setLanguage(language.getValue());
+    info.setLanguage(getLanguageChoice());
 
     DominoProject id = dominoToProject.get(dominoProjects.getValue());
 
@@ -498,7 +506,6 @@ public class ProjectEditForm extends UserDialog {
 
     if (isNew) {
       this.language.addItem(PLEASE_SELECT_A_LANGUAGE);
-
     }
     int i = 0;
 
@@ -628,19 +635,21 @@ public class ProjectEditForm extends UserDialog {
       String safeText = userField.getSafeText();
       if (!safeText.equalsIgnoreCase(info.getName())) {
         //   logger.info("checking name " + safeText);
-        projectServiceAsync.existsByName(safeText, new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            messageHelper.handleNonFatalError("Checking name.", caught);
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            if (result) {
-              markErrorNoGrabRight(userField, "Project with this name already exists.");
+        if (!isLanguageNotValid()) {
+          projectServiceAsync.existsByName(getLanguageChoice(), safeText, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              messageHelper.handleNonFatalError("Checking name.", caught);
             }
-          }
-        });
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+                markErrorNoGrabRight(userField, "Project with this name already exists.");
+              }
+            }
+          });
+        }
       }
     });
   }

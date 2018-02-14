@@ -97,11 +97,7 @@ public class NewContentChooser implements INavigation {
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
     //   logger.info("currentView " + currentView);
-//    if (currentView.equalsIgnoreCase("drill")) currentView = VIEWS.DRILL.toString();
-    VIEWS initialView = isPolyglot() ? DRILL : LEARN;
-
-    VIEWS currentStoredView = (currentView.isEmpty()) ? initialView : VIEWS.valueOf(currentView);
-
+    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView() : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
@@ -117,6 +113,11 @@ public class NewContentChooser implements INavigation {
     }
 
     return currentStoredView;
+  }
+
+  @NotNull
+  private VIEWS getInitialView() {
+    return isPolyglot() ? DRILL : LEARN;
   }
 
   private boolean isPolyglot() {
@@ -138,8 +139,7 @@ public class NewContentChooser implements INavigation {
         case LEARN:
           clear();
 
-          divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
-          divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
+          fixDivToNotScrollUnderHeader();
 
           if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
 
@@ -150,10 +150,12 @@ public class NewContentChooser implements INavigation {
           break;
         case PROGRESS:
           clear();
+          fixDivToNotScrollUnderHeader();
           showProgress();
           break;
         case LISTS:
           clear();
+          fixDivToNotScrollUnderHeader();
           listView.showContent(divWidget, "listView");
           break;
         case RECORD:
@@ -179,6 +181,11 @@ public class NewContentChooser implements INavigation {
           logger.warning("huh? unknown view " + view);
       }
     }
+  }
+
+  private void fixDivToNotScrollUnderHeader() {
+    divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+    divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
   }
 
   @Override

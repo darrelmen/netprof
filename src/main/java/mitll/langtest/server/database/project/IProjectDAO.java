@@ -107,6 +107,7 @@ public interface IProjectDAO extends IDAO {
   int getNumProjects();
 
   int getByName(String name);
+  int getByLanguageAndName(String language, String name);
   int getByLanguage(String language);
 
   int ensureDefaultProject(int defaultUser);

@@ -56,6 +56,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private long start;
   private long end;
   private String phone;
+  private long sessionStart = -100;
 
   private static final int SCALE = 1000;
 
@@ -78,14 +79,13 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
                       long meanTime,
                       long start, long end) {
     this.phone = phone;
-    //this.bin = bin;
+    this.sessionStart = bin;
     this.count = count;
     this.mean = toInt(mean);
     this.stdev = toInt(stdev);
     this.meanTime = meanTime;
     this.start = start;
     this.end = end;
-  //  this.examples = examples;
   }
 
   protected int toInt(double value) {
@@ -162,7 +162,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public long getStart() {
     return start;
   }
-
   public long getEnd() {
     return end;
   }
@@ -179,18 +178,27 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return examples;
   }*/
 
+  public long getSessionStart() {
+    return sessionStart;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
   public String toString() {
     return
-        "\n\tphone " + phone + " : " +
+        "session " + sessionStart+
+            "\n\tphone " + phone + " : " +
 //            "\n\tat    " + new Date(bin) +
-  //          "\n\tstart " + new Date(start) +
-    //        "\n\tend   " + new Date(end) +
+            //          "\n\tstart " + new Date(start) +
+            //        "\n\tend   " + new Date(end) +
             "\n\tn     " + count +
-      //      "\n\tmean  " + mean +
-        //    "\n\tstdev " + stdev +
+            //      "\n\tmean  " + mean +
+            //    "\n\tstdev " + stdev +
             "\n\ttime  " + new Date(meanTime)
-            //+
-            //"\n\texamples  " + examples.size()
+        //+
+        //"\n\texamples  " + examples.size()
         ;
   }
 }

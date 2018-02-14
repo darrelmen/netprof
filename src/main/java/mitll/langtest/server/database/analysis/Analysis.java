@@ -42,6 +42,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.FirstLastUser;
@@ -132,8 +133,8 @@ public abstract class Analysis extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
-   // Set<String> lincoln = getLincolnAffiliations();
-  //  Set<String> skipped = new TreeSet<>();
+    // Set<String> lincoln = getLincolnAffiliations();
+    //  Set<String> skipped = new TreeSet<>();
 
     idToUserInfo.forEach((userid, value) -> {
       FirstLastUser miniUser = firstLastUsers.get(userid);
@@ -145,9 +146,9 @@ public abstract class Analysis extends DAO {
 //          skipped.add(miniUser.getUserID());
 //          logger.info("getUserInfos skip " + miniUser);
 //        } else {
-          value.setFrom(miniUser);
+        value.setFrom(miniUser);
 //          logger.info("getUserInfos got " + value.getID() + " " + value.getFirst() + " " + value.getLast());
-          userInfos.add(value);
+        userInfos.add(value);
 //        }
       }
     });
@@ -155,7 +156,7 @@ public abstract class Analysis extends DAO {
 
     if (now - then > 100) {
       logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos"
-         // +         ", skipped " + skipped
+          // +         ", skipped " + skipped
       );
     }
     return userInfos;
@@ -195,10 +196,13 @@ public abstract class Analysis extends DAO {
       if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + next);
       if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + next.getBestScores().size());
       UserPerformance userPerformance = new UserPerformance(id, next.getBestScores(), next.getFirst(), next.getLast());
-      List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-      logger.debug("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
-      userPerformance.setGranularityToSessions(
-          new PhoneAnalysis().getGranularityToSessions(rawBestScores));
+
+      {
+        List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+        logger.debug("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
+        userPerformance.setGranularityToSessions(
+            new PhoneAnalysis().getGranularityToSessions(rawBestScores));
+      }
       return userPerformance;
     }
   }
@@ -310,7 +314,7 @@ public abstract class Analysis extends DAO {
    * @param next
    * @param project
    * @return
-   * @see IAnalysis#getPerformanceReportForUser
+   * @see SlickAnalysis#getPerformanceReportForUser
    */
   PhoneReport getPhoneReport(int userid, UserInfo next, Project project) {
     //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
@@ -344,13 +348,12 @@ public abstract class Analysis extends DAO {
       Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
       if (phoneToAvgSorted.isEmpty()) {
         logger.warn("getPhonesForUser : no phones for " + userid + "?");
-      }
-      else {
+      } else {
         logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
       }
 
-      setSessions(phoneToAvgSorted);
-
+      //setSessions(phoneToAvgSorted);
+      new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, project.getKind() == ProjectType.POLYGLOT);
       return phoneReport;
     }
   }
@@ -401,10 +404,10 @@ public abstract class Analysis extends DAO {
       logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + resultIDs.size() + " resultIDs ");
     return resultIDs;
   }
-
-  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted);
-  }
+//
+//  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+//    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, useSessionGran);
+//  }
 
   /**
    * remember the last best attempt we have in a sequence for an item, but if they come back to practice it more than 5 minutes later

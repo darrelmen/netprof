@@ -51,18 +51,12 @@ public class PhoneSessionInternal {
   private final long bin;
   private long start;
   private long end = 0;
-  //private MinMaxPriorityQueue<WordAndScore> queue;
 
   /**
    * @param bin
    * @see PhoneAnalysis#partition
    */
-  PhoneSessionInternal(long bin) {
-    this.bin = bin;
-/*    this.queue = MinMaxPriorityQueue
-        .maximumSize(100000)
-        .create();*/
-  }
+  PhoneSessionInternal(long bin) {   this.bin = bin;  }
 
   /**
    *

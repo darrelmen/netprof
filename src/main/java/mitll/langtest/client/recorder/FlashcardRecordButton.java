@@ -146,7 +146,7 @@ public class FlashcardRecordButton extends RecordButton {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       if (isSpace) {
-        logger.info("checkKeyDown got space");
+       // logger.info("checkKeyDown got space");
         if (!mouseDown) {
           mouseDown = true;
           doClick();

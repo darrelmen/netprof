@@ -87,7 +87,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     long then = System.currentTimeMillis();
     if (hasTeacherPerm(-1)) {
       int projectIDFromUser = getProjectIDFromUser();
-      logger.info("getUsersWithRecordings " + projectIDFromUser);
+      logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
       List<UserInfo> userInfo = db.getAnalysis(projectIDFromUser).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
       long now = System.currentTimeMillis();
       if (now - then > 100) {

@@ -42,10 +42,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BasePhoneDAO extends DAO {
   //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
@@ -56,32 +53,33 @@ public class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
-//  private final ParseResultJson parseResultJson;
+  //  private final ParseResultJson parseResultJson;
+  private Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);
-  //  parseResultJson = new ParseResultJson(database.getServerProps(), language);
+    //  parseResultJson = new ParseResultJson(database.getServerProps(), language);
   }
 
   /**
-   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
    * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
    * @param language
+   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
    */
-   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
-                      String scoreJson,
-                      WordAndScore wordAndScore, String language) {
-     ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
-     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
-         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
+  void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
+                     String scoreJson,
+                     WordAndScore wordAndScore, String language) {
+    ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
+        jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
   }
 
   /**
-   * TODO : don't do this with the idToRef map...
-   *  look it up in a better way
+   *
+   * look it up in a better way
    *
    * @param phoneToScores
    * @param phoneToWordAndScore
@@ -89,6 +87,7 @@ public class BasePhoneDAO extends DAO {
    * @param audioAnswer
    * @param scoreJson
    * @param resultTime
+   * @param device
    * @param wseq
    * @param word
    * @param rid
@@ -99,73 +98,99 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
-  WordAndScore getAndRememberWordAndScore(
-                                          String refAudioForExercise,
+  WordAndScore getAndRememberWordAndScore(String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
                                           Map<String, List<WordAndScore>> phoneToWordAndScore,
                                           int exid,
                                           String audioAnswer,
                                           String scoreJson,
                                           long resultTime,
+                                          String device,
                                           int wseq,
                                           String word,
-                                          long rid,
+                                          int rid,
                                           String phone,
                                           int seq,
                                           float phoneScore,
                                           String language) {
-    PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime);
+    Long sessionTime = getSessionTime(sessionToLong, device);
+
+    PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, sessionTime);
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
 
-    String filePath = getFilePath(audioAnswer, language);
-
+   // String filePath = getFilePath(audioAnswer, language);
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
         phoneScore,
-        (int)rid,
+        rid,
         wseq,
         seq,
-        filePath,
+        getFilePath(audioAnswer, language),
         refAudioForExercise,
         scoreJson,
         resultTime);
 
     wordAndScores.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
+
     return wordAndScore;
+  }
+
+  /**
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
+   * @param sessionToLong
+   * @param device
+   * @return
+   */
+  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+    Long parsedTime = sessionToLong.get(device);
+
+    if (parsedTime == null) {
+      try {
+        parsedTime = Long.parseLong(device);
+//        logger.info("getSessionTime " + parsedTime);
+      } catch (NumberFormatException e) {
+        //      logger.info("can't parse " + device);
+        parsedTime = -1L;
+      }
+      sessionToLong.put(device, parsedTime);
+    }
+    return parsedTime;
   }
 
   private String getFilePath(String audioAnswer, String language) {
     boolean isLegacy = audioAnswer.startsWith("answers");
     return isLegacy ?
-        getRelPrefix(language) + audioAnswer:
+        getRelPrefix(language) + audioAnswer :
         trimPathForWebPage(audioAnswer);
   }
 
   /**
-   *
    * @param phoneToScores
    * @param phone
    * @param phoneScore
    * @param resultTime
    * @return
-   * @see #getAndRememberWordAndScore(String, Map, Map, int, String, String, long, int, String, long, String, int, float, String)
+   * @see #getAndRememberWordAndScore
    */
   private PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
                                                     String phone,
                                                     float phoneScore,
-                                                    long resultTime) {
-    List<PhoneAndScore> scores = phoneToScores.computeIfAbsent(phone, k -> new ArrayList<>());
-    PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime);
-    scores.add(phoneAndScore);
+                                                    long resultTime,
+                                                    long sessionStart) {
+    PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime, sessionStart);
+    {
+      List<PhoneAndScore> scores = phoneToScores.computeIfAbsent(phone, k -> new ArrayList<>());
+      scores.add(phoneAndScore);
+    }
     return phoneAndScore;
   }
 
   /**
-   * @see #addTranscript(Map, String, WordAndScore, String)
    * @param wordAndScore
    * @param netPronImageTypeListMap
+   * @see #addTranscript(Map, String, WordAndScore, String)
    */
   private void setTranscript(WordAndScore wordAndScore,
                              Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
@@ -181,15 +206,16 @@ public class BasePhoneDAO extends DAO {
 
   /**
    * Fix the path -  on hydra it's at:
-   *
+   * <p>
    * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
-   *
+   * <p>
    * rel path:
-   *
+   * <p>
    * answers/english/answers/plan/1039/1/subject-130
    *
    * @param language
    * @return
+   * @see mitll.langtest.server.database.result.SlickResultDAO#getRelPrefix
    */
   private String getRelPrefix(String language) {
     String installPath = database.getServerProps().getAnswerDir();
@@ -198,7 +224,6 @@ public class BasePhoneDAO extends DAO {
     String prefix = installPath + File.separator + s;
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
-    String relPrefix = prefix.substring(netProfDurLength) + File.separator ;
-    return relPrefix;
+    return prefix.substring(netProfDurLength) + File.separator;
   }
 }

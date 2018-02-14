@@ -344,6 +344,11 @@ public class ScoreServlet extends DatabaseServlet {
     return userIDFromSession;
   }
 
+  /**
+   * PRODUCTION instance - assume only one?
+   * @param language
+   * @return
+   */
   private int getProjectID(String language) {
     return getDAOContainer().getProjectDAO().getByLanguage(language);
   }
@@ -402,6 +407,8 @@ public class ScoreServlet extends DatabaseServlet {
       }
     }
   }*/
+
+/*
   @NotNull
   private JSONObject getJsonResponse(String message) {
     JSONObject jsonObject = new JSONObject();
@@ -409,11 +416,13 @@ public class ScoreServlet extends DatabaseServlet {
     jsonObject.put(ERROR1, message);
     return jsonObject;
   }
+  */
 
+/*
   private void addSuccess(JSONObject jsonObject, boolean b) {
     jsonObject.put(SUCCESS, Boolean.valueOf(b).toString());
   }
-
+*/
   /**
    * Defaults to this year.
    *

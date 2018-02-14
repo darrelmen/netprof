@@ -47,11 +47,13 @@ import java.util.List;
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
   /**
+   *
+   * @param languageChoice
    * @param name
    * @return
    * @see mitll.langtest.client.project.ProjectEditForm#checkNameOnBlur
    */
-  boolean existsByName(String name) throws DominoSessionException, RestrictedOperationException;
+  boolean existsByName(String languageChoice, String name) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @see ProjectEditForm#updateProject
