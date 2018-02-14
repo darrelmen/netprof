@@ -62,11 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
@@ -163,15 +159,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       super.service(request, response);
     }
   }*/
-
   protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
     return super.getSectionHelper();
   }
 
   /**
-   * @see LangTestDatabaseImpl#getUserHistoryForList
    * @return
    * @throws DominoSessionException
+   * @see LangTestDatabaseImpl#getUserHistoryForList
    */
   private Collection<CommonExercise> getExercisesForUser() throws DominoSessionException {
     return db.getExercises(getProjectIDFromUser());
@@ -318,14 +313,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     int projectID = getProjectIDFromUser(userIDFromSession);
     Collator collator = getCollator(projectID);
     if (userListByID != null) {
-      userListByID.getExercises().forEach(exercise->populateCollatorMap(allIDs, idToKey, collator, exercise));
+      userListByID.getExercises().forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
     } else {
       Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercisesForUser() :
-          getSectionHelper().getExercisesForSelectionState(typeToSection);
+          (getSectionHelper() == null ? Collections.emptyList() : getSectionHelper().getExercisesForSelectionState(typeToSection));
 
       exercisesForState.forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
     }
-     //logger.debug("for " + typeToSection + " found " + allIDs.size());
+    //logger.debug("for " + typeToSection + " found " + allIDs.size());
     return db.getUserHistoryForList(userIDFromSession, ids, (int) latestResultID, allIDs, idToKey, db.getLanguage(projectID));
   }
 
@@ -393,7 +388,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       if (attribute != null) {
 //        logger.info("got " + attribute + " : " + attribute.getClass());
       } else {
-        logger.warn("readProperties : no " +USER_SVC + " attribute...? ");
+        logger.warn("readProperties : no " + USER_SVC + " attribute...? ");
       }
 
       db = makeDatabaseImpl(serverProps);

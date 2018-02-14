@@ -48,6 +48,8 @@ import mitll.langtest.client.analysis.ReqCounter;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.IShowStatus;
+import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
@@ -427,10 +429,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private static final long ONE_MIN = (60L * 1000L);
     private static final int CHART_HEIGHT = 120;
     private static final String TRY_AGAIN = "Try Again?";
-    public static final String TIME_LEFT = "Time left";
+    private static final String TIME_LEFT = "Time left";
 
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
+    private SpeedChoices speedChoices;
 
     private int count;
 
@@ -468,7 +471,25 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     @Override
     protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
-      if (!isPolyglot) super.addControlsBelowAudio(controlState, rightColumn);
+      if (isPolyglot) {
+        speedChoices = new SpeedChoices();
+        rightColumn.add(speedChoices.getSpeedChoices());
+      } else {
+        super.addControlsBelowAudio(controlState, rightColumn);
+      }
+    }
+
+    String getRefAudioToPlay() {
+      if (isPolyglot) {
+        boolean regular = speedChoices.isRegular();
+        String path = regular ? exercise.getRefAudio() : exercise.getSlowAudioRef();
+        if (path == null) {
+          path = regular ? exercise.getSlowAudioRef() : exercise.getRefAudio(); // fall back to slow audio
+        }
+        return path;
+      } else {
+        return super.getRefAudioToPlay();
+      }
     }
 
     public int getCounter() {
@@ -486,6 +507,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     @Override
     protected void recordingStarted() {
+      cancelAdvanceTimer();
       soundFeedback.clear();
       removePlayingHighlight();
     }
@@ -584,7 +606,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
         if (isCorrect(score)) {
-          disableRecord();
+          // disableRecord();
           timer.scheduleIn(NEXT_EXERCISE_DELAY);
           wrongCount = 0;
         } else {
@@ -947,6 +969,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       new TooltipHelper().addTooltip(seeScores, SKIP_TO_END);
       return seeScores;
     }
+
+    @Override
+    void flipCard() {
+      if (!isPolyglot) {
+        super.flipCard();
+      }
+    }
+
 
     private void gotSeeScoresClick() {
       abortPlayback();

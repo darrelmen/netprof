@@ -390,10 +390,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     horiz.addStyleName("inlineFlex");
     horiz.getElement().setId("left-content-right_container");
 
-    leftState = getLeftState();
-    //leftState.addStyleName("floatLeft");
-
-    if (leftState != null) {
+    if ((leftState = getLeftState()) != null) {
       DivWidget leftC = new DivWidget();
       leftC.setWidth(140 + "px");
       leftC.add(leftState);
@@ -414,7 +411,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     horiz.add(grid);
 
     rightColumn = getRightColumn(controlState);
-    //rightColumn.addStyleName("floatLeft");
     horiz.add(rightColumn);
     return horiz;
   }
@@ -446,14 +442,19 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     contentMiddle.setHeight(CARD_HEIGHT + "px");
     contentMiddle.getElement().setId("Focusable_content");
-    contentMiddle.addClickHandler(event -> {
-      boolean englishHidden = isHidden(english);
-      //  logger.info("content click " + englishHidden);
-      setAutoPlay(false);
-      controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
-      flipCard();
-    });
+
+    contentMiddle.addClickHandler(event -> gotCardClick(contentMiddle));
     return contentMiddle;
+  }
+
+  private void gotCardClick(ClickableSimplePanel contentMiddle) {
+    boolean englishHidden = isHidden(english);
+    //  logger.info("content click " + englishHidden);
+    setAutoPlay(false);
+    flipCard();
+
+    controller.logEvent(contentMiddle,
+        "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
   }
 
   /**

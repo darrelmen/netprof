@@ -165,7 +165,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (DEBUG || true) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    if (DEBUG) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
 
     this.from = from;
     this.to = to;
@@ -211,7 +211,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses,
                                 Map<String, PhoneStats> phoneToAvgSorted,
                                 long first, long last) {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getPhoneStatuses From    " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
       logger.info("getPhoneStatuses examine " + phoneToAvgSorted.entrySet().size());
     }
@@ -307,12 +307,15 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       if (doesSessionOverlap(first, last, session)
           ) {
         filtered.add(session);
-        logger.info("getFiltered included " + session.getPhone() +
-            " " +
-            debugFormat(session.getStart()) + "-" +
-            debugFormat(session.getEnd())
-        );
-      } else {
+
+        if (DEBUG) {
+          logger.info("getFiltered included " + session.getPhone() +
+              " " +
+              debugFormat(session.getStart()) + "-" +
+              debugFormat(session.getEnd())
+          );
+        }
+      } else if (DEBUG) {
         logger.info("getFiltered exclude " + session);
       }
     }

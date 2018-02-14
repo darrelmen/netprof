@@ -59,6 +59,7 @@ public class Trie<T> {
   private static final int WINDOW_SIZE = 20;
   private static final int MAX_WINDOW = WINDOW_SIZE;// * 2;
   private static final int MIN_WINDOW = WINDOW_SIZE / 2;
+  private static final int MAX_LEN = 1000;
 
   private final TrieNode<T> root;
   private Map<String, String> tempCache;
@@ -183,9 +184,9 @@ public class Trie<T> {
     List<String> toAdd = new ArrayList<>();
 
     int length = entry.length();
-    if (length > 500) {
+    if (length > MAX_LEN) {
       int orig = entry.length();
-      entry = entry.substring(0, 500);
+      entry = entry.substring(0, MAX_LEN);
       logger.warn("getChars adding entry " + entry + " length " + orig);
     }
     if (DEBUG && length > WINDOW_SIZE) logger.info("getChars : " + entry);

@@ -55,16 +55,32 @@ import java.util.*;
 import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
-public class DownloadHelper {
+public class DownloadHelper implements IShowStatus {
   //  private final Logger logger = Logger.getLogger("DownloadHelper");
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
   private static final String ALLCONTEXT = "allcontext";
+  //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet for whole course.";
+//  private static final String SELECT_A_UNIT_OR_CHAPTER = "If you also want to download audio, select a unit or chapter.";
+  private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
+  private static final String DOWNLOAD_CONTENT_SPREADSHEEET = "Download Content Spreadsheeet";
+  private static final String SPEED = "Speed";
+  private static final String CONTENT = "Content";
+  private static final String CONTEXT_SENTENCES = "Context Sentences";
+  private static final String GENDER = "Gender";
+
+  /*  private static final String REGULAR = "Regular";
+  private static final String SLOW = "Slow";*/
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
+  private SpeedChoices speedChoices;
+
+  public DownloadHelper() {
+    this.speedChoices = new SpeedChoices(this);
+  }
 
   /**
    * @param selectionState
@@ -90,48 +106,38 @@ public class DownloadHelper {
   public void showDialog(String host) {
     isMale = false;
     isContext = false;
-    isRegular = true;
+    // isRegular = true;
 
     DivWidget container = new DivWidget();
-    boolean empty = selectionState == null || selectionState.isEmpty();
+/*    boolean empty = selectionState == null || selectionState.isEmpty();
     if (empty) {
-      container.add(new Heading(3, "Download spreadsheet for whole course."));
-      container.add(new Heading(4, "If you also want to download audio, select a unit or chapter."));
-    } else {
-      status1.setText("");
-      status1.setHeight("20px");
-      isRegularSet = false;
-      isContextSet = false;
-      isMaleSet = false;
+      container.add(new Heading(3, DOWNLOAD_SPREADSHEET));
+      container.add(new Heading(4, SELECT_A_UNIT_OR_CHAPTER));
+    } else {*/
+    // isRegularSet = false;
+    isContextSet = false;
+    isMaleSet = false;
 
-      status2.setText("");
-      status2.setHeight("20px");
+    styleStatus(status1);
+    styleStatus(status2);
+    styleStatus(status3);
 
-      status3.setText("");
-      status3.setHeight("20px");
-
+    {
       FluidRow row = new FluidRow();
       Heading w = new Heading(4, selectionState.getDescription(typeOrder));
       w.addStyleName("blueColor");
       row.add(w);
       container.add(row);
-
-      row = getContentRow();
-      container.add(row);
-
-      row = getGenderRow();
-      container.add(row);
-
-      row = getSpeedRow();
-      container.add(row);
-
-      row = getStatusArea();
-      container.add(row);
     }
 
-    String title = "Download Audio and Spreadsheet";
+    container.add(getContentRow());
+    container.add(getGenderRow());
+    container.add(getSpeedRow());
+    container.add(getStatusArea());
+    //  }
 
-    if (empty) title = "Download Content Spreadsheeet";
+    // String title = empty ? DOWNLOAD_CONTENT_SPREADSHEEET : DOWNLOAD_AUDIO_AND_SPREADSHEET;
+    String title = DOWNLOAD_AUDIO_AND_SPREADSHEET;
 
     closeButton = new DialogHelper(true).show(
         title,
@@ -158,12 +164,16 @@ public class DownloadHelper {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setEnabled(empty);
+    closeButton.setEnabled(false);
+  }
+
+  private void styleStatus(Heading status1) {
+    status1.setText("");
+    status1.setHeight("20px");
   }
 
   private FluidRow getStatusArea() {
-    FluidRow row;
-    row = new FluidRow();
+    FluidRow row = new FluidRow();
 
     Well well = new Well();
     Panel vert = new VerticalPanel();
@@ -179,42 +189,42 @@ public class DownloadHelper {
     return row;
   }
 
-  private FluidRow getSpeedRow() {
-    FluidRow row;
-    row = new FluidRow();
-    row.add(new Heading(4, "Speed"));
-    Widget showGroup2 = getSpeedChoices();
-    row.add(showGroup2);
+  private Widget getSpeedRow() {
+    FluidRow row = new FluidRow();
+    row.add(new Heading(4, SPEED));
+    row.add(speedChoices.getSpeedChoices());
     return row;
   }
 
   private FluidRow getContentRow() {
-    FluidRow row;
-    row = new FluidRow();
-    row.add(new Heading(4, "Content"));
-    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList(VOCABULARY, "Context Sentences"), "vocab", ButtonType.DEFAULT);
+    FluidRow row = new FluidRow();
+    row.add(new Heading(4, CONTENT));
+    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList(VOCABULARY, CONTEXT_SENTENCES), "vocab", ButtonType.DEFAULT);
     row.add(buttonBarChoices);
     return row;
   }
 
   private FluidRow getGenderRow() {
-    DivWidget showGroup = getGenderChoices(/*false*/);
-    showGroup.addStyleName("topFiveMargin");
-    showGroup.addStyleName("bottomFiveMargin");
-
     FluidRow row = new FluidRow();
-    row.add(new Heading(4, "Gender"));
-    row.add(showGroup);
+    row.add(new Heading(4, GENDER));
+
+    {
+      DivWidget showGroup = getGenderChoices(/*false*/);
+      showGroup.addStyleName("topFiveMargin");
+      showGroup.addStyleName("bottomFiveMargin");
+      row.add(showGroup);
+    }
+
     return row;
   }
 
   private Button closeButton;
 
-  private void showStatus() {
+  public void showStatus() {
     status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
     status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
-    status3.setText((isRegularSet ? isRegular ? "Regular Speed" : "Slow Speed" : ""));
-    closeButton.setEnabled(isMaleSet && isContextSet && isRegularSet);
+    status3.setText(speedChoices.getStatus());
+    closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isRegularSet());
   }
 
   private Widget getButtonBarChoices(Collection<String> values, final String type, ButtonType buttonType) {
@@ -273,17 +283,19 @@ public class DownloadHelper {
 
   private boolean isMale = false;
   private boolean isContext = false;
-  private boolean isRegular = false;
+//  private boolean isRegular = false;
 
   private boolean isContextSet = false;
-  private boolean isRegularSet = false;
+  //private boolean isRegularSet = false;
   private boolean isMaleSet = false;
 
+/*
   private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
   private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
 
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
+*/
 
   private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -315,30 +327,35 @@ public class DownloadHelper {
     return buttonToolbar;
   }
 
+/*
   private Widget getSpeedChoices() {
     Panel buttonToolbar = getToolbar2();
     buttonToolbar.setHeight("40px");
-    String choice = "Regular";
 
-    regular = getChoice2(choice, rabbit, rabbitSelected, event -> {
-      isRegular = regular.isDown();
-      isRegularSet = true;
-      showSpeeds();
-    });
-    buttonToolbar.add(regular);
+    {
+      regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> {
+        isRegular = regular.isDown();
+        isRegularSet = true;
+        showSpeeds();
+      });
+      buttonToolbar.add(regular);
+    }
 
-    String choice2 = "Slow";
-    slow = getChoice2(choice2, turtle, turtleSelected, event -> {
-      isRegular = !slow.isDown();
-      //  logger.info("got slow click " + isRegular);
-      isRegularSet = true;
-      showSpeeds();
-    });
-    buttonToolbar.add(slow);
+    {
+      slow = getChoice2(SLOW, turtle, turtleSelected, event -> {
+        isRegular = !slow.isDown();
+        //  logger.info("got slow click " + isRegular);
+        isRegularSet = true;
+        showSpeeds();
+      });
+      buttonToolbar.add(slow);
+    }
+
     buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
     return buttonToolbar;
   }
-
+*/
+/*
   private Panel getToolbar2() {
     return new HorizontalPanel();
   }
@@ -349,7 +366,7 @@ public class DownloadHelper {
     regular.setDown(isRegular);
     slow.setDown(!isRegular);
     showStatus();
-  }
+  }*/
 
   private com.github.gwtbootstrap.client.ui.Button getChoice(String title, boolean isActive, ClickHandler handler) {
     com.github.gwtbootstrap.client.ui.Button onButton =
@@ -421,7 +438,7 @@ public class DownloadHelper {
         "request=" + request +
         "&unit=" + encode +
         "&male=" + isMale +
-        "&regular=" + isRegular +
+        "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext;
   }
 }

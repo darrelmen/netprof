@@ -656,7 +656,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   private void addListsAsLinks(Collection<IUserList> result, long then, Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
-    logger.info("took " + (System.currentTimeMillis() - then) + " to get lists for user.");
+    long l = System.currentTimeMillis();
+    if (l - then > 150) {
+      logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
+
+    }
 
     finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
@@ -1695,13 +1699,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 //    logger.info("goGetNextPage toAskFor " + toAskFor.size());
     if (toAskFor.size() == 1) {
       toAskFor = getNextIDs(items, i, 20);
-  //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size());
+      //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size());
     }
     if (toAskFor.isEmpty()) {
       //logger.info("already has cached total " + fetched.size());
     } else {
       long then = System.currentTimeMillis();
-      logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
+      //logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
       service.getFullExercises(-1, toAskFor,
           new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
             @Override
@@ -1721,7 +1725,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                   logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
                 }
                 setScoreHistory(result);
-                result.getExercises().forEach(ex->addExerciseToCached(ex));
+                result.getExercises().forEach(ex -> addExerciseToCached(ex));
               } else {
                 logger.warning("getFullExercises huh? no exercises");
               }

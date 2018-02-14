@@ -112,7 +112,6 @@ public class PhoneAnalysis {
   <T extends SimpleTimeAndScore> Map<Long, List<PhoneSession>> getGranularityToSessions(List<T> answersForUser) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, GRANULARITIES);
 
-
     Map<Long, List<PhoneSession>> granToSessions = new HashMap<>();
     granularityToSessions
         .forEach((k, v) -> granToSessions.put(k,
@@ -148,9 +147,11 @@ public class PhoneAnalysis {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
     Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
     times.forEach(time -> granularityToSessions.put(time, new ArrayList<>()));
-    logger.info("getGranularityToSessions gran->session " + granularityToSessions.size());
 
     partition(answersForUser, times, granularityToSessions, granToCurrent);
+
+    logger.info("getGranularityToSessions # sessions " + granularityToSessions.get(SESSION).size());
+
     return granularityToSessions;
   }
 
@@ -214,7 +215,7 @@ public class PhoneAnalysis {
    * @param times                 granularities - HOUR, DAY, WEEK, MONTH
    * @param granularityToSessions all sessions for this granularity
    * @param granToCurrent         bin to session
-   * @see #getGranularityToSessions(List, List)
+   * @see #getGranularityToSessions
    */
   private <T extends SimpleTimeAndScore> void partition(List<T> answersForUser,
                                                         List<Long> times,

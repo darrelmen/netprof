@@ -62,7 +62,6 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
-  private NPFlexSectionExerciseList facetExerciseList;
   private PolyglotDialog.MODE_CHOICE mode;
   private NewContentChooser navigation;
 
@@ -103,7 +102,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return facetExerciseList = new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
+        return new NPFlexSectionExerciseList(outer.getController(), topRow, currentExercisePanel,
             new ListOptions(instanceName)
                 .setShowPager(false).
                 setShowTypeAhead(false),
@@ -113,15 +112,8 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
           protected void goToFirst(String searchIfAny, int exerciseID) {
             super.goToFirst(searchIfAny, exerciseID);
-            //      statsFlashcardFactory.checkPoly();
-            logger.info("goToFirst : start over? " + mode);
             statsFlashcardFactory.setMode(mode);
             statsFlashcardFactory.setNavigation(navigation);
-         /*   if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
-              statsFlashcardFactory.stopTimedRun();
-            } else {
-              statsFlashcardFactory.startTimedRun();
-            }*/
           }
 
           protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {

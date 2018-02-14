@@ -23,6 +23,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   public static final String SIL = "sil";
   private static final int MAX_FROM_ANY_TOKEN = 10;
   private static final String POUND = "#";
+  private static final boolean DEBUG = false;
 
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
@@ -171,7 +172,7 @@ public class PronunciationLookup implements IPronunciationLookup {
        // logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
         if ((easyMatch = htkDictionary.contains(word)) ||
             (htkDictionary.contains(word.toLowerCase()))) {
-          logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "'");
+          if (DEBUG) logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "'");
           addDictMatches(justPhones, dict, word, easyMatch);
         } else {  // not in the dictionary, let's ask LTS
           logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'");
