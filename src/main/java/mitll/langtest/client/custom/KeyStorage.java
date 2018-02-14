@@ -47,11 +47,12 @@ import java.util.logging.Logger;
 public class KeyStorage {
   private final Logger logger = Logger.getLogger("KeyStorage");
 
-  private ExerciseController controller;
-  private final boolean DEBUG = false;
+  private ExerciseController controller = null;
   private String language;
   private int user;
   private boolean showedAlert = false;
+
+  private final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -80,8 +81,10 @@ public class KeyStorage {
   }
 
   public boolean isTrue(String name) {
-    return getValue(name).equals("true");
+    String value = getValue(name);
+    return value.equals("true");
   }
+
   public int getInt(String name) {
     String value = getValue(name);
     if (value == null) return -1;
@@ -113,6 +116,10 @@ public class KeyStorage {
     }
   }
 
+  public boolean hasValue(String name) {
+    return !getValue(name).isEmpty();
+  }
+
   /**
    * @see
    * @param name
@@ -120,10 +127,8 @@ public class KeyStorage {
    */
   public String getValue(String name) {
     if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
       String localStorageKey = getLocalStorageKey(name);
-      String item = localStorageIfSupported.getItem(localStorageKey);
+      String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
       //  if (debug) System.out.println("KeyStorage : (" +localStorageKey+ ")" + " name " + name + "=" +item);
       if (item == null) item = "";
       return item;
@@ -132,14 +137,9 @@ public class KeyStorage {
     }
   }
 
-  public boolean hasValue(String name) {
-    return !getValue(name).isEmpty();
-  }
-
   public void removeValue(String name) {
     if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.removeItem(getLocalStorageKey(name));
+      Storage.getLocalStorageIfSupported().removeItem(getLocalStorageKey(name));
       //if (debug) System.out.println("KeyStorage : removeValue " + name);
     }
   }

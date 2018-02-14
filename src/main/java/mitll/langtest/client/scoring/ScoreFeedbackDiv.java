@@ -27,9 +27,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv {
-  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+  //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
-  private static final double NATIVE_THRSHOLD = .75;
+  private static final double NATIVE_THRSHOLD = 0.75D;
   private static final String OVERALL_SCORE = "Overall Score";
 
   private final ProgressBar progressBar;
@@ -183,7 +183,8 @@ public class ScoreFeedbackDiv {
     return praise;
   }
 
-  private List<String> praise = Arrays.asList("Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!", "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!", "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!");
+  private List<String> praise = Arrays.asList("Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
+      "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!", "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!");
   private Random rand = new Random();
 
   @NotNull

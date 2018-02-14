@@ -130,7 +130,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Map<String, Collection<String>> selection = new HashMap<>();
   private final UserList ul;
   private Widget contentPanel;
-  private boolean isPolyglot = false;
+  private boolean isPolyglot;
   private boolean inLightningRound = false;
   private Timer roundTimer = null;
   private Timer recurringTimer = null;
@@ -143,6 +143,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Map<Integer, AudioAnswer> exToLatest = new LinkedHashMap<>();
   private StatsPracticePanel currentFlashcard = null;
   private NewContentChooser navigation;
+  private KeyStorage storage;
 
   /**
    * @param controller
@@ -176,6 +177,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       });
     }
+
     KeyStorage storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
@@ -472,7 +474,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
       if (isPolyglot) {
-        speedChoices = new SpeedChoices(controller.getStorage());
+        speedChoices = new SpeedChoices(storage);
         rightColumn.add(speedChoices.getSpeedChoices());
       } else {
         super.addControlsBelowAudio(controlState, rightColumn);

@@ -75,7 +75,7 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
-  public static final String PREFIX = "#";//"Sess. #";
+  private static final String PREFIX = "#";//"Sess. #";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
@@ -197,11 +197,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
       if (isPolyglot) {
-        //  tenMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(TENMIN.getDuration()), TENMIN.getDuration(), last));
-        //   oneMinutes.addAll(getPeriods(userPerformance.getGranularityToSessions().get(ONEMIN), ONEMIN, last));
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
 
-             logger.info("showUserPerformance got sessions " + phoneSessions);
+        //      logger.info("showUserPerformance got sessions " + phoneSessions);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
@@ -230,7 +228,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     String text = simpleTimeAndScores.size() > 100 ? "" :
         PREFIX + (index + 1) + " : score " + fround1 +
             //"/" + (10 * denom) +
-            "%"+
+            "%" +
             " for " + n + " items";
     return text;
   }
