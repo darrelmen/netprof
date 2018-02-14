@@ -50,7 +50,7 @@ import java.util.*;
  */
 public class UserInfo implements HasID {
   private int current;
-  private int lastSession;
+  private int lastSessionScore;
   private int lastSessionNum;
   private int num;
   private long startTime;
@@ -77,10 +77,11 @@ public class UserInfo implements HasID {
     // done on server
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
     setCurrent(getPercent(bestScores));
-    setLastSession(bestScores);
+
+    setLastSessionScore(bestScores);
   }
 
-  private void setLastSession(List<BestScore> bestScores) {
+  private void setLastSessionScore(List<BestScore> bestScores) {
     long maxSession = Long.MIN_VALUE;
     Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
     for (BestScore bestScore : bestScores) {
@@ -93,7 +94,7 @@ public class UserInfo implements HasID {
     }
     List<BestScore> bestScores1 = sessionToScores.get(maxSession);
 
-    lastSession = getPercent(bestScores1);
+    lastSessionScore = getPercent(bestScores1);
     lastSessionNum = bestScores1.size();
   }
 
@@ -168,7 +169,7 @@ public class UserInfo implements HasID {
     setId(firstLastUser.getID()); // necessary?
     setUserID(firstLastUser.getUserID());
     this.first = firstLastUser.getFirst();
-    this.last = firstLastUser.getLast();
+    this.last  = firstLastUser.getLast();
   }
 
   @Override
@@ -177,26 +178,19 @@ public class UserInfo implements HasID {
   }
 
   /**
-   * @paramx first
-   * @see Analysis#getUserInfos
+   * @see UserContainer#addFirstName(List)
+   * @return
    */
-//  public void setFirst(String first) {
-//    this.first = first;
-//  }
   public String getFirst() {
     return first;
   }
-
-//  public void setLast(String last) {
-//    this.last = last;
-//  }
 
   public String getLast() {
     return last;
   }
 
-  public int getLastSession() {
-    return lastSession;
+  public int getLastSessionScore() {
+    return lastSessionScore;
   }
 
   public int getLastSessionNum() {

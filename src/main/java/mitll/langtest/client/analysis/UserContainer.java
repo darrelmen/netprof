@@ -81,12 +81,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private static final String FILTER_BY1 = "Filter by";
 
   private static final int LIST_BOX_WIDTH = 150;
-  private static final int FIRST_WIDTH = 100;
-  private static final int LAST_WIDTH = 110;
+  private static final int FIRST_WIDTH = 90;
+  private static final int LAST_WIDTH = 100;
 
   private static final String NO_LIST = "(No List)";
   //private static final int FILTER_BY = 19;
   private static final String CURRENT = "Avg";
+  /**
+   *
+   */
   private static final String POLY = "Poly";
   private static final int CURRENT_WIDTH = 60;
 
@@ -327,7 +330,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected IsWidget getBelowHeader() {
     DivWidget filterContainer = new DivWidget();
     filterContainer.setWidth("100%");
-//    filterContainer.getElement().getStyle().setMarginTop(FILTER_BY_TOP, Style.Unit.PX);
     filterContainer.addStyleName("leftFiveMargin");
 
     filterContainer.add(userTypeahead.getSearch());
@@ -336,10 +338,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       DivWidget c = new DivWidget();
       c.addStyleName("leftFiveMargin");
       c.addStyleName("floatRight");
-
       //     c.add(getFilterLabel());
       //     c.add(getListBox());
-
       filterContainer.add(c);
     }
     return filterContainer;
@@ -557,7 +557,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     Column<UserInfo, SafeHtml> current = getLastSession();
     current.setSortable(true);
     addColumn(current, new TextHeader(POLY));
-    table.setColumnWidth(current, CURRENT_WIDTH + "px");
+    table.setColumnWidth(current, 70 + "px");
 
     table.addColumnSortHandler(getLastSessionSorter(current, list));
     return current;
@@ -674,7 +674,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              return Integer.compare(o1.getLastSession(), o2.getLastSession());
+              return Integer.compare(o1.getLastSessionScore(), o2.getLastSessionScore());
             }
           }
           return -1;
@@ -735,7 +735,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getLastSession());
+        return getSafeHtml("" + shell.getLastSessionScore());
       }
     };
   }

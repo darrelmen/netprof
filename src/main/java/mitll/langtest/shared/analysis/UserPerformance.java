@@ -111,13 +111,6 @@ public class UserPerformance implements Serializable {
     return userID;
   }
 
-/*  public String toRawCSV() {
-    StringBuilder builder = new StringBuilder();
-    builder.append(",,,," + userID + "," + getRawTotal() + "," + getRawAverage());
-    for (TimeAndScore ts : getRawBestScores()) builder.append("\n").append(ts.toCSV());
-    return builder.toString();
-  }*/
-
   /**
    * @param rawBestScores
    * @see #UserPerformance()

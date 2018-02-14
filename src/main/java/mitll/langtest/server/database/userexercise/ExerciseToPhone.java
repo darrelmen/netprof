@@ -133,8 +133,6 @@ public class ExerciseToPhone {
 
     ParseResultJson parseResultJson = new ParseResultJson(null, language);
 
-    //Map<Integer, Map<String, List<List<String>>>> exToWordToPronunciations = new HashMap<>();
-
     // partition into same length sets
     Map<Integer, Set<Info>> lengthToInfos = new HashMap<>();
 

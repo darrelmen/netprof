@@ -244,9 +244,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    // logger.info("getTableWithPager" + users.size());
     Panel tableWithPager = getTableWithPager(new ListOptions());
-    // logger.info("getTableWithPager tableWithPager ");
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
@@ -273,20 +271,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        logger.info("populateTable Selected user found  "+ selectedUser + " at " +index + " out of " + users.size());
+        //logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
       }
       i++;
     }
 
     flush();
 
-   // if (index > 0) {
-      logger.info("populateTable scroll to " +index);
-      scrollIntoView(index, false);
-   // }
-  //  else {
-  //    logger.info("populateTable index = " +index);
-   // }
+    scrollIntoView(index, false);
 
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);

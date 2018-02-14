@@ -63,8 +63,8 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
-   * @return
    * @param listid
+   * @return
    * @seex mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
@@ -104,7 +104,7 @@ class H2Analysis extends Analysis implements IAnalysis {
     String sql = getPerfSQL();
     try {
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      return getUserInfos(userDAO, best);
+      return getSortedUserInfos(userDAO, best, false);
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
@@ -183,26 +183,27 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param id
    * @param minRecordings
    * @param listid
-   * @paramx projid
    * @return
+   * @paramx projid
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
   public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
     try {
       String sql = getPerfSQL(id);
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
+      UserInfo next = best.isEmpty() ? null : best.values().iterator().next();
       return getPhoneReport(id, next, null);
     } catch (Exception ee) {
       logException(ee);
     }
     return null;
   }
+
   /**
    * @param userid
    * @param listid
-   * @paramx projid
    * @return
+   * @paramx projid
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
   public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
@@ -233,7 +234,7 @@ class H2Analysis extends Analysis implements IAnalysis {
     int missing = 0;
     Set<String> missingAudio = new TreeSet<>();
 
-    int emptyCount =0;
+    int emptyCount = 0;
     while (rs.next()) {
       count++;
       String exid = rs.getString(Database.EXID);
@@ -273,7 +274,7 @@ class H2Analysis extends Analysis implements IAnalysis {
         missing++;
       }
       results.add(new BestScore(Integer.parseInt(exid), pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),
-          nativeAudio,0));
+          nativeAudio, 0));
     }
 
     if (DEBUG || true) {

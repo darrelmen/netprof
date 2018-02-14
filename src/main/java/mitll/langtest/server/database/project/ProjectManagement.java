@@ -209,8 +209,7 @@ public class ProjectManagement implements IProjectManagement {
     if (!idToProject.isEmpty()) {
       // logger.info("using exercise dao from first project " + exerciseDAO);
       db.getUserExerciseDAO().setExerciseDAO(getFirstProject().getExerciseDAO());
-    }
-    else {
+    } else {
 
       // TODO :make it so we can begin from empty container!
 
@@ -320,8 +319,8 @@ public class ProjectManagement implements IProjectManagement {
               db.getAudioDAO(),
               (SlickResultDAO) db.getResultDAO(),
               project.getLanguage(),
-              id
-          )
+              id,
+              project.getKind() == ProjectType.POLYGLOT)
       );
 
       if (myProject) {
@@ -540,11 +539,11 @@ public class ProjectManagement implements IProjectManagement {
   @NotNull
   private DBExerciseDAO getExerciseDAO(Project project) {
     return new DBExerciseDAO(
-          serverProps,
-          db.getUserListManager(),
-          ADD_DEFECTS,
-          (SlickUserExerciseDAO) db.getUserExerciseDAO(),
-          project);
+        serverProps,
+        db.getUserListManager(),
+        ADD_DEFECTS,
+        (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+        project);
   }
 
 
@@ -927,7 +926,8 @@ public class ProjectManagement implements IProjectManagement {
     }
     return status;
   }
-   /**
+
+  /**
    * @param projID
    * @param dominoID
    * @param sinceInUTC

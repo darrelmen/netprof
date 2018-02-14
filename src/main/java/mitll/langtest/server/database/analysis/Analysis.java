@@ -89,32 +89,14 @@ public abstract class Analysis extends DAO {
    * @return
    * @see SlickAnalysis#getUserInfo
    */
-  List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
+  List<UserInfo> getSortedUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best, boolean sortByPoly) {
     List<UserInfo> userInfos = getUserInfos(best, userDAO);
-    sortUsersByTime(userInfos);
 
-    // TODO : choose the initial granularity and set initial and current to those values
-    // TODO : do we want to use a session as the unit for the last group???
-/*
-    for (UserInfo userInfo : userInfos) {
-      Map<Long, List<PhoneSession>> granularityToSessions =
-          new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
-
-      List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
-      if (!phoneSessions.isEmpty()) {
-        logger.info("getUserInfos For " +userInfo+
-            " Got " + phoneSessions.size() + " sessions");
-        PhoneSession first = phoneSessions.get(0);
-        PhoneSession last = phoneSessions.get(phoneSessions.size() - 1);
-        if (phoneSessions.size() > 2 && last.getCount() < 10) {
-          last = phoneSessions.get(phoneSessions.size() - 2);
-        }
-
-        //userInfo.setStart((int) Math.round(first.getMean() * 100d));
-        userInfo.setCurrent((int) Math.round(last.getMean() * 100d));
-      }
+    if (sortByPoly) {
+      userInfos.sort((o1, o2) -> -1 * Integer.compare(o1.getLastSessionScore(), o2.getLastSessionScore()));
+    } else {
+      sortUsersByTime(userInfos);
     }
-    */
 
     return userInfos;
   }
@@ -124,7 +106,7 @@ public abstract class Analysis extends DAO {
    *
    * @param idToUserInfo
    * @return
-   * @see #getUserInfos(IUserDAO, Map)
+   * @see #getUserInfos
    */
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> idToUserInfo, IUserDAO userDAO) {
@@ -133,23 +115,13 @@ public abstract class Analysis extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, FirstLastUser> firstLastUsers = userDAO.getFirstLastFor(idToUserInfo.keySet());
 
-    // Set<String> lincoln = getLincolnAffiliations();
-    //  Set<String> skipped = new TreeSet<>();
-
     idToUserInfo.forEach((userid, value) -> {
       FirstLastUser miniUser = firstLastUsers.get(userid);
       if (miniUser == null) {
         logger.error("getUserInfos huh? no user for " + userid);
       } else {
-//        boolean isLL = lincoln.contains(miniUser.getAffiliation().toLowerCase());
-//        if (isLL) {
-//          skipped.add(miniUser.getUserID());
-//          logger.info("getUserInfos skip " + miniUser);
-//        } else {
         value.setFrom(miniUser);
-//          logger.info("getUserInfos got " + value.getID() + " " + value.getFirst() + " " + value.getLast());
         userInfos.add(value);
-//        }
       }
     });
     long now = System.currentTimeMillis();

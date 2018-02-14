@@ -31,9 +31,7 @@ public class AnalysisReport implements Serializable {
     this.req=req;
   }
 
-  public UserPerformance getUserPerformance() {
-    return userPerformance;
-  }
+  public UserPerformance getUserPerformance() {  return userPerformance;  }
 
   public PhoneReport getPhoneReport() {
     return phoneReport;

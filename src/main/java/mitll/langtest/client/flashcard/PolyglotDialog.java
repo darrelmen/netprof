@@ -91,9 +91,6 @@ public class PolyglotDialog {
   }
 
   private Widget addModeChoices(int dryMin, int dryNum, int compMin, int compNum, Heading modeDep) {
-    /**
-     *
-     */
     String GENDER_GROUP = PolyglotDialog.GENDER_GROUP;
     RadioButton male = new RadioButton(GENDER_GROUP, DRY_RUN);
     RadioButton female = new RadioButton(GENDER_GROUP, POLYGLOT_COMPETITION);

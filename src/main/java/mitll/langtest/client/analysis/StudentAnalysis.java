@@ -68,9 +68,6 @@ public class StudentAnalysis extends DivWidget {
    * @see NewContentChooser#showProgress
    */
   public StudentAnalysis(final ExerciseController controller) {
-    //logger.info("StudentAnalysis got here " + appTitle);
-//    getElement().setId("StudentAnalysis");
-//    final String selectedUserKey = getRememberedSelectedUser(controller);
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {

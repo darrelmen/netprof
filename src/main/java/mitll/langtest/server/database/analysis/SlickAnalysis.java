@@ -72,11 +72,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
-
+  private final boolean sortByPolyScore;
   /**
    * @param database
    * @param phoneDAO
    * @param projid
+   * @param sortByPolyScore
    * @see ProjectServices#configureProject
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
@@ -85,13 +86,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        IAudioDAO audioDAO,
                        SlickResultDAO resultDAO,
                        String language,
-                       int projid) {
+                       int projid, boolean sortByPolyScore) {
     super(database, phoneDAO, language);
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;
     this.audioDAO = audioDAO;
     project = database.getProject(projid);
+    this.sortByPolyScore = sortByPolyScore;
   }
 
   /**
@@ -203,7 +205,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
-
     if (criteria.isEmpty() || criteria.iterator().next().equals("")) {
       return Comparator.comparingLong(SimpleTimeAndScore::getTimestamp);
     } else {
@@ -366,7 +367,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       logger.info("getUserInfo took " + (now - then) + " to get best for " + perfForUser.size() + " for project #" + projid);
 
     then = now;
-    List<UserInfo> userInfos = getUserInfos(userDAO, best);
+    List<UserInfo> userInfos = getSortedUserInfos(userDAO, best, sortByPolyScore);
     now = System.currentTimeMillis();
     if (now - then > 100)
       logger.info("getUserInfo took " + (now - then) + " to get user infos for " + userInfos.size() + " users for project #" + projid);

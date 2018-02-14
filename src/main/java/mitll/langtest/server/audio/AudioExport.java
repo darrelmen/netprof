@@ -90,14 +90,14 @@ public class AudioExport {
                        AudioExportOptions options,
                        boolean isEnglish) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState, isEnglish);
-    boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
+   // boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
     // logger.info("writeZip skip audio = " + skipAudio);
     writeToStream(copy,
         getPrefix(typeToSection, typeOrder),
         typeOrder,
         language,
         out,
-        skipAudio,
+        false,
         isDefectList,
         options);
   }

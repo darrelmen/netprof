@@ -36,6 +36,7 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
@@ -43,6 +44,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +90,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (hasTeacherPerm(-1)) {
       int projectIDFromUser = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
-      List<UserInfo> userInfo = db.getAnalysis(projectIDFromUser).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+      List<UserInfo> userInfo = db
+          .getAnalysis(projectIDFromUser)
+          .getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
       long now = System.currentTimeMillis();
       if (now - then > 100) {
         logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
@@ -204,14 +208,15 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
   @NotNull
   private SlickAnalysis getSlickAnalysis(int projectID) {
+    Project project = db.getProject(projectID);
     return new SlickAnalysis(
         db.getDatabase(),
         db.getPhoneDAO(),
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
-        db.getProject(projectID).getLanguage(),
-        projectID
-    );
+        project.getLanguage(),
+        projectID,
+        project.getKind()== ProjectType.POLYGLOT);
   }
 
   /**
