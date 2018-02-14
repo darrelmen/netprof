@@ -16,6 +16,9 @@ import static mitll.langtest.client.flashcard.StatsFlashcardFactory.MIN_POLYGLOT
 public class PolyglotDialog {
   private static final int HSIZE = 4;
   private static final String LIGHTNING_ROUND = "Test your pronunciation!";
+  public static final String GENDER_GROUP = "GenderGroup";
+  public static final String DRY_RUN  = "Dry Run (Just Practice!)";
+  public static final String POLYGLOT_COMPETITION = "Polyglot Competition";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
@@ -23,26 +26,22 @@ public class PolyglotDialog {
     void gotMode(MODE_CHOICE choice);
   }
 
-  Button closeButton;
+  private Button closeButton;
   private ModeChoiceListener modeListener;
 
   /**
    * @param closeListener
-   * @paramx num
-   * @see StatsFlashcardFactory#showPolyDialog
+   * @see mitll.langtest.client.banner.NewContentChooser#showPolyDialog
    */
   public PolyglotDialog(int dryMin, int dryNum,
-                 int compMin, int compNum,
-                 int minScore,
-                 DialogHelper.CloseListener closeListener,
-                 ModeChoiceListener modeChoice) {
+                        int compMin, int compNum,
+                        int minScore,
+                        DialogHelper.CloseListener closeListener,
+                        ModeChoiceListener modeChoice) {
     DivWidget container = new DivWidget();
 
     this.modeListener = modeChoice;
     Widget row = new FluidRow();
-    // Heading w = new Heading(4, "Lightning Round!");
-    //  w.addStyleName("blueColor");
-    // row.add(w);
     container.add(row);
 
     row = getContentRow(dryMin, dryNum, compMin, compNum, minScore);
@@ -60,13 +59,11 @@ public class PolyglotDialog {
     closeButton.setEnabled(false);
   }
 
-  private Widget getContentRow(int dryMin, int dryNum, int compMin, int compNum, int minScore ) {
+  private Widget getContentRow(int dryMin, int dryNum, int compMin, int compNum, int minScore) {
     FluidContainer container = new FluidContainer();
-   // Heading w1 = new Heading(HSIZE, "Netprof scores your pronunciation!");
-   // w1.getElement().getStyle().setMarginBottom(20, Style.Unit.PX);
+
     FluidRow row = new FluidRow();
     container.add(row);
-   // row.add(w1);
 
     row.add(new Heading(HSIZE, "Netprof automatically scores your pronunciation relative to a native speaker."));
     row.add(new Heading(HSIZE, "In the flashcards that follow, record yourself saying the prompted phrases."));
@@ -76,20 +73,18 @@ public class PolyglotDialog {
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item (if you want to repeat an item)."));
     row.add(new Heading(HSIZE, "Scores above " + minScore +
         " advance automatically to the next item."));
-    row.add(new Heading(HSIZE, "You are not required to complete all the items, but your final score rewards completion."));
-    //row.add(new Heading(HSIZE, "The dry run choice lets you practice recording."));
+    row.add(new Heading(HSIZE, "You are not required to complete all the items."));//, but your final score rewards completion."));
 
     row.add(new Heading(HSIZE, "Please choose either : "));
-    Heading modeDep = new Heading(HSIZE+1, "");//No selection yet.");
+    Heading modeDep = new Heading(HSIZE, "");
+    modeDep.setHeight(14 + "px");
+    modeDep.getElement().getStyle().setColor("blue");
     container.add(addModeChoices(dryMin, dryNum, compMin, compNum, modeDep));
 
-    container.add(modeDep);//getModeText(minutes, num)));
-    Heading w = new Heading(5, "");
+    container.add(modeDep);
+    Heading w = new Heading(HSIZE, "");
     w.setWidth("100%");
     container.add(w);
-
-//    row.add(new Heading(HSIZE, "You will advance automatically to the next item when your score is above " + minScore +
-//        "."));
 
     container.add(new Heading(HSIZE - 1, "Click start to begin."));
     return container;
@@ -99,13 +94,11 @@ public class PolyglotDialog {
     /**
      *
      */
-    String GENDER_GROUP = "GenderGroup";
-    RadioButton male = new RadioButton(GENDER_GROUP, "Dry Run (Just Practice!)");
-    RadioButton female = new RadioButton(GENDER_GROUP, "Polyglot Competition");
+    String GENDER_GROUP = PolyglotDialog.GENDER_GROUP;
+    RadioButton male = new RadioButton(GENDER_GROUP, DRY_RUN);
+    RadioButton female = new RadioButton(GENDER_GROUP, POLYGLOT_COMPETITION);
     male.setEnabled(true);
-  //  female.addStyleName("leftFiveMargin");
     DivWidget choice = new DivWidget();
-//    choice.addStyleName("inlineFlex");
     choice.setWidth("100%");
     choice.add(male);
     choice.add(female);

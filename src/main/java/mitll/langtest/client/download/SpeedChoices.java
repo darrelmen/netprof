@@ -31,13 +31,12 @@ public class SpeedChoices {
   private boolean isRegularSet = false;
   private ToggleButton regular, slow;
   private IShowStatus showStatus;
-  private KeyStorage keyStorage;
+//  private KeyStorage keyStorage;
   private boolean setInitially = false;
 
   SpeedChoices(KeyStorage keyStorage, IShowStatus showStatus) {
     this.showStatus = showStatus;
-    this.keyStorage = keyStorage;
-
+  //  this.keyStorage = keyStorage;
   }
 
   public SpeedChoices(KeyStorage keyStorage) {
@@ -45,17 +44,17 @@ public class SpeedChoices {
     };
     setInitially = true;
     isRegularSet = true;
-    isRegular = isSpeedReg();
-    this.keyStorage = keyStorage;
+    isRegular = false;//isSpeedReg();
+    //this.keyStorage = keyStorage;
   }
 
-  private boolean isSpeedReg() {
+/*  private boolean isSpeedReg() {
     return keyStorage.isTrue(IS_REG_SPEED);
   }
 
   private void rememberAudioChoice(boolean isReg) {
     keyStorage.setBoolean(IS_REG_SPEED, isReg);
-  }
+  }*/
 
   private void showSpeeds() {
     regular.setDown(isRegular);
@@ -77,7 +76,7 @@ public class SpeedChoices {
         isRegular = regular.isDown();
         isRegularSet = true;
         showSpeeds();
-        rememberAudioChoice(true);
+        //rememberAudioChoice(true);
       });
       buttonToolbar.add(regular);
     }
@@ -88,7 +87,7 @@ public class SpeedChoices {
         //  logger.info("got slow click " + isRegular);
         isRegularSet = true;
         showSpeeds();
-        rememberAudioChoice(false);
+        //rememberAudioChoice(false);
       });
 
       buttonToolbar.add(slow);
