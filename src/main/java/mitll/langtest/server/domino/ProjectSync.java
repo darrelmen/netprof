@@ -803,6 +803,8 @@ public class ProjectSync implements IProjectSync {
   }
 
   /**
+   * transcript to lower case.
+   *
    * @param maxID
    * @return
    * @see #copyAudio(int, List, Map)
@@ -816,7 +818,7 @@ public class ProjectSync implements IProjectSync {
 
     logger.info("getTranscriptToAudio found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + maxID);
     for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
-      List<SlickAudio> audioAttributes = transcriptToAudio.computeIfAbsent(audioAttribute.transcript(), k -> new ArrayList<>());
+      List<SlickAudio> audioAttributes = transcriptToAudio.computeIfAbsent(audioAttribute.transcript().toLowerCase(), k -> new ArrayList<>());
       audioAttributes.add(audioAttribute);
     }
     return transcriptToAudio;
@@ -897,6 +899,8 @@ public class ProjectSync implements IProjectSync {
   /**
    * Only does match on fl, not on pair of fl/english... might be better.
    *
+   * Matches case insensitive.
+   *
    * @param projectid
    * @param transcriptToAudio
    * @param transcriptMatches
@@ -912,13 +916,13 @@ public class ProjectSync implements IProjectSync {
                                      Integer exid) {
     int match = 0;
     int nomatch = 0;
-    String fl = ex.getForeignLanguage();
+
+    String fl = ex.getForeignLanguage().toLowerCase();
+    List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
 
     logger.info("addAudioForVocab looking for match to ex " + exid + "/" + ex.getID() + " '" + ex.getEnglish() + "' = '" + fl + "'");
-
-    List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
     if (audioAttributes != null) {
-      AudioMatches audioMatches = new AudioMatches();//transcriptToMatches.computeIfAbsent(fl, k -> new AudioMatches());
+      AudioMatches audioMatches = new AudioMatches();
       copyMatchingAudio(projectid, exid, audioAttributes, audioMatches);
       transcriptMatches.add(audioMatches);
       match++;
@@ -955,7 +959,7 @@ public class ProjectSync implements IProjectSync {
       if (context.getAudioAttributes().isEmpty()) {
         String prefix = context.getID() + "/" + context.getDominoID();
 
-        String cfl = context.getForeignLanguage();
+        String cfl = context.getForeignLanguage().toLowerCase();
         List<SlickAudio> audioAttributes = transcriptToAudio.get(cfl);
 
         String coldID = context.getOldID();
