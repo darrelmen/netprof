@@ -223,7 +223,9 @@ public class DownloadHelper implements IShowStatus {
     status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
     status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
     status3.setText(speedChoices.getStatus());
-    closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isThereASpeedChoice());
+    if (closeButton != null) {
+      closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isThereASpeedChoice());
+    }
   }
 
   private Widget getButtonBarChoices(Collection<String> values, final String type, ButtonType buttonType) {
