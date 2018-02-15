@@ -157,7 +157,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   public void rememberProject(int id) {
     SlickProject found = null;
-    for (SlickProject slickProject : getAllProjects()) {
+    for (SlickProject slickProject : getAllSlickProjects()) {
       if (slickProject.id() == id) {
         found = slickProject;
         break;
@@ -187,7 +187,7 @@ public class ProjectManagement implements IProjectManagement {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
-    getAllProjects().forEach(slickProject -> {
+    getAllSlickProjects().forEach(slickProject -> {
       if (!idToProject.containsKey(slickProject.id())) {
         if (debugOne) {
           if (slickProject.id() == debugProjectID ||
@@ -222,7 +222,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @return
    */
-  private Collection<SlickProject> getAllProjects() {
+  private Collection<SlickProject> getAllSlickProjects() {
     return projectDAO.getAll();
   }
 
@@ -450,7 +450,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @NotNull
   private Map<Integer, SlickProject> getIdToProjectMapFromDB() {
-    Collection<SlickProject> all = getAllProjects();
+    Collection<SlickProject> all = getAllSlickProjects();
     Map<Integer, SlickProject> idToSlickProject = new HashMap<>();
     for (SlickProject project : all) idToSlickProject.put(project.id(), project);
     return idToSlickProject;
@@ -652,10 +652,17 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private Project lazyGetProject(int projectid) {
-    logger.warn("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-        ") - refreshing projects", new Exception("huh?"));
+    logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+        ") - refreshing projects");
     populateProjects();
-    return idToProject.get(projectid);
+    Project project = idToProject.get(projectid);
+
+    if (project == null) {
+      logger.warn("lazyGetProject, even after project set refresh, no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+          ") - refreshing projects", new Exception());
+    }
+
+    return project;
   }
 
   /**
@@ -665,7 +672,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @NotNull
   private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
-    Set<Integer> dbProjects = getAllProjects().stream().map(SlickProject::id).collect(Collectors.toSet());
+    Set<Integer> dbProjects = getAllSlickProjects().stream().map(SlickProject::id).collect(Collectors.toSet());
     dbProjects.removeAll(knownProjects);
     return dbProjects;
   }
