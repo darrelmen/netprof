@@ -149,9 +149,9 @@ public class CreateProject {
    * @return false if name already exists
    * @see mitll.langtest.server.services.ProjectServiceImpl#create
    */
-  public boolean createProject(DAOContainer daoContainer,
-                               ProjectServices projectServices,
-                               ProjectInfo info) {
+  public int createProject(DAOContainer daoContainer,
+                           ProjectServices projectServices,
+                           ProjectInfo info) {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
     int byName = projectDAO.getByLanguageAndName(info.getLanguage(),info.getName());
 
@@ -187,10 +187,10 @@ public class CreateProject {
         projectDAO.addProperty(projectID, pair.getKey(), pair.getValue(), PROPERTY, "");
       }
       projectServices.rememberProject(projectID);
-      return true;
+      return projectID;
     } else {
       logger.info("createProject : PROJECT EXISTS with name " + info.getName()+" : create new " + info);
-      return false;
+      return -1;
     }
   }
 

@@ -706,12 +706,27 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#tellHydraServerToRefreshProject
+   * @param projID should be a projid from project table...
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   @Override
   public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
-      db.configureProject(db.getProject(projID), true);
-      db.getProjectManagement().refreshProjects();
+      if (projID == -1) {
+        logger.error("huh? why sending bad project id?");
+      } else {
+        Project project = db.getProject(projID);
+        if (project != null) {
+          db.configureProject(project, true);
+          db.getProjectManagement().refreshProjects();
+        } else {
+          logger.error("configureAndRefresh : no project with id " + projID);
+        }
+      }
     } else {
       throw getRestricted(UPDATING_PROJECT_INFO);
     }

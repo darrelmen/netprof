@@ -850,15 +850,26 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     ExerciseTrie<T> trie = predefExercises ? fullTrie :
         new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true);
     List<T> basicExercises = trie.getExercises(prefix);
-    logger.info("getExercisesForSearchWithTrie : predef " + predefExercises +
-        " prefix " + prefix + " matches " + basicExercises.size());
-    ExerciseTrie<T> fullContextTrie = (ExerciseTrie<T>) getProject(projectID).getFullContextTrie();
+    Project project = getProject(projectID);
+    ExerciseTrie<T> fullContextTrie = project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
 
-    List<T> ts = predefExercises ? fullContextTrie.getExercises(prefix) : Collections.emptyList();
-    if (predefExercises) {
+    logger.info("getExercisesForSearchWithTrie : " +
+        "\n\tprojectID " + projectID +
+        "\n\thas full " + (fullContextTrie != null) +
+        "\n\tfound " + (project != null) +
+        "\n\tpredef " + predefExercises +
+        "\n\tprefix " + prefix +
+        "\n\tmatches " + basicExercises.size());
+
+    List<T> ts = Collections.emptyList();
+
+    if (predefExercises && fullContextTrie != null) {
       ts = fullContextTrie.getExercises(prefix);
-      logger.info("getExercisesForSearchWithTrie for full context for '" + prefix + "' got " + ts.size());
+      logger.info("getExercisesForSearchWithTrie for full context for" +
+          "\n\tprefix '" + prefix + "'" +
+          "\n\tgot " + ts.size());
     }
+
     return new TripleExercises<>(
         getExerciseByExid(prefix, userID, projectID),
         basicExercises,
@@ -1178,7 +1189,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
-  int warn =0;
+  int warn = 0;
+
   /**
    * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
    *
@@ -1191,7 +1203,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 
     exercises.forEach(ex -> {
-      if (ex.getNumPhones() == 0 && warn++<100) {
+      if (ex.getNumPhones() == 0 && warn++ < 100) {
         logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
       }
       CommonShell shell = ex.getShell();
@@ -1289,7 +1301,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
     if (byID == null) {
-      logger.error("getAnnotatedExercise : can't find exercise #"+  exid + " in project #" +projectID);
+      logger.error("getAnnotatedExercise : can't find exercise #" + exid + " in project #" + projectID);
       return null;
     }
 

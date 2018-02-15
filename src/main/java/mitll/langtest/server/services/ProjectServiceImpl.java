@@ -127,16 +127,17 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   /**
    * @param newProject
-   * @return
+   * @return project id of newly created project
    * @see ProjectEditForm#newProject
    */
   @Override
-  public boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException {
+  public int create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
       if (newProject.getModelsDir().isEmpty()) {
         setDefaultsIfMissing(newProject);
       }
-      return new CreateProject(db.getServerProps().getHydra2Languages()).createProject(db, db, newProject);
+      CreateProject createProject = new CreateProject(db.getServerProps().getHydra2Languages());
+      return createProject.createProject(db, db, newProject);
     } else {
       throw getRestricted(CREATING_PROJECT);
     }

@@ -71,7 +71,7 @@ public interface ProjectService extends RemoteService {
    * @throws DominoSessionException
    * @throws RestrictedOperationException
    */
-  boolean create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
+  int create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException;
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
 

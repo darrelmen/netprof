@@ -224,14 +224,12 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Boolean result) {
         lifecycleSupport.refreshStartupInfo(true);
-
-        tellHydraServerToRefreshProject();
+        tellHydraServerToRefreshProject(info.getID());
       }
     });
   }
 
-  private void tellHydraServerToRefreshProject() {
-    final int projID = info.getID();
+  private void tellHydraServerToRefreshProject(int projID) {
     services.getScoringService().configureAndRefresh(projID, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -315,30 +313,38 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
+   * TODO : how to handle didn't create the project?
    * @see ProjectChoices#showNewProjectDialog
    */
   void newProject() {
     info.setLanguage(getLanguageChoice());
 
-    DominoProject id = dominoToProject.get(dominoProjects.getValue());
+    {
+      DominoProject id = dominoToProject.get(dominoProjects.getValue());
 
-    if (id != null) {
-      info.setDominoID(id.getDominoID());
+      if (id != null) {
+        info.setDominoID(id.getDominoID());
+      }
     }
 
 //    logger.info("domino id is " + info.getDominoID());
     setCommonFields();
 
-    projectServiceAsync.create(info, new AsyncCallback<Boolean>() {
+    projectServiceAsync.create(info, new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
         messageHelper.handleNonFatalError("Creating project.", caught);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        lifecycleSupport.refreshStartupInfo(true);
-        tellHydraServerToRefreshProject();
+      public void onSuccess(Integer projID) {
+        if (projID == -1) {
+          logger.warning("coudn't create project?");
+          Window.alert("Sorry, couldn't create a new project.");
+        } else {
+          lifecycleSupport.refreshStartupInfo(true);
+          tellHydraServerToRefreshProject(projID);
+        }
       }
     });
   }

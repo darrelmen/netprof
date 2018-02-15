@@ -43,7 +43,7 @@ import java.util.List;
 public interface ProjectServiceAsync {
   void update(ProjectInfo info, AsyncCallback<Boolean> async);
 
-  void create(ProjectInfo newProject, AsyncCallback<Boolean> async);
+  void create(ProjectInfo newProject, AsyncCallback<Integer> async);
 
   void existsByName(String languageChoice, String name, AsyncCallback<Boolean> async);
 
