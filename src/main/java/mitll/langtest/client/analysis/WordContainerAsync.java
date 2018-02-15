@@ -96,7 +96,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
-  // private final DateTimeFormat yearShortFormat2 = DateTimeFormat.getFormat("MMM d yy h:mm");
 
   private final WordTable wordTable = new WordTable();
 

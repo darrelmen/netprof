@@ -264,7 +264,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
     T found = idToExercise.get(itemID);
-    if (DEBUG) logger.info("markCurrentExercise for " + itemID + " in " + idToExercise.size() + " found " + found);
+    if (DEBUG) {
+      logger.info("markCurrentExercise for " + itemID + " in " + idToExercise.size() + " found " + found);
+    }
     markCurrent(getIndex(found), found);
   }
 

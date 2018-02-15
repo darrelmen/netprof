@@ -79,6 +79,9 @@ public class AnalysisTab extends DivWidget {
    * @see #exampleHeader
    */
   private static final String WORDS_USING_SOUND = "Words using Sound";
+  /**
+   * @see #getSoundsContainer
+   */
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
@@ -128,7 +131,7 @@ public class AnalysisTab extends DivWidget {
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
-  private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
+  private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
   private final int listid;
 
   private final boolean isPolyglot;
@@ -174,7 +177,7 @@ public class AnalysisTab extends DivWidget {
     this.userid = userid;
     this.listid = listid;
     this.isPolyglot = isPolyglot;
-     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+    getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
@@ -245,13 +248,13 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @see #AnalysisTab(ExerciseController, int, DivWidget, int, String, int, boolean, int, ReqCounter)
    * @param result
    * @param then
    * @param userChosenID
    * @param isTeacherView
    * @param bottom
    * @param reqInfo
+   * @see #AnalysisTab(ExerciseController, int, DivWidget, int, String, int, boolean, int, ReqCounter)
    */
   private void useReport(AnalysisReport result,
                          long then,
@@ -285,9 +288,6 @@ public class AnalysisTab extends DivWidget {
       logger.info("useReport took " + (now - then2) + " to show plot");
     }
     long then3 = now;
-
-/*    Scheduler.get().scheduleDeferred(() ->
-        showWordScores(result.getNumScores(), controller, analysisPlot, showTab, bottom, fphoneReport, reqInfo));*/
 
     showWordScores(result.getNumScores(), controller, analysisPlot, bottom, fphoneReport, reqInfo);
 
@@ -461,26 +461,25 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param controller
    * @param analysisPlot
-   * @paramx showTab
    * @param lowerHalf
    * @param phoneReport
+   * @paramx showTab
    * @see #useReport
    */
   private void showWordScores(
       int numScores,
       ExerciseController controller,
       AnalysisPlot analysisPlot,
-      //  ShowTab showTab,
       Panel lowerHalf,
       PhoneReport phoneReport,
       ReqInfo reqInfo) {
     {
-      Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
+      Heading wordsTitle = getHeading(WORDS);
+
       Panel tableWithPager = getWordContainer(
           reqInfo,
           numScores,
           controller, analysisPlot,
-          //showTab,
           wordsTitle);
 
       tableWithPager.setWidth(WORD_WIDTH + "px");
@@ -502,6 +501,13 @@ public class AnalysisTab extends DivWidget {
     }
   }
 
+  @NotNull
+  private Heading getHeading(String words) {
+    Heading wordsTitle = new Heading(3, words);
+    wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    return wordsTitle;
+  }
+
   /**
    * @param controller
    * @param analysisPlot
@@ -510,17 +516,16 @@ public class AnalysisTab extends DivWidget {
    * @paramx showTab
    * @paramx wordScores
    */
-  private Panel getWordContainer(//List<WordScore> wordScores,
+  private Panel getWordContainer(
                                  ReqInfo reqInfo,
                                  int numResults,
                                  ExerciseController controller,
                                  AnalysisPlot analysisPlot,
 
                                  Heading wordsTitle) {
-    //   WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle, wordScores.size());
-    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle, numResults, analysisServiceAsync);
-    //   analysisPlot.setExerciseToTimeToAnswer(wordContainer.getExToTimeToAnswer(wordScores));
-    return wordContainer.getTableWithPager();///*wordScores*/);
+    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
+        numResults, analysisServiceAsync);
+    return wordContainer.getTableWithPager();
   }
 
   private DivWidget getSoundsDiv() {
@@ -528,7 +533,6 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().setId("soundsDiv");
     soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
-    //soundsDiv.addStyleName("floatRight");
     soundsDiv.addStyleName("leftFiveMargin");
     soundsDiv.addStyleName("inlineFlex");
     return soundsDiv;
@@ -537,7 +541,6 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
-    // wordsContainer.addStyleName("floatLeftAndClear");
     wordsContainer.add(heading);
     wordsContainer.add(tableWithPager);
     return wordsContainer;
@@ -588,7 +591,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getSoundsContainer(Panel phones) {
     DivWidget sounds = new DivWidget();
     sounds.getElement().setId("SoundsContainer");
-    sounds.add(new Heading(3, SOUNDS));
+    sounds.add(getHeading(SOUNDS));
     sounds.add(phones);
     return sounds;
   }

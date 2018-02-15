@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
   // private final Logger logger = Logger.getLogger("AudioExampleContainer");
-
   private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -155,8 +154,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     playAudio(wordScore);
   }
 
-
-  void playAudio(T wordScore) {
+  private void playAudio(T wordScore) {
     soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()));
   }
 

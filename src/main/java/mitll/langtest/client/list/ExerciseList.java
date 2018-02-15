@@ -44,6 +44,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
@@ -624,7 +625,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-      //  logger.info("checkAndAskServer for " + id);
+    //    logger.info("checkAndAskServer for " + id);
+
       askServerForExercise(id);
     } else {
       logger.warning("checkAndAskServer : skipping request for " + id);
@@ -762,19 +764,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public int getComplete() {
-    int currentExerciseID = getCurrentExerciseID();
-    int index = getIndex(currentExerciseID);
-    return index;
+    return getIndex(getCurrentExerciseID());
   }
 
   /**
    * @see #removeExercise
    */
   void removeCurrentExercise() {
-//    logger.info("removeCurrentExercise clear container --- >");
     clearExerciseContainer();
-//    innerContainer.getParent().removeStyleName("shadowBorder");
-
     showEmptySelection();
   }
 
@@ -789,9 +786,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * Compare with google response for this state.
    */
-  void showEmptyExercise() {
-  //  logger.info("showEmptyExercise --- ");
-
+  private void showEmptyExercise() {
     createdPanel = new SimplePanel(new Heading(3, EMPTY_SEARCH));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
@@ -817,19 +812,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param current
    * @return
+   * @see #loadNextExercise(int)
    */
   @Override
   public boolean loadNextExercise(HasID current) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + getInstance());
-    int id = current.getID();
-    int index = getIndex(id);
-    boolean onLast = isOnLastItem(index);
+    boolean onLast = isOnLast(current);
 /*
     logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + index +
         " of " + getSize() + " last is " + (getSize() - 1) +
         "\n\ton last " + onLast);
         */
-    if (onLast) {
+    if (isOnLast(current)) {
       onLastItem();
     } else {
       getNextExercise(current);
@@ -838,8 +832,19 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return onLast;
   }
 
+  private boolean isOnLast(HasID current) {
+    int id = current.getID();
+    int index = getIndex(id);
+    return isOnLastItem(index);
+  }
+
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#loadAfterCurrent
+   * @param id
+   * @return
+   */
   public boolean loadNextExercise(int id) {
-    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + getInstance());
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id);// + " instance ");// + getInstance());
     T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + id);
     return exerciseByID != null && loadNextExercise(exerciseByID);
@@ -865,9 +870,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public boolean loadPreviousExercise(HasID current) {
     int i = getIndex(current.getID());
+    int prev = i - 1;
+
+    //logger.info("loadPreviousExercise " + current.getID() + " got " +i + " prev " + prev);
     boolean onFirst = i == 0;
     if (!onFirst) {
-      loadExercise(getAt(i - 1).getID());
+      T at = getAt(prev);
+     // logger.info("\tloadPreviousExercise load prev " + at.getID());
+      loadExercise(at.getID());
     }
     return onFirst;
   }

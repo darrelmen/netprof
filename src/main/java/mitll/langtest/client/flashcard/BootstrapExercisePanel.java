@@ -310,6 +310,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
            */
           @Override
           protected void gotLeftArrow() {
+            //logger.info("left arrow - current " + exerciseList.get)
             exerciseList.loadPrev();
           }
 

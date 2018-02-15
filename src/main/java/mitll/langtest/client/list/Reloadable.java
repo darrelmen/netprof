@@ -42,7 +42,6 @@ public interface Reloadable {
   void redraw();
 
   void reloadWithCurrent();
-//  int getCurrentExerciseID();
 
   void loadExercise(int itemID);
 }

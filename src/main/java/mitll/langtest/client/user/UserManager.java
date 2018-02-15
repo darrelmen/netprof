@@ -70,7 +70,7 @@ public class UserManager {
   private static final String USER_PENDING_ID = "userPendingID";
 
   private final UserServiceAsync userServiceAsync;
-  //private final OpenUserServiceAsync openUserService;
+
   private final UserNotification userNotification;
   private final UserFeedback userFeedback;
   private int userID = NO_USER_SET;
@@ -118,7 +118,7 @@ public class UserManager {
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
-        logger.info("user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
+       // logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
       }
     } else {
       userNotification.showLogin();

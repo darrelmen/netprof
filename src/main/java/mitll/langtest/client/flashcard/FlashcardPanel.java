@@ -725,6 +725,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return left;
   }
 
+  /**
+   * @see #getPrevButton
+   * @param left
+   */
   private void gotPrevClick(Button left) {
     left.setEnabled(false);
     exerciseList.loadPrev();

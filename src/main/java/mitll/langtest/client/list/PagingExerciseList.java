@@ -514,9 +514,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public T getCurrentExercise() {
-    return pagingContainer.getCurrentSelection();
-  }
+  public T getCurrentExercise() {  return pagingContainer.getCurrentSelection();  }
 
   @Override
   protected int getRealIndex(T t) {

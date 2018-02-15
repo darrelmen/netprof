@@ -683,6 +683,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
+
 //    chart.setWidth(width + // 1378
 //        "px");
   }
@@ -690,8 +691,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private boolean isShort() {
     return Window.getClientHeight() < SHORT_THRESHOLD;
   }
-
-  private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
+  //private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
 
   /**
    * So when the x axis range changes, we get an event here.

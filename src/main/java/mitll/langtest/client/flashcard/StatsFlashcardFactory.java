@@ -543,12 +543,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         cancelRoundTimer();
         onSetComplete();
       } else {
-        loadCurrent();
+        loadAfterCurrent();
       }
     }
 
-    void loadCurrent() {
-      exerciseList.loadNextExercise(currentExercise.getID());
+    void loadAfterCurrent() {
+     // exerciseList.loadNextExercise(currentExercise.getID());
+      exerciseList.loadNext();
     }
 
     /**
@@ -677,16 +678,17 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         sticky.storeCurrent(exercise);
       }
 
-      Set<Integer> copies = new HashSet<>(exToCorrect.keySet());
+  /*    Set<Integer> copies = new HashSet<>(exToCorrect.keySet());
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
           copies.add(t.getID());
         }
-      }
+      }*/
 //      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
 //          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
-      // TODO simplify this
+      showFeedbackCharts();
+/*      // TODO simplify this
       controller.getService().getUserHistoryForList(copies, latestResultID, selection, getUserListID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -698,7 +700,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void onSuccess(AVPScoreReport scoreReport) {
           showFeedbackCharts(scoreReport.getSortedHistory());
         }
-      });
+      });*/
     }
 
     private int getUserListID() {
@@ -718,9 +720,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * TODO: get last session...
      *
-     * @param sortedHistory
+     * @paramx sortedHistory
      */
-    private void showFeedbackCharts(final List<ExerciseCorrectAndScore> sortedHistory) {
+    private void showFeedbackCharts(){//final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
@@ -729,9 +731,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       container = widgets;
 
-      scoreHistory = isPolyglot ?
-          new AnalysisTab(controller, true, -1, () -> 0) :
-          completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+      scoreHistory = //isPolyglot ?
+          new AnalysisTab(controller, isPolyglot, -1, () -> 0); //:
+ //         completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
 
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
@@ -750,12 +752,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       child.add(w);
       w.addStyleName("topFiveMargin");
 
-      if (!isPolyglot) {
+ /*     if (!isPolyglot) {
         Button repeatButton = getRepeatButton();
         repeatButton.addStyleName("topFiveMargin");
         repeatButton.addStyleName("leftFiveMargin");
         child.add(repeatButton);
-      }
+      }*/
 
       DivWidget lefty = new DivWidget();
       lefty.add(child);
@@ -816,7 +818,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @return
      * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
      */
-    private Button getRepeatButton() {
+/*    private Button getRepeatButton() {
       final Button w1 = new Button(GO_BACK);
       w1.setIcon(IconType.UNDO);
       w1.getElement().setId("AVP_DoWholeSetFromStart");
@@ -824,7 +826,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.addClickHandler(event -> doGoBack(w1));
       controller.register(w1, N_A);
       return w1;
-    }
+    }*/
 
     private void doGoBack(Button w1) {
       w1.setVisible(false);
@@ -877,7 +879,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       sticky.resetStorage();
 
       if (!allExercises.isEmpty()) {
-        exerciseList.loadExercise(allExercises.iterator().next().getID());
+        exerciseList.loadExercise(getFirstExercise());
       }
     }
 
@@ -1133,5 +1135,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       timeLeft.setText(value);
 //      logger.info("showTimeRemaining : time left " + timeLeft);
     }
+  }
+
+  private int getFirstExercise() {
+    return allExercises.iterator().next().getID();
   }
 }

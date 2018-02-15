@@ -97,8 +97,7 @@ public class SelectionState {
     return token
         .replaceAll("%3D", "=")
         .replaceAll("%3B", SECTION_SEPARATOR)
-        .replaceAll("%23", POUND)
-        ;
+        .replaceAll("%23", POUND);
   }
 
   String getSearchEntry() {
@@ -177,7 +176,6 @@ public class SelectionState {
     }
 
     if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
-    //  logger.info(getInfo());
   }
 
   public Map<String, Collection<String>> getTypeToSection() {

@@ -38,6 +38,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -278,7 +279,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
-        if (DEBUG || true) logger.info("pushNewSectionHistoryToken : calling noSectionsGetExercises for" +
+        if (DEBUG) logger.info("pushNewSectionHistoryToken : calling noSectionsGetExercises for" +
             "\n\ttoken '" + historyToken +
             "' " + "\n\tcurrent has " + getSize() + " instance " + getInstance());
 
@@ -413,6 +414,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       loadFromSelectionState(selectionState, selectionState);
     } catch (Exception e) {
       logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
+      logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
     }
   }
 
