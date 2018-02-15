@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
-  private final Logger logger = Logger.getLogger("DialogHelper");
+  //private final Logger logger = Logger.getLogger("DialogHelper");
 
   private final boolean doYesAndNo;
   private Modal dialogBox;

@@ -223,7 +223,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       //  logger.info("Filtered " + filtered.size());
 
       if (!filtered.isEmpty()) {
-        //int initial = value.getInitial(filtered);
         float total = 0;
         float avg = 0;
         for (PhoneSession session : filtered) {
@@ -234,14 +233,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         float overall = avg / total;
 
         int v = Float.valueOf(overall * 100).intValue();
-        if (DEBUG)
+        if (DEBUG) {
           logger.info("getPhoneStatuses : overall " + overall + " avg " + avg + " total " + total + " report " + v);
-//        int current = value.getAvg(filtered);
+        }
+
         int count = value.getCount(filtered);
 
-        phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
-            v,
-            count
+        phoneAndStatses.add(new PhoneAndStats(ps.getKey(), v, count
         ));
       }
     }
@@ -476,6 +474,32 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
+  @Override
+  protected void addColumnsToTable(boolean sortEnglish) {
+    addReview();
+
+    {
+      Column<PhoneAndStats, SafeHtml> countColumn = getCountColumn();
+      table.setColumnWidth(countColumn, COUNT_COL_WIDTH, Style.Unit.PX);
+      table.addColumn(countColumn, COUNT_COL_HEADER);
+
+      ColumnSortEvent.ListHandler<PhoneAndStats> countSorter = getCountSorter(countColumn, getList());
+      table.addColumnSortHandler(countSorter);
+      countColumn.setSortable(true);
+    }
+
+    {
+      Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
+      table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
+      table.addColumn(currentCol, CURR);
+      currentCol.setSortable(true);
+      table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
+      table.setWidth("100%", true);
+    }
+
+    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
+  }
+
   private void addReview() {
     Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
@@ -485,29 +509,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = getEnglishSorter(itemCol, getList());
     table.addColumnSortHandler(columnSortHandler);
-  }
-
-
-  @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
-    addReview();
-
-    Column<PhoneAndStats, SafeHtml> countColumn = getCountColumn();
-    table.setColumnWidth(countColumn, COUNT_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(countColumn, COUNT_COL_HEADER);
-
-    ColumnSortEvent.ListHandler<PhoneAndStats> countSorter = getCountSorter(countColumn, getList());
-    table.addColumnSortHandler(countSorter);
-    countColumn.setSortable(true);
-
-    Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
-    table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(currentCol, CURR);
-    currentCol.setSortable(true);
-    table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
-    table.setWidth("100%", true);
-
-    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
   }
 
   private Column<PhoneAndStats, SafeHtml> getItemColumn() {
@@ -537,42 +538,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     }
   }
 
-  /**
-   * TODO : why are the numbers different for word examples vs childCount???
-   *
-   * @param phone
-   */
-/*  private void clickOnPhone(String phone) {
-    PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
-    //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
-    List<PhoneSession> filtered = getFiltered(statsForPhone.getSessions(), from, to);
-
-    SortedSet<WordAndScore> examples = new TreeSet<>();
-    int total=0;
-    for (PhoneSession session : filtered) {
-     // logger.info("for " + session + " got " + session.getExamples().size());
-      examples.addAll(session.getExamples());
-      total+=session.getExamples().size();
-    }
-
-    logger.info("total    " + total);
-    logger.info("examples " + examples.size());
-
-    List<WordAndScore> filteredWords = new ArrayList<>(examples);
-
-    logger.info("Got " + filteredWords.size() + " for " + from + " - " + to);
-*//*    int i =0;
-    for (WordAndScore wordAndScore:filteredWords) {
-      logger.info(i++ + " : " + wordAndScore);
-    }*//*
-
-    // TODO: better ways of doing this.
-    exampleContainer.addItems(phone,
-        filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
-        MAX_EXAMPLES);
-
-    phonePlot.showErrorBarData(filtered, phone);
-  }*/
   private void clickOnPhone2(String phone) {
     PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
     //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
@@ -615,9 +580,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        int current = shell.getAvg();
-
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(current)).toSafeHtml();
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getAvg())).toSafeHtml();
       }
     };
   }

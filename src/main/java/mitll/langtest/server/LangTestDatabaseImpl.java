@@ -312,14 +312,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     int projectID = getProjectIDFromUser(userIDFromSession);
     Collator collator = getCollator(projectID);
-    if (userListByID != null) {
-      userListByID.getExercises().forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
-    } else {
-      Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercisesForUser() :
-          (getSectionHelper() == null ? Collections.emptyList() : getSectionHelper().getExercisesForSelectionState(typeToSection));
 
-      exercisesForState.forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
+    if (collator != null) {  // some kind of race...
+      if (userListByID != null) {
+        userListByID.getExercises().forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
+      } else {
+        Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercisesForUser() :
+            (getSectionHelper() == null ? Collections.emptyList() : getSectionHelper().getExercisesForSelectionState(typeToSection));
+
+        exercisesForState.forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
+      }
     }
+
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
     return db.getUserHistoryForList(userIDFromSession, ids, (int) latestResultID, allIDs, idToKey, db.getLanguage(projectID));
   }
@@ -329,10 +333,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return audioFileHelper == null ? null : audioFileHelper.getCollator();
   }
 
-  private void populateCollatorMap(List<Integer> allIDs, Map<Integer, CollationKey> idToKey, Collator collator,
+  private void populateCollatorMap(List<Integer> allIDs,
+                                   Map<Integer, CollationKey> idToKey,
+                                   Collator collator,
                                    CommonShell exercise) {
-    allIDs.add(exercise.getID());
-    idToKey.put(exercise.getID(), collator.getCollationKey(exercise.getForeignLanguage()));
+    int id = exercise.getID();
+    allIDs.add(id);
+    idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
   }
 
   public void logMessage(String message, boolean sendEmail) {

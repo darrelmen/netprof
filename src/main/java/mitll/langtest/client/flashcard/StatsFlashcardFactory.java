@@ -178,7 +178,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       });
     }
 
-    KeyStorage storage = new KeyStorage(controller) {
+    storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
         return (selectionID.isEmpty() ? "" : selectionID + "_") + super.getKey(name); // in the context of this selection
@@ -472,13 +472,31 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     @Override
+    protected void showEnglishOrForeign() {
+      if (isPolyglot) {
+        showBoth();
+      } else {
+        super.showEnglishOrForeign();
+      }
+    }
+
+    @Override
     protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
       if (isPolyglot) {
-        speedChoices = new SpeedChoices(storage);
+        speedChoices = new SpeedChoices(storage, getOnSpeedChoiceMade(), true);
         rightColumn.add(speedChoices.getSpeedChoices());
       } else {
         super.addControlsBelowAudio(controlState, rightColumn);
       }
+    }
+
+    @NotNull
+    private IShowStatus getOnSpeedChoiceMade() {
+      return () -> {
+        if (isAudioOn()) {
+          playRef();
+        }
+      };
     }
 
     String getRefAudioToPlay() {

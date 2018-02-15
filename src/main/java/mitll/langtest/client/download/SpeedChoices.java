@@ -14,11 +14,13 @@ import mitll.langtest.client.custom.KeyStorage;
 import java.util.logging.Logger;
 
 public class SpeedChoices {
-//  private final Logger logger = Logger.getLogger("SpeedChoices");
+  //private final Logger logger = Logger.getLogger("SpeedChoices");
 
   private static final String IS_REG_SPEED = "isRegSpeed";
   private static final String REGULAR = "Regular";
   private static final String SLOW = "Slow";
+  private static final String REGULAR_SPEED = "Regular Speed";
+  private static final String SLOW_SPEED = "Slow Speed";
 
   private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
   private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
@@ -26,68 +28,55 @@ public class SpeedChoices {
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-  private boolean isRegular = true;
+  // private boolean isRegular = true;
 
-  private boolean isRegularSet = false;
+  //  private boolean isRegularSet = false;
   private ToggleButton regular, slow;
   private IShowStatus showStatus;
-//  private KeyStorage keyStorage;
-  private boolean setInitially = false;
+  private boolean setInitially;
 
-  SpeedChoices(KeyStorage keyStorage, IShowStatus showStatus) {
+  private KeyStorage keyStorage;
+
+  public SpeedChoices(KeyStorage keyStorage, IShowStatus showStatus, boolean setInitially) {
     this.showStatus = showStatus;
-  //  this.keyStorage = keyStorage;
+    this.keyStorage = keyStorage;
+    this.setInitially = setInitially;
   }
 
   public SpeedChoices(KeyStorage keyStorage) {
     this.showStatus = () -> {
     };
     setInitially = true;
-    isRegularSet = true;
-    isRegular = false;//isSpeedReg();
-    //this.keyStorage = keyStorage;
-  }
-
-/*  private boolean isSpeedReg() {
-    return keyStorage.isTrue(IS_REG_SPEED);
+    this.keyStorage = keyStorage;
   }
 
   private void rememberAudioChoice(boolean isReg) {
     keyStorage.setBoolean(IS_REG_SPEED, isReg);
-  }*/
-
-  private void showSpeeds() {
-    regular.setDown(isRegular);
-    slow.setDown(!isRegular);
-    showStatus.showStatus();
   }
 
   public String getStatus() {
-    return (isRegularSet ? isRegular ? "Regular Speed" : "Slow Speed" : "");
+    return (isThereASpeedChoice() ? isSpeedReg() ? REGULAR_SPEED : SLOW_SPEED : "");
   }
 
   public Widget getSpeedChoices() {
     Panel buttonToolbar = getToolbar2();
     buttonToolbar.setHeight("40px");
-
-    // logger.info("getSpeedChoices got " + isRegularSet);
+    // logger.info("getSpeedChoices got " + isThereASpeedChoice);
     {
       regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> {
-        isRegular = regular.isDown();
-        isRegularSet = true;
+        // isRegular = regular.isDown();
+        rememberAudioChoice(true);
         showSpeeds();
-        //rememberAudioChoice(true);
       });
       buttonToolbar.add(regular);
     }
 
     {
       slow = getChoice2(SLOW, turtle, turtleSelected, event -> {
-        isRegular = !slow.isDown();
+        // isRegular = !slow.isDown();
         //  logger.info("got slow click " + isRegular);
-        isRegularSet = true;
+        rememberAudioChoice(false);
         showSpeeds();
-        //rememberAudioChoice(false);
       });
 
       buttonToolbar.add(slow);
@@ -96,6 +85,18 @@ public class SpeedChoices {
     if (setInitially) showSpeeds();
     buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
     return buttonToolbar;
+  }
+
+
+  private void showSpeeds() {
+    setButtonState();
+    showStatus.showStatus();
+  }
+
+  private void setButtonState() {
+    boolean isRegular = isSpeedReg();
+    regular.setDown(isRegular);
+    slow.setDown(!isRegular);
   }
 
   private Panel getToolbar2() {
@@ -112,11 +113,17 @@ public class SpeedChoices {
     return onButton;
   }
 
-  public boolean isRegularSet() {
-    return isRegularSet;
+  public boolean isThereASpeedChoice() {
+    return !keyStorage.getValue(IS_REG_SPEED).isEmpty();
   }
 
   public boolean isRegular() {
-    return isRegular;
+    return isSpeedReg();
+  }
+
+  private boolean isSpeedReg() {
+    String value = keyStorage.getValue(IS_REG_SPEED);
+ //   logger.info("isSpeedReg speed from storage " + value);
+    return value.isEmpty() || value.equalsIgnoreCase("true");
   }
 }

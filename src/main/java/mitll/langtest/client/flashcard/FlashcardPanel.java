@@ -77,6 +77,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @since 6/26/2014.
  */
 public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends DivWidget implements TimerListener {
+  public static final String MEANING = "Meaning";
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   private static final int ADVANCE_DELAY = 2000;
@@ -218,7 +219,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   private void maybePlayRef(ControlState controlState) {
     //logger.info("maybePlayRef --- ");
-    if (controlState.isAudioOn() && isTabVisible()) {
+    if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
         // logger.info("audio on, so playing ref");
         playRef();
@@ -228,6 +229,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     } else {
       //logger.info("maybePlayRef tab not visible - so no audio.");
     }
+  }
+
+   boolean isAudioOn(ControlState controlState) {
+    return controlState.isAudioOn();
   }
 
   /**
@@ -489,7 +494,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         logger.info("\tplayRefAndGoToNext tab is not visible");
       }
     } else {
-      if (controlState.isAudioOn()) {
+      if (isAudioOn()) {
         playAudioAndAdvance(path, delayMillis, useCheck);
       } else {
         timer.scheduleIn(ADVANCE_DELAY);
@@ -545,15 +550,19 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    */
   void flipCard() {
     if (clickToFlip.isVisible()) {
-      boolean showEnglish = controlState.showEnglish();
+      boolean showEnglish = isShowEnglish();
       if (!showEnglish || !controlState.showForeign()) {
         toggleVisibility(english);
         toggleVisibility(foreign);
-        if (!isHidden(foreign) && controlState.isAudioOn()) {
+        if (!isHidden(foreign) && isAudioOn()) {
           playRef();
         }
       }
     }
+  }
+
+  private boolean isShowEnglish() {
+    return controlState.showEnglish();
   }
 
   private void toggleVisibility(Widget english) {
@@ -810,12 +819,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
     onButton.addClickHandler(event -> {
       setAutoPlay(false);
-      if (!controlState.isAudioOn()) {
+      if (!isAudioOn(controlState)) {
         playRefLater();
       }
       controlState.setAudioOn(true);
     });
-    onButton.setActive(controlState.isAudioOn());
+    onButton.setActive(isAudioOn(controlState));
     //logger.info("audio on button " + onButton.isActive());
     return onButton;
   }
@@ -827,9 +836,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       setAutoPlay(false);
       controlState.setAudioOn(false);
     });
-    offButton.setActive(!controlState.isAudioOn());
+    offButton.setActive(!isAudioOn());
     controller.register(offButton, getID());
     return offButton;
+  }
+
+  boolean isAudioOn() {
+    return isAudioOn(controlState);
   }
 
   /**
@@ -892,8 +905,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   private Button getOff(final ControlState controlState) {
-    String english = isSiteEnglish() ? "Meaning" : ENGLISH;
-    Button showEnglish = new Button(english);
+    Button showEnglish = new Button(isSiteEnglish() ? MEANING : ENGLISH);
     showEnglish.getElement().setId("Show_English");
     controller.register(showEnglish, getID());
 
@@ -914,18 +926,16 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     both.getElement().setId("Show_Both_" + controller.getLanguage() + "_and_English");
     controller.register(both, getID());
 
-    both.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (!controlState.showBoth()) {
-          controlState.setShowState(ControlState.BOTH);
-          //System.out.println("getBoth now  " + controlState);
-          showEnglishOrForeign();
-        }
-      }
-    });
+    both.addClickHandler(event -> gotClickOnBoth(controlState));
     both.setActive(controlState.showBoth());
     return both;
+  }
+
+  private void gotClickOnBoth(ControlState controlState) {
+    if (!controlState.showBoth()) {
+      controlState.setShowState(ControlState.BOTH);
+      showEnglishOrForeign();
+    }
   }
 
   /**
@@ -1069,7 +1079,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     focusPanel.addFocusHandler(event -> focusPanel.setFocus(false));
   }
 
-  private void showEnglishOrForeign() {
+  /**
+   * @see #getBoth
+   * @see #getQuestionContent
+   */
+  protected void showEnglishOrForeign() {
     if (controlState.showBoth()) {
       showBoth();
       showOnlyEnglish = false;
@@ -1096,7 +1110,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     }
   }
 
-  private void showBoth() {
+  void showBoth() {
     showEnglish();
     showForeign();
 
@@ -1108,7 +1122,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
-
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }

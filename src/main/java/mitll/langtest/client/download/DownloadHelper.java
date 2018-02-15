@@ -44,9 +44,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
@@ -66,7 +64,7 @@ public class DownloadHelper implements IShowStatus {
   //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet for whole course.";
 //  private static final String SELECT_A_UNIT_OR_CHAPTER = "If you also want to download audio, select a unit or chapter.";
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
-  private static final String DOWNLOAD_CONTENT_SPREADSHEEET = "Download Content Spreadsheeet";
+  //private static final String DOWNLOAD_CONTENT_SPREADSHEEET = "Download Content Spreadsheeet";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
   private static final String CONTEXT_SENTENCES = "Context Sentences";
@@ -80,7 +78,7 @@ public class DownloadHelper implements IShowStatus {
   private SpeedChoices speedChoices;
 
   public DownloadHelper(ExerciseController controller) {
-    this.speedChoices = new SpeedChoices(controller.getStorage(),this);
+    this.speedChoices = new SpeedChoices(controller.getStorage(),this,true);
   }
 
   /**
@@ -115,7 +113,7 @@ public class DownloadHelper implements IShowStatus {
       container.add(new Heading(3, DOWNLOAD_SPREADSHEET));
       container.add(new Heading(4, SELECT_A_UNIT_OR_CHAPTER));
     } else {*/
-    // isRegularSet = false;
+    // isThereASpeedChoice = false;
     isContextSet = false;
     isMaleSet = false;
 
@@ -225,7 +223,7 @@ public class DownloadHelper implements IShowStatus {
     status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
     status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
     status3.setText(speedChoices.getStatus());
-    closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isRegularSet());
+    closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isThereASpeedChoice());
   }
 
   private Widget getButtonBarChoices(Collection<String> values, final String type, ButtonType buttonType) {
@@ -287,7 +285,7 @@ public class DownloadHelper implements IShowStatus {
 //  private boolean isRegular = false;
 
   private boolean isContextSet = false;
-  //private boolean isRegularSet = false;
+  //private boolean isThereASpeedChoice = false;
   private boolean isMaleSet = false;
 
 /*
@@ -336,7 +334,7 @@ public class DownloadHelper implements IShowStatus {
     {
       regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> {
         isRegular = regular.isDown();
-        isRegularSet = true;
+        isThereASpeedChoice = true;
         showSpeeds();
       });
       buttonToolbar.add(regular);
@@ -346,7 +344,7 @@ public class DownloadHelper implements IShowStatus {
       slow = getChoice2(SLOW, turtle, turtleSelected, event -> {
         isRegular = !slow.isDown();
         //  logger.info("got slow click " + isRegular);
-        isRegularSet = true;
+        isThereASpeedChoice = true;
         showSpeeds();
       });
       buttonToolbar.add(slow);
