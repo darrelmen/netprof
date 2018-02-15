@@ -75,6 +75,9 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
+  /**
+   *
+   */
   private static final String PREFIX = "#";//"Sess. #";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
@@ -157,7 +160,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     {
       getElement().setId("AnalysisPlot");
       Style style = getElement().getStyle();
-      style.setMargin(10, Style.Unit.PX);
+      style.setMarginLeft(10, Style.Unit.PX);
+      style.setMarginRight(10, Style.Unit.PX);
+      style.setMarginBottom(10, Style.Unit.PX);
       addStyleName("cardBorderShadow");
     }
 
@@ -222,7 +227,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores, int index) {
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
-    int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
+   // int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
 
     String text = simpleTimeAndScores.size() > 100 ? "" :
         PREFIX + (index + 1) + " : score " + fround1 +

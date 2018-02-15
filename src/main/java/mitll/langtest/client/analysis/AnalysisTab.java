@@ -351,7 +351,7 @@ public class AnalysisTab extends DivWidget {
     if (isPolyglot) {
       Heading scoreHeader = new Heading(3);
       scoreHeader.addStyleName("leftFiveMargin");
-      scoreHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+      scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
       scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
       stepper.add(this.scoreHeader = scoreHeader);
       //    logger.info("add score header");

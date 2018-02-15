@@ -1358,8 +1358,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   }
 
   /**
-   * @see ListSorting#sortBy
    * @param comparator
+   * @see ListSorting#sortBy
    */
   @Override
   public void flushWith(Comparator<CommonShell> comparator) {
@@ -1492,10 +1492,17 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getExercises(Collection, int)
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
-      logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + "\n\tcurrentReq " + currentReq);
+    if (DEBUG) {
+      logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
+    }
     //long then = System.currentTimeMillis();
     Set<Integer> requested = new HashSet<>();
-    requested.add(getCurrentExercise().getID());
+
+    CommonShell currentExercise = getCurrentExercise();
+    if (currentExercise != null) {
+      requested.add(currentExercise.getID());
+    }
+
     List<CommonExercise> alreadyFetched = new ArrayList<>();
     for (Integer id : visibleIDs) {
       CommonExercise cachedExercise = getCachedExercise(id);
