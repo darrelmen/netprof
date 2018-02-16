@@ -1,7 +1,13 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.Section;
+import com.github.gwtbootstrap.client.ui.Thumbnail;
+import com.github.gwtbootstrap.client.ui.Thumbnails;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -9,9 +15,15 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -21,7 +33,9 @@ import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
-import mitll.langtest.client.services.*;
+import mitll.langtest.client.services.OpenUserServiceAsync;
+import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
@@ -29,21 +43,31 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
-
-import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
+import java.util.stream.Collectors;
 
 /**
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  private static final String COURSES = " courses";
+  private static final String COURSE1 = " course";
 
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
@@ -94,6 +118,7 @@ public class ProjectChoices {
 
   private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  private final Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
 
   /**
    * @see InitialUI#populateRootPanel
@@ -477,8 +502,16 @@ public class ProjectChoices {
       button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
       thumbnail.add(button);
 
+      boolean hasChildren = projectForLang.hasChildren();
+      if (hasChildren) {
+        addPolyglotIcon(projectForLang, button);
+      } else if (projectForLang.getProjectType() == ProjectType.POLYGLOT) {
+        addPolyIcon(button);
+      }
       if (isQC) {
-        addPopover(projectForLang, button);
+        if (!hasChildren) {
+          addPopover(projectForLang, button);
+        }
       } else {
         if (!projectForLang.getCourse().isEmpty()) {
           addPopoverUsual(projectForLang, button);
@@ -489,31 +522,50 @@ public class ProjectChoices {
     DivWidget horiz = new DivWidget();
     horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
     thumbnail.add(horiz);
-    {
-      boolean hasChildren = projectForLang.hasChildren();
 
-      DivWidget container = new DivWidget();
-      Heading label;
-
-      container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren));
-      container.setWidth("100%");
-      container.addStyleName("floatLeft");
-
-      if (isQC && !hasChildren) {
-        container.add(getQCButtons(projectForLang, label));
-      }
-
-      horiz.add(container);
-    }
+    horiz.add(getContainerWithButtons(name, projectForLang, isQC));
 
     return thumbnail;
   }
 
-  private void addPopover(SlimProject projectForLang, FocusWidget button) {
-    Set<String> typeOrder = projectForLang.getProps().keySet();
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
-        new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+  /**
+   * Add poly icon to parent if any child is a polyglot game project.
+   *
+   * @param projectForLang
+   * @param container
+   */
+  private void addPolyglotIcon(SlimProject projectForLang, UIObject container) {
+    boolean hasPoly = !projectForLang.getChildren()
+        .stream()
+        .filter(slimProject -> slimProject.getProjectType() == ProjectType.POLYGLOT).collect(Collectors.toList()).isEmpty();
+    if (hasPoly) {
+      addPolyIcon(container);
+    }
+
+  }
+
+  private void addPolyIcon(UIObject container) {
+    polyglot.addStyleName("floatRight");
+    polyglot.getElement().getStyle().setMarginTop(9, Style.Unit.PX);
+    DOM.appendChild(container.getElement(), polyglot.getElement());
+  }
+
+  @NotNull
+  private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC) {
+    boolean hasChildren = projectForLang.hasChildren();
+
+    DivWidget container = new DivWidget();
+    Heading label;
+
+    container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren));
+    container.setWidth("100%");
+    container.addStyleName("floatLeft");
+
+    if (isQC && !hasChildren) {
+      container.add(getQCButtons(projectForLang, label));
+    }
+    //addPolyglotIcon(projectForLang, hasChildren, container);
+    return container;
   }
 
   private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
@@ -523,6 +575,8 @@ public class ProjectChoices {
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
   }
 
+  private BasicDialog basicDialog = new BasicDialog();
+
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
                                 Set<String> typeOrder,
@@ -530,18 +584,25 @@ public class ProjectChoices {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
 
-    new BasicDialog().showPopover(
+    basicDialog.showPopover(
         button,
         null,
         commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, value),
         Placement.RIGHT);
   }
 
+  private void addPopover(SlimProject projectForLang, FocusWidget button) {
+    Set<String> typeOrder = projectForLang.getProps().keySet();
+    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
+        new UnitChapterItemHelper<>(typeOrder);
+    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+  }
+
   private void showPopover(SlimProject projectForLang,
                            Widget button,
                            Set<String> typeOrder,
                            UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper) {
-    new BasicDialog().showPopover(
+    basicDialog.showPopover(
         button,
         null,
         commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, projectForLang.getProps()),
@@ -577,15 +638,20 @@ public class ProjectChoices {
     }
 
     if (hasChildren) {
-      List<SlimProject> visibleProjects = getVisibleProjects(projectForLang.getChildren());
-      String suffix = (visibleProjects.size() == 1) ? " course" : " courses";
-      label.setSubtext(visibleProjects.size() + suffix);
+      int size = getNumVisible(projectForLang);
+      String suffix = (size == 1) ? COURSE1 : COURSES;
+      label.setSubtext(size + suffix);
     } else {
       showProjectStatus(projectForLang, label);
     }
 
     label.addStyleName("floatLeft");
     return label;
+  }
+
+  private int getNumVisible(SlimProject projectForLang) {
+    List<SlimProject> visibleProjects = getVisibleProjects(projectForLang.getChildren());
+    return visibleProjects.size();
   }
 
   private void showProjectStatus(SlimProject projectForLang, Heading label) {
@@ -806,21 +872,25 @@ public class ProjectChoices {
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
 //    logger.info("gotClickOnFlag project " + projid + " has " + children);
+    NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
 /*
       logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
           */
-      uiLifecycle.makeBreadcrumb(name);
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
       // logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
-      NavLink projectCrumb = uiLifecycle.makeBreadcrumb(name);
-      projectCrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
+      breadcrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
 
       uiLifecycle.clearContent();
       addProjectChoices(nest, children);
     }
+  }
+
+  @NotNull
+  private NavLink makeBreadcrumb(String name) {
+    return uiLifecycle.makeBreadcrumb(name);
   }
 
   private void addProjectChoices(int nest, List<SlimProject> children) {
