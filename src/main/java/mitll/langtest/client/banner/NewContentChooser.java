@@ -18,6 +18,8 @@ import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
+import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
+import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.shared.custom.UserList;
@@ -59,7 +61,7 @@ public class NewContentChooser implements INavigation {
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 
-  public static final int MIN_POLYGLOT_SCORE = 35;
+  private static final int MIN_POLYGLOT_SCORE = 35;
 
   /**
    * @param controller
@@ -203,7 +205,7 @@ public class NewContentChooser implements INavigation {
    *
    */
   private void showPolyDialog() {
-    mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+    mode = MODE_CHOICE.NOT_YET;
 
     new PolyglotDialog(
         DRY_RUN_MINUTES, DRY_NUM,
@@ -213,20 +215,21 @@ public class NewContentChooser implements INavigation {
       @Override
       public boolean gotYes() {
         mode = candidateMode;
-        if (mode == PolyglotDialog.MODE_CHOICE.DRY_RUN) {
+        if (mode == MODE_CHOICE.DRY_RUN) {
           pushFirstUnit();
-        } else if (mode == PolyglotDialog.MODE_CHOICE.POLYGLOT) {
+        } else if (mode == MODE_CHOICE.POLYGLOT) {
           pushSecondUnit();
         } else {
           return false;
         }
+
+        prompt = candidatePrompt;
 
         return true;
       }
 
       @Override
       public void gotNo() {
-
       }
 
       @Override
@@ -234,18 +237,32 @@ public class NewContentChooser implements INavigation {
         showPractice();
       }
     },
-        choice -> candidateMode = choice);
+        new PolyglotDialog.ModeChoiceListener() {
+          @Override
+          public void gotMode(MODE_CHOICE choice) {
+            candidateMode = choice;
+          }
+
+          @Override
+          public void gotPrompt(PROMPT_CHOICE choice) {
+            candidatePrompt = choice;
+          }
+        }
+    );
   }
 
   private void showPractice() {
-    practiceHelper.setMode(mode);
+    practiceHelper.setMode(mode, prompt);
     practiceHelper.setNavigation(this);
     practiceHelper.showContent(divWidget, DRILL.toString());
     practiceHelper.hideList();
   }
 
-  private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-  private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
+  private MODE_CHOICE mode = MODE_CHOICE.NOT_YET;
+
+  private PROMPT_CHOICE candidatePrompt = PROMPT_CHOICE.NOT_YET;
+  private PROMPT_CHOICE prompt = PROMPT_CHOICE.NOT_YET;
 
   private void pushFirstUnit() {
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
@@ -317,7 +334,7 @@ public class NewContentChooser implements INavigation {
     //  logger.info("is poly "+ isPolyglot());
     divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
         new StudentAnalysis(controller) :
-        new AnalysisTab(controller,  isPolyglot(), 0, ()->1));
+        new AnalysisTab(controller, isPolyglot(), 0, () -> 1));
 
     currentSection = PROGRESS;
   }

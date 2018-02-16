@@ -40,11 +40,9 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
-import mitll.langtest.client.analysis.ReqCounter;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -59,8 +57,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,6 +76,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
+  public static final int INCORRECT_BEFORE_ADVANCE = 3;
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final String LISTS = "Lists";
@@ -217,6 +214,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   }
 
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
 
   private boolean getIsDry() {
     return mode == PolyglotDialog.MODE_CHOICE.DRY_RUN;
@@ -328,7 +326,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         soundFeedback,
         soundFeedback.getEndListener(),
         StatsFlashcardFactory.this.instance,
-        exerciseList) {
+        exerciseList, prompt) {
 
       @Override
       protected void gotShuffleClick(boolean b) {
@@ -341,7 +339,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private void reset() {
     exToCorrect.clear();
     exToScore.clear();
-    latestResultID = -1;
+  //  latestResultID = -1;
     sticky.clearCurrent();
   }
 
@@ -395,7 +393,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     return value.split(",");
   }
 
-  private long latestResultID = -1;
+  // private long latestResultID = -1;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   public void resetStorage() {
@@ -410,8 +408,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     this.contentPanel = contentPanel;
   }
 
-  public void setMode(PolyglotDialog.MODE_CHOICE mode) {
+  public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE prompt) {
     this.mode = mode;
+    this.prompt = prompt;
   }
 
   public PolyglotDialog.MODE_CHOICE getMode() {
@@ -447,7 +446,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           soundFeedback,
           null,
           StatsFlashcardFactory.this.instance,
-          exerciseListToUse);
+          exerciseListToUse, prompt);
       soundFeedback.setEndListener(new SoundFeedback.EndListener() {
         @Override
         public void songStarted() {
@@ -462,6 +461,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       });
 
       this.count = counter++;
+
+
+    }
+
+    @Override
+    protected void onUnload() {
+      super.onUnload();
+      cancelRoundTimer();
     }
 
     @Override
@@ -492,11 +499,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     @NotNull
     private IShowStatus getOnSpeedChoiceMade() {
-      return () -> {
-        if (isAudioOn()) {
-          playRef();
-        }
-      };
+      return this::maybePlayRef;
+    }
+
+    private void maybePlayRef() {
+      if (isAudioOn()) {
+        playRef();
+      }
     }
 
     String getRefAudioToPlay() {
@@ -543,18 +552,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         cancelRoundTimer();
         onSetComplete();
       } else {
-        loadAfterCurrent();
+        exerciseList.loadNext();
       }
-    }
-
-    void loadAfterCurrent() {
-     // exerciseList.loadNextExercise(currentExercise.getID());
-      exerciseList.loadNext();
     }
 
     /**
      * @param b
-     * @see FlashcardPanel#getShuffleButton(ControlState)
+     * @see FlashcardPanel#getShuffleButton
      */
     @Override
     protected void gotShuffleClick(boolean b) {
@@ -603,7 +607,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         setStateFeedback();
 
-        latestResultID = result.getResultID();
+      //  latestResultID = result.getResultID();
 
         exToLatest.put(id, result);
 //        if (polyglotChart != null) {
@@ -632,7 +636,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           wrongCount = 0;
         } else {
           wrongCount++;
-          if (wrongCount > 3) {
+          if (wrongCount == INCORRECT_BEFORE_ADVANCE) {
             timer.scheduleIn(NEXT_EXERCISE_DELAY);
             wrongCount = 0;
           }
@@ -722,7 +726,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      *
      * @paramx sortedHistory
      */
-    private void showFeedbackCharts(){//final List<ExerciseCorrectAndScore> sortedHistory) {
+    private void showFeedbackCharts() {//final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
@@ -733,7 +737,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       scoreHistory = //isPolyglot ?
           new AnalysisTab(controller, isPolyglot, -1, () -> 0); //:
- //         completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+      //         completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
 
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
@@ -827,14 +831,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       controller.register(w1, N_A);
       return w1;
     }*/
-
-    private void doGoBack(Button w1) {
+ /*   private void doGoBack(Button w1) {
       w1.setVisible(false);
       sticky.clearCurrent();
       showFlashcardDisplay();
       startOver();
-    }
-
+    }*/
     private void showFlashcardDisplay() {
       abortPlayback();
       belowContentDiv.clear();
@@ -999,7 +1001,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
     }
 
-
     private void gotSeeScoresClick() {
       abortPlayback();
       seeScores.setEnabled(false);
@@ -1056,7 +1057,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         pronScore.setType(LabelType.SUCCESS);
 
         g.setWidget(row, 0, pronScoreGroup);
-        //pronScoreGroup.addStyleName("rightFiveMargin");
         g.setWidget(row++, 1, pronScore);
       }
 
@@ -1080,7 +1080,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     /**
      * @see #getLeftState()
-     * @see #receivedAudioAnswer(AudioAnswer)
+     * @see #receivedAudioAnswer
      */
     private void setStateFeedback() {
       int totalCorrect = getCorrect();

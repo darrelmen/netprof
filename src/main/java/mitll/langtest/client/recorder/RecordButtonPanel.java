@@ -290,7 +290,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 //              postAudioFile(outer, base64EncodedWavFile); // TODO : try one more time...  ???
 //            } else {
     recordButton.setEnabled(true);
-    // receivedAudioFailure();
     String stackTrace = getExceptionAsString(caught);
     logMessage("postAudioFile : failed to post " + getLog(then, len) + "\n" + stackTrace, true);
     Window.alert("postAudioFile : Couldn't post audio for exercise.");

@@ -44,7 +44,7 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundFeedback {
-  public static final String CORRECT = "langtest/sounds/correct4.mp3";
+  public static final String CORRECT   = "langtest/sounds/correct4.mp3";
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
 
@@ -126,7 +126,6 @@ public class SoundFeedback {
 
   public void destroySound() {
     if (currentSound != null) {
-      //System.out.println("destroySound " +currentSound);
       this.soundManager.destroySound(currentSound);
       currentSound = null;
     }

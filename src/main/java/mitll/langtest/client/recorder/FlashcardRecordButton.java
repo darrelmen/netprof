@@ -73,10 +73,10 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
 
-  private boolean warnUserWhenNotSpace;
-  private final boolean addKeyBinding;
+//  private boolean warnUserWhenNotSpace;
+ // private final boolean addKeyBinding;
   private final ExerciseController controller;
-  private final Tooltip tooltip;
+ // private final Tooltip tooltip;
 
   /**
    * @param delay
@@ -97,8 +97,8 @@ public class FlashcardRecordButton extends RecordButton {
     }
     this.controller = controller;
 
-    this.addKeyBinding = addKeyBinding;
-    this.warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
+  //  this.addKeyBinding = addKeyBinding;
+   // boolean warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
 
     setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
@@ -114,7 +114,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     getElement().setId("FlashcardRecordButton_" + instance);
 
-    tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
+    //tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
 //    logger.info("FlashcardRecordButton : using " + getElement().getExID());
   }
 
@@ -161,6 +161,28 @@ public class FlashcardRecordButton extends RecordButton {
           //logger.info("key code is " + keyCode);
         } else {*/
         //logger.info("warn - key code is " + keyCode);
+        switch(keyCode) {
+          case KeyCodes.KEY_LEFT:
+            stopProp(event);
+            gotLeftArrow();
+            break;
+          case KeyCodes.KEY_RIGHT:
+            stopProp(event);
+            gotRightArrow();
+            break;
+          case KeyCodes.KEY_UP:
+            stopProp(event);
+            gotUpArrow();
+            break;
+          case KeyCodes.KEY_DOWN:
+            stopProp(event);
+            gotDownArrow();
+            break;
+            case KeyCodes.KEY_ENTER:
+            stopProp(event);
+            gotEnter();
+            break;
+        }
         if (keyCode == KeyCodes.KEY_LEFT) {
           stopProp(event);
           gotLeftArrow();
@@ -196,6 +218,9 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   protected void gotDownArrow() {
+  }
+
+  protected void gotEnter() {
   }
 
   private void checkKeyUp(NativeEvent event) {
@@ -263,7 +288,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   public void initRecordButton() {
     super.initRecordButton();
-    setText(addKeyBinding ? SPACE_BAR : getPrompt());
+  //  setText(addKeyBinding ? SPACE_BAR : getPrompt());
     setType(ButtonType.DANGER);
   }
 
@@ -272,9 +297,10 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   public void removeTooltip() {
-    if (tooltip != null) {
+
+/*    if (tooltip != null) {
       tooltip.remove(this);
 //      tooltip.reconfigure();
-    }
+    }*/
   }
 }

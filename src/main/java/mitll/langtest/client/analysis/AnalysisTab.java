@@ -66,13 +66,14 @@ public class AnalysisTab extends DivWidget {
   public static final String REPORT_FOR_USER = "getting performance report for user";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private static final int MIN_HEIGHT = 325;
+
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
    * will wrap.
    *
    * @see #showWordScores
    */
-  private static final int WORD_WIDTH = 450;
+  private static final int WORD_WIDTH = 459;
 
   private static final String WORDS = "Vocabulary";
   /**
@@ -83,7 +84,7 @@ public class AnalysisTab extends DivWidget {
    * @see #getSoundsContainer
    */
   private static final String SOUNDS = "Sounds";
-  private static final String SUBTITLE = "";
+  //private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
 

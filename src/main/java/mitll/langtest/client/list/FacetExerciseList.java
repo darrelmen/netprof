@@ -1403,7 +1403,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
-      if (DEBUG || true) logger.info("askServerForVisibleExercises item " + itemID + " and " + visibleIDs.size());
+      if (DEBUG) logger.info("askServerForVisibleExercises item " + itemID + " and " + visibleIDs.size());
       getExercises(getVisibleForDrill(itemID, visibleIDs), currentReq);
     }
   }

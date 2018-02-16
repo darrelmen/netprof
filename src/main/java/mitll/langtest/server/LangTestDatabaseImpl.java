@@ -60,6 +60,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
@@ -80,6 +82,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
   private static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
+  public static final String GOT_BROWSER_EXCEPTION = "got browser exception";
 
   /**
    * @see
@@ -290,17 +293,20 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @return
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
+/*
   @Override
   public AVPScoreReport getUserHistoryForList(Collection<Integer> ids,
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
                                               int userListID) throws DominoSessionException {
+*/
 /*    logger.debug("getUserHistoryForList" +
         "\n\tuser " + userid + " and" +
         "\n\tids " + ids.size() +
         "\n\tlist " + userListID+
         " type to section " + typeToSection);
-    */
+    *//*
+
     int userIDFromSession = getUserIDFromSessionOrDB();
 
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
@@ -327,28 +333,41 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
     return db.getUserHistoryForList(userIDFromSession, ids, (int) latestResultID, allIDs, idToKey, db.getLanguage(projectID));
   }
+*/
 
-  private Collator getCollator(int projid) {
+/*  private Collator getCollator(int projid) {
     AudioFileHelper audioFileHelper = getAudioFileHelper(db.getProject(projid));
     return audioFileHelper == null ? null : audioFileHelper.getCollator();
-  }
+  }*/
 
-  private void populateCollatorMap(List<Integer> allIDs,
+/*  private void populateCollatorMap(List<Integer> allIDs,
                                    Map<Integer, CollationKey> idToKey,
                                    Collator collator,
                                    CommonShell exercise) {
     int id = exercise.getID();
     allIDs.add(id);
     idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
-  }
-
+  }*/
   public void logMessage(String message, boolean sendEmail) {
     if (message.length() > 10000) message = message.substring(0, 10000);
-    String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client : " + message;
-    logger.debug(prefixedMessage);
+    String prefixedMessage = "on " + getHostName() + " from client : " + message;
 
-    if (message.startsWith("got browser exception") || sendEmail) {
+    if (sendEmail) {
+      logger.error(prefixedMessage);
+    } else {
+      logger.info(prefixedMessage);
+    }
+
+    if (message.startsWith(GOT_BROWSER_EXCEPTION) || sendEmail) {
       sendEmail("Javascript Exception", getInfo(prefixedMessage));
+    }
+  }
+
+  private String getHostName() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      return "unknown host exception?";
     }
   }
 

@@ -183,12 +183,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         controller.usingFlashRecorder(),
         "browser",
         controller.getBrowserInfo(),
-
-//        scoreAudioNow, // do flashcard
-//        recordInResults,
-//        shouldAddToAudioTable(),
-//        false, // allow alternates
-
         decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {

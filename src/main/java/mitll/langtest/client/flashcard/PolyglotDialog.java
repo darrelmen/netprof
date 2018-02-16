@@ -17,13 +17,19 @@ public class PolyglotDialog {
   private static final int HSIZE = 4;
   private static final String LIGHTNING_ROUND = "Test your pronunciation!";
   public static final String GENDER_GROUP = "GenderGroup";
-  public static final String DRY_RUN  = "Dry Run (Just Practice!)";
+  public static final String DRY_RUN = "Dry Run (Just Practice!)";
   public static final String POLYGLOT_COMPETITION = "Polyglot Competition";
+  public static final String START = "Start!";
+  public static final String CANCEL = "Cancel";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
+  public enum PROMPT_CHOICE {NOT_YET, PLAY, DONT_PLAY}
+
   public interface ModeChoiceListener {
     void gotMode(MODE_CHOICE choice);
+
+    void gotPrompt(PROMPT_CHOICE choice);
   }
 
   private Button closeButton;
@@ -52,8 +58,8 @@ public class PolyglotDialog {
             LIGHTNING_ROUND,
             Collections.emptyList(),
             container,
-            "Start!",
-            "Cancel",
+            START,
+            CANCEL,
             closeListener, 550);
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(false);
@@ -70,47 +76,81 @@ public class PolyglotDialog {
     row.add(new Heading(HSIZE, "To record : "));
     row.add(new Heading(HSIZE, " * PRESS and HOLD the space bar while recording <i>or</i>"));
     row.add(new Heading(HSIZE, " * CLICK and HOLD the mouse button."));
-    row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item (if you want to repeat an item)."));
-    row.add(new Heading(HSIZE, "Scores above " + minScore +
-        " advance automatically to the next item."));
-    row.add(new Heading(HSIZE, "You are not required to complete all the items."));//, but your final score rewards completion."));
+    String text = "Scores above " + minScore + " advance automatically.";
+    row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. " + text));// (if you want to repeat an item)."));
+    // row.add(new Heading(HSIZE, text));
+    row.add(new Heading(HSIZE, "You are not required to record all the items."));//, but your final score rewards completion."));
 
-    row.add(new Heading(HSIZE, "Please choose either : "));
-    Heading modeDep = new Heading(HSIZE, "");
-    modeDep.setHeight(14 + "px");
-    modeDep.getElement().getStyle().setColor("blue");
-    container.add(addModeChoices(dryMin, dryNum, compMin, compNum, modeDep));
+    {
+      container.add(new Heading(HSIZE, "Do you want to hear each item before recording?"));
+      container.add(addPromptChoices());
+    }
 
-    container.add(modeDep);
-    Heading w = new Heading(HSIZE, "");
+    container.add(new Heading(HSIZE, "Please choose either : "));
+
+    {
+      Heading modeDep = new Heading(HSIZE, "");
+      modeDep.setHeight(14 + "px");
+      modeDep.getElement().getStyle().setColor("blue");
+      container.add(addModeChoices(dryMin, dryNum, compMin, compNum, modeDep));
+      container.add(modeDep);
+    }
+
+
+
+    /*Heading w = new Heading(HSIZE, "");
     w.setWidth("100%");
     container.add(w);
-
-    container.add(new Heading(HSIZE - 1, "Click start to begin."));
+*/
+    //   container.add(new Heading(HSIZE - 1, "Click start to begin."));
     return container;
   }
 
   private Widget addModeChoices(int dryMin, int dryNum, int compMin, int compNum, Heading modeDep) {
-    String GENDER_GROUP = PolyglotDialog.GENDER_GROUP;
-    RadioButton male = new RadioButton(GENDER_GROUP, DRY_RUN);
-    RadioButton female = new RadioButton(GENDER_GROUP, POLYGLOT_COMPETITION);
-    male.setEnabled(true);
-    DivWidget choice = new DivWidget();
-    choice.setWidth("100%");
-    choice.add(male);
-    choice.add(female);
-    male.addClickHandler(event -> {
-      modeListener.gotMode(MODE_CHOICE.DRY_RUN);
-      modeDep.setText(getModeText(dryMin, dryNum));
-      closeButton.setEnabled(true);
+    String genderGroup = GENDER_GROUP;
+    RadioButton male = new RadioButton(genderGroup, DRY_RUN);
+    RadioButton female = new RadioButton(genderGroup, POLYGLOT_COMPETITION);
 
-    });
+    {
+//      male.setEnabled(true);
+      male.addClickHandler(event -> {
+        modeListener.gotMode(MODE_CHOICE.DRY_RUN);
+        modeDep.setText(getModeText(dryMin, dryNum));
+        closeButton.setEnabled(true);
+
+      });
+    }
+
     female.addClickHandler(event -> {
       modeListener.gotMode(MODE_CHOICE.POLYGLOT);
       modeDep.setText(getModeText(compMin, compNum));
       closeButton.setEnabled(true);
-
     });
+
+    DivWidget choice = new DivWidget();
+    choice.setWidth("100%");
+    choice.add(male);
+    choice.add(female);
+
+    return choice;
+  }
+
+  private Widget addPromptChoices() {
+    String genderGroup = "prompt";
+    RadioButton playPrompt = new RadioButton(genderGroup, "Yes");
+    RadioButton dontPlayPrompt = new RadioButton(genderGroup, "No");
+
+    playPrompt.addClickHandler(event -> modeListener.gotPrompt(PROMPT_CHOICE.PLAY));
+    dontPlayPrompt.addClickHandler(event -> modeListener.gotPrompt(PROMPT_CHOICE.DONT_PLAY));
+    dontPlayPrompt.setValue(true);
+
+    modeListener.gotPrompt(PROMPT_CHOICE.DONT_PLAY);
+
+    DivWidget choice = new DivWidget();
+    choice.setWidth("100%");
+    choice.add(playPrompt);
+    choice.add(dontPlayPrompt);
+
     return choice;
   }
 

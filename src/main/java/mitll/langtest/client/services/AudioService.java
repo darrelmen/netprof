@@ -51,16 +51,13 @@ import mitll.langtest.shared.scoring.ImageOptions;
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    * @param base64EncodedString encoded audio bytes
    * @param audioContext
    * @param recordedWithFlash
    * @param deviceType
    * @param device
-   * @paramx doFlashcard
-   * @paramx recordInResults
-   * @paramx addToAudioTable
-   * @paramx allowAlternates
+
    * @return
    */
   AudioAnswer writeAudioFile(String base64EncodedString,

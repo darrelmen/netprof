@@ -30,6 +30,7 @@ public class ScoreFeedbackDiv {
   //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
+
   private static final String OVERALL_SCORE = "Overall Score";
 
   private final ProgressBar progressBar;
@@ -183,8 +184,12 @@ public class ScoreFeedbackDiv {
     return praise;
   }
 
-  private List<String> praise = Arrays.asList("Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
-      "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!", "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!");
+  private List<String> praise = Arrays.asList(
+      "Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
+      "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!",
+      "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!",
+      "Wonderful!", "Terrific!", "Groovy!", "Adroit!", "First-rate!");
+
   private Random rand = new Random();
 
   @NotNull

@@ -58,11 +58,12 @@ import java.util.logging.Logger;
  * @since 2/4/16.
  */
 public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("PracticeHelper");
+  //private final Logger logger = Logger.getLogger("PracticeHelper");
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
+  private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private NewContentChooser navigation;
 
   /**
@@ -112,7 +113,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
           protected void goToFirst(String searchIfAny, int exerciseID) {
             super.goToFirst(searchIfAny, exerciseID);
-            statsFlashcardFactory.setMode(mode);
+            statsFlashcardFactory.setMode(mode, promptChoice);
             statsFlashcardFactory.setNavigation(navigation);
           }
 
@@ -156,15 +157,12 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     };
   }
 
-  public void setMode(PolyglotDialog.MODE_CHOICE mode) {
+  public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE promptChoice) {
     this.mode = mode;
+    this.promptChoice = promptChoice;
     if (statsFlashcardFactory != null) {
-      statsFlashcardFactory.setMode(mode);
+      statsFlashcardFactory.setMode(mode, promptChoice);
     }
-  }
-
-  public PolyglotDialog.MODE_CHOICE getMode() {
-    return mode;
   }
 
   public void setNavigation(NewContentChooser navigation) {

@@ -55,10 +55,12 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 
+/*
   void getUserHistoryForList(Collection<Integer> ids,
                              long latestResultID,
                              Map<String, Collection<String>> typeToSection,
                              int userListID, AsyncCallback<AVPScoreReport> async);
+*/
 
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);

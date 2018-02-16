@@ -80,8 +80,10 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
+/*
   AVPScoreReport getUserHistoryForList(Collection<Integer> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, int userListID) throws DominoSessionException;
+                                       */
   // Telemetry ---
 
   /**

@@ -822,24 +822,11 @@ public class ProjectManagement implements IProjectManagement {
       if (projects.size() > 1) {
         // add child to self?
         projects.forEach(project -> parent.addChild(getProjectInfo(project)));
-//        for (Project project : projects) {
-//          parent.addChild(getProjectInfo(project));
-//          //  logger.info("\t add child to " + parent);
-//        }
       }
     });
 
     return projectInfos;
   }
-
-/*
-  private List<SlickProject> getProductionProjects(List<SlickProject> slickProjects) {
-    return slickProjects
-        .stream()
-        .filter(project -> project.status()
-            .equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
-        .collect(Collectors.toList());
-  }*/
 
   @NotNull
   private Map<String, List<Project>> getLangToProjects() {

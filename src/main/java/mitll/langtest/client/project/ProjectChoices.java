@@ -193,8 +193,7 @@ public class ProjectChoices {
         filtered.add(project);
       } else {
         if (status == ProjectStatus.RETIRED) {
-          boolean admin = controller.getUserManager().isAdmin();
-          if (admin) {
+          if (controller.getUserManager().isAdmin()) {
             filtered.add(project);
           }
         } else if (canRecord) {
@@ -243,7 +242,7 @@ public class ProjectChoices {
   /**
    * @param result
    * @param nest
-   * @see #showProjectChoices(List, int)
+   * @see #showProjectChoices
    */
   private Thumbnails addFlags(List<SlimProject> result, int nest) {
     Thumbnails current = new Thumbnails();
@@ -503,11 +502,15 @@ public class ProjectChoices {
       thumbnail.add(button);
 
       boolean hasChildren = projectForLang.hasChildren();
-      if (hasChildren) {
-        addPolyglotIcon(projectForLang, button);
-      } else if (projectForLang.getProjectType() == ProjectType.POLYGLOT) {
-        addPolyIcon(button);
+
+      {
+        if (hasChildren) {
+          addPolyglotIcon(projectForLang, button);
+        } else if (projectForLang.getProjectType() == ProjectType.POLYGLOT) {
+          addPolyIcon(button);
+        }
       }
+
       if (isQC) {
         if (!hasChildren) {
           addPopover(projectForLang, button);
@@ -515,6 +518,9 @@ public class ProjectChoices {
       } else {
         if (!projectForLang.getCourse().isEmpty()) {
           addPopoverUsual(projectForLang, button);
+        }
+        else {
+          addPopover(projectForLang, button);
         }
       }
     }
@@ -538,10 +544,11 @@ public class ProjectChoices {
     boolean hasPoly = !projectForLang.getChildren()
         .stream()
         .filter(slimProject -> slimProject.getProjectType() == ProjectType.POLYGLOT).collect(Collectors.toList()).isEmpty();
+    logger.info("addPolyglotIcon : found " + projectForLang.getChildren().size() + " children  of " + projectForLang.getName() +
+        " has poly " + hasPoly);
     if (hasPoly) {
       addPolyIcon(container);
     }
-
   }
 
   private void addPolyIcon(UIObject container) {
@@ -550,6 +557,13 @@ public class ProjectChoices {
     DOM.appendChild(container.getElement(), polyglot.getElement());
   }
 
+  /**
+   * @see #getImageAnchor
+   * @param name
+   * @param projectForLang
+   * @param isQC
+   * @return
+   */
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC) {
     boolean hasChildren = projectForLang.hasChildren();
@@ -564,7 +578,6 @@ public class ProjectChoices {
     if (isQC && !hasChildren) {
       container.add(getQCButtons(projectForLang, label));
     }
-    //addPolyglotIcon(projectForLang, hasChildren, container);
     return container;
   }
 
@@ -650,8 +663,7 @@ public class ProjectChoices {
   }
 
   private int getNumVisible(SlimProject projectForLang) {
-    List<SlimProject> visibleProjects = getVisibleProjects(projectForLang.getChildren());
-    return visibleProjects.size();
+    return getVisibleProjects(projectForLang.getChildren()).size();
   }
 
   private void showProjectStatus(SlimProject projectForLang, Heading label) {

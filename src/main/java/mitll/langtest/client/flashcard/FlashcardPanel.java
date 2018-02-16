@@ -95,7 +95,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
   /**
-   * @see #getRightColumn
+   * @see #addControlsBelowAudio
    */
   private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip. Space to record.</i>";
 
@@ -105,7 +105,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   /**
    * @see #getShowGroup(ControlState)
    */
-  private static final String SHOW = "START WITH";
+  private static final String SHOW = "SHOW";//"START WITH";
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
   private static final String BOTH = "Both";
@@ -144,6 +144,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param endListener
    * @param instance
    * @param exerciseList
+   * @param prompt
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
   FlashcardPanel(final T e,
@@ -153,7 +154,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
                  String instance,
-                 ListInterface exerciseList) {
+                 ListInterface exerciseList,
+                 PolyglotDialog.PROMPT_CHOICE prompt) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -163,6 +165,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
     controlState.setStorage(new KeyStorage(controller));
+
+    logger.info("prompt is " + prompt);
+
+    if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
+    else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
 
     this.soundFeedback = soundFeedback;
     final DivWidget middleVert = new DivWidget();
@@ -217,7 +224,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     getSoundFeedback().clear();
   }
 
-  private void maybePlayRef(ControlState controlState) {
+  /**
+   * Worry about whether audio play is turned on at all.
+   * @param controlState
+   */
+  void maybePlayRef(ControlState controlState) {
     //logger.info("maybePlayRef --- ");
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
@@ -231,7 +242,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     }
   }
 
-   boolean isAudioOn(ControlState controlState) {
+  private boolean isAudioOn(ControlState controlState) {
     return controlState.isAudioOn();
   }
 
@@ -598,6 +609,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     rightColumn.add(getAudioGroup(controlState));
     addControlsBelowAudio(controlState, rightColumn);
 
+    Widget child = new HTML(ARROW_KEY_TIP);
+    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    child.setWidth(KEY_PRESS_WIDTH + "px");
+    rightColumn.add(child);
+
     return rightColumn;
   }
 
@@ -610,10 +626,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     rightColumn.add(getShuffleButton(controlState));
     rightColumn.add(autoPlay = getAutoPlayButton(controlState));
 
-    Widget child = new HTML(ARROW_KEY_TIP);
-    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
-    child.setWidth(KEY_PRESS_WIDTH + "px");
-    rightColumn.add(child);
+
   }
 
   private Button getShuffleButton(final ControlState controlState) {
@@ -726,8 +739,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   /**
-   * @see #getPrevButton
    * @param left
+   * @see #getPrevButton
    */
   private void gotPrevClick(Button left) {
     left.setEnabled(false);
@@ -800,7 +813,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
    */
   private ControlGroup getAudioGroup(final ControlState controlState) {
-    ControlGroup group = new ControlGroup(PLAY);// + " " + controller.getLanguage().toUpperCase());
+    ControlGroup group = new ControlGroup(PLAY);
     Icon widget = new Icon(IconType.VOLUME_UP);
     widget.addStyleName("leftFiveMargin");
     group.add(widget);
@@ -826,7 +839,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       if (!isAudioOn(controlState)) {
         playRefLater();
       }
-      controlState.setAudioOn(true);
+      rememberAudioOnChoice(controlState, true);
     });
     onButton.setActive(isAudioOn(controlState));
     //logger.info("audio on button " + onButton.isActive());
@@ -838,11 +851,23 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     offButton.getElement().setId(PLAY + "_Off");
     offButton.addClickHandler(event -> {
       setAutoPlay(false);
-      controlState.setAudioOn(false);
+      abortPlayback();
+      rememberAudioOnChoice(controlState, false);
     });
     offButton.setActive(!isAudioOn());
     controller.register(offButton, getID());
     return offButton;
+  }
+
+  private void rememberAudioOnChoice(ControlState controlState, boolean state) {
+    controlState.setAudioOn(state);
+  }
+
+  private void rememberAudioOnChoice(boolean state) {
+    controlState.setAudioOn(state);
+  }
+
+  protected void abortPlayback() {
   }
 
   boolean isAudioOn() {
@@ -1052,7 +1077,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
 
     Element element = foreignLanguageContent.getElement();
-    element.setId("ForeignLanguageContent");
+    //element.setId("ForeignLanguageContent");
     element.getStyle().setTextAlign(Style.TextAlign.CENTER);
     foreignLanguageContent.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     return foreignLanguageContent;
@@ -1060,7 +1085,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   private DivWidget getCenteringRow() {
     DivWidget status = new DivWidget();
-    status.getElement().setId("statusRow");
+    //status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
     status.addStyleName("inlineBlockStyleOnly");
     return status;
@@ -1126,6 +1151,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
+
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
@@ -1176,7 +1202,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
           @Override
           public void songEnded() {
-//            logger.info("playRef remove playing highlight on ");
             removePlayingHighlight(textWidget);
             if (endListener != null) endListener.songEnded();
           }

@@ -61,12 +61,6 @@ public class StartupInfo implements IsSerializable {
   public StartupInfo() {
   } // for serialization
 
-/*
-  public Set<String> getKnownHydraHosts() {
-    return projects.stream().map(ProjectInfo::getHost).collect(Collectors.toSet());
-  }
-  */
-
   /**
    * @param properties - ui properties only!
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo
@@ -82,8 +76,8 @@ public class StartupInfo implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#rememberStartup(StartupInfo, boolean)
    * @return
+   * @see mitll.langtest.client.LangTest#rememberStartup(StartupInfo, boolean)
    */
   public Map<String, String> getProperties() {
     return properties;
@@ -94,27 +88,11 @@ public class StartupInfo implements IsSerializable {
   }
 
   /**
-   * @see LangTest#getAllProjects
-   * OK to modify the returned list.
-   * @return mutable copy of the current project list
-   */
-  public List<SlimProject> getAllProjects() {
-    List<SlimProject> all = new ArrayList<>();
-    projects.forEach(slimProject -> {
-      if (slimProject.hasChildren()) {
-        all.addAll(slimProject.getChildren());
-      } else {
-        all.add(slimProject);
-      }
-    });
-    return all;
-  }
-
-  /**
    * Not sure when these could be out of sync but...
-   * @see LangTest#getHost
+   *
    * @param id
    * @return
+   * @see LangTest#getHost
    */
   public String getHost(int id) {
     List<SlimProject> withThisID =
@@ -132,6 +110,23 @@ public class StartupInfo implements IsSerializable {
   }
 
   /**
+   * @return mutable copy of the current project list
+   * @see LangTest#getAllProjects
+   * OK to modify the returned list.
+   */
+  public List<SlimProject> getAllProjects() {
+    List<SlimProject> all = new ArrayList<>();
+    projects.forEach(slimProject -> {
+      if (slimProject.hasChildren()) {
+        all.addAll(slimProject.getChildren());
+      } else {
+        all.add(slimProject);
+      }
+    });
+    return all;
+  }
+
+  /**
    * If the app doesn't start properly, what to show
    *
    * @return
@@ -145,6 +140,6 @@ public class StartupInfo implements IsSerializable {
   }
 
   public String toString() {
-    return "Message = '" + message+ "', " + getProjects().size()+ " projects.";
+    return "Message = '" + message + "', " + getProjects().size() + " projects.";
   }
 }
