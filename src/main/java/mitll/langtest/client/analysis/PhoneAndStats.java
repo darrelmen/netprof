@@ -46,18 +46,16 @@ import java.util.Map;
 class PhoneAndStats implements Comparable<PhoneAndStats>{
   private final String phone;
 
-//  private final int score;
   private final int avg;
   private final int count;
 
   /**
    * @param phone
    * @param count
-   * @see PhoneContainer#getPhoneStatuses(List, Map, long, long)
+   * @see PhoneContainer#getPhoneStatuses
    */
   public PhoneAndStats(String phone, int avg, int count) {
     this.phone = phone;
-  //  this.score = score;
     this.avg = avg;
     this.count = count;
   }

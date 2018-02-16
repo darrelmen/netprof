@@ -132,7 +132,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   ) {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
-    //this.learnTab = learnTab;
     // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
     myStudents = new HashSet<>();

@@ -45,6 +45,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -56,10 +57,17 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.project.ProjectType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -83,13 +91,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private static final int MAX_EXAMPLES = 25;
 
-  private static final int SCORE_COL_WIDTH = 60;
+  //private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
   private static final String COUNT_COL_HEADER = "#";
+  /**
+   *
+   */
   private static final String CURR = "Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";
-  private static final int SOUND_WIDTH = 75;
+  private static final int SOUND_WIDTH = 65;
 
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
@@ -103,7 +114,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private static final boolean DEBUG = false;
   private final AnalysisServiceAsync analysisServiceAsync;
-  boolean isPoly;
+  //private final boolean isPoly;
 
   /**
    * @param controller
@@ -125,7 +136,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     this.analysisServiceAsync = analysisServiceAsync;
     this.listid = listid;
     this.userid = userid;
-    isPoly = controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
+    //isPoly = controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
   }
 
   @Override
@@ -224,11 +235,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       if (!filtered.isEmpty()) {
         float total = 0;
+        long ltotal = 0;
         float avg = 0;
         for (PhoneSession session : filtered) {
-          float count = Long.valueOf(session.getCount()).floatValue();
-          total += count;
-          avg += Double.valueOf(session.getMean()).floatValue() * count;
+          long count1 = session.getCount();
+          ltotal += count1;
+          float fcount = Long.valueOf(count1).floatValue();
+          total += fcount;
+          avg += Double.valueOf(session.getMean()).floatValue() * fcount;
         }
         float overall = avg / total;
 
@@ -237,10 +251,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
           logger.info("getPhoneStatuses : overall " + overall + " avg " + avg + " total " + total + " report " + v);
         }
 
-        int count = value.getCount(filtered);
-
-        phoneAndStatses.add(new PhoneAndStats(ps.getKey(), v, count
-        ));
+       // int totalCount = value.getTotalCount(filtered);
+        String thePhone = ps.getKey();
+      //  logger.info(thePhone + " : total " + total + " vs " + totalCount);
+        phoneAndStatses.add(new PhoneAndStats(thePhone, v, Long.valueOf(ltotal).intValue()));
       }
     }
 
@@ -490,12 +504,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     {
       Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
-      table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
+      table.setColumnWidth(currentCol, 80, Style.Unit.PX);
       table.addColumn(currentCol, CURR);
       currentCol.setSortable(true);
       table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
-      table.setWidth("100%", true);
+      table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(currentCol, true));
+
     }
+    table.setWidth("100%", true);
 
     new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
   }
