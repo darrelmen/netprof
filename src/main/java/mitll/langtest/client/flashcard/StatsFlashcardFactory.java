@@ -108,12 +108,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
+   * @seex StatsFlashcardFactory.StatsPracticePanel#getRepeatButton
    */
-  private static final String GO_BACK = "Go back";
+//  private static final String GO_BACK = "Go back";
   private static final String N_A = "N/A";
 
-  private HasID currentExercise;
+//  private HasID currentExercise;
   private final ControlState controlState;
   private List<L> allExercises;
 
@@ -230,11 +230,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         @Override
         public void run() {
 //          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
-          currentFlashcard.cancelAdvanceTimer();
-          currentFlashcard.onSetComplete();
-          cancelRoundTimer();
-          currentFlashcard.showTimeRemaining(0);
-          inLightningRound = false;
+          if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
+            currentFlashcard.cancelAdvanceTimer();
+            currentFlashcard.onSetComplete();
+            cancelRoundTimer();
+            currentFlashcard.showTimeRemaining(0);
+            inLightningRound = false;
+          }
         }
       };
 
@@ -295,7 +297,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    */
   @Override
   public Panel getExercisePanel(T e) {
-    currentExercise = e;
+   // currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
 
@@ -339,7 +341,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private void reset() {
     exToCorrect.clear();
     exToScore.clear();
-  //  latestResultID = -1;
+    //  latestResultID = -1;
     sticky.clearCurrent();
   }
 
@@ -411,6 +413,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE prompt) {
     this.mode = mode;
     this.prompt = prompt;
+
+    logger.info("setMode : prompt is " + prompt);
+
+    if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
+    else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
   }
 
   public PolyglotDialog.MODE_CHOICE getMode() {
@@ -521,13 +528,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
     }
 
-    public int getCounter() {
-      return count;
-    }
-
-    public String toString() {
+    public int getCounter() {    return count;    }
+/*    public String toString() {
       return "Stats # " + count;
-    }
+    }*/
 
     @Override
     protected boolean showScoreFeedback(AudioAnswer result) {
@@ -607,7 +611,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         setStateFeedback();
 
-      //  latestResultID = result.getResultID();
+        //  latestResultID = result.getResultID();
 
         exToLatest.put(id, result);
 //        if (polyglotChart != null) {
@@ -631,7 +635,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void maybeAdvance(double score) {
       if (inLightningRound) {
         if (isCorrect(score)) {
-          // disableRecord();
           timer.scheduleIn(NEXT_EXERCISE_DELAY);
           wrongCount = 0;
         } else {
@@ -793,7 +796,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     void doIncorrectFirst() {
       showFlashcardDisplay();
 
-      currentExercise = null;
+      //currentExercise = null;
       reset();
 
       exerciseList.reload(selection);
@@ -849,7 +852,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * If we're coming back to the cards at the end, we want to start over from the start,
      * otherwise, we want to pick back up where we left off.
      *
-     * @see #getRepeatButton()
+     * @seex #getRepeatButton()
      * @see #getStartOver()
      */
     void startOver() {

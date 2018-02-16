@@ -97,7 +97,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   /**
    * @see #addControlsBelowAudio
    */
-  private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip. Space to record.</i>";
+  private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
+  private static final String ARROW_KEY_TIP2 = "<b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
 
   static final String ON = "On";
   static final String OFF = "Off";
@@ -166,10 +167,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.timer = new FlashcardTimer(this);
     controlState.setStorage(new KeyStorage(controller));
 
-    logger.info("prompt is " + prompt);
 
-    if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
-    else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
 
     this.soundFeedback = soundFeedback;
     final DivWidget middleVert = new DivWidget();
@@ -228,8 +226,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * Worry about whether audio play is turned on at all.
    * @param controlState
    */
-  void maybePlayRef(ControlState controlState) {
-    //logger.info("maybePlayRef --- ");
+  private void maybePlayRef(ControlState controlState) {
+    logger.info("maybePlayRef --- ");
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
         // logger.info("audio on, so playing ref");

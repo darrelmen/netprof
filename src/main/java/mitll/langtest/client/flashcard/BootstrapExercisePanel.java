@@ -336,8 +336,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected void gotEnter() {
-            maybePlayRef(controlState);
-
+           // maybePlayRef(controlState);
+            playRef();
           }
 
           @Override

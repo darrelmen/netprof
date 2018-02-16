@@ -118,7 +118,7 @@ public class ProjectChoices {
 
   private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  private final Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
+ // private final Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
 
   /**
    * @see InitialUI#populateRootPanel
@@ -503,11 +503,19 @@ public class ProjectChoices {
 
       boolean hasChildren = projectForLang.hasChildren();
 
+      ProjectType projectType = projectForLang.getProjectType();
+      logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
       {
         if (hasChildren) {
           addPolyglotIcon(projectForLang, button);
-        } else if (projectForLang.getProjectType() == ProjectType.POLYGLOT) {
-          addPolyIcon(button);
+        } else {
+          if (projectType == ProjectType.POLYGLOT) {
+            logger.info("adding poly icon to " +projectForLang);
+            addPolyIcon(button);
+          }
+          else {
+            //logger.info("not adding poly icon to " +projectForLang);
+          }
         }
       }
 
@@ -552,6 +560,7 @@ public class ProjectChoices {
   }
 
   private void addPolyIcon(UIObject container) {
+    Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
     polyglot.addStyleName("floatRight");
     polyglot.getElement().getStyle().setMarginTop(9, Style.Unit.PX);
     DOM.appendChild(container.getElement(), polyglot.getElement());

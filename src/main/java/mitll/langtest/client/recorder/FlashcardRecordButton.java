@@ -68,8 +68,8 @@ public class FlashcardRecordButton extends RecordButton {
   /**
    * @see #initRecordButton
    */
-  private static final String SPACE_BAR = "Press and hold";
-  private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to start recording, release to stop.";
+  //private static final String SPACE_BAR = "Press and hold";
+  //private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to start recording, release to stop.";
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
 
@@ -289,6 +289,7 @@ public class FlashcardRecordButton extends RecordButton {
   public void initRecordButton() {
     super.initRecordButton();
   //  setText(addKeyBinding ? SPACE_BAR : getPrompt());
+    setText("");
     setType(ButtonType.DANGER);
   }
 
