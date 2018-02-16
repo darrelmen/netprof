@@ -65,6 +65,7 @@ import mitll.langtest.shared.project.ProjectType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
+  public static final boolean SORT_BY_RANK = false;
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
   /**
@@ -97,7 +99,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    *
    */
-  private static final String CURR = "Average";//"Avg. Score";
+  private static final String CURR = "Avg";//"Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";
   private static final int SOUND_WIDTH = 65;
@@ -227,6 +229,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       logger.info("getPhoneStatuses examine " + phoneToAvgSorted.entrySet().size());
     }
 
+    // if avg score is less than 75 = native
+    // get diff, weighted by total
+    // this diff is the rank - highest go first
+    // then above 75 weighted... how?
+
     for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
       PhoneStats value = ps.getValue();
       List<PhoneSession> filtered = getFiltered(first, last, value);
@@ -237,12 +244,29 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         float total = 0;
         long ltotal = 0;
         float avg = 0;
+        float ndiff = 0;
         for (PhoneSession session : filtered) {
           long count1 = session.getCount();
           ltotal += count1;
           float fcount = Long.valueOf(count1).floatValue();
           total += fcount;
-          avg += Double.valueOf(session.getMean()).floatValue() * fcount;
+          double mean = session.getMean();
+          float fmean = Double.valueOf(mean).floatValue();
+          float diffNative = 0.75F - fmean;
+          if (fmean > 0.75) {
+            float diffN1 = (1F - fmean) / 100F;
+            ndiff += getSquash(diffN1) * fcount;
+          } else {
+            float ldiff = (float) getSquash(diffNative);
+            float weight = ldiff * fcount;
+            ndiff += weight;
+
+            if (SORT_BY_RANK)
+              logger.info(session.getPhone() + " diff " + diffNative +
+                  " ldiff " + ldiff + " * " + fcount + " = " + weight);
+          }
+
+          avg += fmean * fcount;
         }
         float overall = avg / total;
 
@@ -251,15 +275,23 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
           logger.info("getPhoneStatuses : overall " + overall + " avg " + avg + " total " + total + " report " + v);
         }
 
-       // int totalCount = value.getTotalCount(filtered);
+        // int totalCount = value.getTotalCount(filtered);
         String thePhone = ps.getKey();
-      //  logger.info(thePhone + " : total " + total + " vs " + totalCount);
-        phoneAndStatses.add(new PhoneAndStats(thePhone, v, Long.valueOf(ltotal).intValue()));
+        if (SORT_BY_RANK) logger.info(thePhone + " : total " + total + " ndiff " + ndiff);
+        phoneAndStatses.add(new PhoneAndStats(thePhone, v, Long.valueOf(ltotal).intValue(), ndiff));
       }
     }
 
-    Collections.sort(phoneAndStatses);
+    if (SORT_BY_RANK) {
+      phoneAndStatses.sort((o1, o2) -> {
+        int compare = -1 * Float.compare(o1.getNdiff(), o2.getNdiff());
+        return compare == 0 ? o1.compareTo(o2) : compare;
+      });
 
+      for (int i = 0; i < phoneAndStatses.size(); i++) phoneAndStatses.get(i).setRank(i + 1);
+    } else {
+      Collections.sort(phoneAndStatses);
+    }
     if (DEBUG) {
       logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
       if (phoneAndStatses.isEmpty()) {
@@ -271,6 +303,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         });
       }
     }
+  }
+
+  private double getSquash(float diffN1) {
+    return diffN1;
+    // return Math.log(diffN1);
+//    return (1 -
+//        (1 / (1 - Math.pow(Math.E, -1*diffN1))));
   }
 
   /**
@@ -429,11 +468,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
-    int i = Integer.compare(a1, a2);
-    return (i == 0) ? compPhones(o1, o2) : i;
-  }
-
   private int compPhones(PhoneAndStats o1, PhoneAndStats o2) {
     return o1.getPhone().compareTo(o2.getPhone());
   }
@@ -463,7 +497,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-
   private ColumnSortEvent.ListHandler<PhoneAndStats> getCurrSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                    List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -475,13 +508,42 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
           if (o1 != null) {
             if (o2 == null) {
-              logger.warning("------- o2 is null?");
+              // logger.warning("------- o2 is null?");
               return -1;
             } else {
               return compIntThenPhone(o1, o2, o1.getAvg(), o2.getAvg());
             }
           } else {
-            logger.warning("------- o1 is null?");
+            // logger.warning("------- o1 is null?");
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
+    int i = Integer.compare(a1, a2);
+    return (i == 0) ? compPhones(o1, o2) : i;
+  }
+
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getRankSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+                                                                   List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(scoreCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          if (o1 != null) {
+            if (o2 == null) {
+              // logger.warning("------- o2 is null?");
+              return -1;
+            } else {
+              return compIntThenPhone(o1, o2, o1.getRank(), o2.getRank());
+            }
+          } else {
+            // logger.warning("------- o1 is null?");
             return -1;
           }
         });
@@ -504,13 +566,22 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     {
       Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
-      table.setColumnWidth(currentCol, 80, Style.Unit.PX);
+      table.setColumnWidth(currentCol, COUNT_COL_WIDTH, Style.Unit.PX);
       table.addColumn(currentCol, CURR);
       currentCol.setSortable(true);
       table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
-      table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(currentCol, true));
 
+      table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(currentCol, true));
     }
+
+ /*   {
+      Column<PhoneAndStats, SafeHtml> currentCol = getNDiffCol();
+      table.setColumnWidth(currentCol, 80, Style.Unit.PX);
+      table.addColumn(currentCol, "Rank");
+      currentCol.setSortable(true);
+      table.addColumnSortHandler(getRankSorter(currentCol, getList()));
+      table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(currentCol, true));
+    }*/
     table.setWidth("100%", true);
 
     new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
@@ -597,6 +668,21 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getAvg())).toSafeHtml();
+      }
+    };
+  }
+
+  private Column<PhoneAndStats, SafeHtml> getNDiffCol() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkForClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(PhoneAndStats shell) {
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getRank())).toSafeHtml();
       }
     };
   }

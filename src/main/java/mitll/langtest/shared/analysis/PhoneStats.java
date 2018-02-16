@@ -80,12 +80,14 @@ public class PhoneStats implements Serializable {
     return count;
   }
 
-  public int getCount(List<PhoneSession> sessions2) {
+/*
+  public int getTotalCount(List<PhoneSession> sessions2) {
     if (sessions2 == null || sessions2.isEmpty()) return 0;
     int total = 0;
     for (PhoneSession session : sessions2) total += session.getCount();
     return total;
   }
+*/
 
   public List<TimeAndScore> getTimeSeries() {
     return timeSeries;
