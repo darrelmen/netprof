@@ -230,7 +230,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
           if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
             currentFlashcard.cancelAdvanceTimer();
-            currentFlashcard.onSetComplete();
+            if (currentFlashcard.isTabVisible()) {
+              currentFlashcard.onSetComplete();
+            }
             cancelRoundTimer();
             currentFlashcard.showTimeRemaining(0);
             inLightningRound = false;
@@ -299,7 +301,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    */
   @Override
   public Panel getExercisePanel(T e) {
-   // currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
 
@@ -414,7 +415,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE prompt) {
     this.mode = mode;
     this.prompt = prompt;
- //   logger.info("setMode : prompt is " + prompt);
+
+    logger.info("setMode : prompt is " + prompt);
 
     if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
     else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
@@ -500,6 +502,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
       if (isPolyglot) {
         speedChoices = new SpeedChoices(storage, getOnSpeedChoiceMade(), true);
+        logger.info("speedChoices " + speedChoices);
         rightColumn.add(speedChoices.getSpeedChoices());
       } else {
         super.addControlsBelowAudio(controlState, rightColumn);
@@ -702,7 +705,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       });*/
     }
 
-    private int getUserListID() {
+    /*private int getUserListID() {
       int userListID = ul == null ? -1 : ul.getID();
 
       if (selection.containsKey(LISTS)) {
@@ -714,7 +717,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       }
       return userListID;
-    }
+    }*/
 
     /**
      * TODO: get last session...

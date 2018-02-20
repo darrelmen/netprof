@@ -21,6 +21,7 @@ public class PolyglotDialog {
   public static final String POLYGLOT_COMPETITION = "Polyglot Competition";
   public static final String START = "Start!";
   public static final String CANCEL = "Cancel";
+  public static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
@@ -28,7 +29,6 @@ public class PolyglotDialog {
 
   public interface ModeChoiceListener {
     void gotMode(MODE_CHOICE choice);
-
     void gotPrompt(PROMPT_CHOICE choice);
   }
 
@@ -79,7 +79,7 @@ public class PolyglotDialog {
     String text = "Scores above " + minScore + " advance automatically.";
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. " + text));// (if you want to repeat an item)."));
     // row.add(new Heading(HSIZE, text));
-    row.add(new Heading(HSIZE, "You are not required to record all the items."));//, but your final score rewards completion."));
+    row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
     {
       container.add(new Heading(HSIZE, "Do you want to hear each item before recording?"));

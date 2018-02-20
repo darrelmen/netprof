@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.initial.InitialUI;
@@ -232,7 +233,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private void maybePlayRef(ControlState controlState) {
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
-        // logger.info("maybePlayRef : audio on, so playing ref");
+        logger.info("maybePlayRef : audio on, so playing ref");
         playRef();
       } else {
         //    logger.info("maybePlayRef auto advance on, so not playing ref here");
@@ -253,7 +254,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see BootstrapExercisePanel#playRefAndGoToNext
    * @see #maybePlayRef
    */
-  private boolean isTabVisible() {
+  boolean isTabVisible() {
     return mainContainer.isVisible() && !isHidden(foreign) && isVisible(mainContainer);
   }
 
@@ -1163,7 +1164,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
-
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
@@ -1201,7 +1201,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #playRef()
    */
   private void playRef(String path) {
-    //logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+
+     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+      logger.info("playRef : logException stack " + exceptionAsString);
+
     path = getPath(path);
     final Widget textWidget = foreign;
     getSoundFeedback().queueSong(path,

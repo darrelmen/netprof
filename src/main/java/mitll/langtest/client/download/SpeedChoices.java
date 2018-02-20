@@ -28,9 +28,6 @@ public class SpeedChoices {
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-  // private boolean isRegular = true;
-
-  //  private boolean isRegularSet = false;
   private ToggleButton regular, slow;
   private IShowStatus showStatus;
   private boolean setInitially;

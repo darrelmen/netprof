@@ -7,7 +7,6 @@ import com.google.gwt.dom.client.Style;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.download.DownloadEvent;
-import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.PhonesChoices;
 import org.jetbrains.annotations.NotNull;
@@ -41,9 +40,11 @@ public class DisplayMenu {
   public static final String SHOWALT = "showStorageALTFL";
 
   private final KeyStorage storage;
+  private ShowEventListener showEventListener;
 
-  DisplayMenu(KeyStorage storage) {
+  DisplayMenu(KeyStorage storage, ShowEventListener showEventListener) {
     this.storage = storage;
+    this.showEventListener=showEventListener;
   }
 
   /**
@@ -140,18 +141,8 @@ public class DisplayMenu {
 
       primary.setIcon(choicesFL ? null : CHECK);
     });
-    //  showChoices.add(primary);
 
- /*   showChoices.add(both);
-    both.addClickHandler(event -> {
-      storeShowChoices(ShowChoices.BOTH.toString());
-      fireShowEvent();
-      altflChoice.setIcon(null);
-      both.setIcon(CHECK);
-      primary.setIcon(null);
-    });*/
     return altflChoice;
-
   }
 
   @NotNull
@@ -188,7 +179,8 @@ public class DisplayMenu {
   }
 
   private void fireShowEvent() {
-    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+//    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
+    showEventListener.gotShow();
   }
 
   /**

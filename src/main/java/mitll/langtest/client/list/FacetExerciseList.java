@@ -49,10 +49,8 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
-import mitll.langtest.client.download.ShowEvent;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -77,7 +75,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
-public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
   /**
    *
@@ -209,9 +207,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
 
     // should be better for change visibility...
-    LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {
+/*    LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {
       askServerForExercise(-1);
-    });
+    });*/
   }
 
   /**
@@ -235,7 +233,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 //    pagerAndSort.add(expander);
 //    expander.addStyleName("floatRight");
     {
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage()).getRealViewMenu();
+      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
       widgets.add(realViewMenu);
@@ -1478,6 +1476,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       }
     }
     if (isCurrentReq(currentReq)) {
+      logger.info("getExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
       reallyGetExercises(visibleIDs, currentReq);
     } else {
       logger.info("getExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
@@ -2016,5 +2015,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return commonShells;
   }
 
-
+  @Override
+  public void gotShow() {
+    askServerForExercise(-1);
+  }
 }
