@@ -37,19 +37,15 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
@@ -647,9 +643,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void addBrowserData(Collection<TimeAndScore> browserData, Chart chart, boolean isAVP, boolean isVisible) {
     if (!browserData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(browserData);
-
       String prefix = isAVP ? VOCAB_PRACTICE : LEARN;
-      recordVisible(isVisible, getScatterSeries(chart, data, prefix));
+      recordVisible(isVisible, getScatterSeries(chart, prefix, data));
     }
   }
 
@@ -658,7 +653,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
-      data[i][0] = ts.getTimestamp();
+      data[i][0]   = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
     }
     return data;
@@ -688,7 +683,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
-
 //    chart.setWidth(width + // 1378
 //        "px");
   }
@@ -696,7 +690,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private boolean isShort() {
     return Window.getClientHeight() < SHORT_THRESHOLD;
   }
-  //private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
 
   /**
    * So when the x axis range changes, we get an event here.

@@ -54,6 +54,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -821,7 +822,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 
   private boolean isPolyglot() {
-    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
 
   public Button getAdd() {

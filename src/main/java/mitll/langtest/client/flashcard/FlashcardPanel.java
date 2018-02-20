@@ -110,6 +110,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
   private static final String BOTH = "Both";
+  /**
+   *
+   */
   private static final String CLICK_TO_FLIP = "Click to flip";
   private static final String SHUFFLE = "Shuffle";
 
@@ -227,10 +230,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param controlState
    */
   private void maybePlayRef(ControlState controlState) {
-    logger.info("maybePlayRef --- ");
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
-        // logger.info("audio on, so playing ref");
+        // logger.info("maybePlayRef : audio on, so playing ref");
         playRef();
       } else {
         //    logger.info("maybePlayRef auto advance on, so not playing ref here");
@@ -898,8 +900,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   private Button showOnlyFL, both, showEnglish;
 
+  /**
+   * both is null in polyglot view.
+   * @return
+   */
   boolean selectShowFL() {
-    if (both.isActive()) {
+    if (both != null && both.isActive()) {
       showOnlyFL.click();
       showOnlyFL.setActive(true);
       both.setActive(false);
@@ -1119,9 +1125,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       showEnglish();
       foreign.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-      if (clickToFlip != null) {
-        clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
-      }
+      showClickToFlip();
       showOnlyEnglish = true;
     } else if (controlState.isForeign()) {
       showOnlyEnglish = false;
@@ -1131,9 +1135,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
       showForeign();
 
-      if (clickToFlip != null) {
-        clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
-      }
+      showClickToFlip();
     }
   }
 
@@ -1141,7 +1143,19 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     showEnglish();
     showForeign();
 
-    if (clickToFlip != null) {
+    hideClickToFlip();
+  }
+
+  private void showClickToFlip() {
+    if (clickToFlipContainer != null) {
+      //logger.info("show click to flip");
+      clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
+    }
+  }
+
+  protected void hideClickToFlip() {
+    if (clickToFlipContainer != null) {
+    //  logger.info("hide click to flip");
       clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
     }
   }

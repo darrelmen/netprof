@@ -80,6 +80,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final String LISTS = "Lists";
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#showTimeRemaining
+   */
   private static final String TIMES_UP = "Times Up!";
 
   static final int MIN_POLYGLOT_SCORE = 35;
@@ -195,15 +198,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private void startTimedRun() {
     if (!inLightningRound) {
-      //logger.info("StartTimedRun: START ");
       inLightningRound = true;
       reset();
-
-      // if (currentFlashcard != null) {
-      //   logger.info("start over on " + currentFlashcard);
-      //  currentFlashcard.reallyStartOver();
-      // }
-
       startRoundTimer(getIsDry());
     }
   }
@@ -226,10 +222,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private void startRoundTimer(boolean isDry) {
     if (isRoundTimerNotRunning()) {
+      clearAnswerMemory();
+
       roundTimer = new Timer() {
         @Override
         public void run() {
-//          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
+          logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
           if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
             currentFlashcard.cancelAdvanceTimer();
             currentFlashcard.onSetComplete();
@@ -273,9 +271,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   }
 
   private void cancelRoundTimer() {
+    logger.info("cancel round timer -");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     roundTimeLeftMillis = 0;
+  }
+
+  private void clearAnswerMemory() {
     exToLatest.clear();
   }
 
@@ -395,7 +397,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     return value.split(",");
   }
 
-  // private long latestResultID = -1;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   public void resetStorage() {
@@ -413,8 +414,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE prompt) {
     this.mode = mode;
     this.prompt = prompt;
-
-    logger.info("setMode : prompt is " + prompt);
+ //   logger.info("setMode : prompt is " + prompt);
 
     if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
     else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
@@ -467,16 +467,18 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       });
 
+      if (isPolyglot) {
+        hideClickToFlip();
+      }
+
       this.count = counter++;
-
-
     }
 
-    @Override
+/*    @Override
     protected void onUnload() {
       super.onUnload();
       cancelRoundTimer();
-    }
+    }*/
 
     @Override
     protected String getDeviceValue() {
@@ -553,7 +555,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void loadNext() {
       if (exerciseList.onLast()) {
         timer.cancelTimer();
-        cancelRoundTimer();
+     //   cancelRoundTimer();
         onSetComplete();
       } else {
         exerciseList.loadNext();
@@ -611,15 +613,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         setStateFeedback();
 
-        //  latestResultID = result.getResultID();
-
         exToLatest.put(id, result);
-//        if (polyglotChart != null) {
-//          polyglotChart.addPoint(result.getTimestamp(), (float) result.getScore());
-//        }
-        //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
-      } else {
-        //    logger.info("got invalid result " + result);
       }
       super.receivedAudioAnswer(result);
     }
@@ -654,9 +648,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * Turn off for now?
      */
-    protected void playCorrectDing() {
-      // getSoundFeedback().queueSong(SoundFeedback.CORRECT);
-    }
+    protected void playCorrectDing() { }
 
     /**
      * Don't play the incorrect sound.

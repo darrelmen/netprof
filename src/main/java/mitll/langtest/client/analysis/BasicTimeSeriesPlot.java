@@ -138,10 +138,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
         .setType(Series.Type.SPLINE);
   }
 
-  Series getScatterSeries(Chart chart, Number[][] data, String prefix) {
+  Series getScatterSeries(Chart chart, String prefix, Number[][] data) {
     return chart.createSeries()
         .setName(prefix)
         .setPoints(data)
+        .setOption("color", "#00B800")
         .setType(Series.Type.SCATTER);
   }
 
