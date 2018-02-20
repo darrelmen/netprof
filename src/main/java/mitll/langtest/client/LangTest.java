@@ -227,6 +227,7 @@ import java.util.logging.Logger;
  */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
+  public static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
@@ -236,7 +237,7 @@ public class LangTest implements
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
-  private static final int MAX_EXCEPTION_STRING = 300;
+  private static final int MAX_EXCEPTION_STRING = 600;
   private static final int MAX_CACHE_SIZE = 100;
   private static final boolean DEBUG = false;
 
@@ -495,7 +496,7 @@ public class LangTest implements
     } else {
       lastWasStackOverflow = isStackOverflow;
     }
-    logMessageOnServer(exceptionAsString, "got browser exception : ", true);
+    logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
     return exceptionAsString;
   }
 
@@ -512,18 +513,20 @@ public class LangTest implements
     getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(exerciseID, toSend, user));
   }
 
-  private void logMessageOnServer(String message, boolean sendEmail) {
-    service.logMessage(message, sendEmail,
+  private void logMessageOnServer(final String message, final boolean sendEmail) {
+    Scheduler.get().scheduleDeferred(() -> service.logMessage(message, sendEmail,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
+            logger.warning("couldn't post message to server?");
           }
 
           @Override
           public void onSuccess(Void result) {
+            logger.info("posted message to server, length " + message.length() + " send email " + sendEmail);
           }
         }
-    );
+    ));
   }
 
   /**

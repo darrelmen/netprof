@@ -504,18 +504,18 @@ public class ProjectChoices {
       boolean hasChildren = projectForLang.hasChildren();
 
       ProjectType projectType = projectForLang.getProjectType();
-      logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
+     // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
       {
         if (hasChildren) {
           addPolyglotIcon(projectForLang, button);
         } else {
           if (projectType == ProjectType.POLYGLOT) {
-            logger.info("adding poly icon to " +projectForLang);
+         //   logger.info("adding poly icon to " +projectForLang);
             addPolyIcon(button);
           }
-          else {
+//          else {
             //logger.info("not adding poly icon to " +projectForLang);
-          }
+  //        }
         }
       }
 
@@ -975,7 +975,8 @@ public class ProjectChoices {
       @Override
       public void onSuccess(User aUser) {
         if (aUser == null) {
-          logger.warning("huh? no current user? ");
+          logger.warning("setProjectForUser : no current user? ");
+          uiLifecycle.logout();
         } else {
           if (aUser.getStartupInfo() == null) { // no project with that project id
             lifecycleSupport.getStartupInfo();

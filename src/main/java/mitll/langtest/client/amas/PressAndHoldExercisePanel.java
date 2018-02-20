@@ -33,6 +33,7 @@
 package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -348,12 +349,16 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
     iconContainer.clear();
     if (badAudioRecording) {
       controller.logEvent(button, "Button", exerciseID, "bad recording");
-      if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
-        showPopup(result.getValidity().getPrompt(), realRecordButton.getParent());
+      Validity validity = result.getValidity();
+      if (!realRecordButton.checkAndShowTooLoud(validity)) {
+        showPopup(
+            validity.getPrompt(),
+            //realRecordButton.getParent()
+              button
+        );
       }
       initRecordButton();
 
-      Validity validity = result.getValidity();
       if (validity.equals(Validity.TOO_LOUD)) {
         addIcon(IconType.BULLHORN);
       } else if (validity.equals(Validity.TOO_SHORT)) {

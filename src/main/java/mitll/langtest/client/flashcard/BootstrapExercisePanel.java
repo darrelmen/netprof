@@ -41,6 +41,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -446,15 +447,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     setDownloadHref(result.getPath());
 
     boolean badAudioRecording = result.getValidity() != Validity.OK;
-//    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
+
+    //    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
 //        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
-    // String feedback = "";
     if (badAudioRecording) {
       controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
       if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
-        //logger.info("receivedAudioAnswer: show popup for " + result.getValidity());
+        if (button instanceof ComplexPanel) {
+          button = ((ComplexPanel) button).getWidget(0);
+          logger.info("receivedAudioAnswer: show popup for " + result.getValidity() + " on " + button.getElement().getId());
+        }
+//        else {
+//          logger.info("receivedAudioAnswer: NOPE : show popup for " + result.getValidity() + " on " + button.getElement().getId());
+//        }
         showPopup(result.getValidity().getPrompt(), button);
       }
       initRecordButton();
@@ -524,8 +531,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private final DownloadContainer downloadContainer;
 
   private void setDownloadHref(String audioPath) {
-    String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
-    downloadContainer.setDownloadHref(audioPathToUse, exercise.getID(), controller.getUser(), controller.getHost());
+    if (audioPath != null) {
+      String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, ".mp3") : audioPath;
+      downloadContainer.setDownloadHref(audioPathToUse, exercise.getID(), controller.getUser(), controller.getHost());
+    }
   }
 
   /**

@@ -142,15 +142,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     }
   }
 
-  protected void gotShortDurationRecording() {
+  protected void hideWaveform() {
   }
 
-  protected void hideWaveform() {
+  protected void gotShortDurationRecording() {
   }
 
   /**
    * @param base64EncodedWavFile
-   * @see RecordingListener#stopRecording
+   * @see #stopRecording
    */
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;

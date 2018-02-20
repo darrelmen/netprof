@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -67,6 +68,7 @@ import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class RecordButtonPanel implements RecordButton.RecordingListener {
+  public static final String NETWORK_ISSUE = "Network issue : Couldn't post audio. Please try again.";
   private final Logger logger = Logger.getLogger("RecordButtonPanel");
 
   protected final RecordButton recordButton;
@@ -243,19 +245,32 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     return browserInfo;
   }
 
+  /**
+   * @see #postAudioFile
+   * @param result
+   * @param then
+   * @param outer
+   * @param len
+   */
   private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
     //System.out.println("postAudioFile : onSuccess " + result);
     if (reqid != result.getReqid()) {
-//              System.out.println("ignoring old answer " + result);
       return;
     }
-    long now = System.currentTimeMillis();
-    long diff = now - then;
+    long diff = System.currentTimeMillis() - then;
 
     recordButton.setEnabled(true);
     receivedAudioAnswer(result, outer);
 
-    controller.getScoringService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
+    Scheduler.get().scheduleDeferred(() -> addRoundTrip(result, (int) diff));
+
+    if (diff > 1000) {
+      Scheduler.get().scheduleDeferred(() -> logMessage("long round trip : posted " + getLog(then, len), false));
+    }
+  }
+
+  private void addRoundTrip(AudioAnswer result, int diff) {
+    controller.getScoringService().addRoundTrip(result.getResultID(), diff, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("adding round trip to recording", caught);
@@ -263,12 +278,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
       @Override
       public void onSuccess(Void result) {
+       // logger.info("couldn't post round trip.");
       }
     });
-
-    if (diff > 1000) {
-      logMessage("posted " + getLog(then, len), false);
-    }
   }
 
   private void logMessage(String message, boolean sendEmail) {
@@ -284,16 +296,21 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     });
   }
 
+  /**
+   *
+   * @param caught
+   * @param then
+   * @param len
+   * @see #postAudioFile
+   */
   private void onPostFailure(Throwable caught, long then, int len) {
     controller.logException(caught);
-//            if (tries > 0) {
-//              postAudioFile(outer, base64EncodedWavFile); // TODO : try one more time...  ???
-//            } else {
     recordButton.setEnabled(true);
     String stackTrace = getExceptionAsString(caught);
     logMessage("postAudioFile : failed to post " + getLog(then, len) + "\n" + stackTrace, true);
-    Window.alert("postAudioFile : Couldn't post audio for exercise.");
-    new ExceptionHandlerDialog(caught);
+ //   Window.alert(NETWORK_ISSUE);
+  //  new ExceptionHandlerDialog(caught);
+    receivedAudioAnswer(new AudioAnswer(), getPanel());
   }
 
 
@@ -315,7 +332,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   /**
    * @param result
    * @param outer
-   * @see RecordButtonPanel#postAudioFile
+   * @see #onPostSuccess
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
 
