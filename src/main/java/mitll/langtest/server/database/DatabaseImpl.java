@@ -71,7 +71,6 @@ import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -263,14 +262,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("took " + (now - then) + " to delete from words for #" + projID);
 
 
-
     then = now;
     // result table.
     logger.info("start deleting from result table...");
     getAnswerDAO().deleteForProject(projID);
     now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " to delete from result for #" + projID);
-
 
 
     then = now;
@@ -526,10 +523,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see ScoreServlet#getJSONForExercises
-   * @see ScoreServlet#getJsonNestedChapters
    * @param projectid
    * @return
+   * @see ScoreServlet#getJSONForExercises
+   * @see ScoreServlet#getJsonNestedChapters
    */
   public JsonExport getJSONExport(int projectid) {
     getExercises(projectid);
@@ -625,7 +622,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @param userWhere
-   * @see NPUserSecurityManager#setSessionUser
+   * @see IUserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
@@ -1336,14 +1333,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     String language = getLanguage(project);
 
 //    if (!typeToSection.isEmpty()) {
-      logger.info("writeZip for project " + projectid +
-          " ensure audio for " + exercisesForSelectionState.size() +
-          " exercises for " + language +
-          " selection " + typeToSection);
+    logger.info("writeZip for project " + projectid +
+        " ensure audio for " + exercisesForSelectionState.size() +
+        " exercises for " + language +
+        " selection " + typeToSection);
 
-      audioDAO.attachAudioToExercises(exercisesForSelectionState,language);
-      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
-  //  }
+    audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
+    ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+    //  }
 
     new AudioExport(getServerProps())
         .writeZip(out,
@@ -1448,7 +1445,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getAudioDAO().attachAudioToExercises(exercises, language);
 
     {
-      String name = project.getProject().name();
+      String name = project.getName();
       logger.info("attachAllAudio " + name + "/" + language +
           " took " + (System.currentTimeMillis() - then) +
           " millis to attachAllAudio to " + exercises.size() + " exercises");
@@ -1670,7 +1667,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     List<ReportStats> allReports = new ArrayList<>();
     Collection<Project> projects = getProjects();
     List<Project> copy = new ArrayList<>(projects);
-    copy.sort((o1, o2) -> o1.getProject().name().toLowerCase().compareTo(o2.getProject().name().toLowerCase()));
+
+    // sort by name...?
+    copy.sort(Comparator.comparing(o -> o.getName().toLowerCase()));
 
     copy.forEach(project -> {
           try {
@@ -1724,7 +1723,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     long then = System.currentTimeMillis();
     recordWordAndPhone.recordWordAndPhoneInfo(projID, answer, answerID);
     long now = System.currentTimeMillis();
-    logger.info("recordWordAndPhoneInfo took " + (now - then) + " millis");
+    if (now - then > 50) {
+      logger.info("recordWordAndPhoneInfo took " + (now - then) + " millis");
+    }
   }
 
   /**

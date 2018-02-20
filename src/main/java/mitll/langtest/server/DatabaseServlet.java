@@ -35,6 +35,7 @@ package mitll.langtest.server;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import org.apache.logging.log4j.LogManager;
@@ -86,6 +87,7 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * TODO replace with commons call
+   *
    * @param inputStream
    * @param outputStream
    * @throws IOException
@@ -107,7 +109,7 @@ public class DatabaseServlet extends HttpServlet {
    * @return
    * @see #doGet
    */
-  int getProject(HttpServletRequest request) {
+  int getProjectID(HttpServletRequest request) {
     getDatabase();
     int userIDFromRequest = securityManager.getUserIDFromRequest(request);
     if (userIDFromRequest == -1) {
@@ -117,17 +119,24 @@ public class DatabaseServlet extends HttpServlet {
     }
   }
 
+  String getProjectName(int id) {
+    Project project = getDatabase().getProjectManagement().getProject(id);
+    return project == null ? "UNK" : project.getName();
+  }
+
   /**
    * @param id
    * @return
-   * @see #getProject
+   * @see #getProjectID
    * @see DownloadServlet#getProjectIDFromUser
    */
-  int getMostRecentProjectByUser(int id) {  return getDatabase().getUserProjectDAO().mostRecentByUser(id);  }
+  int getMostRecentProjectByUser(int id) {
+    return getDatabase().getUserProjectDAO().mostRecentByUser(id);
+  }
 
   /**
-   * @see #getProject
    * @return
+   * @see #getProjectID
    */
   DatabaseImpl getDatabase() {
     if (db == null) {

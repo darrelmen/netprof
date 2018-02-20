@@ -45,6 +45,16 @@ public interface IUserSecurityManager {
 
   void logoutUser(HttpServletRequest request, int userId, boolean killAllSessions);
 
+  /**
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#loginUser
+   * @see mitll.langtest.server.rest.RestUserManagement
+   * @param userId
+   * @param attemptedFreeTextPassword
+   * @param remoteAddr
+   * @param userAgent
+   * @param session
+   * @return
+   */
   LoginResult getLoginResult(String userId,
                              String attemptedFreeTextPassword,
                              String remoteAddr,
@@ -55,9 +65,10 @@ public interface IUserSecurityManager {
    *
    * @param session
    * @param loggedInUser
+   * @param madeNewSession
    * @return
    */
-  void setSessionUser(HttpSession session, User loggedInUser);
+  void setSessionUser(HttpSession session, User loggedInUser, boolean madeNewSession);
 
   String getRemoteAddr(HttpServletRequest request);
 }

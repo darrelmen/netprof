@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.filter;
 
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -67,7 +67,7 @@ public class ForceNocacheFilter implements Filter {
    * @param chain
    * @throws IOException
    * @throws ServletException
-   * @see NPUserSecurityManager#setSessionUser
+   * @see IUserSecurityManager#setSessionUser
    */
   @Override
   public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)

@@ -43,6 +43,7 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -52,6 +53,7 @@ import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -638,13 +640,14 @@ public class Project implements IPronunciationLookup {
     return integer;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores, AudioFileHelper, int, int, String)
+   * @param testAudioFile
+   * @param userIDFromSessionOrDB
+   */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
     //logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
-  }
-
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 
   public int getPort() {
@@ -656,5 +659,11 @@ public class Project implements IPronunciationLookup {
       logger.error("for " + project + " got " + e);
       return -1;
     }
+  }
+
+  public String getName() { return project.name(); }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

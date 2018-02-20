@@ -36,7 +36,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
@@ -71,7 +70,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   /**
    * @param user
    * @return
-   * @see NPUserSecurityManager#setSessionUser
+   * @see IUserSecurityManager#setSessionUser
    */
   @Override
   public void add(SlickUserSession user) {
@@ -89,15 +88,16 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
   }
 
+/*
   @Override
   public int getUserForSV(String sesssion, String v) {
     Collection<Integer> userForSession = dao.getUserForSV(sesssion, v);
     return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
-  }
+  }*/
 
   /**
    * @see IUserSecurityManager#logoutUser
-   * @param session
+   * @paramx session
    */
 /*
   @Override

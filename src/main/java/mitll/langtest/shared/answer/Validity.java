@@ -12,7 +12,7 @@ public enum Validity implements IsSerializable {
   TOO_QUIET("Audio too quiet. Check your mic settings or speak closer to the mic."),
   SNR_TOO_LOW("You are either speaking too quietly or the room is too noisy.<br/>Speak louder or closer to the mic or go to a quieter room."),
   TOO_LOUD("Audio too loud. Check your mic settings or speak farther from the mic."),
-  INVALID("There was a problem with the audio. Please record again.");
+  INVALID("There was a problem posting the audio. Please record again.");
   private String prompt;
 
   Validity() {

@@ -82,6 +82,9 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String COMPRESSED_SUFFIX = "mp3";
   // private static final String USERS = "users";
   private static final String RESULTS = "results";
+  /**
+   * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String)
+   */
   private static final String EVENTS = "events";
   private static final String REQUEST = "request";
   private static final String MALE = "male=";
@@ -97,6 +100,8 @@ public class DownloadServlet extends DatabaseServlet {
 
   private static final String AMPERSAND = DownloadHelper.AMPERSAND;//"___AMPERSAND___";
   private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
+  public static final String RESULTS_XLSX = "results.xlsx";
+  public static final String EVENTS_XLSX = "events.xlsx";
 
   /**
    * This is getting complicated.
@@ -127,7 +132,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
-        int projid = getProject(request);
+        int projid = getProjectID(request);
 
         if (projid == -1) {
           projid = getProjectIDFromUser(request);
@@ -448,10 +453,12 @@ public class DownloadServlet extends DatabaseServlet {
   private void returnSpreadsheet(HttpServletResponse response,
                                  DatabaseImpl db,
                                  String encodedFileName,
-                                 int projectid, String language) throws IOException {
+                                 int projectid,
+                                 String language) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
-    String prefix = language + "_";
+    String projectName = getProjectName(projectid);
+    String prefix = language + "_" + projectName.replaceAll("\\s++","_") + "_";
 /*    if (encodedFileName.toLowerCase().contains(USERS)) {
       String filename = prefix + "users.xlsx";
       response.setHeader("Content-Disposition", "attachment; filename=" + filename);
@@ -459,20 +466,22 @@ public class DownloadServlet extends DatabaseServlet {
     } else
       */
     if (encodedFileName.toLowerCase().contains(RESULTS)) {
-      String filename = prefix + "results.xlsx";
-      response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), response.getOutputStream());
+      setFilenameHeader(response, prefix + RESULTS_XLSX);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
-      String filename = prefix + "events.xlsx";
-      response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
+      setFilenameHeader(response, prefix + EVENTS_XLSX);
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }
   }
 
   private void setResponseHeader(HttpServletResponse response, String fileName) {
-    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+    setFilenameHeader(response, fileName);
+  }
+
+  private void setFilenameHeader(HttpServletResponse response, String filename) {
+    response.setHeader("Content-Disposition", "attachment; filename=" + filename);
   }
 
   /**
@@ -496,7 +505,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     try {
       String name = id == null ? "unknown" : db.getUserListName(id);
-      name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
+      name = name.replaceAll(",", "_").replaceAll(" ", "_");
       name += ".zip";
       setHeader(response, name);
 

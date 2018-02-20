@@ -73,6 +73,7 @@ public class AttachSecurityFilter implements Filter {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_RESPONSE = true;
+  private static final boolean DEBUG_RESPONSE_DETAIL = false;
 
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
@@ -174,7 +175,7 @@ public class AttachSecurityFilter implements Filter {
   private boolean isAllowedToGet(int userIDFromSessionOrDB, int userForFile) {
     if (userForFile == userIDFromSessionOrDB) {
       // 2 are you the same person? if so you get to hear it
-      if (DEBUG_RESPONSE) log.info("isAllowedToGet OK, it's your file.");
+      if (DEBUG_RESPONSE_DETAIL) log.info("isAllowedToGet OK, it's your file.");
       return true;
     } else {
       if (db.getUserDAO().isStudent(userIDFromSessionOrDB)) {
@@ -182,8 +183,7 @@ public class AttachSecurityFilter implements Filter {
           // 5 we somehow couldn't figure out who had recorded the file initially - perhaps an old Japanese file?
           log.warn("isAllowedToGet OK : you are a student " + userIDFromSessionOrDB + ", who did not create the file, but an unknown user #" + userForFile + " did so we'll allow it.");
           return true;
-        }
-        else {
+        } else {
           // 4 if you are a student sorry, you don't get to hear it
           log.warn("isAllowedToGet nope - student " + userIDFromSessionOrDB + " did not create the file, user #" + userForFile + " did.");
           return false;
@@ -242,31 +242,33 @@ public class AttachSecurityFilter implements Filter {
   }
 
   private int getUserForFile(String requestURI, File file) {
-    int userForFile = getUserForFile(requestURI, requestURI.substring(1));
+    int userForFile = getUserForFileAbsolute(file);
     if (userForFile == -1) {
-      String absolutePath = file.getAbsolutePath();
-      log.info("getUserForFile now trying full path " + absolutePath);
-      userForFile = getUserForWavFile(absolutePath);
+      userForFile = getUserForFile(requestURI);
     }
     return userForFile;
   }
 
-  private int getUserForFile(String requestURI, String fileToFind) {
+  private int getUserForFileAbsolute(File file) {
+    String absolutePath = file.getAbsolutePath();
+    //log.info("getUserForFile now trying full path " + absolutePath);
+    return getUserForWavFile(absolutePath);
+  }
+
+  private int getUserForFile(String requestURI) {
 //    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
-    fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
+    log.info("getUserForFile checking owner of " + requestURI);
+    String fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
     fileToFind = removeNetprof(fileToFind);
     if (DEBUG) log.info("getUserForFile user for " + fileToFind);
-
-    fileToFind = removeAnswers(fileToFind);
-
-    return getUserForWavFile(fileToFind);
+    return getUserForWavFile(removeAnswers(fileToFind));
   }
 
   @NotNull
   private String removeAnswers(String fileToFind) {
     int answers = fileToFind.indexOf(ANSWERS);
     if (answers != -1) {
-      fileToFind = fileToFind.substring(answers+ANSWERS.length());
+      fileToFind = fileToFind.substring(answers + ANSWERS.length());
 
       answers = fileToFind.indexOf(ANSWERS);
       if (answers != -1) {
@@ -293,11 +295,11 @@ public class AttachSecurityFilter implements Filter {
   }
 
   /**
-   * @see #doFilter
    * @param request
    * @param response
+   * @see #doFilter
    */
-  private void handleAccessFailure(final HttpServletRequest request, final ServletResponse response)   {
+  private void handleAccessFailure(final HttpServletRequest request, final ServletResponse response) {
     log.error("System access failed security filter! Request: {}", request.getRequestURI());
     try {
       response.setContentType("text/plain");

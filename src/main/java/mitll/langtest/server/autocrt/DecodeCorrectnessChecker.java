@@ -163,12 +163,13 @@ public class DecodeCorrectnessChecker {
                                       AudioAnswer answer,
                                       DecoderOptions decoderOptions,
 
-                                      PrecalcScores precalcScores, boolean isMandarinEtAl) {
+                                      PrecalcScores precalcScores,
+                                      boolean isMandarinEtAl) {
     List<String> lmSentences = removePunct(possibleSentences);
 //    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
     //making the transliteration empty as I don't think it is useful here
-    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "",
-        decoderOptions, precalcScores);
+    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(answer.getReqid(), audioFile, lmSentences,
+        "", decoderOptions, precalcScores);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?

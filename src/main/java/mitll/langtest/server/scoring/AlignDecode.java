@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -50,13 +51,17 @@ import java.util.Collection;
  */
 public interface AlignDecode {
   /**
+   *
+   * @param reqid
    * @param testAudioFile
    * @param lmSentences
    * @param precalcScores
    * @return
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getDecodeScore(File, Collection, AudioAnswer, DecoderOptions, PrecalcScores, boolean)
+   * @see
    */
-  PretestScore getASRScoreForAudio(File testAudioFile,
+  PretestScore getASRScoreForAudio(int reqid,
+                                   File testAudioFile,
                                    Collection<String> lmSentences,
                                    String transliteration,
                                    DecoderOptions decoderOptions,

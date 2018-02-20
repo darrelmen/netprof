@@ -70,10 +70,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader("User-Agent");
 
-      // ensure a session is created.
-      HttpSession session = createSession();
-      logger.info("Login session " + session.getId() + " isNew=" + session.isNew());
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
+      // ensure a newSession is created.
+      HttpSession newSession = createSession();
+      //logger.info("Login newSession " + newSession.getId() + " isNew=" + newSession.isNew());
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, newSession);
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);
@@ -220,9 +220,13 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     User userByID = getUserByID(userId);
     if (result) {
       if (userByID != null) {
+        boolean newSession = false;
         HttpSession currentSession = getCurrentSession();
-        if (currentSession == null) currentSession = createSession();
-        securityManager.setSessionUser(currentSession, userByID);
+        if (currentSession == null) {
+          currentSession = createSession();
+          newSession=true;
+        }
+        securityManager.setSessionUser(currentSession, userByID, newSession);
       }
       return new ChoosePasswordResult(userByID, userByID == null ? NotExists : Success);
     } else {

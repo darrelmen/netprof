@@ -95,6 +95,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }*/
 
+  /**
+   * @param userId
+   * @param attemptedFreeTextPassword
+   * @param remoteAddr
+   * @param userAgent
+   * @param session
+   * @return
+   */
   @Override
   public LoginResult getLoginResult(String userId,
                                     String attemptedFreeTextPassword,
@@ -137,7 +145,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
     LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     if (loggedInUser.isValid()) {
-      setSessionUser(session, loggedInUser);
+      setSessionUser(session, loggedInUser, true);
     } else {
       log.info("getValidLogin user " + loggedInUser + "\n\tis not valid ");
       loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
@@ -158,10 +166,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    *
    * @param session
    * @param loggedInUser
+   * @param madeNewSession
    * @return
+   * @see #getValidLogin
+   * @see #lookupUserFromSessionOrDB
    */
-  public void setSessionUser(HttpSession session, User loggedInUser) {
-    log.debug("setSessionUser - made session - " + session + " user - " + loggedInUser);
+  public void setSessionUser(HttpSession session, User loggedInUser, boolean madeNewSession) {
+    log.info("setSessionUser - made session - " + session + "\n\tnewSession " + madeNewSession +
+        "\n\tuser - " + loggedInUser);
     try {
       long then = System.currentTimeMillis();
       setSessionUserAndRemember(session, loggedInUser.getID());
@@ -170,10 +182,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       userDAO.getDatabase().setStartupInfo(loggedInUser);
       long now = System.currentTimeMillis();
       if (now - then > 40) {
-        log.info("took " + (now - then) + " to add session to db");
+        log.info("setSessionUser took " + (now - then) + " to add session to db");
       }
     } catch (Exception e) {
-      log.error("got " + e, e);
+      log.error("setSessionUser got " + e, e);
     }
   }
 
@@ -230,7 +242,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     if (session != null) {
       log.info("logoutUser : Invalidating session {}", session.getId());
 ///      if (killAllSessions) {
-        userSessionDAO.removeAllSessionsForUser(userId);
+      userSessionDAO.removeAllSessionsForUser(userId);
 //      } else {
 //        userSessionDAO.removeSession(session.getId());
 //      }
@@ -320,13 +332,22 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     if (sessUser == null) {
       sessUser = lookupUserFromDBSession(request);
       if (sessUser != null) {
-        HttpSession session = getCurrentOrNewSession(request);
+        // HttpSession session = getCurrentOrNewSession(request);
+
+        boolean madeNewSession = false;
+        HttpSession session = getCurrentSession(request);
+        if (session == null) {
+          madeNewSession = true;
+          session = getNewHttpSession(request);
+        }
 
         // why???
-        setSessionUser(session, sessUser);
+        if (sessUser.getStartupInfo() == null || madeNewSession) {
+          setSessionUser(session, sessUser, madeNewSession);
+        }
       } else {
         if (DEBUG)
-          log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
+          log.info("lookupUserFromSessionOrDB no user for session - " + getCurrentSession(request) + " logged out?");
       }
 
     } else {
@@ -358,10 +379,17 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       sessUserID = sid == null ? -1 : userSessionDAO.getUserForSession(sid);
 
       if (sessUserID != -1) {
-        setSessionUserAndRemember(getCurrentOrNewSession(request), sessUserID);
+        HttpSession currentOrNewSession = getCurrentOrNewSession(request);
+
+        if (currentOrNewSession == null) {
+          log.error("huh? couldn't create a new session?");
+        } else {
+          setSessionUserAndRemember(currentOrNewSession, sessUserID);
+        }
+
       } else {
         if (DEBUG)
-          log.info("lookupUserFromSessionOrDB no user for session - " + request.getSession(false) + " logged out?");
+          log.info("lookupUserFromSessionOrDB no user for session - " + getCurrentSession(request) + " logged out?");
       }
 
     } else {
@@ -382,17 +410,23 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   @Nullable
   private HttpSession getCurrentOrNewSession(HttpServletRequest request) {
-    HttpSession session = request.getSession(false);
+    HttpSession session = getCurrentSession(request);
     if (session == null) {
-      if (DEBUG) log.info("lookupUserFromSessionOrDB note - no current session - ");
-      try {
-        session = request.getSession();
-        if (DEBUG) log.info("lookupUserFromSessionOrDB note - made session - ");
-      } catch (Exception e) {
-        log.error("got " + e, e);
-      }
+      session = getNewHttpSession(request);
     } else {
       if (DEBUG) log.info("lookupUserFromSessionOrDB found current session - ");
+    }
+    return session;
+  }
+
+  private HttpSession getNewHttpSession(HttpServletRequest request) {
+    if (DEBUG) log.info("lookupUserFromSessionOrDB note - no current session - ");
+    HttpSession session = null;
+    try {
+      session = request.getSession();
+      if (DEBUG) log.info("lookupUserFromSessionOrDB note - made session - ");
+    } catch (Exception e) {
+      log.error("got " + e, e);
     }
     return session;
   }

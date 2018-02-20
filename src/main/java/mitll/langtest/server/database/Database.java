@@ -35,11 +35,11 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
-import javax.servlet.http.HttpSession;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
@@ -77,7 +77,7 @@ public interface Database extends AutoCloseable {
   Collection<String> getTypeOrder(int projectid);
 
   /**
-   * @see mitll.langtest.server.database.security.NPUserSecurityManager#setSessionUser
+   * @see IUserSecurityManager#setSessionUser
    * @param userWhere
    */
   void setStartupInfo(User userWhere);

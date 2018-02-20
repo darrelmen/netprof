@@ -33,10 +33,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.scoring.AlignDecode;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.HashMap;
@@ -147,7 +144,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
 
   /**
    * @see AlignDecode#getASRScoreForAudio
-   * @see AudioFileHelper#getASRScoreForAudio
+   * @see AlignDecode#getASRScoreForAudio
    * @param json
    */
   public void setJson(String json) {

@@ -146,7 +146,7 @@ public class RecordWordAndPhone {
         }
       }
 
-      logger.info("recordWordAndPhoneInfo for " + answerID+ " adding " + windex + " words and " + toAdd.size() + " phones");
+//      logger.info("recordWordAndPhoneInfo for " + answerID+ " adding " + windex + " words and " + toAdd.size() + " phones");
       phoneDAO.addBulkPhones(toAdd, projID);
     }
   }

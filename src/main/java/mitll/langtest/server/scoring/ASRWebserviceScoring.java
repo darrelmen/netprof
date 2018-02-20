@@ -690,7 +690,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param background
    * @return
    * @see AlignDecode#getASRScoreForAudio
-   * @see AlignDecode#getASRScoreForAudio(File, Collection, String, DecoderOptions, PrecalcScores)
+   * @see AlignDecode#getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return pronunciationLookup.getUsedTokens(lmSentences, background);

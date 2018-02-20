@@ -98,7 +98,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
    * @param deviceType
    * @param device
-   * @param doFlashcard         true if called from practice (flashcard) and we want to do decode and not align
+   * @paramx doFlashcard         true if called from practice (flashcard) and we want to do decode and not align
    * @paramx recordInResults     if true, record in results table -- only when recording in a learn or practice tab
    * @paramx addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @paramx allowAlternates
@@ -113,12 +113,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean recordedWithFlash,
                                     String deviceType,
                                     String device,
-
-//                                    boolean doFlashcard,
-//                                    boolean recordInResults,
-//                                    boolean addToAudioTable,
-//                                    boolean allowAlternates,
-
                                     DecoderOptions decoderOptions
   ) throws DominoSessionException {
     int projectID = getProjectIDFromUser();
@@ -129,6 +123,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
 
+//    if (true) throw new IllegalArgumentException("testing exception handling...");
 /*
     logger.info("writeAudioFile got " +
         "\n\trequest         " + audioContext +

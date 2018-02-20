@@ -181,14 +181,14 @@ public class ScoreServlet extends DatabaseServlet {
       }
 
       int userID = checkSession(request);
-      int projid = getProject(request);
+      int projid = getProjectID(request);
 
       // language overrides user id mapping...
       {
         String language = getLanguage(request);
         if (language != null) {
           projid = getProjectID(language);
-          if (projid == -1) projid = getProject(request);
+          if (projid == -1) projid = getProjectID(request);
         }
       }
 
@@ -904,7 +904,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.info("couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
     }
     int reqid = getReqID(request);
-    int projid = getProject(request);
+    int projid = getProjectID(request);
 
     logger.debug("getJsonForAudio got projid from session " + projid);
     if (projid == -1) {
@@ -999,7 +999,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.debug("getJsonForAudio got projid from language " + projid);
 
       if (projid == -1) {
-        projid = getProject(request);
+        projid = getProjectID(request);
         logger.debug("getJsonForAudio got projid from request again " + projid);
       }
     }

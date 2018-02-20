@@ -277,6 +277,7 @@ public class AutoCRT {
    * @param useCache
    * @return the reco sentence and the score for this sentence
    * @see #getExportedAnswers(String, int)
+   * @deprecated just for AMAS
    */
   private PretestScore getScoreForAudio(AmasExerciseImpl exercise, String exerciseID, int questionID, File audioFile, boolean useCache) {
     Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID - 1);
@@ -290,8 +291,8 @@ public class AutoCRT {
     // logger.info("getScoreForAudio : got possible answers, num = " + size + " vs orig " + size1);
     long then = System.currentTimeMillis();
 
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, "",//exercise.getTransliteration(),
-        new DecoderOptions().setCanUseCache(useCache), null);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(0, audioFile, exportedAnswers,//exercise.getTransliteration(),
+        "", new DecoderOptions().setCanUseCache(useCache), null);
     long now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +

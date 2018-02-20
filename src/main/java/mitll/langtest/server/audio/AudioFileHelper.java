@@ -984,6 +984,8 @@ public class AudioFileHelper implements AlignDecode {
    * <p>
    * TODO : why even generate images here???
    *
+   *
+   * @param reqid
    * @param testAudioFile   audio file to score
    * @param lmSentences     to look for in the audio
    * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
@@ -994,28 +996,28 @@ public class AudioFileHelper implements AlignDecode {
    * @see AlignDecode#getASRScoreForAudio
    */
   @Override
-  public PretestScore getASRScoreForAudio(File testAudioFile,
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          File testAudioFile,
                                           Collection<String> lmSentences,
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    List<String> unk = new ArrayList<>();
-
+    /*
+        List<String> unk = new ArrayList<>();
     if (isMacOrWin()) {  // i.e. NOT using cool new jcodr webservice
       unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
-
-    String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-      logger.info("getASRScoreForAudio from" +
-          "\n\tlm sentences '" + lmSentences + "'" +
-          "\n\tto vocab '" + vocab +"'");
-
+      String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
+    logger.info("getASRScoreForAudio from" +
+        "\n\tlm sentences '" + lmSentences + "'" +
+        "\n\tto vocab '" + vocab + "'");
+*/
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
-    String next = lmSentences.iterator().next();
-      logger.info("getASRScoreForAudio audio file path is " + path + " " + next);
-    return getASRScoreForAudio(0, path, next, lmSentences, transliteration,
+    String firstSentence = lmSentences.iterator().next();
+//      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
+    return getASRScoreForAudio(reqid, path, firstSentence, lmSentences, transliteration,
         DEFAULT, prefix, precalcScores,
         options);
   }
@@ -1047,7 +1049,7 @@ public class AudioFileHelper implements AlignDecode {
           "\n\texid    " + exid +
           "\n\tenglish " + english +
           "\n\titem    " + foreignLanguage +
-          "\n\tuser    " + userid+
+          "\n\tuser    " + userid +
           "\n\thost    " + hydraHost
       );
     }
@@ -1274,8 +1276,8 @@ public class AudioFileHelper implements AlignDecode {
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
-    logger.info("getASRScoreForAudio : precalcScore " +precalcScores);
+//    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+//    logger.info("getASRScoreForAudio : precalcScore " +precalcScores);
 
     PretestScore pretestScore = getASRScoring().scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
@@ -1290,7 +1292,7 @@ public class AudioFileHelper implements AlignDecode {
     pretestScore.setReqid(reqid);
 
     String json = new ScoreToJSON().asJson(pretestScore);
-    logger.info("getASRScoreForAudio : json for preset score " +pretestScore + " " + json);
+    logger.info("getASRScoreForAudio : json for preset score " + pretestScore + " " + json);
     pretestScore.setJson(json);
 
     return pretestScore;
@@ -1355,9 +1357,9 @@ public class AudioFileHelper implements AlignDecode {
               file);
 
       String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(exercise.getForeignLanguage(), language);
-      PretestScore asrScoreForAudio = getASRScoreForAudio(file,
-          Collections.singleton(phraseToDecode), "",
-          decoderOptions, precalcScores);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
+          file, Collections.singleton(phraseToDecode),
+          "", decoderOptions, precalcScores);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
 

@@ -2,12 +2,14 @@ package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -30,28 +32,30 @@ public class EventDAOToExcel {
   public EventDAOToExcel(Database database) {
     this.logAndNotify = database.getLogAndNotify();
   }
+
   /**
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String)
    */
-  public void toXLSX(List<Event> all,OutputStream out) {
+  public void toXLSX(List<Event> all, OutputStream out) {
     long then = System.currentTimeMillis();
 
-    //List<Event> all = getAllPredef();
     long now = System.currentTimeMillis();
-    if (now-then > 100) logger.info("toXLSX : took " + (now - then) + " millis to read " + all.size() +
+    if (now - then > 100) logger.info("toXLSX : took " + (now - then) + " millis to read " + all.size() +
         " events from database");
     then = now;
 
-    //Workbook wb = new XSSFWorkbook();
     SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
 
     Sheet sheet = wb.createSheet(EVENTS);
     int rownum = 0;
-    Row headerRow = sheet.createRow(rownum++);
-    for (int i = 0; i < COLUMNS2.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(COLUMNS2.get(i));
+
+    {
+      Row headerRow = sheet.createRow(rownum++);
+      for (int i = 0; i < COLUMNS2.size(); i++) {
+        Cell headerCell = headerRow.createCell(i);
+        headerCell.setCellValue(COLUMNS2.get(i));
+      }
     }
 
     CellStyle cellStyle = wb.createCellStyle();
@@ -84,27 +88,24 @@ public class EventDAOToExcel {
       cell = row.createCell(j++);
       cell.setCellValue(event.getTimestamp());
 
-//      cell = row.createCell(j++);
-//      cell.setCellValue(event.getHitID());
-
       cell = row.createCell(j++);
       cell.setCellValue(event.getDevice());
 
     }
     now = System.currentTimeMillis();
-    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
-        " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
+        " rows to sheet, or " + (now - then) / rownum + " millis/row");
     then = now;
     try {
       wb.write(out);
       now = System.currentTimeMillis();
-      if (now-then > 100) {
-        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
+      if (now - then > 100) {
+        logger.warn("toXLSX : took " + (now - then) + " millis to write excel to output stream ");
       }
       out.close();
       wb.dispose();
     } catch (IOException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
       logAndNotify.logAndNotifyServerException(e);
     }
   }

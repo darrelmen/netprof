@@ -38,9 +38,9 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
 public class AudioAnswer implements IsSerializable {
-  private int reqid;
-  private String path;
-  private Validity validity;
+  private int reqid = -1;
+  private String path = null;
+  private Validity validity = Validity.INVALID;
   private String decodeOutput = "";
   private String transcript = "";
   private double score = -1;
@@ -152,6 +152,10 @@ public class AudioAnswer implements IsSerializable {
     this.path = path;
   }
 
+  /**
+   *
+   * @return
+   */
   public Validity getValidity() {
     return validity;
   }
