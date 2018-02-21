@@ -34,8 +34,10 @@ package mitll.langtest.client.flashcard;
 
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.Shell;
 
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -46,13 +48,18 @@ import java.util.logging.Logger;
  * @since 7/8/14.
  */
 class StickyState {
- // private final Logger logger = Logger.getLogger("StickyState");
+  // private final Logger logger = Logger.getLogger("StickyState");
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
   private static final String CURRENT_EXERCISE = "currentExercise";
   private static final String CORRECT1 = "correct";
   private final KeyStorage storage;
+
+
+  private final Map<Integer, Boolean> exToCorrect = new HashMap<>();
+  private final Map<Integer, Double> exToScore = new HashMap<>();
+  private Map<Integer, AudioAnswer> exToLatest = new LinkedHashMap<>();
 
   /**
    * @param storage
@@ -65,16 +72,16 @@ class StickyState {
   /**
    * @param e
    * @see ExercisePanelFactory#getExercisePanel(Shell)
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
+   * @see StatsPracticePanel#onSetComplete
    */
   void storeCurrent(Shell e) {
-   // logger.info("StickyState.storeCurrent store current " + e.getID());
+    // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }
 
   int getCurrentExerciseID() {
     String value = storage.getValue(CURRENT_EXERCISE);
-   // logger.info("StickyState.getCurrentExerciseID '" + value + "'");
+    // logger.info("StickyState.getCurrentExerciseID '" + value + "'");
     return value.isEmpty() ? -1 : Integer.parseInt(value);
   }
 
@@ -106,10 +113,136 @@ class StickyState {
     storage.storeValue(CORRECT1, builder.toString());
   }
 
+  KeyStorage getStorage() {
+    return storage;
+  }
+
+  public void populateCorrectMap() {
+    String value = getCorrect();
+    if (value != null && !value.trim().isEmpty()) {
+      // logger.info("using correct map " + value);
+      for (int ex : getIDsFromStorage(value)) {
+        exToCorrect.put(ex, Boolean.TRUE);
+      }
+    }
+
+    value = getIncorrect();
+    if (value != null && !value.trim().isEmpty()) {
+      //  logger.info("using incorrect map " + value);
+      for (int ex : getIDsFromStorage(value)) {
+        exToCorrect.put(ex, Boolean.FALSE);
+      }
+    }
+
+    value = getScore();
+    if (value != null && !value.trim().isEmpty()) {
+      for (String pair : getIDsFroStorage(value)) {
+        String[] split = pair.split("=");
+        if (split.length == 2) {
+          String s = split[0];
+          int id = Integer.parseInt(s);
+          exToScore.put(id, Double.parseDouble(split[1]));
+        }
+      }
+    }
+  }
+
+  private Collection<Integer> getIDsFromStorage(String value) {
+    String[] split = getIDsFroStorage(value);
+    Collection<Integer> ids = new ArrayList<>();
+    for (String ex : split) ids.add(Integer.parseInt(ex));
+    return ids;
+  }
+
+  private String[] getIDsFroStorage(String value) {
+    return value.split(",");
+  }
+
+
   void resetStorage() {
     storage.removeValue(CORRECT1);
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
   }
+
+  void addScore(int id, Double score) {
+    exToScore.put(id, score);
+  }
+
+
+   void reset() {
+    exToCorrect.clear();
+    exToScore.clear();
+    exToLatest.clear(); // why wouldn't we do that too?
+    clearCurrent();
+  }
+
+  void storeAnswer(final AudioAnswer result, int id) {
+    // int id = exercise.getID();
+    exToScore.put(id, result.getScore());
+    exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
+
+    StringBuilder builder = new StringBuilder();
+    StringBuilder builder2 = new StringBuilder();
+    for (Map.Entry<Integer, Boolean> pair : exToCorrect.entrySet()) {
+      if (pair.getValue()) {
+        builder.append(pair.getKey()).append(",");
+      } else {
+        builder2.append(pair.getKey()).append(",");
+      }
+    }
+    storeCorrect(builder);
+    storeIncorrect(builder2);
+
+    StringBuilder builder3 = new StringBuilder();
+    for (Map.Entry<Integer, Double> pair : exToScore.entrySet()) {
+      builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
+    }
+    storeScore(builder3);
+
+//    setStateFeedback();
+
+    exToLatest.put(id, result);
+  }
+
+  protected boolean isCorrect(boolean correct, double score) {
+
+    return correct;
+  }
+
+
+  void addCorrect(int id, Boolean score) {
+    exToCorrect.put(id, score);
+  }
+
+  Collection<Boolean> getCorrectValues() {
+    return exToCorrect.values();
+  }
+
+  Collection<Double> getScores() {
+    return exToScore.values();
+  }
+
+  Collection<AudioAnswer> getAnswers() {
+    return exToLatest.values();
+  }
+
+
+   int getCorrectCount() {
+    int count = 0;
+    for (Boolean val : getCorrectValues()) {
+      if (val) count++;
+    }
+    return count;
+  }
+
+   int getIncorrectCount() {
+    int count = 0;
+    for (Boolean val : getCorrectValues()) {
+      if (!val) count++;
+    }
+    return count;
+  }
+
 }

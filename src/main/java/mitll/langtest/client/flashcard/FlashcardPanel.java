@@ -126,13 +126,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final boolean addKeyBinding;
   final ExerciseController controller;
   final ControlState controlState;
-  private final Panel mainContainer;
+  private   Panel mainContainer;
   private Panel leftState;
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
   final String instance;
   final ListInterface exerciseList;
-  private final DivWidget prevNextRow;
+  private   DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
   protected FlashcardTimer timer;
@@ -174,6 +174,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
 
     this.soundFeedback = soundFeedback;
+
+
+  //  addWidgets(e, controller, controlState);
+  }
+
+   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
     middleVert.getElement().setId("middle_vert_container");
 
@@ -223,6 +229,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   private void wasHidden() {
     cancelAdvanceTimer();
+    stopPlayback();
+  }
+
+  void stopPlayback() {
     getSoundFeedback().clear();
   }
 
@@ -233,7 +243,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private void maybePlayRef(ControlState controlState) {
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
-        logger.info("maybePlayRef : audio on, so playing ref");
+       // logger.info("maybePlayRef : audio on, so playing ref");
         playRef();
       } else {
         //    logger.info("maybePlayRef auto advance on, so not playing ref here");
@@ -1201,9 +1211,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #playRef()
    */
   private void playRef(String path) {
-    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
-/*     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      logger.info("playRef : logException stack " + exceptionAsString);*/
+   // logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+/*
+ String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+      logger.info("playRef : logException stack " + exceptionAsString);
+      */
 
     path = getPath(path);
     final Widget textWidget = foreign;

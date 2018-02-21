@@ -73,10 +73,11 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
 
-//  private boolean warnUserWhenNotSpace;
- // private final boolean addKeyBinding;
+  //  private boolean warnUserWhenNotSpace;
+  // private final boolean addKeyBinding;
   private final ExerciseController controller;
- // private final Tooltip tooltip;
+  // private final Tooltip tooltip;
+  private static final boolean DEBUG = false;
 
   /**
    * @param delay
@@ -97,16 +98,11 @@ public class FlashcardRecordButton extends RecordButton {
     }
     this.controller = controller;
 
-  //  this.addKeyBinding = addKeyBinding;
-   // boolean warnUserWhenNotSpace = addKeyBinding && warnNotASpace;
-
     setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
     getElement().getStyle().setProperty("fontSize", "x-large");
-    // DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
     getElement().getStyle().setProperty("fontFamily", "Arial Unicode MS, Arial, sans-serif");
 
-    // DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
     getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
     getElement().getStyle().setLineHeight(37, Style.Unit.PX);
 
@@ -119,7 +115,7 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
-    //     logger.info("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
+    if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
@@ -146,14 +142,14 @@ public class FlashcardRecordButton extends RecordButton {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       if (isSpace) {
-       // logger.info("checkKeyDown got space");
+        if (DEBUG) logger.info("checkKeyDown got space");
         if (!mouseDown) {
           mouseDown = true;
           doClick();
         }
       } else {//if (warnUserWhenNotSpace) {
         int keyCode = event.getKeyCode();
-//        logger.info("checkKeyDown key code is " + keyCode);
+        if (DEBUG) logger.info("checkKeyDown key code is " + keyCode);
      /*   if (keyCode == KeyCodes.KEY_ALT ||
             keyCode == KeyCodes.KEY_CTRL ||
             keyCode == KeyCodes.KEY_ESCAPE ||
@@ -161,7 +157,7 @@ public class FlashcardRecordButton extends RecordButton {
           //logger.info("key code is " + keyCode);
         } else {*/
         //logger.info("warn - key code is " + keyCode);
-        switch(keyCode) {
+        switch (keyCode) {
           case KeyCodes.KEY_LEFT:
             stopProp(event);
             gotLeftArrow();
@@ -178,28 +174,14 @@ public class FlashcardRecordButton extends RecordButton {
             stopProp(event);
             gotDownArrow();
             break;
-            case KeyCodes.KEY_ENTER:
+          case KeyCodes.KEY_ENTER:
             stopProp(event);
             gotEnter();
             break;
         }
-        if (keyCode == KeyCodes.KEY_LEFT) {
-          stopProp(event);
-          gotLeftArrow();
-        } else if (keyCode == KeyCodes.KEY_RIGHT) {
-          stopProp(event);
-          gotRightArrow();
-        } else if (keyCode == KeyCodes.KEY_UP) {
-          stopProp(event);
-          gotUpArrow();
-        } else if (keyCode == KeyCodes.KEY_DOWN) {
-          stopProp(event);
-          gotDownArrow();
-        }
-        // }
       }
     } else {
-      //logger.info("ignore key down.");
+      if (DEBUG) logger.info("ignore key down.");
     }
   }
 
@@ -288,7 +270,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   public void initRecordButton() {
     super.initRecordButton();
-  //  setText(addKeyBinding ? SPACE_BAR : getPrompt());
+    //  setText(addKeyBinding ? SPACE_BAR : getPrompt());
     setText("");
     setType(ButtonType.DANGER);
   }

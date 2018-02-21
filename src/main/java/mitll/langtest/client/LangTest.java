@@ -1160,8 +1160,10 @@ public class LangTest implements
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
-    if (keyPressHelper.getSize() > 2) {
-      logger.info("addKeyListener " + listener.getName() + " key press handler now " + keyPressHelper);
+    if (keyPressHelper.getSize() > 1) {
+      logger.info("addKeyListener " + listener.getName() + " ( " + keyPressHelper.getSize()+
+          ")" +
+          "key press handler now " + keyPressHelper);
     }
   }
 

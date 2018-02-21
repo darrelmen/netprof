@@ -1476,7 +1476,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       }
     }
     if (isCurrentReq(currentReq)) {
-      logger.info("getExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
+      if (DEBUG) logger.info("getExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
       reallyGetExercises(visibleIDs, currentReq);
     } else {
       logger.info("getExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
@@ -1491,7 +1491,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getExercises(Collection, int)
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
     }
     //long then = System.currentTimeMillis();

@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.list.ListInterface;
@@ -110,7 +111,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param instance
    * @param exerciseList
    * @param prompt
-   * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
+   * @see StatsPracticePanel#StatsPracticePanel
    */
   BootstrapExercisePanel(final T e,
                          final ExerciseController controller,
@@ -312,7 +313,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
            */
           @Override
           protected void gotLeftArrow() {
-            //logger.info("left arrow - current " + exerciseList.get)
             exerciseList.loadPrev();
           }
 
@@ -634,7 +634,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   /**
    * @see #timerCancelled
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
+   * @see StatsPracticePanel#recordingStarted
    */
   void removePlayingHighlight() {
     removePlayingHighlight(foreign);

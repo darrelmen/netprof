@@ -49,7 +49,7 @@ public class MakePhoneReport {
     //  setSessions(phoneToAvg, useSessionGran);
     new PhoneAnalysis().setSessionsWithPrune(phoneToAvg, useSessionGran);
 
-    if (DEBUG) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG && false) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
 
