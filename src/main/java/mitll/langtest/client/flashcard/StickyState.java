@@ -38,7 +38,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -59,7 +58,7 @@ class StickyState {
 
   private final Map<Integer, Boolean> exToCorrect = new HashMap<>();
   private final Map<Integer, Double> exToScore = new HashMap<>();
-  private Map<Integer, AudioAnswer> exToLatest = new LinkedHashMap<>();
+  private final Map<Integer, AudioAnswer> exToAnswer = new LinkedHashMap<>();
 
   /**
    * @param storage
@@ -89,27 +88,27 @@ class StickyState {
     storage.removeValue(CURRENT_EXERCISE);
   }
 
-  String getIncorrect() {
+  private String getIncorrect() {
     return storage.getValue(INCORRECT);
   }
 
-  String getCorrect() {
+  private String getCorrect() {
     return storage.getValue(CORRECT1);
   }
 
-  String getScore() {
+  private String getScore() {
     return storage.getValue(SCORE);
   }
 
-  void storeScore(StringBuilder builder3) {
+  private void storeScore(StringBuilder builder3) {
     storage.storeValue(SCORE, builder3.toString());
   }
 
-  void storeIncorrect(StringBuilder builder2) {
+  private void storeIncorrect(StringBuilder builder2) {
     storage.storeValue(INCORRECT, builder2.toString());
   }
 
-  void storeCorrect(StringBuilder builder) {
+  private void storeCorrect(StringBuilder builder) {
     storage.storeValue(CORRECT1, builder.toString());
   }
 
@@ -166,15 +165,15 @@ class StickyState {
     storage.removeValue(SCORE);
   }
 
-  void addScore(int id, Double score) {
+/*  void addScore(int id, Double score) {
     exToScore.put(id, score);
-  }
+  }*/
 
 
-   void reset() {
+  void reset() {
     exToCorrect.clear();
     exToScore.clear();
-    exToLatest.clear(); // why wouldn't we do that too?
+    exToAnswer.clear(); // why wouldn't we do that too?
     clearCurrent();
   }
 
@@ -203,20 +202,19 @@ class StickyState {
 
 //    setStateFeedback();
 
-    exToLatest.put(id, result);
+    exToAnswer.put(id, result);
   }
 
   protected boolean isCorrect(boolean correct, double score) {
-
     return correct;
   }
 
-
+/*
   void addCorrect(int id, Boolean score) {
     exToCorrect.put(id, score);
-  }
+  }*/
 
-  Collection<Boolean> getCorrectValues() {
+  private Collection<Boolean> getCorrectValues() {
     return exToCorrect.values();
   }
 
@@ -225,11 +223,14 @@ class StickyState {
   }
 
   Collection<AudioAnswer> getAnswers() {
-    return exToLatest.values();
+    return exToAnswer.values();
   }
 
+  void clearAnswers() {
+    exToAnswer.clear();
+  }
 
-   int getCorrectCount() {
+  int getCorrectCount() {
     int count = 0;
     for (Boolean val : getCorrectValues()) {
       if (val) count++;
@@ -237,7 +238,7 @@ class StickyState {
     return count;
   }
 
-   int getIncorrectCount() {
+  int getIncorrectCount() {
     int count = 0;
     for (Boolean val : getCorrectValues()) {
       if (!val) count++;

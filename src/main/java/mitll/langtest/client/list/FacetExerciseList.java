@@ -1491,7 +1491,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getExercises(Collection, int)
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
     }
     //long then = System.currentTimeMillis();

@@ -41,11 +41,13 @@ import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
+import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectType;
 
 import java.util.Collection;
 import java.util.Map;
@@ -60,6 +62,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   //private final Logger logger = Logger.getLogger("PracticeHelper");
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
+  private PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
   private Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
@@ -80,18 +83,24 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
    */
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice");
+    if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
+      polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
+      statsFlashcardFactory =polyglotFlashcardFactory;
+    } else {
+      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice");
+    }
+
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }
 
-  @Override
+/*  @Override
   public void onResize() {
     super.onResize();
     if (statsFlashcardFactory != null) {
       statsFlashcardFactory.onResize();
     }
-  }
+  }*/
 
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
@@ -112,7 +121,9 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
           protected void goToFirst(String searchIfAny, int exerciseID) {
             super.goToFirst(searchIfAny, exerciseID);
-            statsFlashcardFactory.setMode(mode, promptChoice);
+            if (polyglotFlashcardFactory != null) {
+              polyglotFlashcardFactory.setMode(mode, promptChoice);
+            }
             statsFlashcardFactory.setNavigation(navigation);
           }
 
@@ -159,8 +170,8 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   public void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE promptChoice) {
     this.mode = mode;
     this.promptChoice = promptChoice;
-    if (statsFlashcardFactory != null) {
-      statsFlashcardFactory.setMode(mode, promptChoice);
+    if (polyglotFlashcardFactory != null) {
+      polyglotFlashcardFactory.setMode(mode, promptChoice);
     }
   }
 

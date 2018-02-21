@@ -11,7 +11,7 @@ import mitll.langtest.client.dialog.DialogHelper;
 
 import java.util.Collections;
 
-import static mitll.langtest.client.flashcard.StatsFlashcardFactory.MIN_POLYGLOT_SCORE;
+import static mitll.langtest.client.flashcard.PolyglotFlashcardFactory.MIN_POLYGLOT_SCORE;
 
 public class PolyglotDialog {
   private static final int HSIZE = 4;

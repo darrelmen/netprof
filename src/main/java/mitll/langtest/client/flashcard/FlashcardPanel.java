@@ -126,13 +126,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   final boolean addKeyBinding;
   final ExerciseController controller;
   final ControlState controlState;
-  private   Panel mainContainer;
+  private Panel mainContainer;
   private Panel leftState;
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
   final String instance;
   final ListInterface exerciseList;
-  private   DivWidget prevNextRow;
+  private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
   protected FlashcardTimer timer;
@@ -172,14 +172,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     controlState.setStorage(new KeyStorage(controller));
 
 
-
     this.soundFeedback = soundFeedback;
 
 
-  //  addWidgets(e, controller, controlState);
+    //  addWidgets(e, controller, controlState);
   }
 
-   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
+  void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
     middleVert.getElement().setId("middle_vert_container");
 
@@ -238,12 +237,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * Worry about whether audio play is turned on at all.
+   *
    * @param controlState
    */
   private void maybePlayRef(ControlState controlState) {
     if (isAudioOn(controlState) && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
-       // logger.info("maybePlayRef : audio on, so playing ref");
+        // logger.info("maybePlayRef : audio on, so playing ref");
         playRef();
       } else {
         //    logger.info("maybePlayRef auto advance on, so not playing ref here");
@@ -635,9 +635,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     if (feedbackGroup != null) rightColumn.add(feedbackGroup);
 
     rightColumn.add(getShuffleButton(controlState));
-    rightColumn.add(autoPlay = getAutoPlayButton(controlState));
-
-
+    Button child = autoPlay = getAutoPlayButton(controlState);
+    DivWidget autoPlayContainer = new DivWidget();
+    autoPlayContainer.setWidth("100%");
+    autoPlayContainer.add(child);
+    rightColumn.add(autoPlayContainer);
   }
 
   private Button getShuffleButton(final ControlState controlState) {
@@ -913,6 +915,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * both is null in polyglot view.
+   *
    * @return
    */
   boolean selectShowFL() {
@@ -1166,7 +1169,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   protected void hideClickToFlip() {
     if (clickToFlipContainer != null) {
-    //  logger.info("hide click to flip");
+      //  logger.info("hide click to flip");
       clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
     }
   }
@@ -1174,6 +1177,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
+
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
@@ -1211,7 +1215,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #playRef()
    */
   private void playRef(String path) {
-   // logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    // logger.info("playRef ---------- " + exercise.getID() + " path " + path);
 /*
  String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
       logger.info("playRef : logException stack " + exceptionAsString);

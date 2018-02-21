@@ -69,6 +69,7 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
  * @since 10/19/15.
  */
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
+  public static final int STUDENT_WIDTH = 1070;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   /**
@@ -148,7 +149,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
-    int width = isTeacherView ? WIDTH : 1365;
+    int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
 
     if (!isPolyglot) {
       setWidth(width + "px");
