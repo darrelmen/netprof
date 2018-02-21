@@ -13,7 +13,7 @@ import java.util.*;
 public class MakePhoneReport {
   private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param phoneToScores
@@ -34,7 +34,7 @@ public class MakePhoneReport {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
     if (DEBUG) {
-      logger.warn(
+      logger.info(
           "getPhoneReport : \n\tscore " + overallScore +
               "\n\titems " + totalItems +
               "\n\tpercent " + percentOverall +
@@ -43,17 +43,17 @@ public class MakePhoneReport {
     }
 
     final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
-    if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     // set sessions on each phone stats
     //  setSessions(phoneToAvg, useSessionGran);
     new PhoneAnalysis().setSessionsWithPrune(phoneToAvg, useSessionGran);
 
-    if (DEBUG) logger.warn("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
 
-    if (DEBUG) logger.warn("getPhoneReport before sorted " + sorted);
+    if (DEBUG) logger.info("getPhoneReport before sorted " + sorted);
 
     if (sortByLatestExample) {
       phoneToWordAndScore = sortPhonesByLatest(phoneToAvg, sorted);
@@ -61,13 +61,13 @@ public class MakePhoneReport {
       sortPhonesByAvg(phoneToAvg, sorted);
     }
 
-    if (DEBUG) logger.warn("getPhoneReport sorted " + sorted.size() + " " + sorted);
+    if (DEBUG) logger.info("getPhoneReport sorted " + sorted.size() + " " + sorted);
 
     Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
     sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
 
     if (DEBUG) {
-      logger.warn("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+      logger.info("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
@@ -76,16 +76,16 @@ public class MakePhoneReport {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       Collections.sort(value);
       if (DEBUG) {
-        logger.warn("getPhoneReport phone->words for " + phone + " : " + value.size());
+        logger.info("getPhoneReport phone->words for " + phone + " : " + value.size());
         for (WordAndScore wordAndScore : value) {
-          logger.warn("getPhoneReport for " + phone + " got " + wordAndScore);
+          logger.info("getPhoneReport for " + phone + " got " + wordAndScore);
         }
       }
       phoneToWordAndScoreSorted.put(phone, value);
     }
 
     if (DEBUG) {
-      logger.warn("getPhoneReport phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
+      logger.info("getPhoneReport phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
     }
 
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);

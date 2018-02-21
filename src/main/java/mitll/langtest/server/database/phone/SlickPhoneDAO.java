@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -54,6 +55,7 @@ import java.util.*;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
+
   private final PhoneDAOWrapper dao;
 
   private static final boolean DEBUG = false;
@@ -115,16 +117,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * @param aPhone
-   * @return
-   * @see RecordWordAndPhone#recordWordAndPhoneInfo(long, Map)
-   */
-/*  @Override
-  public boolean addPhone(Phone aPhone) {
-    return dao.insert(toSlick(aPhone)) > 0;
-  }*/
-
-  /**
    * @param userid
    * @param exids
    * @param language
@@ -137,14 +129,17 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        Collection<Integer> exids,
                                        String language,
                                        Project project) {
-    PhoneReport report = getPhoneReport(dao.getPhoneReportByExercises(userid, exids), false, true,
+    Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids);
+    PhoneReport report = getPhoneReport(phoneReportByExercises, false, true,
         userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser " +
         userid +
         "\n\texids " +
         exids.size() +
-        " report : \n\t" + report);
+        "\n\treport " + report +
+        "\n\tphone reports " + phoneReportByExercises.size()
+    );
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
@@ -199,7 +194,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * TODO : don't use idToRef map
    * <p>
    * Why get native audio here?
-   *
+   * <p>
    * TODO : add transcript in smarter way!
    *
    * @param addTranscript       true if going to analysis tab
@@ -221,9 +216,18 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     boolean useSessionGran = project.getKind() == ProjectType.POLYGLOT;
     String language = project.getLanguage();
 
-    if (DEBUG) {
-      logger.info("getPhoneReport user " + userid + " lang " + language + " project " + project.getID() + " add transcript " + addTranscript + " sort by latest " + sortByLatestExample);
-      logger.info("getPhoneReport phoneReportByResult " + phoneReportByResult.size());
+    if (DEBUG || true) {
+      logger.info("getPhoneReport" +
+          "\n\tuser    " + userid +
+          "\n\tlang    " + language +
+          "\n\tproject " + project.getID() +
+          "\n\tadd transcript " + addTranscript +
+          "\n\tsort by latest " + sortByLatestExample +
+          "\n\tphoneReportByResult " + phoneReportByResult.size());
+
+      List<SlickPhoneReport> sample = new ArrayList<>(phoneReportByResult);
+      int n = Math.min(sample.size(), 10);
+      for (int i = 0; i < n; i++) logger.info("\te.g. " + sample.get(i));
     }
 
     float totalScore = 0;
@@ -284,7 +288,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       //  }
     }
 
-    if (DEBUG) logger.info("getPhoneReport added " + num + " transcripts");
+    if (DEBUG || true) logger.info("getPhoneReport added " + num + " transcripts");
 
     return new MakePhoneReport()
         .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample, useSessionGran);
@@ -298,6 +302,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     dao.removeForResult(resultid);
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
+   */
   public int getNumRows() {
     return dao.getNumRows();
   }

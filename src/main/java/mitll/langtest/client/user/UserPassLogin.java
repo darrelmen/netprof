@@ -66,10 +66,11 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
   //  private final Logger logger = Logger.getLogger("UserPassLogin");
+
   public static final String USER_NAME_BOX = "UserNameBox";
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
-  // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://netprof.ll.mit.edu/ios/'>netprof for your iPad/iPhone" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final int LEFT_SIDE_WIDTH = 453;
@@ -174,7 +175,10 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    * @see #UserPassLogin(PropertyHandler, UserManager, EventRegistration, StartupInfo)
    */
   private void showSuggestApp() {
-    List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_3);
+    List<String> messages = Arrays.asList(
+        IPAD_LINE_1,
+        IPAD_LINE_2,
+        IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
         INSTALL_APP,
         messages,

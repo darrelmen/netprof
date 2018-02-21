@@ -60,6 +60,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * All in support of tethered iOS app.
@@ -118,6 +119,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String LANGUAGE = "language";
   public static final String FULL = "full";
   private static final String WIDGET_TYPE = "widgetType";
+  public static final boolean REPORT_ON_HEADERS = false;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -200,14 +202,14 @@ public class ScoreServlet extends DatabaseServlet {
 
       String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
 
-      logger.debug("ScoreServlet.doGet (" + language + "):" +
-          "\n\tRequest '" + queryString + "'" +
-          "\n\tprojid " + projid +
-          "\n\tpath   " + request.getPathInfo() +
-          "\n\turi    " + request.getRequestURI() +
-          "\n\turl    " + request.getRequestURL() + "  " + request.getServletPath());
+      logger.info("doGet (" + language + "):" +
+          "\n\trequest '" + queryString + "'" +
+          "\n\tprojid  " + projid +
+          "\n\tpath    " + request.getPathInfo() +
+          "\n\turi     " + request.getRequestURI() +
+          "\n\turl     " + request.getRequestURL() + "  " + request.getServletPath());
 
-      reportOnHeaders(request);
+      if (REPORT_ON_HEADERS) reportOnHeaders(request);
 
       long then = System.currentTimeMillis();
       configureResponse(response);
@@ -320,11 +322,14 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
+  private Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding", "Accept-Language", "accept", "connection"));
+
   private void reportOnHeaders(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
     Set<String> headers = new TreeSet<>();
     while (headerNames.hasMoreElements()) headers.add(headerNames.nextElement());
-    headers.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
+    List<String> collect = headers.stream().filter(name -> !notInteresting.contains(name)).collect(Collectors.toList());
+    collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
   }
 
 
@@ -346,6 +351,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * PRODUCTION instance - assume only one?
+   *
    * @param language
    * @return
    */
@@ -423,6 +429,7 @@ public class ScoreServlet extends DatabaseServlet {
     jsonObject.put(SUCCESS, Boolean.valueOf(b).toString());
   }
 */
+
   /**
    * Defaults to this year.
    *
@@ -500,7 +507,7 @@ public class ScoreServlet extends DatabaseServlet {
     UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
     Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
-    logger.debug("getPhoneReport : user " + userid + " selection " + selection + " proj " + projid);
+    logger.info("getPhoneReport : user " + userid + " selection " + selection + " proj " + projid);
     try {
       long then = System.currentTimeMillis();
 
@@ -508,7 +515,7 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
       if (now - then > 5) {
-        logger.debug("getPhoneReport :" +
+        logger.info("getPhoneReport :" +
             "\n\tuser      " + userid +
             "\n\tselection " + selection +
             "\n\tprojectID " + projectID +
@@ -626,10 +633,10 @@ public class ScoreServlet extends DatabaseServlet {
     if (requestType != null) {
       PostRequest realRequest = getPostRequest(requestType);
       if (realRequest != PostRequest.EVENT) {
-        logger.debug("doPost got request " + requestType + "/" + realRequest + " device " + deviceType + "/" + device);
+        logger.info("doPost got request " + requestType + "/" + realRequest + " device " + deviceType + "/" + device);
       }
 
-      reportOnHeaders(request);
+      if (REPORT_ON_HEADERS) reportOnHeaders(request);
 
       switch (realRequest) {
         case HASUSER:
@@ -738,8 +745,7 @@ public class ScoreServlet extends DatabaseServlet {
         //  logger.info("getGetRequest no match lcReq '" + lcReq + "' vs '" + prefix + "'");
       }
     }
-
-    logger.info("getGetRequest get req '" + lcReq + "' = " + matched);
+//    logger.info("getGetRequest get req '" + lcReq + "' = " + matched);
 
     return matched;
   }
