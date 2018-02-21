@@ -1202,9 +1202,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    */
   private void playRef(String path) {
     logger.info("playRef ---------- " + exercise.getID() + " path " + path);
-
-     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      logger.info("playRef : logException stack " + exceptionAsString);
+/*     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+      logger.info("playRef : logException stack " + exceptionAsString);*/
 
     path = getPath(path);
     final Widget textWidget = foreign;

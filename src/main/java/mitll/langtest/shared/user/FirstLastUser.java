@@ -14,7 +14,7 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
   public FirstLastUser() {
   }
 
-  public FirstLastUser(int id) {
+  FirstLastUser(int id) {
     this.id = id;
   }
 
@@ -78,6 +78,8 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
   public void setAffiliation(String affilation) {
     this.affiliation = affilation;
   }
+
+  public boolean isPoly() { return affiliation.equalsIgnoreCase("polyglot"); }
 
   public String toString() {
     return "user " + getID() + " : " + first + " " + last + " from " + getAffiliation();

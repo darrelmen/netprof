@@ -1850,7 +1850,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     PhonesChoices phoneChoices = factory.getPhoneChoices();
     for (CommonExercise exercise : result) {
       if (isStale(reqID)) {
-        logger.info("makeExercisePanels stop stale req " + reqID + " vs current " + getCurrentExerciseReq());
+        if (DEBUG_STALE) {
+          logger.info("makeExercisePanels stop stale req " + reqID + " vs current " + getCurrentExerciseReq());
+        }
         break;
       }
 

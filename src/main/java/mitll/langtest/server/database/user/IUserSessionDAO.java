@@ -35,7 +35,13 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
+import javax.servlet.http.HttpSession;
+
 public interface IUserSessionDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.database.security.NPUserSecurityManager#setSessionUserAndRemember
+   * @param user
+   */
   void add(SlickUserSession user);
 
   int getUserForSession(String sesssion);

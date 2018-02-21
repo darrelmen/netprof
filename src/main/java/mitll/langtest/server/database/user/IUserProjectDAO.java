@@ -43,7 +43,9 @@ public interface IUserProjectDAO extends IDAO {
   /**
    * @param userid
    * @param projid
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberUsersCurrentProject
+   * @see UserProjectDAO#setCurrentUserToProject
+   * @see
    */
   void add(int userid, int projid);
 

@@ -134,7 +134,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param userPassLogin
    * @see UserPassLogin#UserPassLogin
    */
-  public SignUpForm(PropertyHandler props,
+  SignUpForm(PropertyHandler props,
                     UserManager userManager,
                     EventRegistration eventRegistration,
                     UserPassDialog userPassLogin,
@@ -308,9 +308,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     affBox.addStyleName("leftTenMargin");
 
     affBox.addItem(CHOOSE_AFFILIATION);
-    for (Affiliation value : affiliations) {
-      affBox.addItem(value.getDisp());
-    }
+    affiliations.forEach(affiliation -> affBox.addItem(affiliation.getDisp()));
     affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
     return affBox;
   }

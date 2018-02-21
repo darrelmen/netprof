@@ -49,7 +49,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -81,7 +80,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
    */
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice", null);
+    statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice");
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }

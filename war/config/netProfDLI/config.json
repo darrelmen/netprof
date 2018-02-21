@@ -43,9 +43,15 @@
           "abbreviation": "OTHER",
           "displayName": "Other",
           "dataType": "affiliation"
+        },
+        {
+          "_id": 8,
+          "abbreviation": "POLYGLOT",
+          "displayName": "Polyglot",
+          "dataType": "affiliation"
         }
       ],
-      "help":"Please consult the user manual or send email to netprof-help@dliflc.edu."
+      "help": "Please consult the user manual or send email to netprof-help@dliflc.edu."
     }
   ]
 }

@@ -47,6 +47,7 @@ import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.User.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -60,14 +61,16 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.shared.user.User.Permission.*;
+
 /**
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  private static final String COURSES = " courses";
   private static final String COURSE1 = " course";
+  private static final String COURSES = COURSE1 + "s";
 
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
@@ -118,7 +121,6 @@ public class ProjectChoices {
 
   private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
- // private final Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
 
   /**
    * @see InitialUI#populateRootPanel
@@ -173,31 +175,44 @@ public class ProjectChoices {
    * Students and teachers can only see production sites.
    * Admins can see retired sites.
    * Developers can see development sites.
+   * Polyglot users can only see polyglot sites.
    *
    * @param projects
    * @return
    */
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
-    Collection<User.Permission> permissions = controller.getPermissions();
+    Collection<Permission> permissions = controller.getPermissions();
+
     boolean canRecord =
-        permissions.contains(User.Permission.RECORD_AUDIO) ||
-            permissions.contains(User.Permission.QUALITY_CONTROL) ||
-            permissions.contains(User.Permission.DEVELOP_CONTENT);
-    //  logger.info("Examining  " + projects.size() + " projects, can record = " + canRecord + " permissions " + permissions);
+        permissions.contains(RECORD_AUDIO) ||
+            permissions.contains(QUALITY_CONTROL) ||
+            permissions.contains(DEVELOP_CONTENT);
+
+    boolean isPoly = permissions.contains(POLYGLOT);
+/*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
+        "\n\tpoly " + isPoly +
+        "\n\tcan record = " + canRecord +
+        "\n\tpermissions " + permissions);*/
 
     for (SlimProject project : projects) {
-      ProjectStatus status = project.getStatus();
-
-      if (status == ProjectStatus.PRODUCTION) {
-        filtered.add(project);
+      if (isPoly) {
+        if (project.getProjectType() == ProjectType.POLYGLOT || project.hasChildren()) {
+          filtered.add(project);
+        }
       } else {
-        if (status == ProjectStatus.RETIRED) {
-          if (controller.getUserManager().isAdmin()) {
+        ProjectStatus status = project.getStatus();
+
+        if (status == ProjectStatus.PRODUCTION) {
+          filtered.add(project);
+        } else {
+          if (status == ProjectStatus.RETIRED) {
+            if (controller.getUserManager().isAdmin()) {
+              filtered.add(project);
+            }
+          } else if (canRecord) {
             filtered.add(project);
           }
-        } else if (canRecord) {
-          filtered.add(project);
         }
       }
     }
@@ -504,18 +519,18 @@ public class ProjectChoices {
       boolean hasChildren = projectForLang.hasChildren();
 
       ProjectType projectType = projectForLang.getProjectType();
-     // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
+      // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
       {
         if (hasChildren) {
           addPolyglotIcon(projectForLang, button);
         } else {
           if (projectType == ProjectType.POLYGLOT) {
-         //   logger.info("adding poly icon to " +projectForLang);
+            //   logger.info("adding poly icon to " +projectForLang);
             addPolyIcon(button);
           }
 //          else {
-            //logger.info("not adding poly icon to " +projectForLang);
-  //        }
+          //logger.info("not adding poly icon to " +projectForLang);
+          //        }
         }
       }
 
@@ -526,8 +541,7 @@ public class ProjectChoices {
       } else {
         if (!projectForLang.getCourse().isEmpty()) {
           addPopoverUsual(projectForLang, button);
-        }
-        else {
+        } else {
           addPopover(projectForLang, button);
         }
       }
@@ -552,8 +566,8 @@ public class ProjectChoices {
     boolean hasPoly = !projectForLang.getChildren()
         .stream()
         .filter(slimProject -> slimProject.getProjectType() == ProjectType.POLYGLOT).collect(Collectors.toList()).isEmpty();
-    logger.info("addPolyglotIcon : found " + projectForLang.getChildren().size() + " children  of " + projectForLang.getName() +
-        " has poly " + hasPoly);
+/*    logger.info("addPolyglotIcon : found " + projectForLang.getChildren().size() + " children  of " + projectForLang.getName() +
+        " has poly " + hasPoly);*/
     if (hasPoly) {
       addPolyIcon(container);
     }
@@ -567,11 +581,11 @@ public class ProjectChoices {
   }
 
   /**
-   * @see #getImageAnchor
    * @param name
    * @param projectForLang
    * @param isQC
    * @return
+   * @see #getImageAnchor
    */
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC) {
@@ -880,7 +894,7 @@ public class ProjectChoices {
 
   private boolean isQC() {
     UserState userState = controller.getUserState();
-    return userState.hasPermission(User.Permission.QUALITY_CONTROL) || userState.isAdmin();
+    return userState.hasPermission(QUALITY_CONTROL) || userState.isAdmin();
   }
 
   /**
@@ -915,13 +929,12 @@ public class ProjectChoices {
   }
 
   private void addProjectChoices(int nest, List<SlimProject> children) {
-    int widgetCount = contentRow.getWidgetCount();
+   // int widgetCount = contentRow.getWidgetCount();
     // logger.info("addProjectChoices " + widgetCount);
-
-    if (widgetCount == 1) {
+    if (contentRow.getWidgetCount() == 1) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      logger.warning("not adding project choices again...");
+      logger.info("not adding project choices again...");
     }
   }
 
@@ -934,29 +947,6 @@ public class ProjectChoices {
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
     return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
   }
-
-  /**
-   * @param projectid
-   * @see #getImageAnchor
-   */
-/*  private void setProjectForUser(final int projectid) {
-    projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("project exists?", caught);
-
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
-          reallySetTheProject(projectid);
-        } else {
-          lifecycleSupport.getStartupInfo();
-        }
-      }
-    });
-  }*/
 
   /**
    * @param projectid

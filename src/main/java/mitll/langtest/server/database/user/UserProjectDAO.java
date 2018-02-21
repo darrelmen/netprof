@@ -98,6 +98,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    *
    * @param userid
    * @param projid
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
    */
   @Override
   public boolean setCurrentUserToProject(int userid, int projid) {

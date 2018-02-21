@@ -134,10 +134,7 @@ public class StartupInfo implements IsSerializable {
   public String getMessage() {
     return message;
   }
-
-  public List<Affiliation> getAffiliations() {
-    return affiliations;
-  }
+  public List<Affiliation> getAffiliations() {    return affiliations;  }
 
   public String toString() {
     return "Message = '" + message + "', " + getProjects().size() + " projects.";

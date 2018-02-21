@@ -927,7 +927,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
-    if (user.isAdmin()) permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
+    if (user.isAdmin()) {
+      permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
+    }
+    if (user.isPoly()) {
+      permissionSet.add(User.Permission.POLYGLOT);
+    }
     user.setPermissions(permissionSet);
 
 //    logger.info("\ttoUser return " + user);

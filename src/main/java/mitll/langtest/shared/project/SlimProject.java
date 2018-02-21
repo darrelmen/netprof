@@ -33,8 +33,10 @@
 package mitll.langtest.shared.project;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.function.ToIntFunction;
 
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
@@ -109,10 +111,7 @@ public class SlimProject extends ProjectInfo {
   }
 
   public List<SlimProject> getChildren() {
-    children.sort((o1, o2) -> {
-      int i = Integer.compare(o1.getDisplayOrder(), o2.getDisplayOrder());
-      return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
-    });
+    children.sort(Comparator.comparingInt((ToIntFunction<SlimProject>) ProjectInfo::getDisplayOrder).thenComparing(DominoProject::getName));
     return children;
   }
 

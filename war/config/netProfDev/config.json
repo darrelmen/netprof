@@ -43,14 +43,20 @@
           "abbreviation": "OTHER",
           "displayName": "Other",
           "dataType": "affiliation"
+        },
+        {
+          "_id": 8,
+          "abbreviation": "POLYGLOT",
+          "displayName": "Polyglot",
+          "dataType": "affiliation"
         }
       ]
     }
   ],
-  "flags" : [
+  "flags": [
     {
-      "lang":"croatian",
-      "cc":"hr"
+      "lang": "croatian",
+      "cc": "hr"
     }
   ]
 }

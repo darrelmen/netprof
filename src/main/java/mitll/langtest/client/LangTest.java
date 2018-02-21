@@ -966,6 +966,10 @@ public class LangTest implements
     return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
+  /**
+   *
+   * @return
+   */
   @Override
   public Collection<User.Permission> getPermissions() {
     User current = getCurrent();

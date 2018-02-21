@@ -61,12 +61,18 @@ public class User extends MiniUser implements ReportUser {
   private boolean admin;
 
   private Kind userKind;
+
   @Deprecated
   private String nativeLang;
+
+  @Deprecated
   private String dialect;
+
   private String device;
+
   @Deprecated
   private String resetKey;
+
   private boolean hasAppPermission;
 
   private Collection<Permission> permissions;
@@ -120,7 +126,8 @@ public class User extends MiniUser implements ReportUser {
     QUALITY_CONTROL("Quality Control"), // mark defects, fix defects
     RECORD_AUDIO("Record Audio"),       // record audio
     DEVELOP_CONTENT("Develop Content"), // not sure how different from Record Audio
-    PROJECT_ADMIN("Project Admin");     // make new projects, edit via domino
+    PROJECT_ADMIN("Project Admin"),     // make new projects, edit via domino
+    POLYGLOT("Polyglot");     // only see polyglot projects
 
     String name;
 
@@ -159,7 +166,7 @@ public class User extends MiniUser implements ReportUser {
         System.currentTimeMillis(), "OTHER", true);
   }
 
-  public User(User copy) {
+/*  public User(User copy) {
     this(copy.getID(),
         copy.getUserID(), copy.getAge(),
         copy.getGender(),
@@ -179,7 +186,7 @@ public class User extends MiniUser implements ReportUser {
         copy.getTimestampMillis(),
         copy.getAffiliation(),
         copy.isHasAppPermission());
-  }
+  }*/
 
   public User(int id,
               String userID,
@@ -323,6 +330,13 @@ public class User extends MiniUser implements ReportUser {
     return permissions;
   }
 
+  /**
+   *
+   * @param permissions
+   */
+  public void setPermissions(Collection<Permission> permissions) {
+    this.permissions = permissions;
+  }
 
   /**
    * @return
@@ -332,6 +346,7 @@ public class User extends MiniUser implements ReportUser {
     return admin;
   }
 
+  @Deprecated
   public int getExperience() {
     return experience;
   }
@@ -407,9 +422,6 @@ public class User extends MiniUser implements ReportUser {
     this.dialect = dialect;
   }
 
-  public void setPermissions(Collection<Permission> permissions) {
-    this.permissions = permissions;
-  }
 
   public String getFullName() {
     return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
