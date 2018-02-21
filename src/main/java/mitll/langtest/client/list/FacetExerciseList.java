@@ -1499,7 +1499,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     CommonShell currentExercise = getCurrentExercise();
     if (currentExercise != null) {
-      requested.add(currentExercise.getID());
+      visibleIDs.add(currentExercise.getID());
     }
 
     List<CommonExercise> alreadyFetched = new ArrayList<>();
@@ -1534,7 +1534,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
                                 Collection<Integer> requested,
                                 List<CommonExercise> alreadyFetched) {
     long then = System.currentTimeMillis();
-    service.getFullExercises(currentReq, requested,
+
+    if (DEBUG) {
+      logger.info("getFullExercises" +
+          "\n\trequest   " + visibleIDs.size() + " visible ids : " + visibleIDs +
+          "\n\trequested " + requested +
+          "\n\talready   " + getIDs(alreadyFetched));
+    }
+
+    service.getFullExercises(currentReq,
+        requested,
         new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1708,22 +1717,25 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
+  /**
+   *
+   */
   private void goGetNextPage() {
     CommonShell currentSelection = pagingContainer.getCurrentSelection();
     List<CommonShell> items = pagingContainer.getItems();
     int i = items.indexOf(currentSelection);
 
     Set<Integer> toAskFor = getNextIDs(items, i, 10);
-//    logger.info("goGetNextPage toAskFor " + toAskFor.size());
+//    logger.info("goGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
     if (toAskFor.size() == 1) {
       toAskFor = getNextIDs(items, i, 20);
-      //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size());
+  //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
     }
     if (toAskFor.isEmpty()) {
-      //logger.info("already has cached total " + fetched.size());
+  //    logger.info("goGetNextPage already has cached total " + fetched.size());
     } else {
       long then = System.currentTimeMillis();
-      //logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
+ //     logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
       service.getFullExercises(-1, toAskFor,
           new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
             @Override
