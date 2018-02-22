@@ -240,6 +240,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Set<Integer> exids = new HashSet<>();
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
+    Map<String, Long> sessionToLong = new HashMap<>();
+
     int num = 0;
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       // int i = 1;
@@ -281,6 +283,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
         addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);
         num++;
+      } else {
+        getAndRememberPhoneAndScore(phoneToScores, report.phone(), report.pscore(), report.modified(),
+            getSessionTime(sessionToLong, report.device()));
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
@@ -288,7 +293,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       //  }
     }
 
-    if (DEBUG || true) logger.info("getPhoneReport added " + num + " transcripts");
+    if (DEBUG || addTranscript) logger.info("getPhoneReport added " + num + " transcripts");
 
     return new MakePhoneReport()
         .getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, exids.size(), sortByLatestExample, useSessionGran);

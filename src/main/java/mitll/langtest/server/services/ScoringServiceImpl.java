@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
@@ -39,6 +40,8 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
@@ -76,6 +79,17 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
+
+  private IEnsureAudioHelper ensureAudioHelper;
+
+  /**
+   * Sanity checks on answers and bestAudio dir
+   */
+  @Override
+  public void init() {
+    super.init();
+    ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
+  }
 
   /**
    * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...
@@ -707,10 +721,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#tellHydraServerToRefreshProject
    * @param projID should be a projid from project table...
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.project.ProjectEditForm#tellHydraServerToRefreshProject
    */
   @Override
   public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {
@@ -729,6 +743,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
     } else {
       throw getRestricted(UPDATING_PROJECT_INFO);
+    }
+  }
+
+  @Override
+  public void ensureAudio(int resultID) throws DominoSessionException {
+    int projectIDFromUser = getProjectIDFromUser();
+    List<MonitorResult> monitorResultsByID = db.getResultDAO().getMonitorResultsByID(resultID);
+    ensureAudioForAnswers(projectIDFromUser, monitorResultsByID);
+  }
+
+  private void ensureAudioForAnswers(int projectID, List<MonitorResult> resultList) {
+    String language = db.getLanguage(projectID);
+    for (MonitorResult result : resultList) {
+      String path = result.getAnswer();
+      CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
+      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language);
     }
   }
 }

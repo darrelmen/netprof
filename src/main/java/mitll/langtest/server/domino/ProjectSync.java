@@ -508,8 +508,7 @@ public class ProjectSync implements IProjectSync {
     List<ImportProjectInfo> collect = getByLanguage(lang, vocabProjects);
 
     if (collect.isEmpty()) {
-      Language language = getLanguage(lang);
-      String dominoName = language.getDominoName();
+      String dominoName = getLanguage(lang).getDominoName();
       if (!dominoName.isEmpty()) {
         logger.debug("getForLanguage trying using domino language : " + dominoName);
         collect = getByLanguage(dominoName, vocabProjects);

@@ -47,11 +47,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
-
-    boolean showRecordingFlashcard = hasModel && controller.isRecordingEnabled();
+    boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
 
     Panel widgets = showRecordingFlashcard ?
         currentFlashcard = getCurrentFlashcard(e) :

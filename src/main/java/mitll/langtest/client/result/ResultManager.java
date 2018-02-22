@@ -52,11 +52,13 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.services.ResultService;
 import mitll.langtest.client.services.ResultServiceAsync;
+import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -341,6 +343,8 @@ public class ResultManager extends PagerTable {
 */
                     cellTable.getSelectionModel().setSelected(object, true);
                   }
+
+                  ensureAudio(result.results);
                 }
               }
             });
@@ -350,6 +354,24 @@ public class ResultManager extends PagerTable {
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
+  }
+
+  private void ensureAudio(List<MonitorResult> results) {
+    ScoringServiceAsync scoringService = controller.getScoringService();
+
+    for (MonitorResult result : results) {
+      scoringService.ensureAudio(result.getUniqueID(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+
+        }
+      });
+    }
   }
 
   /**
@@ -410,7 +432,7 @@ public class ResultManager extends PagerTable {
     audioFile.setSortable(true);
 
     table.addColumn(audioFile, nameForAnswer);
-    rememberColumn(audioFile,ANSWER);
+    rememberColumn(audioFile, ANSWER);
     addResultColumn(table);
   }
 
@@ -441,7 +463,7 @@ public class ResultManager extends PagerTable {
     }
   }
 
-  private void rememberColumn( Column<?, ?> unit,String type) {
+  private void rememberColumn(Column<?, ?> unit, String type) {
     tableSortHelper.rememberColumn(unit, type);
   }
 
@@ -469,7 +491,7 @@ public class ResultManager extends PagerTable {
     };
     exercise.setSortable(true);
     table.addColumn(exercise, "Ex.");
-    rememberColumn(exercise,ID);
+    rememberColumn(exercise, ID);
   }
 
   private void addUserID(CellTable<MonitorResult> table) {
@@ -569,7 +591,7 @@ public class ResultManager extends PagerTable {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
         String device = answer.getDevice();
-        if (device.length() > 12) device = device.substring(0,12) + "...";
+        if (device.length() > 12) device = device.substring(0, 12) + "...";
         return getNoWrapContent(device);
       }
     };

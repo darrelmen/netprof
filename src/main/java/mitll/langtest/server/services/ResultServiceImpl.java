@@ -55,16 +55,6 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   private static final Logger logger = LogManager.getLogger(ResultServiceImpl.class);
 
   private static final int MAX = 30;
-  private IEnsureAudioHelper ensureAudioHelper;
-
-  /**
-   * Sanity checks on answers and bestAudio dir
-   */
-  @Override
-  public void init() {
-    super.init();
-    ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
-  }
 
   /**
    * NOTE NOTE NOTE - we skip doing ensure ogg/mp3 on files for now - since this service will likely not be
@@ -113,7 +103,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       }
       List<MonitorResult> resultList = results.subList(start, min);
 
-      ensureAudioForAnswers(projectID, resultList);
+      // have to do it on hydra!
+    //  ensureAudioForAnswers(projectID, resultList);
+
       //logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
       return new ResultAndTotal(new ArrayList<>(resultList), n, req);
     } else {
@@ -121,14 +113,6 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
-  private void ensureAudioForAnswers(int projectID, List<MonitorResult> resultList) {
-    String language = db.getLanguage(projectID);
-    for (MonitorResult result : resultList) {
-      String path = result.getAnswer();
-      CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
-      String actualPath = ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language);
-    }
-  }
 
   @Override
   public int getNumResults() throws DominoSessionException, RestrictedOperationException {

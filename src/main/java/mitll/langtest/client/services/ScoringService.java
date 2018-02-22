@@ -122,4 +122,6 @@ public interface ScoringService extends RemoteService {
   void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException;
 
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
+
+  void ensureAudio(int resultID) throws DominoSessionException;
 }

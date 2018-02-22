@@ -48,16 +48,14 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -151,6 +149,20 @@ public class Project implements IPronunciationLookup {
 
   public String getLanguage() {
     return project == null ? "No project yet" : project.language();
+  }
+
+  public Language getLanguageEnum() {
+    return project == null ? Language.UNKNOWN : getLanguageFor();
+  }
+
+  @NotNull
+  private Language getLanguageFor() {
+    try {
+      return Language.valueOf(project.language().toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.error("no known language  " + project.language());
+      return Language.UNKNOWN;
+    }
   }
 
   public boolean isEnglish() {
@@ -641,9 +653,9 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores, AudioFileHelper, int, int, String)
    * @param testAudioFile
    * @param userIDFromSessionOrDB
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores, AudioFileHelper, int, int, String)
    */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
@@ -661,7 +673,9 @@ public class Project implements IPronunciationLookup {
     }
   }
 
-  public String getName() { return project.name(); }
+  public String getName() {
+    return project.name();
+  }
 
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;

@@ -85,4 +85,6 @@ public interface ScoringServiceAsync {
   void recalcAllAlignments(AsyncCallback<Void> async);
 
   void configureAndRefresh(int projID, AsyncCallback<Void> async);
+
+  void ensureAudio(int resultID, AsyncCallback<Void> async);
 }

@@ -27,6 +27,16 @@ class HidePolyglotPanel extends PolyglotPracticePanel {
     return rightColumn;
   }
 
+  /**
+   * no comment
+   * @param firstRow
+   */
+
+  @Override
+  void addCommentBox(DivWidget firstRow) {
+
+  }
+
   String getKeyBindings() {
     return ARROW_KEY_TIP;
   }

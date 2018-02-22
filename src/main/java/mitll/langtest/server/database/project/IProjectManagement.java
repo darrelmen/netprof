@@ -40,6 +40,7 @@ import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 
@@ -76,6 +77,7 @@ public interface IProjectManagement {
 
   Project getProject(int projectid);
   Project getProjectByName(String name);
+  List<Project> getProjectByLangauge(Language name);
 
   Collection<Project> getProjects();
 

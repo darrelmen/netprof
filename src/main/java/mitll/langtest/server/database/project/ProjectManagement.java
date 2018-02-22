@@ -611,6 +611,15 @@ public class ProjectManagement implements IProjectManagement {
         .orElseGet(null);
   }
 
+  @Override
+  public List<Project> getProjectByLangauge(Language name) {
+    return idToProject
+        .values()
+        .stream()
+        .filter(project -> project.getLanguageEnum() == name)
+        .collect(Collectors.toList());
+  }
+
   /**
    * Try to deal with project set changing out from underneath us...
    *

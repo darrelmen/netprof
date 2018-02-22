@@ -78,7 +78,6 @@ public class BasePhoneDAO extends DAO {
   }
 
   /**
-   *
    * look it up in a better way
    *
    * @param phoneToScores
@@ -113,13 +112,11 @@ public class BasePhoneDAO extends DAO {
                                           int seq,
                                           float phoneScore,
                                           String language) {
-    Long sessionTime = getSessionTime(sessionToLong, device);
-
-    PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, sessionTime);
+    PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, getSessionTime(sessionToLong, device));
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
 
-   // String filePath = getFilePath(audioAnswer, language);
+    // String filePath = getFilePath(audioAnswer, language);
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
         phoneScore,
@@ -138,12 +135,12 @@ public class BasePhoneDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    * @param sessionToLong
    * @param device
    * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {
@@ -174,16 +171,13 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see #getAndRememberWordAndScore
    */
-  private PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
-                                                    String phone,
-                                                    float phoneScore,
-                                                    long resultTime,
-                                                    long sessionStart) {
+  PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
+                                            String phone,
+                                            float phoneScore,
+                                            long resultTime,
+                                            long sessionStart) {
     PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime, sessionStart);
-    {
-      List<PhoneAndScore> scores = phoneToScores.computeIfAbsent(phone, k -> new ArrayList<>());
-      scores.add(phoneAndScore);
-    }
+    phoneToScores.computeIfAbsent(phone, k -> new ArrayList<>()).add(phoneAndScore);
     return phoneAndScore;
   }
 

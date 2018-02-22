@@ -44,7 +44,6 @@ import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -58,18 +57,15 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/10/14.
- * TODOx : store state -- how many items have been done, where are we in the list
- * TODOx : so we can skip around in the list...? if get to end - get score of all the ones we've answered.
+ * stores state -- how many items have been done, where are we in the list
+ * so we can skip around in the list...? if get to end - get score of all the ones we've answered.
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
-    implements //RequiresResize,
-    FlashcardContainer {
+    implements FlashcardContainer {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
-
-  private static final boolean DEBUG = false;
 
   private static final boolean ADD_KEY_BINDING = true;
 
@@ -90,6 +86,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
+  //  private static final boolean DEBUG = false;
+
   /**
    * @param controller
    * @param exerciseList
@@ -102,7 +100,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     super(controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
-    //  this.ul = ul;
+
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<L>() {
         /**
@@ -126,13 +124,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         return (selectionID.isEmpty() ? "" : selectionID + "_") + super.getKey(name); // in the context of this selection
       }
     };
-//    isPolyglot = isPolyglot(controller);
 
     sticky = getSticky();
     controlState.setStorage(storage);
     // logger.info("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
-
-//    logger.info("is poly glot " + isPolyglot);
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
@@ -153,11 +148,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
-
-    boolean showRecordingFlashcard = hasModel && controller.isRecordingEnabled();
+    boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
 
     Panel widgets = showRecordingFlashcard ?
         currentFlashcard = new StatsPracticePanel<L, T>(this,
@@ -175,6 +166,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     return widgets;
+  }
+
+  boolean shouldShowRecordingFlashcard() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
+    return hasModel && controller.isRecordingEnabled();
   }
 
   FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
@@ -240,23 +237,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
     int currentExerciseID = sticky.getCurrentExerciseID();
 //logger.info("startOver : current " + currentExerciseID + " = " + statsFlashcardFactory.mode);
-
     if (currentExerciseID != -1 && currentExerciseID != lastID) {
       exerciseList.loadExercise(currentExerciseID);
     } else {
       reallyStartOver();
     }
-
-    /*    if (isPolyglot(controller)) {
-     *//*       if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
-        stopTimedRun();
-      } else {
-        stopTimedRun();
-       // startTimedRun();
-      }*//*
-
-      stopTimedRun();
-    }*/
   }
 
   private void reallyStartOver() {

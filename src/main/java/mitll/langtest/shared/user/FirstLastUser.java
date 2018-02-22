@@ -79,7 +79,7 @@ public class FirstLastUser implements HasID, Comparable<HasID> {
     this.affiliation = affilation;
   }
 
-  public boolean isPoly() { return affiliation.equalsIgnoreCase("polyglot"); }
+  public boolean isPoly() { return affiliation.toLowerCase().startsWith("poly"); }
 
   public String toString() {
     return "user " + getID() + " : " + first + " " + last + " from " + getAffiliation();

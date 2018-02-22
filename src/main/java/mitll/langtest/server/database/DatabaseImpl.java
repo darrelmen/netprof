@@ -221,6 +221,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
     initializeDAOs(pathHelper, dominoUserDAO);
+
+    dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
+    dominoUserDAO.setProjectManagement(getProjectManagement());
     {
       long now = System.currentTimeMillis();
 

@@ -55,5 +55,4 @@ public class ResultAndTotal implements IsSerializable {
     this.numTotal = n;
     this.req = req;
   }
-
 }

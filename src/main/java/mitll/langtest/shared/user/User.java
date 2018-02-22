@@ -33,6 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
@@ -127,6 +128,9 @@ public class User extends MiniUser implements ReportUser {
     RECORD_AUDIO("Record Audio"),       // record audio
     DEVELOP_CONTENT("Develop Content"), // not sure how different from Record Audio
     PROJECT_ADMIN("Project Admin"),     // make new projects, edit via domino
+    /**
+     * @see DominoUserDAOImpl#toUser
+     */
     POLYGLOT("Polyglot");     // only see polyglot projects
 
     String name;

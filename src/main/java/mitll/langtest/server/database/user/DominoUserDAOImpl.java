@@ -42,13 +42,17 @@ import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
@@ -133,11 +137,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Ignite ignite = null;
 
   private JSONSerializer serializer = null;
+  private IUserProjectDAO userProjectDAO;
 
+  private IProjectManagement projectManagement;
 
   /**
    * @param database
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param userProjectDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
@@ -437,6 +444,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * Need a group - just use the first one.
    *
    * @return
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
+   * @see #forgotPassword
    */
   @NotNull
   public Group getGroup() {
@@ -759,10 +768,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return delegate.getDBUser(userID);
   }
 
-  private User getUser(DBUser dominoUser) {
-    return dominoUser == null ? null : toUser(dominoUser);
-  }
-
   /**
    * @param id
    * @return
@@ -770,6 +775,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public User getByID(int id) {
     return getUser(lookupUser(id));
+  }
+
+  private User getUser(DBUser dominoUser) {
+    return dominoUser == null ? null : toUser(dominoUser);
   }
 
   @Override
@@ -930,13 +939,71 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (user.isAdmin()) {
       permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     }
+
     if (user.isPoly()) {
       permissionSet.add(User.Permission.POLYGLOT);
+
+      if (userProjectDAO.mostRecentByUser(user.getID()) == -1) {  // none yet...
+        makeDefaultProjectAssignment(dominoUser, user.getID());
+      }
     }
     user.setPermissions(permissionSet);
 
 //    logger.info("\ttoUser return " + user);
     return user;
+  }
+
+  private void makeDefaultProjectAssignment(DBUser dominoUser, int id) {
+    Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
+    if (!secondaryGroups.isEmpty()) {
+      Group next = secondaryGroups.iterator().next();
+      Language languageMatchingGroup = getLanguageMatchingGroup(next);
+      if (languageMatchingGroup != Language.UNKNOWN) {
+        List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
+
+        List<Project> collect = projectByLangauge.stream().filter(project -> project.getKind() == ProjectType.POLYGLOT).collect(Collectors.toList());
+
+        if (!collect.isEmpty()) {
+          if (collect.size() > 1) {
+            logger.info("found multiple polyglot projects ");
+          }
+          int projID = collect.iterator().next().getID();
+          userProjectDAO.setCurrentUserToProject(id, projID);
+          logger.info("makeDefaultProjectAssignment : match " + next + " to project " + projID);
+        }
+        else {
+          logger.warn("no polyglot project for " + languageMatchingGroup);
+        }
+      } else {
+        logger.warn("no language matching group " + next);
+      }
+    } else logger.info("no groups for user id " + id);
+  }
+
+  private Language getLanguageMatchingGroup(Group next) {
+    logger.info("found secondary " + next);
+    String name = next.getName();
+    Language language = getLanguage(name);
+    if (language == Language.UNKNOWN) {
+      List<Language> languages = Arrays.asList(Language.values());
+      List<Language> matches = languages.stream()
+          .filter(language1 -> language1.getDominoName().equalsIgnoreCase(name))
+          .collect(Collectors.toList());
+      if (!matches.isEmpty()) {
+        language = matches.iterator().next();
+      }
+    }
+    return language;
+  }
+
+  private Language getLanguage(String lang) {
+    Language language = Language.UNKNOWN;
+    try {
+      language = Language.valueOf(lang.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.error("unknown language " + lang);
+    }
+    return language;
   }
 
   /**
@@ -1488,5 +1555,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public DBUser getDominoAdminUser() {
     return dominoAdminUser;
+  }
+
+  public void setUserProjectDAO(IUserProjectDAO userProjectDAO) {
+    this.userProjectDAO = userProjectDAO;
+  }
+
+  public void setProjectManagement(IProjectManagement projectManagement) {
+    this.projectManagement = projectManagement;
   }
 }
