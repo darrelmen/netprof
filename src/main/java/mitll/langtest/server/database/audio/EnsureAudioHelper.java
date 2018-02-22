@@ -212,7 +212,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
+    String title   = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? UNKNOWN : commonShell.getEnglish();
 
     if (audioType.isContext() && !noExerciseYet) {

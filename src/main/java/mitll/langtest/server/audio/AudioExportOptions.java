@@ -7,7 +7,7 @@ public class AudioExportOptions {
   private boolean justMale = false;
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
-  private boolean allContext = false;
+//  private boolean allContext = false;
   private boolean isUserList = false;
   private boolean skip = false;
   private boolean hasProjectSpecificAudio = false;
@@ -60,17 +60,19 @@ public class AudioExportOptions {
   }
 
 
+/*
   public boolean isAllContext() {
     return allContext;
   }
+*/
 
   /**
-   * @param justContext
+   * @paramx justContext
    * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
    */
-  public void setAllContext(boolean justContext) {
+/*  public void setAllContext(boolean justContext) {
     this.allContext = justContext;
-  }
+  }*/
 
   public boolean isHasProjectSpecificAudio() {
     return hasProjectSpecificAudio;
@@ -87,14 +89,14 @@ public class AudioExportOptions {
   }
 
   public String getInfo() {
-    if (isAllContext()) {
-      return "";
-    } else {
+//    if (isAllContext()) {
+//      return "";
+//    } else {
       return skip || isUserList ?
           "" :
           "_" + (justMale ? "male" : "female") + "_" +
               (justRegularSpeed ? "regular" : "slow") + "_" +
               (justContext ? "context" : "vocab");
-    }
+//    }
   }
 }

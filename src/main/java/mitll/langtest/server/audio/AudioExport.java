@@ -90,7 +90,7 @@ public class AudioExport {
                        AudioExportOptions options,
                        boolean isEnglish) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState, isEnglish);
-   // boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
+    // boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
     // logger.info("writeZip skip audio = " + skipAudio);
     writeToStream(copy,
         getPrefix(typeToSection, typeOrder),
@@ -271,26 +271,32 @@ public class AudioExport {
     long then = System.currentTimeMillis();
 
     //logger.info("writeFolderContents overall name " + overallName);
-    if (options.isAllContext()) {
-      overallName += "_allContextAudio";
-    }
+//    if (options.isAllContext()) {
+//      overallName += "_allContextAudio";
+//    }
     //logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
     // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
 
-    // get male and female majority users - map of user->childCount of recordings for this exercise
+    // get prefMale and prefFemale majority users - map of user->childCount of recordings for this exercise
     Map<MiniUser, Integer> maleToCount = new HashMap<>();
     Map<MiniUser, Integer> femaleToCount = new HashMap<>();
 
     // attach audio
 //    int numAttach = attachAudio(toWrite, audioDAO, language, hasProjectSpecificAudio);
 
-    boolean justContext = options.isJustContext() || options.isAllContext();
-    if (!justContext) {
+    boolean justContext = options.isJustContext();// || options.isAllContext();
+    MiniUser majorityUser = null;
+    if (justContext) {
+      //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
+      //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
+      //populateGenderToCount(contextEx, maleToCount, femaleToCount);
+    } else {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
+      majorityUser = options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
     }
-    // find the male and female with most recordings for this exercise
-    MiniUser male = justContext ? null : getMaxUser(maleToCount);
-    MiniUser female = justContext ? null : getMaxUser(femaleToCount);
+    // find the pref Male and pref Female with most recordings for this exercise set
+//    MiniUser prefMale   = getMaxUser(maleToCount);
+//    MiniUser prefFemale = getMaxUser(femaleToCount);
 
     AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
 
@@ -301,22 +307,21 @@ public class AudioExport {
     for (CommonExercise ex : toWrite) {
       boolean someAudio = false;
 
-      // write male/female fast/slow
+      // write male or female, reg or slow
       if (justContext) {
         someAudio = someAudio ||
             copyContextAudioBothGenders(zOut, overallName, isEnglish, countryCode,
                 audioConversion, names, ex, options.isJustMale(), language);
-        if (options.isAllContext()) {
+/*        if (options.isAllContext()) {
           someAudio = someAudio || copyContextAudioBothGenders(zOut, overallName, isEnglish, countryCode,
               audioConversion, names, ex, !options.isJustMale(), language);
-        }
+        }*/
         if (!someAudio && numMissing < 20) {
           logger.warn("writeFolder : no context audio for exercise " + ex.getID() + " in " + ex.getAudioAttributes().size() + " attributes");
         }
         // if (someAudio) logger.info("found context for " + ex.getID());
 
       } else {
-        MiniUser majorityUser = options.isJustMale() ? male : female;
         String speed = options.isJustRegularSpeed() ? AudioAttribute.REGULAR : AudioAttribute.SLOW;
 
         if (options.isUserList()) {
@@ -327,6 +332,7 @@ public class AudioExport {
           } else {
             logger.info("writeFolder : no   male audio for " + ex.getID());
           }
+
           audioAttribute = getLatest(ex, false);
           if (audioAttribute != null) {
             copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
@@ -420,6 +426,20 @@ public class AudioExport {
     return audioConversion.getMP3ForWav(s);
   }
 
+  /**
+   * TODO : Only regular speed audio for context, take from first sentence if multiple, for now
+   * @param zOut
+   * @param overallName
+   * @param isEnglish
+   * @param countryCode
+   * @param audioConversion
+   * @param names
+   * @param ex
+   * @param justMale
+   * @param language
+   * @return
+   * @throws IOException
+   */
   private boolean copyContextAudioBothGenders(ZipOutputStream zOut,
                                               String overallName,
                                               boolean isEnglish,
@@ -427,10 +447,11 @@ public class AudioExport {
                                               AudioConversion audioConversion,
                                               Set<String> names,
                                               CommonExercise ex,
-                                              boolean justMale, String language) throws IOException {
+                                              boolean justMale,
+                                              String language) throws IOException {
     boolean someAudio = false;
 
-    AudioAttribute latestContext = ex.getLatestContext(justMale);
+    AudioAttribute latestContext = ex.getLatestContext(justMale);  // likely always be empty?
 
     if (latestContext == null) {
       List<CommonExercise> directlyRelated = ex.getDirectlyRelated();
@@ -439,8 +460,7 @@ public class AudioExport {
       }
     }
     if (latestContext != null) {
-      copyContextAudio(zOut, overallName, isEnglish, audioConversion, names, ex, latestContext, countryCode,
-          language);
+      copyContextAudio(zOut, overallName, isEnglish, audioConversion, names, ex, latestContext, countryCode, language);
       someAudio = true;
     }
     return someAudio;
@@ -491,6 +511,7 @@ public class AudioExport {
     String speed = latestContext.getSpeed();
     String folder = overallName + File.separator;
     Map<String, String> unitToValue = ex.getUnitToValue();
+
     String name;
 
     int id = ex.getID();
@@ -501,9 +522,7 @@ public class AudioExport {
       name = buildFileName(folder, countryCode, unitToValue, id);
     }
 
-    String mp3File = getMP3(audioConversion, latestContext, language);
-
-    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext, ex.getID(), mp3File);
+    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext, id, getMP3(audioConversion, latestContext, language));
   }
 
   @NotNull
@@ -607,7 +626,7 @@ public class AudioExport {
       name = name.replaceAll(" ", "_");
       name += MP3;
 
-  //    logger.debug("copyAudioAtPath : mp3 name is " + name);
+      //    logger.debug("copyAudioAtPath : mp3 name is " + name);
       if (add) {
         addZipEntry(zOut, mp3, name);
       } else {

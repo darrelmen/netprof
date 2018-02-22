@@ -177,7 +177,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
 
-    downloadHelper = new DownloadHelper(controller);
+    downloadHelper = new DownloadHelper();
 
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");

@@ -41,7 +41,7 @@ public class UserMenu {
   private static final String STATUS_REPORT_SENT = "Status report sent";
   private static final String MANAGE_USERS = "Manage Users";
   private static final String EVENTS = "Events";
-  private static final String DOWNLOAD_CONTEXT = "Download Context";
+ // private static final String DOWNLOAD_CONTEXT = "Download Context";
   private static final String SEND_REPORT = "Send Report to You";
   private static final String REPORT_LIST = "Weekly Report List";
 
@@ -99,8 +99,8 @@ public class UserMenu {
     choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle(EVENTS, new EventsClickHandler()));
-    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Female", new DownloadContentsClickHandler(menu,false)));
-    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Male", new DownloadContentsClickHandler(menu,true)));
+/*    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Female", new DownloadContentsClickHandler(menu,false)));
+    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Male", new DownloadContentsClickHandler(menu,true)));*/
     return choices;
   }
 
@@ -206,15 +206,15 @@ public class UserMenu {
     }
   }
 
-  private class DownloadContentsClickHandler implements ClickHandler {
+ /* private class DownloadContentsClickHandler implements ClickHandler {
     Widget menu;
     boolean isMale;
 
-    /**
+    *//**
      *
-     * @param menu
-     * @param isMale
-     */
+     * @paramx menu
+     * @paramx isMale
+     *//*
     public DownloadContentsClickHandler(Widget menu, boolean isMale) {
       this.menu = menu;
       this.isMale = isMale;
@@ -233,7 +233,7 @@ public class UserMenu {
       });
     }
   }
-
+*/
   private class ResultsClickHandler implements ClickHandler {
     final EventRegistration outer = lifecycleSupport;
 

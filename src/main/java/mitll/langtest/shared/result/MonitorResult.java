@@ -62,8 +62,6 @@ public class MonitorResult implements IsSerializable, UserAndTime {
 
   private int uniqueID;
   private int userid;
-//  @Deprecated
-//  private String oldExID;
   private int exid;
 
   private String foreignText = "";
@@ -85,8 +83,6 @@ public class MonitorResult implements IsSerializable, UserAndTime {
   private Map<String, String> unitToValue;
 
   private transient String deviceType;
-  private transient String simpleDevice;
-  private transient String scoreJSON;
 
   public MonitorResult() {
   }
@@ -94,7 +90,6 @@ public class MonitorResult implements IsSerializable, UserAndTime {
   /**
    * @param uniqueID
    * @param userid
-   * @param exid
    * @param answer
    * @param valid
    * @param timestamp
@@ -109,13 +104,13 @@ public class MonitorResult implements IsSerializable, UserAndTime {
    * @param exid
    * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
-  public MonitorResult(int uniqueID, int userid, String oldExID, String answer,
+  public MonitorResult(int uniqueID, int userid, String answer,
                        boolean valid, long timestamp,
                        AudioType audioType, long durationInMillis,
                        boolean correct, float pronScore, String device,
                        long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
                        String validity,
-                       String deviceType, String simpleDevice, String scoreJSON,
+                       String deviceType,
                        String transcript, int exid) {
     this.uniqueID = uniqueID;
     this.userid = userid;
@@ -134,8 +129,8 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     this.validity = validity;
     this.snr = dynamicRange;
     this.deviceType = deviceType;
-    this.simpleDevice = simpleDevice;
-    this.scoreJSON = scoreJSON;
+//    String simpleDevice1 = simpleDevice;
+//    String scoreJSON1 = scoreJSON;
     this.foreignText = transcript;
     this.exid = exid;
   }

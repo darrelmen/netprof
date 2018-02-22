@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
 
@@ -259,7 +260,7 @@ public class AudioExercise extends ExerciseShell {
     long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
-      if (audioAttribute.getAudioType().isContext() &&
+      if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
           ) {
         if (audioAttribute.getTimestamp() >= latestTime) {

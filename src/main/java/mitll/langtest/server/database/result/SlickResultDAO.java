@@ -201,7 +201,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
     return new MonitorResult(slick.id(),
         slick.userid(),
-        "",
         getRelativePath(slick),
         slick.valid(),
         slick.modified().getTime(),
@@ -216,8 +215,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.dynamicrange(),
         slick.validity(),
         slick.devicetype(),
-        simpleDevice,
-        "",
         slick.transcript(),
         slick.exid());
   }

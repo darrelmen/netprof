@@ -93,15 +93,15 @@ public class DownloadServlet extends DatabaseServlet {
   /**
    * @see #getAudioExportOptions
    */
-  private static final String ALLCONTEXT = "allcontext";
+//  private static final String ALLCONTEXT = "allcontext";
   private static final String LISTS = "Lists=[";
 
   private static final String REGEXAMPERSAND = "&";
 
   private static final String AMPERSAND = DownloadHelper.AMPERSAND;//"___AMPERSAND___";
   private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
-  public static final String RESULTS_XLSX = "results.xlsx";
-  public static final String EVENTS_XLSX = "events.xlsx";
+  private static final String RESULTS_XLSX = "results.xlsx";
+  private static final String EVENTS_XLSX = "events.xlsx";
 
   /**
    * This is getting complicated.
@@ -244,7 +244,7 @@ public class DownloadServlet extends DatabaseServlet {
       if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
       else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
-      else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
+      //else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
         logger.info("getAudioExportOptions : got unexpected arg '" + arg + "'");
       }
@@ -280,7 +280,7 @@ public class DownloadServlet extends DatabaseServlet {
     AudioExportOptions audioExportOptions =
         getAudioExportOptions(split1, db.getProject(projid).hasProjectSpecificAudio());
 
-    audioExportOptions.setSkip(typeToSection.isEmpty() && !audioExportOptions.isAllContext());
+    audioExportOptions.setSkip(typeToSection.isEmpty());// && !audioExportOptions.isAllContext());
 
     {
       String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);

@@ -34,7 +34,6 @@ package mitll.langtest.client.download;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -46,7 +45,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
@@ -60,19 +58,19 @@ public class DownloadHelper implements IShowStatus {
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
-  private static final String ALLCONTEXT = "allcontext";
+  //private static final String ALLCONTEXT = "allcontext";
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
   private static final String CONTEXT_SENTENCES = "Context Sentences";
-  public static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
+  private static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
   private static final String GENDER = "Gender";
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
-  private SpeedChoices speedChoices;
+  private final SpeedChoices speedChoices;
 
-  public DownloadHelper(ExerciseController controller) {
+  public DownloadHelper() {
     this.speedChoices = new SpeedChoices(this, false);
   }
 
@@ -85,13 +83,14 @@ public class DownloadHelper implements IShowStatus {
     this.typeOrder = typeOrder;
   }
 
+/*
   public void downloadContext(String host, boolean isMale) {
     String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&" +
         ALLCONTEXT + "=true" +
         "&" +
         "male=" + isMale;
     new DownloadIFrame(urlForDownload);
-  }
+  }*/
 
   private final Heading status1 = new Heading(4, "");
   private final Heading status2 = new Heading(4, "");

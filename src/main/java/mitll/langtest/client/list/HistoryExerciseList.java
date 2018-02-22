@@ -422,7 +422,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   void maybeSwitchProject(SelectionState selectionState, int currentProject) {
     int project = selectionState.getProject();
     //int currentProject = projectStartupInfo.getProjectid();
- //   logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
+    //   logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
     if (project != currentProject) {
       if (project > DEFAULT_PROJECT_ID) {
         logger.info("onValueChange project from state " + project + " != " + currentProject);
@@ -447,7 +447,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
           "'");
     }
 
-   // String search = selectionState.getSearch();
+    // String search = selectionState.getSearch();
     // logger.info("restoreUIState search box should be "+search);
     setTypeAheadText(selectionState.getSearch());
   }
@@ -471,7 +471,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                              boolean onlyUninspected,
                              int exerciseID) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-    logger.info("HistoryExerciseList.loadExercises : looking for " +
+    if (DEBUG) logger.info("HistoryExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
   }
@@ -527,7 +527,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
-        if (DEBUG)  logger.info("loadExercisesUsingPrefix Not doing anything as response to request " + request + "\n\tfor exercise " + exerciseID);
+        if (DEBUG)
+          logger.info("loadExercisesUsingPrefix Not doing anything as response to request " + request + "\n\tfor exercise " + exerciseID);
       }
     }
   }

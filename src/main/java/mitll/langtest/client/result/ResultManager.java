@@ -74,6 +74,7 @@ import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
  */
 public class ResultManager extends PagerTable {
   public static final int TOP = 56;
+  public static final String DOWNLOAD_EXCEL = "Download Excel";
   private final Logger logger = Logger.getLogger("ResultManager");
 
   private static final String YES = "Yes";
@@ -182,7 +183,7 @@ public class ResultManager extends PagerTable {
 
   @Override
   protected SafeHtml getURL2() {
-    return getAnchorHTML("downloadResults", "Download Excel");
+    return getAnchorHTML("downloadResults", DOWNLOAD_EXCEL);
   }
 
   /**

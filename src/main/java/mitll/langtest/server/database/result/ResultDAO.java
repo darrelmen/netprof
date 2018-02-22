@@ -36,7 +36,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.HasID;
@@ -642,12 +641,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       }
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
-          exid,
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
           audioType, dur, correct, pronScore, device, processDur, roundTripDur, rs.getBoolean(WITH_FLASH),
-          snr, validity, dtype, simpleDevice, json, "", -1);
+          snr, validity, dtype, "", -1);
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);
