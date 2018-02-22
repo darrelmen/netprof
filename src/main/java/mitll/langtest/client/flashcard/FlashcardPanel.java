@@ -614,18 +614,27 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getThreePartContent(ControlState, Panel, DivWidget, DivWidget)
    */
-  private Panel getRightColumn(final ControlState controlState) {
+   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
     rightColumn.add(getAudioGroup(controlState));
     addControlsBelowAudio(controlState, rightColumn);
 
-    Widget child = new HTML(ARROW_KEY_TIP);
-    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
-    child.setWidth(KEY_PRESS_WIDTH + "px");
-    rightColumn.add(child);
+    rightColumn.add(getKeyBinding());
 
     return rightColumn;
+  }
+
+  @NotNull
+   Widget getKeyBinding() {
+    Widget child = new HTML(getKeyBindings());
+    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    child.setWidth(KEY_PRESS_WIDTH + "px");
+    return child;
+  }
+
+  String getKeyBindings() {
+    return ARROW_KEY_TIP;
   }
 
   protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {

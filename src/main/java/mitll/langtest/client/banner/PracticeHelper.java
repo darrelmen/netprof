@@ -40,6 +40,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
@@ -48,6 +49,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.Map;
@@ -84,8 +86,14 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
-      polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
-      statsFlashcardFactory =polyglotFlashcardFactory;
+      Collection<User.Permission> permissions = controller.getPermissions();
+      if (permissions.size() == 1 && permissions.iterator().next() == User.Permission.POLYGLOT) {
+        polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "practice");
+
+      } else {
+        polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
+      }
+      statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
       statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice");
     }

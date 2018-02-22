@@ -54,7 +54,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
 
-  public PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory, ControlState controlState, ExerciseController controller, MySoundFeedback soundFeedback, PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState, ListInterface exerciseListToUse) {
+  public PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
+                               ControlState controlState, ExerciseController controller, MySoundFeedback soundFeedback, PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState, ListInterface exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
 
@@ -92,9 +93,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
     speedChoices = new SpeedChoices(sticky.getStorage(), getOnSpeedChoiceMade(), true);
-    // logger.info("speedChoices " + speedChoices);
     rightColumn.add(speedChoices.getSpeedChoices());
-
   }
 
   @Override

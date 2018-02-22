@@ -30,7 +30,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   private long roundTimeLeftMillis = -1;
   private long sessionStartMillis = 0;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-  private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
+  PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
 
   public PolyglotFlashcardFactory(ExerciseController controller, ListInterface exerciseList, String instance) {
     super(controller, exerciseList, instance);
@@ -54,14 +54,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     boolean showRecordingFlashcard = hasModel && controller.isRecordingEnabled();
 
     Panel widgets = showRecordingFlashcard ?
-        currentFlashcard = new PolyglotPracticePanel(this,
-            controlState,
-            controller,
-            soundFeedback,
-            prompt,
-            e.getCommonAnnotatable(),
-            sticky,
-            exerciseList) :
+        currentFlashcard = getCurrentFlashcard(e) :
         getNoRecordFlashcardPanel(e.getCommonAnnotatable());
     if (!showRecordingFlashcard) {
 //      logger.info("getExercisePanel no recording ");
@@ -69,6 +62,18 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
 
     return widgets;
+  }
+
+  @NotNull
+  protected PolyglotPracticePanel getCurrentFlashcard(T e) {
+    return new PolyglotPracticePanel(this,
+        controlState,
+        controller,
+        soundFeedback,
+        prompt,
+        e.getCommonAnnotatable(),
+        sticky,
+        exerciseList);
   }
 
   @Override

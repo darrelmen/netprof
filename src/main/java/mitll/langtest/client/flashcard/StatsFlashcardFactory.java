@@ -69,17 +69,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     FlashcardContainer {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-
   private static final boolean DEBUG = false;
 
   private static final boolean ADD_KEY_BINDING = true;
-  /**
-   * @seex StatsFlashcardFactory.StatsPracticePanel#getRepeatButton
-   */
-//  private static final String GO_BACK = "Go back";
-  private static final String N_A = "N/A";
 
-   final ControlState controlState;
+  final ControlState controlState;
   private List<L> allExercises;
 
 
@@ -177,7 +171,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
 
-    boolean showRecordingFlashcard = hasModel &&  controller.isRecordingEnabled();
+    boolean showRecordingFlashcard = hasModel && controller.isRecordingEnabled();
 
     Panel widgets = showRecordingFlashcard ?
         currentFlashcard = new StatsPracticePanel<L, T>(this,
@@ -276,8 +270,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       reallyStartOver();
     }
 
-/*    if (isPolyglot(controller)) {
-*//*       if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
+    /*    if (isPolyglot(controller)) {
+     *//*       if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
         stopTimedRun();
       } else {
         stopTimedRun();
