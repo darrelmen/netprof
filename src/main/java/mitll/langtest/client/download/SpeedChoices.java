@@ -9,9 +9,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.KeyStorage;
-
-import java.util.logging.Logger;
 
 public class SpeedChoices {
   //private final Logger logger = Logger.getLogger("SpeedChoices");
@@ -31,57 +28,55 @@ public class SpeedChoices {
   private ToggleButton regular, slow;
   private IShowStatus showStatus;
   private boolean setInitially;
+  private boolean choiceMade = false;
+  private boolean isRegular = true;
+//  private KeyStorage keyStorage;
 
-  private KeyStorage keyStorage;
-
-  public SpeedChoices(KeyStorage keyStorage, IShowStatus showStatus, boolean setInitially) {
+  public SpeedChoices(IShowStatus showStatus, boolean setInitially) {
     this.showStatus = showStatus;
-    this.keyStorage = keyStorage;
+//    this.keyStorage = keyStorage;
     this.setInitially = setInitially;
+
+    if (setInitially) {
+      choiceMade = true;
+      isRegular  = true;
+    }
   }
 
-  public SpeedChoices(KeyStorage keyStorage) {
+  public SpeedChoices() {
     this.showStatus = () -> {
     };
     setInitially = true;
-    this.keyStorage = keyStorage;
-  }
-
-  private void rememberAudioChoice(boolean isReg) {
-    keyStorage.setBoolean(IS_REG_SPEED, isReg);
+    //  this.keyStorage = keyStorage;
   }
 
   public String getStatus() {
-    return (isThereASpeedChoice() ? isSpeedReg() ? REGULAR_SPEED : SLOW_SPEED : "");
+    return (isThereASpeedChoice() ? isRegular() ? REGULAR_SPEED : SLOW_SPEED : "");
   }
 
   public Widget getSpeedChoices() {
     Panel buttonToolbar = getToolbar2();
     buttonToolbar.setHeight("40px");
-    // logger.info("getSpeedChoices got " + isThereASpeedChoice);
-    {
-      regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> {
-        // isRegular = regular.isDown();
-        rememberAudioChoice(true);
-        showSpeeds();
-      });
-      buttonToolbar.add(regular);
-    }
 
-    {
-      slow = getChoice2(SLOW, turtle, turtleSelected, event -> {
-        // isRegular = !slow.isDown();
-        //  logger.info("got slow click " + isRegular);
-        rememberAudioChoice(false);
-        showSpeeds();
-      });
-
-      buttonToolbar.add(slow);
-    }
+    buttonToolbar.add(regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> chooseReg()));
+    buttonToolbar.add(slow = getChoice2(SLOW, turtle, turtleSelected, event -> clickSlow()));
 
     if (setInitially) showSpeeds();
     buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
     return buttonToolbar;
+  }
+
+  public void chooseReg() {
+    gotClickForSpeed(true);
+  }
+
+  private void clickSlow() {
+    gotClickForSpeed(false);
+  }
+
+  private void gotClickForSpeed(boolean isReg) {
+    rememberAudioChoice(isReg);
+    showSpeeds();
   }
 
 
@@ -91,7 +86,7 @@ public class SpeedChoices {
   }
 
   private void setButtonState() {
-    boolean isRegular = isSpeedReg();
+    boolean isRegular = isRegular();
     regular.setDown(isRegular);
     slow.setDown(!isRegular);
   }
@@ -111,16 +106,24 @@ public class SpeedChoices {
   }
 
   public boolean isThereASpeedChoice() {
-    return !keyStorage.getValue(IS_REG_SPEED).isEmpty();
+    return choiceMade;//!keyStorage.getValue(IS_REG_SPEED).isEmpty();
+  }
+
+  private void rememberAudioChoice(boolean isReg) {
+    //keyStorage.setBoolean(IS_REG_SPEED, isReg);
+    choiceMade = true;
+    isRegular = isReg;
   }
 
   public boolean isRegular() {
-    return isSpeedReg();
+    return isRegular;
+/*    String value = keyStorage.getValue(IS_REG_SPEED);
+    //   logger.info("isSpeedReg speed from storage " + value);
+    return value.isEmpty() || value.equalsIgnoreCase("true");*/
   }
 
-  private boolean isSpeedReg() {
-    String value = keyStorage.getValue(IS_REG_SPEED);
- //   logger.info("isSpeedReg speed from storage " + value);
-    return value.isEmpty() || value.equalsIgnoreCase("true");
+  public void setEnabled(boolean b) {
+    regular.setEnabled(b);
+    slow.setEnabled(b);
   }
 }

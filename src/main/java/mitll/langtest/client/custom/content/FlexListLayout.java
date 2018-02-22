@@ -66,7 +66,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    */
   public FlexListLayout(ExerciseController controller) {
     this.controller = controller;
-  }
+   }
 
   /**
    * TODO : don't pass in user list
@@ -138,13 +138,20 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return twoRows;
   }
 
-  boolean atTop = true;
+  public void setVisible(boolean vis) {
+    section.setVisible(vis);
+  }
+
+  ///  boolean atTop = true;
+  private FlowPanel section;
 
   /**
    * TODO: Do something smarter here - if we scroll down and can't see facets anymore, change position to fixed, but with the bottom close to the bottom.
    * If we can see the facets, don't do anything.
+   *
    * @param twoRows
    * @param topRow
+   * @see #doInternalLayout
    */
   protected void styleTopRow(Panel twoRows, Panel topRow) {
     topRow.addStyleName("floatLeft");
@@ -154,6 +161,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     twoRows.addStyleName("inlineFlex");
 
     FlowPanel section = new FlowPanel("section");
+    this.section = section;
     section.addStyleName("sidebar");
 //    section.addStyleName("scrolledpos");
 
@@ -161,7 +169,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     twoRows.setWidth("100%");
     section.add(topRow);
 
-  //  makeSureFacetsAlwaysVisible(section);
+    //  makeSureFacetsAlwaysVisible(section);
   }
 
 
@@ -186,8 +194,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   }
 
   /**
-   * @see #doInternalLayout
    * @return
+   * @see #doInternalLayout
    */
   protected Panel getCurrentExercisePanel() {
     DivWidget currentExerciseVPanel = new DivWidget();

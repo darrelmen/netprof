@@ -45,7 +45,6 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.list.ListInterface;
@@ -92,7 +91,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   private Panel recoOutput;
 
-  static final int CORRECT_DELAY = 600;
+  //static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
@@ -121,7 +120,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          SoundFeedback.EndListener endListener,
                          String instance,
                          ListInterface exerciseList, PolyglotDialog.PROMPT_CHOICE prompt) {
-    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList, prompt);
+    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
     downloadContainer = new DownloadContainer();
   }
 
@@ -359,7 +358,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void recordingStarted() {
   }
 
-  protected String getDeviceValue() {
+  String getDeviceValue() {
     return controller.getBrowserInfo();
   }
 
@@ -483,7 +482,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
   }
 
-  protected  boolean isCorrect(boolean correct, double score) {
+  boolean isCorrect(boolean correct, double score) {
     return correct;
   }
 
@@ -495,7 +494,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param html
    * @see #receivedAudioAnswer
    */
-  protected void showPopup(String html, Widget button) {
+  private void showPopup(String html, Widget button) {
     new PopupHelper().showPopup(html, button, HIDE_DELAY);
   }
 
@@ -514,9 +513,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     maybeAdvance(score);
   }
 
-  protected void playCorrectDing() {   getSoundFeedback().queueSong(SoundFeedback.CORRECT);  }
+  void playCorrectDing() {   getSoundFeedback().queueSong(SoundFeedback.CORRECT);  }
 
-  protected void maybeAdvance(double score) {}
+  void maybeAdvance(double score) {}
 
   private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
@@ -576,7 +575,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     maybeAdvance(score);
   }
 
-  protected boolean showScoreFeedback(AudioAnswer result) {
+  boolean showScoreFeedback(AudioAnswer result) {
     return result.isSaidAnswer();
   }
 
@@ -604,7 +603,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     else if (controlState.isForeign()) showForeign();
   }
 
-  protected void playIncorrect() {
+  void playIncorrect() {
     getSoundFeedback().queueSong(SoundFeedback.INCORRECT,
         new SoundFeedback.EndListener() {
           @Override

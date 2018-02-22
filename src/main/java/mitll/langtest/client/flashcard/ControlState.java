@@ -41,7 +41,7 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/11/14.
  */
-public class ControlState {
+class ControlState {
   private static final String SHOW_STATE = "showState";
   private static final String AUDIO_ON = "audioOn";
   private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
@@ -57,7 +57,7 @@ public class ControlState {
   public static final String ENGLISH = "english";
   public static final String FOREIGN = "foreign";
   public static final String BOTH = "both";
-  public static final String AUTO_PLAY = "autoPlay";
+  private static final String AUTO_PLAY = "autoPlay";
   private String showState = BOTH; // english/foreign/both - default
 
   private KeyStorage storage = null;

@@ -3,37 +3,34 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.DialogHelper;
 
 import java.util.Collections;
 
-import static mitll.langtest.client.flashcard.PolyglotFlashcardFactory.MIN_POLYGLOT_SCORE;
-
 public class PolyglotDialog {
   private static final int HSIZE = 4;
   private static final String LIGHTNING_ROUND = "Test your pronunciation!";
-  public static final String GENDER_GROUP = "GenderGroup";
-  public static final String DRY_RUN = "Dry Run (Just Practice!)";
-  public static final String POLYGLOT_COMPETITION = "Polyglot Competition";
-  public static final String START = "Start!";
-  public static final String CANCEL = "Cancel";
-  public static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
+  private static final String GENDER_GROUP = "GenderGroup";
+  private static final String DRY_RUN = "Dry Run (Just Practice!)";
+  private static final String POLYGLOT_COMPETITION = "Polyglot Competition";
+  private static final String START = "Start!";
+  private static final String CANCEL = "Cancel";
+  private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
+  private static final boolean SHOW_AUDIO_PROMPT = false;
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
   public enum PROMPT_CHOICE {NOT_YET, PLAY, DONT_PLAY}
+
 
   public interface ModeChoiceListener {
     void gotMode(MODE_CHOICE choice);
     void gotPrompt(PROMPT_CHOICE choice);
   }
 
-  private Button closeButton;
-  private ModeChoiceListener modeListener;
+  private final Button closeButton;
+  private final ModeChoiceListener modeListener;
 
   /**
    * @param closeListener
@@ -81,9 +78,11 @@ public class PolyglotDialog {
     // row.add(new Heading(HSIZE, text));
     row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
-    {
-      container.add(new Heading(HSIZE, "Do you want to hear each item before recording?"));
-      container.add(addPromptChoices());
+    if (SHOW_AUDIO_PROMPT) {
+      {
+        container.add(new Heading(HSIZE, "Do you want to hear each item before recording?"));
+        container.add(addPromptChoices());
+      }
     }
 
     container.add(new Heading(HSIZE, "Please choose either : "));

@@ -53,6 +53,7 @@ import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -61,7 +62,7 @@ import java.util.Map;
  * @since 2/4/16.
  */
 public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  //private final Logger logger = Logger.getLogger("PracticeHelper");
+  private final Logger logger = Logger.getLogger("PracticeHelper");
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
@@ -74,9 +75,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  PracticeHelper(ExerciseController controller) {
-    super(controller);
-  }
+  PracticeHelper(ExerciseController controller) {    super(controller);  }
 
   /**
    * @param exerciseList
@@ -86,10 +85,8 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
-      Collection<User.Permission> permissions = controller.getPermissions();
-      if (permissions.size() == 1 && permissions.iterator().next() == User.Permission.POLYGLOT) {
+      if (isPolyglotUser()) {
         polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "practice");
-
       } else {
         polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
       }
@@ -102,14 +99,17 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     return statsFlashcardFactory;
   }
 
-/*  @Override
-  public void onResize() {
-    super.onResize();
-    if (statsFlashcardFactory != null) {
-      statsFlashcardFactory.onResize();
-    }
-  }*/
+  private boolean isPolyglotUser() {
+    Collection<User.Permission> permissions = controller.getPermissions();
+    boolean b = permissions.size() == 1 && permissions.iterator().next() == User.Permission.POLYGLOT;
+    return b;
+  }
 
+  /**
+   *
+   * @param outer
+   * @return
+   */
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
@@ -170,6 +170,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       @Override
       protected void styleBottomRow(Panel bottomRow) {
         bottomRow.addStyleName("centerPractice");
+        setVisible(!isPolyglotUser());
         outerBottomRow = bottomRow;
       }
     };

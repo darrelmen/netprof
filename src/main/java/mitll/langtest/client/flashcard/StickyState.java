@@ -112,9 +112,11 @@ class StickyState {
     storage.storeValue(CORRECT1, builder.toString());
   }
 
+/*
   KeyStorage getStorage() {
     return storage;
   }
+*/
 
   public void populateCorrectMap() {
     String value = getCorrect();
@@ -205,7 +207,7 @@ class StickyState {
     exToAnswer.put(id, result);
   }
 
-  protected boolean isCorrect(boolean correct, double score) {
+  boolean isCorrect(boolean correct, double score) {
     return correct;
   }
 

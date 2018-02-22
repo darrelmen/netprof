@@ -1,6 +1,6 @@
 package mitll.langtest.client.flashcard;
 
-public interface PolyglotFlashcardContainer extends FlashcardContainer {
+interface PolyglotFlashcardContainer extends FlashcardContainer {
 
   void startTimedRun();
 

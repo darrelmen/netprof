@@ -2,7 +2,7 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.Timer;
 
-public class FlashcardTimer {
+class FlashcardTimer {
   private final TimerListener listener;
   /**
    * @see #cancelTimer

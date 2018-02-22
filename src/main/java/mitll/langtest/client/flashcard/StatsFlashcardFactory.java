@@ -86,7 +86,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   StatsPracticePanel currentFlashcard = null;
   private NewContentChooser navigation;
-  KeyStorage storage;
+  final KeyStorage storage;
 
   final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
@@ -143,20 +143,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     return new StickyState(storage);
   }
 
-  private boolean isPolyglot(ExerciseController controller) {
-    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
-  }
-
-
-   /*  @Override
-  public void onResize() {
-    if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
-      ((RequiresResize) scoreHistory).onResize();
-    } else {
-      logger.warning("huh? score history doesn't implement requires resize????\\n\n");
-    }
-  }*/
-
   /**
    * @param e
    * @return
@@ -199,8 +185,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         soundFeedback,
         soundFeedback.getEndListener(),
         StatsFlashcardFactory.this.instance,
-        exerciseList,
-        PolyglotDialog.PROMPT_CHOICE.NOT_YET) {
+        exerciseList
+    ) {
 
       @Override
       protected void gotShuffleClick(boolean b) {
@@ -212,15 +198,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   void reset() {
     sticky.reset();
-/*
-    exToCorrect.clear();
-    exToScore.clear();
-    sticky.clearCurrent();
-*/
-  }
-
-  public int getCurrentExerciseID() {
-    return sticky.getCurrentExerciseID();
   }
 
   /**
@@ -244,7 +221,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     this.contentPanel = contentPanel;
   }
 
-  private int counter = 0;
+//  private int counter = 0;
 
   public void setNavigation(NewContentChooser navigation) {
     this.navigation = navigation;

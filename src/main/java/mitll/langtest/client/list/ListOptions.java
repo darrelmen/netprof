@@ -43,10 +43,6 @@ public class ListOptions {
     return this;
   }
 
- /* public ListOptions setIncorrectFirst(boolean val) {
-    this.incorrectFirst = val;
-    return this;
-  }*/
 
   public ListOptions setInstance(String instance) {
     this.instance = instance;
@@ -73,10 +69,9 @@ public class ListOptions {
     return instance;
   }
 
-  boolean isIncorrectFirst() {
-  //  boolean incorrectFirst = false;
+/*  boolean isIncorrectFirst() {
     return false;
-  }
+  }*/
 
   boolean isShowFirstNotCompleted() {
     return showFirstNotCompleted;
@@ -89,12 +84,4 @@ public class ListOptions {
   public boolean isShowPager() {
     return showPager;
   }
-/*  public boolean isContextOnly() {
-    return contextOnly;
-  }
-
-  public ListOptions setContextOnly(boolean contextOnly) {
-    this.contextOnly = contextOnly;
-    return this;
-  }*/
 }

@@ -83,7 +83,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private static final boolean DEBUG_STALE = false;
   private static final boolean DEBUG = false;
 
-  public static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
+  private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
   private static final String ADDING_VISITOR = "adding visitor";
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
@@ -171,7 +171,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
     this.isDrill = isDrillView;
     sectionPanel = new DivWidget();
-//    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
+    sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
     secondRow.add(sectionPanel);
@@ -197,6 +197,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     // addPrevNextPage(footer);
     finished = true;
 
+    // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
     LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> {
       gotListChanged();
@@ -205,6 +206,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
       downloadHelper.showDialog(controller.getHost());
     });
+
 
     // should be better for change visibility...
 /*    LangTest.EVENT_BUS.addHandler(ShowEvent.TYPE, authenticationEvent -> {

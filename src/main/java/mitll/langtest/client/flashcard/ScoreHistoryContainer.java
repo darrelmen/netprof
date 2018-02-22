@@ -113,11 +113,9 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     }
 
     final int flast = last;
-    Scheduler.get().scheduleDeferred(new Command() {
-      public void execute() {
-       // logger.info("scroll to visible " + flast);
-        scrollToVisible(flast);
-      }
+    Scheduler.get().scheduleDeferred((Command) () -> {
+     // logger.info("scroll to visible " + flast);
+      scrollToVisible(flast);
     });
 
     flush();
@@ -171,23 +169,21 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
                                                                                 List<ExerciseCorrectAndScore> dataList) {
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<ExerciseCorrectAndScore>() {
-          public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                CommonShell shell1 = idToExercise.get(o1.getId());
-                CommonShell shell2 = idToExercise.get(o2.getId());
-                return sorter.compareStrings(getEnglishText(shell1), getEnglishText(shell2));
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              CommonShell shell1 = idToExercise.get(o1.getId());
+              CommonShell shell2 = idToExercise.get(o2.getId());
+              return sorter.compareStrings(getEnglishText(shell1), getEnglishText(shell2));
+            }
+          }
+          return -1;
         });
     return columnSortHandler;
   }
@@ -197,26 +193,24 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = new ColumnSortEvent.ListHandler<>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
-        new Comparator<ExerciseCorrectAndScore>() {
-          public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                CommonShell shell1 = idToExercise.get(o1.getId());
-                CommonShell shell2 = idToExercise.get(o2.getId());
-
-                String id1 = getFLText(shell1);
-                String id2 = getFLText(shell2);
-                return id1.toLowerCase().compareTo(id2.toLowerCase());
-              }
-            }
-            return -1;
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
           }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              CommonShell shell1 = idToExercise.get(o1.getId());
+              CommonShell shell2 = idToExercise.get(o2.getId());
+
+              String id1 = getFLText(shell1);
+              String id2 = getFLText(shell2);
+              return id1.toLowerCase().compareTo(id2.toLowerCase());
+            }
+          }
+          return -1;
         });
     return columnSortHandler2;
   }
@@ -226,35 +220,33 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
                                                                               List<ExerciseCorrectAndScore> dataList) {
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<ExerciseCorrectAndScore>() {
-          public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
 
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                int a1 = o1.getAvgScorePercent();
-                int a2 = o2.getAvgScorePercent();
-                int i = Integer.valueOf(a1).compareTo(a2);
-                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
-                if (i == 0) {
-                  CommonShell shell1 = idToExercise.get(o1.getId());
-                  CommonShell shell2 = idToExercise.get(o2.getId());
-                  if (o1.getId() == o2.getId()) logger.warning("same id " + o1.getId());
-                  return shell1.getEnglish().compareTo(shell2.getEnglish());
-                } else {
-                  return i;
-                }
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
+          if (o1 != null) {
+            if (o2 == null) {
+              logger.warning("------- o2 is null?");
               return -1;
+            } else {
+              int a1 = o1.getAvgScorePercent();
+              int a2 = o2.getAvgScorePercent();
+              int i = Integer.valueOf(a1).compareTo(a2);
+              // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
+              if (i == 0) {
+                CommonShell shell1 = idToExercise.get(o1.getId());
+                CommonShell shell2 = idToExercise.get(o2.getId());
+                if (o1.getId() == o2.getId()) logger.warning("same id " + o1.getId());
+                return shell1.getEnglish().compareTo(shell2.getEnglish());
+              } else {
+                return i;
+              }
             }
+          } else {
+            logger.warning("------- o1 is null?");
+
+            return -1;
           }
         });
     return columnSortHandler;

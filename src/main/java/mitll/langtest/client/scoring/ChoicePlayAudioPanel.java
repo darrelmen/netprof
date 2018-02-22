@@ -67,30 +67,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     // getElement().setId("ChoicePlayAudioPanel");
     addButtons(null);
 
-/*    addPlayListener( new PlayListener() {
-      public void playStarted() {
-//          goodwaveExercisePanel.setBusy(true);
-        // TODO put back busy thing?
-//            postAudioRecordButton1.setEnabled(false);
-           gotPlayStarted();
-      }
-
-      public void playStopped() {
-        //  goodwaveExercisePanel.setBusy(false);
-        //          postAudioRecordButton1.setEnabled(true);
-      }
-    });*/
+// TODO : don't do this - leaves pointers to dead components unless removed...
 
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
       gotAudioSelected(authenticationEvent.getExid());
     });
   }
-
-/*
-  private void gotPlayStarted() {
-    logger.info("---> got play started ");
-  }
-*/
 
   /**
    * @param optionalToTheRight
@@ -204,7 +186,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       }
     }
 
-    AudioAttribute ms = simpleGetAtSpeed(maleAudio, false);
+    /**
+     * DLI doesn't want slow speed context, for some reason.
+     */
+    AudioAttribute ms = includeContext ? null : simpleGetAtSpeed(maleAudio, false);
     if (ms != null) {
       allPossible.add(ms);
       if (hasPlayButton) addAudioChoice(playButton, true, false, ms);
@@ -222,7 +207,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       if (fallback == null) fallback = fr;
     }
 
-    AudioAttribute fs = simpleGetAtSpeed(femaleAudio, false);
+    AudioAttribute fs = includeContext ? null : simpleGetAtSpeed(femaleAudio, false);
     if (fs != null) {
       allPossible.add(fs);
 

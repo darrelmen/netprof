@@ -35,6 +35,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -133,7 +134,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see INavigation#showView(INavigation.VIEWS, boolean)
+   * @see NewContentChooser#showPractice
    */
   @Override
   public void hideList() {
@@ -161,6 +162,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
+    //private final Logger logger = Logger.getLogger("MyFlexListLayout");
+
+    /**
+     *  @param controller
+     * @param outer
+     */
     protected MyFlexListLayout(ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
       super(controller);
       this.outer = outer;

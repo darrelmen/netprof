@@ -53,7 +53,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.initial.InitialUI;
@@ -78,7 +77,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @since 6/26/2014.
  */
 public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends DivWidget implements TimerListener {
-  public static final String MEANING = "Meaning";
+  private static final String MEANING = "Meaning";
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   private static final int ADVANCE_DELAY = 2000;
@@ -99,7 +98,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #addControlsBelowAudio
    */
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
-  private static final String ARROW_KEY_TIP2 = "<b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
+  //private static final String ARROW_KEY_TIP2 = "<b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
 
   static final String ON = "On";
   static final String OFF = "Off";
@@ -135,7 +134,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
-  protected FlashcardTimer timer;
+  final FlashcardTimer timer;
 
   /**
    * @see #setAutoPlay
@@ -149,7 +148,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @param prompt
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
   FlashcardPanel(final T e,
@@ -159,8 +157,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
                  String instance,
-                 ListInterface exerciseList,
-                 PolyglotDialog.PROMPT_CHOICE prompt) {
+                 ListInterface exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -637,7 +634,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return ARROW_KEY_TIP;
   }
 
-  protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
+  void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
     rightColumn.add(getShowGroup(controlState));
 
     Widget feedbackGroup = getFeedbackGroup(controlState);
@@ -718,7 +715,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     else cancelAdvanceTimer();
   }
 
-  protected void cancelAdvanceTimer() {
+  void cancelAdvanceTimer() {
     timer.cancelTimer();
   }
 
@@ -885,11 +882,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     controlState.setAudioOn(state);
   }
 
+/*
   private void rememberAudioOnChoice(boolean state) {
     controlState.setAudioOn(state);
   }
+*/
 
-  protected void abortPlayback() {
+  void abortPlayback() {
   }
 
   boolean isAudioOn() {
@@ -1139,7 +1138,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getBoth
    * @see #getQuestionContent
    */
-  protected void showEnglishOrForeign() {
+  void showEnglishOrForeign() {
     if (controlState.showBoth()) {
       showBoth();
       showOnlyEnglish = false;
@@ -1176,7 +1175,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     }
   }
 
-  protected void hideClickToFlip() {
+  void hideClickToFlip() {
     if (clickToFlipContainer != null) {
       //  logger.info("hide click to flip");
       clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);

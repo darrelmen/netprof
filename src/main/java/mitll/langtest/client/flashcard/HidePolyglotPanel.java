@@ -6,7 +6,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 
-public class HidePolyglotPanel extends PolyglotPracticePanel {
+class HidePolyglotPanel extends PolyglotPracticePanel {
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   public HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,

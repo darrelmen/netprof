@@ -70,7 +70,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   //  @Override
-  void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
+  private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
     hideClickToFlip();
   }
@@ -92,7 +92,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
-    speedChoices = new SpeedChoices(sticky.getStorage(), getOnSpeedChoiceMade(), true);
+    speedChoices = new SpeedChoices( getOnSpeedChoiceMade(), true);
     rightColumn.add(speedChoices.getSpeedChoices());
   }
 

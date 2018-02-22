@@ -33,12 +33,8 @@
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -226,16 +222,16 @@ public class SetCompleteDisplay {
   }*/
 
   /**
-   * @param sortedHistory
-   * @param allExercises
-   * @param controller
+   * @paramx sortedHistory
+   * @paramx allExercises
+   * @paramx controller
    * @return
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    */
-  public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
+/*  public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                Collection<? extends CommonShell> allExercises, ExerciseController controller) {
     return new ScoreHistoryContainer(controller, allExercises).getTableWithPager(sortedHistory);
-  }
+  }*/
 
    static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
     int size = correctAndScores.size();

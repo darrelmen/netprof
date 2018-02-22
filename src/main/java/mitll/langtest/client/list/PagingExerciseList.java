@@ -139,7 +139,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setActivityType(getActivityType())
         .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
-        .setIncorrectFirstOrder(listOptions.isIncorrectFirst())
+       // .setIncorrectFirstOrder(listOptions.isIncorrectFirst())
         .setOnlyDefaultAudio(false)
         .setOnlyUninspected(false);
   }

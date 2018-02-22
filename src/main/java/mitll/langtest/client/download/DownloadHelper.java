@@ -61,24 +61,19 @@ public class DownloadHelper implements IShowStatus {
 
   private static final String VOCABULARY = "Vocabulary";
   private static final String ALLCONTEXT = "allcontext";
-  //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet for whole course.";
-//  private static final String SELECT_A_UNIT_OR_CHAPTER = "If you also want to download audio, select a unit or chapter.";
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
-  //private static final String DOWNLOAD_CONTENT_SPREADSHEEET = "Download Content Spreadsheeet";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
   private static final String CONTEXT_SENTENCES = "Context Sentences";
+  public static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
   private static final String GENDER = "Gender";
-
-  /*  private static final String REGULAR = "Regular";
-  private static final String SLOW = "Slow";*/
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
   private SpeedChoices speedChoices;
 
   public DownloadHelper(ExerciseController controller) {
-    this.speedChoices = new SpeedChoices(controller.getStorage(),this,true);
+    this.speedChoices = new SpeedChoices(this, false);
   }
 
   /**
@@ -133,7 +128,6 @@ public class DownloadHelper implements IShowStatus {
     container.add(getGenderRow());
     container.add(getSpeedRow());
     container.add(getStatusArea());
-    //  }
 
     // String title = empty ? DOWNLOAD_CONTENT_SPREADSHEEET : DOWNLOAD_AUDIO_AND_SPREADSHEET;
     String title = DOWNLOAD_AUDIO_AND_SPREADSHEET;
@@ -198,8 +192,7 @@ public class DownloadHelper implements IShowStatus {
   private FluidRow getContentRow() {
     FluidRow row = new FluidRow();
     row.add(new Heading(4, CONTENT));
-    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList(VOCABULARY, CONTEXT_SENTENCES), "vocab", ButtonType.DEFAULT);
-    row.add(buttonBarChoices);
+    row.add(getButtonBarChoices(CONTENT_CHOICES, "vocab", ButtonType.DEFAULT));
     return row;
   }
 
@@ -208,7 +201,7 @@ public class DownloadHelper implements IShowStatus {
     row.add(new Heading(4, GENDER));
 
     {
-      DivWidget showGroup = getGenderChoices(/*false*/);
+      DivWidget showGroup = getGenderChoices( );
       showGroup.addStyleName("topFiveMargin");
       showGroup.addStyleName("bottomFiveMargin");
       row.add(showGroup);
@@ -228,7 +221,7 @@ public class DownloadHelper implements IShowStatus {
     }
   }
 
-  private Widget getButtonBarChoices(Collection<String> values, final String type, ButtonType buttonType) {
+  private Widget getButtonBarChoices(Collection<String> choices, final String type, ButtonType buttonType) {
     ButtonToolbar toolbar = new ButtonToolbar();
     toolbar.getElement().setId("Choices_" + type);
     styleToolbar(toolbar);
@@ -239,21 +232,31 @@ public class DownloadHelper implements IShowStatus {
 
     Set<String> seen = new HashSet<>();
 
-    for (String v : values) {
-      if (!seen.contains(v)) {
-        Button choice1 = getChoice(buttonGroup, v);
+    for (String choice : choices) {
+      if (!seen.contains(choice)) {
+        Button choice1 = getChoice(buttonGroup, choice);
         choice1.setType(buttonType);
         buttonGroup.add(choice1);
-        seen.add(v);
+        seen.add(choice);
       }
     }
     return toolbar;
   }
 
+  /**
+   * Only regular speed audio for context.
+   * @param buttonGroup
+   * @param text
+   * @return
+   */
   private Button getChoice(ButtonGroup buttonGroup, final String text) {
     ClickHandler handler = event -> Scheduler.get().scheduleDeferred(() -> {
       isContext = !(text.equals(VOCABULARY));
       isContextSet = true;
+      if (isContext) {
+        speedChoices.chooseReg();
+      }
+      speedChoices.setEnabled(!isContext);
       showStatus();
     });
 
@@ -380,6 +383,7 @@ public class DownloadHelper implements IShowStatus {
     return onButton;
   }
 
+/*
   private ToggleButton getChoice2(String title, Image upImage, Image downImage, ClickHandler handler) {
     ToggleButton onButton = new ToggleButton(upImage, downImage);
     onButton.getElement().setId("Choice_" + title);
@@ -389,6 +393,7 @@ public class DownloadHelper implements IShowStatus {
     onButton.setHeight(32 + "px");
     return onButton;
   }
+*/
 
   private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();

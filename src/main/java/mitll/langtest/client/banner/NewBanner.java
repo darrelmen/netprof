@@ -438,6 +438,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void checkProjectSelected() {
     setVisibleChoices(controller.getProjectStartupInfo() != null);
+
     VIEWS currentView = navigation.getCurrentView();
     NavLink linkToShow = viewToLink.get(currentView);
 

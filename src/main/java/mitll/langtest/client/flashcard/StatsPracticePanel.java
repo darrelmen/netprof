@@ -188,7 +188,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
 */
 
   @Override
-  protected void recordingStarted() {
+  void recordingStarted() {
     cancelAdvanceTimer();
     stopPlayback();
     removePlayingHighlight();
@@ -495,7 +495,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
    * @see FlashcardPanel#FlashcardPanel
    */
   @Override
-  protected void addRowBelowPrevNext(DivWidget toAddTo) {
+  void addRowBelowPrevNext(DivWidget toAddTo) {
   /*  if (isPolyglot()) {
       // String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
       //  logger.info("logException stack " + exceptionAsString);
@@ -580,7 +580,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     return seeScores;
   }
 
-   protected void gotSeeScoresClick() {
+   void gotSeeScoresClick() {
     abortPlayback();
     seeScores.setEnabled(false);
   //  statsFlashcardFactory.cancelRoundTimer();

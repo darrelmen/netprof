@@ -65,7 +65,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   @NotNull
-  protected PolyglotPracticePanel getCurrentFlashcard(T e) {
+  PolyglotPracticePanel getCurrentFlashcard(T e) {
     return new PolyglotPracticePanel(this,
         controlState,
         controller,
@@ -106,7 +106,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
-  void stopTimedRun() {
+  private void stopTimedRun() {
     inLightningRound = false;
     cancelRoundTimer();
   }
@@ -212,7 +212,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   }
 
-  void clearAnswerMemory() {
+  private void clearAnswerMemory() {
     sticky.clearAnswers();
   }
 }

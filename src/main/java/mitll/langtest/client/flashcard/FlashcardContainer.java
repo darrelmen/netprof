@@ -1,6 +1,6 @@
 package mitll.langtest.client.flashcard;
 
-public interface FlashcardContainer {
+interface FlashcardContainer {
 
   void reload();
 

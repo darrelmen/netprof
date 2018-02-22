@@ -7,7 +7,6 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
@@ -17,8 +16,6 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static mitll.langtest.client.list.FacetExerciseList.PAGE_SIZE_SELECTED;
 
 /**
  * Created by go22670 on 4/5/17.
