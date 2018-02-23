@@ -117,6 +117,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
+   * TODO : consider if we need to add transcript or not.
    * @param userid
    * @param exids
    * @param language
@@ -130,7 +131,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        String language,
                                        Project project) {
     Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByExercises, false, true,
+    PhoneReport report = getPhoneReport(phoneReportByExercises, true, true,
         userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser " +

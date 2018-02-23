@@ -86,7 +86,7 @@ public class UserInfo implements HasID {
   private void setLastSessionScore(List<BestScore> bestScores) {
     long maxSession = Long.MIN_VALUE;
     Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
-    int lastSessionSize=-1;
+    int lastSessionSize = -1;
     for (BestScore bestScore : bestScores) {
       long sessionStart = bestScore.getSessionStart();
       if (sessionStart > maxSession) {
@@ -167,14 +167,14 @@ public class UserInfo implements HasID {
   }
 
   /**
-   * @see Analysis#getUserInfos(Map, IUserDAO)
    * @param firstLastUser
+   * @see Analysis#getUserInfos(Map, IUserDAO)
    */
   public void setFrom(FirstLastUser firstLastUser) {
     setId(firstLastUser.getID()); // necessary?
     setUserID(firstLastUser.getUserID());
     this.first = firstLastUser.getFirst();
-    this.last  = firstLastUser.getLast();
+    this.last = firstLastUser.getLast();
   }
 
   @Override
@@ -183,8 +183,8 @@ public class UserInfo implements HasID {
   }
 
   /**
-   * @see UserContainer#addFirstName(List)
    * @return
+   * @see UserContainer#addFirstName(List)
    */
   public String getFirst() {
     return first;
@@ -194,14 +194,18 @@ public class UserInfo implements HasID {
     return last;
   }
 
+  public String getName() {
+    return first + " " + last;
+  }
+
   public int getLastSessionScore() {
     return lastSessionScore;
   }
 
   /**
+   * @return
    * @see UserContainer#getPolyNum
    * @see UserContainer#getPolyNumSorter
-   * @return
    */
   public int getLastSessionNum() {
     return lastSessionNum;

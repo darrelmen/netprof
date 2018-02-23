@@ -80,6 +80,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    *
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
+  public static final String SCORE = "";// "score ";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
@@ -1029,7 +1030,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     String s = "(" + percent +  "%)";
     int score = getAdjustedScore(fround1, percent);
     String text = simpleTimeAndScores.size() > 100 ? "" :
-        PREFIX + (index + 1) + " : score " + score +
+        PREFIX + (index + 1) + " : " +
+            SCORE + score +
             //"%" +
             " for " + n + "/" + denom + " " + s +
             " items ";

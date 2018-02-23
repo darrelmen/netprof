@@ -140,8 +140,7 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param controller
    * @param isPolyglot
-   * @paramx showTab
-   * @see NewContentChooser#showProgress
+    * @see NewContentChooser#showProgress
    */
   public AnalysisTab(ExerciseController controller,
                      boolean isPolyglot,
@@ -191,10 +190,12 @@ public class AnalysisTab extends DivWidget {
         controller.getMessageHelper(), isTeacherView,
         controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
 
-    Panel timeControls = getTimeControls(playFeedback);
-    analysisPlot.setTimeWidgets(timeWidgets);
+    {
+      Panel timeControls = getTimeControls(playFeedback);
+      analysisPlot.setTimeWidgets(timeWidgets);
+      add(timeControls);
+    }
 
-    add(timeControls);
     add(analysisPlot);
 
     DivWidget bottom = getBottom(isTeacherView);
@@ -319,8 +320,7 @@ public class AnalysisTab extends DivWidget {
     bottom.addStyleName("inlineFlex");
     bottom.setWidth("100%");
     bottom.getElement().setId("bottom");
-    //bottom.addStyleName("floatLeftAndClear");
-    if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+     if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
     return bottom;
   }
 

@@ -69,6 +69,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
   private static final String COURSES = COURSE1 + "s";
 
@@ -179,6 +180,8 @@ public class ProjectChoices {
    *
    * @param projects
    * @return
+   * @see #getNumVisible
+   * @see #addProjectChoices
    */
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
@@ -194,6 +197,7 @@ public class ProjectChoices {
         "\n\tpoly " + isPoly +
         "\n\tcan record = " + canRecord +
         "\n\tpermissions " + permissions);*/
+    boolean admin = controller.getUserManager().isAdmin();
 
     for (SlimProject project : projects) {
       if (isPoly) {
@@ -207,7 +211,7 @@ public class ProjectChoices {
           filtered.add(project);
         } else {
           if (status == ProjectStatus.RETIRED) {
-            if (controller.getUserManager().isAdmin()) {
+            if (admin) {
               filtered.add(project);
             }
           } else if (canRecord) {
@@ -255,6 +259,9 @@ public class ProjectChoices {
   }
 
   /**
+   * skip parents that have no visible children -- e.g. with polyglot users.
+   * getLangIcon will be null in those cases.
+   *
    * @param result
    * @param nest
    * @see #showProjectChoices
@@ -263,7 +270,12 @@ public class ProjectChoices {
     Thumbnails current = new Thumbnails();
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
     getSorted(result, nest)
-        .forEach(project -> current.add(getLangIcon(capitalize(project.getLanguage()), project, nest)));
+        .forEach(project -> {
+          Panel langIcon = getLangIcon(capitalize(project.getLanguage()), project, nest);
+          if (langIcon != null) {
+            current.add(langIcon);
+          }
+        });
 
     return current;
   }
@@ -478,14 +490,14 @@ public class ProjectChoices {
         CREATE_NEW_PROJECT,
         projectEditForm.getForm(new ProjectInfo(), true),
         listener,
-        550);
+        DIALOG_HEIGHT);
   }
 
   /**
    * @param lang
    * @param projectForLang
    * @param nest
-   * @return
+   * @return null if the project is a parent and has no visible children (polyglot filter)
    * @see #addFlags
    */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
@@ -505,55 +517,60 @@ public class ProjectChoices {
    * @see #getLangIcon
    */
   private Panel getImageAnchor(final String name, SlimProject projectForLang) {
-    Thumbnail thumbnail = new Thumbnail();
-    thumbnail.setWidth(CHOICE_WIDTH + "px");
-    thumbnail.setSize(2);
+    int numVisibleChildren = getNumVisible(projectForLang);
+    if (projectForLang.hasChildren() && numVisibleChildren == 0) {
+      return null;
+    } else {
+      Thumbnail thumbnail = new Thumbnail();
+      thumbnail.setWidth(CHOICE_WIDTH + "px");
+      thumbnail.setSize(2);
 
-    boolean isQC = isQC();
-    {
-      PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
-      final int projid = projectForLang.getID();
-      button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
-      thumbnail.add(button);
-
-      boolean hasChildren = projectForLang.hasChildren();
-
-      ProjectType projectType = projectForLang.getProjectType();
-      // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
+      boolean isQC = isQC();
       {
-        if (hasChildren) {
-          addPolyglotIcon(projectForLang, button);
-        } else {
-          if (projectType == ProjectType.POLYGLOT) {
-            //   logger.info("adding poly icon to " +projectForLang);
-            addPolyIcon(button);
-          }
+        PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
+        final int projid = projectForLang.getID();
+        button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
+        thumbnail.add(button);
+
+        boolean hasChildren = projectForLang.hasChildren();
+
+        ProjectType projectType = projectForLang.getProjectType();
+        // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
+        {
+          if (hasChildren) {
+            addPolyglotIcon(projectForLang, button);
+          } else {
+            if (projectType == ProjectType.POLYGLOT) {
+              //   logger.info("adding poly icon to " +projectForLang);
+              addPolyIcon(button);
+            }
 //          else {
-          //logger.info("not adding poly icon to " +projectForLang);
-          //        }
+            //logger.info("not adding poly icon to " +projectForLang);
+            //        }
+          }
         }
-      }
 
-      if (isQC) {
-        if (!hasChildren) {
-          addPopover(projectForLang, button);
-        }
-      } else {
-        if (!projectForLang.getCourse().isEmpty()) {
-          addPopoverUsual(projectForLang, button);
+        if (isQC) {
+          if (!hasChildren) {
+            addPopover(projectForLang, button);
+          }
         } else {
-          addPopover(projectForLang, button);
+          if (!projectForLang.getCourse().isEmpty()) {
+            addPopoverUsual(projectForLang, button);
+          } else {
+            addPopover(projectForLang, button);
+          }
         }
       }
+
+      DivWidget horiz = new DivWidget();
+      horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
+      thumbnail.add(horiz);
+
+      horiz.add(getContainerWithButtons(name, projectForLang, isQC, numVisibleChildren));
+
+      return thumbnail;
     }
-
-    DivWidget horiz = new DivWidget();
-    horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
-    thumbnail.add(horiz);
-
-    horiz.add(getContainerWithButtons(name, projectForLang, isQC));
-
-    return thumbnail;
   }
 
   /**
@@ -584,17 +601,18 @@ public class ProjectChoices {
    * @param name
    * @param projectForLang
    * @param isQC
+   * @param numVisibleChildren
    * @return
    * @see #getImageAnchor
    */
   @NotNull
-  private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC) {
+  private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
     boolean hasChildren = projectForLang.hasChildren();
 
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren));
+    container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren, numVisibleChildren));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -656,11 +674,12 @@ public class ProjectChoices {
    * @param name
    * @param projectForLang
    * @param hasChildren
+   * @param numVisibleChildren
    * @return
    * @see #getImageAnchor
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren) {
+  private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren, int numVisibleChildren) {
     Heading label = new Heading(LANGUAGE_SIZE, name);
     label.addStyleName("floatLeft");
     label.setWidth("100%");
@@ -674,9 +693,9 @@ public class ProjectChoices {
     }
 
     if (hasChildren) {
-      int size = getNumVisible(projectForLang);
-      String suffix = (size == 1) ? COURSE1 : COURSES;
-      label.setSubtext(size + suffix);
+      // int size = getNumVisible(projectForLang);
+      String suffix = (numVisibleChildren == 1) ? COURSE1 : COURSES;
+      label.setSubtext(numVisibleChildren + suffix);
     } else {
       showProjectStatus(projectForLang, label);
     }
@@ -802,7 +821,7 @@ public class ProjectChoices {
         "Edit " + projectForLang.getName(),
         projectEditForm.getForm(projectForLang, false),
         listener,
-        550);
+        DIALOG_HEIGHT);
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button) {
@@ -889,7 +908,7 @@ public class ProjectChoices {
         "Delete " + projectForLang.getName() + " forever?",
         contents,
         listener,
-        550);
+        DIALOG_HEIGHT);
   }
 
   private boolean isQC() {
@@ -928,13 +947,17 @@ public class ProjectChoices {
     return uiLifecycle.makeBreadcrumb(name);
   }
 
+  /**
+   * @param nest
+   * @param children
+   */
   private void addProjectChoices(int nest, List<SlimProject> children) {
-   // int widgetCount = contentRow.getWidgetCount();
+    // int widgetCount = contentRow.getWidgetCount();
     // logger.info("addProjectChoices " + widgetCount);
     if (contentRow.getWidgetCount() == 1) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      logger.info("not adding project choices again...");
+      logger.info("addProjectChoices not adding project choices again...");
     }
   }
 

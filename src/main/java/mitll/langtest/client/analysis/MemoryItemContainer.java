@@ -77,11 +77,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String selectedUserKey;
   private final String header;
 
-  private static final String SIGNED_UP1 = "Started";
+  public static final int STARTED_WIDTH = 90;
+  private static final String SIGNED_UP1 = "Start";
 
   static final String SELECTED_USER = "selectedUser";
 
-  private static final int ID_WIDTH = 110;
+  private static final int ID_WIDTH = 90;
   private int idWidth = ID_WIDTH;
   private int pageSize;
   private final String todayYear;
@@ -115,7 +116,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.shortPageSize = shortPageSize;
   }
 
-  DivWidget getTable(Collection<T> users, String title, String subtitle) {
+  DivWidget getTable(Collection<T> users) {
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
     leftSide.addStyleName("floatLeft");
@@ -162,9 +163,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return students;
   }
 
+/*
   private IsWidget getRightOfHeader() {
     return null;
   }
+*/
 
   protected IsWidget getBelowHeader() {
     return null;
@@ -225,7 +228,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
-    table.setColumnWidth(dateCol, 100 + "px");
+    table.setColumnWidth(dateCol, STARTED_WIDTH + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, list));
   }
 

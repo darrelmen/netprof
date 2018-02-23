@@ -95,6 +95,22 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     return -1;
   }
 
+  int getNameCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
+    }
+
+    // Compare the name columns.
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        int i = o1.getName().compareTo(o2.getName());
+        return i == 0 ? getDateCompare(o1, o2) : i;
+      }
+    }
+    return -1;
+  }
+
   protected String getItemLabel(T shell) {
     return shell.getUserID();
   }

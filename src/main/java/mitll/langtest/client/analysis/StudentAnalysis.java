@@ -85,9 +85,8 @@ public class StudentAnalysis extends DivWidget {
 
         {
           DivWidget rightSide = getRightSide();
-          UserContainer userContainer = new UserContainer(controller, rightSide, bottom,
-              getRememberedSelectedUser(controller));
-          add(getTop(userContainer.getTable(getUserInfos(users), STUDENTS, OR_MORE_RECORDINGS), rightSide));
+          UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller));
+          add(getTop(userContainer.getTable(getUserInfos(users)), rightSide));
         }
         add(bottom);
 
@@ -126,6 +125,12 @@ public class StudentAnalysis extends DivWidget {
     top.getElement().setId("top");
     top.add(leftSide);
     top.add(rightSide);
+
+    DivWidget spacer = new DivWidget();
+    //spacer.setWidth("10px");
+    spacer.getElement().getStyle().setProperty("minWidth", 5 + "px");
+
+    top.add(spacer);
     return top;
   }
 

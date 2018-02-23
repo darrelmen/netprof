@@ -120,6 +120,8 @@ public class MakePhoneReport {
   }
 
   /**
+   *
+   * TODO : make this work
    * For the iPad, we don't want to return every single example, just the latest one, and the summary score
    * for the phone is just for the latest ones, or else they can seem inconsistent, since the iPad only shows
    * distinct words.

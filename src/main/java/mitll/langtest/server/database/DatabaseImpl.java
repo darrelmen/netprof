@@ -223,7 +223,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     initializeDAOs(pathHelper, dominoUserDAO);
 
     dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
-    dominoUserDAO.setProjectManagement(getProjectManagement());
+
     {
       long now = System.currentTimeMillis();
 
@@ -307,7 +307,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
 //      logger.info("populateProjects --- ");
+
       projectManagement.populateProjects();
+
+      userDAO.setProjectManagement(getProjectManagement());
+
     }
     return this;
   }
@@ -442,6 +446,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userDAO;
   }
 
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
+    return setInstallPath(lessonPlanFileOnlyForImport, null);
+  }
+
   /**
    * @param lessonPlanFileOnlyForImport
    * @param servletContext
@@ -452,10 +460,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this, servletContext);
     makeDAO(lessonPlanFileOnlyForImport);
     return this;
-  }
-
-  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-    return setInstallPath(lessonPlanFileOnlyForImport, null);
   }
 
   /**

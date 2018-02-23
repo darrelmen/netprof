@@ -329,14 +329,15 @@ public class NewContentChooser implements INavigation {
   }
 
   public void showProgress() {
-    ShowTab showTab = getShowTab();
-
-    //  logger.info("is poly "+ isPolyglot());
-    divWidget.add(controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM) ?
+    divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
         new AnalysisTab(controller, isPolyglot(), 0, () -> 1));
 
     currentSection = PROGRESS;
+  }
+
+  private boolean isTeacher() {
+    return controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
   }
 
   /**

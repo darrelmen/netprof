@@ -1496,7 +1496,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   @NotNull
   private DivWidget getSpacer() {
     DivWidget spacer = new DivWidget();
-    //spacer.getElement().setId("spacer");
     spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
     return spacer;
   }

@@ -71,10 +71,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private final Logger logger = Logger.getLogger("UserContainer");
 
   public static final String MINE = "Mine";
-  public static final String POLY_NUMBER = "Session Complete";
+  public static final int SESSION_WIDTH = 100;
+  public static final String POLY_NUMBER = "Session Completed";
+  public static final int LIFETIME_WIDTH = 60;
   public static final String LIFETIME = "Life. #";
+  public static final int LIFETIME_AVG_WIDTH = 65;
   public static final String LIFETIME_AVG = "Life. Avg";
-  public static final String OVERALL_SCORE = "Overall";
+  public static final String OVERALL_SCORE = "Adjust.";
+  /**
+   * @see #addLastSession
+   */
+  public static final int COMPLETED_WIDTH = 60;
+  private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
+  private static final int CURRENT_WIDTH = 60;
 
   private static final boolean SHOW_MY_STUDENTS = false;
   private static final String Y = "Y";
@@ -98,16 +107,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    *
    */
   private static final String CURRENT = "Avg";
-  /**
-   * @see #addLastSession
-   */
-  private static final String SCORE_FOR_COMPLETED = "Completed Score";
-  private static final int CURRENT_WIDTH = 60;
+
 
   private static final int MIN_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS;
 
   /**
-   *
+   * @see #UserContainer(ExerciseController, DivWidget, DivWidget, String)
    */
   private static final String STUDENT = "Student";
   /**
@@ -159,7 +164,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * @param users
    * @param leftSide
-   * @see #getTable(Collection, String, String)
+   * @see MemoryItemContainer#getTable(Collection)
    */
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {
@@ -474,14 +479,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserInfo> list = getList();
     addItemID(list, 20);
-    addFirstName(list);
-    addLastName(list);
+    boolean polyglot = isPolyglot();
+    if (polyglot) {
+      addName(list);
+    } else {
+      addFirstName(list);
+      addLastName(list);
+    }
     addDateCol(list);
 
     addNumber(list);
     addCurrent(list);
 
-    boolean polyglot = isPolyglot();
     if (!polyglot) {
       if (SHOW_MY_STUDENTS) addMine(list);
     }
@@ -511,10 +520,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        // logger.info("shell " + (shell == null));
-        String first = shell.getFirst();
-        // logger.info("first " + first);
-        return getSafeHtml(first);
+        return getSafeHtml(shell.getFirst());
       }
     };
     userCol.setSortable(true);
@@ -527,6 +533,32 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
                                                                List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getFirstCompare);
+    return columnSortHandler;
+  }
+
+  private void addName(List<UserInfo> list) {
+    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(shell.getName());
+      }
+    };
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, 130 + "px");
+    addColumn(userCol, new TextHeader("Name"));
+    table.addColumnSortHandler(getNameSorter(userCol, list));
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getNameSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                               List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getNameCompare);
     return columnSortHandler;
   }
 
@@ -562,7 +594,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     boolean polyglot = isPolyglot();
     String current1 = polyglot ? LIFETIME_AVG : CURRENT;
     addColumn(current, new TextHeader(current1));
-    int currentWidth = polyglot ? 80 : CURRENT_WIDTH;
+    int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
     table.setColumnWidth(current, currentWidth + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
@@ -572,7 +604,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     Column<UserInfo, SafeHtml> current = getLastSession();
     current.setSortable(true);
     addColumn(current, new TextHeader(SCORE_FOR_COMPLETED));
-    table.setColumnWidth(current, 100 + "px");
+    table.setColumnWidth(current, COMPLETED_WIDTH + "px");
 
     table.addColumnSortHandler(getLastSessionSorter(current, list));
     return current;
@@ -606,7 +638,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     addColumn(num, new TextHeader(text));
     table.addColumnSortHandler(getNumSorter(num, list));
-    int numWidth = polyglot ? 65 : NUM_WIDTH;
+    int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
     table.setColumnWidth(num, numWidth + "px");
   }
 
@@ -615,7 +647,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     num.setSortable(true);
     addColumn(num, new TextHeader(POLY_NUMBER));
     table.addColumnSortHandler(getPolyNumSorter(num, list));
-    table.setColumnWidth(num, 80 + "px");
+    table.setColumnWidth(num, SESSION_WIDTH + "px");
   }
 
   /**
@@ -836,7 +868,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       lastf *= 0.9f;
     }
 
-    return  Math.round(lastf);
+    return Math.round(lastf);
   }
 
   private Column<UserInfo, SafeHtml> getMineCol() {

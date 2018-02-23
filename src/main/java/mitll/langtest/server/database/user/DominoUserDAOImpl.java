@@ -620,7 +620,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
                         String sessionID) {
     String encodedCurrPass = getUserCredentials(userId);
 
-
     DBUser loggedInUser =
         delegate.loginUser(
             userId,
@@ -633,9 +632,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         "\n\texisting credentials " + encodedCurrPass +
         "\n\tyielded " + loggedInUser);
 
-/*    if (loggedInUser == null) {
-      myDelegate.isMatch(encodedCurrPass, attemptedTxtPass);
-    }*/
     return getUser(loggedInUser);
   }
 
@@ -959,16 +955,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Group next = secondaryGroups.iterator().next();
       Language languageMatchingGroup = getLanguageMatchingGroup(next);
       if (languageMatchingGroup != Language.UNKNOWN) {
-        List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
-
-        List<Project> collect = projectByLangauge.stream().filter(project -> project.getKind() == ProjectType.POLYGLOT).collect(Collectors.toList());
+        List<Project> collect = getMatchingProjects(languageMatchingGroup);
 
         if (!collect.isEmpty()) {
           if (collect.size() > 1) {
             logger.info("found multiple polyglot projects ");
           }
+
           int projID = collect.iterator().next().getID();
-          userProjectDAO.setCurrentUserToProject(id, projID);
+          userProjectDAO.add(id, projID);
           logger.info("makeDefaultProjectAssignment : match " + next + " to project " + projID);
         }
         else {
@@ -978,6 +973,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         logger.warn("no language matching group " + next);
       }
     } else logger.info("no groups for user id " + id);
+  }
+
+  private List<Project> getMatchingProjects(Language languageMatchingGroup) {
+    List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
+    return projectByLangauge.stream().filter(project -> project.getKind() == ProjectType.POLYGLOT).collect(Collectors.toList());
   }
 
   private Language getLanguageMatchingGroup(Group next) {

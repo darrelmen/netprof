@@ -116,7 +116,6 @@ public class BasePhoneDAO extends DAO {
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
 
-    // String filePath = getFilePath(audioAnswer, language);
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
         phoneScore,

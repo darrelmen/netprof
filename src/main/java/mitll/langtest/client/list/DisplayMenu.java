@@ -26,12 +26,14 @@ public class DisplayMenu {
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
   private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
 
-
   /**
    *
    */
   private static final String SHOW_SOUNDS = "Show Sounds";
 
+  /**
+   * @see DisplayMenu#storePhoneChoices
+   */
   public static final String SHOW_PHONES = "showPhones";
 
   private static final IconType CHECK = IconType.CHECK;

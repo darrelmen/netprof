@@ -166,13 +166,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.instance = instance;
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
-    controlState.setStorage(new KeyStorage(controller));
-
-
     this.soundFeedback = soundFeedback;
-
-
-    //  addWidgets(e, controller, controlState);
+    controlState.setStorage(new KeyStorage(controller));
   }
 
   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
@@ -242,12 +237,14 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       if (!controlState.isAutoPlay()) {
         // logger.info("maybePlayRef : audio on, so playing ref");
         playRef();
-      } else {
-        //    logger.info("maybePlayRef auto advance on, so not playing ref here");
       }
-    } else {
-      //logger.info("maybePlayRef tab not visible - so no audio.");
+      //else {
+        //    logger.info("maybePlayRef auto advance on, so not playing ref here");
+      //}
     }
+    //else {
+      //logger.info("maybePlayRef tab not visible - so no audio.");
+    //}
   }
 
   private boolean isAudioOn(ControlState controlState) {
@@ -326,9 +323,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   void addCommentBox(DivWidget firstRow) {
-    DivWidget left = getCommentDiv();
-    // left.setWidth("50%");
-    firstRow.add(left);
+    firstRow.add(getCommentDiv());
   }
 
   @NotNull

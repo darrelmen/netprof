@@ -367,6 +367,12 @@ public class PronunciationLookup implements IPronunciationLookup {
     return builder.toString().trim();
   }
 
+  /**
+   * @see #getNumPhonesFromDictionaryOrLTS
+   *
+   * @param process
+   * @return
+   */
   private boolean ltsOutputOk(String[][] process) {
     return !(
         process == null ||

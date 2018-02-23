@@ -37,6 +37,7 @@ import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.MiniUser;
@@ -698,6 +699,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public DBUser getDominoAdminUser() {
     return null;
+  }
+
+  @Override
+  public void setProjectManagement(IProjectManagement projectManagement) {
+
   }
 
   @Override
