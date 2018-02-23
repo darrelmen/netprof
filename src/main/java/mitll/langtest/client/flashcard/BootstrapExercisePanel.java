@@ -343,6 +343,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected void gotEnter() {
+
             playRef();
           }
 

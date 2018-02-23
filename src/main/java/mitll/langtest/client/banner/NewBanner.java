@@ -31,6 +31,12 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
+  private static final List<INavigation.VIEWS> STANDARD_VIEWS =
+      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
+
+
+  private static final List<INavigation.VIEWS> POLY_VIEWS =
+      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS);
 
   private static final String NETPROF = "netprof";
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
@@ -74,6 +80,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * setInverse = white on black background
+   *
    * @param userManager
    * @param lifecycle
    * @see InitialUI#InitialUI
@@ -140,8 +147,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    viewToLink.put(VIEWS.RECORD, getChoice(recnav, VIEWS.RECORD));
-    viewToLink.put(VIEWS.CONTEXT, getChoice(recnav, VIEWS.CONTEXT));
+    viewToLink.put(INavigation.VIEWS.RECORD, getChoice(recnav, INavigation.VIEWS.RECORD));
+    viewToLink.put(INavigation.VIEWS.CONTEXT, getChoice(recnav, INavigation.VIEWS.CONTEXT));
     return recnav;
   }
 
@@ -157,8 +164,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     nav.getElement().setId("defectnav");
     styleNav(nav);
 
-    viewToLink.put(VIEWS.DEFECTS, getChoice(nav, VIEWS.DEFECTS));
-    viewToLink.put(VIEWS.FIX, getChoice(nav, VIEWS.FIX));
+    viewToLink.put(INavigation.VIEWS.DEFECTS, getChoice(nav, INavigation.VIEWS.DEFECTS));
+    viewToLink.put(INavigation.VIEWS.FIX, getChoice(nav, INavigation.VIEWS.FIX));
 
     return nav;
   }
@@ -259,7 +266,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
 
-
   private void getInfoMenu(UserMenu userMenu, Nav rnav) {
     Dropdown info = new Dropdown();
     info.setIcon(IconType.INFO);
@@ -275,7 +281,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
-    for (VIEWS choice : Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS, VIEWS.LISTS)) {
+    boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
+
+    List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
+    for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
         choice1.addStyleName("leftTwentyMargin");
@@ -303,11 +312,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see NewContentChooser#getShowTab
    */
   public void showLearn() {
-    gotClickOnChoice(VIEWS.LEARN.toString(), viewToLink.get(VIEWS.LEARN));
+    gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN));
   }
 
   public void showDrill() {
-    gotClickOnChoice(VIEWS.DRILL.toString(), viewToLink.get(VIEWS.DRILL));
+    gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL));
   }
 
   private void gotClickOnChoice(String instanceName, NavLink learn) {
@@ -316,9 +325,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void showSection(String instance1) {
-    VIEWS choices = VIEWS.NONE;
+    VIEWS choices = INavigation.VIEWS.NONE;
     try {
-      choices = VIEWS.valueOf(instance1.toUpperCase());
+      choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("can't parse " + instance1);
 
@@ -423,11 +432,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private boolean isQC() {
-   // logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
+    // logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     boolean admin = isAdmin();
-   // logger.info("is admin " + admin);
+    // logger.info("is admin " + admin);
     boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
-   // logger.info("is canDoQC " + canDoQC);
+    // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
   }
 
@@ -446,7 +455,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.warning("checkProjectSelected Current view is " + currentView);
       logger.warning("checkProjectSelected Current view link is " + linkToShow);
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(VIEWS.LEARN);
+      linkToShow = viewToLink.get(INavigation.VIEWS.LEARN);
     }
     showActive(linkToShow);
     recordMenuVisible();

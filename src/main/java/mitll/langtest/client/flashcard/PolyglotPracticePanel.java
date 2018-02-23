@@ -35,7 +35,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   private static final long ONE_MIN = (60L * 1000L);
   /**
-   * @seex StatsPracticePanel#showTimeRemaining
+   * @see #showTimeRemaining
    */
   private static final String TIMES_UP = "Times Up!";
 
@@ -44,10 +44,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
 
-  public PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
+  PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                                ControlState controlState, ExerciseController controller,
                                MySoundFeedback soundFeedback,
-                               PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState, ListInterface exerciseListToUse) {
+                               PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState,
+                               ListInterface<L,T> exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
     realAddWidgets(e, controller, controlState);
@@ -149,15 +150,22 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected void playIncorrect() {
   }
 
+  /**
+   * @return null if we're not allowed to play audio.
+   * @see #playRef
+   */
   @Override
   String getRefAudioToPlay() {
-    boolean regular = speedChoices.isRegular();
-    String path = regular ? exercise.getRefAudio() : exercise.getSlowAudioRef();
-    if (path == null) {
-      path = regular ? exercise.getSlowAudioRef() : exercise.getRefAudio(); // fall back to slow audio
+    if (speedChoices == null) {
+      return null;
+    } else {
+      boolean regular = speedChoices.isRegular();
+      String path = regular ? exercise.getRefAudio() : exercise.getSlowAudioRef();
+      if (path == null) {
+        path = regular ? exercise.getSlowAudioRef() : exercise.getRefAudio(); // fall back to slow audio
+      }
+      return path;
     }
-    return path;
-
   }
 
   @Override

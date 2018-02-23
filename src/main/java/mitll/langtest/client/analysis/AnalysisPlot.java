@@ -1027,14 +1027,16 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     if (denom < 0) denom = n;
 
     int percent = getPercent(n, denom);
-    String s = "(" + percent +  "%)";
+    String s = "(" + percent + "%)";
     int score = getAdjustedScore(fround1, percent);
+    String ratio = (n == denom) ? "" + n : n + "/" + denom;
+
     String text = simpleTimeAndScores.size() > 100 ? "" :
         PREFIX + (index + 1) + " : " +
             SCORE + score +
             //"%" +
-            " for " + n + "/" + denom + " " + s +
-            " items ";
+            " for " + ratio + " " + s +
+            " items";
     return text;
   }
 

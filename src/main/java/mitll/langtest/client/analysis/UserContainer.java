@@ -68,20 +68,25 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
+  public static final String NAME = "Name";
+  public static final int NAME_WIDTH = 135;
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  public static final String MINE = "Mine";
-  public static final int SESSION_WIDTH = 100;
-  public static final String POLY_NUMBER = "Session Completed";
-  public static final int LIFETIME_WIDTH = 60;
-  public static final String LIFETIME = "Life. #";
-  public static final int LIFETIME_AVG_WIDTH = 65;
-  public static final String LIFETIME_AVG = "Life. Avg";
-  public static final String OVERALL_SCORE = "Adjust.";
+  private static final String MINE = "Mine";
+  private static final int SESSION_WIDTH = 105;
+  /**
+   *
+   */
+  private static final String POLY_NUMBER = "Session Completed";
+  private static final int LIFETIME_WIDTH = 60;
+  private static final String LIFETIME = "Life. #";
+  private static final int LIFETIME_AVG_WIDTH = 65;
+  private static final String LIFETIME_AVG = "Life. Avg";
+  private static final String OVERALL_SCORE = "Adjust.";
   /**
    * @see #addLastSession
    */
-  public static final int COMPLETED_WIDTH = 60;
+  private static final int COMPLETED_WIDTH = 60;
   private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
   private static final int CURRENT_WIDTH = 60;
 
@@ -546,17 +551,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(shell.getName());
+        String name = shell.getName();
+        return getSafeHtml(name);
       }
     };
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, 130 + "px");
-    addColumn(userCol, new TextHeader("Name"));
+    table.setColumnWidth(userCol, NAME_WIDTH + "px");
+    addColumn(userCol, new TextHeader(NAME));
     table.addColumnSortHandler(getNameSorter(userCol, list));
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getNameSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                               List<UserInfo> dataList) {
+                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getNameCompare);
     return columnSortHandler;
@@ -678,6 +684,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return columnSortHandler;
   }
 
+  /**
+   * Sort by % then by number in set.
+   *
+   * @param englishCol
+   * @param dataList
+   * @return
+   */
   private ColumnSortEvent.ListHandler<UserInfo> getPolyNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -693,10 +706,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              // int compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
               int p1 = getPercent(o1);
               int p2 = getPercent(o2);
               int compare = Integer.compare(p1, p2);
+              if (compare == 0) {
+                compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
+              }
 
               return compare == 0 ? getDateCompare(o1, o2) : compare;
             }
@@ -914,8 +929,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         int lastSessionNum = shell.getLastSessionNum();
         int lastSessionSize = shell.getLastSessionSize();
         if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
-        String columnText = "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
-            "%)";
+        boolean same = lastSessionNum == lastSessionSize;
+        String columnText = same ?
+            ("" + lastSessionNum) :
+            "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
+                "%)";
         return getSafeHtml(columnText);
       }
     };

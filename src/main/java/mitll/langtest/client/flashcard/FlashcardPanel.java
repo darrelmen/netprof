@@ -1206,6 +1206,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #FlashcardPanel
    */
   void playRef() {
+
     String refAudioToPlay = getRefAudioToPlay();
     if (isValid(refAudioToPlay)) {
       playRef(refAudioToPlay);
