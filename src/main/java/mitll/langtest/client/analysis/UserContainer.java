@@ -70,6 +70,12 @@ import java.util.logging.Logger;
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
   private final Logger logger = Logger.getLogger("UserContainer");
 
+  public static final String MINE = "Mine";
+  public static final String POLY_NUMBER = "Session Complete";
+  public static final String LIFETIME = "Life. #";
+  public static final String LIFETIME_AVG = "Life. Avg";
+  public static final String OVERALL_SCORE = "Overall";
+
   private static final boolean SHOW_MY_STUDENTS = false;
   private static final String Y = "Y";
 
@@ -87,11 +93,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private static final String NO_LIST = "(No List)";
   //private static final int FILTER_BY = 19;
-  private static final String CURRENT = "Avg";
+
   /**
    *
    */
-  private static final String POLY = "Poly";
+  private static final String CURRENT = "Avg";
+  /**
+   * @see #addLastSession
+   */
+  private static final String SCORE_FOR_COMPLETED = "Completed Score";
   private static final int CURRENT_WIDTH = 60;
 
   private static final int MIN_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS;
@@ -141,6 +151,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
+
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
@@ -477,7 +488,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     if (polyglot) {
       addPolyNumber(list);
-      table.getColumnSortList().push(addLastSession(list));
+      addLastSession(list);
+      table.getColumnSortList().push(addLastOverallScore(list));
     }
 
     if (!polyglot) {
@@ -547,8 +559,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
-    addColumn(current, new TextHeader(CURRENT));
-    table.setColumnWidth(current, CURRENT_WIDTH + "px");
+    boolean polyglot = isPolyglot();
+    String current1 = polyglot ? LIFETIME_AVG : CURRENT;
+    addColumn(current, new TextHeader(current1));
+    int currentWidth = polyglot ? 80 : CURRENT_WIDTH;
+    table.setColumnWidth(current, currentWidth + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
   }
@@ -556,17 +571,27 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getLastSession();
     current.setSortable(true);
-    addColumn(current, new TextHeader(POLY));
-    table.setColumnWidth(current, 70 + "px");
+    addColumn(current, new TextHeader(SCORE_FOR_COMPLETED));
+    table.setColumnWidth(current, 100 + "px");
 
     table.addColumnSortHandler(getLastSessionSorter(current, list));
+    return current;
+  }
+
+  private Column<UserInfo, SafeHtml> addLastOverallScore(List<UserInfo> list) {
+    Column<UserInfo, SafeHtml> current = getOverall();
+    current.setSortable(true);
+    addColumn(current, new TextHeader(OVERALL_SCORE));
+    table.setColumnWidth(current, 80 + "px");
+
+    table.addColumnSortHandler(getOverallSorter(current, list));
     return current;
   }
 
   private void addMine(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getMineCol();
     current.setSortable(true);
-    addColumn(current, new TextHeader("Mine"));
+    addColumn(current, new TextHeader(MINE));
     table.setColumnWidth(current, 65 + "px");
 
     table.addColumnSortHandler(getMineSorter(current, list));
@@ -575,17 +600,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
-    addColumn(num, new TextHeader("#"));
+
+    boolean polyglot = isPolyglot();
+    String text = polyglot ? LIFETIME : "#";
+
+    addColumn(num, new TextHeader(text));
     table.addColumnSortHandler(getNumSorter(num, list));
-    table.setColumnWidth(num, NUM_WIDTH + "px");
+    int numWidth = polyglot ? 65 : NUM_WIDTH;
+    table.setColumnWidth(num, numWidth + "px");
   }
 
   private void addPolyNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getPolyNum();
     num.setSortable(true);
-    addColumn(num, new TextHeader("P #"));
+    addColumn(num, new TextHeader(POLY_NUMBER));
     table.addColumnSortHandler(getPolyNumSorter(num, list));
-    table.setColumnWidth(num, 60 + "px");
+    table.setColumnWidth(num, 80 + "px");
   }
 
   /**
@@ -631,13 +661,24 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              int compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
+              // int compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
+              int p1 = getPercent(o1);
+              int p2 = getPercent(o2);
+              int compare = Integer.compare(p1, p2);
+
               return compare == 0 ? getDateCompare(o1, o2) : compare;
             }
           }
           return -1;
         });
     return columnSortHandler;
+  }
+
+  private int getPercent(UserInfo o1) {
+    int lastSessionNum1 = o1.getLastSessionNum();
+    int lastSessionSize1 = o1.getLastSessionSize();
+    if (lastSessionSize1 == -1) lastSessionSize1 = lastSessionNum1;
+    return getPercent(lastSessionNum1, lastSessionSize1);
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
@@ -675,6 +716,29 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
             if (o2 == null) return 1;
             else {
               return Integer.compare(o1.getLastSessionScore(), o2.getLastSessionScore());
+            }
+          }
+          return -1;
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getOverallSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                                 List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              int s1 = getAdjustedScore(o1);
+              int s2 = getAdjustedScore(o2);
+              return Integer.compare(s1, s2);
             }
           }
           return -1;
@@ -740,6 +804,41 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     };
   }
 
+  private Column<UserInfo, SafeHtml> getOverall() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public boolean isDefaultSortAscending() {
+        return false;
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        int adjustedScore = getAdjustedScore(shell);
+        return getSafeHtml("" + adjustedScore);
+      }
+    };
+  }
+
+  private int getAdjustedScore(UserInfo shell) {
+    int percent = getPercent(shell);
+    int lastSessionScore = shell.getLastSessionScore();
+
+    float lastf = (float) lastSessionScore;
+    if (percent < 50) {
+      lastf *= 0.8f;
+    } else if (percent < 60) {
+      lastf *= 0.9f;
+    }
+
+    return  Math.round(lastf);
+  }
+
   private Column<UserInfo, SafeHtml> getMineCol() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -780,9 +879,24 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getLastSessionNum());
+        int lastSessionNum = shell.getLastSessionNum();
+        int lastSessionSize = shell.getLastSessionSize();
+        if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
+        String columnText = "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
+            "%)";
+        return getSafeHtml(columnText);
       }
     };
+  }
+
+
+  private int getPercent(float totalScore, float denom) {
+    float v = totalScore / denom;
+    // logger.info("ratio " + v);
+    float fround = Math.round(v * 100);
+    // logger.info("fround " + fround);
+
+    return (int) (fround);
   }
 
   private int req = 0;

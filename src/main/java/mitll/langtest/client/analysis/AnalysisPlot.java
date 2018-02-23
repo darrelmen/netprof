@@ -48,6 +48,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -64,7 +65,7 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 
 /**
  * TODO : subclass for polyglot, no if's.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -73,12 +74,12 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
-  public static final int STUDENT_WIDTH = 1070;
+  private static final int STUDENT_WIDTH = 1070;
 
   /**
    *
    */
-  private static final String PREFIX = "Session ";//"Sess. #";
+  private static final String PREFIX = "Sess. #";//"Sess. #";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
@@ -217,7 +218,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
 
-
   private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
     float totalScore = 0f;
 
@@ -235,7 +235,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     //  logger.info("total " + totalScore);
     // logger.info("possible " + possible);
-    float denom = (float) sessionSize == -1 ? n : sessionSize;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
+    // float denom = (float) sessionSize == -1 ? n : sessionSize;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
+
+    //int n = simpleTimeAndScores.size();
+    float denom = (float) n;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
+
     return getPercent(totalScore, denom);
   }
 
@@ -342,7 +346,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private String getSubtitle(UserPerformance userPerformance, List<TimeAndScore> rawBestScores) {
     float percentAvg = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();
-    //  return "Score and average : " + rawTotal + " items, avg " + (int) percentAvg + " %";
     return getChartSubtitle((int) percentAvg, rawTotal);
   }
 
@@ -1020,14 +1023,35 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     // int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
     int denom = simpleTimeAndScores.iterator().next().getSessionSize();
 
+    if (denom < 0) denom = n;
+
+    int percent = getPercent(n, denom);
+    String s = "(" + percent +  "%)";
+    int score = getAdjustedScore(fround1, percent);
     String text = simpleTimeAndScores.size() > 100 ? "" :
-        PREFIX + (index + 1) + " : score " + fround1 +
-            //"/" + (10 * denom) +
-            "%" +
-            " for " + n + "/" + denom +
-            " items (" + getPercent(n, denom) +
-            "%)";
+        PREFIX + (index + 1) + " : score " + score +
+            //"%" +
+            " for " + n + "/" + denom + " " + s +
+            " items ";
     return text;
+  }
+
+  /**
+   * Tamas wants a penalty for not doing them all.
+   *
+   * @param score
+   * @param percent
+   * @return
+   */
+  private int getAdjustedScore(int score, int percent) {
+    float lastf = (float) score;
+    if (percent < 50) {
+      lastf *= 0.8f;
+    } else if (percent < 60) {
+      lastf *= 0.9f;
+    }
+
+    return Math.round(lastf);
   }
 
   public interface TimeChangeListener {

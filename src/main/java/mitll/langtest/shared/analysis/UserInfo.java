@@ -33,6 +33,7 @@
 package mitll.langtest.shared.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.cellview.client.Column;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -52,6 +53,7 @@ public class UserInfo implements HasID {
   private int current;
   private int lastSessionScore;
   private int lastSessionNum;
+  private int lastSessionSize;
   private int num;
   private long startTime;
 
@@ -84,10 +86,12 @@ public class UserInfo implements HasID {
   private void setLastSessionScore(List<BestScore> bestScores) {
     long maxSession = Long.MIN_VALUE;
     Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
+    int lastSessionSize=-1;
     for (BestScore bestScore : bestScores) {
       long sessionStart = bestScore.getSessionStart();
       if (sessionStart > maxSession) {
         maxSession = sessionStart;
+        lastSessionSize = bestScore.getSessionSize();
       }
       List<BestScore> bestScores1 = sessionToScores.computeIfAbsent(sessionStart, k -> new ArrayList<>());
       bestScores1.add(bestScore);
@@ -96,6 +100,7 @@ public class UserInfo implements HasID {
 
     lastSessionScore = getPercent(bestScores1);
     lastSessionNum = bestScores1.size();
+    this.lastSessionSize = lastSessionSize;
   }
 
   private int getPercent(List<BestScore> bestScores1) {
@@ -107,7 +112,7 @@ public class UserInfo implements HasID {
   }
 
   private static int toPercent(float total, float size) {
-    return (int) Math.ceil(100 * total / size);
+    return Math.round(100f * total / size);
   }
 
   public long getTimestampMillis() {
@@ -193,8 +198,17 @@ public class UserInfo implements HasID {
     return lastSessionScore;
   }
 
+  /**
+   * @see UserContainer#getPolyNum
+   * @see UserContainer#getPolyNumSorter
+   * @return
+   */
   public int getLastSessionNum() {
     return lastSessionNum;
+  }
+
+  public int getLastSessionSize() {
+    return lastSessionSize;
   }
 
   public String toString() {
