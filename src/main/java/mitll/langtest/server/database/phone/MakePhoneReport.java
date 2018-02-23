@@ -4,6 +4,7 @@ import mitll.langtest.server.database.analysis.PhoneAnalysis;
 import mitll.langtest.shared.analysis.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -127,30 +128,18 @@ public class MakePhoneReport {
    * distinct words.
    *
    * @param phoneToAvg
-   * @param sorted
+   * @param sortedPhones
    * @return
    */
-  private Map<String, List<WordAndScore>> sortPhonesByLatest(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
-    Map<String, List<WordAndScore>> phoneToMinimal = new HashMap<>();
-    for (Map.Entry<String, PhoneStats> pair : phoneToAvg.entrySet()) {
-      PhoneStats value = pair.getValue();
-      Map<String, WordAndScore> wordToExample = new HashMap<>();
-      for (TimeAndScore item : value.getTimeSeries()) {
-//        logger.info("got " + item + " at " + new Date(item.getTimestamp()));
-        wordToExample.put(item.getWordAndScore().getWord(), item.getWordAndScore());
-      }
-      phoneToMinimal.put(pair.getKey(), new ArrayList<>(wordToExample.values()));
-    }
+  private Map<String, List<WordAndScore>> sortPhonesByLatest(final Map<String, PhoneStats> phoneToAvg, List<String> sortedPhones) {
+    Map<String, List<WordAndScore>> phoneToMinimal = getPhoneToMinimal(phoneToAvg);
 
     final Map<String, Float> phoneToScore = new HashMap<>();
     for (Map.Entry<String, List<WordAndScore>> pair : phoneToMinimal.entrySet()) {
-      float total = 0;
-      for (WordAndScore example : pair.getValue()) total += example.getPronScore();
-      total /= pair.getValue().size();
-      phoneToScore.put(pair.getKey(), total);
+      phoneToScore.put(pair.getKey(), getAverage(pair));
     }
 
-    Collections.sort(sorted, (o1, o2) -> {
+    sortedPhones.sort((o1, o2) -> {
       Float current = phoneToScore.get(o1);
       Float current1 = phoneToScore.get(o2);
       int i = current.compareTo(current1);
@@ -158,9 +147,32 @@ public class MakePhoneReport {
     });
 
     if (DEBUG) {
-      for (String phone : sorted) {
+      for (String phone : sortedPhones) {
         logger.info("phone " + phone + " : " + phoneToScore.get(phone) + " " + phoneToMinimal.get(phone));
       }
+    }
+    return phoneToMinimal;
+  }
+
+  private float getAverage(Map.Entry<String, List<WordAndScore>> pair) {
+    float total = 0;
+    for (WordAndScore example : pair.getValue()) total += example.getPronScore();
+    total /= pair.getValue().size();
+    return total;
+  }
+
+  @NotNull
+  private Map<String, List<WordAndScore>> getPhoneToMinimal(Map<String, PhoneStats> phoneToAvg) {
+    Map<String, List<WordAndScore>> phoneToMinimal = new HashMap<>();
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvg.entrySet()) {
+      PhoneStats value = pair.getValue();
+      Map<String, WordAndScore> wordToExample = new HashMap<>();
+      for (TimeAndScore item : value.getTimeSeries()) {
+//        logger.info("got " + item + " at " + new Date(item.getTimestamp()));
+        WordAndScore wordAndScore = item.getWordAndScore();
+        wordToExample.put(wordAndScore.getWord(), wordAndScore);
+      }
+      phoneToMinimal.put(pair.getKey(), new ArrayList<>(wordToExample.values()));
     }
     return phoneToMinimal;
   }

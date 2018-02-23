@@ -33,7 +33,6 @@
 package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -254,7 +253,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
 
-        final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
+        final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this,
             addKeyBinding, controller,
             PressAndHoldExercisePanel.this.instance) {
 

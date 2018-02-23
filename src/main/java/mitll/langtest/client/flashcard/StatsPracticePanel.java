@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -32,10 +33,13 @@ import java.util.logging.Logger;
 /**
  * @see ExercisePanelFactory#getExercisePanel(Shell)
  */
-class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
-    extends BootstrapExercisePanel<CommonAnnotatable> {
+class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extends BootstrapExercisePanel<CommonAnnotatable> {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
+  /**
+   *
+   */
+  private static final int BUTTON_RIGHT_MARGIN = 8;
   private static final String TRY_AGAIN = "Try Again?";
   private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";
 
@@ -233,19 +237,29 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
    * @see #showFeedbackCharts
    */
   private Panel getButtonsBelowScoreHistory() {
-    Panel child = new HorizontalPanel();
+    // Panel child = new HorizontalPanel();
+    DivWidget child = new DivWidget();
+    child.addStyleName("floatRight");
 
-    final Button w = getSummaryStartOver();
-    child.add(w);
-    w.addStyleName("topFiveMargin");
+    {
+      final Button w = getSummaryStartOver();
+      child.add(w);
+      w.addStyleName("topFiveMargin");
+    }
 
     DivWidget lefty = new DivWidget();
     lefty.add(child);
+    lefty.setWidth("100%");
+
     return lefty;
   }
 
+  /**
+   * @return
+   */
   private Button getSummaryStartOver() {
     final Button w = new Button();
+    w.getElement().getStyle().setMarginRight(BUTTON_RIGHT_MARGIN, Style.Unit.PX);
     w.setType(ButtonType.SUCCESS);
     w.setText(TRY_AGAIN);
     w.setIcon(IconType.REPEAT);
@@ -259,21 +273,17 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     return w;
   }
 
-  void gotTryAgain() {
-    doIncorrectFirst();
-
-  }
+  void gotTryAgain() {    doIncorrectFirst();  }
 
   /**
    * @see #getSummaryStartOver()
    */
   private void doIncorrectFirst() {
     showFlashcardDisplay();
-
-     sticky.reset();
+    sticky.reset();
 
     statsFlashcardFactory.reload();
-     makeFlashcardButtonsVisible();
+    makeFlashcardButtonsVisible();
 
     sticky.resetStorage();
   }
@@ -412,7 +422,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
   void gotSeeScoresClick() {
     abortPlayback();
     seeScores.setEnabled(false);
-     onSetComplete();
+    onSetComplete();
   }
 
   /**

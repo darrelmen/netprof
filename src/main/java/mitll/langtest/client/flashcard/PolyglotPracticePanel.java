@@ -67,7 +67,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   @Override
-  protected void addRecordingAndFeedbackWidgets(int exerciseID, ExerciseController controller, Panel toAddTo) {
+  protected void addRecordingAndFeedbackWidgets(int exerciseID,
+                                                ExerciseController controller, Panel toAddTo) {
     super.addRecordingAndFeedbackWidgets(exerciseID, controller, toAddTo);
 
     AudioAnswer answer = sticky.getAnswer(exerciseID);
@@ -147,8 +148,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     return b;
   }
 
-  protected void playIncorrect() {
-  }
+  protected void playIncorrect() {}
 
   /**
    * @return null if we're not allowed to play audio.

@@ -42,12 +42,12 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.KeyStorage;
@@ -239,11 +239,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
         playRef();
       }
       //else {
-        //    logger.info("maybePlayRef auto advance on, so not playing ref here");
+      //    logger.info("maybePlayRef auto advance on, so not playing ref here");
       //}
     }
     //else {
-      //logger.info("maybePlayRef tab not visible - so no audio.");
+    //logger.info("maybePlayRef tab not visible - so no audio.");
     //}
   }
 
@@ -617,7 +617,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getThreePartContent(ControlState, Panel, DivWidget, DivWidget)
    */
-   Panel getRightColumn(final ControlState controlState) {
+  Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
     rightColumn.add(getAudioGroup(controlState));
@@ -629,7 +629,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   @NotNull
-   Widget getKeyBinding() {
+  Widget getKeyBinding() {
     Widget child = new HTML(getKeyBindings());
     child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
     child.setWidth(KEY_PRESS_WIDTH + "px");
@@ -888,12 +888,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     controlState.setAudioOn(state);
   }
 
-/*
-  private void rememberAudioOnChoice(boolean state) {
-    controlState.setAudioOn(state);
-  }
-*/
-
   void abortPlayback() {
   }
 
@@ -1069,6 +1063,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   /**
+   * TODO : remove table...
+   *
    * @param foreignSentence
    * @param hasRefAudio
    * @return
@@ -1078,19 +1074,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     Panel hp = new HorizontalPanel();
     hp.add(getFLContainer(foreignSentence));
 
-    Icon w = new Icon(IconType.VOLUME_UP);
-    w.setSize(IconSize.TWO_TIMES);
-
-    if (!hasRefAudio) {
-      w.getElement().getStyle().setColor("red");
-    }
-
-    {
-      Panel simple = new SimplePanel();
-      simple.add(w);
-      simple.addStyleName("leftTenMargin");
-      hp.add(simple);
-    }
+    Widget hasAudioIndicator = getHasAudioIndicator(hasRefAudio);
+    if (hasAudioIndicator != null) hp.add(hasAudioIndicator);
 
     FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
     flPhraseContainer.getElement().setId("FLPhrase_container");
@@ -1104,14 +1089,30 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return flPhraseContainer;
   }
 
+  Widget getHasAudioIndicator(boolean hasRefAudio) {
+    Icon audioIndicator = new Icon(IconType.VOLUME_UP);
+    audioIndicator.setSize(IconSize.TWO_TIMES);
+
+    if (!hasRefAudio) {
+      audioIndicator.getElement().getStyle().setColor("red");
+    }
+
+    Panel simple = new SimplePanel();
+    simple.add(audioIndicator);
+    simple.addStyleName("leftTenMargin");
+
+    return simple;
+  }
+
   @NotNull
   private Widget getFLContainer(String foreignSentence) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
 
-    Element element = foreignLanguageContent.getElement();
+    //Element element = foreignLanguageContent.getElement();
     //element.setId("ForeignLanguageContent");
-    element.getStyle().setTextAlign(Style.TextAlign.CENTER);
-    foreignLanguageContent.getElement().getStyle().setProperty("fontFamily", "sans-serif");
+    Style style = foreignLanguageContent.getElement().getStyle();
+    style.setTextAlign(Style.TextAlign.CENTER);
+    style.setProperty("fontFamily", "sans-serif");
     return foreignLanguageContent;
   }
 
@@ -1129,15 +1130,22 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    focusPanel.addClickHandler(event -> {
-      //logger.info("addAudioBindings : click on audio playback panel...");
-      setAutoPlay(false);
-      playRefLater();
-      event.getNativeEvent().stopPropagation();
-    });
+    //logger.info("addAudioBindings : click on audio playback panel...");
+    focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));
     focusPanel.addFocusHandler(event -> focusPanel.setFocus(false));
+  }
+
+  /**
+   * What about click to flip?
+   *
+   * @param event
+   */
+  void onClickOnCard(ClickEvent event) {
+    setAutoPlay(false);
+    playRefLater();
+    event.getNativeEvent().stopPropagation();
   }
 
   /**

@@ -33,8 +33,8 @@
 package mitll.langtest.client.instrumentation;
 
 public class EventContext {
-  final String exid;
-  final String context;
+  private final String exid;
+  private final String context;
   private int userid = -1; // fill in later
 
   public EventContext(String exid, String context) {
@@ -53,6 +53,14 @@ public class EventContext {
 
   public int getUserid() {
     return userid;
+  }
+
+  public String getExid() {
+    return exid;
+  }
+
+  public String getContext() {
+    return context;
   }
 
   public String toString() {

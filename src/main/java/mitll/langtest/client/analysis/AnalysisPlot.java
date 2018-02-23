@@ -74,7 +74,8 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
-  private static final int STUDENT_WIDTH = 1070;
+  private static final String ITEMS = "";// items";
+  private static final int STUDENT_WIDTH = 1050;
 
   /**
    *
@@ -1013,6 +1014,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   /**
+   * Uses remembered session size.
    * @param simpleTimeAndScores
    * @param index
    * @return
@@ -1021,10 +1023,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores, int index) {
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
-    // int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
     int denom = simpleTimeAndScores.iterator().next().getSessionSize();
 
     if (denom < 0) denom = n;
+    if (denom > n) denom = n; // denom never larger than numerator...
 
     int percent = getPercent(n, denom);
     String s = "(" + percent + "%)";
@@ -1036,7 +1038,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
             SCORE + score +
             //"%" +
             " for " + ratio + " " + s +
-            " items";
+            ITEMS;
     return text;
   }
 

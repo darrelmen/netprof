@@ -1155,7 +1155,7 @@ public class LangTest implements
 
   /**
    * @param listener
-   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, RecordButton.RecordingListener, boolean, ExerciseController, String)
    */
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {

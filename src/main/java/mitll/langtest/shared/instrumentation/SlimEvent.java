@@ -54,7 +54,7 @@ public class SlimEvent implements IsSerializable, Comparable<SlimEvent> {
 
   @Override
   public int compareTo(SlimEvent o) {
-    return timestamp < o.timestamp ? -1 : timestamp > o.timestamp ? +1 : 0;
+    return Long.compare(timestamp, o.timestamp);
   }
 
   public int getUserID() {

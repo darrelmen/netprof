@@ -46,7 +46,6 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class Event extends SlimEvent {
-  //private Long id;
   private String widgetID;
   private String widgetType;
   private String exerciseID;
@@ -111,17 +110,4 @@ public class Event extends SlimEvent {
         " info " + getExerciseID() + "/" + getExid() + " : " + getContext() +
         " from " + device;
   }
-
-/*
-  private void setContext(String context) {
-    this.context = context;
-  }
-*/
-
-/*  public void truncate() {
-    String context = getContext();
-    if (context.length() > 255) {
-      setContext(context.substring(0, 255));
-    }
-  }*/
 }

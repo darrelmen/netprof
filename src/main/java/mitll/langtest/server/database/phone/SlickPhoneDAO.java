@@ -131,7 +131,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        String language,
                                        Project project) {
     Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByExercises, true, true,
+    PhoneReport report = getPhoneReport(phoneReportByExercises, false, false,
         userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser " +

@@ -82,7 +82,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
   private static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
-  public static final String GOT_BROWSER_EXCEPTION = "got browser exception";
+  private static final String GOT_BROWSER_EXCEPTION = "got browser exception";
 
   /**
    * @see
@@ -286,12 +286,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
-   * @param ids            items the user has actually practiced/recorded audio for
-   * @param latestResultID
-   * @param typeToSection  indicates the unit and chapter(s) we're asking about
-   * @param userListID     if we're asking about a list and not predef items
+   * @paramx ids            items the user has actually practiced/recorded audio for
+   * @paramx latestResultID
+   * @paramx typeToSection  indicates the unit and chapter(s) we're asking about
+   * @paramx userListID     if we're asking about a list and not predef items
    * @return
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
+   * @seex mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
 /*
   @Override

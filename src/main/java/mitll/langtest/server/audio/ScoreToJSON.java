@@ -45,6 +45,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -112,40 +113,34 @@ public class ScoreToJSON {
         }
       } else {
         List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
-        List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+
         if (words != null) {
+          List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+
           int windex = 0;
           int pindex = 0;
           JSONArray jsonWords = new JSONArray();
 
           for (TranscriptSegment segment : words) {
             String event = segment.getEvent();
-            if (!event.equals(ASR.UNKNOWN_MODEL) && !event.equals("sil")) {
-              JSONObject wordJson = new JSONObject();
-              String wid = Integer.toString(windex++);
-              wordJson.put("id", wid);
-              wordJson.put("w", event);
-              wordJson.put("s", getScore(segment));
-              wordJson.put("str", floatToString(segment.getStart()));
-              wordJson.put("end", floatToString(segment.getEnd()));
+            if (isValidEvent(event)) {
+              JSONObject wordJson = getJSONForWord(segment, event, Integer.toString(windex++));
 
-              JSONArray jsonPhones = new JSONArray();
+              {
+                JSONArray jsonPhones = new JSONArray();
 
-              for (TranscriptSegment pseg : phones) {
-                if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
-                  String pevent = pseg.getEvent();
-                  if (!pevent.equals(ASR.UNKNOWN_MODEL) && !pevent.equals("sil")) {
-                    JSONObject phoneJson = new JSONObject();
-                    phoneJson.put("id", Integer.toString(pindex++));
-                    phoneJson.put("p", pevent);
-                    phoneJson.put("s", getScore(pseg));
-                    phoneJson.put("str", floatToString(pseg.getStart()));
-                    phoneJson.put("end", floatToString(pseg.getEnd()));
-                    jsonPhones.add(phoneJson);
+                for (TranscriptSegment pseg : phones) {
+                  if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+                    String pevent = pseg.getEvent();
+                    if (isValidEvent(pevent)) {
+                      JSONObject phoneJson = getJSONForPhone(pindex, pseg, pevent);
+                      pindex++;
+                      jsonPhones.add(phoneJson);
+                    }
                   }
                 }
+                wordJson.put("phones", jsonPhones);
               }
-              wordJson.put("phones", jsonPhones);
               jsonWords.add(wordJson);
             }
           }
@@ -159,6 +154,32 @@ public class ScoreToJSON {
 //      logger.warn("pretest score is null?");
     }
     return jsonObject;
+  }
+
+  private boolean isValidEvent(String event) {
+    return !event.equals(ASR.UNKNOWN_MODEL) && !event.equals("sil");
+  }
+
+  @NotNull
+  private JSONObject getJSONForWord(TranscriptSegment segment, String event, String wid) {
+    JSONObject wordJson = new JSONObject();
+    wordJson.put("id", wid);
+    wordJson.put("w", event);
+    wordJson.put("s", getScore(segment));
+    wordJson.put("str", floatToString(segment.getStart()));
+    wordJson.put("end", floatToString(segment.getEnd()));
+    return wordJson;
+  }
+
+  @NotNull
+  private JSONObject getJSONForPhone(int pindex, TranscriptSegment pseg, String pevent) {
+    JSONObject phoneJson = new JSONObject();
+    phoneJson.put("id", Integer.toString(pindex));
+    phoneJson.put("p", pevent);
+    phoneJson.put("s", getScore(pseg));
+    phoneJson.put("str", floatToString(pseg.getStart()));
+    phoneJson.put("end", floatToString(pseg.getEnd()));
+    return phoneJson;
   }
 
   private String getScore(TranscriptSegment segment) {

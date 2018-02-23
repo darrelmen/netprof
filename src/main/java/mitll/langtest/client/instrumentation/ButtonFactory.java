@@ -34,8 +34,6 @@ package mitll.langtest.client.instrumentation;
 
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
@@ -86,24 +84,16 @@ public class ButtonFactory implements EventLogger {
   public void registerButton(final UIObject button, EventContext context) {
     if (button instanceof HasClickHandlers) {
       HasClickHandlers button1 = (HasClickHandlers) button;
-      button1.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          logEvent(button, "button", context);
-        }
-      });
+      button1.addClickHandler(event -> logEvent(button, "button", context));
     }
   }
 
   @Override
   public void registerWidget(final HasClickHandlers clickable, final UIObject uiObject, EventContext context) {
-    clickable.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String widgetType = uiObject.getClass().toString();
-        widgetType = widgetType.substring(widgetType.lastIndexOf(".") + 1);
-        logEvent(uiObject, widgetType, context);
-      }
+    clickable.addClickHandler(event -> {
+      String widgetType = uiObject.getClass().toString();
+      widgetType = widgetType.substring(widgetType.lastIndexOf(".") + 1);
+      logEvent(uiObject, widgetType, context);
     });
   }
 
@@ -157,7 +147,7 @@ public class ButtonFactory implements EventLogger {
   private void sendEvent(String widgetID, String widgetType, EventContext context, String browserInfo) {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     int projID = projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
-    service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), browserInfo,
+    service.logEvent(widgetID, widgetType, context.getExid(), context.getContext(), context.getUserid(), browserInfo,
         projID, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {

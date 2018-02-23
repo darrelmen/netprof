@@ -72,6 +72,9 @@ public class RecordButton extends Button {
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
 
+  /**
+   * flip period
+   */
   private static final int PERIOD_MILLIS = 500;
 
   private static final String WINDOWS = "Win32";
@@ -86,6 +89,10 @@ public class RecordButton extends Button {
 
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
+
+  /**
+   * don't actually stop recording until a little while after end of recording
+   */
   private Timer afterStopTimer = null;
 
   public interface RecordingListener {
@@ -393,7 +400,6 @@ public class RecordButton extends Button {
     }
   }
 
-
   protected static native String getPlatform() /*-{
       return window.navigator.platform;
   }-*/;
@@ -411,18 +417,10 @@ public class RecordButton extends Button {
     }
   }
 
-  void removeTooltip() {
-  }
-
   private void showTooLoud() {
     final RecordButton widget = this;
-    removeTooltip();
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        new BasicDialog().showPopover(widget,
-            null,
-            propertyHandler.getTooLoudMessage(), Placement.RIGHT);
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> new BasicDialog().showPopover(widget,
+        null,
+        propertyHandler.getTooLoudMessage(), Placement.RIGHT));
   }
 }

@@ -193,6 +193,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showDrill() {
     clear();
+    fixDivToNotScrollUnderHeader();
 
     if (isPolyglot()) {
       showPolyDialog();
@@ -360,6 +361,7 @@ public class NewContentChooser implements INavigation {
     return divWidget;
   }
 
+  /*
   @NotNull
   private ShowTab getShowTab() {
     return exid -> {
@@ -372,7 +374,7 @@ public class NewContentChooser implements INavigation {
         banner.showLearn();
       }
     };
-  }
+  }*/
 
   @Override
   public void showLearnList(int listid) {

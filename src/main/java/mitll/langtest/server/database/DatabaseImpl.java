@@ -1035,6 +1035,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.warn("no projects loaded yet ???");
       return false;
     } else {
+      int realExid = -1;
+      try {
+        realExid = Integer.parseInt(exid);
+      } catch (NumberFormatException e) {
+        logger.warn("couldn't parse exid '" + exid + "'");
+        //e.printStackTrace();
+      }
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }

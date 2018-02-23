@@ -566,10 +566,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #startSong(String)
    */
   private void createSound(String song) {
-//    if (LOCAL_TESTING) {
-//      currentPath = song;
-//    }
-
     currentSound = new Sound(this);
     if (DEBUG) {
       logger.info("PlayAudioPanel.createSound  : (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);

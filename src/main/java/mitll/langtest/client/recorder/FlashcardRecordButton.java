@@ -32,17 +32,14 @@
 
 package mitll.langtest.client.recorder;
 
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
-import mitll.langtest.client.initial.PopupHelper;
 
 import java.util.logging.Logger;
 
@@ -73,23 +70,22 @@ public class FlashcardRecordButton extends RecordButton {
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
 
-  //  private boolean warnUserWhenNotSpace;
-  // private final boolean addKeyBinding;
   private final ExerciseController controller;
-  // private final Tooltip tooltip;
   private static final boolean DEBUG = false;
 
   /**
    * @param delay
    * @param recordingListener
-   * @param warnNotASpace
    * @param addKeyBinding
    * @param controller
    * @param instance
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    */
-  public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
-                               boolean addKeyBinding, ExerciseController controller, final String instance) {
+  public FlashcardRecordButton(int delay,
+                               RecordingListener recordingListener,
+                               boolean addKeyBinding,
+                               ExerciseController controller,
+                               final String instance) {
     super(delay, recordingListener, true, controller.getProps());
 
     if (addKeyBinding) {
@@ -109,9 +105,6 @@ public class FlashcardRecordButton extends RecordButton {
     initRecordButton();
 
     getElement().setId("FlashcardRecordButton_" + instance);
-
-    //tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
-//    logger.info("FlashcardRecordButton : using " + getElement().getExID());
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
@@ -222,11 +215,6 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected boolean shouldIgnoreKeyPress() {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
-    //if (b) {
-    //logger.info("attached " + isAttached());
-    //   logger.info("hidden   " + checkHidden(getElement().getExID()));
-    //  logger.info("user     " + controller.getUser());
-    // }
     return b;
   }
 
@@ -234,19 +222,6 @@ public class FlashcardRecordButton extends RecordButton {
       return $wnd.jQuery('#' + id).is(":hidden");
   }-*/;
 
-  /**
-   * @see #checkKeyDown(com.google.gwt.dom.client.NativeEvent)
-   */
-/*  private void warnNotASpace() {
-    logger.warning("warnNotASpace --- ");
-    showPopup(NO_SPACE_WARNING);
-  }*/
-
-/*
-  private void showPopup(String html) {
-    new PopupHelper().showPopup(html);
-  }
-*/
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();
     return true;
@@ -277,13 +252,5 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected String getPrompt() {
     return PROMPT;
-  }
-
-  public void removeTooltip() {
-
-/*    if (tooltip != null) {
-      tooltip.remove(this);
-//      tooltip.reconfigure();
-    }*/
   }
 }

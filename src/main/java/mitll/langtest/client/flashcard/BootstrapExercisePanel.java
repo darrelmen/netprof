@@ -294,7 +294,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         final FlashcardRecordButton widgets = new FlashcardRecordButton(
             controller.getRecordTimeout(),
             this,
-            true,
             addKeyBinding,
             controller,
             BootstrapExercisePanel.this.instance) {
@@ -479,17 +478,18 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       clearFeedback();
       recoOutput.clear();
     } else {
-      long round = Math.round(score * 100f);
-      int oldID = exercise.getID();
-
+      String prefix = "";
       if (isCorrect(correct, score)) {
         showCorrectFeedback(score, result.getPretestScore());
-        controller.logEvent(button, "Button", oldID, "correct response - score " + round);
       } else {   // incorrect!!
-        //  logger.info("show incorrect feedback for " + heard + " score " + score);
         showIncorrectFeedback(result, score, hasRefAudio);
-        controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
+        prefix = "in";
       }
+
+      controller.logEvent(button, "Button", exercise.getID(), prefix + "correct response - score " +
+          Math.round(score * 100f));
+
+      // load audio?  why fetch it? unless we're going to play it?
       playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()));
     }
   }
@@ -533,6 +533,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
   }
 
+  /**
+   * Polyglot does auto advance if score is high enough.
+   * @param score
+   */
   void maybeAdvance(double score) {
   }
 

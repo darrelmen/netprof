@@ -2,21 +2,24 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
-class HidePolyglotPanel extends PolyglotPracticePanel {
+class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L,T> {
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
-  public HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
-                           ControlState controlState,
-                           ExerciseController controller,
-                           MySoundFeedback soundFeedback,
-                           PolyglotDialog.PROMPT_CHOICE prompt,
-                           CommonAnnotatable e,
-                           StickyState stickyState,
-                           ListInterface exerciseListToUse) {
+  HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
+                    ControlState controlState,
+                    ExerciseController controller,
+                    MySoundFeedback soundFeedback,
+                    PolyglotDialog.PROMPT_CHOICE prompt,
+                    CommonAnnotatable e,
+                    StickyState stickyState,
+                    ListInterface<L,T> exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
   }
 
@@ -29,13 +32,22 @@ class HidePolyglotPanel extends PolyglotPracticePanel {
 
   /**
    * no comment
+   *
    * @param firstRow
    */
-
   @Override
   void addCommentBox(DivWidget firstRow) {
-    DivWidget left = getCommentDiv();
+    getCommentDiv();
+  }
 
+  /**
+   * No audio play indicator, since it's not available. Thanks Jonathan S.
+   *
+   * @param hasRefAudio
+   * @return
+   */
+  Widget getHasAudioIndicator(boolean hasRefAudio) {
+    return null;
   }
 
   String getKeyBindings() {

@@ -65,7 +65,7 @@ public class PropertyHandler {
    *
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 120;//185;//85;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 140;//120;//185;//85;
 
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
@@ -82,7 +82,6 @@ public class PropertyHandler {
 
   // URL parameters that can override above parameters
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
-//  private static final String EXERCISE_TITLE = "exercise_title";
 
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
@@ -151,7 +150,6 @@ public class PropertyHandler {
   public boolean isAMAS() {
     return isAMAS;
   }
-
   public boolean isBeta() {
     return true;
   }
@@ -204,8 +202,6 @@ public class PropertyHandler {
 
   private String splashTitle = null;
   private String appTitle = null;
-
-  // private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
 
   private static final String RESPONSE_TYPE = "responseType";
@@ -275,7 +271,7 @@ public class PropertyHandler {
   }
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";// Alpha";
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";
   }
 
   public String getInitialPrompt() {

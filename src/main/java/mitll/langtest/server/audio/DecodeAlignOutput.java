@@ -128,11 +128,6 @@ public class DecodeAlignOutput {
     return numPhones;
   }
 
-  @Override
-  public String toString() {
-    return "Took " + processDurInMillis + " to score " + score + " # phones " + numPhones;
-  }
-
   public int getProcessDurInMillis() {
     return (int) processDurInMillis;
   }
@@ -143,6 +138,11 @@ public class DecodeAlignOutput {
 
   public boolean isCorrect() {
     return isCorrect;
+  }
+
+  @Override
+  public String toString() {
+    return "Took " + processDurInMillis + " to score " + score + " # phones " + numPhones;
   }
  /*   public boolean isDecode() {
       return isDecode;
