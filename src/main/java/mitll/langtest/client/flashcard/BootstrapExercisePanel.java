@@ -93,7 +93,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   private Panel recoOutput;
 
-  //static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
@@ -517,12 +516,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see #receivedAudioAnswer
    */
   private void showCorrectFeedback(double score, PretestScore pretestScore) {
-    showPronScoreFeedback(true, score);
-    showOtherText();
+    showOtherText(); // if only one of foreign or english showing
     playCorrectDing();
-    showRecoOutput(pretestScore);
+    showRecoFeedback(score, pretestScore, true);
 
     maybeAdvance(score);
+  }
+
+  void showRecoFeedback(double score, PretestScore pretestScore, boolean correct) {
+    showPronScoreFeedback(correct, score);
+    showRecoOutput(pretestScore);
   }
 
   void playCorrectDing() {

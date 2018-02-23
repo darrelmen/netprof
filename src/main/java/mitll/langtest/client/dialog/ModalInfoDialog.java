@@ -94,7 +94,9 @@ public class ModalInfoDialog {
   public Modal getModal(String title,
                         Collection<String> messages,
                         Collection<String> values, Widget widget,
-                        HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
+                        HiddenHandler handler,
+                        boolean bigger,
+                        boolean addEnterKeyBinding) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
 
@@ -132,7 +134,7 @@ public class ModalInfoDialog {
         flexTable.setHTML(r, 1, "&nbsp;" + "<b>" + iterator.next() + "</b>");
       }
       if (bigger) {
-        rf.addStyleName(r, "Instruction-title");
+        rf.addStyleName(r, "Instruction-data-with-wrap");//"Instruction-title");
       }
       r++;
     }

@@ -18,12 +18,10 @@ import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-
   private static final int MIN_POLYGLOT_SCORE = 35;
 
   private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
 
-  //  private static final int FEEDBACK_SLOTS = 4;
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 750;
   private static final int INCORRECT_BEFORE_ADVANCE = 3;
@@ -36,18 +34,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final String TIME_LEFT = "Time left";
 
   private static final long ONE_MIN = (60L * 1000L);
-//  private static final String TRY_AGAIN = "Try Again?";
- // private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";
-
-
   /**
    * @seex StatsPracticePanel#showTimeRemaining
    */
   private static final String TIMES_UP = "Times Up!";
-
-  //private static final int MIN_POLYGLOT_SCORE = 35;
-
-
 
   private Label timeLeft;
 
@@ -55,24 +45,34 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private int wrongCount = 0;
 
   public PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
-                               ControlState controlState, ExerciseController controller, MySoundFeedback soundFeedback, PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState, ListInterface exerciseListToUse) {
+                               ControlState controlState, ExerciseController controller,
+                               MySoundFeedback soundFeedback,
+                               PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState, ListInterface exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
-
     realAddWidgets(e, controller, controlState);
   }
 
 
   @Override
   void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
-//    super.addWidgets(e, controller, controlState);
-//    hideClickToFlip();
   }
 
   //  @Override
   private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
     hideClickToFlip();
+
+  }
+
+  @Override
+  protected void addRecordingAndFeedbackWidgets(int exerciseID, ExerciseController controller, Panel toAddTo) {
+    super.addRecordingAndFeedbackWidgets(exerciseID, controller, toAddTo);
+
+    AudioAnswer answer = sticky.getAnswer(exerciseID);
+    if (answer != null) {
+      showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
+    }
   }
 
   @Override
@@ -92,7 +92,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
-    speedChoices = new SpeedChoices( getOnSpeedChoiceMade(), true);
+    speedChoices = new SpeedChoices(getOnSpeedChoiceMade(), true);
     rightColumn.add(speedChoices.getSpeedChoices());
   }
 
@@ -104,7 +104,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   String getDeviceTypeValue() {
-    return ""+polyglotFlashcardContainer.getNumExercises();
+    return "" + polyglotFlashcardContainer.getNumExercises();
   }
 
   @Override
@@ -186,7 +186,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     g.setWidget(row++, 1, timeLeft);
 
     showTimeRemaining(polyglotFlashcardContainer.getRoundTimeLeftMillis());
-
   }
 
   @NotNull
@@ -208,13 +207,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   void reallyStartOver() {
     polyglotFlashcardContainer.showDrill();
-
   }
 
   @Override
   void flipCard() {
-
   }
+
   public void showTimeRemaining(long l) {
     String value = TIMES_UP;
     if (l > 0) {

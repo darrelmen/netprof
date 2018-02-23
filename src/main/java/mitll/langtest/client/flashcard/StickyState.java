@@ -248,4 +248,7 @@ class StickyState {
     return count;
   }
 
+  public AudioAnswer getAnswer(int id) {
+    return exToAnswer.get(id);
+  }
 }

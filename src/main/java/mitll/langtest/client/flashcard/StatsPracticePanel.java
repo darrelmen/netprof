@@ -36,22 +36,10 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     extends BootstrapExercisePanel<CommonAnnotatable> {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-
-  //private static final long ONE_MIN = (60L * 1000L);
-   private static final String TRY_AGAIN = "Try Again?";
+  private static final String TRY_AGAIN = "Try Again?";
   private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";
 
-
-   /**
-   * @see StatsPracticePanel#showTimeRemaining
-   */
-//  private static final String TIMES_UP = "Times Up!";
-
-  //private static final int MIN_POLYGLOT_SCORE = 35;
-
-
   private static final int FEEDBACK_SLOTS = 4;
-
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
@@ -70,12 +58,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
 
   private static final String N_A = "N/A";
 
-
   private final FlashcardContainer statsFlashcardFactory;
   private Widget container;
-  //  final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
   SpeedChoices speedChoices;
-  //private int count;
   final StickyState sticky;
   private Label remain, incorrectBox, correctBox, pronScore;
 
@@ -112,24 +97,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     });
 
     addWidgets(e, controller, controlState);
-
- /*   if (isPolyglot()) {
-      hideClickToFlip();
-    }*/
-//    this.count = statsFlashcardFactory.counter++;
   }
 
-/*
-  private boolean isPolyglot() {
-    return controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
-  }
-*/
-
-/*    @Override
-  protected void onUnload() {
-    super.onUnload();
-    cancelRoundTimer();
-  }*/
 
   @Override
   protected String getDeviceValue() {
@@ -137,26 +106,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     //     logger.info("getDeviceValue  " + s);
     return s;
   }
-
-/*  @Override
-  protected void showEnglishOrForeign() {
-    if (isPolyglot()) {
-      showBoth();
-    } else {
-      super.showEnglishOrForeign();
-    }
-  }*/
-
-/*  @Override
-  protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
-    if (isPolyglot()) {
-      speedChoices = new SpeedChoices(sticky.getStorage(), getOnSpeedChoiceMade(), true);
-      // logger.info("speedChoices " + speedChoices);
-      rightColumn.add(speedChoices.getSpeedChoices());
-    } else {
-      super.addControlsBelowAudio(controlState, rightColumn);
-    }
-  }*/
 
   @NotNull
   IShowStatus getOnSpeedChoiceMade() {
@@ -168,24 +117,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
       playRef();
     }
   }
-
-  /*
-  public int getCounter() {
-    return count;
-  }
-*/
-/*    public String toString() {
-    return "Stats # " + count;
-  }*/
-
-
-
-/*
-  @Override
-  protected boolean showScoreFeedback(AudioAnswer result) {
-    return result.isSaidAnswer() || isPolyglot();
-  }
-*/
 
   @Override
   void recordingStarted() {
@@ -236,59 +167,17 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
   public void receivedAudioAnswer(final AudioAnswer result) {
     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
     if (result.getValidity() == Validity.OK) {
-      int id = exercise.getID();
-/*      statsFlashcardFactory.exToScore.put(id, result.getScore());
-      statsFlashcardFactory.exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
-
-      StringBuilder builder = new StringBuilder();
-      StringBuilder builder2 = new StringBuilder();
-      for (Map.Entry<Integer, Boolean> pair : statsFlashcardFactory.exToCorrect.entrySet()) {
-        if (pair.getValue()) {
-          builder.append(pair.getKey()).append(",");
-        } else {
-          builder2.append(pair.getKey()).append(",");
-        }
-      }
-      sticky.storeCorrect(builder);
-      sticky.storeIncorrect(builder2);
-
-      StringBuilder builder3 = new StringBuilder();
-      for (Map.Entry<Integer, Double> pair : statsFlashcardFactory.exToScore.entrySet()) {
-        builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
-      }
-      sticky.storeScore(builder3);
-
-
-      statsFlashcardFactory.exToLatest.put(id, result);
-      */
-      sticky.storeAnswer(result, id);
+      sticky.storeAnswer(result, exercise.getID());
       setStateFeedback();
-
     }
     super.receivedAudioAnswer(result);
   }
-/*
-  protected boolean isCorrect(boolean correct, double score) {
-    boolean b = isPolyglot() ? (score * 100D) >= PolyglotFlashcardFactory.MIN_POLYGLOT_SCORE : correct;
-    // logger.info("isCorrect " + correct + "  " + score + " " + b);
-    return b;
-  }*/
-
 
   /**
    * Turn off for now?
    */
   protected void playCorrectDing() {
   }
-
-  /**
-   * Don't play the incorrect sound.
-   */
-/*
-  protected void playIncorrect() {
-    if (!isPolyglot()) super.playIncorrect();
-  }
-*/
 
   /**
    * Ask for history for those items that were actually practiced.
@@ -381,33 +270,13 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
   private void doIncorrectFirst() {
     showFlashcardDisplay();
 
-    //currentExercise = null;
-    sticky.reset();
+     sticky.reset();
 
     statsFlashcardFactory.reload();
-//    exerciseList.reload(statsFlashcardFactory.selection);
-    makeFlashcardButtonsVisible();
+     makeFlashcardButtonsVisible();
 
     sticky.resetStorage();
   }
-
-/*
-  private int getCorrect() {
-    int count = 0;
-    for (Boolean val : sticky.getCorrectValues()) {
-      if (val) count++;
-    }
-    return count;
-  }
-
-  private int getIncorrect() {
-    int count = 0;
-    for (Boolean val : sticky.getCorrectValues()) {
-      if (!val) count++;
-    }
-    return count;
-  }
-*/
 
   /**
    * @return
@@ -445,42 +314,11 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
    */
   private void startOver() {
     makeFlashcardButtonsVisible();
-
     statsFlashcardFactory.startOver();
-    /*int lastID = statsFlashcardFactory.allExercises.isEmpty() ? -1 : statsFlashcardFactory.allExercises.get(statsFlashcardFactory.allExercises.size() - 1).getID();
-    int currentExerciseID = sticky.getCurrentExerciseID();
-//logger.info("startOver : current " + currentExerciseID + " = " + statsFlashcardFactory.mode);
-
-    if (currentExerciseID != -1 && currentExerciseID != lastID) {
-      exerciseList.loadExercise(currentExerciseID);
-    } else {
-      reallyStartOver();
-    }
-
-    if (isPolyglot()) {
-*//*       if (mode == PolyglotDialog.MODE_CHOICE.NOT_YET) {
-        stopTimedRun();
-      } else {
-        stopTimedRun();
-       // startTimedRun();
-      }*//*
-
-      statsFlashcardFactory.stopTimedRun();
-    }*/
   }
 
-/*  private void reallyStartOver() {
-    sticky.reset();
-    sticky.resetStorage();
-
-    statsFlashcardFactory.loadFirstExercise();
-  }*/
-
   private void makeFlashcardButtonsVisible() {
-//    statsFlashcardFactory.contentPanel.removeStyleName("noWidthCenterPractice");
-//    statsFlashcardFactory.contentPanel.addStyleName("centerPractice");
     statsFlashcardFactory.styleContent(true);
-
     startOver.setVisible(true);
     startOver.setEnabled(true);
     seeScores.setVisible(true);
@@ -496,12 +334,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
    */
   @Override
   void addRowBelowPrevNext(DivWidget toAddTo) {
-  /*  if (isPolyglot()) {
-      // String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      //  logger.info("logException stack " + exceptionAsString);
-      toAddTo.add(getChart(statsFlashcardFactory.getIsDry() ? DRY_RUN_ROUND_TIME : ROUND_TIME));
-    }*/
-
     DivWidget buttons = new DivWidget();
     buttons.setWidth("100%");
     toAddTo.add(buttons);
@@ -550,15 +382,12 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
   }
 
   void reallyStartOver() {
-
     startOver();
-
   }
 
   @Override
   protected void abortPlayback() {
     timer.cancelTimer();
-//    statsFlashcardFactory.soundFeedback.clear();
     stopPlayback();
   }
 
@@ -580,13 +409,11 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     return seeScores;
   }
 
-   void gotSeeScoresClick() {
+  void gotSeeScoresClick() {
     abortPlayback();
     seeScores.setEnabled(false);
-  //  statsFlashcardFactory.cancelRoundTimer();
-    onSetComplete();
+     onSetComplete();
   }
-
 
   /**
    * @return
@@ -645,13 +472,13 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
     return g;
   }
 
-   void addMoreStats(Grid g, int row) {
+  void addMoreStats(Grid g, int row) {
 
   }
 
   @NotNull
-   Grid getGrid() {
-    return new Grid(  FEEDBACK_SLOTS, 2);
+  Grid getGrid() {
+    return new Grid(FEEDBACK_SLOTS, 2);
   }
 
   /**
@@ -691,6 +518,4 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise>
 
     pronScore.setText("" + itotal);
   }
-
-
 }
