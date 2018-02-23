@@ -52,14 +52,22 @@ public class PhoneSessionInternal {
   private long start;
   private long end = 0;
 
+  private int sessionSize;
+
   /**
    * @param bin
    * @see PhoneAnalysis#partition
    */
-  PhoneSessionInternal(long bin) {   this.bin = bin;  }
+  PhoneSessionInternal(long bin) {
+    this.bin = bin;
+  }
+
+  PhoneSessionInternal(long bin, int sessionSize) {
+    this.bin = bin;
+    this.sessionSize = sessionSize;
+  }
 
   /**
-   *
    * @param value
    * @param timestamp
    */
@@ -72,10 +80,6 @@ public class PhoneSessionInternal {
     summaryStatistics2.addValue(timestamp);
 
     if (timestamp > end) end = timestamp;
-
-/*    if (wordAndScore != null) {
-      getQueue().add(wordAndScore);
-    }*/
   }
 
   public void remember() {
@@ -94,7 +98,7 @@ public class PhoneSessionInternal {
   }
 
   long getMeanTime() {
-    return (long)meanTime;
+    return (long) meanTime;
   }
 
   public long getCount() {
@@ -118,18 +122,21 @@ public class PhoneSessionInternal {
   }
 
   /**
+   * @return
    * @see PhoneAnalysis#getPhoneSessions
    * @see #addValue
-   * @return
    */
 /*
   MinMaxPriorityQueue<WordAndScore> getQueue() {
     return queue;
   }
 */
-
   @Override
   public String toString() {
     return getCount() + " s " + getStart() + " - " + getEnd() + " mean " + getMean();
+  }
+
+  public int getSessionSize() {
+    return sessionSize;
   }
 }

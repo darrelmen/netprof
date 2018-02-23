@@ -36,7 +36,6 @@ import mitll.langtest.client.analysis.AnalysisPlot;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,8 +56,16 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private long end;
   private String phone;
   private long sessionStart = -100;
+  private int sessionSize = -100;
 
   private static final int SCALE = 1000;
+
+
+  /**
+   * For RPC
+   */
+  public PhoneSession() {
+  }
 
   /**
    * @param phone
@@ -69,6 +76,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
    * @param meanTime
    * @param start
    * @param end
+   * @param sessionSize
    * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions
    */
   public PhoneSession(String phone,
@@ -77,7 +85,9 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
                       double mean,
                       double stdev,
                       long meanTime,
-                      long start, long end) {
+                      long start,
+                      long end,
+                      int sessionSize) {
     this.phone = phone;
     this.sessionStart = bin;
     this.count = count;
@@ -86,6 +96,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     this.meanTime = meanTime;
     this.start = start;
     this.end = end;
+    this.sessionSize = sessionSize;
   }
 
   protected int toInt(double value) {
@@ -97,16 +108,10 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   }
 
   /**
-   * For RPC
-   */
-  public PhoneSession() {
-  }
-
-  /**
-   * @see AnalysisPlot#getPeriods
    * @param start
    * @param last
    * @return
+   * @see AnalysisPlot#getPeriods
    */
   public boolean doesOverlap(long start, long last) {
     return (getEnd() > start && getEnd() <= last)
@@ -162,6 +167,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public long getStart() {
     return start;
   }
+
   public long getEnd() {
     return end;
   }
@@ -188,7 +194,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   public String toString() {
     return
-        "session " + sessionStart+
+        "session " + sessionStart +
             "\n\tphone " + phone + " : " +
 //            "\n\tat    " + new Date(bin) +
             //          "\n\tstart " + new Date(start) +
@@ -200,5 +206,9 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
         //+
         //"\n\texamples  " + examples.size()
         ;
+  }
+
+  public int getSessionSize() {
+    return sessionSize;
   }
 }

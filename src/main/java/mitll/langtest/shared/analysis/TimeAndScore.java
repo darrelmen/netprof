@@ -52,7 +52,7 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @see UserPerformance#setRawBestScores
    */
   TimeAndScore(BestScore bs, float cumulativeAverage) {
-    this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage, null, bs.getSessionStart());
+    this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage, null, bs.getSessionStart(), bs.getSessionSize());
   }
 
   /**
@@ -60,17 +60,18 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @param timestamp
    * @param score
    * @param cumulativeAverage
+   * @param sessionSize
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries(List)
    */
   public TimeAndScore(int exid, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore,
-                      long sessionStart) {
-    super(timestamp, score, wordAndScore, sessionStart);
+                      long sessionStart, int sessionSize) {
+    super(timestamp, score, wordAndScore, sessionStart, sessionSize);
     this.exid = exid;
     this.cumulativeAverage = toInt(cumulativeAverage);
   }
 
   public TimeAndScore(long timestamp) {
-    super(timestamp, 0f, null, 0L);
+    super(timestamp, 0f, null, 0L, 0);
   }
 
   public TimeAndScore() {

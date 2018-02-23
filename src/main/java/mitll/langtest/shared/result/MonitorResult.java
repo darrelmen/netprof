@@ -357,23 +357,16 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     }
   }
 
+  public String getDeviceType() {
+    return deviceType;
+  }
+
   /**
    * @return
-   * @see mitll.langtest.client.result.ResultManager#addResultColumn(CellTable)
+   * @see mitll.langtest.client.result.ResultManager#addResultColumn
    */
   public String getDevice() {
     return device;
-  }
-
-  @Override
-  public String toString() {
-    return "MonitorResult #" + uniqueID + "\t\tby user " + userid +
-        //"\toldExID " + oldExID + " " +
-        " at " + new Date(timestamp) +
-        "  ans " + answer +
-        " audioType : " + audioType +
-        " device " + device +
-        " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
   }
 
   public boolean isWithFlash() {
@@ -395,22 +388,15 @@ public class MonitorResult implements IsSerializable, UserAndTime {
   public float getSnr() {
     return snr;
   }
-//
-//  public void setDisplayID(String displayID) {
-//    this.oldExID = displayID;
-//  }
 
-  public String getDeviceType() {
-    return deviceType;
+  @Override
+  public String toString() {
+    return "MonitorResult #" + uniqueID + "\t\tby user " + userid +
+        //"\toldExID " + oldExID + " " +
+        " at " + new Date(timestamp) +
+        "  ans " + answer +
+        " audioType : " + audioType +
+        " device " + device +
+        " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
   }
-/*
-
-  public String getSimpleDevice() {
-    return simpleDevice;
-  }
-
-  public String getScoreJSON() {
-    return scoreJSON;
-  }
-*/
 }

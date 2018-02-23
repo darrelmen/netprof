@@ -148,14 +148,11 @@ public class MakePhoneReport {
       phoneToScore.put(pair.getKey(), total);
     }
 
-    Collections.sort(sorted, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        Float current = phoneToScore.get(o1);
-        Float current1 = phoneToScore.get(o2);
-        int i = current.compareTo(current1);
-        return i == 0 ? o1.compareTo(o2) : i;
-      }
+    Collections.sort(sorted, (o1, o2) -> {
+      Float current = phoneToScore.get(o1);
+      Float current1 = phoneToScore.get(o2);
+      int i = current.compareTo(current1);
+      return i == 0 ? o1.compareTo(o2) : i;
     });
 
     if (DEBUG) {
@@ -184,15 +181,8 @@ public class MakePhoneReport {
   }
 
   /**
-   * @param phoneToAvgSorted
-   * @param useSessionGran
-   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
-   */
-//  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted, boolean useSessionGran) {
-//    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, useSessionGran);
-//  }
-
-  /**
+   * For now we don't carry forward the session size here...
+   *
    * @param phoneAndScores
    * @return
    * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
@@ -209,7 +199,7 @@ public class MakePhoneReport {
 
       TimeAndScore timeAndScore =
           new TimeAndScore(-1, phoneAndScore.getTimestamp(), pronScore, moving,
-              phoneAndScore.getWordAndScore(), phoneAndScore.getSessionStart());
+              phoneAndScore.getWordAndScore(), phoneAndScore.getSessionStart(), 0);
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;

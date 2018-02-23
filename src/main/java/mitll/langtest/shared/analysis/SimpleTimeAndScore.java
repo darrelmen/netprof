@@ -46,6 +46,7 @@ import java.io.Serializable;
 public class SimpleTimeAndScore implements Serializable {
   public static final int SCALE = 1000;
   private long sessionStart;
+  private int sessionSize = -1;
   private long timestamp;
   private int score;
   private transient WordAndScore wordAndScore;
@@ -53,25 +54,29 @@ public class SimpleTimeAndScore implements Serializable {
   /**
    * @param timestamp
    * @param score
-   * @see TimeAndScore#TimeAndScore(int, long, float, float, WordAndScore)
+   * @param sessionSize
+   * @see TimeAndScore#TimeAndScore(int, long, float, float, WordAndScore, long, int)
    */
-  SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore, long sessionStart) {
+  SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore, long sessionStart, int sessionSize) {
     this.timestamp = timestamp;
     this.score = toInt(score);
     this.wordAndScore = wordAndScore;
     this.sessionStart = sessionStart;
+    this.sessionSize = sessionSize;
   }
 
   /**
    * @param timestamp
    * @param score
+   * @param sessionSize
    * @see BestScore#BestScore
    */
-  SimpleTimeAndScore(long timestamp, float score, long sessionStart) {
+  SimpleTimeAndScore(long timestamp, float score, long sessionStart, int sessionSize) {
     this.timestamp = timestamp;
     this.score = toInt(score);
     this.wordAndScore = null;
     this.sessionStart = sessionStart;
+    this.sessionSize = sessionSize;
   }
 
   public SimpleTimeAndScore() {
@@ -114,6 +119,7 @@ public class SimpleTimeAndScore implements Serializable {
 
   /**
    * Overkill - can't have more than on response at the same time.
+   *
    * @param o
    * @return
    */
@@ -128,5 +134,9 @@ public class SimpleTimeAndScore implements Serializable {
 
   public String toString() {
     return "at\t" + getTimeString() + " avg score for " + "=\t" + score;
+  }
+
+  public int getSessionSize() {
+    return sessionSize;
   }
 }

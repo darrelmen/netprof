@@ -95,11 +95,13 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     int id = dao.insert(res).id();
 
     logger.info("addAnswer inserting answer" +
-        "\n\tby     " + answerInfo.getUserid() +
-        "\n\tto     " + answerInfo.getId() +
-        "\n\tanswer " + answerInfo.getAnswer() +
-        "\n\tslick  " + res +
-        "\n\tid     " + id);
+        "\n\tby      " + answerInfo.getUserid() +
+        "\n\tto      " + answerInfo.getId() +
+        "\n\tanswer  " + answerInfo.getAnswer() +
+        "\n\tsession " + answerInfo.getDevice() +
+        "\n\tnum     " + answerInfo.getDeviceType() +
+        "\n\tslick   " + res +
+        "\n\tid      " + id);
 
     return id;
   }

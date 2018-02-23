@@ -274,7 +274,7 @@ class H2Analysis extends Analysis implements IAnalysis {
         missing++;
       }
       results.add(new BestScore(Integer.parseInt(exid), pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),
-          nativeAudio, 0));
+          nativeAudio, 0, 0));
     }
 
     if (DEBUG || true) {

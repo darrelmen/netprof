@@ -60,6 +60,7 @@ import static mitll.langtest.shared.analysis.WordScore.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
+
   private static final int WARN_THRESH = 100;
   private static final String ANSWERS = "answers";
   private static final int MAX_TO_SEND = 25;
@@ -73,6 +74,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
   private final boolean sortByPolyScore;
+
   /**
    * @param database
    * @param phoneDAO
@@ -420,6 +422,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 
     Map<String, Long> sessionToLong = new HashMap<>();
+    Map<String, Integer> sessionNumToInteger = new HashMap<>();
 
     for (SlickPerfResult perf : perfs) {
       count++;
@@ -441,6 +444,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       String device = perf.devicetype();
       Long sessionTime = getSessionTime(sessionToLong, perf.device());
+      Integer sessionSize  = getNumInSession(sessionNumToInteger, perf.devicetype());
       String path = perf.answer();
 
       boolean isiPad = device != null && device.startsWith("i");
@@ -473,7 +477,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
           filePath,
           nativeAudio,
-          sessionTime);
+          sessionTime, sessionSize);
 
 //      if (e.getSessionStart()> 0) {
 //        logger.info("id " + id + " = " + e.getSessionStart());
@@ -511,6 +515,22 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         parsedTime = -1L;
       }
       sessionToLong.put(device, parsedTime);
+    }
+    return parsedTime;
+  }
+
+  private Integer getNumInSession(Map<String, Integer> sessionToLong, String deviceType) {
+    Integer parsedTime = sessionToLong.get(deviceType);
+
+    if (parsedTime == null) {
+      try {
+        parsedTime = Integer.parseInt(deviceType);
+//        logger.info("getSessionTime " + parsedTime);
+      } catch (NumberFormatException e) {
+        //      logger.info("can't parse " + device);
+        parsedTime = -1;
+      }
+      sessionToLong.put(deviceType, parsedTime);
     }
     return parsedTime;
   }

@@ -58,6 +58,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
    * @param timestamp
    * @param isFlashcard
    * @param nativeAudio
+   * @param numInSession
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
    */
   public BestScore(int id,
@@ -69,8 +70,9 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
                    boolean isFlashcard,
                    String fileRef,
                    String nativeAudio,
-                   long sessionStart) {
-    super(timestamp, (pronScore < 0) ? 0 : pronScore, sessionStart);
+                   long sessionStart,
+                   int numInSession) {
+    super(timestamp, (pronScore < 0) ? 0 : pronScore, sessionStart, numInSession);
     this.exid = id;
     this.resultID = resultID;
     this.json = json;
@@ -125,6 +127,4 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
         //childCount +
         " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
-
 }
-

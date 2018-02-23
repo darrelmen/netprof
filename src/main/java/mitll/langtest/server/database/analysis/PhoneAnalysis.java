@@ -196,8 +196,8 @@ public class PhoneAnalysis {
               stdev1,
               meanTime,
               internal.getStart(),
-              internal.getEnd()
-          ));
+              internal.getEnd(),
+              internal.getSessionSize()));
 
         } else {
           logger.warn("\tgetPhoneSessions: for " + thePhone + "skipping session " + internal);
@@ -241,7 +241,7 @@ public class PhoneAnalysis {
 //          }
 
           if ((phoneSessionInternal == null) || (currentSession != sessionStart)) {
-            phoneSessionInternal = new PhoneSessionInternal(sessionStart);
+            phoneSessionInternal = new PhoneSessionInternal(sessionStart, r.getSessionSize());
             granularityToSessions.get(granularity).add(phoneSessionInternal);
             granToCurrent.put(granularity, phoneSessionInternal);
             if (DEBUG)
