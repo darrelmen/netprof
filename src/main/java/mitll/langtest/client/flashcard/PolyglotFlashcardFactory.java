@@ -12,11 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
-    extends StatsFlashcardFactory<L, T>
-    implements PolyglotFlashcardContainer {
-
+    extends StatsFlashcardFactory<L, T>  implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
-
 
   static final int MIN_POLYGLOT_SCORE = 35;
   private static final int HEARTBEAT_INTERVAL = 1000;
@@ -32,7 +29,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
 
-  public PolyglotFlashcardFactory(ExerciseController controller, ListInterface exerciseList, String instance) {
+  public PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
   }
 
@@ -61,7 +58,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   @NotNull
   PolyglotPracticePanel getCurrentFlashcard(T e) {
-    return new PolyglotPracticePanel(this,
+    return new PolyglotPracticePanel<L, T>(this,
         controlState,
         controller,
         soundFeedback,
@@ -193,6 +190,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   @Override
   public boolean isInLightningRound() {
     return inLightningRound;
+  }
+
+  @Override
+  public boolean isComplete() {
+    return sticky.isComplete(getNumExercises());
   }
 
   @Override

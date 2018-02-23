@@ -80,6 +80,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final String MEANING = "Meaning";
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
+  static final int PROGRESS_LEFT_MARGIN = 20;
   private static final int ADVANCE_DELAY = 2000;
 
   private static final int KEY_PRESS_WIDTH = 125;
@@ -775,7 +776,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private DivWidget getProgressBarWidget() {
     DivWidget vp = new DivWidget();
     vp.setWidth("78%");
-    vp.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
+    vp.getElement().getStyle().setMarginLeft(PROGRESS_LEFT_MARGIN, Style.Unit.PCT);
 
     {
       int complete = exerciseList.getComplete();
@@ -1032,9 +1033,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
     {
-      FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
-      englishPhrase.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
+    //  FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
+      Widget englishPhrase = makeEnglishPhrase(englishTranslations);
+      english = englishPhrase;
+      moveEnglishForComment(englishPhrase);
+
       englishPhrase.setWidth("100%");
+
       div.add(englishPhrase);
     }
 
@@ -1048,13 +1053,16 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     return div;
   }
 
-  private FocusPanel makeEnglishPhrase(String englishSentence) {
+  void moveEnglishForComment(Widget englishPhrase) {
+    englishPhrase.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
+  }
+
+  private Widget makeEnglishPhrase(String englishSentence) {
     Heading englishHeading = new Heading(1, englishSentence);
     englishHeading.getElement().setId("EnglishPhrase");
-    FocusPanel widgets = new FocusPanel();
+    DivWidget widgets = new DivWidget();
     widgets.add(englishHeading);
-    english = widgets;
-    english.getElement().setId("EnglishPhrase_container");
+    widgets.getElement().setId("EnglishPhrase_container");
     return widgets;
   }
 
@@ -1071,11 +1079,18 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
-    Panel hp = new HorizontalPanel();
-    hp.add(getFLContainer(foreignSentence));
+    Panel hp = new DivWidget();
+    hp.addStyleName("inlineFlex");
+    hp.setWidth("100%");
+    Widget flContainer = getFLContainer(foreignSentence);
+    DivWidget flDiv = new DivWidget();
+    flDiv.add(flContainer);
+    hp.add(flDiv);
 
     Widget hasAudioIndicator = getHasAudioIndicator(hasRefAudio);
-    if (hasAudioIndicator != null) hp.add(hasAudioIndicator);
+    if (hasAudioIndicator != null) {
+      hp.add(hasAudioIndicator);
+    }
 
     FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
     flPhraseContainer.getElement().setId("FLPhrase_container");
@@ -1107,9 +1122,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   @NotNull
   private Widget getFLContainer(String foreignSentence) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
-
-    //Element element = foreignLanguageContent.getElement();
-    //element.setId("ForeignLanguageContent");
     Style style = foreignLanguageContent.getElement().getStyle();
     style.setTextAlign(Style.TextAlign.CENTER);
     style.setProperty("fontFamily", "sans-serif");
@@ -1199,7 +1211,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
-
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }

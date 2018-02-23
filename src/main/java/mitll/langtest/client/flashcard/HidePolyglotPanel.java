@@ -31,6 +31,15 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
   }
 
   /**
+   * No comment - no move to the left...
+   * @param englishPhrase
+   */
+  @Override
+  void moveEnglishForComment(Widget englishPhrase) {
+
+  }
+
+  /**
    * no comment
    *
    * @param firstRow

@@ -40,6 +40,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    *
    */
   private static final int BUTTON_RIGHT_MARGIN = 8;
+  /**
+   * 
+   */
   private static final String TRY_AGAIN = "Try Again?";
   private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";
 
@@ -191,7 +194,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    * @see #loadNext()
    */
   public void onSetComplete() {
-    // if (!startOver.isVisible()) return;
+
+
+
     startOver.setVisible(false);
     seeScores.setVisible(false);
     setPrevNextVisible(false);
@@ -227,7 +232,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     belowContentDiv.add(container);
   }
 
-  @NotNull
   AnalysisTab getScoreHistory() {
     return new AnalysisTab(controller, true, -1, () -> 0);
   }
@@ -273,7 +277,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     return w;
   }
 
-  void gotTryAgain() {    doIncorrectFirst();  }
+  void gotTryAgain() {
+    doIncorrectFirst();
+  }
 
   /**
    * @see #getSummaryStartOver()
@@ -355,17 +361,19 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   }
 
   /**
-   * @see FlashcardPanel#getNextButton()
+   * @see FlashcardPanel#getNextButton
    */
   @Override
   protected void gotClickOnNext() {
     abortPlayback();
-    if (exerciseList.onLast()) {
+
+    loadNext();
+/*    if (exerciseList.onLast()) {
       onSetComplete();
     } else {
       //logger.info("load next " + exerciseList.getCurrentExerciseID());
       exerciseList.loadNext();
-    }
+    }*/
   }
 
   private Button getStartOver() {
@@ -482,9 +490,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     return g;
   }
 
-  void addMoreStats(Grid g, int row) {
-
-  }
+  void addMoreStats(Grid g, int row) {}
 
   @NotNull
   Grid getGrid() {

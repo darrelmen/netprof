@@ -167,6 +167,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       style.setMarginRight(10, Style.Unit.PX);
       style.setMarginBottom(10, Style.Unit.PX);
       addStyleName("cardBorderShadow");
+
+      getElement().getStyle().setProperty("maxWidth", STUDENT_WIDTH + "px");
+
     }
 
     /**

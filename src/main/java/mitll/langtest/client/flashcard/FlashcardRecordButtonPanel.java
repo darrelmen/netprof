@@ -32,7 +32,9 @@
 
 package mitll.langtest.client.flashcard;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -96,10 +98,13 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   public Widget getRecordButton() {
     Widget recordButton1 = super.getRecordButton();
-    Panel hp = new FlowPanel();
+   // Panel hp = new FlowPanel();
+    Panel hp = new DivWidget();
+    hp.getElement().getStyle().setMarginLeft(70, Style.Unit.PX);
     hp.getElement().setId("flashcardButtonContainer");
     hp.add(recordButton1);
     hp.add(waiting);
+    hp.addStyleName("bottomFiveMargin");
     return hp;
   }
 

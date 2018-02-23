@@ -100,23 +100,7 @@ class StickyState {
     return storage.getValue(SCORE);
   }
 
-  private void storeScore(StringBuilder builder3) {
-    storage.storeValue(SCORE, builder3.toString());
-  }
 
-  private void storeIncorrect(StringBuilder builder2) {
-    storage.storeValue(INCORRECT, builder2.toString());
-  }
-
-  private void storeCorrect(StringBuilder builder) {
-    storage.storeValue(CORRECT1, builder.toString());
-  }
-
-/*
-  KeyStorage getStorage() {
-    return storage;
-  }
-*/
 
   public void populateCorrectMap() {
     String value = getCorrect();
@@ -167,11 +151,6 @@ class StickyState {
     storage.removeValue(SCORE);
   }
 
-/*  void addScore(int id, Double score) {
-    exToScore.put(id, score);
-  }*/
-
-
   void reset() {
     exToCorrect.clear();
     exToScore.clear();
@@ -202,19 +181,24 @@ class StickyState {
     }
     storeScore(builder3);
 
-//    setStateFeedback();
-
     exToAnswer.put(id, result);
+  }
+
+  private void storeScore(StringBuilder builder3) {
+    storage.storeValue(SCORE, builder3.toString());
+  }
+
+  private void storeIncorrect(StringBuilder builder2) {
+    storage.storeValue(INCORRECT, builder2.toString());
+  }
+
+  private void storeCorrect(StringBuilder builder) {
+    storage.storeValue(CORRECT1, builder.toString());
   }
 
   boolean isCorrect(boolean correct, double score) {
     return correct;
   }
-
-/*
-  void addCorrect(int id, Boolean score) {
-    exToCorrect.put(id, score);
-  }*/
 
   private Collection<Boolean> getCorrectValues() {
     return exToCorrect.values();
@@ -223,6 +207,8 @@ class StickyState {
   Collection<Double> getScores() {
     return exToScore.values();
   }
+
+  public boolean isComplete(int num) { return num == exToScore.size(); }
 
   Collection<AudioAnswer> getAnswers() {
     return exToAnswer.values();

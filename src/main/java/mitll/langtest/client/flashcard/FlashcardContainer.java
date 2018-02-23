@@ -1,7 +1,6 @@
 package mitll.langtest.client.flashcard;
 
 interface FlashcardContainer {
-
   void reload();
 
   void startOver();

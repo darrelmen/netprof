@@ -6,8 +6,10 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -17,7 +19,16 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
+  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+
+  private static final String ALL_DONE = "All done!";
+
+  private static final String COMPLETE = "You've recorded all the items. " +
+      "Use the arrow keys to review or re-record as desired, or click See Your Scores.";
+
   private static final int MIN_POLYGLOT_SCORE = 35;
 
   private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
@@ -34,10 +45,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final String TIME_LEFT = "Time left";
 
   private static final long ONE_MIN = (60L * 1000L);
+
   /**
    * @see #showTimeRemaining
    */
-  private static final String TIMES_UP = "Times Up!";
+//  private static final String TIMES_UP = "Times Up!";
 
   private Label timeLeft;
 
@@ -45,10 +57,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private int wrongCount = 0;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
-                               ControlState controlState, ExerciseController controller,
-                               MySoundFeedback soundFeedback,
-                               PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState,
-                               ListInterface<L,T> exerciseListToUse) {
+                        ControlState controlState, ExerciseController controller,
+                        MySoundFeedback soundFeedback,
+                        PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState,
+                        ListInterface<L, T> exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
     realAddWidgets(e, controller, controlState);
@@ -58,6 +70,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
   }
+
+/*  @Override
+  void moveEnglishForComment(Widget englishPhrase) {
+
+  }*/
 
   //  @Override
   private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
@@ -148,7 +165,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     return b;
   }
 
-  protected void playIncorrect() {}
+  protected void playIncorrect() {
+  }
 
   /**
    * @return null if we're not allowed to play audio.
@@ -175,7 +193,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   void gotTryAgain() {
     doStartOver();
-
   }
 
   @NotNull
@@ -222,7 +239,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   public void showTimeRemaining(long l) {
-    String value = TIMES_UP;
+    String value;// = TIMES_UP;
     if (l > 0) {
       long min = l / ONE_MIN;
       long sec = (l - (min * ONE_MIN)) / 1000;
@@ -241,5 +258,15 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     }
     timeLeft.setText(value);
     //   logger.info("showTimeRemaining : time left " + l);
+  }
+
+  public void onSetComplete() {
+    long roundTimeLeftMillis = polyglotFlashcardContainer.getRoundTimeLeftMillis();
+    logger.info("onSetComplete  "+roundTimeLeftMillis);
+    if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
+      new ModalInfoDialog(ALL_DONE, COMPLETE);
+    } else {
+      super.onSetComplete();
+    }
   }
 }

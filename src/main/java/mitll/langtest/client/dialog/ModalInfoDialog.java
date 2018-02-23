@@ -68,7 +68,7 @@ public class ModalInfoDialog {
     this(title, message, null);
   }
 
-  public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding, int width, int height, HiddenHandler hiddenHandler) {
+  public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding, int width, int height) {
     this(title, MESSAGES, Collections.emptyList(), widget, null, false, addEnterKeyBinding, width, height);
   }
 

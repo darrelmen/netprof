@@ -85,6 +85,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     implements AudioAnswerListener {
   private Logger logger;
 
+  private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
+
   private static final int FIRST_STEP = 35;
   private static final int SECOND_STEP = 75;
 
@@ -244,12 +246,23 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
-    Panel recordButtonRow = getCenteredWrapper(recordButton);
+   // Panel recordButtonRow = getCenteredWrapper(recordButton);
+    Panel recordButtonRow = new DivWidget();
+    recordButtonRow.setWidth("100%");
+
+    DivWidget bDiv =new DivWidget();
+    bDiv.add(recordButton);
+    recordButtonRow.add(bDiv);
     recordButtonRow.getElement().setId("recordButtonRow");
 
-    recordButtonRow.addStyleName("leftTenMargin");
-    recordButtonRow.addStyleName("rightTenMargin");
-    recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
+
+    recordButtonRow.addStyleName("alignCenter");
+    recordButton.addStyleName("alignCenter");
+
+
+   // recordButtonRow.addStyleName("leftTenMargin");
+  //  recordButtonRow.addStyleName("rightTenMargin");
+   // recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
 
     return recordButtonRow;
   }
@@ -439,7 +452,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     scoreContainer.setWidth("73%");
 
     container.setWidth("78%");
-    container.getElement().getStyle().setMarginLeft(17, Style.Unit.PCT);
+    container.getElement().getStyle().setMarginLeft(FEEDBACK_LEFT_MARGIN, Style.Unit.PCT);
     container.add(scoreContainer);
 
     return container;
@@ -644,7 +657,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void disableRecord() {
     realRecordButton.setEnabled(false);
   }
-
   void enableRecord() {
     realRecordButton.setEnabled(true);
   }

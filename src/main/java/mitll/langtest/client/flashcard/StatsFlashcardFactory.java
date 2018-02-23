@@ -256,6 +256,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
+  /**
+   * @see PolyglotPracticePanel#getDeviceTypeValue
+   * @return
+   */
   @Override
   public int getNumExercises() {
     return allExercises.size();
