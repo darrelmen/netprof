@@ -63,6 +63,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -277,7 +278,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
 
-      protected String getDevice() {
+      @NotNull
+      protected String getDeviceType() {
+        return getDeviceTypeValue();
+      }
+
+      @Override protected String getDevice() {
         return getDeviceValue();
       }
 
@@ -359,6 +365,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   String getDeviceValue() {
+    return controller.getBrowserInfo();
+  }
+  String getDeviceTypeValue() {
     return controller.getBrowserInfo();
   }
 

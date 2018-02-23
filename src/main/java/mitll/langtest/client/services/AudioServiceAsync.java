@@ -40,6 +40,16 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 
 public interface AudioServiceAsync {
+  /**
+   *
+   * @param base64EncodedString
+   * @param audioContext
+   * @param recordedWithFlash
+   * @param deviceType
+   * @param device
+   * @param decoderOptions
+   * @param async
+   */
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 

@@ -36,7 +36,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     super(controller, exerciseList, instance);
   }
 
-
   /**
    * @param e
    * @return
@@ -205,7 +204,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   void reset() {
     super.reset();
     cancelRoundTimer();
-
   }
 
   private void clearAnswerMemory() {

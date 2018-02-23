@@ -356,6 +356,10 @@ public class ResultManager extends PagerTable {
     dataProvider.updateRowCount(numResults, true);
   }
 
+  /**
+   * TODO :  Too late... table already requesting audio...
+   * @param results
+   */
   private void ensureAudio(List<MonitorResult> results) {
     ScoringServiceAsync scoringService = controller.getScoringService();
 

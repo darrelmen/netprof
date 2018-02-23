@@ -326,13 +326,19 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   void addCommentBox(DivWidget firstRow) {
+    DivWidget left = getCommentDiv();
+    // left.setWidth("50%");
+    firstRow.add(left);
+  }
+
+  @NotNull
+  DivWidget getCommentDiv() {
     DivWidget left = new DivWidget();
     boolean rtlContent = isRTLContent(exercise.getForeignLanguage());
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true, rtlContent));
     left.addStyleName("floatLeftAndClear");
     left.getElement().setId("leftCommentBoxContainer");
-    // left.setWidth("50%");
-    firstRow.add(left);
+    return left;
   }
 
   private boolean isRTLContent(String content) {

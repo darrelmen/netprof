@@ -34,6 +34,7 @@ class HidePolyglotPanel extends PolyglotPracticePanel {
 
   @Override
   void addCommentBox(DivWidget firstRow) {
+    DivWidget left = getCommentDiv();
 
   }
 

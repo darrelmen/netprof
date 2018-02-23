@@ -63,19 +63,22 @@ import static mitll.langtest.client.analysis.AnalysisTab.*;
 import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 
 /**
+ * TODO : subclass for polyglot, no if's.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/19/15.
  */
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
-  public static final int STUDENT_WIDTH = 1070;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  public static final int STUDENT_WIDTH = 1070;
 
   /**
    *
    */
-  private static final String PREFIX = "#";//"Sess. #";
+  private static final String PREFIX = "Session ";//"Sess. #";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
@@ -200,7 +203,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
       if (isPolyglot) {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        //      logger.info("showUserPerformance got sessions " + phoneSessions);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
       {
@@ -215,30 +217,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
   }
 
-  /**
-   * @param simpleTimeAndScores
-   * @param index
-   * @return
-   * @see #setTitleScore
-   */
-  private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores, int index) {
-    int fround1 = getPercentScore(simpleTimeAndScores);
-    int n = simpleTimeAndScores.size();
-   // int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
-
-    String text = simpleTimeAndScores.size() > 100 ? "" :
-        PREFIX + (index + 1) + " : score " + fround1 +
-            //"/" + (10 * denom) +
-            "%" +
-            " for " + n + " items";
-    return text;
-  }
 
   private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
     float totalScore = 0f;
 
+    int n = simpleTimeAndScores.size();
+    int sessionSize = -1;
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
+      if (sessionSize == -1 && exerciseCorrectAndScore.getSessionSize() > 0) {
+        sessionSize = exerciseCorrectAndScore.getSessionSize();
+      }
       if (score > 0) {
         totalScore += score;
       }
@@ -246,8 +235,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     //  logger.info("total " + totalScore);
     // logger.info("possible " + possible);
-    int n = simpleTimeAndScores.size();
-    float denom = (float) n;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
+    float denom = (float) sessionSize == -1 ? n : sessionSize;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
+    return getPercent(totalScore, denom);
+  }
+
+  private int getPercent(float totalScore, float denom) {
     float v = totalScore / denom;
     // logger.info("ratio " + v);
     float fround = Math.round(v * 100);
@@ -654,7 +646,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
-      data[i][0]   = ts.getTimestamp();
+      data[i][0] = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
     }
     return data;
@@ -916,9 +908,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
       PhoneSession currentSession = phoneSessions.get(index);
-
-//      logger.info("current "+ currentSession);
-
       offset = currentSession.getEnd() + 1 - thisPeriodStart;
     }
     return offset;
@@ -1019,6 +1008,28 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
+  /**
+   * @param simpleTimeAndScores
+   * @param index
+   * @return
+   * @see #setTitleScore
+   */
+  private String getScoreText(SortedSet<TimeAndScore> simpleTimeAndScores, int index) {
+    int fround1 = getPercentScore(simpleTimeAndScores);
+    int n = simpleTimeAndScores.size();
+    // int denom = (n <= 10 ? 10 : n <= 100 ? 100 : n);
+    int denom = simpleTimeAndScores.iterator().next().getSessionSize();
+
+    String text = simpleTimeAndScores.size() > 100 ? "" :
+        PREFIX + (index + 1) + " : score " + fround1 +
+            //"/" + (10 * denom) +
+            "%" +
+            " for " + n + "/" + denom +
+            " items (" + getPercent(n, denom) +
+            "%)";
+    return text;
+  }
+
   public interface TimeChangeListener {
     /**
      * @param from
@@ -1033,17 +1044,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     String seriesName = toolTipData.getSeriesName();
 
     if (granToLabel.values().contains(seriesName)) {
-      Series series = chart.getSeries(toolTipData.getSeriesId());
-
-      if (granToAverage.values().contains(series)) {
+      if (granToAverage.values().contains(chart.getSeries(toolTipData.getSeriesId()))) {
         return getAvgTooltip(toolTipData, seriesName);
       } else {
         return getErrorBarToolTip(toolTipData, seriesName);
       }
     } else {
-      //else {
-      //logger.info("getTooltip series is " + seriesName + " not in " + values);
-      // }
       return super.getTooltip(toolTipData, exid, commonShell);
     }
   }

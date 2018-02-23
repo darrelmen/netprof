@@ -47,6 +47,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -225,7 +226,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
         controller.usingFlashRecorder(),
-        "browser",
+        getDeviceType(),
         getDevice(),
         decoderOptions,
         new AsyncCallback<AudioAnswer>() {
@@ -237,6 +238,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             onPostSuccess(result, then, outer, len);
           }
         });
+  }
+
+  @NotNull
+  protected String getDeviceType() {
+    return "browser";
   }
 
   protected String getDevice() {

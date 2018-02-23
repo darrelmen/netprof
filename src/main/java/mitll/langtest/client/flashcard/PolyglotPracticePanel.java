@@ -103,6 +103,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     return s;
   }
 
+  String getDeviceTypeValue() {
+    return ""+polyglotFlashcardContainer.getNumExercises();
+  }
+
   @Override
   protected boolean showScoreFeedback(AudioAnswer result) {
     return true;

@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+ // private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final boolean ADD_KEY_BINDING = true;
 
