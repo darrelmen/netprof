@@ -794,7 +794,7 @@ public class InitialUI implements UILifecycle {
    * @see #clickOnParentCrumb
    */
   private void removeLastCrumb() {
-    //  logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
+      logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
     //  logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }

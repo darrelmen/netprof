@@ -56,12 +56,15 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
+ * THIS IS DEAD FOR NOW.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
  */
-class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScore> {
+class ScoreHistoryContainer {
+ /* extends
+ SimplePagingContainer<ExerciseCorrectAndScore> {
   private final Logger logger = Logger.getLogger("ScoreHistoryContainer");
 
   private static final int HISTORY_COL_WIDTH = 105;
@@ -77,10 +80,10 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private final Map<Integer, CommonShell> idToExercise = new HashMap<>();
   private final ExerciseComparator sorter;
 
-  /**
+  *//**
    * @param controller
    * @param allExercises
-   */
+   *//*
   ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
@@ -91,12 +94,12 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     }
   }
 
-  /**
+  *//**
    * Scroll to first score.
    * @param sortedHistory
    * @return
    * @see SetCompleteDisplay#getScoreHistory
-   */
+   *//*
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
     tableWithPager.getElement().setId("TableScoreHistory");
@@ -285,11 +288,11 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     };
   }
 
-  /**
+  *//**
    * TODO : what if we can't find the exercise id here?
    *
    * @return
-   */
+   *//*
   private Column<ExerciseCorrectAndScore, SafeHtml> getFLColumn() {
     return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
@@ -345,23 +348,23 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
 
-  /**
+  *//**
    * Confusing for english - english col should be foreign language for english,
    *
    * @param shell
    * @return
-   */
+   *//*
   private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     return english ? shell.getForeignLanguage() : shell.getEnglish();
   }
 
-  /**
+  *//**
    * Confusing for english - fl text should be english or meaning if there is meaning
    *
    * @param shell
    * @return
-   */
+   *//*
   private String getFLText(CommonShell shell) {
     String toShow = shell.getForeignLanguage();
     if (english) {
@@ -372,9 +375,9 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   public interface LocalTableResources extends CellTable.Resources {
-    /**
+    *//**
      * The styles applied to the table.
-     */
+     *//*
     interface TableStyle extends CellTable.Style {
     }
 
@@ -384,17 +387,17 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   public interface RTLLocalTableResources extends CellTable.Resources {
-    /**
+    *//**
      * The styles applied to the table.
-     */
+     *//*
     interface TableStyle extends CellTable.Style {
     }
 
-    /**
+    *//**
      * The styles applied to the table.
-     */
+     *//*
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
     ScoreHistoryContainer.RTLLocalTableResources.TableStyle cellTableStyle();
-  }
+  }*/
 }

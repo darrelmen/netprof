@@ -34,6 +34,7 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import org.apache.xpath.operations.Bool;
 
 import java.util.List;
 
@@ -233,13 +234,13 @@ public class SetCompleteDisplay {
     return new ScoreHistoryContainer(controller, allExercises).getTableWithPager(sortedHistory);
   }*/
 
-   static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
+   static String getScoreHistory(List<Boolean> correctAndScores) {
     int size = correctAndScores.size();
     if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
 
     StringBuilder builder = new StringBuilder();
-    for (CorrectAndScore correctAndScore : correctAndScores) {
-      boolean correct = correctAndScore.isCorrect();
+    for (Boolean correct : correctAndScores) {
+      //boolean correct = correctAndScore.isCorrect();
       String icon =
           correct ? "icon-plus-sign" :
               "icon-minus-sign";
@@ -258,6 +259,7 @@ public class SetCompleteDisplay {
     }
     return builder.toString();
   }
+
 /*
   private String bold(AVPHistoryForList.UserScore score, String html) {
     return score.isCurrent() ? "<b>" + html + "</b>" : html;

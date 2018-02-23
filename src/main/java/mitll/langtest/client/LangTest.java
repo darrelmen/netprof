@@ -1033,7 +1033,7 @@ public class LangTest implements
   public AudioServiceAsync getAudioService() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo == null) {
-      logger.warning("\ngetAudioService has no project yet... using default audio service...?");
+      logger.info("\ngetAudioService has no project yet... using default audio service...?");
       if (userManager.getCurrent() != null) {
         setProjectStartupInfo(userManager.getCurrent());
       }
@@ -1054,7 +1054,7 @@ public class LangTest implements
   public ScoringServiceAsync getScoringService() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo == null) {
-      logger.warning("getScoringService has no project yet...");
+      logger.info("getScoringService has no project yet...");
     }
     ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultScoringServiceAsync : projectToScoringService.get(projectStartupInfo.getProjectid());
     if (audioServiceAsync == null) logger.warning("getScoringService no audio service for " + projectStartupInfo);

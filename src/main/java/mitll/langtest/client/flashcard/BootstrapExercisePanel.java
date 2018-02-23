@@ -65,6 +65,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -283,7 +284,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         return getDeviceTypeValue();
       }
 
-      @Override protected String getDevice() {
+      @Override
+      protected String getDevice() {
         return getDeviceValue();
       }
 
@@ -367,6 +369,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   String getDeviceValue() {
     return controller.getBrowserInfo();
   }
+
   String getDeviceTypeValue() {
     return controller.getBrowserInfo();
   }
@@ -522,9 +525,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     maybeAdvance(score);
   }
 
-  void playCorrectDing() {   getSoundFeedback().queueSong(SoundFeedback.CORRECT);  }
+  void playCorrectDing() {
+    getSoundFeedback().queueSong(SoundFeedback.CORRECT);
+  }
 
-  void maybeAdvance(double score) {}
+  void maybeAdvance(double score) {
+  }
 
   private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
@@ -665,7 +671,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       DivWidget historyDiv = new DivWidget();
       historyDiv.getElement().setId("historyDiv");
       firstRow.add(historyDiv);
-      String history = SetCompleteDisplay.getScoreHistory(scores);
+
+      List<Boolean> adjusted = new ArrayList<>();
+      for (CorrectAndScore score : scores) {
+        boolean correct = isCorrect(score.isCorrect(), score.getScore());
+        adjusted.add(correct);
+      }
+      String history = SetCompleteDisplay.getScoreHistory(adjusted);
       String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
           "</span>";
 

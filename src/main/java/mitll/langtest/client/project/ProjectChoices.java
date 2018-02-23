@@ -152,8 +152,10 @@ public class ProjectChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
+      logger.info("show initial " + level);
       showInitialChoices(level);
     } else {
+      logger.info("show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }
@@ -200,27 +202,33 @@ public class ProjectChoices {
     boolean admin = controller.getUserManager().isAdmin();
 
     for (SlimProject project : projects) {
-      if (isPoly) {
-        if (project.getProjectType() == ProjectType.POLYGLOT || project.hasChildren()) {
-          filtered.add(project);
-        }
-      } else {
-        ProjectStatus status = project.getStatus();
+      ProjectStatus status = project.getStatus();
 
-        if (status == ProjectStatus.PRODUCTION) {
-          filtered.add(project);
-        } else {
-          if (status == ProjectStatus.RETIRED) {
-            if (admin) {
-              filtered.add(project);
-            }
-          } else if (canRecord) {
+      if (status == ProjectStatus.PRODUCTION) {
+        filtered.add(project);
+      } else {
+        if (status == ProjectStatus.RETIRED) {
+          if (admin) {
             filtered.add(project);
           }
+        } else if (canRecord) {
+          filtered.add(project);
         }
       }
+
     }
-    return filtered;
+
+    List<SlimProject> filtered2 = new ArrayList<>();
+    if (isPoly) {
+      for (SlimProject project : filtered) {
+        if (project.getProjectType() == ProjectType.POLYGLOT || project.hasChildren()) {
+          filtered2.add(project);
+        }
+      }
+    } else {
+      filtered2 = filtered;
+    }
+    return filtered2;
   }
 
   /**
@@ -934,8 +942,13 @@ public class ProjectChoices {
           */
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
-      // logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
-      breadcrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang));
+
+      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      breadcrumb.addClickHandler(clickEvent -> {
+        SlimProject projectForLang1 = projectForLang;
+        logger.info("Click on crumb " + projectForLang1.getName());
+        uiLifecycle.clickOnParentCrumb(projectForLang1);
+      });
 
       uiLifecycle.clearContent();
       addProjectChoices(nest, children);

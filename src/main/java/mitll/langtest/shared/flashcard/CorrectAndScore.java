@@ -56,16 +56,16 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   /**
    * For AMAS
    */
- // private int qid;
+  // private int qid;
   private boolean correct;
   /**
    * For AMAS
    */
- // private float classifierScore;
+  // private float classifierScore;
   /**
    * For AMAS
    */
- // private float userScore;
+  // private float userScore;
 
   private String path;
 
@@ -81,12 +81,12 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    * @see MiniScoreListener#gotScore(mitll.langtest.shared.scoring.PretestScore, String)
    */
   public CorrectAndScore(float score, String path) {
-   super(score);
+    super(score);
     this.path = path;
   }
 
   public CorrectAndScore(AudioAnswer result) {
-    this(result.getPretestScore().getHydecScore(),result.getPath());
+    this(result.getPretestScore().getHydecScore(), result.getPath());
 
     setScores(result.getPretestScore().getTypeToSegments());
     setJson(result.getPretestScore().getJson());
@@ -105,7 +105,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    */
   public CorrectAndScore(int uniqueID, int userid, int exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
-    super(uniqueID,timestamp,score);
+    super(uniqueID, timestamp, score);
     this.uniqueID = uniqueID;
     this.exid = exerciseID;
     this.userid = userid;
@@ -115,7 +115,9 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   }
 
   @Override
-  public int compareTo(CorrectAndScore o) { return Long.compare(getTimestamp(), o.getTimestamp()); }
+  public int compareTo(CorrectAndScore o) {
+    return Long.compare(getTimestamp(), o.getTimestamp());
+  }
 
   public boolean isCorrect() {
     return correct;
@@ -148,6 +150,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   /**
    * AMAS
    * TODO : maybe put this back someday
+   *
    * @return
    */
   public int getQid() {
@@ -156,6 +159,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   /**
    * AMAS
+   *
    * @return
    */
   public boolean hasUserScore() {
@@ -184,6 +188,6 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
 
   public String toString() {
     return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore() +
-        (scores == null ? "":" segments for "+scores.keySet());
+        (scores == null ? "" : " segments for " + scores.keySet());
   }
 }

@@ -147,7 +147,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   protected void playIncorrect() {
-
   }
 
   @Override
