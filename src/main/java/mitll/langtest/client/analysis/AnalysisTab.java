@@ -63,8 +63,9 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  public static final String REPORT_FOR_USER = "getting performance report for user";
   private final Logger logger = Logger.getLogger("AnalysisTab");
+
+  private static final String REPORT_FOR_USER = "getting performance report for user";
   private static final int MIN_HEIGHT = 325;
 
   /**

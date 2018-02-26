@@ -144,17 +144,10 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
     boolean isReg = isSpeedReg();
     boolean isSlow = !isReg;
 
-//
-//    Collection<Integer> preferredVoices = Collections.emptyList(); // bogus for now...
-//    Map<MiniUser, List<AudioAttribute>> malesMap =
-//        exercise.getMostRecentAudio(true, preferredVoices, includeContext);
-//    Map<MiniUser, List<AudioAttribute>> femalesMap =
-//        exercise.getMostRecentAudio(false, preferredVoices, includeContext);
-
     List<AudioAttribute> maleAudio = exercise.getMostRecentAudioEasy(true, includeContext);
     List<AudioAttribute> femaleAudio = exercise.getMostRecentAudioEasy(false, includeContext);
 
-    if (exercise.getID() == 8729) {
+/*    if (exercise.getID() == 8729) {
       logger.info("addChoices for exercise " + exercise.getID() + " eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
           "'" +
           "\n\tmale       " + isMale +
@@ -164,7 +157,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
 
       );
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
-    }
+    }*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;

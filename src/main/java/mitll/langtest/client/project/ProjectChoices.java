@@ -167,7 +167,6 @@ public class ProjectChoices {
       public void onFailure(Throwable caught) {
         lifecycleSupport.onFailure(caught, then);
       }
-
       public void onSuccess(StartupInfo startupInfo) {
         addProjectChoices(level, startupInfo.getProjects());
       }
@@ -240,7 +239,7 @@ public class ProjectChoices {
     if (widgetCount == 2) {
       logger.warning("showProject has " + widgetCount);
     }
-    contentRow.add(showProjectChoices(project.getChildren(), 1));
+    contentRow.add(showProjectChoices(getVisibleProjects(project.getChildren()), 1));
   }
 
   /**
@@ -943,10 +942,10 @@ public class ProjectChoices {
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
 
-      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+  //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
         SlimProject projectForLang1 = projectForLang;
-        logger.info("Click on crumb " + projectForLang1.getName());
+      //  logger.info("Click on crumb " + projectForLang1.getName());
         uiLifecycle.clickOnParentCrumb(projectForLang1);
       });
 

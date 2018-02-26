@@ -28,7 +28,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
       new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
 
   private static final int X_OFFSET_LEGEND = 65;
-  private static final int Y_OFFSET_FOR_LEGEND = 20;
+  private static final int Y_OFFSET_FOR_LEGEND = -10;
 
   private final Map<Long, Integer> timeToId = new TreeMap<>();
   private final Map<Integer, CommonShell> idToEx = new TreeMap<>();

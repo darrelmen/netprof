@@ -136,6 +136,11 @@ public class ListView implements ContentView, CreateListComplete {
         ListContainer listContainer =
             new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE) {
               @Override
+              protected boolean hasDoubleClick() {
+                return true;
+              }
+
+              @Override
               protected void gotDoubleClickOn(UserList<CommonShell> selected) {
                 showLearnList(this);
               }
@@ -167,6 +172,11 @@ public class ListView implements ContentView, CreateListComplete {
       public void onSuccess(Collection<UserList<CommonShell>> result) {
         ListContainer listContainer =
             new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE) {
+
+              @Override
+              protected boolean hasDoubleClick() {
+                return true;
+              }
               @Override
               protected void gotDoubleClickOn(UserList<CommonShell> selected) {
                 showLearnList(this);
@@ -175,7 +185,7 @@ public class ListView implements ContentView, CreateListComplete {
         Panel tableWithPager = listContainer.getTableWithPager(result);
         addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
         tableWithPager.setHeight(BROWSE_HEIGHT + "px");
-        tableWithPager.getElement().getStyle().setProperty("minWidth","700px");
+        tableWithPager.getElement().getStyle().setProperty("minWidth", "700px");
 
         new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
 
@@ -432,7 +442,7 @@ public class ListView implements ContentView, CreateListComplete {
         controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-         //   logger.warning("delete list call failed?");
+            //   logger.warning("delete list call failed?");
             controller.handleNonFatalError("deleting a list", caught);
           }
 
@@ -617,8 +627,13 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private class MyListContainer extends ListContainer {
-    public MyListContainer() {
+    MyListContainer() {
       super(ListView.this.controller, 20, true, "myLists", 15);
+    }
+
+    @Override
+    protected boolean hasDoubleClick() {
+      return true;
     }
 
     @Override

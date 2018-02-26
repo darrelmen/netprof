@@ -47,8 +47,8 @@ import java.util.logging.Logger;
  */
 class TimeWidgets {
   //private final Logger logger = Logger.getLogger("TimeWidgets");
-  final Button prevButton;
-  final Button nextButton;
+  private final Button prevButton;
+  private final Button nextButton;
   private final Button all;
   private final Button week;
   private final Button minute;
@@ -92,11 +92,20 @@ class TimeWidgets {
 
   public void reset() {
     all.setActive(true);
+
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
 
     if (minute != null) {
       minute.setActive(false);
     }
+  }
+
+  public Button getPrevButton() {
+    return prevButton;
+  }
+
+  public Button getNextButton() {
+    return nextButton;
   }
 }

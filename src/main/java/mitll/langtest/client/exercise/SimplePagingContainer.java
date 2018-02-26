@@ -159,7 +159,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
 
-    addDoubleClick();
+    if (hasDoubleClick()) {
+      addDoubleClick();
+    }
 
     configureTable(sortEnglish);
     return table;
@@ -175,6 +177,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
         DoubleClickEvent.getType());
   }
 
+  protected boolean hasDoubleClick() { return false; }
   protected void gotDoubleClickOn(T selected) {
 //    logger.info("got double click on " + selected);
   }

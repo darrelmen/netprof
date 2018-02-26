@@ -96,12 +96,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     this.controller = controller;
     this.lifecycle = lifecycle;
-
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      public void execute() {
-//        addWidgets(userManager, userMenu, breadcrumbs);
-//      }
-//    });
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 

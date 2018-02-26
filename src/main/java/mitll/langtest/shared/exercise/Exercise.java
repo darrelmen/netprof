@@ -34,7 +34,6 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
@@ -666,4 +665,5 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;
   }
+
 }

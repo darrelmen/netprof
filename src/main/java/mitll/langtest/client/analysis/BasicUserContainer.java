@@ -35,11 +35,15 @@ package mitll.langtest.client.analysis;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.UserInfo;
 
+/**
+ * Short page size is for laptops...
+ * @param <T>
+ */
 public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<T> {
   BasicUserContainer(ExerciseController controller,
                      String selectedUserKey,
                      String header) {
-    super(controller, selectedUserKey, header, 10, 8);
+    super(controller, selectedUserKey, header, 10, 7);
   }
 
   /**

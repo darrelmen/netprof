@@ -60,9 +60,9 @@ public class AudioExercise extends ExerciseShell {
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
   /**
-   * TODO: shouldn't be here.
+   *
    */
-  String altfl = "";
+  protected String altfl = "";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
@@ -71,6 +71,11 @@ public class AudioExercise extends ExerciseShell {
   public AudioExercise() {
   }
 
+  /**
+   *
+   * @param id
+   * @param projectid
+   */
   public AudioExercise(int id, int projectid) {
     super(id);
     this.projectid = projectid;

@@ -68,9 +68,10 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
+  private final Logger logger = Logger.getLogger("UserContainer");
+
   public static final String NAME = "Name";
   public static final int NAME_WIDTH = 135;
-  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final String MINE = "Mine";
   private static final int SESSION_WIDTH = 105;
@@ -153,7 +154,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   ) {
     super(controller, selectedUserKey, STUDENT);
     this.rightSide = rightSide;
-    // logger.info("overall bottom is " + overallBottom.getElement().getId() + " selected " + selectedUserKey);
     this.overallBottom = overallBottom;
     myStudents = new HashSet<>();
   }
@@ -161,7 +161,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
-
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }

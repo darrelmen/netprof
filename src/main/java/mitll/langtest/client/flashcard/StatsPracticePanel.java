@@ -8,10 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
@@ -41,7 +38,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    */
   private static final int BUTTON_RIGHT_MARGIN = 8;
   /**
-   * 
+   *
    */
   private static final String TRY_AGAIN = "Try Again?";
   private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";
@@ -196,7 +193,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   public void onSetComplete() {
 
 
-
     startOver.setVisible(false);
     seeScores.setVisible(false);
     setPrevNextVisible(false);
@@ -227,6 +223,15 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     AnalysisTab scoreHistory = getScoreHistory();
 
     scoreHistory.add(getButtonsBelowScoreHistory());
+    DivWidget w = new DivWidget();
+    w.addStyleName("floatRight");
+
+    HTML test = new HTML("");
+    w.add(test);
+    test.setHeight("60px");
+    //  w.setHeight("20px");
+    w.setWidth("100%");
+    scoreHistory.add(w);
     widgets.add(scoreHistory);
     belowContentDiv.clear();
     belowContentDiv.add(container);
@@ -241,7 +246,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    * @see #showFeedbackCharts
    */
   private Panel getButtonsBelowScoreHistory() {
-    // Panel child = new HorizontalPanel();
     DivWidget child = new DivWidget();
     child.addStyleName("floatRight");
 
@@ -254,7 +258,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     DivWidget lefty = new DivWidget();
     lefty.add(child);
     lefty.setWidth("100%");
-
+    lefty.addStyleName("bottomFiveMargin");
     return lefty;
   }
 
@@ -490,7 +494,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     return g;
   }
 
-  void addMoreStats(Grid g, int row) {}
+  void addMoreStats(Grid g, int row) {
+  }
 
   @NotNull
   Grid getGrid() {

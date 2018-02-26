@@ -184,7 +184,9 @@ public class DialogHelper {
       }
     });
 
-    dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
+    if (listener != null) {
+      dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
+    }
     dialogBox.add(container);
     dialogBox.show();
 

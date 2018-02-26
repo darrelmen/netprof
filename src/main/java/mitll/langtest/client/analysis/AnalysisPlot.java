@@ -48,7 +48,6 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -76,6 +75,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private static final String ITEMS = "";// items";
   private static final int STUDENT_WIDTH = 1050;
+  /**
+   * @see #configureChart
+   */
+  private static final int CHART_HEIGHT = 275;//295;
 
   /**
    *
@@ -98,11 +101,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this list by this student. Choose another list or student or don't filter on lists.";
 
   private static final int SHORT_THRESHOLD = 822;
+
   private static final int CHART_HEIGHT_SHORT = 225;//260;
-  /**
-   * @see #configureChart
-   */
-  private static final int CHART_HEIGHT = 295;
+
 
   private final AnalysisServiceAsync service;
   private final PlayAudio playAudio;
@@ -855,7 +856,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     Long lastPeriod = timePeriods.get(lastPeriodIndex);
     this.index = lastPeriodIndex;
 
-    timeWidgets.prevButton.setEnabled(numPeriods > 1);
+    timeWidgets.getPrevButton().setEnabled(numPeriods > 1);
     disableNext();
 
     timeWidgets.setDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
@@ -863,10 +864,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeChanged(startOfPrevPeriod, lastPlusSlack);
 
     return startOfPrevPeriod;
-  }
-
-  private void disableNext() {
-    timeWidgets.nextButton.setEnabled(false);
   }
 
   /**
@@ -887,7 +884,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   private void setTimeWindowControlsToAll() {
-    timeWidgets.prevButton.setEnabled(false);
+    timeWidgets.getPrevButton().setEnabled(false);
     disableNext();
     timeWidgets.setDisplay("");
     setTitleScore(-1, -1, index);
@@ -895,15 +892,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeChanged(firstTime, lastTime);
   }
 
+  private void disableNext() {
+    timeWidgets.getNextButton().setEnabled(false);
+  }
+
   /**
    * @see AnalysisTab#getPrevButton
    */
   void gotPrevClick() {
-
     index--;
 
-    timeWidgets.prevButton.setEnabled(index > 0);
-    timeWidgets.nextButton.setEnabled(true);
+    timeWidgets.getPrevButton().setEnabled(index > 0);
+    timeWidgets.getNextButton().setEnabled(true);
 
     long offset = getOffsetPerSession();
     showTimePeriod(offset, getPeriods());
@@ -929,8 +929,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     index++;
 
-    timeWidgets.prevButton.setEnabled(true);
-    timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
+    timeWidgets.getPrevButton().setEnabled(true);
+    timeWidgets.getNextButton().setEnabled(index < periods.size() - 1);
 
     showTimePeriod(getOffsetPerSession(), periods);
   }
