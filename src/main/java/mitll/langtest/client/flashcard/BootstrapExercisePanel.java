@@ -503,9 +503,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
           Math.round(score * 100f));
 
       // load audio?  why fetch it? unless we're going to play it?
-      playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()));
+      playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()), shouldDoAutoload());
     }
   }
+
+  protected boolean shouldDoAutoload() { return true; }
 
   boolean isCorrect(boolean correct, double score) {
     return correct;

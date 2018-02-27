@@ -504,14 +504,13 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid, int userid) {
-    UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
-    Map<String, Collection<String>> selection = userAndSelection.getSelection();
+    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
     logger.info("getPhoneReport : user " + userid + " selection " + selection + " proj " + projid);
     try {
       long then = System.currentTimeMillis();
 
-      int projectID = projid != -1 ? projid : getMostRecentProjectByUser(userid);
+      int projectID = getProjectID(projid, userid);
       toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
       if (now - then > 5) {
@@ -525,6 +524,10 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn.put(ERROR, "User id should be a number");
     }
     return toReturn;
+  }
+
+  private int getProjectID(int projid, int userid) {
+    return projid != -1 ? projid : getMostRecentProjectByUser(userid);
   }
 
   private String getProjects() {

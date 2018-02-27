@@ -61,16 +61,16 @@ class SoundManager {
   }-*/;
 
   /**
-   * @see SoundManagerStatic#createSound(Sound, String, String)
+   * @see SoundManagerAPI#createSound(Sound, String, String, boolean)
    * @param sound
    * @param title
    * @param file
    */
-	public static native void createSound(Sound sound, String title, String file) /*-{
+	public static native void createSound(Sound sound, String title, String file, boolean doAutoload) /*-{
       var javascriptSound = $wnd.soundManager.createSound({
           id: title,
           url: file,
-          autoLoad: true,
+          autoLoad: doAutoload,
           autoPlay: false,
           onfinish: function () {
               $wnd.songFinished(sound);

@@ -36,6 +36,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.ProjectType;
@@ -131,7 +132,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                        String language,
                                        Project project) {
     Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids);
-    PhoneReport report = getPhoneReport(phoneReportByExercises, false, false,
+    PhoneReport report = getPhoneReport(phoneReportByExercises, true, false,
         userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser " +
@@ -175,6 +176,17 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return getPhoneReport(phoneReportByResult, true, false, userid, project);
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPhone
+   * @param userid
+   * @param ids
+   * @param project
+   * @param phone
+   * @param from
+   * @param to
+   * @return
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPhone
+   */
   @Override
   public PhoneReport getWorstPhonesForResultsForPhone(int userid,
                                                       Collection<Integer> ids,
@@ -263,7 +275,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         totalItems++;
       }*/
 
-      if (addTranscript) {
         String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
         String scoreJson = report.scorejson();
         WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise,
@@ -282,12 +293,13 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             report.pscore(),
             language);
 
+      if (addTranscript) {
         addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);
         num++;
-      } else {
+      } /*else {
         getAndRememberPhoneAndScore(phoneToScores, report.phone(), report.pscore(), report.modified(),
             getSessionTime(sessionToLong, report.device()));
-      }
+      }*/
       //    } else {
      /*   logger.debug("------> current " + currentRID +
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/

@@ -415,7 +415,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     }
     lastWidth = 0;
     if (playAudio != null) {
-      playAudio.startSong(path);
+      playAudio.startSong(path, true);
     }
     return path;
   }

@@ -711,33 +711,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return null;
   }
 
-  /*  private Collection<Integer> getDeletedDocsSince(long then) {
-    Bson query = and(
-        eq("active", "false"),
-        gt("updateTime", "time")
-    );
-
-    FindIterable<Document> projection = pool
-        .getMongoCollection("document_heads")
-        .find(query)
-        .projection(include("_id"));
-
-    List<Integer> ids = new ArrayList<>();
-
-    MongoCursor<Document> cursor = projection.iterator();
-    try {
-      while (cursor.hasNext()) {
-        Document doc = cursor.next();
-        ids.add(doc.getInteger("_id"));
-      }
-    } finally {
-      cursor.close();
-    }
-
-    return ids;
-  }*/
-
-
   /**
    * @param userID
    * @return
@@ -937,20 +910,39 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     if (user.isPoly()) {
-      permissionSet.add(User.Permission.POLYGLOT);
-
-      if (userProjectDAO.mostRecentByUser(user.getID()) == -1) {  // none yet...
-        makeDefaultProjectAssignment(dominoUser, user.getID());
-      }
+      handlePolyglotUser(dominoUser, permissionSet, user);
     }
     user.setPermissions(permissionSet);
-
 //    logger.info("\ttoUser return " + user);
     return user;
   }
 
-  private void makeDefaultProjectAssignment(DBUser dominoUser, int id) {
+  private void handlePolyglotUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user) {
+    permissionSet.add(User.Permission.POLYGLOT);
+
+    int id = user.getID();
+    int mostRecentByUser = userProjectDAO.getCurrentProjectForUser(id);
+    int projectAssignment = getProjectAssignment(dominoUser, id);
+
+    if (mostRecentByUser == -1) {  // none yet...
+      if (projectAssignment != -1) {
+        userProjectDAO.add(id, projectAssignment);
+      }
+    } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser){
+      logger.info("handlePolyglotUser before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #"+ projectAssignment);
+      userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
+    }
+  }
+
+  /**
+   * Get language from secondary group, then try to match language to a polyglot project.
+   * @param dominoUser
+   * @param id
+   * @return
+   */
+  private int getProjectAssignment(DBUser dominoUser, int id) {
     Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
+    int projID = -1;
     if (!secondaryGroups.isEmpty()) {
       Group next = secondaryGroups.iterator().next();
       Language languageMatchingGroup = getLanguageMatchingGroup(next);
@@ -959,20 +951,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
         if (!collect.isEmpty()) {
           if (collect.size() > 1) {
-            logger.info("found multiple polyglot projects ");
+            logger.info("getProjectAssignment found multiple polyglot projects ");
           }
 
-          int projID = collect.iterator().next().getID();
-          userProjectDAO.add(id, projID);
-          logger.info("makeDefaultProjectAssignment : match " + next + " to project " + projID);
-        }
-        else {
-          logger.warn("no polyglot project for " + languageMatchingGroup);
+          projID = collect.iterator().next().getID();
+          logger.info("getProjectAssignment : match " + next + " to project " + projID);
+        } else {
+          logger.warn("getProjectAssignment no polyglot project for " + languageMatchingGroup);
         }
       } else {
-        logger.warn("no language matching group " + next);
+        logger.warn("getProjectAssignment no language matching group " + next);
       }
-    } else logger.info("no groups for user id " + id);
+    } else {
+      logger.info("getProjectAssignment no groups for user id " + id);
+    }
+    return projID;
   }
 
   private List<Project> getMatchingProjects(Language languageMatchingGroup) {

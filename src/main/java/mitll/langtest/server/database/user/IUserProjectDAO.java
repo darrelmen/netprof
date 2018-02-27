@@ -36,7 +36,6 @@ import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserProject;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public interface IUserProjectDAO extends IDAO {
@@ -44,7 +43,7 @@ public interface IUserProjectDAO extends IDAO {
    * @param userid
    * @param projid
    * @see mitll.langtest.server.database.DatabaseImpl#rememberUsersCurrentProject
-   * @see UserProjectDAO#setCurrentUserToProject
+   * @see UserProjectDAO#setCurrentProjectForUser
    * @see
    */
   void add(int userid, int projid);
@@ -57,7 +56,14 @@ public interface IUserProjectDAO extends IDAO {
 
   void forgetUsersBulk(Collection<Integer> bulk);
 
-  boolean setCurrentUserToProject(int userid, int projid);
+  /**
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
+   * @param user
+   * @return -1 if has no project
+   */
+  int getCurrentProjectForUser(int user);
+
+  boolean setCurrentProjectForUser(int userid, int projid);
 
   /**
    * @param userid
@@ -65,13 +71,6 @@ public interface IUserProjectDAO extends IDAO {
    * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
    */
   void forget(int userid);
-
-  /**
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
-   * @param user
-   * @return -1 if has no project
-   */
-  int mostRecentByUser(int user);
 
   Map<Integer, Integer> getUserToProject();
 

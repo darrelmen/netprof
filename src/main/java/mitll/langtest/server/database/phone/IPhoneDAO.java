@@ -3,6 +3,7 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
@@ -32,6 +33,17 @@ public interface IPhoneDAO<T>  extends IDAO {
    * @return
    */
   PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
+
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPhone(int, UserInfo, Project, String, long, long)
+   * @param userid
+   * @param ids
+   * @param project
+   * @param phone
+   * @param from
+   * @param to
+   * @return
+   */
   PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to);
 
   void removeForResult(int resultid);

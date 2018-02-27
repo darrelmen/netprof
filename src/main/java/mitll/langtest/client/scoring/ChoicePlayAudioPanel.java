@@ -159,6 +159,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
     }*/
 
+    logger.warning("isMale " + isMale + " isReg " + isReg);
+
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
     AudioAttribute genderFallback = null;
@@ -244,7 +246,8 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private boolean isSpeedReg() {
-    return controller.getStorage().isTrue(IS_REG);
+    KeyStorage storage = controller.getStorage();
+    return !storage.hasValue(IS_REG) || storage.isTrue(IS_REG);
   }
 
   private boolean isMale() {

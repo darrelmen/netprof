@@ -74,13 +74,13 @@ function startRecording() {
     recorder && recorder.record();
     //  start = new Date().getTime();
 
-    __log('Recording...');
+   // __log('Recording...');
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
-    __log('Stopped recording.');
+    //__log('Stopped recording.');
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
     // get WAV from audio data blob

@@ -262,11 +262,17 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   public void onSetComplete() {
     long roundTimeLeftMillis = polyglotFlashcardContainer.getRoundTimeLeftMillis();
-    logger.info("onSetComplete  "+roundTimeLeftMillis);
+    logger.info("onSetComplete  " + roundTimeLeftMillis);
     if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
       new ModalInfoDialog(ALL_DONE, COMPLETE);
     } else {
       super.onSetComplete();
     }
   }
+
+  @Override
+  protected boolean shouldDoAutoload() {
+    return false;
+  }
+
 }

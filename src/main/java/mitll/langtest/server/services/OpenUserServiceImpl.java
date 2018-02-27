@@ -335,24 +335,24 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     try {
       long then = System.currentTimeMillis();
       int sessionUserID = getSessionUserID();
-      boolean b = sessionUserID != -1 && db.getUserProjectDAO().setCurrentUserToProject(sessionUserID, projid);
+      boolean b = sessionUserID != -1 && db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
 
       long now = System.currentTimeMillis();
       if (now - then > 10) {
-        logger.info("setCurrentUserToProject : took " + (now - then) + " to get current session user " + sessionUserID +
+        logger.info("setCurrentProjectForUser : took " + (now - then) + " to get current session user " + sessionUserID +
             " and set project to " + projid);
       }
       if (!b) {
         if (sessionUserID == -1) {
-          logger.info("setCurrentUserToProject : no current session user " + sessionUserID + " for " + projid);
+          logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
         } else {
-          logger.info("setCurrentUserToProject : no most recent project for " + sessionUserID + ", tried " + projid);
+          logger.info("setCurrentProjectForUser : no most recent project for " + sessionUserID + ", tried " + projid);
         }
       }
 
       return b;
     } catch (DominoSessionException e) {
-      logger.error("setCurrentUserToProject got  " + e, e);
+      logger.error("setCurrentProjectForUser got  " + e, e);
       return false;
     }
   }

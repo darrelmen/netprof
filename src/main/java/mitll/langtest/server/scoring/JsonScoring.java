@@ -130,7 +130,7 @@ public class JsonScoring {
    * @see #getAnswer
    */
   private int getMostRecentProjectByUser(int id) {
-    return db.getUserProjectDAO().mostRecentByUser(id);
+    return db.getUserProjectDAO().getCurrentProjectForUser(id);
   }
 
   /**

@@ -727,8 +727,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see Database#getNativeAudio
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
-                               String language, Map<Integer, MiniUser> idToMini) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
+                               int userid,
+                               CommonExercise exercise,
+                               String language,
+                               Map<Integer, MiniUser> idToMini) {
     //String nativeAudio = null;
     if (exercise != null) {
       MiniUser.Gender genderOfUser = getGender(userToGender, userid);
@@ -794,7 +797,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Collection<SlickAudio> byID = dao.getByID(audioID);
     return byID.isEmpty() ? null : toAudioAttribute(byID, hasProjectSpecificAudio).iterator().next();
   }
-
 
   @Override
   public void deleteForProject(int projID) {

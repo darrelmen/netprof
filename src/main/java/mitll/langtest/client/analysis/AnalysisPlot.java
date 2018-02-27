@@ -823,11 +823,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     return null;
   }
 
-  /**
-   * logger.info("from lastMonth        " + getShortDate(lastMonth));
-   * logger.info("from startOfPrevMonth " + getShortDate(startOfPrevMonth));
-   * logger.info("to lastTime           " + getShortDate(lastTime));
-   **/
   private long showLastWeek(XAxis xAxis, long lastPlusSlack) {
     return showLastPeriod(xAxis, lastPlusSlack, WEEK.getDuration(), this.weeks);
   }
@@ -1018,6 +1013,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   /**
    * Uses remembered session size.
+   *
    * @param simpleTimeAndScores
    * @param index
    * @return
@@ -1027,12 +1023,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
     int denom = simpleTimeAndScores.iterator().next().getSessionSize();
+   // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
-    if (denom < 0) denom = n;
-    if (denom > n) denom = n; // denom never larger than numerator...
+    if (denom < 0) {
+      denom = n;
+    } else if (n > denom) {
+      logger.info("denom " + denom + " n " + n);
+      denom = n; // denom never larger than numerator...
+    }
 
     int percent = getPercent(n, denom);
-    String s = "(" + percent + "%)";
+    String percentPart = "(" + percent + "%)";
     int score = getAdjustedScore(fround1, percent);
     String ratio = (n == denom) ? "" + n : n + "/" + denom;
 
@@ -1040,7 +1041,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         PREFIX + (index + 1) + " : " +
             SCORE + score +
             //"%" +
-            " for " + ratio + " " + s +
+            " for " + ratio + " " + percentPart +
             ITEMS;
     return text;
   }

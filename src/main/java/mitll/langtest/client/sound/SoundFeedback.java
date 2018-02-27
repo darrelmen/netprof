@@ -119,7 +119,7 @@ public class SoundFeedback {
       }
     });
 
-    soundManager.createSound(currentSound, song, song);
+    soundManager.createSound(currentSound, song, song, true);
 
     return currentSound;
   }

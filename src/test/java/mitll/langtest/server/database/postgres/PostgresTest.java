@@ -35,7 +35,6 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
-import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -581,11 +580,11 @@ public class PostgresTest extends BaseTest {
 
     User byID = spanish.getUserDAO().getUserByID("gvidaver");
     logger.info("user is " + byID);
-    int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getID());
+    int i = spanish.getUserProjectDAO().getCurrentProjectForUser(byID.getID());
     logger.info("most recent is " + i);
-    i = spanish.getUserProjectDAO().mostRecentByUser(999999);
+    i = spanish.getUserProjectDAO().getCurrentProjectForUser(999999);
     logger.info("most recent is " + i);
-    i = spanish.getUserProjectDAO().mostRecentByUser(342);
+    i = spanish.getUserProjectDAO().getCurrentProjectForUser(342);
     logger.info("most recent is " + i);
   }
 

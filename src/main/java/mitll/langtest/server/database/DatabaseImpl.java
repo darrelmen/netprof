@@ -930,7 +930,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private int projectForUser(int userid) {
-    return getUserProjectDAO().mostRecentByUser(userid);
+    return getUserProjectDAO().getCurrentProjectForUser(userid);
   }
 
   private JsonSupport getJsonSupportForProject(int i) {

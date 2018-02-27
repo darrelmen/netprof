@@ -46,7 +46,7 @@ public class PhoneJSON {
    *
    * @param worstPhonesAndScore
    * @return
-   * @see IPhoneDAO#getWorstPhonesJson(int, java.util.Collection, String, mitll.langtest.server.database.exercise.Project)
+   * @see SlickPhoneDAO#getWorstPhonesJson(int, java.util.Collection, String, mitll.langtest.server.database.exercise.Project)
    */
   JSONObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JSONObject jsonObject = new JSONObject();
@@ -62,8 +62,7 @@ public class PhoneJSON {
 
       for (Map.Entry<String, List<WordAndScore>> pair : worstPhones.entrySet()) {
         List<WordAndScore> value = pair.getValue();
-        JSONArray words = getWordsJsonArray(resToAnswer, resToRef, resToResult, value);
-        phones.put(pair.getKey(), words);
+        phones.put(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, resToResult, value));
       }
 
       jsonObject.put(PHONES, phones);
@@ -74,18 +73,20 @@ public class PhoneJSON {
       jsonObject.put(ORDER, order);
       if (DEBUG) logger.debug("order phones are " + order);
 
-      JSONObject results = new JSONObject();
-      for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
-        JSONObject result = new JSONObject();
+      {
+        JSONObject results = new JSONObject();
+        for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
+          JSONObject result = new JSONObject();
 
-        Long key = pair.getKey();
-        result.put(ANSWER, pair.getValue());
-        result.put(REF, resToRef.get(key));
-        result.put(RESULT, resToResult.get(key));
+          Long key = pair.getKey();
+          result.put(ANSWER, pair.getValue());
+          result.put(REF,    resToRef.get(key));
+          result.put(RESULT, resToResult.get(key));
 
-        results.put(Long.toString(key), result);
+          results.put(Long.toString(key), result);
+        }
+        jsonObject.put(RESULTS, results);
       }
-      jsonObject.put(RESULTS, results);
       jsonObject.put(PHONE_SCORE, Integer.toString(worstPhonesAndScore.getOverallPercent())); // TODO : not sure where this is used
     }
 
@@ -103,7 +104,7 @@ public class PhoneJSON {
    * @param resToResult
    * @param value
    * @return
-   * @see #getWorstPhonesJson(PhoneReport)
+   * @see #getWorstPhonesJson
    */
   private JSONArray getWordsJsonArray(Map<Long, String> resToAnswer,
                                       Map<Long, String> resToRef,
@@ -114,6 +115,7 @@ public class PhoneJSON {
     int count = 0;
     for (WordAndScore wordAndScore : value) {
       words.add(getJsonForWord(wordAndScore));
+
       long resultID = wordAndScore.getResultID();
       resToAnswer.put(resultID, wordAndScore.getAnswerAudio());
       resToRef.put(resultID, wordAndScore.getRefAudio());

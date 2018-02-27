@@ -172,14 +172,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       logger.warn("getProjectIDFromUser : no user in session, so we can't get the project id for the user.");
       return -1;
     } else {
-      int mostRecentByUser = db.getUserProjectDAO().mostRecentByUser(userIDFromSession);
+      int mostRecentByUser = db.getUserProjectDAO().getCurrentProjectForUser(userIDFromSession);
 
       // why would we want to configure it as a side effect here???
       // if it's a new project, we'd want to configure it there?
 
-    /*    Project project = db.getProject(mostRecentByUser);
+    /*    Project project = db.getProject(getCurrentProjectForUser);
     if (project == null) {
-      logger.warn("getProjectIDFromUser user " + userIDFromSession + " no project for id " + mostRecentByUser);
+      logger.warn("getProjectIDFromUser user " + userIDFromSession + " no project for id " + getCurrentProjectForUser);
     } else {
       logger.info("getProjectIDFromUser user " + userIDFromSession + " = project " + project.getID() + " " + project.getLanguage());
       db.configureProject(project, false); //check if we should configure it - might be a new project

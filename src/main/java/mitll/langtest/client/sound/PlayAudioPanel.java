@@ -46,7 +46,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 import mitll.langtest.shared.exercise.CommonAudioExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -513,7 +512,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     doPause();
     String fixedPath = rememberAudio(path);
-    startSong(fixedPath);
+    startSong(fixedPath, true);
 
     if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
   }
@@ -536,11 +535,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * Check if soundmanager loaded properly, warn if it didn't.
    *
    * @param path to audio file on server
+   * @param doAutoload
    * @see mitll.langtest.client.scoring.AudioPanel#getReadyToPlayAudio
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getReadyToPlayAudio
    * @see #loadAudio
    */
-  public void startSong(String path) {
+  public void startSong(String path, boolean doAutoload) {
     if (path == null) logger.warning("no path given???");
     else if (!path.equals(FILE_MISSING)) {
       //logger.info("PlayAudioPanel.loadAudio - skipping " + path);
@@ -552,7 +552,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
           if (DEBUG) logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
-          createSound(path);
+          createSound(path, doAutoload);
         } else {
           logger.info(" Sound manager is not OK!.");
           warnNoFlash.setVisible(true);
@@ -563,21 +563,22 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   /**
    * @param song
-   * @see #startSong(String)
+   * @param doAutoload
+   * @see #startSong(String, boolean)
    */
-  private void createSound(String song) {
+  private void createSound(String song, boolean doAutoload) {
     currentSound = new Sound(this);
     if (DEBUG) {
       logger.info("PlayAudioPanel.createSound  : (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
     }
 
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
-    soundManager.createSound(currentSound, uniqueID, song);
+    soundManager.createSound(currentSound, uniqueID, song, doAutoload);
   }
 
   /**
    * @see #onUnload()
-   * @see #startSong(String)
+   * @see #startSong(String, boolean)
    */
   private void destroySound() {
     if (currentSound != null) {

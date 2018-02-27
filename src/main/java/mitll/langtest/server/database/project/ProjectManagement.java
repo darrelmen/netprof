@@ -499,7 +499,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public Project getProjectForUser(int userid) {
-    Project project = getProject(db.getUserProjectDAO().mostRecentByUser(userid));
+    Project project = getProject(db.getUserProjectDAO().getCurrentProjectForUser(userid));
 
     if (project != null &&
         project.getStatus() == ProjectStatus.RETIRED) {

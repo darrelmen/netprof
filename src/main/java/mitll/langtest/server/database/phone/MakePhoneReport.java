@@ -38,10 +38,10 @@ public class MakePhoneReport {
     if (DEBUG) {
       logger.info(
           "getPhoneReport : \n\tscore " + overallScore +
-              "\n\titems " + totalItems +
-              "\n\tpercent " + percentOverall +
+              "\n\titems         " + totalItems +
+              "\n\tpercent       " + percentOverall +
               "\n\tphoneToScores " + phoneToScores.size() +
-              "\n\t: " + phoneToScores.keySet());
+              "\n\tphones        " + phoneToScores.keySet());
     }
 
     final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
@@ -72,6 +72,17 @@ public class MakePhoneReport {
       logger.info("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
 
+    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = getPhoneToWordAndScore(phoneToWordAndScore, sorted);
+
+    if (DEBUG) {
+      logger.info("getPhoneReport phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
+    }
+
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
+  }
+
+  @NotNull
+  private Map<String, List<WordAndScore>> getPhoneToWordAndScore(Map<String, List<WordAndScore>> phoneToWordAndScore, List<String> sorted) {
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
     for (String phone : sorted) {
@@ -85,12 +96,7 @@ public class MakePhoneReport {
       }
       phoneToWordAndScoreSorted.put(phone, value);
     }
-
-    if (DEBUG) {
-      logger.info("getPhoneReport phone->words " + phoneToWordAndScore.size() + " : " + phoneToWordAndScore.keySet());
-    }
-
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
+    return phoneToWordAndScoreSorted;
   }
 
   /**

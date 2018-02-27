@@ -332,7 +332,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     }
     if (playAudioPanel != null) {
       //logger.info("getReadyToPlayAudio startSong ready to play " +path);
-      playAudioPanel.startSong(path);
+      playAudioPanel.startSong(path, true);
     }
   }
 

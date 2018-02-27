@@ -131,7 +131,7 @@ public class DatabaseServlet extends HttpServlet {
    * @see DownloadServlet#getProjectIDFromUser
    */
   int getMostRecentProjectByUser(int id) {
-    return getDatabase().getUserProjectDAO().mostRecentByUser(id);
+    return getDatabase().getUserProjectDAO().getCurrentProjectForUser(id);
   }
 
   /**

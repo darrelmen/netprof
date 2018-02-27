@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
@@ -101,29 +100,20 @@ public class UserProjectDAO implements IUserProjectDAO {
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
    */
   @Override
-  public boolean setCurrentUserToProject(int userid, int projid) {
-    int mostRecentByUser = mostRecentByUser(userid);
+  public boolean setCurrentProjectForUser(int userid, int projid) {
+    int mostRecentByUser = getCurrentProjectForUser(userid);
 
     if (mostRecentByUser == -1) { // they logged out!
-      logger.info("setCurrentUserToProject no most recent project " + mostRecentByUser + " did they log out?");
+      logger.info("setCurrentProjectForUser no most recent project " + mostRecentByUser + " did they log out?");
       return false;
     } else if (mostRecentByUser != projid) {
-      logger.info("setCurrentUserToProject switched tabs, was " + mostRecentByUser + " but now will be " + projid);
+      logger.info("setCurrentProjectForUser switched tabs, was " + mostRecentByUser + " but now will be " + projid);
       add(userid, projid);
       return true;
     } else {
-     // logger.info("OK, just confirming current project for " + mostRecentByUser + " is " + projid);
+     // logger.info("OK, just confirming current project for " + getCurrentProjectForUser + " is " + projid);
       return true;
     }
-  }
-
-  /**
-   * @param userid
-   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
-   */
-  @Override
-  public void forget(int userid) {
-    dao.forget(userid);
   }
 
   /**
@@ -134,12 +124,21 @@ public class UserProjectDAO implements IUserProjectDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#projectForUser
    */
   @Override
-  public int mostRecentByUser(int user) {
+  public int getCurrentProjectForUser(int user) {
 //    long then = System.currentTimeMillis();
     List<Integer> slickUserProjects = dao.mostRecentByUser(user);
 //    long now = System.currentTimeMillis();
-//    logger.info("mostRecentByUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
+//    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
+  }
+
+  /**
+   * @param userid
+   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
+   */
+  @Override
+  public void forget(int userid) {
+    dao.forget(userid);
   }
 
   @Override
