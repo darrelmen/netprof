@@ -65,6 +65,7 @@ public class PhoneJSON {
         phones.put(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, resToResult, value));
       }
 
+
       jsonObject.put(PHONES, phones);
 
       JSONArray order = new JSONArray();

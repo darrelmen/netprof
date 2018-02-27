@@ -3,6 +3,7 @@ package mitll.langtest.server.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;
 
@@ -16,34 +17,40 @@ public class ProjectExport {
   private static final String LOCALHOST = "127.0.0.1";
 
   /**
+   * Also sends current iOSVersion.
+   *
    * @param productionProjects
    * @return
    * @see mitll.langtest.server.ScoreServlet#getProjects
    */
-  public String toJSON(Collection<Project> productionProjects) {
+  public String toJSON(Collection<Project> productionProjects, String iOSVersion) {
     JsonObject jsonObject = new JsonObject();
     JsonArray value = new JsonArray();
+    jsonObject.addProperty("iOSVersion",  iOSVersion);
     jsonObject.add("sites", value);
     //logger.info("toJSON converting " + productionProjects.size() + " projects");
 
     for (Project project : productionProjects) {
+      project.clearPropCache();
 
-   project.clearPropCache();
       JsonObject proj = new JsonObject();
       value.add(proj);
 
-      proj.addProperty("id", project.getProject().id());
-      proj.addProperty("name", project.getProject().name());
+      SlickProject project1 = project.getProject();
+
+      proj.addProperty("id", project1.id());
+      proj.addProperty("name", project1.name());
       proj.addProperty("type", "npf2");
 //      proj.addProperty("appVersion", "npf");
-      proj.addProperty("language", project.getProject().language());
-      proj.addProperty("course", project.getProject().course());
-      proj.addProperty("kind", project.getProject().kind());
-      proj.addProperty("status", project.getProject().status());
-      proj.addProperty("countrycode", project.getProject().countrycode());
-      proj.addProperty("displayorder", project.getProject().displayorder());
+      proj.addProperty("language", project1.language());
+      proj.addProperty("course", project1.course());
+      proj.addProperty("kind", project1.kind());
+      proj.addProperty("status", project1.status());
+      proj.addProperty("countrycode", project1.countrycode());
+      proj.addProperty("displayorder", project1.displayorder());
       proj.addProperty(SHOW_ON_IOS, project.isOnIOS());
       proj.addProperty("rtl", project.isRTL());
+
       String host = project.getWebserviceHost();
       proj.addProperty("host", host.equals(LOCALHOST) ? "" : host);
     }

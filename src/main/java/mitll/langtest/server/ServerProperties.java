@@ -126,6 +126,8 @@ public class ServerProperties {
   public static final String MAIL_SERVER = "mail.server";
   public static final String SERVER_NAME = "SERVER_NAME";
   public static final String DEBUG_ONE_PROJECT = "debugOneProject";
+  public static final String IOS_VERSION = "1.0.1";
+  public static final String I_OS_VERSION = "iOSVersion";
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
@@ -240,6 +242,7 @@ public class ServerProperties {
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
+  private String IOSVersion;
 
 /*
   private final Set<String> lincoln = new HashSet<>(Arrays.asList(
@@ -953,5 +956,9 @@ public class ServerProperties {
   public Set<String> getHydra2Languages() {
     String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT);
     return new HashSet<>(Arrays.asList(property.split(",")));
+  }
+
+  public String getIOSVersion() {
+    return props.getProperty(I_OS_VERSION, IOS_VERSION);
   }
 }

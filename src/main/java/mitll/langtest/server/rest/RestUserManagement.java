@@ -123,10 +123,10 @@ public class RestUserManagement {
   private PathHelper pathHelper;
 
   /**
-   * @see ScoreServlet#makeAudioFileHelper
    * @param db
    * @param serverProps
    * @param pathHelper
+   * @see ScoreServlet#makeAudioFileHelper
    */
   public RestUserManagement(DatabaseImpl db,
                             ServerProperties serverProps,
@@ -162,29 +162,25 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
-      logger.warn("\n\n\n calling reset RESET_PASS? ");
+      logger.warn(" - calling reset " + queryString);
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
-        String first = split1[0];
-        String user = getArg(first);
-
-        String second = split1[1];
-        String emailFromDevice = getArg(second);//second.split("=")[1];
-        String token = resetPassword(user, emailFromDevice, request.getRequestURL().toString());
+        String user = getFirst(split1[0]);
+        //  String second = split1[1];
+        //  String emailFromDevice = getArg(second);//second.split("=")[1];
+        String token = resetPassword(user, request);//emailFromDevice, request.getRequestURL().toString());
         toReturn.put(TOKEN, token);
       }
       return true;
     } else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
-
       logger.warn("\n\n\n calling reset password? ");
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
       } else {
-        String first = split1[0];
-        String token = getArg(first);
+        String token = getFirst(split1[0]);
 
         // OK the real person clicked on their email link
         response.setContentType("text/html");
@@ -200,20 +196,17 @@ public class RestUserManagement {
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
-        String first = split1[0];
-        String token = getArg(first);
-
-        String second = split1[1];
-        String passwordH = getArg(second);
+        String token    = getFirst(split1[0]);
+        String passwordH = getArg(split1[1]);
         toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
       return true;
     }
-/*    else if (queryString.equals(USERS)) {  // TODO - require a session
-      toReturn.put(USERS, db.usersToJSON());
-      return true;
-    }*/
     return false;
+  }
+
+  private String getFirst(String first1) {
+    return getArg(first1);
   }
 
   @NotNull
@@ -235,15 +228,15 @@ public class RestUserManagement {
     }
   }
 
-   public void tryToLogin(JSONObject toReturn,
-                          HttpServletRequest request,
-                          IUserSecurityManager securityManager,
-                          int projid,
-                          String user,
-                          String freeTextPassword
-                          //,
+  public void tryToLogin(JSONObject toReturn,
+                         HttpServletRequest request,
+                         IUserSecurityManager securityManager,
+                         int projid,
+                         String user,
+                         String freeTextPassword
+                         //,
 //                          String passwordH
-   ) {
+  ) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
     logger.debug("tryToLogin user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
@@ -380,17 +373,16 @@ public class RestUserManagement {
     }
   }
 
-  private String resetPassword(String user, String email, String requestURL) {
-    logger.warn("resetPassword for " + user + " and " + email);
-    //String emailH = Md5Hash.getHash(email);
-    Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, email);
+  private String resetPassword(String user, HttpServletRequest request) {
+    if (user.length() == 4) user = user + "_";
+    else if (user.length() == 3) user = user + "__";
 
-    if (validUserAndEmail != null) {
-      if (getEmailHelper().resetPassword(user, email, requestURL)) {
-        return PASSWORD_EMAIL_SENT;
-      } else {
-        return ERROR;
-      }
+    logger.warn("resetPassword for '" + user + "'");// and " + email);
+
+    boolean knownUser = db.getUserDAO().isKnownUser(user);
+    if (knownUser) {
+      db.getUserDAO().forgotPassword(user, getBaseURL(request));
+      return PASSWORD_EMAIL_SENT;
     } else {
       return NOT_VALID;
     }

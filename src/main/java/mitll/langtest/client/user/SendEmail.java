@@ -26,6 +26,9 @@ class SendEmail extends UserDialog {
 //  private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
+  /**
+   * @see #showSendEmail(Anchor, String, boolean)
+   */
   private static final String SEND = "Send Reset Email";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String PLEASE_CHECK = "Please check";

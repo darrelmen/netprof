@@ -531,7 +531,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private String getProjects() {
-    return new ProjectExport().toJSON(db.getProjectManagement().getProductionProjects());
+    return new ProjectExport().toJSON(
+        db.getProjectManagement().getProductionProjects(),
+        db.getServerProps().getIOSVersion());
   }
 
   /**
