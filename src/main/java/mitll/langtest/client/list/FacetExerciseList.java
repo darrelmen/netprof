@@ -1387,7 +1387,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     } else {
       if (DEBUG) logger.info("askServerForExercise visible " + visibleIDs);
 //      logger.warning("askServerForExercise got " + getExceptionAsString(new Exception()));
-
       askServerForVisibleExercises(itemID, visibleIDs, incrReq());
     }
   }
@@ -1497,23 +1496,32 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
     }
     //long then = System.currentTimeMillis();
-    Set<Integer> requested = new HashSet<>();
-
-    CommonShell currentExercise = getCurrentExercise();
-    if (currentExercise != null) {
-      visibleIDs.add(currentExercise.getID());
-    }
-
-    List<CommonExercise> alreadyFetched = new ArrayList<>();
-    for (Integer id : visibleIDs) {
-      CommonExercise cachedExercise = getCachedExercise(id);
-      if (cachedExercise == null) {
-        requested.add(id);
-      } else {
-        alreadyFetched.add(cachedExercise);
+    if (isDrillView() && visibleIDs.isEmpty()) {
+      CommonShell currentExercise = getCurrentExercise();
+      if (currentExercise != null) {
+        int id = currentExercise.getID();
+        if (!visibleIDs.contains(id)) {
+          visibleIDs.add(id);
+          logger.warning("added current ex to visible " + id);
+/*
+          int c = 0;
+          for (Integer id2 : visibleIDs) {
+            logger.info("#" + c++ + " : " + id2);
+          }
+*/
+        }
       }
     }
 
+/*
+    int c = 0;
+    for (Integer id2 : visibleIDs) {
+      logger.info("reallyGetExercises #" + c++ + " : " + id2);
+    }
+*/
+
+    List<CommonExercise> alreadyFetched = new ArrayList<>();
+    Set<Integer> requested = getRequested(visibleIDs, alreadyFetched);
 
     if (requested.isEmpty()) {
       if (DEBUG) logger.info("reallyGetExercises no req for " + alreadyFetched.size());
@@ -1529,6 +1537,20 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         logger.warning("reallyGetExercises : not asking for " + requested);
       }
     }
+  }
+
+  @NotNull
+  private Set<Integer> getRequested(Collection<Integer> visibleIDs, List<CommonExercise> alreadyFetched) {
+    Set<Integer> requested = new HashSet<>();
+    for (Integer id : visibleIDs) {
+      CommonExercise cachedExercise = getCachedExercise(id);
+      if (cachedExercise == null) {
+        requested.add(id);
+      } else {
+        alreadyFetched.add(cachedExercise);
+      }
+    }
+    return requested;
   }
 
   private void getFullExercises(Collection<Integer> visibleIDs,
@@ -1731,13 +1753,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 //    logger.info("goGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
     if (toAskFor.size() == 1) {
       toAskFor = getNextIDs(items, i, 20);
-  //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
+      //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
     }
     if (toAskFor.isEmpty()) {
-  //    logger.info("goGetNextPage already has cached total " + fetched.size());
+      //    logger.info("goGetNextPage already has cached total " + fetched.size());
     } else {
       long then = System.currentTimeMillis();
- //     logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
+      //     logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
       service.getFullExercises(-1, toAskFor,
           new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
             @Override

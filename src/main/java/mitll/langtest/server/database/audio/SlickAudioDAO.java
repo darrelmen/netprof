@@ -379,7 +379,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
 //    }
     Tuple2<Map<Integer, Collection<Tuple2<Integer, Integer>>>,
-        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded = dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid, isMale ? 0 : 1);
+        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded =
+        dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid, isMale ? 0 : 1);
 
     Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs = audioForGenderBothRecorded._1();
     Map<Integer, Collection<Tuple2<Integer, Integer>>> slowSpeedPairs = audioForGenderBothRecorded._2();
@@ -408,11 +409,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private Set<Pair> getGenderMatch(Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs) {
     Set<Pair> regSpeedGenderMatch = new HashSet<>();
     for (Integer key : regSpeedPairs.keySet()) {
-      //boolean male = userDAO.isMale(key);
-      // if (male == isMale) {
       Iterator<Tuple2<Integer, Integer>> iterator = regSpeedPairs.get(key).iterator();
       regSpeedGenderMatch.addAll(getPairs(iterator));
-      // }
     }
     return regSpeedGenderMatch;
   }
@@ -428,7 +426,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     return pairs;
   }
-
 
   /**
    * TODO : why do we return a tuple when we don't use the second one?

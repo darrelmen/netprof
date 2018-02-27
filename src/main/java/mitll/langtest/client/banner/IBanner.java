@@ -17,6 +17,8 @@ public interface IBanner {
 
   void setSubtitle();
 
+  void setVisible(boolean visible);
+
   void reflectPermissions(Collection<User.Permission> permissions);
 
   void setVisibleChoices(boolean visible);

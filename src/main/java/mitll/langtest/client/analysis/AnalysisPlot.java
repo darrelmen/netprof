@@ -89,7 +89,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
 
-  private static final String SCORE_SUFFIX = " pronunciation score (Drag to zoom in, click to hear)";
+  private static final String SCORE_SUFFIX = "'s pronunciation scores (Drag to zoom, click to hear)";
   private static final int TIME_SLACK = 60;
   private static final int WIDTH = 740;
 

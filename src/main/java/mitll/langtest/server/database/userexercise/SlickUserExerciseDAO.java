@@ -75,6 +75,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final int DEFAULT_PROJECT = 1;
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
   private static final String QUOT = "&quot;";
+  private static final int MAX_LENGTH = 220;
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -111,16 +112,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
     hostName = database.getServerProps().getHostName();
-
-    /*
-    try {
-      InetAddress ip = InetAddress.getLocalHost();
-      hostAddress = ip.getHostAddress();
-    } catch (UnknownHostException e) {
-      logger.error("got " + e, e);
-
-    }*/
-//    logger.info("hostName " + hostName + "/"+hostAddress);
   }
 
   public void createTable() {
@@ -230,11 +221,17 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 //        " = '" + firstType + "' " +
 //        "" + second + " = '" + secondType + "'");
 
+    String english = shared.getEnglish();
+    if (english.length() > MAX_LENGTH) {
+      english = english.substring(0, MAX_LENGTH) + "...";
+      logger.warn("toSlick " + shared.getID() + " truncate english " + english);
+    }
+
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
-        shared.getEnglish(),
+        english,
         shared.getMeaning(),
         getFL(shared),
         shared.getAltFL(),
@@ -275,11 +272,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     Map<String, String> unitToValue = getUnitToValue(slick);
 
 //    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
+    String english = slick.english();
+    if (english.length() > MAX_LENGTH) {
+      english = english.substring(0, MAX_LENGTH) + "...";
+      logger.warn("toSlick " + slick.id() + " truncate english " + english);
+    }
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
-        slick.english(),
+        english,
         slick.foreignlanguage(),
         StringUtils.stripAccents(slick.foreignlanguage()),
         slick.altfl(),
@@ -294,8 +296,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.numphones(),
         factory.getTokens(slick.foreignlanguage()),
         slick.legacyid());
-/*    logger.info("fromSlick " +
 
+/*    logger.info("fromSlick " +
         "\n\tfrom    " + slick+
         "\n\tcreated " + userExercise+
         "\n\tcontext " + userExercise.isContext()
@@ -370,7 +372,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
         }
       }
-
       exercise.setNumPhones(numToUse);
     } else {
       // logger.info("hostName " + hostName + " host addr " + hostAddress + " : " + exercise.getNumPhones() + " " + lookup.hasModel());
@@ -1036,7 +1037,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * TODOx : Why so complicated?
-   *
+   * <p>
    * Maybe separately update context exercises.
    *
    * @param userExercise
@@ -1369,6 +1370,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
   }*/
+
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
   }
@@ -1377,7 +1379,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return unknownExercise;
   }
 
-  public ExerciseDAOWrapper getDao() {  return dao;  }
+  public ExerciseDAOWrapper getDao() {
+    return dao;
+  }
 
   public void addBulkAttributeJoins(List<SlickExerciseAttributeJoin> joins) {
     attributeJoinDAOWrapper.addBulk(joins);

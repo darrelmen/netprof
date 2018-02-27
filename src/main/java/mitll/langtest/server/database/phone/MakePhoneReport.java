@@ -14,7 +14,7 @@ import java.util.*;
 public class MakePhoneReport {
   private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param phoneToScores
@@ -34,6 +34,7 @@ public class MakePhoneReport {
                                     boolean useSessionGran) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
+
     if (DEBUG) {
       logger.info(
           "getPhoneReport : \n\tscore " + overallScore +

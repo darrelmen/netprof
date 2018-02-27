@@ -420,4 +420,17 @@ public abstract class Scoring {
 
     return b.toString().trim();
   }
+
+  List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
+    List<String> phones = new ArrayList<>();
+
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      if (key == NetPronImageType.PHONE_TRANSCRIPT) {
+        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.event));
+      }
+    }
+    return phones;
+  }
 }

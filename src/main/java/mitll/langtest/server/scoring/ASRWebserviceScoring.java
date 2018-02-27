@@ -457,7 +457,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private PretestScore getPretestScore(String imageOutDir,
                                        ImageOptions imageOptions,
 
-                                       boolean decode, String prefix, String noSuffix,
+                                       boolean decode,
+                                       String prefix,
+                                       String noSuffix,
                                        Scores scores,
                                        String phoneLab,
                                        String wordLab,
@@ -499,7 +501,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           "\n\tsTypeToImage " + sTypeToImage
       );
 */
-
       if (typeToEndTimes.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + wordLab + " phones " + phoneLab);
       }
@@ -512,6 +513,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         phoneToDisplay = this.phoneToDisplay;
         // logger.info("using " + phoneToDisplay.size());
       }
+
+      List<String> recoPhones = getRecoPhones(eventAndFileInfo);
+      logger.info("getPretestScore : reco phones " + recoPhones);
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores, phoneToDisplay),
           getWordToScore(scores),
@@ -767,8 +771,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return typeToEndTimes;
   }
 
-
-  protected String getDisplayName(String event) {
+  private String getDisplayName(String event) {
     String displayName = phoneToDisplay.get(event);
     displayName = displayName == null ? event : displayName;
     return displayName;

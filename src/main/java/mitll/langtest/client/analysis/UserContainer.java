@@ -43,6 +43,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -70,10 +71,14 @@ import java.util.logging.Logger;
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  public static final String NAME = "Name";
-  public static final int NAME_WIDTH = 135;
+  /**
+   * @see #addName
+   */
+  private static final String NAME = "Name";
+  private static final int NAME_WIDTH = 130;
 
   private static final String MINE = "Mine";
+
   private static final int SESSION_WIDTH = 105;
   /**
    *
@@ -161,6 +166,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected int getMaxLengthId() {
     return MAX_LENGTH;
   }
+
   protected int getMaxTableWidth() {
     return TABLE_WIDTH;
   }
@@ -550,8 +556,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        String name = shell.getName();
-        return getSafeHtml(name);
+        return getNoWrapContent(shell.getName());
       }
     };
     userCol.setSortable(true);
@@ -933,9 +938,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
             ("" + lastSessionNum) :
             "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
                 "%)";
-        return getSafeHtml(columnText);
+
+        return getNoWrapContent(columnText);
       }
     };
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 
 

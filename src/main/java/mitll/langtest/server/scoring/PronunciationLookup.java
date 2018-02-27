@@ -275,9 +275,11 @@ public class PronunciationLookup implements IPronunciationLookup {
     return dict.toString();
   }
 
-  private void addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {
+  private  List<List<String>> addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {
     scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
-    for (int i = 0; i < prons.size(); i++) {
+    int size = prons.size();
+    List<List<String>> possibleProns = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
       String[] apply = prons.apply(i);
     /*  if (project.getLanguage().equalsIgnoreCase("korean")) {
         for (String p : apply) {
@@ -286,26 +288,12 @@ public class PronunciationLookup implements IPronunciationLookup {
       }*/
       dict.append(getPronStringForWord(word, apply, justPhones));
     }
-
     /*    logger.info("addDictMatches for" +
         "\n\teasyMatch " + easyMatch +
         "\n\tword " + word +
         "\n\tdict " + dict);*/
-  }
 
-  public String getCleanedTranscript(String cleaned) {
-    return getCleanedTranscript(cleaned, SEMI);
-  }
-
-  private String getCleanedTranscript(String cleaned, String sep) {
-    String s = cleaned.replaceAll("\\p{Z}", sep);
-    String transcriptCleaned = sep + s.trim();
-
-    if (!transcriptCleaned.endsWith(sep)) {
-      transcriptCleaned = transcriptCleaned + sep;
-    }
-
-    return transcriptCleaned.replaceAll(";;", sep);
+    return possibleProns;
   }
 
   /**
@@ -321,6 +309,21 @@ public class PronunciationLookup implements IPronunciationLookup {
   public String getPronStringForWord(String word, String[] apply, boolean justPhones) {
     String s = listToSpaceSepSequence(apply);
     return justPhones ? s + " " : word + "," + s + " sp" + SEMI;
+  }
+
+  public String getCleanedTranscript(String cleaned) {
+    return getCleanedTranscript(cleaned, SEMI);
+  }
+
+  private String getCleanedTranscript(String cleaned, String sep) {
+    String s = cleaned.replaceAll("\\p{Z}", sep);
+    String transcriptCleaned = sep + s.trim();
+
+    if (!transcriptCleaned.endsWith(sep)) {
+      transcriptCleaned = transcriptCleaned + sep;
+    }
+
+    return transcriptCleaned.replaceAll(";;", sep);
   }
 
   /**
