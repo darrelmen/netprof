@@ -65,6 +65,8 @@ import java.util.logging.Logger;
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
+  private static final String WORD_EXAMPLES = "WordExamples";
+
   private static final String REPORT_FOR_USER = "getting performance report for user";
   private static final int MIN_HEIGHT = 325;
 
@@ -85,7 +87,6 @@ public class AnalysisTab extends DivWidget {
    * @see #getSoundsContainer
    */
   private static final String SOUNDS = "Sounds";
-  //private static final String SUBTITLE = "";
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
 
@@ -141,7 +142,7 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param controller
    * @param isPolyglot
-    * @see NewContentChooser#showProgress
+   * @see NewContentChooser#showProgress
    */
   public AnalysisTab(ExerciseController controller,
                      boolean isPolyglot,
@@ -321,7 +322,7 @@ public class AnalysisTab extends DivWidget {
     bottom.addStyleName("inlineFlex");
     bottom.setWidth("100%");
     bottom.getElement().setId("bottom");
-     if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+    if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
     return bottom;
   }
 
@@ -406,7 +407,6 @@ public class AnalysisTab extends DivWidget {
 
   private Button allChoice;
   private Button weekChoice;
-  // private Button minuteChoice;
   private Button sessionChoice;
   private Button monthChoice;
 
@@ -519,12 +519,12 @@ public class AnalysisTab extends DivWidget {
    * @paramx wordScores
    */
   private Panel getWordContainer(
-                                 ReqInfo reqInfo,
-                                 int numResults,
-                                 ExerciseController controller,
-                                 AnalysisPlot analysisPlot,
+      ReqInfo reqInfo,
+      int numResults,
+      ExerciseController controller,
+      AnalysisPlot analysisPlot,
 
-                                 Heading wordsTitle) {
+      Heading wordsTitle) {
     WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
         numResults, analysisServiceAsync);
     return wordContainer.getTableWithPager();
@@ -582,9 +582,7 @@ public class AnalysisTab extends DivWidget {
     if (!isPolyglot) {
       // #3 - phone plot
       phonePlot.addStyleName("topMargin");
-      // phonePlot.addStyleName("floatLeftAndClear");
       lowerHalf.add(phonePlot);
-      logger.info("adding phone plot");
     }
 
     phoneContainer.showExamplesForSelectedSound();
@@ -600,10 +598,9 @@ public class AnalysisTab extends DivWidget {
 
 
   private DivWidget getWordExamples(Panel examples) {
-    DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", exampleHeader);
+    DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     wordExamples.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
-
     return wordExamples;
   }
 }

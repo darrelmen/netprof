@@ -781,6 +781,9 @@ public class LangTest implements
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
   }
 
+  /**
+   * @see InitialUI#clearStartupInfo
+   */
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
   }

@@ -41,11 +41,7 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.user.User.Permission;
 import org.jetbrains.annotations.NotNull;
@@ -152,7 +148,7 @@ public class ProjectChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
-      logger.info("show initial " + level);
+     // logger.info("show initial " + level);
       showInitialChoices(level);
     } else {
       logger.info("show choice for parent " + parent.getName() + " " + level);
@@ -188,13 +184,19 @@ public class ProjectChoices {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
 
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
     boolean canRecord =
         permissions.contains(RECORD_AUDIO) ||
             permissions.contains(QUALITY_CONTROL) ||
             permissions.contains(DEVELOP_CONTENT);
 
     boolean isPoly = permissions.contains(POLYGLOT);
-/*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
+
+
+    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
+
+    /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
         "\n\tpoly " + isPoly +
         "\n\tcan record = " + canRecord +
         "\n\tpermissions " + permissions);*/
@@ -214,7 +216,6 @@ public class ProjectChoices {
           filtered.add(project);
         }
       }
-
     }
 
     List<SlimProject> filtered2 = new ArrayList<>();

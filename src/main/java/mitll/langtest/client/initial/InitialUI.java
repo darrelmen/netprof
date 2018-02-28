@@ -281,9 +281,10 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #getBreadcrumbs()
+   * @see #getBreadcrumbs
    */
   public void clearContent() {
+    //logger.info("clearContent -");
     clearStartupInfo();
     contentRow.clear();
     contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
@@ -291,7 +292,11 @@ public class InitialUI implements UILifecycle {
     contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
 
+  /**
+   *
+   */
   private void clearStartupInfo() {
+    //logger.info("clearStartupInfo -");
     lifecycleSupport.clearStartupInfo();
   }
 
@@ -318,6 +323,7 @@ public class InitialUI implements UILifecycle {
    * that and make it the current one.
    * <p>
    * Also, if we log out of one tab and go to another, we'll notice here.
+   *
    * @see #getRootContainer
    */
   private void confirmCurrentProject() {
@@ -492,7 +498,7 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-      // logger.info("getLangBreadcrumb got click on " + project.getName());
+      logger.info("getLangBreadcrumb got click on " + project.getName());
       History.newItem("");
       clearStartupInfo();
       clearContent();
@@ -523,20 +529,25 @@ public class InitialUI implements UILifecycle {
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      //logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
-      forgetProjectForUser();
+      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
 
-      History.newItem("");
-      clearStartupInfo();
+      if (userManager.isPolyglot()) {
+        logger.info("\tpolyglot users don't get to change projects.");
+      } else {
+        forgetProjectForUser();
 
-      breadcrumbs.clear();
-      addCrumbs(breadcrumbs);
+        History.newItem("");
+        clearStartupInfo();
 
-      clearContent();
-      addProjectChoices(0, null);
-      showCogMenu();
+        breadcrumbs.clear();
+        addCrumbs(breadcrumbs);
+
+        clearContent();
+        addProjectChoices(0, null);
+        showCogMenu();
+      }
     } else {
-      logger.info("chooseProjectAgain no user --- ");
+      logger.warning("chooseProjectAgain no user --- ");
     }
   }
 
@@ -832,5 +843,7 @@ public class InitialUI implements UILifecycle {
     banner.setSubtitle();
   }
 
-  public void setVisible(boolean visible) { banner.setVisible(visible); }
+  public void setVisible(boolean visible) {
+    banner.setVisible(visible);
+  }
 }

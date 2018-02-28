@@ -239,7 +239,7 @@ public class NewContentChooser implements INavigation {
         if (mode != MODE_CHOICE.NOT_YET) {
           controller.setBannerVisible(false);
         }
-        logger.info("mode is " + mode);
+//        logger.info("mode is " + mode);
         showPractice();
       }
     },

@@ -95,14 +95,14 @@ public class UserManager {
                      PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-   // this.openUserService = openUserService;
+    // this.openUserService = openUserService;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
   }
 
   /**
-   * @see SignInForm#gotLogin
    * @return
+   * @see SignInForm#gotLogin
    */
   UserServiceAsync getUserService() {
     return userServiceAsync;
@@ -118,7 +118,7 @@ public class UserManager {
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
-       // logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
+        // logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
       }
     } else {
       userNotification.showLogin();
@@ -144,7 +144,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-     //   logger.info("took " + (System.currentTimeMillis()-then)  + " to get current user.");
+        //   logger.info("took " + (System.currentTimeMillis()-then)  + " to get current user.");
         gotSessionUser(result);
       }
     });
@@ -242,6 +242,7 @@ public class UserManager {
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
+
   private String getUserPendingID() {
     return appTitle + ":" + USER_PENDING_ID;
   }
@@ -331,5 +332,13 @@ public class UserManager {
 
   public Collection<User.Permission> getPermissions() {
     return current.getPermissions();
+  }
+
+  /**
+   * Only one perm = polyglot
+   * @return
+   */
+  public boolean isPolyglot() {
+    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == User.Permission.POLYGLOT;
   }
 }
