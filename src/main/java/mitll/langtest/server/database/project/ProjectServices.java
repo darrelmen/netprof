@@ -2,12 +2,9 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.ProjectInfo;
-import net.sf.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**

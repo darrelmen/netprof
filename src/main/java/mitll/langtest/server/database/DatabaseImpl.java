@@ -1037,12 +1037,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       int realExid = -1;
       try {
-        realExid = Integer.parseInt(exid);
+        if (!exid.equalsIgnoreCase("N/A")) {
+          realExid = Integer.parseInt(exid);
+        }
       } catch (NumberFormatException e) {
         logger.warn("couldn't parse exid '" + exid + "'");
         //e.printStackTrace();
       }
-      Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
+      Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }
   }

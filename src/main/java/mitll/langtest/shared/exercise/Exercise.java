@@ -482,6 +482,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return safeToDecode;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @param safeToDecode
+   */
   public void setSafeToDecode(boolean safeToDecode) {
     this.safeToDecode = safeToDecode;
   }

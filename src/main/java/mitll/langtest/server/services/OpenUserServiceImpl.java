@@ -73,7 +73,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       // ensure a newSession is created.
       HttpSession newSession = createSession();
       //logger.info("Login newSession " + newSession.getId() + " isNew=" + newSession.isNew());
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, newSession);
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, newSession, true);
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);

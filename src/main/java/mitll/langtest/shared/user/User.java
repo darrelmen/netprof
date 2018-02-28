@@ -335,7 +335,6 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
-   *
    * @param permissions
    */
   public void setPermissions(Collection<Permission> permissions) {
@@ -443,16 +442,19 @@ public class User extends MiniUser implements ReportUser {
    * @return
    */
   public boolean isValid() {
-    return hasValidEmail() &&
+    return isForgivingValid() &&
         isValid(first) &&
         isValid(last) &&
-        isValid(getAffiliation()) &&
 
         // must have a gender (and ideally age and dialect) if you want to record audio
 
         (!(getPermissions().contains(Permission.RECORD_AUDIO) ||
             getPermissions().contains(Permission.DEVELOP_CONTENT)) ||
             getRealGender() != Gender.Unspecified);
+  }
+
+  public boolean isForgivingValid() {
+    return hasValidEmail() && isValid(getAffiliation());
   }
 
   public boolean hasValidEmail() {

@@ -108,8 +108,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private static final String EXERCISE = "exercise";
   public static final String EXERCISE_TEXT = "exerciseText";
-  //  private static final String SUCCESS = "success";
-//  private static final String ERROR1 = "error";
   private static final String NO_SESSION = "no session";
 
   public static final String PASS = "pass";
@@ -119,7 +117,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String LANGUAGE = "language";
   public static final String FULL = "full";
   private static final String WIDGET_TYPE = "widgetType";
-  private static final boolean REPORT_ON_HEADERS = true;
+  private static final boolean REPORT_ON_HEADERS = false;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -131,8 +129,6 @@ public class ScoreServlet extends DatabaseServlet {
     PROJECTS,
     NESTED_CHAPTERS,
     CHAPTER_HISTORY,
-    //JSON_REPORT,
-    //EXPORT, REMOVE_REF_RESULT, REPORT,
     PHONE_REPORT,
     UNKNOWN
   }
@@ -655,7 +651,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (REPORT_ON_HEADERS) reportOnHeaders(request);
 
       switch (realRequest) {
-        case HASUSER:
+        case HASUSER:  // when ?
           checkUserAndLogin(request, jsonObject);
           break;
         case ADDUSER:
@@ -708,8 +704,8 @@ public class ScoreServlet extends DatabaseServlet {
 
         getProjID(request),
         getUserID(request),
-        getPass(request)
-    );
+        getPass(request),
+        false);
   }
 
   /**
@@ -945,7 +941,7 @@ public class ScoreServlet extends DatabaseServlet {
     int userid = userManagement.getUserFromParam(user);
     String fullJSONFormat = request.getHeader(FULL);
 
-    logger.debug("getJsonForAudio got" +
+    logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
         "\n\tfor user " + user +
         "\n\tprojid  " + projid +

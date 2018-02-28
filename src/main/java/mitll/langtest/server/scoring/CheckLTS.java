@@ -40,6 +40,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+import static mitll.langtest.server.scoring.ASRWebserviceScoring.MAX_FROM_ANY_TOKEN;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -54,9 +56,10 @@ class CheckLTS {
   private final String language;
 
   private final HTKDictionary htkDictionary;
-  private final boolean isAsianLanguage;
+  private final boolean isAsianLanguage, urdu;
 
   private static final boolean DEBUG = false;
+  private static final String POUND = "#";
 
   /**
    * @param lts
@@ -73,7 +76,21 @@ class CheckLTS {
     }
     this.language = languageProperty != null ? languageProperty : "";
     this.isAsianLanguage = isAsianLanguage;
+    urdu = languageProperty.equalsIgnoreCase("urdu");
+
     if (isAsianLanguage) logger.warn("using mandarin segmentation.");
+  }
+
+  private boolean areAllPhonesValid(String[] pron) {
+    boolean allValid = true;
+    for (String p : pron) {
+      if (checkInvalidPhone(p)) allValid = false;
+    }
+    return allValid;
+  }
+
+  private boolean checkInvalidPhone(String p) {
+    return p.equalsIgnoreCase(POUND) || (urdu && p.equalsIgnoreCase("aa"));
   }
 
   /**
@@ -166,10 +183,10 @@ class CheckLTS {
 
           // so we've checked with LTS - why first ?
           // but if it's not in LTS, check in dict
-          boolean legitLTS = isLegitLTS(process);
+          boolean legitLTS = isLegitLTS(process, token);
           if (!legitLTS) { // deal with upper case better
             process = (!isEmptyLTS) ? lts.process(token.toLowerCase()) : null;
-            legitLTS = isLegitLTS(process);
+            legitLTS = isLegitLTS(process, token);
           }
           if (!translitOk &&
               !legitLTS
@@ -268,7 +285,7 @@ class CheckLTS {
           String trim = translitToken.trim();
           String[][] process = lts.process(trim);
           //if any of the words in the transliteration fails, we won't use the transliteration
-          translitOk &= isLegitLTS(process);
+          translitOk &= isLegitLTS(process, trim);
         }
       } catch (Exception e) {
         if (DEBUG) {
@@ -282,12 +299,40 @@ class CheckLTS {
     return translitOk;
   }
 
-  private boolean isLegitLTS(String[][] process) {
-    return !(process == null ||
+  private boolean isLegitLTS(String[][] process, String token) {
+    boolean b = !(process == null ||
         process.length == 0 ||
         process[0].length == 0 ||
         process[0][0].length() == 0 ||
         (StringUtils.join(process[0], "-")).contains("#"));
+
+    boolean valid = true;
+    if (b) {
+      int max = MAX_FROM_ANY_TOKEN;
+      int n = process.length;
+      int c = 0;
+//      logger.warn("isLegitLTS " + n + " for " + token);
+
+      int numBad = 0;
+      for (String[] pron : process) {
+        if (max-- == 0) break;
+        boolean allValid = areAllPhonesValid(pron);
+        if (!allValid) {
+         // logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
+          numBad++;
+        } else {
+          //         logger.info("good " + c + "/" + n + " for " + token);
+        }
+        c++;
+        //  valid &= allValid;
+      }
+      if (numBad == n) {
+        valid = false;
+      } else if (numBad > 0) {
+       // logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
+      }
+    }
+    return b && valid;
   }
 
   //private int multiple = 0;

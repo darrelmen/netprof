@@ -84,7 +84,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false, false);
   private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
-  public static final String OGG = "ogg";
+  private static final String OGG = "ogg";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -105,8 +105,6 @@ public class AudioFileHelper implements AlignDecode {
    */
   private Map<String, Integer> phoneToCount;
 
-  @Deprecated
-  private boolean useOldSchoolServiceOnly = false;
   private AudioConversion audioConversion;
   private boolean isNoModel;
   private String language;
@@ -129,7 +127,6 @@ public class AudioFileHelper implements AlignDecode {
     this.serverProps = serverProperties;
     this.db = db;
     this.logAndNotify = langTestDatabase;
-    this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
 
     this.mp3Support = new MP3Support(pathHelper);
     audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
@@ -184,6 +181,7 @@ public class AudioFileHelper implements AlignDecode {
           phoneToCount = new HashMap<>();
           Set<Integer> safe = new HashSet<>();
           Set<Integer> unsafe = new HashSet<>();
+          logger.info("checkLTSAndCountPhones : " +language+ " checking " + exercises.size() + " exercises...");
 
           for (CommonExercise exercise : exercises) {
             boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);

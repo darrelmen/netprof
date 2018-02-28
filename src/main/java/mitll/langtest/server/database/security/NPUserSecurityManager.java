@@ -101,6 +101,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param remoteAddr
    * @param userAgent
    * @param session
+   * @param strictValidity
    * @return
    */
   @Override
@@ -108,7 +109,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
                                     String attemptedFreeTextPassword,
                                     String remoteAddr,
                                     String userAgent,
-                                    HttpSession session) {
+                                    HttpSession session, boolean strictValidity) {
     User loggedInUser = userDAO.loginUser(
         userId,
         attemptedFreeTextPassword,
@@ -121,7 +122,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
 
     if (success) {
-      return getValidLogin(session, loggedInUser);
+      return getValidLogin(session, loggedInUser, strictValidity);
     } else {
       return getInvalidLoginResult(userDAO.getUserByID(userId));
     }
@@ -138,13 +139,15 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   /**
    * @param session
    * @param loggedInUser
+   * @param strictValidity
    * @return
-   * @see NPUserSecurityManager#getLoginResult
+   * @see IUserSecurityManager#getLoginResult
    */
   @NotNull
-  private LoginResult getValidLogin(HttpSession session, User loggedInUser) {
+  private LoginResult getValidLogin(HttpSession session, User loggedInUser, boolean strictValidity) {
     LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
-    if (loggedInUser.isValid()) {
+    boolean valid = strictValidity ? loggedInUser.isValid() : loggedInUser.isForgivingValid();
+    if (valid) {
       setSessionUser(session, loggedInUser, true);
     } else {
       log.info("getValidLogin user " + loggedInUser + "\n\tis not valid ");

@@ -28,7 +28,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean;
+  private boolean korean, urdu;
 
   /**
    * @param dictionary
@@ -40,6 +40,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     this.htkDictionary = dictionary;
     this.lts = lts;
     korean = project.getLanguage().equalsIgnoreCase("korean");
+    urdu = project.getLanguage().equalsIgnoreCase("urdu");
     makeDecoder();
   }
 
@@ -147,7 +148,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
 //    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
- //   logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
+    //   logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
 
 //    {
 //      StringBuilder builder = new StringBuilder();
@@ -169,7 +170,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       if (!word.equals(" ") && !word.isEmpty()) {
         boolean easyMatch;
 
-       // logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
+        // logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
         if ((easyMatch = htkDictionary.contains(word)) ||
             (htkDictionary.contains(word.toLowerCase()))) {
           if (DEBUG) logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "'");
@@ -250,10 +251,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                   }
                 }*/
 
-                  boolean allValid = true;
-                  for (String p : pron) {
-                    if (p.equalsIgnoreCase(POUND)) allValid = false;
-                  }
+                  boolean allValid = areAllPhonesValid(pron);
 
                   if (allValid) {
                     String pronStringForWord = getPronStringForWord(word, pron, justPhones);
@@ -275,7 +273,19 @@ public class PronunciationLookup implements IPronunciationLookup {
     return dict.toString();
   }
 
-  private  List<List<String>> addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {
+  private boolean areAllPhonesValid(String[] pron) {
+    boolean allValid = true;
+    for (String p : pron) {
+      if (checkInvalidPhone(p)) allValid = false;
+    }
+    return allValid;
+  }
+
+  private boolean checkInvalidPhone(String p) {
+    return p.equalsIgnoreCase(POUND) || (urdu && p.equalsIgnoreCase("aa"));
+  }
+
+  private List<List<String>> addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {
     scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
     int size = prons.size();
     List<List<String>> possibleProns = new ArrayList<>(size);
@@ -371,10 +381,9 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   /**
-   * @see #getNumPhonesFromDictionaryOrLTS
-   *
    * @param process
    * @return
+   * @see #getNumPhonesFromDictionaryOrLTS
    */
   private boolean ltsOutputOk(String[][] process) {
     return !(

@@ -53,13 +53,15 @@ public interface IUserSecurityManager {
    * @param remoteAddr
    * @param userAgent
    * @param session
+   * @param strictValidity
    * @return
    */
   LoginResult getLoginResult(String userId,
                              String attemptedFreeTextPassword,
                              String remoteAddr,
                              String userAgent,
-                             HttpSession session);
+                             HttpSession session,
+                             boolean strictValidity);
 
   /**
    *

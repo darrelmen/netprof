@@ -192,7 +192,9 @@ public class Trie<T> {
     if (DEBUG && length > WINDOW_SIZE) logger.info("getChars : " + entry);
 
     Deque<Character> slidingWindow = new LinkedList<>();
-    for (int i = 0; i < length; i++) {
+    int n = Math.min(length, entry.length());
+
+    for (int i = 0; i < n; i++) {
       char c = entry.charAt(i);
 
       slidingWindow.addLast(c);

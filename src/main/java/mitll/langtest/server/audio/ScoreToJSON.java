@@ -157,7 +157,7 @@ public class ScoreToJSON {
   }
 
   private boolean isValidEvent(String event) {
-    return !event.equals(ASR.UNKNOWN_MODEL) && !event.equals("sil");
+    return !event.equals(ASR.UNKNOWN_MODEL) && !event.equals("sil") && !event.equals("SIL");
   }
 
   @NotNull
@@ -228,16 +228,19 @@ public class ScoreToJSON {
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
         String event = segment.getEvent();
-        if (usePhone) {  // remap to display labels
-          event = serverProps.getDisplayPhoneme(language, event);
+
+        if (isValidEvent(event)) {
+          if (usePhone) {  // remap to display labels
+            event = serverProps.getDisplayPhoneme(language, event);
+          }
+
+          object.put(EVENT, event);
+          object.put(START, segment.getStart());
+          object.put(END, segment.getEnd());
+          object.put(SCORE, segment.getScore());
+
+          value1.add(object);
         }
-
-        object.put(EVENT, event);
-        object.put(START, segment.getStart());
-        object.put(END, segment.getEnd());
-        object.put(SCORE, segment.getScore());
-
-        value1.add(object);
       }
 
       jsonObject.put(imageType.toString(), value1);

@@ -49,9 +49,11 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
@@ -611,7 +613,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param sessionID
    * @return
    * @seex #getStrictUserWithPass(String, String)
-   * @see mitll.langtest.server.database.security.NPUserSecurityManager#getLoginResult
+   * @see IUserSecurityManager#getLoginResult
    */
   public User loginUser(String userId,
                         String attemptedTxtPass,
@@ -910,7 +912,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     if (user.isPoly()) {
+      logger.info("toUser user " + user.getUserID() + " is a polyglot user.");
       handlePolyglotUser(dominoUser, permissionSet, user);
+    } else {
+      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
     }
     user.setPermissions(permissionSet);
 //    logger.info("\ttoUser return " + user);
@@ -928,14 +933,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (projectAssignment != -1) {
         userProjectDAO.add(id, projectAssignment);
       }
-    } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser){
-      logger.info("handlePolyglotUser before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #"+ projectAssignment);
+    } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
+      logger.info("handlePolyglotUser before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
       userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
     }
   }
 
   /**
    * Get language from secondary group, then try to match language to a polyglot project.
+   *
    * @param dominoUser
    * @param id
    * @return
@@ -970,7 +976,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private List<Project> getMatchingProjects(Language languageMatchingGroup) {
     List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
-    return projectByLangauge.stream().filter(project -> project.getKind() == ProjectType.POLYGLOT).collect(Collectors.toList());
+    return projectByLangauge.stream()
+        .filter(project ->
+            project.getKind() == ProjectType.POLYGLOT &&
+                project.getStatus() == ProjectStatus.PRODUCTION)
+        .collect(Collectors.toList());
   }
 
   private Language getLanguageMatchingGroup(Group next) {

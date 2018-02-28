@@ -197,7 +197,7 @@ public class RestUserManagement {
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
-        String token    = getFirst(split1[0]);
+        String token = getFirst(split1[0]);
         String passwordH = getArg(split1[1]);
         toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
@@ -229,15 +229,23 @@ public class RestUserManagement {
     }
   }
 
+  /**
+   * @see ScoreServlet#checkUserAndLogin
+   * @param toReturn
+   * @param request
+   * @param securityManager
+   * @param projid
+   * @param user
+   * @param freeTextPassword
+   * @param strictValidity
+   */
   public void tryToLogin(JSONObject toReturn,
                          HttpServletRequest request,
                          IUserSecurityManager securityManager,
                          int projid,
                          String user,
-                         String freeTextPassword
-                         //,
-//                          String passwordH
-  ) {
+                         String freeTextPassword,
+                         boolean strictValidity) {
     IUserDAO userDAO = db.getUserDAO();
     User userFound = userDAO.getUserByID(user);
     logger.debug("tryToLogin user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
@@ -261,7 +269,7 @@ public class RestUserManagement {
       toReturn.put(TOKEN, userFound.getResetKey());
 
       // so we can tell if we need to collect more info, etc.
-      LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager);
+      LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
       toReturn.put("loginResult", loginResult.getResultType().name());
 
       if (loginResult.getResultType() == Success) {
@@ -276,7 +284,8 @@ public class RestUserManagement {
   public LoginResult loginUser(String userId,
                                String attemptedFreeTextPassword,
                                HttpServletRequest request,
-                               IUserSecurityManager securityManager) {
+                               IUserSecurityManager securityManager,
+                               boolean strictValidity) {
     try {
       String remoteAddr = securityManager.getRemoteAddr(request);
       String userAgent = request.getHeader("User-Agent");
@@ -284,7 +293,7 @@ public class RestUserManagement {
       HttpSession session = createSession(request);
       logger.info("loginUser : Login session " + session.getId() + " isNew=" + session.isNew() + " userid " + userId);
 //      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session);
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session, strictValidity);
     } catch (Exception e) {
       logger.error("got " + e, e);
       //   logAndNotifyServerException(e);
@@ -505,7 +514,7 @@ public class RestUserManagement {
             user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
           } catch (Exception e) {
             jsonObject.put(ERROR, "got " + e.getMessage());
-            logger.error("Got " + e,e);
+            logger.error("Got " + e, e);
           }
         }
 
@@ -544,7 +553,7 @@ public class RestUserManagement {
     User user1;
     String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
 
-    logger.warn("AppURL " + appURL + " user " + user + " email " + email + " emailH "+ emailH);
+    logger.warn("AppURL " + appURL + " user " + user + " email " + email + " emailH " + emailH);
     String first = request.getHeader("first");
     if (first == null) first = "";
     String last = request.getHeader("last");
