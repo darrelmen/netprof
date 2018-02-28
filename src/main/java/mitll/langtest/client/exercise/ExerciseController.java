@@ -118,6 +118,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   void showLearnList(int id);
   void showDrillList(int id);
+  void setBannerVisible(boolean visible);
 
   CommentAnnotator getCommentAnnotator();
 

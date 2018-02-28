@@ -116,6 +116,7 @@ public class RestUserManagement {
    */
   public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
   public static final String USERS = "users";
+  public static final String DLIFLC = "DLIFLC";
 
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -445,18 +446,11 @@ public class RestUserManagement {
                       String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
-    //  String passwordH = request.getHeader(PASSWORD_H);
-/*
-    String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
-    if (freeTextPassword == null) {
-      freeTextPassword = passwordH;
-    }
-    */
 
     User existingUser = db.getUserDAO().getUserByID(user);
 
-    logger.info("addUser user " + user + " match " + existingUser);
-    int projid = -1;
+    logger.warn("addUser user " + user + " match " + existingUser);
+ /*   int projid = -1;
     try {
       String project = request.getHeader("projid");
       if (project != null) {
@@ -464,7 +458,7 @@ public class RestUserManagement {
       }
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
-    }
+    }*/
     if (existingUser == null) {
       User checkExisting = existingUser;// kinda stupid but here we are
 
@@ -476,7 +470,7 @@ public class RestUserManagement {
         String email = request.getHeader(EMAIL);
         if (email == null) email = "";
 
-        logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
+        logger.warn("addUser : Request " + requestType + " for " + deviceType + " user " + user +
             " adding " + gender +
             " age " + age + " dialect " + dialect);
 
@@ -507,7 +501,12 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
+          try {
+            user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
+          } catch (Exception e) {
+            jsonObject.put(ERROR, "got " + e.getMessage());
+            logger.error("Got " + e,e);
+          }
         }
 
         if (user1 == null) { // how could this happen?
@@ -520,33 +519,46 @@ public class RestUserManagement {
         jsonObject.put(EXISTING_USER_NAME, "");
       }
     } else {
-      logger.debug("addUser - found existing user for " + user +
+      logger.warn("addUser - found existing user for " + user +
           //" pass " + passwordH +
           " -> " + existingUser);
 
-      if (existingUser.hasResetKey()) {
+/*      if (existingUser.hasResetKey()) {
         jsonObject.put(ERROR, "password was reset");
       } else {
         jsonObject.put(USERID, existingUser.getID());
-      }
+      }*/
+
+      jsonObject.put(EXISTING_USER_NAME, "");
+
     }
   }
 
   private User addUserFromIPAD(HttpServletRequest request,
-                               String deviceType, String device,
-                               String user, String gender, String emailH, String email) {
+                               String deviceType,
+                               String device,
+                               String user,
+                               String gender,
+                               String emailH,
+                               String email) {
     User user1;
     String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
 
-    logger.info("AppURL " + appURL);
-    // String gender = request.getHeader(GENDER);
+    logger.warn("AppURL " + appURL + " user " + user + " email " + email + " emailH "+ emailH);
     String first = request.getHeader("first");
+    if (first == null) first = "";
     String last = request.getHeader("last");
+    if (last == null) last = "";
     String affiliation = request.getHeader("affiliation");
+    if (affiliation == null) {
+      affiliation = DLIFLC;
+    }
 
     boolean isMale = gender != null && gender.equalsIgnoreCase("male");
+
     SignUpUser user2 = new SignUpUser(user,
-        emailH, email,
+        emailH,
+        email,
         Kind.STUDENT,
         isMale,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, affiliation);

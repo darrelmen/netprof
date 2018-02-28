@@ -60,6 +60,8 @@ public interface INavigation {
 
   Widget getNavigation();
 
+  void setBannerVisible(boolean visible);
+
   void onResize();
 
   void showPreviousState();

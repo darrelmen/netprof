@@ -161,9 +161,10 @@ public abstract class BaseUserDAO extends DAO {
     User currentUser = getUserByID(userID);
     if (currentUser == null) {
       User userWhere = getUserWhere(addUserAndGetID(user));
-      logger.debug(" : addUser : added new user " + userWhere);
+      logger.warn(" : addUser : added new user " + userWhere);
       return userWhere;
     } else {
+      logger.warn(" : addUser : user exists ");
       // user exists!
       return null;
       /*String emailHash = currentUser.getEmailHash();

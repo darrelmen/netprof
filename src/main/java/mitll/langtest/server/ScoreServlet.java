@@ -108,8 +108,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private static final String EXERCISE = "exercise";
   public static final String EXERCISE_TEXT = "exerciseText";
-  private static final String SUCCESS = "success";
-  private static final String ERROR1 = "error";
+  //  private static final String SUCCESS = "success";
+//  private static final String ERROR1 = "error";
   private static final String NO_SESSION = "no session";
 
   public static final String PASS = "pass";
@@ -119,7 +119,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String LANGUAGE = "language";
   public static final String FULL = "full";
   private static final String WIDGET_TYPE = "widgetType";
-  public static final boolean REPORT_ON_HEADERS = false;
+  private static final boolean REPORT_ON_HEADERS = true;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -127,6 +127,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   public enum GetRequest {
     HASUSER,
+    ADDUSER,
     PROJECTS,
     NESTED_CHAPTERS,
     CHAPTER_HISTORY,
@@ -175,13 +176,19 @@ public class ScoreServlet extends DatabaseServlet {
         reply(response, getProjects());
         return;
       } else if (realRequest == GetRequest.HASUSER) {
-        logger.info("doGet got doGet hasUser " + queryString);
+        logger.info("doGet got hasUser " + queryString);
+        JSONObject toReturn = new JSONObject();
+        checkUserAndLogin(request, toReturn);
+        reply(response, toReturn);
+        return;
+      }/* else if (realRequest == GetRequest.ADDUSER) {
+        logger.info("doGet got add user " + queryString);
         JSONObject toReturn = new JSONObject();
         checkUserAndLogin(request, toReturn);
         reply(response, toReturn);
         return;
       }
-
+*/
       int userID = checkSession(request);
       int projid = getProjectID(request);
 
@@ -322,7 +329,11 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding", "Accept-Language", "accept", "connection"));
+  private Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding",
+      "Accept-Language",
+      "accept",
+      "connection",
+      "password"));
 
   private void reportOnHeaders(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
@@ -623,9 +634,9 @@ public class ScoreServlet extends DatabaseServlet {
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //   String pathInfo = request.getPathInfo();
-//    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
-//        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+    logger.info("ScoreServlet.doPost : Request " + request.getQueryString() +// " path " + pathInfo +
+        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+
     makeAudioFileHelper();
 
     configureResponse(response);
@@ -729,6 +740,7 @@ public class ScoreServlet extends DatabaseServlet {
     for (PostRequest request : PostRequest.values()) {
       if (s.startsWith(request.toString().toLowerCase())) return request;
     }
+
     return PostRequest.UNKNOWN;
   }
 

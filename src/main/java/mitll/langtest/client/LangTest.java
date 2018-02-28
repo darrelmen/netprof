@@ -967,7 +967,6 @@ public class LangTest implements
   }
 
   /**
-   *
    * @return
    */
   @Override
@@ -1161,7 +1160,7 @@ public class LangTest implements
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
     if (keyPressHelper.getSize() > 1) {
-      logger.info("addKeyListener " + listener.getName() + " ( " + keyPressHelper.getSize()+
+      logger.info("addKeyListener " + listener.getName() + " ( " + keyPressHelper.getSize() +
           ")" +
           "key press handler now " + keyPressHelper);
     }
@@ -1207,6 +1206,11 @@ public class LangTest implements
   @Override
   public void showDrillList(int id) {
     initialUI.getNavigation().showDrillList(id);
+  }
+
+  @Override
+  public void setBannerVisible(boolean visible) {
+    initialUI.getNavigation().setBannerVisible(visible);
   }
 
   @Override

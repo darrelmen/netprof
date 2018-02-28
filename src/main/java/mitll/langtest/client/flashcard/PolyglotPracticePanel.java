@@ -226,6 +226,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   protected void gotSeeScoresClick() {
+    controller.setBannerVisible(true);
     polyglotFlashcardContainer.cancelRoundTimer();
     super.gotSeeScoresClick();
   }

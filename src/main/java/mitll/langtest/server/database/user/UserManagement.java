@@ -103,24 +103,6 @@ public class UserManagement {
   }
 
   /**
-   * @param out
-   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
-   */
-/*  public void usersToXLSX(OutputStream out) {
-    new UserDAOToExcel().toXLSX(out, getUsers());
-  }*/
-
-  /**
-   * @return
-   * @see DatabaseImpl#usersToJSON
-   */
-/*
-  public JSON usersToJSON() {
-    return new UserDAOToExcel().toJSON(getUsers());
-  }
-*/
-
-  /**
    * TODO : come back and re-examine percent complete in context of a project
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    * <p>

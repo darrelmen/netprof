@@ -212,7 +212,8 @@ public class NewContentChooser implements INavigation {
         DRY_RUN_MINUTES, DRY_NUM,
         ROUND_MINUTES, COMP_NUM,
 
-        MIN_POLYGLOT_SCORE, new DialogHelper.CloseListener() {
+        MIN_POLYGLOT_SCORE,
+        new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
         mode = candidateMode;
@@ -235,6 +236,10 @@ public class NewContentChooser implements INavigation {
 
       @Override
       public void gotHidden() {
+        if (mode != MODE_CHOICE.NOT_YET) {
+          controller.setBannerVisible(false);
+        }
+        logger.info("mode is " + mode);
         showPractice();
       }
     },
@@ -387,6 +392,9 @@ public class NewContentChooser implements INavigation {
     setHistoryWithList(listid);
     banner.showDrill();
   }
+
+  @Override
+  public void setBannerVisible(boolean visible) { banner.setVisible(visible);}
 
   private void setHistoryWithList(int listid) {
     History.newItem(FacetExerciseList.LISTS + "=" + listid);
