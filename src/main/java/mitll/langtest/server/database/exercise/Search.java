@@ -96,7 +96,7 @@ public class Search<T extends CommonExercise> {
       }
     }
     return new TripleExercises<T>(
-        byID,//getExerciseByExid(prefix, userID, projectID),
+        byID,
         basicExercises,
         ts);
   }

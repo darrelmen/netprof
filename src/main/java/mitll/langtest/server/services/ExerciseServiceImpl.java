@@ -613,7 +613,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       Collections.sort(sorted);
       sorted.forEach(exid -> logger.info("exids #" + exid+" -> " + scores.get(exid)));
 */
-
       exerciseListWrapper.setIdToScore(scores);
     }
 
@@ -827,7 +826,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Search<T> search = new Search<T>(db, db);
     int exid = search.getExid(prefix);
     TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID);
-    if (exid != -1) {
+    if (exid != -1 && exid != 1) {
       T exercise = getAnnotatedExercise(userID, projectID, exid, false);
       if (exercise != null) {
         exercisesForSearch.setByID(Collections.singletonList(exercise));
@@ -835,140 +834,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     return exercisesForSearch;
   }
-
-  /**
-   * If not the full exercise list, build a trie here and use it.
-   *
-   * @param <T>
-   * @param prefix
-   * @param exercises
-   * @param predefExercises
-   * @param fullTrie
-   * @param projectID
-   * @return
-   * @see #getExercisesForSearch
-   */
-/*  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearchWithTrie(String prefix,
-                                                                                      Collection<T> exercises,
-                                                                                      boolean predefExercises,
-                                                                                      ExerciseTrie<T> fullTrie,
-                                                                                      int projectID,
-                                                                                      int userID) {
-    ExerciseTrie<T> trie = predefExercises ? fullTrie :
-        new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true);
-    List<T> basicExercises = trie.getExercises(prefix);
-    Project project = getProject(projectID);
-    ExerciseTrie<T> fullContextTrie = project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
-
-    logger.info("getExercisesForSearchWithTrie : " +
-        "\n\tprojectID " + projectID +
-        "\n\thas full " + (fullContextTrie != null) +
-        "\n\tfound " + (project != null) +
-        "\n\tpredef " + predefExercises +
-        "\n\tprefix " + prefix +
-        "\n\tmatches " + basicExercises.size());
-
-    List<T> ts = Collections.emptyList();
-
-    if (predefExercises && fullContextTrie != null) {
-      ts = fullContextTrie.getExercises(prefix);
-      logger.info("getExercisesForSearchWithTrie for full context for" +
-          "\n\tprefix '" + prefix + "'" +
-          "\n\tgot " + ts.size());
-    }
-
-    return new TripleExercises<>(
-        getExerciseByExid(prefix, userID, projectID),
-        basicExercises,
-        ts);
-  }*/
-
-  /**
-   * Three buckets - match by id, matches on vocab item, then match on context sentences
-   *
-   * @param <T>
-   */
-/*  private static class TripleExercises<T extends CommonExercise> {
-    private List<T> byID = Collections.emptyList();
-    private List<T> byExercise = Collections.emptyList();
-    private List<T> byContext = Collections.emptyList();
-
-    TripleExercises() {
-    }
-
-    TripleExercises(List<T> byID, List<T> byExercise, List<T> byContext) {
-      this.byID = byID;
-      this.byExercise = byExercise;
-      this.byContext = byContext;
-    }
-
-    public List<T> getByID() {
-      return byID;
-    }
-
-    List<T> getByExercise() {
-      return byExercise;
-    }
-
-    TripleExercises<T> setByExercise(List<T> byExercise) {
-      this.byExercise = byExercise;
-      return this;
-    }
-
-    */
-
-  /**
-   * @return
-   * @seex #getSortedExercise
-   *//*
-    List<T> getByContext() {
-      return byContext;
-    }
-
-    public String toString() {
-      return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
-    }
-  }*/
-/*  private <T extends CommonExercise> List<T> getExerciseByExid(String prefix, int userID, int projectID) {
-    int exid = new SearcgetExid(prefix);
-
-    if (exid > 0) {
-      logger.info("getExerciseByExid return exid " + exid);
-      T exercise = getAnnotatedExercise(userID, projectID, exid, false);
-      if (exercise != null && exercise.getProjectID() == projectID) {
-        return Collections.singletonList(exercise);
-      }
-    }
-    return Collections.emptyList();
-  }*/
-
-/*  private int getExid(String prefix) {
-    int exid = -1;
-    if (!prefix.isEmpty()) {
-      try {
-        exid = Integer.parseInt(prefix);
-      } catch (NumberFormatException e) {
-        // logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
-      }
-    }
-    return exid;
-  }*/
-
-/*  private <T extends CommonShell> Collection<T> getAMASExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
-    long then = System.currentTimeMillis();
-    ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
-    exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
-    long now = System.currentTimeMillis();
-    if (now - then > 300) {
-      logger.debug("took " + (now - then) + " millis to do trie lookup");
-    }
-    if (exercises.isEmpty()) { // allow lookup by id
-      T exercise = getExercise(prefix, userID, false);
-      if (exercise != null) exercises = Collections.singletonList(exercise);
-    }
-    return exercises;
-  }*/
-
 
   /**
    * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
@@ -1528,21 +1393,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                    int userID) {
     long then = System.currentTimeMillis();
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID);
-
-/*    Map<Integer, List<CorrectAndScore>> idToScores = new HashMap<>();
-
-    for (HasID exercise : exercises) {
-      int id = exercise.getID();
-      List<CorrectAndScore> scoreTotal = scoreHistories.get(id);
-
-      if (scoreTotal == null) {
-        //logger.error("huh? no history for " + exercise.getID());
-      } else {
-        //exercise.getMutable().setScores(scoreTotal);
-        idToScores.put(id, scoreTotal);
-      }
-    }*/
-
     long now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
