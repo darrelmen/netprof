@@ -59,6 +59,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
+ // public static final int MAX_LENGTH = 300;
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
 
   /**
@@ -75,7 +76,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final int DEFAULT_PROJECT = 1;
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
   private static final String QUOT = "&quot;";
-  private static final int MAX_LENGTH = 220;
+  private static final int MAX_LENGTH = 250;
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -389,16 +390,19 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   @NotNull
   private Exercise makeExercise(SlickExercise slick) {
     int id = slick.id();
-    String noAccentFL = StringUtils.stripAccents(slick.foreignlanguage());
+    String foreignlanguage = getTruncated(slick.foreignlanguage());
+    String noAccentFL = StringUtils.stripAccents(foreignlanguage);
+    String english = getTruncated(slick.english());
+    String meaning = getTruncated(slick.meaning());
     Exercise exercise = new Exercise(
         id,
         slick.exid(),
         BaseUserDAO.UNDEFINED_USER,
-        slick.english(),
-        slick.foreignlanguage(),
+        english,
+        foreignlanguage,
         noAccentFL,
         slick.altfl(),
-        slick.meaning(),
+        meaning,
         slick.transliteration(),
         slick.projid(),
         slick.candecode(),
@@ -409,8 +413,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     {
       List<String> translations = new ArrayList<String>();
-      if (!slick.foreignlanguage().isEmpty()) {
-        translations.add(slick.foreignlanguage());
+      if (!foreignlanguage.isEmpty()) {
+        translations.add(foreignlanguage);
       }
       exercise.setRefSentences(translations); // ?
     }
@@ -418,6 +422,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     exercise.setUpdateTime(lastModified);
     exercise.setAltFL(slick.altfl());
     return exercise;
+  }
+
+  @NotNull
+  private String getTruncated(String english2) {
+    String english = english2;
+    if (english.length() > MAX_LENGTH) english = english.substring(0, MAX_LENGTH) + "...";
+    return english;
   }
 
   /**
@@ -1370,7 +1381,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
   }*/
-
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
   }

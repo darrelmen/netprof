@@ -188,6 +188,7 @@ class CheckLTS {
             process = (!isEmptyLTS) ? lts.process(token.toLowerCase()) : null;
             legitLTS = isLegitLTS(process, token);
           }
+
           if (!translitOk &&
               !legitLTS
           /*    (process == null || process.length == 0 || process[0].length == 0 ||
@@ -196,19 +197,7 @@ class CheckLTS {
             boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
             if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
 
-            if (htkEntry
-                ) {
- /*
-              if (process != null) {
-                //logger.info("2 checkLTS in dict for " + process.length);
-                if (process.length > 0) {
-                //  logger.info("2 in dict for " + process[0].length);
-                  if (process[0].length > 0) {
-                  //  logger.info("2 in dict for " + process[0][0].length());
-                  }
-                }
-              }
-              */
+            if (htkEntry) {
               // we don't accept tokens when the dict is empty...
               indict.add(trim);
             } else {
@@ -218,15 +207,6 @@ class CheckLTS {
                     " is invalid in '" + foreignLanguagePhrase +
                     "' and not in dictionary of size " + htkDictionary.size() + " translitOk " + translitOk + " legitLTS " + legitLTS
                 );
-    /*            if (process != null) {
-                  logger.info("2 " +token + " checkLTS in dict for " + process.length);
-                  if (process.length > 0) {
-                      logger.info("2 in dict for " + process[0].length + " : " + (StringUtils.join(process[0], "-")));
-                    if (process[0].length > 0) {
-                       logger.info("2 in dict for " + process[0][0].length());
-                    }
-                  }
-                }*/
               } else if (DEBUG) {
                 logger.debug("checkLTS with " + lts + "/" + language + " token #" + i +
                     " : '" + token + "' hash " + token.hashCode() +
@@ -236,8 +216,8 @@ class CheckLTS {
               }
               oov.add(trim);
             }
-          } else if (!isEmptyLTS) {
-            if (DEBUG) {
+          } else if (!isEmptyLTS && legitLTS) {
+            if (DEBUG && process != null) {
               logger.info("checkLTS for " + token + " got " + (process.length));
               for (String[] first : process) {
                 for (String second : first) logger.info("\t" + second);
@@ -245,7 +225,7 @@ class CheckLTS {
             }
             inlts.add(trim);
           } else {
-            if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + trim);
+            if (DEBUG) logger.info("checkLTS oov for " + token + " = " + trim);
             oov.add(trim);
           }
         }
@@ -259,7 +239,7 @@ class CheckLTS {
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
     } else {
-      if (DEBUG) logger.info("for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+      if (DEBUG) logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
     if (DEBUG)
       logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
@@ -318,24 +298,23 @@ class CheckLTS {
         if (max-- == 0) break;
         boolean allValid = areAllPhonesValid(pron);
         if (!allValid) {
-         // logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
+          if (DEBUG) logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
           numBad++;
         } else {
-          //         logger.info("good " + c + "/" + n + " for " + token);
+         // logger.info("good " + c + "/" + n + " for " + token);
         }
         c++;
         //  valid &= allValid;
       }
       if (numBad == n) {
         valid = false;
+        //logger.info("isLegitLTS all bad " + numBad + " out of " + n + " for " + token);
       } else if (numBad > 0) {
-       // logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
+        if (DEBUG)  logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
       }
     }
     return b && valid;
   }
-
-  //private int multiple = 0;
 
   /**
    * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase

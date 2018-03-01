@@ -27,7 +27,6 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
  // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
-
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -73,8 +72,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     this.exercise = exercise;
     this.listContainer = listContainer;
 
-    //getElement().setId("SimpleRecordAudioPanel");
-    this.isRTL = controller.isRightAlignContent();//new ClickableWords<>().isRTL(exercise);
+    getElement().setId("SimpleRecordAudioPanel");
+    this.isRTL = controller.isRightAlignContent();
     setWidth("100%");
     addWidgets();
     List<CorrectAndScore> scores = exercise.getScores();

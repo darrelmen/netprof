@@ -185,7 +185,6 @@ public class AudioFileHelper implements AlignDecode {
 
           for (CommonExercise exercise : exercises) {
             boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
-            //        boolean validForeignPhrase = isInDictOrLTS(exercise);
             if (!validForeignPhrase) {
               if (count < 10) {
                 logger.warn("checkLTSAndCountPhones : not a valid foreign phrase for " +
@@ -236,8 +235,10 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(now, exercise)) {
+    if (isStale(now, exercise) || exercise.getEnglish().equalsIgnoreCase("teacher")) {
       validForeignPhrase = isInDictOrLTS(exercise);
+
+      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
       Set<Integer> toAddTo = validForeignPhrase ? safe : unsafe;
       toAddTo.add(exercise.getID());
     }
@@ -246,10 +247,6 @@ public class AudioFileHelper implements AlignDecode {
 
   private boolean isStale(long now, CommonExercise exercise) {
     return now - exercise.getLastChecked() > 24 * 60 * 60 * 1000L;
-  }
-
-  private boolean isInDictOrLTS(CommonExercise exercise) {
-    return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
   /**
@@ -276,6 +273,10 @@ public class AudioFileHelper implements AlignDecode {
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
     return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
+  }
+
+  private boolean isInDictOrLTS(CommonExercise exercise) {
+    return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {

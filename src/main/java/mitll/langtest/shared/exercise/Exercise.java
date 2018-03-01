@@ -598,16 +598,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return dominoID;
   }
 
-  /**
-   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#getExerciseFromVocabularyItem
-   * @paramx xdominoID
-   */
-/*
-  public void setDominoID(int dominoID) {
-    this.dominoID = dominoID;
-  }
-*/
-
   public long getLastChecked() {
     return safeToDecodeLastChecked;
   }

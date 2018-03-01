@@ -258,18 +258,18 @@ public class JsonExport {
     JSONArray jsonArray = new JSONArray();
 
     {
-     // logger.info("getJsonForNode node " + type + " = " + node.getName() + " vs " + firstTypes);
+      // logger.info("getJsonForNode node " + type + " = " + node.getName() + " vs " + firstTypes);
 
       if (node.isLeaf() || !firstTypes.iterator().next().equalsIgnoreCase(type)) { // stop when get below first types, e.g. unit,chapter
-       // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
-        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio));
+        // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
+        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true));
       } else {
         List<SectionNode> children = node.getChildren();
-   //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
+        //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
 
         for (SectionNode child : children) {
           typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-     //     logger.info("\tgetJsonForNode node " + child.getType() + " = " + child.getName() + " typeToValues " + typeToValues);
+          //     logger.info("\tgetJsonForNode node " + child.getType() + " = " + child.getName() + " typeToValues " + typeToValues);
           jsonArray.add(getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio, firstTypes));
           typeToValues.remove(child.getType());
         }
@@ -287,7 +287,8 @@ public class JsonExport {
    */
   private JSONArray getJsonForSelection(
       Map<String, Collection<String>> typeToValues,
-      boolean removeExercisesWithMissingAudio) {
+      boolean removeExercisesWithMissingAudio,
+      boolean removeCantDecode) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     if (exercisesForState.isEmpty()) {
@@ -302,6 +303,16 @@ public class JsonExport {
         CommonExercise next = iterator.next();
         if (!next.hasRefAudio()) iterator.remove();
       }
+    }
+
+    if (removeCantDecode) {
+      logger.info("getJsonForSelection before had " + exercisesForState.size());
+      Iterator<CommonExercise> iterator = copy.iterator();
+      for (; iterator.hasNext(); ) {
+        CommonExercise next = iterator.next();
+        if (!next.isSafeToDecode()) iterator.remove();
+      }
+      logger.info("getJsonForSelection after  had " + exercisesForState.size());
     }
     getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
     return getJsonArray(copy);

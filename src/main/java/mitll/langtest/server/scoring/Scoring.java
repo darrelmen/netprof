@@ -361,7 +361,7 @@ public abstract class Scoring {
   public boolean validLTS(String fl, String transliteration) {
     if (fl.isEmpty()) return false;
     Set<String> strings = checkLTSHelper.checkLTS(fl, transliteration);
-    // logger.info("For " + fl + " got " + strings);
+//    logger.info("validLTS : For " + fl + " got " + strings);
     return strings.isEmpty();
   }
 

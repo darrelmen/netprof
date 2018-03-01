@@ -436,7 +436,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
       invalidateCache();
-      return clientUserDetail.getDocumentDBID();
+      return clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID();
     }
   }
 
@@ -612,7 +612,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param remoteAddr
    * @param sessionID
    * @return
-   * @seex #getStrictUserWithPass(String, String)
    * @see IUserSecurityManager#getLoginResult
    */
   public User loginUser(String userId,
@@ -632,7 +631,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() +
         "\n\texisting credentials " + encodedCurrPass +
-        "\n\tyielded " + loggedInUser);
+        "\n\tyielded              " + loggedInUser);
 
     return getUser(loggedInUser);
   }

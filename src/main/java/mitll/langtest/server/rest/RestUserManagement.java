@@ -67,7 +67,6 @@ import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 public class RestUserManagement {
   private static final Logger logger = LogManager.getLogger(RestUserManagement.class);
 
-  //private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";
 
   /**
@@ -117,6 +116,9 @@ public class RestUserManagement {
   public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
   public static final String USERS = "users";
   public static final String DLIFLC = "DLIFLC";
+  public static final String MALE = "male";
+  public static final String FIRST = "First";
+  public static final String LAST = "Last";
 
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -458,16 +460,19 @@ public class RestUserManagement {
 
     User existingUser = db.getUserDAO().getUserByID(user);
 
-    logger.warn("addUser user " + user + " match " + existingUser);
- /*   int projid = -1;
+    logger.info("addUser user " + user + " match " + existingUser);
+    int projid = -1;
     try {
       String project = request.getHeader("projid");
       if (project != null) {
         projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
       }
+
+      logger.info("Got " + projid + " projid");
+
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
-    }*/
+    }
     if (existingUser == null) {
       User checkExisting = existingUser;// kinda stupid but here we are
 
@@ -479,7 +484,7 @@ public class RestUserManagement {
         String email = request.getHeader(EMAIL);
         if (email == null) email = "";
 
-        logger.warn("addUser : Request " + requestType + " for " + deviceType + " user " + user +
+        logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
             " adding " + gender +
             " age " + age + " dialect " + dialect);
 
@@ -488,7 +493,7 @@ public class RestUserManagement {
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
-            boolean male = gender.equalsIgnoreCase("male");
+            boolean male = gender.equalsIgnoreCase(MALE);
 
             SignUpUser user2 = new SignUpUser(user,
                 emailH,
@@ -553,17 +558,17 @@ public class RestUserManagement {
     User user1;
     String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
 
-    logger.warn("AppURL " + appURL + " user " + user + " email " + email + " emailH " + emailH);
+    logger.info("addUserFromIPAD AppURL " + appURL + " user " + user + " email '" + email + "' emailH " + emailH);
     String first = request.getHeader("first");
-    if (first == null) first = "";
+    if (first == null) first = FIRST;
     String last = request.getHeader("last");
-    if (last == null) last = "";
+    if (last == null) last = LAST;
     String affiliation = request.getHeader("affiliation");
     if (affiliation == null) {
       affiliation = DLIFLC;
     }
 
-    boolean isMale = gender != null && gender.equalsIgnoreCase("male");
+    boolean isMale = gender == null || gender.equalsIgnoreCase(MALE);
 
     SignUpUser user2 = new SignUpUser(user,
         emailH,

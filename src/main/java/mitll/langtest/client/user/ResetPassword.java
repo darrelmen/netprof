@@ -60,6 +60,10 @@ public class ResetPassword extends UserDialog {
   private static final String HINT = "Confirm " + PASSWORD;
 
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
+
+  /**
+   *
+   */
   private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
   private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
   private static final String PASSWORD_HAS_BEEN_CHANGED = "Password has been changed";

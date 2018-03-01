@@ -388,8 +388,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    * @param req
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
   @Override
   public void setReq(int req) {
@@ -1004,6 +1004,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     boolean hasEnglish = isValid(english);
     Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
+   // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
+    recordPanel.setVisible(e.isSafeToDecode());
     card.add(rowWidget);
 
     //long now = System.currentTimeMillis();
@@ -1028,15 +1030,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     rowWidget.add(recordPanel);
 
     if (e.hasContext()) {
-/*      rowWidget = getRowWidget();
-      rowWidget.getElement().setId("contextRow_"+exercise.getID());
-      rowWidget.setWidth("100%");
-      card.add(rowWidget);*/
-      //rowWidget.getElement().setId("contextRow");
-      addContext(e, card);//, rowWidget);
+      addContext(e, card);
     }
-   // now = System.currentTimeMillis();
-
+    // now = System.currentTimeMillis();
 //    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
     return card;
   }
@@ -1102,7 +1098,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
-    long then = System.currentTimeMillis();
+    //  long then = System.currentTimeMillis();
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
 
     DivWidget flContainer = getHorizDiv();
@@ -1112,6 +1108,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget recordButtonContainer = new DivWidget();
       recordButtonContainer.addStyleName("recordingRowStyle");
       recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+      recordButtonContainer.setVisible(e.isSafeToDecode());
       flContainer.add(recordButtonContainer);
     }
 
@@ -1237,7 +1234,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see #getItemContent
    */
   private void addContext(T e, Panel card) {
-  //  int c = 0;
+    //  int c = 0;
     String foreignLanguage = e.getForeignLanguage();
     String altFL = e.getAltFL();
     Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
@@ -1254,7 +1251,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   *
    * @param rowWidget
    * @param foreignLanguage
    * @param altFL
@@ -1475,7 +1471,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(col);
 
       String altFL1 = contextExercise.getAltFL();
-      if (showFL  || altFL1.isEmpty()) {
+      if (showFL || altFL1.isEmpty()) {
         col.add(commentRow);
         col.add(contextClickableRowPhones);
       }
