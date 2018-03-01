@@ -45,26 +45,33 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
+/**
+ *
+ */
 public class DownloadHelper implements IShowStatus {
   //  private final Logger logger = Logger.getLogger("DownloadHelper");
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
-  //private static final String ALLCONTEXT = "allcontext";
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
   private static final String CONTEXT_SENTENCES = "Context Sentences";
   private static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
   private static final String GENDER = "Gender";
+  public static final String DOWNLOAD = "Download";
+  public static final String CANCEL = "Cancel";
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
@@ -96,18 +103,15 @@ public class DownloadHelper implements IShowStatus {
   private final Heading status2 = new Heading(4, "");
   private final Heading status3 = new Heading(4, "");
 
+  /**
+   * @param host
+   * @see mitll.langtest.client.list.FacetExerciseList#FacetExerciseList
+   */
   public void showDialog(String host) {
     isMale = false;
     isContext = false;
-    // isRegular = true;
 
     DivWidget container = new DivWidget();
-/*    boolean empty = selectionState == null || selectionState.isEmpty();
-    if (empty) {
-      container.add(new Heading(3, DOWNLOAD_SPREADSHEET));
-      container.add(new Heading(4, SELECT_A_UNIT_OR_CHAPTER));
-    } else {*/
-    // isThereASpeedChoice = false;
     isContextSet = false;
     isMaleSet = false;
 
@@ -115,9 +119,15 @@ public class DownloadHelper implements IShowStatus {
     styleStatus(status2);
     styleStatus(status3);
 
+    final String search = selectionState.getSearch();
     {
       FluidRow row = new FluidRow();
-      Heading w = new Heading(4, selectionState.getDescription(typeOrder));
+      String description = selectionState.getDescription(typeOrder);
+      if (!search.isEmpty()) {
+        description += " and searching '" + search +
+            "'";
+      }
+      Heading w = new Heading(4, description);
       w.addStyleName("blueColor");
       row.add(w);
       container.add(row);
@@ -128,19 +138,18 @@ public class DownloadHelper implements IShowStatus {
     container.add(getSpeedRow());
     container.add(getStatusArea());
 
-    // String title = empty ? DOWNLOAD_CONTENT_SPREADSHEEET : DOWNLOAD_AUDIO_AND_SPREADSHEET;
-    String title = DOWNLOAD_AUDIO_AND_SPREADSHEET;
-
     closeButton = new DialogHelper(true).show(
-        title,
+        DOWNLOAD_AUDIO_AND_SPREADSHEET,
         Collections.emptyList(),
         container,
-        "Download",
-        "Cancel",
+        DOWNLOAD,
+        CANCEL,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection());
+            String urlForDownload = toDominoUrl(getDownloadAudio(host)) +
+                getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection(), search);
+
             new DownloadIFrame(urlForDownload);
             return true;
           }
@@ -200,7 +209,7 @@ public class DownloadHelper implements IShowStatus {
     row.add(new Heading(4, GENDER));
 
     {
-      DivWidget showGroup = getGenderChoices( );
+      DivWidget showGroup = getGenderChoices();
       showGroup.addStyleName("topFiveMargin");
       showGroup.addStyleName("bottomFiveMargin");
       row.add(showGroup);
@@ -244,6 +253,7 @@ public class DownloadHelper implements IShowStatus {
 
   /**
    * Only regular speed audio for context.
+   *
    * @param buttonGroup
    * @param text
    * @return
@@ -286,19 +296,9 @@ public class DownloadHelper implements IShowStatus {
 
   private boolean isMale = false;
   private boolean isContext = false;
-//  private boolean isRegular = false;
 
   private boolean isContextSet = false;
-  //private boolean isThereASpeedChoice = false;
   private boolean isMaleSet = false;
-
-/*
-  private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
-  private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
-
-  private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
-  private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
-*/
 
   private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -330,47 +330,6 @@ public class DownloadHelper implements IShowStatus {
     return buttonToolbar;
   }
 
-/*
-  private Widget getSpeedChoices() {
-    Panel buttonToolbar = getToolbar2();
-    buttonToolbar.setHeight("40px");
-
-    {
-      regular = getChoice2(REGULAR, rabbit, rabbitSelected, event -> {
-        isRegular = regular.isDown();
-        isThereASpeedChoice = true;
-        showSpeeds();
-      });
-      buttonToolbar.add(regular);
-    }
-
-    {
-      slow = getChoice2(SLOW, turtle, turtleSelected, event -> {
-        isRegular = !slow.isDown();
-        //  logger.info("got slow click " + isRegular);
-        isThereASpeedChoice = true;
-        showSpeeds();
-      });
-      buttonToolbar.add(slow);
-    }
-
-    buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
-    return buttonToolbar;
-  }
-*/
-/*
-  private Panel getToolbar2() {
-    return new HorizontalPanel();
-  }
-
-  private ToggleButton regular, slow;
-
-  private void showSpeeds() {
-    regular.setDown(isRegular);
-    slow.setDown(!isRegular);
-    showStatus();
-  }*/
-
   private com.github.gwtbootstrap.client.ui.Button getChoice(String title, boolean isActive, ClickHandler handler) {
     com.github.gwtbootstrap.client.ui.Button onButton =
         new com.github.gwtbootstrap.client.ui.Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
@@ -381,18 +340,6 @@ public class DownloadHelper implements IShowStatus {
     onButton.getElement().getStyle().setZIndex(0);
     return onButton;
   }
-
-/*
-  private ToggleButton getChoice2(String title, Image upImage, Image downImage, ClickHandler handler) {
-    ToggleButton onButton = new ToggleButton(upImage, downImage);
-    onButton.getElement().setId("Choice_" + title);
-    onButton.addClickHandler(handler);
-    onButton.getElement().getStyle().setZIndex(0);
-    onButton.setWidth(50 + "px");
-    onButton.setHeight(32 + "px");
-    return onButton;
-  }
-*/
 
   private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
@@ -416,22 +363,12 @@ public class DownloadHelper implements IShowStatus {
    *
    * @param request
    * @param typeToSection
+   * @param search
    * @return
    * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
    */
-  private String getURL(String request, Map<String, Collection<String>> typeToSection) {
-    Map<String, Collection<String>> ts = new HashMap<>();
-    typeToSection.forEach((k, v) -> {
-      List<String> newV = new ArrayList<>();
-      v.forEach(value -> newV.add(
-          value
-              .replaceAll(",", COMMA)
-              .replaceAll("&", AMPERSAND)
-      ));
-      ts.put(k, newV);
-    });
-    String sel = ts.toString();
-    String encode = URL.encodeQueryString(sel);
+  private String getURL(String request, Map<String, Collection<String>> typeToSection, String search) {
+    String encode = URL.encodeQueryString(getSelectionMap(typeToSection).toString());
 
 /*    logger.info("getURL " +
         "\n\torig '" + typeToSection.toString() + "'" +
@@ -444,6 +381,22 @@ public class DownloadHelper implements IShowStatus {
         "&unit=" + encode +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
-        "&context=" + isContext;
+        "&context=" + isContext +
+        "&search=" + URL.encodeQueryString(search);
+  }
+
+  @NotNull
+  private Map<String, Collection<String>> getSelectionMap(Map<String, Collection<String>> typeToSection) {
+    Map<String, Collection<String>> ts = new HashMap<>();
+    typeToSection.forEach((k, v) -> {
+      List<String> newV = new ArrayList<>();
+      v.forEach(value -> newV.add(
+          value
+              .replaceAll(",", COMMA)
+              .replaceAll("&", AMPERSAND)
+      ));
+      ts.put(k, newV);
+    });
+    return ts;
   }
 }

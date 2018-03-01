@@ -45,12 +45,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final String TIME_LEFT = "Time left";
 
   private static final long ONE_MIN = (60L * 1000L);
-
-  /**
-   * @see #showTimeRemaining
-   */
-//  private static final String TIMES_UP = "Times Up!";
-
   private Label timeLeft;
 
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
@@ -240,11 +234,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   public void showTimeRemaining(long l) {
-    String value;// = TIMES_UP;
+    String value;
     if (l > 0) {
       long min = l / ONE_MIN;
       long sec = (l - (min * ONE_MIN)) / 1000;
-      value = "0" + min + ":" + (sec < 10 ? "0" : "") + sec;
+      String prefix = min < 10 ? "0" : "";
+      value = prefix + min + ":" + (sec < 10 ? "0" : "") + sec;
       if (min == 0) {
         if (sec < 30) {
           timeLeft.setType(LabelType.IMPORTANT);
@@ -263,7 +258,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   public void onSetComplete() {
     long roundTimeLeftMillis = polyglotFlashcardContainer.getRoundTimeLeftMillis();
-    logger.info("onSetComplete  " + roundTimeLeftMillis);
+    //logger.info("onSetComplete  " + roundTimeLeftMillis);
     if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
       new ModalInfoDialog(ALL_DONE, COMPLETE);
     } else {
@@ -275,5 +270,4 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected boolean shouldDoAutoload() {
     return false;
   }
-
 }

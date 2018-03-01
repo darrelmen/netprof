@@ -37,6 +37,7 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
  * Created by go22670 on 3/23/17.
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
+  public static final boolean HIDE_UNSAFE = false;
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
   /**
    * @see #getContext
@@ -1005,7 +1006,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     boolean hasEnglish = isValid(english);
     Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
    // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
-    recordPanel.setVisible(e.isSafeToDecode());
+   if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
     card.add(rowWidget);
 
     //long now = System.currentTimeMillis();
@@ -1108,7 +1109,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget recordButtonContainer = new DivWidget();
       recordButtonContainer.addStyleName("recordingRowStyle");
       recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-      recordButtonContainer.setVisible(e.isSafeToDecode());
+      if (HIDE_UNSAFE) recordButtonContainer.setVisible(e.isSafeToDecode());
       flContainer.add(recordButtonContainer);
     }
 
