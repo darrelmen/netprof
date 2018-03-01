@@ -33,16 +33,11 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.TrackInfo;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.user.MiniUser;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -196,8 +191,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    * @param exid
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    */
   public void setExid(int exid) {
     this.exid = exid;
@@ -363,23 +358,26 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
+   * remove punct before we get here.
+   *
    * @param foreignLanguage
    * @param transcript
    * @return
-   * @see #matchTranscript
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio(AudioAttribute, String)
    */
   public boolean matchTranscript(String foreignLanguage, String transcript) {
+    foreignLanguage = foreignLanguage.trim();
+    if (transcript != null) {
+      transcript = transcript.trim();
+    }
+
     return transcript == null ||
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
-        removePunct(transcript)
-            .toLowerCase()
-            .equals(removePunct(foreignLanguage)
+        transcript.toLowerCase()
+            .equals(
+                foreignLanguage
                 .toLowerCase());
-  }
-
-  private String removePunct(String t) {
-    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
   }
 
   public String getTranscript() {
@@ -400,16 +398,16 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param oldexid
-   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
+   * @seex mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
    */
   public void setOldexid(String oldexid) {
     this.oldexid = oldexid;
   }
 
   /**
-   * @deprecated  - do we ever set this properly???
    * @return
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
+   * @deprecated - do we ever set this properly???
    */
   public String getActualPath() {
     return actualPath;
