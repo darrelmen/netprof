@@ -244,7 +244,8 @@ public class DownloadServlet extends DatabaseServlet {
       if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
       else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
-      //else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
+      else if (arg.startsWith("search")) options.setSearch(arg.split("=")[1]);
+        //else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
       else {
         logger.info("getAudioExportOptions : got unexpected arg '" + arg + "'");
       }
@@ -267,7 +268,7 @@ public class DownloadServlet extends DatabaseServlet {
                              String queryString,
                              int projid,
                              String language) {
-    logger.debug("writeAudioZip : request " + projid + " " + language+ " query " + queryString);
+    logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     String[] split1 = queryString.split(REGEXAMPERSAND);
 
     // TODO : super buggy - what if we don't have a unit/chapter hierarchy???
@@ -405,7 +406,7 @@ public class DownloadServlet extends DatabaseServlet {
     CommonExercise exercise1 = db.getExercise(projid, exercise);
 
     if (exercise1 == null) {
-      logger.error("getFilenameForDownload couldn't find exercise #" + exercise + " for user '" + useridString + "' and language " + language + " for project #"+projid);
+      logger.error("getFilenameForDownload couldn't find exercise #" + exercise + " for user '" + useridString + "' and language " + language + " for project #" + projid);
       return "Unknown_Exercise";
     } else {
       return getPrettyFileName(db, useridString, language, exercise1);
@@ -458,7 +459,7 @@ public class DownloadServlet extends DatabaseServlet {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     String projectName = getProjectName(projectid);
-    String prefix = language + "_" + projectName.replaceAll("\\s++","_") + "_";
+    String prefix = language + "_" + projectName.replaceAll("\\s++", "_") + "_";
 /*    if (encodedFileName.toLowerCase().contains(USERS)) {
       String filename = prefix + "users.xlsx";
       response.setHeader("Content-Disposition", "attachment; filename=" + filename);
@@ -531,15 +532,14 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * Parse the query string that indicates the unit and chapter selections.
-   *
+   * <p>
    * So here we remap an encoded ampersand and an encoded comma back to unencoded versions.
-   *
+   * <p>
    * Encoded in download helper.
-   *
-   * @see mitll.langtest.client.download.DownloadHelper#getURL
    *
    * @param queryString
    * @return map representing unit/chapter selections - what SectionHelper will parse
+   * @see mitll.langtest.client.download.DownloadHelper#getURL
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private Map<String, Collection<String>> getTypeToSelectionFromRequest(String queryString) {
@@ -570,9 +570,7 @@ public class DownloadServlet extends DatabaseServlet {
         s = s.replaceAll("]", "");
         //   logger.debug("\ts " + s);
 
-        s = s
-            .replaceAll(AMPERSAND, "&")
-        ;
+        s = s.replaceAll(AMPERSAND, "&");
         List<String> values = Arrays.asList(s.split(","));
         List<String> trimmed = new ArrayList<>();
         values.forEach(v -> trimmed.add(v.replaceAll(COMMA, ",").trim()));
