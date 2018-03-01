@@ -282,7 +282,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   private boolean checkInvalidPhone(String p) {
-    return p.equalsIgnoreCase(POUND) || (urdu && p.equalsIgnoreCase("aa"));
+    return p.equalsIgnoreCase(POUND);
   }
 
   private List<List<String>> addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {

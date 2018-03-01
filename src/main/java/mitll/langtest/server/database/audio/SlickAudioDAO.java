@@ -34,6 +34,7 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
@@ -487,7 +488,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     if (!all.isEmpty()) {
       int projid = all.iterator().next().projid();
-      hasProjectSpecificAudio = database.getProject(projid).hasProjectSpecificAudio();
+      Project project = database.getProject(projid);
+      if (project != null) {
+        hasProjectSpecificAudio = project.hasProjectSpecificAudio();
+      }
     }
 
     for (SlickAudio slickAudio : all) {

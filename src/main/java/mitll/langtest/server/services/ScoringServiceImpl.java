@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
@@ -61,6 +60,7 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -194,6 +194,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   /**
+   * Only if we have a valid webservice port.
+   *
    * @param userIDFromSession
    * @param project
    * @see #recalcAlignments(int)
@@ -202,29 +204,27 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (project.getWebservicePort() > 100) {
       try {
         String name = project.getProject().name();
-        logger.info("recalcAlignments Doing project : " + name);
-
         int projectID = project.getID();
         List<Integer> audioIDs = getAllAudioIDs(projectID);
 
         long then = System.currentTimeMillis();
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-        logger.info("getAllAlignments Doing project " + name + " : " + audioIDs.size() + " audio cuts with " + audioFileHelper);
+        logger.info("recalcAlignments Doing project " + name + " : " + audioIDs.size() + " audio cuts with " + audioFileHelper);
 
-        Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
+        //Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
         //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
-        recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, audioToResult, true);
+        recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, getAudioIDMap(projectID), true);
 
         long now = System.currentTimeMillis();
 
         long l = (now - then) / 1000;
         long min = l / 60;
-        logger.info("getAllAlignments Doing project " + name + " " + audioIDs.size() + " audio cuts took " + min + " minutes.");
+        logger.info("recalcAlignments Doing project " + name + " " + audioIDs.size() + " audio cuts took " + min + " minutes.");
       } catch (Exception e) {
-        logger.error("getAllAlignments got " + e, e);
+        logger.error("recalcAlignments got " + e, e);
       }
     } else {
-      logger.info("getAllAlignments no hydra service for " + project);
+      logger.info("recalcAlignments no hydra service for " + project);
     }
   }
 
@@ -242,9 +242,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         .stream()
         .map(AudioAttribute::getUniqueID)
         .collect(Collectors.toList())));
-//    for (List<AudioAttribute> values : exToAudio.values()) {
-//      audioIDs.addAll(values.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toList()));
-//    }
+
     return audioIDs;
   }
 
@@ -755,10 +753,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   private void ensureAudioForAnswers(int projectID, List<MonitorResult> resultList) {
     String language = db.getLanguage(projectID);
+    Map<Integer, User> idToUser = new HashMap<>();
+
     for (MonitorResult result : resultList) {
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
-      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language);
+      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
     }
   }
 }

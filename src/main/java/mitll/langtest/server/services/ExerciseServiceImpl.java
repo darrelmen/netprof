@@ -38,9 +38,7 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
@@ -133,7 +131,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param request
    * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
+   * @seex mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
   public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException {
@@ -826,8 +824,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               int projectID,
                                                                               int userID
   ) {
-    Project project = db.getProject(projectID);
-    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, (ExerciseTrie<T>) project.getFullTrie(), projectID, userID);
+    Search<T> search = new Search<T>(db, db);
+    int exid = search.getExid(prefix);
+    TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID);
+    if (exid != -1) {
+      T exercise = getAnnotatedExercise(userID, projectID, exid, false);
+      if (exercise != null) {
+        exercisesForSearch.setByID(Collections.singletonList(exercise));
+      }
+    }
+    return exercisesForSearch;
   }
 
   /**
@@ -842,11 +848,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #getExercisesForSearch
    */
-  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearchWithTrie(String prefix,
+/*  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearchWithTrie(String prefix,
                                                                                       Collection<T> exercises,
                                                                                       boolean predefExercises,
                                                                                       ExerciseTrie<T> fullTrie,
-                                                                                      int projectID, int userID) {
+                                                                                      int projectID,
+                                                                                      int userID) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie :
         new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true);
     List<T> basicExercises = trie.getExercises(prefix);
@@ -874,14 +881,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         getExerciseByExid(prefix, userID, projectID),
         basicExercises,
         ts);
-  }
+  }*/
 
   /**
    * Three buckets - match by id, matches on vocab item, then match on context sentences
    *
    * @param <T>
    */
-  private static class TripleExercises<T extends CommonExercise> {
+/*  private static class TripleExercises<T extends CommonExercise> {
     private List<T> byID = Collections.emptyList();
     private List<T> byExercise = Collections.emptyList();
     private List<T> byContext = Collections.emptyList();
@@ -899,10 +906,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return byID;
     }
 
- /*   public void setByID(List<T> byID) {
-      this.byID = byID;
-    }*/
-
     List<T> getByExercise() {
       return byExercise;
     }
@@ -912,29 +915,22 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return this;
     }
 
-    /**
-     * @return
-     * @seex #getSortedExercise
-     */
+    */
+
+  /**
+   * @return
+   * @seex #getSortedExercise
+   *//*
     List<T> getByContext() {
       return byContext;
     }
 
-    /**
-     * @paramx byContext
-     */
-/*
-    public void setByContext(List<T> byContext) {
-      this.byContext = byContext;
-    }
-*/
     public String toString() {
       return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
     }
-  }
-
-  private <T extends CommonExercise> List<T> getExerciseByExid(String prefix, int userID, int projectID) {
-    int exid = getExid(prefix);
+  }*/
+/*  private <T extends CommonExercise> List<T> getExerciseByExid(String prefix, int userID, int projectID) {
+    int exid = new SearcgetExid(prefix);
 
     if (exid > 0) {
       logger.info("getExerciseByExid return exid " + exid);
@@ -944,9 +940,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return Collections.emptyList();
-  }
+  }*/
 
-  private int getExid(String prefix) {
+/*  private int getExid(String prefix) {
     int exid = -1;
     if (!prefix.isEmpty()) {
       try {
@@ -956,7 +952,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return exid;
-  }
+  }*/
 
 /*  private <T extends CommonShell> Collection<T> getAMASExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
     long then = System.currentTimeMillis();
@@ -1844,9 +1840,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       amasFullTrie = new ExerciseTrie<>(exercises, getOldLanguage(), getSmallVocabDecoder());
     }*/
 
-//    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
-//      shareAudioFileHelper(getServletContext());
-//    }
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list");// for " + getOldLanguage());

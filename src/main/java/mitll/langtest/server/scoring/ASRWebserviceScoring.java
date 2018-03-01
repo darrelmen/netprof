@@ -82,7 +82,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private static final String SEMI = ";";
   private static final String SIL = "sil";
-  public static final int MAX_FROM_ANY_TOKEN = 10;
+
+  static final int MAX_FROM_ANY_TOKEN = 10;
 
   private final SLFFile slfFile = new SLFFile();
 

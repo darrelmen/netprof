@@ -90,7 +90,7 @@ class CheckLTS {
   }
 
   private boolean checkInvalidPhone(String p) {
-    return p.equalsIgnoreCase(POUND) || (urdu && p.equalsIgnoreCase("aa"));
+    return p.equalsIgnoreCase(POUND);
   }
 
   /**

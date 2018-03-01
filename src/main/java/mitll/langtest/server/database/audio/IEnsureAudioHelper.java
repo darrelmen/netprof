@@ -34,11 +34,10 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 public interface IEnsureAudioHelper {
   /**
@@ -62,13 +61,15 @@ public interface IEnsureAudioHelper {
    * @param path
    * @param audioType
    * @param language
+   * @param idToUser
    * @return
    */
   String ensureCompressedAudio(int user,
                                CommonExercise commonShell,
                                String path,
                                AudioType audioType,
-                               String language);
+                               String language,
+                               Map<Integer, User> idToUser);
 
   /**
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile

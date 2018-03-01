@@ -1344,6 +1344,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
+
+    if (!options.getSearch().isEmpty()) {
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this, this)
+          .getExercisesForSearch(
+              options.getSearch(),
+              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid);
+      exercisesForSelectionState = exercisesForSearch.getByExercise();
+    }
+
     Project project = getProject(projectid);
 
     String language = getLanguage(project);

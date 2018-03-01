@@ -58,6 +58,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -203,7 +205,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, device, projectID);
       } else {
         String path = audioAnswer.getPath();
-        String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language);
+        Map<Integer, User> idToUser = new HashMap<>();
+        String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language, idToUser);
         //logger.info("Was " + path);
         // logger.info("Now " + actualPath);
         if (actualPath.startsWith(serverProps.getAudioBaseDir())) {

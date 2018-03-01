@@ -914,7 +914,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("toUser user " + user.getUserID() + " is a polyglot user.");
       handlePolyglotUser(dominoUser, permissionSet, user);
     } else {
-      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
+//      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
     }
     user.setPermissions(permissionSet);
 //    logger.info("\ttoUser return " + user);
@@ -944,6 +944,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param dominoUser
    * @param id
    * @return
+   * @see #handlePolyglotUser
    */
   private int getProjectAssignment(DBUser dominoUser, int id) {
     Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
@@ -982,8 +983,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         .collect(Collectors.toList());
   }
 
+  /**
+   * @param next
+   * @return
+   * @see #getProjectAssignment
+   */
   private Language getLanguageMatchingGroup(Group next) {
-    logger.info("found secondary " + next);
+    //logger.info("getLanguageMatchingGroup : found secondary " + next);
     String name = next.getName();
     Language language = getLanguage(name);
     if (language == Language.UNKNOWN) {
