@@ -402,11 +402,6 @@ public class AudioConversion extends AudioBase {
     return writeMP3(realContextPath, pathToWav, overwrite, trackInfo);
   }
 
-//  public String ensureWriteMP3Easy(String pathToWav, boolean overwrite, String title, String author) {
-//    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
-//    return writeMP3Easy(pathToWav, new File(pathToWav), overwrite, title, author);
-//  }
-
   private int spew2 = 0;
   private int spew3 = 0;
 
@@ -627,6 +622,8 @@ public class AudioConversion extends AudioBase {
     return file.getAbsolutePath();
   }
 
+  int spew4 = 0;
+
   public String getParentForFilePathUnderBaseAudio(String wavFile, String language, String parent, String audioBaseDir) {
     File test = new File(wavFile);
     if (!test.exists()) {
@@ -649,7 +646,9 @@ public class AudioConversion extends AudioBase {
         logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
 
       if (!fileUnderParent2.exists()) {
-        logger.error("ensureMP3 nope " + fileUnderParent2.getAbsolutePath());
+        if (spew4++ < 100) {
+          logger.error("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath());
+        }
       } else {
         // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());
       }

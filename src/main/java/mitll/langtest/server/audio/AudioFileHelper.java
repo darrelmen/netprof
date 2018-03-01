@@ -237,8 +237,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(now, exercise) || exercise.getEnglish().equalsIgnoreCase("teacher")) {
       validForeignPhrase = isInDictOrLTS(exercise);
-
-      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
+//      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
       Set<Integer> toAddTo = validForeignPhrase ? safe : unsafe;
       toAddTo.add(exercise.getID());
     }

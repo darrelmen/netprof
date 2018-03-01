@@ -7,17 +7,17 @@ public class AudioExportOptions {
   private boolean justMale = false;
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
-//  private boolean allContext = false;
   private boolean isUserList = false;
   private boolean skip = false;
   private boolean hasProjectSpecificAudio = false;
+  private String search="";
 
   /**
-   * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
    * @param hasProjectSpecificAudio
+   * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
    */
   public AudioExportOptions(boolean hasProjectSpecificAudio) {
-    this.hasProjectSpecificAudio=hasProjectSpecificAudio;
+    this.hasProjectSpecificAudio = hasProjectSpecificAudio;
   }
 
   public void setJustMale(boolean justMale) {
@@ -51,7 +51,7 @@ public class AudioExportOptions {
     this.justContext = justContext;
   }
 
-  boolean isUserList() {
+  public boolean isUserList() {
     return isUserList;
   }
 
@@ -73,7 +73,6 @@ public class AudioExportOptions {
 /*  public void setAllContext(boolean justContext) {
     this.allContext = justContext;
   }*/
-
   public boolean isHasProjectSpecificAudio() {
     return hasProjectSpecificAudio;
   }
@@ -82,21 +81,29 @@ public class AudioExportOptions {
     this.hasProjectSpecificAudio = hasProjectSpecificAudio;
   }
 
-  public String toString() {
-    return "options " +
-        getInfo() + " " +
-        (isUserList ? "user list" : "predef");
-  }
-
   public String getInfo() {
 //    if (isAllContext()) {
 //      return "";
 //    } else {
-      return skip || isUserList ?
-          "" :
-          "_" + (justMale ? "male" : "female") + "_" +
-              (justRegularSpeed ? "regular" : "slow") + "_" +
-              (justContext ? "context" : "vocab");
+    return skip || isUserList ?
+        "" :
+        "_" + (justMale ? "male" : "female") + "_" +
+            (justRegularSpeed ? "regular" : "slow") + "_" +
+            (justContext ? "context" : "vocab");
 //    }
+  }
+
+  public void setSearch(String search) {
+    this.search = search;
+  }
+
+  public String getSearch() {
+    return search;
+  }
+
+  public String toString() {
+    return "options " +
+        getInfo() + " " +
+        (isUserList ? "user list" : "predef");
   }
 }

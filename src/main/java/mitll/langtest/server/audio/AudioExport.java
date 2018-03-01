@@ -428,6 +428,7 @@ public class AudioExport {
 
   /**
    * TODO : Only regular speed audio for context, take from first sentence if multiple, for now
+   *
    * @param zOut
    * @param overallName
    * @param isEnglish
@@ -602,6 +603,8 @@ public class AudioExport {
     return name;
   }
 
+  int spew = 0;
+
   /**
    * @param zOut
    * @param names
@@ -635,7 +638,7 @@ public class AudioExport {
     } else {
       String absolutePath = mp3.getAbsolutePath();
       if (!absolutePath.endsWith(AudioConversion.FILE_MISSING)) {
-        logger.error("\tcopyAudio Didn't write " + absolutePath + " for " + exid);
+        if (spew++ < 100) logger.error("\tcopyAudio Didn't write " + absolutePath + " for " + exid);
       }
     }
   }
@@ -645,7 +648,6 @@ public class AudioExport {
     String audioBaseDir = props.getAudioBaseDir();
     String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", audioBaseDir);
 //    logger.info("getAbsFilePath audioBaseDir " + audioBaseDir + " " + absPathForAudio);
-
     return absPathForAudio;
   }
 
