@@ -13,6 +13,7 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -65,11 +66,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
   }
 
-/*  @Override
-  void moveEnglishForComment(Widget englishPhrase) {
-
-  }*/
-
   //  @Override
   private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
@@ -77,6 +73,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   }
 
+  /**
+   * Remember to preload the audio!
+   * @param exerciseID
+   * @param controller used in subclasses for audio control
+   * @param toAddTo
+   */
   @Override
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
                                                 ExerciseController controller, Panel toAddTo) {
@@ -85,6 +87,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     AudioAnswer answer = sticky.getAnswer(exerciseID);
     if (answer != null) {
       showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
+      playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), false);
     }
   }
 
@@ -265,9 +268,4 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       super.onSetComplete();
     }
   }
-/*
-  @Override
-  protected boolean shouldDoAutoload() {
-    return false;
-  }*/
 }
