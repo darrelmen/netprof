@@ -159,8 +159,6 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
     }*/
 
-    logger.warning("isMale " + isMale + " isReg " + isReg);
-
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
     AudioAttribute genderFallback = null;

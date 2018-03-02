@@ -826,10 +826,20 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Search<T> search = new Search<T>(db, db);
     int exid = search.getExid(prefix);
     TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID);
+    exercisesForSearch.setByID(Collections.emptyList());
+
     if (exid != -1 && exid != 1) {
-      T exercise = getAnnotatedExercise(userID, projectID, exid, false);
-      if (exercise != null) {
-        exercisesForSearch.setByID(Collections.singletonList(exercise));
+
+      List<T> byID = exercisesForSearch.getByID();
+
+      if (!byID.isEmpty()) {
+        int projectID1 = byID.iterator().next().getProjectID();
+        if (projectID1 == projectID) {
+          T exercise = getAnnotatedExercise(userID, projectID, exid, false);
+          if (exercise != null) {
+            exercisesForSearch.setByID(Collections.singletonList(exercise));
+          }
+        }
       }
     }
     return exercisesForSearch;

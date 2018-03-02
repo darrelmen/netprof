@@ -244,8 +244,11 @@ public class DownloadServlet extends DatabaseServlet {
       if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
       else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
-      else if (arg.startsWith("search")) options.setSearch(arg.split("=")[1]);
-        //else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
+      else if (arg.startsWith("search")) {
+        String[] split = arg.split("=");
+        String search = split.length > 1 ? split[1] : "";
+        options.setSearch(search);
+      }
       else {
         logger.info("getAudioExportOptions : got unexpected arg '" + arg + "'");
       }

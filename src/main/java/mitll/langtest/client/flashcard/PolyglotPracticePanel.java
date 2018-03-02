@@ -265,9 +265,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       super.onSetComplete();
     }
   }
-
+/*
   @Override
   protected boolean shouldDoAutoload() {
     return false;
-  }
+  }*/
 }
