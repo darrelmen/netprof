@@ -148,7 +148,7 @@ public class ProjectChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
-     // logger.info("show initial " + level);
+      // logger.info("show initial " + level);
       showInitialChoices(level);
     } else {
       logger.info("show choice for parent " + parent.getName() + " " + level);
@@ -163,6 +163,7 @@ public class ProjectChoices {
       public void onFailure(Throwable caught) {
         lifecycleSupport.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         addProjectChoices(level, startupInfo.getProjects());
       }
@@ -183,18 +184,12 @@ public class ProjectChoices {
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
+//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    boolean canRecord =
-        permissions.contains(RECORD_AUDIO) ||
-            permissions.contains(QUALITY_CONTROL) ||
-            permissions.contains(DEVELOP_CONTENT);
-
+    boolean canRecord = isCanRecord(permissions);
     boolean isPoly = permissions.contains(POLYGLOT);
 
-
-    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
+//    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
         "\n\tpoly " + isPoly +
@@ -229,6 +224,12 @@ public class ProjectChoices {
       filtered2 = filtered;
     }
     return filtered2;
+  }
+
+  private boolean isCanRecord(Collection<Permission> permissions) {
+    return permissions.contains(RECORD_AUDIO) ||
+        permissions.contains(QUALITY_CONTROL) ||
+        permissions.contains(DEVELOP_CONTENT);
   }
 
   /**
@@ -943,10 +944,10 @@ public class ProjectChoices {
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
 
-  //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
         SlimProject projectForLang1 = projectForLang;
-      //  logger.info("Click on crumb " + projectForLang1.getName());
+        //  logger.info("Click on crumb " + projectForLang1.getName());
         uiLifecycle.clickOnParentCrumb(projectForLang1);
       });
 

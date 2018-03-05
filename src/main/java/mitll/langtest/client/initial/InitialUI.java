@@ -529,7 +529,7 @@ public class InitialUI implements UILifecycle {
    */
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
+     // logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
 
       if (userManager.isPolyglot()) {
         logger.info("\tpolyglot users don't get to change projects.");

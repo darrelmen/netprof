@@ -8,4 +8,5 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 public interface AudioChangeListener {
   void audioChanged(int id, long duration);
   void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio);
+//  void contextAudioChanged(int id, long duration);
 }

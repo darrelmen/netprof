@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -37,16 +36,14 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
  * Created by go22670 on 3/23/17.
  */
 public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
-  public static final boolean HIDE_UNSAFE = false;
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
-  /**
-   * @see #getContext
-   */
-  private static final int CONTEXT_WIDTH = 75;
+
+
+  private static final boolean HIDE_UNSAFE = false;
 
   enum FieldType {FL, TRANSLIT, MEANING, EN}
 
-  private static final String SHOW_COMMENTS = "Show Comments";
+  private static final String SHOW_COMMENTS = "Leave Comments";
   private static final String HIDE_COMMENTS = "Hide Comments";
   private static final String N_A = "N/A";
 
@@ -75,7 +72,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean showInitially = false;
   private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell, T> listContainer;
-  private ChoicePlayAudioPanel playAudio;
+  private ChoicePlayAudioPanel playAudio, contextPlay;
 
   /**
    *
@@ -113,7 +110,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
-  private int req;
+  //  private int req;
+  private AlignmentFetcher alignmentFetcher;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -138,6 +136,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     this.alignments = alignments;
     annotationHelper = controller.getCommentAnnotator();
+    this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
+        controller, listContainer,
+        alignments,  this, new AudioChangeListener() {
+      @Override
+      public void audioChanged(int id, long duration) {
+        contextAudioChanged(id, duration);
+      }
+
+      @Override
+      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+
+      }
+    });
   }
 
   @Override
@@ -163,219 +174,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  /**
-   * @param listener
-   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
-   */
   @Override
   public void getRefAudio(RefAudioListener listener) {
-    AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
-    int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
-
-    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
-    int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-
-    if (DEBUG) logger.info("getRefAudio asking for" +
-            "\n\texercise  " + exercise.getID() +
-            "\n\taudio     " + contextAudioAttr// +
-//            "\n\talignment " + contextAudioAttr
-        //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
-        //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
-    );
-    Set<Integer> req = new HashSet<>();
-    int exerciseID = exercise.getID();
-    if (refID != -1) {
-      if (DEBUG) {
-        logger.info("getRefAudio asking for" +
-                "\n\texercise  " + exerciseID +
-                "\n\taudio    #" + refID +
-                "\n\talignment " + currentAudioAttr.getAlignmentOutput()
-            //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
-            //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
-        );
-      }
-      if (addToRequest(currentAudioAttr)) req.add(currentAudioAttr.getUniqueID());
-
-      playAudio.getAllPossible().forEach(audioAttribute -> {
-        if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
-      });
-    }
-    //else {
-    //  logger.warning("getRefAudio huh? how can audio id be -1??? " + currentAudioAttr);
-    //}
-
-    if (contextRefID != -1) {
-      // logger.info("getRefAudio asking for context " + contextRefID);
-      if (DEBUG) {
-        logger.info("getRefAudio asking for context" +
-            "\n\texercise " + exerciseID +
-            "\n\taudio #" + contextRefID +
-            "\n\tspeed  " + contextAudioAttr.getSpeed() +
-            "\n\tisMale " + contextAudioAttr.getUser().isMale()
-        );
-      }
-      if (addToRequest(contextAudioAttr)) {
-        req.add(contextRefID);
-
-        if (DEBUG) {
-          logger.info("getRefAudio added context" +
-              "\n\taudio #" + contextRefID
-          );
-        }
-      }
-
-      Set<AudioAttribute> allPossible = contextPlay.getAllPossible();
-
-      if (DEBUG) {
-        logger.info("getRefAudio examining context" +
-            "\n\taudio " + allPossible.size()
-        );
-      }
-      allPossible.forEach(audioAttribute -> {
-        if (addToRequest(audioAttribute)) {
-          req.add(audioAttribute.getUniqueID());
-        } else {
-          if (DEBUG) {
-            logger.info("getRefAudio  context" +
-                "\n\taudio " + audioAttribute.getUniqueID() + " " + audioAttribute.getAudioType() + " not added to request."
-            );
-          }
-        }
-      });
-    } else {
-      // logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
-    }
-
-    if (req.isEmpty()) {
-      if (DEBUG) {
-        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio #" + refID + " = " + alignments.containsKey(refID));
-        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.containsKey(contextRefID));
-      }
-
-      //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
-      listener.refAudioComplete();
-      if (listContainer.isCurrentReq(getReq())) {
-        cacheOthers(listener);
-      }
-    } else {
-      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
-
-      // threre could be a race where we go to get this after we log out...
-      if (projectStartupInfo != null && listContainer.isCurrentReq(getReq())) {
-        getAlignments(listener, currentAudioAttr, refID, contextAudioAttr, contextRefID, req, projectStartupInfo.getProjectid());
-      }
-    }
+    alignmentFetcher.getRefAudio(listener);
   }
 
-  /**
-   * Is the alignment already known and attached?
-   *
-   * @param currentAudioAttr
-   * @return
-   */
-  private boolean addToRequest(AudioAttribute currentAudioAttr) {
-    int refID = currentAudioAttr.getUniqueID();
-    if (alignments.containsKey(refID)) {
-      if (DEBUG)
-        logger.info("addToRequest found " + refID + " " + currentAudioAttr.getAudioType() + " : " + alignments.get(refID));
-
-
-      return false;
-    } else {
-      AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
-      if (alignmentOutput == null) {
-        if (DEBUG)
-          logger.info("addToRequest nope - no alignment for audio " + refID + " " + currentAudioAttr.getAudioType());
-        return true;
-      } else {
-        if (DEBUG)
-          logger.info("addToRequest remember audio " + refID + " " + alignmentOutput + " " + currentAudioAttr.getAudioType());
-        alignments.put(refID, alignmentOutput);
-        return false;
-      }
-    }
-  }
-
-  private void getAlignments(RefAudioListener listener,
-                             AudioAttribute currentAudioAttr,
-                             int refID,
-                             AudioAttribute contextAudioAttr,
-                             int contextRefID,
-                             Set<Integer> req,
-                             int projectid) {
-    if (DEBUG) {
-      logger.info("getAlignments asking scoring service for " + req.size() + " : " + req +
-          " alignments for " + refID + " and context " + contextRefID);
-    }
-    final boolean needToShowRef = req.contains(refID);
-    final boolean needToShowContextRef = req.contains(contextRefID);
-
-    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
-    if (projectStartupInfo != null && projectStartupInfo.isHasModel()) {
-      controller.getScoringService().getAlignments(
-          projectid,
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("get alignments", caught);
-            }
-
-            @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              alignments.putAll(result);
-
-              if (needToShowRef) {
-                audioChanged(refID, currentAudioAttr.getDurationInMillis());
-              }
-              if (needToShowContextRef) {
-                //logger.info("registerSegments register " + refID + " context " + contextRefID);
-                contextAudioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
-              }
-
-              cacheOthers(listener);
-            }
-          });
-    }
-  }
-
-  /**
-   * @param listener
-   * @see #getRefAudio(RefAudioListener)
-   */
-  private void cacheOthers(RefAudioListener listener) {
-    Set<Integer> req = getReqAudio();
-
-    if (req.isEmpty()) {
-      listener.refAudioComplete();
-    } else {
-
-      if (DEBUG)
-        logger.info("cacheOthers (" + exercise.getID() + ") Asking for audio alignments for " + req.size() + " knownAlignments " + alignments.size());
-      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
-      if (projectStartupInfo != null) {
-        controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
-            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                controller.handleNonFatalError("cacheOthers get alignments", caught);
-              }
-
-              @Override
-              public void onSuccess(Map<Integer, AlignmentOutput> result) {
-                alignments.putAll(result);
-                listener.refAudioComplete();
-              }
-            });
-      }
-    }
-  }
 
   private ProjectStartupInfo getProjectStartupInfo() {
     return controller.getProjectStartupInfo();
   }
 
   public Set<Integer> getReqAudio() {
-    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
+    return alignmentFetcher.getReqAudio();
+/*    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
 //    logger.info("getRefAudio " + req.size() + " audio attrs");
     if (contextPlay != null) {
@@ -385,7 +196,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     req.removeAll(alignments.keySet());
     //  logger.info("getRefAudio after removing known " + req.size() + " audio attrs");
 
-    return req;
+    return req;*/
   }
 
   /**
@@ -394,18 +205,19 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void setReq(int req) {
-    this.req = req;
+    alignmentFetcher.setReq(req);
   }
 
   @Override
   public int getReq() {
-    return req;
+    return alignmentFetcher.getReq();
   }
 
   @Override
   public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
     if (alignmentOutputFromAudio != null) {
-      alignments.put(id, alignmentOutputFromAudio);
+//      alignments.put(id, alignmentOutputFromAudio);
+      alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
     }
     //logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
     audioChanged(id, duration);
@@ -418,7 +230,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void audioChanged(int id, long duration) {
-    showAlignment(id, duration, alignments.get(id));
+    showAlignment(id, duration, alignmentFetcher.getAlignment(id));
   }
 
   private int currentAudioDisplayed = -1;
@@ -710,16 +522,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
   }
 
-  // the phones go left to right, even in rtl languages.
-
-/*  private List<TranscriptSegment> getPhonesInWord(List<TranscriptSegment> phones, TranscriptSegment wordSegment) {
-    List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
-//    if (isRTL) { // phones should play right to left
-//      Collections.reverse(phonesInWord);
-//    }
-    return phonesInWord;
-  }*/
-
   private List<TranscriptSegment> getWordSegments(AlignmentOutput alignmentOutput) {
     List<TranscriptSegment> wordSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
     if (wordSegments == null) {
@@ -992,7 +794,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemContent(final T e) {
-    //long then = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     Panel card = new DivWidget();
     card.setWidth("100%");
 
@@ -1005,8 +807,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     boolean hasEnglish = isValid(english);
     Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
-   // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
-   if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
+    // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
+    if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
     card.add(rowWidget);
 
     //long now = System.currentTimeMillis();
@@ -1033,8 +835,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     if (e.hasContext()) {
       addContext(e, card);
     }
-    // now = System.currentTimeMillis();
-//    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
+
+    long now = System.currentTimeMillis();
+    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
     return card;
   }
 
@@ -1118,6 +921,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
+      alignmentFetcher.setPlayAudio(playAudio);
     }
     //else {
     // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
@@ -1426,7 +1230,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   private final List<CommentBox> comments = new ArrayList<>();
-  private ChoicePlayAudioPanel contextPlay;
 
   /**
    * @param contextExercise
@@ -1532,6 +1335,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, contextAudioChanged);
     AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
     contextPlay.setEnabled(audioAttrPrefGender != null);
+    alignmentFetcher.setContextPlay(contextPlay);
 
     return contextPlay;
   }
@@ -1543,13 +1347,13 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     }
 
     if (alignmentOutputFromAudio != null) {
-      alignments.put(id, alignmentOutputFromAudio);
+      alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
     }
     contextAudioChanged(id, duration);
   }
 
-  private void contextAudioChanged(int id, long duration) {
-    AlignmentOutput alignmentOutput = alignments.get(id);
+  public void contextAudioChanged(int id, long duration) {
+    AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(id);
     if (alignmentOutput != null) {
       if (DEBUG) {
         logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
