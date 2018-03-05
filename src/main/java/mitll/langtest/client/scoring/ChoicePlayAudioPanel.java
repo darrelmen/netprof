@@ -282,7 +282,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
       speed.setBaseIcon(isReg ? MyCustomIconType.rabbit : MyCustomIconType.turtle);
       speed.addStyleName("leftFiveMargin");
       widget.add(speed);
-      speed.setText(isReg?"Regular":"Slow");
+      speed.setText(isReg?"Reg":"Slow");
     }
 
     {

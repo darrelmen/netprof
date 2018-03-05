@@ -51,7 +51,7 @@ import org.jetbrains.annotations.NotNull;
  * @since 9/8/14.
  */
 public class PopupContainerFactory {
-  public static final int VISIBLE_LENGTH = 70;
+  private static final int VISIBLE_LENGTH = 70;
   //private final Logger logger = Logger.getLogger("PopupContainerFactory");
   private final PopupHelper popupHelper = new PopupHelper();
 

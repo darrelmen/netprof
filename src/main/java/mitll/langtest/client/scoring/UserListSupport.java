@@ -134,25 +134,28 @@ public class UserListSupport {
     boolean anyAdded = false;
     boolean anyToRemove = false;
     int user = controller.getUser();
+
     for (final IUserListWithIDs ul : result) {
-      logger.info("useLists : " + ul);
+      //  logger.info("useLists : " + ul);
       boolean isMyList = ul.getUserID() == user;
       if (isMyList) {
         knownNamesForDuplicateCheck.add(ul.getName().trim().toLowerCase());
-        if (!ul.containsByID(exid)) {
-          anyAdded = true;
-          getAddListLink(ul, addToList, exid, container);
-        } else {
+        if (ul.containsByID(exid)) {
           anyToRemove = true;
           getRemoveListLink(ul, removeFromList, exid, container);
+        } else {
+          anyAdded = true;
+          getAddListLink(ul, addToList, exid, container);
         }
       }
 
       addSendLink(ul, emailList, isMyList);
     }
+
     if (!anyAdded) {
       addToList.add(new NavLink(ITEM_ALREADY_ADDED));
     }
+
     if (!anyToRemove) {
       removeFromList.add(new NavLink(NOT_ON_ANY_LISTS));
     }
@@ -169,7 +172,7 @@ public class UserListSupport {
   }
 
   @NotNull
-  String getMailToExercise(CommonExercise exercise) {
+  String getMailToExercise(CommonShell exercise) {
     String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +

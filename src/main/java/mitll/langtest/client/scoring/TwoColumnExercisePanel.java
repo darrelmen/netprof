@@ -43,8 +43,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   enum FieldType {FL, TRANSLIT, MEANING, EN}
 
-  private static final String SHOW_COMMENTS = "Leave Comments";
-  private static final String HIDE_COMMENTS = "Hide Comments";
   private static final String N_A = "N/A";
 
   private static final String LEFT_WIDTH = "60%";
@@ -54,10 +52,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final String RIGHT_WIDTH = "40%";
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
-  /**
-   * @see #getDropdown
-   */
-  private static final String EMAIL = "Email Item";
+
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -73,12 +68,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<CommonShell, T> listContainer;
   private ChoicePlayAudioPanel playAudio, contextPlay;
-
-  /**
-   *
-   */
-  private final Map<Integer, AlignmentOutput> alignments;
-
   private List<IHighlightSegment> altflClickables = null;
   /**
    * @see #getFLEntry
@@ -110,8 +99,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
-  //  private int req;
+
   private AlignmentFetcher alignmentFetcher;
+  private ItemMenu itemMenu;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -134,11 +124,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     addStyleName("twoColumnStyle");
 
-    this.alignments = alignments;
     annotationHelper = controller.getCommentAnnotator();
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
-        alignments,  this, new AudioChangeListener() {
+        alignments, this, new AudioChangeListener() {
       @Override
       public void audioChanged(int id, long duration) {
         contextAudioChanged(id, duration);
@@ -149,6 +138,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       }
     });
+    this.itemMenu = new ItemMenu(controller, commonExercise);
   }
 
   @Override
@@ -821,7 +811,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       if (hasEnglish) lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
-      lr.add(getDropdown());
+      lr.add(itemMenu.getDropdown());
 
       rowWidget.add(lr);
     }
@@ -845,54 +835,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return controller.getLanguage().equalsIgnoreCase("english");
   }
 
-  private boolean showingComments = false;
-
-  @NotNull
-  private Dropdown getDropdown() {
-    Dropdown dropdownContainer = new Dropdown("");
-    dropdownContainer.setIcon(IconType.REORDER);
-    dropdownContainer.setRightDropdown(true);
-    dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
-
-    dropdownContainer.addStyleName("leftThirtyMargin");
-    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    dropdownContainer.getTriggerWidget().setCaret(false);
-
-    UserListSupport userListSupport = new UserListSupport(controller);
-    userListSupport.addListOptions(dropdownContainer, exercise.getID());
-
-    {
-      NavLink share = new NavLink(EMAIL);
-      dropdownContainer.add(share);
-      share.setHref(userListSupport.getMailToExercise(exercise));
-    }
-    userListSupport.addSendLinkWhatYouSee(dropdownContainer);
-
-    dropdownContainer.add(getShowComments());
-
-    return dropdownContainer;
-  }
-
-  @NotNull
-  private NavLink getShowComments() {
-    NavLink widget = new NavLink(SHOW_COMMENTS);
-    widget.addClickHandler(event -> {
-      for (CommentBox box : comments) {
-        if (showingComments) {
-          box.hideButtons();
-        } else {
-          box.showButtons();
-        }
-      }
-      showingComments = !showingComments;
-      if (showingComments) {
-        widget.setText(HIDE_COMMENTS);
-      } else {
-        widget.setText(SHOW_COMMENTS);
-      }
-    });
-    return widget;
-  }
 
   /**
    * @param e
@@ -1229,7 +1171,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return meaning != null && !meaning.trim().isEmpty() && !meaning.equals(N_A);
   }
 
-  private final List<CommentBox> comments = new ArrayList<>();
+  // private final List<CommentBox> comments = new ArrayList<>();
 
   /**
    * @param contextExercise
@@ -1452,7 +1394,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                     boolean showInitially,
                                     CommentAnnotator annotationHelper,
                                     boolean isRTL,
-                                    DivWidget contentWidget, int exid) {
+                                    DivWidget contentWidget,
+                                    int exid) {
     if (isTranslit && isRTL) {
       // logger.info("- float right value " + value + " translit " + isTranslit + " is fl " + isFL);
       contentWidget.addStyleName("floatRight");
@@ -1474,7 +1417,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     T exercise = this.exercise;
     CommentBox commentBox = new CommentBox(exid, controller,
         annotationHelper, exercise.getMutableAnnotation(), true);
-    comments.add(commentBox);
+    itemMenu.addCommentBox(commentBox);
     return commentBox;
   }
 }

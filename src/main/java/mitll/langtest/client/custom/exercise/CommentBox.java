@@ -62,10 +62,12 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainerFactory {
-  public static final String ADD_A_COMMENT = "Add a comment";
   private final Logger logger = Logger.getLogger("CommentBox");
 
-  private static final int ENTRY_VISIBLE_LENGTH = 70;
+
+  private static final String ADD_A_COMMENT = "Add a comment";
+
+  //private static final int ENTRY_VISIBLE_LENGTH = 70;
 
   private static final int MAX_LENGTH = 500;
 
