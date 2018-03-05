@@ -35,7 +35,7 @@ public class UserListSupport {
   private final Logger logger = Logger.getLogger("UserListSupport");
 
 
-  public static final String SHARE_NETPROF = "Share netprof ";
+  private static final String SHARE_NETPROF = "Share netprof ";
 
   private static final String ADD_TO_LIST = "Add to List";
   private static final String REMOVE_FROM_LIST = "Remove from List";
@@ -58,7 +58,7 @@ public class UserListSupport {
   /**
    * @param dropdownContainer
    * @param exid
-   * @see TwoColumnExercisePanel#getDropdown
+   * @see ItemMenu#getDropdown
    */
   void addListOptions(Dropdown dropdownContainer, int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
@@ -108,7 +108,8 @@ public class UserListSupport {
                                    Dropdown container
   ) {
     //  logger.info("asking for " + id );
-    controller.getListService().getListsWithIDsForUser(true, true, new AsyncCallback<Collection<IUserListWithIDs>>() {
+    controller.getListService().getListsWithIDsForUser(true, true,
+        new AsyncCallback<Collection<IUserListWithIDs>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("get list with ids for user", caught);

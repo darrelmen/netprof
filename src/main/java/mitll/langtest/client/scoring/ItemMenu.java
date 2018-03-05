@@ -3,7 +3,10 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -23,6 +26,7 @@ public class ItemMenu {
 
   private static final String SHOW_COMMENTS = "Leave Comments";
   private static final String HIDE_COMMENTS = "Hide Comments";
+  private static final String SHARE = "Share";
 
   private final ExerciseController controller;
   private final CommonShell exercise;
@@ -34,16 +38,31 @@ public class ItemMenu {
     this.exercise = exercise;
   }
 
+  /**
+   *
+   * @return
+   */
   @NotNull
   Dropdown getDropdown() {
-    Dropdown dropdownContainer = new Dropdown("");
-    dropdownContainer.setIcon(IconType.REORDER);
-    dropdownContainer.setRightDropdown(true);
-    dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
+    Dropdown dropdownContainer = new Dropdown(SHARE);
+    {
+      dropdownContainer.setIcon(IconType.SHARE_ALT);
+      dropdownContainer.getTriggerWidget().addStyleName("inlineFlex");
 
-    dropdownContainer.addStyleName("leftThirtyMargin");
-    dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    dropdownContainer.getTriggerWidget().setCaret(false);
+      dropdownContainer.setRightDropdown(true);
+      dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
+
+      dropdownContainer.addStyleName("leftThirtyMargin");
+      dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
+      dropdownContainer.getTriggerWidget().setCaret(false);
+
+      // the icon link
+      Widget widget = dropdownContainer.getWidget(0);
+
+      Element element = DOM.getChild(widget.getElement(), 0);
+      element.getStyle().setMarginRight(5, Style.Unit.PX);
+      element.getStyle().setMarginTop(3, Style.Unit.PX);
+    }
 
     UserListSupport userListSupport = new UserListSupport(controller);
     userListSupport.addListOptions(dropdownContainer, exercise.getID());

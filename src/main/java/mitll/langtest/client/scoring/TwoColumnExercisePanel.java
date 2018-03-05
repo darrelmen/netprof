@@ -49,6 +49,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
   private static final String LEFT_WIDTH_NO_ENGLISH = LEFT_WIDTH_NO_ENGLISH_VALUE + "%";
 
+  /**
+   *
+   */
   private static final String RIGHT_WIDTH = "40%";
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
@@ -808,10 +811,15 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget lr = getHorizDiv();
       addFloatLeft(lr);
       lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
-
+      if (hasEnglish) {
+        lr.getElement().getStyle().setProperty("minWidth", "345px");
+      }
       if (hasEnglish) lr.add(getEnglishWidget(e, english));
       lr.add(getItemWidget(e));
-      lr.add(itemMenu.getDropdown());
+
+      DivWidget dropC = new DivWidget();
+      dropC.add(itemMenu.getDropdown());
+      lr.add(dropC);
 
       rowWidget.add(lr);
     }
