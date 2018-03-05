@@ -146,7 +146,6 @@ public class ServerProperties {
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
-  // private static final String ANALYSIS_NUM_FINAL_AVERAGE_SCORES = "analysisNumFinalScores";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
@@ -155,8 +154,8 @@ public class ServerProperties {
   /**
    * For development, from a laptop.
    */
-  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
-//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
+//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
+  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 

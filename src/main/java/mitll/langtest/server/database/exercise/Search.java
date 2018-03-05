@@ -70,11 +70,11 @@ public class Search<T extends CommonExercise> {
 
     logger.info("getExercisesForSearchWithTrie : " +
         "\n\tprojectID " + projectID +
-        "\n\thas full " + (fullContextTrie != null) +
-        "\n\tfound " + (project != null) +
-        "\n\tpredef " + predefExercises +
-        "\n\tprefix " + prefix +
-        "\n\tmatches " + basicExercises.size());
+        "\n\thas full  " + (fullContextTrie != null) +
+        "\n\tfound     " + (project != null) +
+        "\n\tpredef    " + predefExercises +
+        "\n\tprefix    " + prefix +
+        "\n\tmatches   " + basicExercises.size());
 
     List<T> ts = Collections.emptyList();
 
@@ -84,7 +84,7 @@ public class Search<T extends CommonExercise> {
           "\n\tprefix '" + prefix + "'" +
           "\n\tgot " + ts.size());
     }
-    int exid = getExid(prefix);
+ /*   int exid = getExid(prefix);
 
 
     List<T> byID = new ArrayList<>();
@@ -94,9 +94,10 @@ public class Search<T extends CommonExercise> {
       if (customOrPredefExercise != null) {
         byID.add(customOrPredefExercise);
       }
-    }
+      else logger.warn("getExercisesForSearchWithTrie no ex for " +projectID + " = " + exid);
+    }*/
     return new TripleExercises<T>(
-        byID,
+        Collections.emptyList(),
         basicExercises,
         ts);
   }

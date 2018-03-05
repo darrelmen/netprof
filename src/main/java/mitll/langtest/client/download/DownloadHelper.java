@@ -45,8 +45,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
@@ -122,7 +120,7 @@ public class DownloadHelper implements IShowStatus {
     final String search = selectionState.getSearch();
     {
       FluidRow row = new FluidRow();
-      String description = selectionState.getDescription(typeOrder);
+      String description = selectionState.getDescription(typeOrder, true);
       if (!search.isEmpty()) {
         description += " and searching '" + search +
             "'";

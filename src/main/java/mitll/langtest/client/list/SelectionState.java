@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
-
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -204,10 +202,11 @@ public class SelectionState {
 
   /**
    * @param typeOrder
+   * @param addBold
    * @return
    * @see mitll.langtest.client.download.DownloadHelper#showDialog
    */
-  public String getDescription(Collection<String> typeOrder) {
+  public String getDescription(Collection<String> typeOrder, boolean addBold) {
     if (typeToSection.isEmpty()) {
       return SHOWING_ALL_ENTRIES;
     } else {
@@ -218,8 +217,7 @@ public class SelectionState {
         if (selectedItems != null) {
           StringBuilder status2 = new StringBuilder();
 
-          List<String> sorted = new ArrayList<>();
-          sorted.addAll(selectedItems);
+          List<String> sorted = new ArrayList<>(selectedItems);
           Collections.sort(sorted);
 
           String sep = sorted.size() == 2 ? " and " : ", ";
@@ -227,7 +225,7 @@ public class SelectionState {
 
           String s = status2.toString();
           if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
-          String statusForType = type + " " + "<b>" + s + "</b>";
+          String statusForType = type + " " + (addBold ? "<b>" : "") + s + (addBold ? "</b>" : "");
           status.append(statusForType).append(" and ");
         }
       }

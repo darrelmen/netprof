@@ -22,7 +22,7 @@ public class ItemMenu {
   /**
    * @see #getDropdown
    */
-  private static final String EMAIL = "Email Item";
+  private static final String EMAIL = "Share Item";
 
   private static final String SHOW_COMMENTS = "Leave Comments";
   private static final String HIDE_COMMENTS = "Hide Comments";

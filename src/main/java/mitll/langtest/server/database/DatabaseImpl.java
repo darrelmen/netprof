@@ -1260,14 +1260,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
     CommonExercise toRet = getExercise(projid, id);
-    if (toRet == null && id != userExerciseDAO.getUnknownExerciseID()) {
+/*    if (toRet == null && id != userExerciseDAO.getUnknownExerciseID()) {
       // if (warns++ < 50)
       logger.warn("getCustomOrPredefExercise couldn't find exercise " + id + " vs unk ex " +
           userExerciseDAO.getUnknownExerciseID() +
           " in project #" + projid +
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
-    }
+    }*/
     if (toRet == null) {
       String message = "getCustomOrPredefExercise couldn't find exercise " + id + " (context?) in project #" + projid +
           " after looking in exercise table.";

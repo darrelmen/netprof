@@ -17,8 +17,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -41,8 +39,12 @@ public class UserListSupport {
   private static final String REMOVE_FROM_LIST = "Remove from List";
   private static final String NEW_LIST = "New List";
   private static final String NOT_ON_ANY_LISTS = "Not on any lists.";
-  private static final String EMAIL_LIST = "Email List";
-  private static final String EMAIL_THESE_ITEMS = "Email these items";
+  private static final String EMAIL = "Share";
+  private static final String EMAIL_LIST = EMAIL + " List";
+  /**
+   * @see #addSendLinkWhatYouSee(DropdownBase)
+   */
+  private static final String SHARE_THESE_ITEMS = EMAIL + " these items";
   private final PopupContainerFactory popupContainer = new PopupContainerFactory();
 
   private static final int END_INDEX = 15;
@@ -62,8 +64,6 @@ public class UserListSupport {
    */
   void addListOptions(Dropdown dropdownContainer, int exid) {
     DropdownSubmenu addToList = new DropdownSubmenu(ADD_TO_LIST);
-    //  addToList.setRightDropdown(true);
-    //  addToList.setStyleDependentName("pull-left", true);
 
     DropdownSubmenu removeFromList = new DropdownSubmenu(REMOVE_FROM_LIST);
     removeFromList.setRightDropdown(true);
@@ -73,20 +73,19 @@ public class UserListSupport {
 
     dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, sendList, dropdownContainer));
 
+    addNewListChoice(dropdownContainer, exid, this);
     dropdownContainer.add(addToList);
     dropdownContainer.add(removeFromList);
     dropdownContainer.add(sendList);
+  }
 
-    UserListSupport outer = this;
-
-    {
-      NavLink widget = new NavLink(NEW_LIST);
-      widget.addClickHandler(event -> {
-        NewListButton newListButton = new NewListButton(exid, controller, outer, dropdownContainer);
-        newListButton.showOrHide(newListButton.getNewListButton2(), widget);
-      });
-      dropdownContainer.add(widget);
-    }
+  private void addNewListChoice(Dropdown dropdownContainer, int exid, UserListSupport outer) {
+    NavLink widget = new NavLink(NEW_LIST);
+    widget.addClickHandler(event -> {
+      NewListButton newListButton = new NewListButton(exid, controller, outer, dropdownContainer);
+      newListButton.showOrHide(newListButton.getNewListButton2(), widget);
+    });
+    dropdownContainer.add(widget);
   }
 
   /**
@@ -110,16 +109,16 @@ public class UserListSupport {
     //  logger.info("asking for " + id );
     controller.getListService().getListsWithIDsForUser(true, true,
         new AsyncCallback<Collection<IUserListWithIDs>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("get list with ids for user", caught);
-      }
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("get list with ids for user", caught);
+          }
 
-      @Override
-      public void onSuccess(Collection<IUserListWithIDs> result) {
-        useLists(result, addToList, removeFromList, emailList, exid, container);
-      }
-    });
+          @Override
+          public void onSuccess(Collection<IUserListWithIDs> result) {
+            useLists(result, addToList, removeFromList, emailList, exid, container);
+          }
+        });
   }
 
   private void useLists(Collection<IUserListWithIDs> result,
@@ -255,10 +254,9 @@ public class UserListSupport {
   }
 
   void addSendLinkWhatYouSee(DropdownBase addToList) {
-    final NavLink widget = new NavLink(EMAIL_THESE_ITEMS);
+    final NavLink widget = new NavLink(SHARE_THESE_ITEMS);
     addToList.add(widget);
     widget.setHref(getMailToThese());
-//    widget.addClickHandler(event -> controller.logEvent(addToList, "DropUp", ul.getID(), "sharing_" + ul.getID() + "/" + ul.getName()));
   }
 
   @NotNull
@@ -272,15 +270,19 @@ public class UserListSupport {
         token +
         SelectionState.SECTION_SEPARATOR + "project=" + projectStartupInfo.getProjectid();
 
-    String encode = URL.encode(s);
+    String encode = s.replaceAll("\\s","+");//URL.encode(s);
+
+   // logger.info("getMailToThese : encode " +encode);
     return "mailto:" +
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
         " items " +
         "&body=" +
         getPrefix() +
-        selectionState.getDescription(projectStartupInfo.getTypeOrder()) + " : " +
-        encode +
+        selectionState.getDescription(projectStartupInfo.getTypeOrder(), false) + " : " +
+        //"<" +
+        encode+
+        //">" +
         getSuffix();
   }
 

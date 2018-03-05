@@ -821,24 +821,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               Collection<T> exercises,
                                                                               boolean predefExercises,
                                                                               int projectID,
-                                                                              int userID
-  ) {
+                                                                              int userID) {
     Search<T> search = new Search<T>(db, db);
-    int exid = search.getExid(prefix);
     TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID);
     exercisesForSearch.setByID(Collections.emptyList());
 
-    if (exid != -1 && exid != 1) {
-
-      List<T> byID = exercisesForSearch.getByID();
-
-      if (!byID.isEmpty()) {
-        int projectID1 = byID.iterator().next().getProjectID();
-        if (projectID1 == projectID) {
-          T exercise = getAnnotatedExercise(userID, projectID, exid, false);
-          if (exercise != null) {
-            exercisesForSearch.setByID(Collections.singletonList(exercise));
-          }
+    {
+      int exid = search.getExid(prefix);
+      if (exid != -1 && exid != 1) {
+        T exercise = getAnnotatedExercise(userID, projectID, exid, false);
+        if (exercise != null && exercise.getProjectID() == projectID) {
+          exercisesForSearch.setByID(Collections.singletonList(exercise));
+        } else {
+          logger.info("getExercisesForSearch no exercise with " + projectID + " " + exid);
         }
       }
     }
@@ -1172,7 +1167,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
     if (byID == null) {
-      logger.error("getAnnotatedExercise : can't find exercise #" + exid + " in project #" + projectID);
+      logger.warn("getAnnotatedExercise : can't find exercise #" + exid + " in project #" + projectID);
       return null;
     }
 
@@ -1507,7 +1502,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     //logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
     if (audioIDs.isEmpty()) logger.warn("getAlignmentsFromDB not asking for any audio ids?");
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    logger.info("getAlignmentsFromDB found " + audioIDs.size() +"/"+audioIDMap.size() + " ref result alignments...");
+    logger.info("getAlignmentsFromDB found " + audioIDs.size() + "/" + audioIDMap.size() + " ref result alignments...");
     return parseJsonToGetAlignments(audioIDs, audioIDMap, language);
   }
 
