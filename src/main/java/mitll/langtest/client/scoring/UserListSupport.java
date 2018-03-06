@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Divider;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.DropdownSubmenu;
 import com.github.gwtbootstrap.client.ui.NavLink;
@@ -30,8 +31,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/19/17.
  */
 public class UserListSupport {
-  private final Logger logger = Logger.getLogger("UserListSupport");
-
+  //private final Logger logger = Logger.getLogger("UserListSupport");
 
   private static final String SHARE_NETPROF = "Share netprof ";
 
@@ -74,8 +74,12 @@ public class UserListSupport {
     dropdownContainer.addClickHandler(event -> populateListChoices(exid, addToList, removeFromList, sendList, dropdownContainer));
 
     addNewListChoice(dropdownContainer, exid, this);
+
+
     dropdownContainer.add(addToList);
     dropdownContainer.add(removeFromList);
+    dropdownContainer.add(new Divider());
+
     dropdownContainer.add(sendList);
   }
 

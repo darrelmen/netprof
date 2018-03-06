@@ -34,6 +34,9 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
@@ -42,9 +45,10 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,7 +57,7 @@ import java.util.logging.Logger;
  * @since 3/11/16.
  */
 public class UnitChapterItemHelper<T extends CommonExercise> {
-  private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
+  //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
 
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
@@ -126,14 +130,34 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
 
   @NotNull
   private String getID(T e) {
-    return  ""+ e.getID();
+    return "" + e.getID();
 //    int dominoID = e.getDominoID();
 //    int idToUse = dominoID != -1 ? dominoID : e.getID();
 //    return "" + idToUse;
   }
 
   private InlineLabel getLabel(T e) {
-    return new InlineLabel(getID(e));
+    String unitChapterLabel = getUnitChapterLabel(e.getUnitToValue());
+    // String val = "<span style='white-space:nowrap;'>" + unitChapterLabel + "</span>";
+    InlineLabel inlineLabel = new InlineLabel(unitChapterLabel);
+    inlineLabel.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
+    return inlineLabel;
+  }
+
+  protected SafeHtml getSafeHtml(String columnText) {
+    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+  }
+
+  private String getUnitChapterLabel(Map<String, String> unitToValue) {
+    List<String> sections = new ArrayList<>();
+    for (String type : typeOrder) {
+      String subtext = unitToValue.get(type);
+      if (subtext != null && !subtext.isEmpty()) {
+        sections.add(subtext);
+      }
+      if (sections.size() == 2) break;
+    }
+    return String.join(" > ", sections);
   }
 
   /**
@@ -161,28 +185,8 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
       child.addStyleName("rightFiveMargin");
       flow.add(child);
     }
+
     return flow;
-  }
-
-  private String getUnitLessonForExercise2(T exercise) {
-    return getTypeToValue(this.typeOrder, exercise.getUnitToValue());
-  }
-
-  @NotNull
-  public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue) {
-    StringBuilder builder = new StringBuilder();
-    for (String type : typeOrder) {
-      String subtext = unitToValue.get(type);
-      if (subtext != null && !subtext.isEmpty()) {
-        String html =
-            "<span>" +
-                "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
-                "</h5>" +
-                "</span>";
-        builder.append(html);
-      }
-    }
-    return builder.toString();
   }
 
   public InlineLabel showPopup(T exercise) {
@@ -197,5 +201,41 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
         null,
         toShow,
         Placement.LEFT));
+  }
+
+  /**
+   * @param exercise
+   * @return
+   * @see #showPopup(CommonExercise)
+   */
+  private String getUnitLessonForExercise2(T exercise) {
+    return getTypeToValue(this.typeOrder, exercise.getUnitToValue(), exercise.getID());
+  }
+
+  public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue) {
+    return getTypeToValue(typeOrder, unitToValue, -1);
+  }
+
+  @NotNull
+  public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id) {
+    StringBuilder builder = new StringBuilder();
+    for (String type : typeOrder) {
+      String subtext = unitToValue.get(type);
+      if (subtext != null && !subtext.isEmpty()) {
+        builder.append(getTypeAndValue(type, subtext));
+      }
+    }
+    if (id > 0) {
+      builder.append(getTypeAndValue("ID", "" + id));
+    }
+    return builder.toString();
+  }
+
+  @NotNull
+  private String getTypeAndValue(String type, String subtext) {
+    return "<span>" +
+        "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
+        "</h5>" +
+        "</span>";
   }
 }

@@ -1,5 +1,6 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Divider;
 import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -22,7 +23,7 @@ public class ItemMenu {
   /**
    * @see #getDropdown
    */
-  private static final String EMAIL = "Share Item";
+  private static final String SHARE_ITEM = "Share Item";
 
   private static final String SHOW_COMMENTS = "Leave Comments";
   private static final String HIDE_COMMENTS = "Hide Comments";
@@ -64,15 +65,19 @@ public class ItemMenu {
       element.getStyle().setMarginTop(3, Style.Unit.PX);
     }
 
+
     UserListSupport userListSupport = new UserListSupport(controller);
     userListSupport.addListOptions(dropdownContainer, exercise.getID());
 
+
     {
-      NavLink share = new NavLink(EMAIL);
+      NavLink share = new NavLink(SHARE_ITEM);
       dropdownContainer.add(share);
       share.setHref(userListSupport.getMailToExercise(exercise));
     }
     userListSupport.addSendLinkWhatYouSee(dropdownContainer);
+
+    dropdownContainer.add(new Divider());
 
     dropdownContainer.add(getShowComments());
 
