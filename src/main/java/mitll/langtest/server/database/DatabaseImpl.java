@@ -1446,7 +1446,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
           getSectionHelper(projectid),
           copyAsExercises,
           language,
-          getAudioDAO(),
           listid == COMMENT_MAGIC_ID,
           options);
     }

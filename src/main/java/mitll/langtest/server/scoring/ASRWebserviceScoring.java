@@ -186,7 +186,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int port = getWebservicePort();
     String ip = getWebserviceIP();
     if (available) {
-      logger.info("ASRWebserviceScoring CAN talk to " + ip + ":" + port);
+      logger.debug("ASRWebserviceScoring CAN talk to " + ip + ":" + port);
     } else {
       logger.warn("ASRWebserviceScoring can't talk to " + ip + ":" + port + " : this is only a problem on a hydra machine.");
     }

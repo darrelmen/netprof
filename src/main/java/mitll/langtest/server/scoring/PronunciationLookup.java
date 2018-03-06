@@ -2,8 +2,6 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.Project;
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.Normalizer;
 import java.util.*;
 
 public class PronunciationLookup implements IPronunciationLookup {
@@ -28,7 +27,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, urdu;
+  private boolean korean, russian;
 
   /**
    * @param dictionary
@@ -40,7 +39,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     this.htkDictionary = dictionary;
     this.lts = lts;
     korean = project.getLanguage().equalsIgnoreCase("korean");
-    urdu = project.getLanguage().equalsIgnoreCase("urdu");
+    russian = project.getLanguage().equalsIgnoreCase("russian");
     makeDecoder();
   }
 
@@ -168,15 +167,26 @@ public class PronunciationLookup implements IPronunciationLookup {
         word = trim;
       }
       if (!word.equals(" ") && !word.isEmpty()) {
-        boolean easyMatch;
+        boolean easyMatch, lowerMatch = false, stripMatch = false;
 
         // logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
         if ((easyMatch = htkDictionary.contains(word)) ||
-            (htkDictionary.contains(word.toLowerCase()))) {
-          if (DEBUG) logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "'");
-          addDictMatches(justPhones, dict, word, easyMatch);
+            (lowerMatch = htkDictionary.contains(word.toLowerCase())) ||
+            (russian && (stripMatch = htkDictionary.contains(removeAccents(word))))
+            ) {
+
+          String lookupToken =
+              easyMatch ? word :
+                  lowerMatch ? word.toLowerCase() :
+                      stripMatch ? removeAccents(word) : word;
+
+          if (DEBUG) {
+            logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "' : '" + lookupToken + "'");
+          }
+          addDictMatches(justPhones, dict, word, lookupToken);
         } else {  // not in the dictionary, let's ask LTS
-          logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'");
+          String optional = russian ? " or " + removeAccents(word) : "";
+          logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
           LTS lts = getLTS();
           if (lts == null) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");
@@ -233,7 +243,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                   dict += getUnkPron(word);
                 }*/
 
-                  logger.warn("using unk phone for '" + word + "' in " + transcript);
+                  logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript);
                   dict.append(getUnkPron(word));
                 }
               } else { // it's ok -use it
@@ -285,8 +295,11 @@ public class PronunciationLookup implements IPronunciationLookup {
     return p.equalsIgnoreCase(POUND);
   }
 
-  private List<List<String>> addDictMatches(boolean justPhones, StringBuilder dict, String word, boolean easyMatch) {
-    scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
+  private List<List<String>> addDictMatches(boolean justPhones,
+                                            StringBuilder dict,
+                                            String word,
+                                            String lookupToken) {
+    scala.collection.immutable.List<String[]> prons = htkDictionary.apply(lookupToken);
     int size = prons.size();
     List<List<String>> possibleProns = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
@@ -304,6 +317,12 @@ public class PronunciationLookup implements IPronunciationLookup {
         "\n\tdict " + dict);*/
 
     return possibleProns;
+  }
+
+  public static String removeAccents(String text) {
+    return text == null ? null :
+        Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
   }
 
   /**

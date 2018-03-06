@@ -32,7 +32,6 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.scoring.LTSFactory;
@@ -97,7 +96,7 @@ public class AudioExport {
         typeOrder,
         language,
         out,
-        false,
+       // false,
         isDefectList,
         options);
   }
@@ -108,7 +107,6 @@ public class AudioExport {
    * @param sectionHelper
    * @param exercisesForSelectionState
    * @param language1
-   * @param audioDAO
    * @param isDefectList
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
@@ -118,12 +116,11 @@ public class AudioExport {
                                  ISection<?> sectionHelper,
                                  Collection<? extends CommonExercise> exercisesForSelectionState,
                                  String language1,
-                                 IAudioDAO audioDAO,
                                  boolean isDefectList,
                                  AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
     new ExerciseSorter().sortByEnglish(copy, "");
-    writeToStream(copy, prefix, typeOrder, language1, out, false,
+    writeToStream(copy, prefix, typeOrder, language1, out,// false,
         isDefectList, options);
   }
 
@@ -192,7 +189,7 @@ public class AudioExport {
    * @param typeOrder
    * @param language1
    * @param out
-   * @param skipAudio
+   * @paramx skipAudio
    * @param isDefectList
    * @throws Exception
    * @see #writeUserListAudio
@@ -202,16 +199,16 @@ public class AudioExport {
                              Collection<String> typeOrder,
                              String language1,
                              OutputStream out,
-                             boolean skipAudio,
+                            // boolean skipAudio,
                              boolean isDefectList,
                              AudioExportOptions options) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
-    String baseName = baseName(name, language1).replaceAll(",", "_");
+    String baseName = baseName(language1, name).replaceAll(",", "_");
     String overallName = baseName + options.getInfo();
 
     logger.info("writeToStream overall name " + overallName);
-    if (!skipAudio) {
+    //if (!skipAudio) {
       writeFolderContents(zOut,
           toWrite,
           overallName,
@@ -219,14 +216,14 @@ public class AudioExport {
           getCountryCode(language1),
           options,
           language1);
-    } else {
-      logger.info("writeToStream skip audio export.");
-    }
+//    } else {
+//      logger.info("writeToStream skip audio export.");
+//    }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
   }
 
-  private String baseName(String name, String language1) {
+  private String baseName(String language1, String name) {
     return language1 + "_" + name;
   }
 
@@ -286,14 +283,14 @@ public class AudioExport {
 
     boolean justContext = options.isJustContext();// || options.isAllContext();
     MiniUser majorityUser = null;
-    if (justContext) {
+    //if (justContext) {
       //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
       //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
       //populateGenderToCount(contextEx, maleToCount, femaleToCount);
-    } else {
+    //} else {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
       majorityUser = options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
-    }
+   // }
     // find the pref Male and pref Female with most recordings for this exercise set
 //    MiniUser prefMale   = getMaxUser(maleToCount);
 //    MiniUser prefFemale = getMaxUser(femaleToCount);

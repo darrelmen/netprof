@@ -8,9 +8,9 @@ public class AudioExportOptions {
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
   private boolean isUserList = false;
-  private boolean skip = false;
+  //private boolean skip = false;
   private boolean hasProjectSpecificAudio = false;
-  private String search="";
+  private String search = "";
 
   /**
    * @param hasProjectSpecificAudio
@@ -36,9 +36,9 @@ public class AudioExportOptions {
     return justRegularSpeed;
   }
 
-  public void setSkip(boolean skip) {
+/*  public void setSkip(boolean skip) {
     this.skip = skip;
-  }
+  }*/
 
   /**
    * @return
@@ -59,20 +59,6 @@ public class AudioExportOptions {
     this.isUserList = userList;
   }
 
-
-/*
-  public boolean isAllContext() {
-    return allContext;
-  }
-*/
-
-  /**
-   * @paramx justContext
-   * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
-   */
-/*  public void setAllContext(boolean justContext) {
-    this.allContext = justContext;
-  }*/
   public boolean isHasProjectSpecificAudio() {
     return hasProjectSpecificAudio;
   }
@@ -81,24 +67,25 @@ public class AudioExportOptions {
     this.hasProjectSpecificAudio = hasProjectSpecificAudio;
   }
 
-  public String getInfo() {
-//    if (isAllContext()) {
-//      return "";
-//    } else {
-    return skip || isUserList ?
-        "" :
-        "_" + (justMale ? "male" : "female") + "_" +
-            (justRegularSpeed ? "regular" : "slow") + "_" +
-            (justContext ? "context" : "vocab");
-//    }
-  }
-
   public void setSearch(String search) {
     this.search = search;
   }
 
   public String getSearch() {
     return search;
+  }
+
+  public String getInfo() {
+//    if (isAllContext()) {
+//      return "";
+//    } else {
+    return
+        //skip || isUserList ?
+        // "" :
+        "_" + (justMale ? "male" : "female") + "_" +
+            (justRegularSpeed ? "regular" : "slow") + "_" +
+            (justContext ? "context" : "vocab");
+//    }
   }
 
   public String toString() {

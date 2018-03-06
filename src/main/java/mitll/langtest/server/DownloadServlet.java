@@ -102,6 +102,9 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
   private static final String RESULTS_XLSX = "results.xlsx";
   private static final String EVENTS_XLSX = "events.xlsx";
+  public static final String WAV = ".wav";
+  public static final String MP3 = ".mp3";
+  public static final String UNIT = "unit";
 
   /**
    * This is getting complicated.
@@ -248,8 +251,7 @@ public class DownloadServlet extends DatabaseServlet {
         String[] split = arg.split("=");
         String search = split.length > 1 ? split[1] : "";
         options.setSearch(search);
-      }
-      else {
+      } else {
         logger.info("getAudioExportOptions : got unexpected arg '" + arg + "'");
       }
     }
@@ -273,18 +275,14 @@ public class DownloadServlet extends DatabaseServlet {
                              String language) {
     logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     String[] split1 = queryString.split(REGEXAMPERSAND);
-
-    // TODO : super buggy - what if we don't have a unit/chapter hierarchy???
-    String unitChapter = "";
-    for (String arg : split1) {
-      if (arg.startsWith("unit=")) unitChapter = arg.split("unit=")[1];
-    }
+    Project project = db.getProject(projid);
+    String unitChapter = getUnitAndChapter(split1);
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
     AudioExportOptions audioExportOptions =
-        getAudioExportOptions(split1, db.getProject(projid).hasProjectSpecificAudio());
+        getAudioExportOptions(split1, project.hasProjectSpecificAudio());
 
-    audioExportOptions.setSkip(typeToSection.isEmpty());// && !audioExportOptions.isAllContext());
+    //audioExportOptions.setSkip(typeToSection.isEmpty());// && !audioExportOptions.isAllContext());
 
     {
       String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
@@ -293,6 +291,19 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     writeZip(response, typeToSection, projid, audioExportOptions);
+  }
+
+  private String getUnitAndChapter(String[] split1) {
+    String unitChapter = "";
+    String prefix = UNIT;
+
+    for (String arg : split1) {
+      String prefix1 = prefix + "=";
+      if (arg.startsWith(prefix1)) {
+        unitChapter = arg.split(prefix1)[1];
+      }
+    }
+    return unitChapter;
   }
 
   /**
@@ -360,7 +371,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     // better be mp3 lying around - see ensureCompressedAudio
 
-    if (file.endsWith(".wav")) file = file.replaceAll(".wav", ".mp3");
+    if (file.endsWith(WAV)) file = file.replaceAll(WAV, MP3);
 
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
@@ -549,7 +560,7 @@ public class DownloadServlet extends DatabaseServlet {
     if (queryString.length() > 2) {
       queryString = queryString.substring(1, queryString.length() - 1);
     }
-    //  logger.debug("got " + queryString);
+//      logger.info("getTypeToSelectionFromRequest " + queryString);
     queryString = queryString.replaceAll("%20", " ");    // need this for pashto3 which has "29 LC1" as chapters
     //   logger.debug("got " + queryString);
 
@@ -584,7 +595,11 @@ public class DownloadServlet extends DatabaseServlet {
         logger.debug("\tgetTypeToSelectionFromRequest sections 1" + split1[0]);
       }
     }
-    logger.debug("getTypeToSelectionFromRequest returning type->selection '" + typeToSection + "' for '" + queryString + "'");
+
+    logger.info("getTypeToSelectionFromRequest returning" +
+        "\n\ttype->selection '" + typeToSection + "'" +
+        "\n\tfor             '" + queryString + "'");
+
     return typeToSection;
   }
 
