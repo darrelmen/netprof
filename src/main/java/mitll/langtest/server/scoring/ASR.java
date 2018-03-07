@@ -95,7 +95,14 @@ public interface ASR {
    */
   boolean isAvailable();
 
-  String getHydraDict(String cleaned, String transliteration);
+  /**
+   *
+   * @param cleaned
+   * @param transliteration
+   * @param possibleProns
+   * @return
+   */
+  String getHydraDict(String cleaned, String transliteration, List<String> possibleProns);
 
   String getSegmented(String input);
 }

@@ -325,7 +325,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding",
+  private final Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding",
       "Accept-Language",
       "accept",
       "connection",
@@ -484,7 +484,7 @@ public class ScoreServlet extends DatabaseServlet {
     return s.equals(param + "=true") ? "true" : "false";
   }
 
-  private int getParamIntValue(String arg, String param) {
+/*  private int getParamIntValue(String arg, String param) {
     boolean hasParam = arg.startsWith(param);
     if (!hasParam) {
       return -1;
@@ -500,7 +500,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.warn("got " + e + " on " + arg);
       return 0;
     }
-  }
+  }*/
 
 
   /**
@@ -813,13 +813,13 @@ public class ScoreServlet extends DatabaseServlet {
    * @param year
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void configureResponseHTML(HttpServletResponse response, int year) {
+/*  private void configureResponseHTML(HttpServletResponse response, int year) {
     response.setContentType("text/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 //    String language = "";
 //    String fileName = year == -1 ? "reportFor" + language : ("reportFor" + language + "_forYear" + year);
     // response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".html");
-  }
+  }*/
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray}
@@ -860,23 +860,26 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private String getLanguage(int projectid) {
-    return getProject(projectid).getLanguage();
+    Project project = getProject(projectid);
+    return project == null ? ("" + projectid) : project.getLanguage();
   }
 
   /**
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
+/*
   private JSONObject getJSONForExercises(int projectid) {
     return getJSONExerciseExport(db.getJSONExport(projectid), projectid);
   }
+*/
 
-  private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
+/*  private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
     JSONObject jsonObject = new JSONObject();
     addVersion(jsonObject, projectid);
     jsonExport.addJSONExerciseExport(jsonObject, db.getExercises(projectid));
     return jsonObject;
-  }
+  }*/
 
   /**
    * REALLY IMPORTANT.
@@ -1059,6 +1062,15 @@ public class ScoreServlet extends DatabaseServlet {
     return realExID;
   }
 
+  /**
+   * @see #getJsonForAudio
+   * @param inputStream
+   * @param project
+   * @param realExID
+   * @param userid
+   * @return
+   * @throws IOException
+   */
   @NotNull
   private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid) throws IOException {
     String wavPath = pathHelper.getAbsoluteToAnswer(
@@ -1170,7 +1182,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
 */
 
-    public Map<String, Collection<String>> getSelection() {
+    Map<String, Collection<String>> getSelection() {
       return selection;
     }
 

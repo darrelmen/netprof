@@ -39,8 +39,12 @@ import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.trie.StringValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -57,6 +61,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
@@ -88,8 +93,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final SLFFile slfFile = new SLFFile();
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
-  private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
-  private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
+  private final Cache<String, HydraOutput> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
+  private final Cache<String, HydraOutput> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Double> fileToDuration; // key => (Scores, wordLab, phoneLab)
 
   /**
@@ -202,6 +207,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param precalcScores
    * @param usePhoneToDisplay
    * @return PretestScore object
+   * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   public PretestScore scoreRepeat(String testAudioDir,
                                   String testAudioFileNoSuffix,
@@ -251,7 +257,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param precalcScores
    * @param usePhoneToDisplay
    * @return score info coming back from alignment/reco
-   * @see ASR#scoreRepeat
+   * @see #scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
@@ -304,42 +310,50 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String filePath = testAudioDir + File.separator + testAudioFileNoSuffix;
 
     // check the cache...
-    Object[] cached = useCache ? (decode ?
+    HydraOutput cached = useCache ? (decode ?
         decodeAudioToScore.getIfPresent(filePath) :
         alignAudioToScore.getIfPresent(filePath)) : null;
 
+    // Scores scores = null;
     if (cached != null) {
       logger.info("scoreRepeatExercise : using cached score for " + filePath);
+      // scores = cached.getScores();
     }
-    Scores scores = null;
-    String phoneLab = "";
-    String wordLab = "";
+//    String phoneLab = "";
+    //String wordLab = "";
 
-    Double cachedDuration = fileToDuration.getIfPresent(filePath);
-    if (cachedDuration == null) {
-      cachedDuration = new AudioCheck(props.shouldTrimAudio(), props.getMinDynamicRange()).getDurationInSeconds(wavFile);
-      fileToDuration.put(filePath, cachedDuration);
-      //    logger.info("fileToDur now has "+fileToDuration.size());
-    }
-    if (cached != null) {
-      scores = (Scores) cached[0];
-      wordLab = (String) cached[1];
-      phoneLab = (String) cached[2];
-    }
+    Double cachedDuration = getFileDuration(wavFile, filePath);
+
     // actually run the scoring
-    //logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
-    // TODO remove the 16k hardcoding?
-
     JsonObject jsonObject = null;
 
     if (precalcScores != null && precalcScores.isValid()) {
-//      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
-      scores = precalcScores.getScores();
+      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
+      Scores scores = precalcScores.getScores();
+
+      if (cached == null) {
+        List<String> possibleProns = new ArrayList<>();
+
+        String hydraDict = getHydraDict(sentence, "", possibleProns);
+        getTrie(possibleProns);
+
+        logger.info("getProxyScore " +
+            "\n\tdict " + hydraDict +
+            "\n\tpossibleProns " + possibleProns.size()
+        );
+
+        possibleProns.forEach(p->logger.info("\t"+p));
+
+        cached = new HydraOutput(scores, "", "", getTrie(possibleProns));
+      } else {
+        cached.setScores(scores);
+      }
+
       jsonObject = precalcScores.getJsonObject();
     }
 
     int processDur = 0;
-    if (scores == null) {
+    if (cached == null) {
       long then = System.currentTimeMillis();
       int end = (int) (cachedDuration * 100.0);
       Path tempDir = null;
@@ -361,20 +375,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           return new PretestScore(0);
         }
 
-        Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
+        cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
             tempFile.getAbsolutePath(), decode, end);
-        if (result == null) {
+
+        if (cached == null) {
           return new PretestScore(0);
         } else {
           processDur = (int) (System.currentTimeMillis() - then);
-          scores = (Scores) result[0];
-          wordLab = (String) result[1];
-          phoneLab = (String) result[2];
-          if (scores.isValid()) {
-            if (wordLab.contains("UNKNOWN")) {
-              logger.info("note : hydra result includes UNKNOWNMODEL : " + wordLab);
+          //scores = result.getScores();
+          // wordLab = result.getWordLab();
+//          phoneLab = (String) result.getPhoneLab();
+          if (cached.getScores().isValid()) {
+            if (cached.getWordLab().contains("UNKNOWN")) {
+              logger.info("note : hydra result includes UNKNOWNMODEL : " + cached.getWordLab());
             }
-            cacheHydraResult(decode, filePath, scores, phoneLab, wordLab);
+            cacheHydraResult(decode, filePath, cached);//, scores, phoneLab, wordLab);
           } else {
             logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
           }
@@ -394,7 +409,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         cleanUpRawFile(rawAudioPath);
       }
     }
-    if (scores == null) {
+    if (cached == null) {
       logger.error("scoreRepeatExercise hydra failed to generate scores.");
       return new PretestScore(-1f);
     }
@@ -402,8 +417,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         imageOutDir,
         imageOptions,
         decode, prefix, noSuffix,
-        scores, phoneLab, wordLab,
+        //scores, phoneLab, wordLab,
+        cached,//result.setScores(scores),
         cachedDuration, processDur, usePhoneToDisplay, jsonObject);
+  }
+
+  @NotNull
+  private Double getFileDuration(File wavFile, String filePath) {
+    Double cachedDuration = fileToDuration.getIfPresent(filePath);
+    if (cachedDuration == null) {
+      cachedDuration = new AudioCheck(props.shouldTrimAudio(), props.getMinDynamicRange()).getDurationInSeconds(wavFile);
+      fileToDuration.put(filePath, cachedDuration);
+      //    logger.info("fileToDur now has "+fileToDuration.size());
+    }
+    return cachedDuration;
   }
 
   /**
@@ -432,9 +459,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return filePath.replaceAll("\\=", "") + "_" + unique + ".raw";
   }
 
-  private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {
-    Cache<String, Object[]> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
-    stringCache.put(key, new Object[]{scores, wordLab, phoneLab});
+  private void cacheHydraResult(boolean decode, String key, HydraOutput hydraOutput) {
+    Cache<String, HydraOutput> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
+    stringCache.put(key, hydraOutput);
   }
 
   /**
@@ -446,13 +473,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param decode
    * @param prefix
    * @param noSuffix
-   * @param scores
-   * @param phoneLab
-   * @param wordLab
    * @param duration
    * @param processDur
    * @param usePhoneToDisplay
    * @return
+   * @paramx scores
+   * @paramx phoneLab
+   * @paramx wordLab
    * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir,
@@ -461,9 +488,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        boolean decode,
                                        String prefix,
                                        String noSuffix,
-                                       Scores scores,
-                                       String phoneLab,
-                                       String wordLab,
+//                                       Scores scores,
+//                                       String phoneLab,
+//                                       String wordLab,
+
+                                       HydraOutput result,
                                        double duration,
                                        int processDur,
                                        boolean usePhoneToDisplay,
@@ -489,7 +518,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
-              prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay, imageOptions.isWriteImages()) :
+              prefix1, "", decode, result.getPhoneLab(), result.getWordLab(), true, usePhoneToDisplay, imageOptions.isWriteImages()) :
           writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
               prefix1, "", decode, false, jsonObject, reallyUsePhone, imageOptions.isWriteImages());
@@ -503,7 +532,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
 */
       if (typeToEndTimes.isEmpty()) {
-        logger.warn("getPretestScore huh? no segments from words " + wordLab + " phones " + phoneLab);
+        logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
 /*      logger.info("getPretestScore typeToEndTimes" +
           "\n\ttypeToEndTimes " + typeToEndTimes
@@ -516,7 +545,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
 
       List<String> recoPhones = getRecoPhones(eventAndFileInfo);
-      logger.info("getPretestScore : reco phones " + recoPhones);
+      List<String> noSil = recoPhones.stream().filter(s -> !s.equalsIgnoreCase("sil")).collect(Collectors.toList());
+      StringBuilder builder = new StringBuilder();
+      noSil.forEach(builder::append);
+      String pron = builder.toString();
+      Collection<String> matchesLC = result.getTrie().getMatchesLC(pron);
+      List<String> exact = matchesLC.stream().filter(p -> p.equals(pron)).collect(Collectors.toList());
+      logger.info("getPretestScore : reco" +
+          "\n\tphones " + recoPhones +
+          "\n\tphones " + pron +
+          "\n\tmatch  " + matchesLC +
+          "\n\texact  " + exact
+      );
+
+      Scores scores = result.getScores();
+
       return new PretestScore(scores.hydraScore,
           getPhoneToScore(scores, phoneToDisplay),
           getWordToScore(scores),
@@ -524,7 +567,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           typeToEndTimes,
           getRecoSentence(eventAndFileInfo),
           (float) duration,
-          processDur);
+          processDur, !exact.isEmpty());
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -542,13 +585,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  public Object[] runHydra(String audioPath,
-                           String transcript,
-                           String transliteration,
-                           Collection<String> lmSentences,
-                           String tmpDir,
-                           boolean decode,
-                           int end) {
+  public HydraOutput runHydra(String audioPath,
+                              String transcript,
+                              String transliteration,
+                              Collection<String> lmSentences,
+                              String tmpDir,
+                              boolean decode,
+                              int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
 
@@ -567,8 +610,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       );
     }
 
+    List<String> possibleProns = new ArrayList<>();
+
     // generate dictionary
-    String hydraDict = getHydraDict(cleaned, transliteration);
+    String hydraDict = getHydraDict(cleaned, transliteration, possibleProns);
+
+    Trie<String> trie = getTrie(possibleProns);
+
     String smallLM = "[" +
         (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
         "]";
@@ -625,13 +673,26 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 				logger.error("Deleting dir " + tmpDir + " got " +e,e);
 			}
 		}*/
-      return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
+      return new HydraOutput(scores,
+          results[1].replaceAll("#", ""),
+          results[2].replaceAll("#", ""),
+          trie); // where are the # coming from?
     }
   }
 
+  @NotNull
+  private Trie<String> getTrie(List<String> possibleProns) {
+    Trie<String> trie = new Trie<>();
+    trie.startMakingNodes();
+    possibleProns.forEach(pron -> trie.addEntryToTrie(new StringValue(pron.toLowerCase())));
+//    possibleProns.forEach(pron -> logger.info("\n\trunHydra : adding " + pron));
+    trie.endMakingNodes();
+    return trie;
+  }
+
   @Override
-  public String getHydraDict(String cleaned, String transliteration) {
-    return pronunciationLookup.createHydraDict(cleaned, transliteration);
+  public String getHydraDict(String cleaned, String transliteration, List<String> possibleProns) {
+    return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
   }
 
   /**
@@ -821,5 +882,24 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   public IPronunciationLookup getPronunciationLookup() {
     return pronunciationLookup;
+  }
+
+  /**
+   * Filter out sil
+   *
+   * @param eventAndFileInfo
+   * @return
+   */
+  List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
+    List<String> phones = new ArrayList<>();
+
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      if (key == NetPronImageType.PHONE_TRANSCRIPT) {
+        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.event));
+      }
+    }
+    return phones.stream().filter(p -> !toSkip.contains(p)).collect(Collectors.toList());
   }
 }

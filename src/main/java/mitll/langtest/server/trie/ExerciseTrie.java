@@ -59,8 +59,6 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private static final int TOOLONG_TO_WAIT = 150;
 
-//  private static final String ENGLISH = "English";
-
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";

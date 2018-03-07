@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -81,7 +82,7 @@ public abstract class Scoring {
   private static final String END_SIL = "</s>";
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
-  private final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
+  final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 
   private final String deployPath;
   final ServerProperties props;
@@ -421,16 +422,4 @@ public abstract class Scoring {
     return b.toString().trim();
   }
 
-  List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
-    List<String> phones = new ArrayList<>();
-
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.PHONE_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.event));
-      }
-    }
-    return phones;
-  }
 }

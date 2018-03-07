@@ -83,8 +83,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         soundFeedback,
         null,
         "",//statsFlashcardFactory.instance,
-        exerciseListToUse,
-        prompt);
+        exerciseListToUse
+    );
     this.sticky = stickyState;
     this.statsFlashcardFactory = statsFlashcardFactory;
     soundFeedback.setEndListener(new SoundFeedback.EndListener() {

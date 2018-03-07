@@ -33,7 +33,6 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -175,14 +174,14 @@ public class SmallVocabDecoder {
   /**
    * @param sentence
    * @return
-   * @see PronunciationLookup#getPronunciationsFromDictOrLTS
+   * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<>();
-    // logger.debug("initial " + sentence);
+    logger.info("getTokens initial    " + sentence);
     String trimmedSent = getTrimmed(sentence);
-    // logger.debug("after  trim " + trimmedSent);
+    logger.info("getTokens after trim " + trimmedSent);
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct

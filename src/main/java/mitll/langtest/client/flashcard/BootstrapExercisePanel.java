@@ -112,7 +112,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @param prompt
    * @see StatsPracticePanel#StatsPracticePanel
    */
   BootstrapExercisePanel(final T e,
@@ -122,7 +121,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          MySoundFeedback soundFeedback,
                          SoundFeedback.EndListener endListener,
                          String instance,
-                         ListInterface exerciseList, PolyglotDialog.PROMPT_CHOICE prompt) {
+                         ListInterface exerciseList) {
     super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
     downloadContainer = new DownloadContainer();
   }
@@ -355,7 +354,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected void gotEnter() {
-
             playRef();
           }
 
