@@ -70,7 +70,10 @@ public class ResetPassword extends UserDialog {
   private static final String SUCCESS = "Success";
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
-  private static final String PASSWORD_HAS_ALREADY_BEEN_CHANGED = "Password has already been changed?";
+  /**
+   *
+   */
+  private static final String PASSWORD_HAS_ALREADY_BEEN_CHANGED = "Couldn't set password - please try again.";
   private static final int DELAY_MILLIS = 2000;
   private static final int OLD_NETPROF_LEN = 4;
 

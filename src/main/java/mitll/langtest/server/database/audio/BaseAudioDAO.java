@@ -55,6 +55,7 @@ import org.apache.lucene.analysis.ar.ArabicNormalizer;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public abstract class BaseAudioDAO extends DAO {
@@ -148,6 +149,15 @@ public abstract class BaseAudioDAO extends DAO {
   public abstract Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
   /**
+   * So we remember domino users for the lifetime of the app - maybe we should clear it periodically?
+   * Or will we restart the server every day?
+   * Don't want to keep hitting domino for user info...
+   *
+   * Concurrent since could be multiple threads coming through.
+   */
+  protected Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
+
+  /**
    * TODO : consider why doing this all the time
    *
    * @param exercises
@@ -172,10 +182,14 @@ public abstract class BaseAudioDAO extends DAO {
 
     if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
 
+  //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
+
     long then = System.currentTimeMillis();
-    Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAudioAttributesForExercises(exerciseIDs, new HashMap<>());
+    Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAudioAttributesForExercises(exerciseIDs, idToMini);
     long now = System.currentTimeMillis();
-    logger.info("attachAudioToExercises took " + (now - then) + " millis to get audio attributes for " + exerciseIDs.size());
+    if (now - then > 10) {
+      logger.info("attachAudioToExercises took " + (now - then) + " millis to get audio attributes for " + exerciseIDs.size());
+    }
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
 
@@ -199,6 +213,10 @@ public abstract class BaseAudioDAO extends DAO {
       }
 
       addContextAudio(language, audioAttributesForExercises, exercise);
+    }
+    if (DEBUG_ATTACH) {
+      logger.info("attachAudioToExercises finished attach to " + exercises.size() + " exercises for " +
+          language + " : " + exerciseIDs.size());
     }
   }
 
@@ -728,7 +746,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see IAudioDAO#addOrUpdate
    * @deprecated
    */
-  protected AudioAttribute getAudioAttribute(int i,
+/*  protected AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, int exerciseID, long timestamp,
                                              AudioType audioType, long durationInMillis, String transcript, float dnr) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
@@ -743,7 +761,7 @@ public abstract class BaseAudioDAO extends DAO {
         audioRef,
         dnr,
         -1, realGender);
-  }
+  }*/
 
   /**
    * @param userExercise

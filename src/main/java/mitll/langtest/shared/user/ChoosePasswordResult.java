@@ -11,6 +11,9 @@ public class ChoosePasswordResult implements Serializable {
     return user;
   }
 
+  /**
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#changePasswordWithToken
+   */
   public enum ResultType {
     Success,
     Failed,

@@ -472,7 +472,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
-  private boolean reportBadDNRAudio = false;
+  private static final boolean reportBadDNRAudio = false;
 
   /**
    * Skips over audio that has negative infinity DNR - usually a bad sign.
@@ -647,7 +647,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
 //    logger.info("toAudioAttribute " + all.size());
-    Map<Integer, MiniUser> idToMini = new HashMap<>();
+   // Map<Integer, MiniUser> idToMini = new HashMap<>();
     all.forEach(slickAudio -> copy.add(getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio)));
 //    for (SlickAudio s : all) {
 //      copy.add(getAudioAttribute(s, idToMini, hasProjectSpecificAudio));
@@ -655,14 +655,21 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return copy;
   }
 
+  /**
+   * Avoid asking domino for the same user over and over.
+   * @param s
+   * @param idToMini
+   * @param hasProjectSpecificAudio
+   * @return
+   */
   private AudioAttribute getAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini, boolean hasProjectSpecificAudio) {
     int userid = s.userid();
 
-    //  int before =idToMini.size();
+//    int before = idToMini.size();
     MiniUser miniUser = idToMini.computeIfAbsent(userid, k -> userDAO.getMiniUser(userid));
-    //  int after =idToMini.size();
-    //  if (after>before) logger.info("getAudioAttribute id->mini now "+ after);
-    //      logger.info("got " + s);
+//    int after = idToMini.size();
+//    if (after > before) logger.info("getAudioAttribute id->mini now " + after + " req for " + userid);
+
     return toAudioAttribute(s, miniUser, hasProjectSpecificAudio);
   }
 
