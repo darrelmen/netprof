@@ -21,7 +21,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.
@@ -32,6 +31,7 @@ public class ScoreFeedbackDiv {
   private static final double NATIVE_THRSHOLD = 0.75D;
 
   private static final String OVERALL_SCORE = "Overall Score";
+  public static final String AUDIO_CUT_OFF = "Audio cut off.";
 
   private final ProgressBar progressBar;
   /**
@@ -68,13 +68,23 @@ public class ScoreFeedbackDiv {
    * Not the 4 color styles that come with the progress bar.
    *
    * @param score
+   * @param isFullMatch
+   * @see SimpleRecordAudioPanel#useScoredResult
    */
-  void showScore(double score) {
-    double percent = score / 100d;
+  void showScore(double score, boolean isFullMatch) {
+    double percent = isFullMatch ? score / 100d : 0.41D;
     progressBar.setVisible(true);
+    if (isFullMatch) {
+      progressBar.getElement().getStyle().clearProperty("width");
+    }
+    else {
+      progressBar.setWidth("250px");
+    }
 
-    long round = Math.round(score);
-    progressBar.setText("" + round);
+    double round = isFullMatch ? Math.round(score) : 100.0D;
+    String text = isFullMatch ? "" + round : AUDIO_CUT_OFF;
+
+    progressBar.setText(text);
 
 //    progressBar.setColor(
 //        score > SECOND_STEP ?
@@ -87,16 +97,21 @@ public class ScoreFeedbackDiv {
 
     // logger.info("showScore : color " + color + " for " + percent);
     Scheduler.get().scheduleDeferred((Command) () -> {
-      Widget theBar = progressBar.getWidget(0);
-      Style style = theBar.getElement().getStyle();
-      style.setBackgroundImage("linear-gradient(to bottom," +
-          color +
-          "," +
-          color +
-          ")");
-      if (percent > 0.4) style.setColor("black");
-      progressBar.setPercent(round);//(int)(100 * percent));
+      setPercentLater(percent, round, color);
     });
+  }
+
+  private void setPercentLater(double percent, double round, String color) {
+    Widget theBar = progressBar.getWidget(0);
+    Style style = theBar.getElement().getStyle();
+    style.setBackgroundImage("linear-gradient(to bottom," +
+        color +
+        "," +
+        color +
+        ")");
+    if (percent > 0.4) style.setColor("black");
+
+    progressBar.setPercent(round);
   }
 
   void hideScore() {
@@ -184,7 +199,7 @@ public class ScoreFeedbackDiv {
     return praise;
   }
 
-  private List<String> praise = Arrays.asList(
+  private static final List<String> praise = Arrays.asList(
       "Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
       "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!",
       "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!",

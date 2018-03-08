@@ -170,7 +170,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
-    if (result.getValidity() == Validity.OK) {
+    if (result.isValid()) {
       sticky.storeAnswer(result, exercise.getID());
       setStateFeedback();
     }
