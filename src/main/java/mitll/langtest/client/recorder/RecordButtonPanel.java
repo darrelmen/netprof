@@ -69,8 +69,8 @@ import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class RecordButtonPanel implements RecordButton.RecordingListener {
-  public static final String NETWORK_ISSUE = "Network issue : Couldn't post audio. Please try again.";
   private final Logger logger = Logger.getLogger("RecordButtonPanel");
+  //public static final String NETWORK_ISSUE = "Network issue : Couldn't post audio. Please try again.";
 
   protected final RecordButton recordButton;
   private final ExerciseController controller;

@@ -89,12 +89,12 @@ public interface ScoringService extends RemoteService {
    * @return
    * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    */
-  AudioAnswer getAlignment(String base64EncodedString,
+/*  AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
                            String transliteration,
                            String identifier,
                            int reqid,
-                           String device) throws DominoSessionException;
+                           String device) throws DominoSessionException;*/
 
   /**
    * @param resultid
