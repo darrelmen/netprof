@@ -342,7 +342,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             "\n\tpossibleProns " + possibleProns.size()
         );
 
-        possibleProns.forEach(p->logger.info("\t"+p));
+        possibleProns.forEach(p -> logger.info("\t" + p));
 
         cached = new HydraOutput(scores, "", "", getTrie(possibleProns));
       } else {
@@ -593,7 +593,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               boolean decode,
                               int end) {
     // reference trans
-    String cleaned = slfFile.cleanToken(transcript).trim();
+    String cleaned = slfFile.cleanToken(transcript, removeAllAccents).trim();
 
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
@@ -609,6 +609,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           "\n\tcleaned    " + cleaned
       );
     }
+    boolean removeAllPunct = !language.equalsIgnoreCase("french");
 
     List<String> possibleProns = new ArrayList<>();
 
@@ -618,14 +619,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     Trie<String> trie = getTrie(possibleProns);
 
     String smallLM = "[" +
-        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
+        (SEND_GRAMMER_WITH_ALIGNMENT ?
+            slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK, removeAllPunct)[0] : "") +
         "]";
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK);
+      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK, removeAllPunct);
       smallLM = "[" + slfOut[0] + "]";
-      cleaned = slfFile.cleanToken(slfOut[1]);
+      cleaned = slfFile.cleanToken(slfOut[1], removeAllPunct);
     }
 
     String hydraInput =
@@ -701,7 +703,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #runHydra(String, String, String, Collection, String, boolean, int)
    */
   public String getSegmented(String transcript) {
-    return pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim());
+    return pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim(), removeAllAccents);
   }
 
   @NotNull

@@ -6,6 +6,7 @@ public class HydraOutput {
   private Scores scores;
   private String wordLab;
   private String phoneLab;
+ // private Trie<String> trie;
   private Trie<String> trie;
 
   HydraOutput(Scores scores,

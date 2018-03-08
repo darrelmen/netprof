@@ -329,7 +329,7 @@ public class AttachSecurityFilter implements Filter {
         log.error("findSharedDatabase no database?");
       } else {
         securityManager = db.getUserSecurityManager();
-        log.info("made security manager " + securityManager);
+//        log.info("made security manager " + securityManager);
       }
     }
   }
@@ -345,7 +345,7 @@ public class AttachSecurityFilter implements Filter {
     Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-      log.debug("getDatabase : found existing database reference " + db + " under " + servletContext);
+//      log.debug("getDatabase : found existing database reference " + db + " under " + servletContext);
     } else {
       log.warn("getDatabase : no existing db reference yet - config error?");
     }

@@ -53,7 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -89,13 +88,14 @@ public abstract class Scoring {
   final LogAndNotify logAndNotify;
 
   /**
-   * @see SLFFile#createSimpleSLFFile(Collection, String, float)
+   * @see SLFFile#createSimpleSLFFile(Collection, String, float, boolean)
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final CheckLTS checkLTSHelper;
 
   final boolean isAsianLanguage;
+  final boolean removeAllAccents;
 
   private LTSFactory ltsFactory;
   final String language;
@@ -114,6 +114,7 @@ public abstract class Scoring {
     this.logAndNotify = langTestDatabase;
     String language = project.getLanguage();
     this.language = language;
+    removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
     if (isAsianLanguage) {
       logger.warn("using mandarin segmentation.");

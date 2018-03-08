@@ -27,7 +27,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, russian;
+  private boolean korean, russian, removeAllPunct;
 
   /**
    * @param dictionary
@@ -38,8 +38,10 @@ public class PronunciationLookup implements IPronunciationLookup {
   PronunciationLookup(HTKDictionary dictionary, LTS lts, Project project) {
     this.htkDictionary = dictionary;
     this.lts = lts;
-    korean = project.getLanguage().equalsIgnoreCase("korean");
-    russian = project.getLanguage().equalsIgnoreCase("russian");
+    String language = project.getLanguage();
+    korean = language.equalsIgnoreCase("korean");
+    russian = language.equalsIgnoreCase("russian");
+    removeAllPunct = !language.equalsIgnoreCase("french");
     makeDecoder();
   }
 
@@ -133,13 +135,15 @@ public class PronunciationLookup implements IPronunciationLookup {
   /**
    * Don't strip accents from tokens used in dictionary lookup - like for French precisement.
    *
+   * It would be good if the accent thing were consistent across dictionaries.
+   *
    * @param transcript
    * @param transliteration
    * @param justPhones      true if just want the phones
    * @param makeCandidates
    * @param possible
    * @return
-   * @see IPronunciationLookup#createHydraDict
+   * @see #createHydraDict
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   @Override
@@ -149,7 +153,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
 //    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
     //   logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
 
 //    {

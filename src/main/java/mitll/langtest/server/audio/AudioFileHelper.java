@@ -87,6 +87,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false, false);
   private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
   private static final String OGG = "ogg";
+  public static final String FRENCH = "french";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -110,6 +111,7 @@ public class AudioFileHelper implements AlignDecode {
   private AudioConversion audioConversion;
   private boolean isNoModel;
   private String language;
+  private final boolean removeAccents;
 
   /**
    * @param pathHelper
@@ -134,6 +136,7 @@ public class AudioFileHelper implements AlignDecode {
     audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
 
     this.language = project.getLanguage();
+    removeAccents = !language.equalsIgnoreCase(FRENCH);
     isNoModel = project.isNoModel();
     makeASRScoring(project);
     this.project = project;
@@ -907,14 +910,14 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @param base64EncodedString
-   * @param textToAlign
-   * @param identifier
-   * @param reqid
    * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignment
+   * @paramx base64EncodedString
+   * @paramx textToAlign
+   * @paramx identifier
+   * @paramx reqid
+   * @seex mitll.langtest.server.services.ScoringServiceImpl#getAlignment
    */
-  public AudioAnswer getAlignment(String base64EncodedString,
+/*  public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
                                   String transliteration,
                                   String identifier,
@@ -945,25 +948,28 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return audioAnswer;
-  }
+  }*/
 
+/*
   private File getPostedFileLoc() {
     return getPathUnder(POSTED_AUDIO);
   }
+*/
 
+/*
   private File getPathUnder(String postedAudio) {
     String absoluteWavPathUnder = pathHelper.getAbsoluteWavPathUnder(postedAudio);
     return new File(absoluteWavPathUnder);
   }
+*/
 
-  private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
+/*  private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
     //  logger.debug("getAMASAudioAnswer writing to " + file.getAbsolutePath() + " validity " + validity);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getAbsoluteWavPathUnder(POSTED_AUDIO)),
         validity.getValidity(), reqid, validity.durationInMillis);
-  }
-
+  }*/
   private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
@@ -1123,13 +1129,14 @@ public class AudioFileHelper implements AlignDecode {
           requestToServer +
           " '" + english + "' = '" + foreignLanguage + "'");
 
-      //String trim = new SLFFile().cleanToken(foreignLanguage).trim();
-      List<String> possibleProns = new ArrayList<>();
+      {
+        List<String> possibleProns = new ArrayList<>();
 
-      logger.info("getProxyScore " +
-          "\n\tfile " + theFile +
-          "\n\tdict " + getHydraDict(foreignLanguage, possibleProns));
-      //possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
+        logger.info("getProxyScore " +
+            "\n\tfile " + theFile +
+            "\n\tdict " + getHydraDict(foreignLanguage, possibleProns));
+        //possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
+      }
 
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
@@ -1141,7 +1148,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private String getHydraDict(String foreignLanguage, List<String> possibleProns) {
-    return asrScoring.getHydraDict(new SLFFile().cleanToken(foreignLanguage).trim(), "", possibleProns);
+    String s = new SLFFile().cleanToken(foreignLanguage, removeAccents);
+    return asrScoring.getHydraDict(s.trim(), "", possibleProns);
   }
 
   @NotNull
@@ -1236,7 +1244,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @see #getAlignment(String, String, String, String, int, boolean)
+   * @see #getAlignment
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,
@@ -1251,8 +1259,11 @@ public class AudioFileHelper implements AlignDecode {
                                            DecoderOptions options) {
     // alignment trumps decoding
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
-    logger.info("getASRScoreForAudio (" + getLanguage() + ")" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
-        "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
+    logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
+        "\n\t" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
+        "" + testAudioFile +
+        "\n\twith sentence '" + sentence + "'" +
+        "\n\treq# " + reqid +
         (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     if (testAudioFile == null) {
@@ -1368,15 +1379,18 @@ public class AudioFileHelper implements AlignDecode {
 
       String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(exercise.getForeignLanguage(), language);
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
-          file, Collections.singleton(phraseToDecode),
-          "", decoderOptions, precalcScores);
+          file,
+          Collections.singleton(phraseToDecode),
+          "",
+          decoderOptions,
+          precalcScores);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
-      if (!asrScoreForAudio.isFullMatch()) {
+/*      if (!asrScoreForAudio.isFullMatch()) {
         audioAnswer.setValidity(CUT_OFF);
 
       }
-      logger.warn("validity " + audioAnswer.getValidity());
+      logger.warn("validity " + audioAnswer.getValidity());*/
 
       return audioAnswer;
     } else if (decoderOptions.shouldDoDecoding()) {
@@ -1398,10 +1412,12 @@ public class AudioFileHelper implements AlignDecode {
           precalcScores);
 
       audioAnswer.setPretestScore(flashcardAnswer);
+/*
       if (!flashcardAnswer.isFullMatch()) {
         audioAnswer.setValidity(CUT_OFF);
       }
       logger.warn("validity " + audioAnswer.getValidity());
+*/
 
       return audioAnswer;
     }

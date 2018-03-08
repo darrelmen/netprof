@@ -642,9 +642,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param reqid
    * @param device
    * @return
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
    */
-  @Override
+/*  @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
                                   String transliteration,
@@ -660,7 +660,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logEvent(identifier, device, -1);
     }
     return audioAnswer;
-  }
+  }*/
 
   /**
    * @param projid

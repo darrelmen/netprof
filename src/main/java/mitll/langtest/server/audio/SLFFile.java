@@ -35,7 +35,6 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -51,11 +50,9 @@ import static mitll.langtest.server.scoring.SmallVocabDecoder.REMOVE_ME;
  * @since 1/17/14.
  * Writes an HTK SLF file similar to : <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">Example</a>
  * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
- *
- *
  */
 public class SLFFile {
- // private static final Logger logger = LogManager.getLogger(SLFFile.class);
+  // private static final Logger logger = LogManager.getLogger(SLFFile.class);
 
   private static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
   private static final String ENCODING = "UTF8";
@@ -74,10 +71,11 @@ public class SLFFile {
    * @param lmSentences
    * @param tmpDir
    * @param unknownModelBiasWeight - a property you can set in the property file
+   * @param dontRemoveAccents
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#calcScoreForAudio
    */
-  public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
+  public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight, boolean dontRemoveAccents) {
     String slfFile = getSLFPath(tmpDir);
 
     String unknownModelBias = String.format("%.2f", unknownModelBiasWeight);
@@ -100,7 +98,7 @@ public class SLFFile {
 
       SmallVocabDecoder svd = new SmallVocabDecoder();
       for (String sentence : sentencesToUse) {
-        Collection<String> tokens = svd.getTokens(sentence);
+        Collection<String> tokens = svd.getTokens(sentence, dontRemoveAccents);
         //logger.debug("\tfor '" + sentence + "' tokens are " + tokens);
         int start = 0;
 
@@ -146,10 +144,15 @@ public class SLFFile {
    * @param addSil
    * @param includeUnk
    * @param includeSelfSILLink
+   * @param removeAllAccents
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
    */
-  public String[] createSimpleSLFFile(Collection<String> lmSentences, boolean addSil, boolean includeUnk, boolean includeSelfSILLink) {
+  public String[] createSimpleSLFFile(Collection<String> lmSentences,
+                                      boolean addSil,
+                                      boolean includeUnk,
+                                      boolean includeSelfSILLink,
+                                      boolean removeAllAccents) {
     List<String> slf = new ArrayList<>();
     slf.add("VERSION=1.0;");
 
@@ -173,7 +176,7 @@ public class SLFFile {
     int ctr = 0;
     for (String sentence : sentencesToUse) {
 //      logger.info("createSimpleSLFFile sentence " + sentence);
-      Collection<String> tokens = svd.getTokens(sentence);
+      Collection<String> tokens = svd.getTokens(sentence, removeAllAccents);
 
       int prevNode = 0;  // points to initial node
       int currentSil = 0;
@@ -187,7 +190,7 @@ public class SLFFile {
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
 //        logger.info("createSimpleSLFFile onLast " + onLast + " c " + c + " '" + token + "' tokens length = " + tokens.size());
-        String cleanedToken = cleanToken(token);
+        String cleanedToken = cleanToken(token, removeAllAccents);
 
         if (!cleanedToken.isEmpty()) {
           int currentNode = newNodes++;
@@ -260,16 +263,20 @@ public class SLFFile {
    *
    * @param token
    * @return
-   * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean)
+   * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
-  public String cleanToken(String token) {
+  private String cleanToken(String token) {
     String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")
         .replaceAll("\\p{P}", "");
 
-   // return StringUtils.stripAccents(s).toLowerCase();
+    // return StringUtils.stripAccents(s).toLowerCase();
     return s.toLowerCase();
+  }
+
+  public String cleanToken(String token, boolean removeAllPunct) {
+    return removeAllPunct ? cleanToken(token) : token.replaceAll("[.?]", "");
   }
 }

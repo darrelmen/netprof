@@ -95,7 +95,7 @@ public class SmallVocabDecoder {
   /**
    * @param s
    * @return
-   * @see #getTokens(String)
+   * @see #getTokens(String, boolean)
    */
   String toFull(String s) {
     StringBuilder builder = new StringBuilder();
@@ -122,7 +122,7 @@ public class SmallVocabDecoder {
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<>();
-    sentences.forEach(sent -> getTokens(sent).forEach(token -> {
+    sentences.forEach(sent -> getTokens(sent, false).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
     }));
@@ -156,8 +156,8 @@ public class SmallVocabDecoder {
     return vocab;
   }
 
-  public String getSegmented(String longPhrase) {
-    Collection<String> tokens = getTokens(longPhrase);
+  public String getSegmented(String longPhrase, boolean removeAllAccents) {
+    Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
 //    for (String token : tokens) {
@@ -167,21 +167,24 @@ public class SmallVocabDecoder {
     return builder.toString();
   }
 
-  public List<String> getTokensAllLanguages(boolean isMandarin, String fl) {
-    return isMandarin ? getMandarinTokens(fl) : getTokens(fl);
+  public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
   }
 
   /**
    * @param sentence
+   * @param removeAllAccents
    * @return
    * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
-  public List<String> getTokens(String sentence) {
+  public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
-    logger.info("getTokens initial    " + sentence);
-    String trimmedSent = getTrimmed(sentence);
-    logger.info("getTokens after trim " + trimmedSent);
+    logger.info("getTokens initial    '" + sentence + "'");
+    String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
+    if (removeAllAccents) {
+      logger.info("getTokens after trim '" + trimmedSent + "'");
+    }
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
@@ -197,6 +200,12 @@ public class SmallVocabDecoder {
     return all;
   }
 
+  private String getTrimmedSent(String sentence, boolean removeAllAccents) {
+    return removeAllAccents ?
+        getTrimmed(sentence) :
+        getTrimmedLeaveAccents(sentence);
+  }
+
   /**
    * @param foreignLanguage
    * @return
@@ -204,7 +213,7 @@ public class SmallVocabDecoder {
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
 //    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
-    return getTokens(segmentation);
+    return getTokens(segmentation, false);
   }
 
   /**
@@ -220,9 +229,19 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
    */
   public String getTrimmed(String sentence) {
-    return getTrimmedLeaveLastSpace(sentence)
+    String trim = getTrimmedLeaveLastSpace(sentence)
         //.replaceAll("\\s+", " ")
         .trim();
+    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
+    return trim;
+  }
+
+  public String getTrimmedLeaveAccents(String sentence) {
+    String trim = sentence.replaceAll("[.?]", "")
+        //.replaceAll("\\s+", " ")
+        .trim();
+    //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
+    return trim;
   }
 
   /**
