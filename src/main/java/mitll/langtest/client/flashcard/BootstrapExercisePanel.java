@@ -35,7 +35,6 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -54,6 +53,7 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.ClickableWords;
 import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
+import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -83,16 +83,19 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
-  public static final String IN = "in";
   private Logger logger;
 
+  public static final String IN = "in";
+
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
+/*
 
   private static final int FIRST_STEP = 35;
   private static final int SECOND_STEP = 75;
 
   private static final double FIRST_STEP_PCT = ((double) FIRST_STEP) / 100d;
   private static final double SECOND_STEP_PCT = ((double) SECOND_STEP) / 100d;
+*/
 
   private Panel recoOutput;
 
@@ -391,23 +394,25 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    *
    * @param correct
    * @param score
+   * @param isFullMatch
    * @see
    */
-  private void showPronScoreFeedback(boolean correct, double score) {
+  private void showPronScoreFeedback(boolean correct, double score, boolean isFullMatch) {
     scoreFeedbackRow.clear();
-    scoreFeedbackRow.add(showScoreFeedback(correct, score));
+    scoreFeedbackRow.add(showScoreFeedback(correct, score, isFullMatch));
   }
 
   /**
    * TODO : use same as in learn tab or vice versa
    *
    * @param score
-   * @see #showPronScoreFeedback(boolean, double)
+   * @param isFullMatch
+   * @see #showPronScoreFeedback(boolean, double, boolean)
    */
-  private DivWidget showScoreFeedback(boolean correct, double score) {
+  private DivWidget showScoreFeedback(boolean correct, double score, boolean isFullMatch) {
     DivWidget container = new DivWidget();
 
-    container.setId("containerAndBar");
+    container.setId("feedbackContainerAndBar");
 
     {
       IconAnchor correctIcon = new IconAnchor();
@@ -426,7 +431,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
       scoreContainer.addStyleName("topMargin");
       scoreContainer.addStyleName("leftFiveMargin");
-      scoreContainer.add(getProgressBar(score));
+      scoreContainer.add(getProgressBar(score, isFullMatch));
 
       scoreContainer.setWidth("73%");
 
@@ -439,14 +444,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   @NotNull
-  private ProgressBar getProgressBar(double score) {
-    if (score < 0) score = 0;
-    double percent = 100 * score;
+  private DivWidget getProgressBar(double score, boolean isFullMatch) {
+//    if (score < 0) score = 0;
+//    double percent = 100 * score;
 
-    return getProgressBar(score, (int) percent);
+    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
+    widgets.setHeight("25px");
+    return widgets;
   }
 
-  @NotNull
+/*  @NotNull
   private ProgressBar getProgressBar(double score, int percent) {
     ProgressBar scoreFeedback = new ProgressBar();
     int percent1 = percent;
@@ -467,7 +474,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             ProgressBarBase.Color.WARNING :
             ProgressBarBase.Color.DANGER);
     return scoreFeedback;
-  }
+  }*/
 
   /**
    * @param result
@@ -552,11 +559,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     playCorrectDing();
     showRecoFeedback(score, pretestScore, true);
 
-    maybeAdvance(score);
+    maybeAdvance(score, pretestScore.isFullMatch());
   }
 
   void showRecoFeedback(double score, PretestScore pretestScore, boolean correct) {
-    showPronScoreFeedback(correct, score);
+    showPronScoreFeedback(correct, score, pretestScore.isFullMatch());
     showRecoOutput(pretestScore);
   }
 
@@ -568,8 +575,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * Polyglot does auto advance if score is high enough.
    *
    * @param score
+   * @param isFullMatch
    */
-  void maybeAdvance(double score) {
+  void maybeAdvance(double score, boolean isFullMatch) {
   }
 
   private void showRecoOutput(PretestScore pretestScore) {
@@ -602,22 +610,20 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
     if (showScoreFeedback(result)) { // if they said the right answer, but poorly, show pron score
-      showPronScoreFeedback(false, score);
+      showPronScoreFeedback(false, score, result.getPretestScore().isFullMatch());
     }
     showOtherText();
 
-/*
-      logger.info("showIncorrectFeedback : said answer " +result.isSaidAnswer()+
-          "result " + result + " score " + score + " has ref " + hasRefAudio);*/
+
+      logger.info("showIncorrectFeedback : " +
+          "said answer " +result.isSaidAnswer()+
+          "result " + result +
+          " score " + score +
+          " has ref " + hasRefAudio);
 
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
-        String path = getRefAudioToPlay();
-        if (path == null) {
-          playIncorrect(); // this should never happen
-        } else {
-          playRef();
-        }
+        playRefOnError();
       } else {
         playIncorrect();
       }
@@ -627,7 +633,20 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     showRecoOutput(result.getPretestScore());
 
-    maybeAdvance(score);
+    maybeAdvance(score, result.getPretestScore().isFullMatch());
+  }
+
+  /**
+   * don't play ref in polyglot -subclass there
+   */
+  void playRefOnError() {
+    String path = getRefAudioToPlay();
+    if (path == null) {
+      playIncorrect(); // this should never happen
+    } else {
+      logger.info("showIncorrectFeedback play ref audio on error");
+      playRef();
+    }
   }
 
   boolean showScoreFeedback(AudioAnswer result) {

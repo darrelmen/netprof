@@ -64,7 +64,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String ITEM = "Item";
-  private static final int MAXLEN = 20;
+  private static final int MAXLEN = 18;
 
   private final Collection<String> typeOrder;
 

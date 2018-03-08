@@ -3,7 +3,6 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
@@ -25,15 +24,12 @@ import java.util.*;
 /**
  * Created by go22670 on 5/19/17.
  */
-public class ScoreFeedbackDiv {
+public class ScoreFeedbackDiv extends ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
-
   private static final String OVERALL_SCORE = "Overall Score";
-  public static final String AUDIO_CUT_OFF = "Audio cut off.";
 
-  private final ProgressBar progressBar;
   /**
    * @see #getWordTableContainer
    */
@@ -52,7 +48,7 @@ public class ScoreFeedbackDiv {
    */
   public ScoreFeedbackDiv(PlayAudioPanel playAudioPanel,
                           DownloadContainer downloadContainer) {
-    progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+    super();
     styleTheProgressBar(progressBar);
     addTooltip(progressBar, OVERALL_SCORE);
     this.playAudioPanel = playAudioPanel;
@@ -63,62 +59,12 @@ public class ScoreFeedbackDiv {
     new TooltipHelper().addTooltip(w, tip);
   }
 
-  /**
-   * Color the feedback with same color scheme as words and phones.
-   * Not the 4 color styles that come with the progress bar.
-   *
-   * @param score
-   * @param isFullMatch
-   * @see SimpleRecordAudioPanel#useScoredResult
-   */
-  void showScore(double score, boolean isFullMatch) {
-    double percent = isFullMatch ? score / 100d : 0.41D;
-    progressBar.setVisible(true);
-    if (isFullMatch) {
-      progressBar.getElement().getStyle().clearProperty("width");
-    }
-    else {
-      progressBar.setWidth("250px");
-    }
-
-    double round = isFullMatch ? Math.round(score) : 100.0D;
-    String text = isFullMatch ? "" + round : AUDIO_CUT_OFF;
-
-    progressBar.setText(text);
-
-//    progressBar.setColor(
-//        score > SECOND_STEP ?
-//            ProgressBarBase.Color.SUCCESS :
-//            score > FIRST_STEP ?
-//                ProgressBarBase.Color.WARNING :
-//                ProgressBarBase.Color.DANGER);
-
-    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
-
-    // logger.info("showScore : color " + color + " for " + percent);
-    Scheduler.get().scheduleDeferred((Command) () -> {
-      setPercentLater(percent, round, color);
-    });
-  }
-
-  private void setPercentLater(double percent, double round, String color) {
-    Widget theBar = progressBar.getWidget(0);
-    Style style = theBar.getElement().getStyle();
-    style.setBackgroundImage("linear-gradient(to bottom," +
-        color +
-        "," +
-        color +
-        ")");
-    if (percent > 0.4) style.setColor("black");
-
-    progressBar.setPercent(round);
-  }
-
   void hideScore() {
     progressBar.setVisible(false);
   }
 
   /**
+   * TODO : do in CSS
    * Add score feedback to the right of the play button.
    *
    * @return
@@ -169,7 +115,8 @@ public class ScoreFeedbackDiv {
     return wordTableContainer;
   }
 
-  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer, float hydecScore) {
+  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
+                                 float hydecScore) {
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 
