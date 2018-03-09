@@ -148,20 +148,20 @@ public class TranscriptImage extends AudioImage {
     float denom = getLen(displayStart, displayEnd);
     for (float st : events.keySet()) {
       TranscriptEvent event = events.get(st);
-      String str = event.event;
+      String str = event.getEvent();
       if (ignore.contains(str)) continue;
 
-      if (event.end < wStart) continue;
+      if (event.getEnd() < wStart) continue;
       if (st > wEnd) break;
 
-      float a = (st - wStart) / denom, b = (event.end - wStart) / denom;
+      float a = (st - wStart) / denom, b = (event.getEnd() - wStart) / denom;
       x = (int) (a * (float) xm);
       xe = (int) (b * (float) xm);
       int left = Math.max(x, 0);
       int length = Math.min(xm, xe) - left;
 
       //  Color c = mapScoreToColor(colormap, scoreScalar, event.score);
-      Color c = getColor2(Math.min(1.0f, event.score * scoreScalar));
+      Color c = getColor2(Math.min(1.0f, event.getScore() * scoreScalar));
 
       if (!fill || ignore.contains(str)) {
         gri.setColor(bkg);
@@ -174,7 +174,7 @@ public class TranscriptImage extends AudioImage {
 //        else gri.fillRect(x, 0, xm - x, ym);
       gri.setColor(Color.black);
       if (x > 0) gri.drawLine(x, 0, x, ym);
-      if (Math.abs(event.end - wEnd) > 0.02) gri.drawLine(xe, 0, xe, ym);
+      if (Math.abs(event.getEnd() - wEnd) > 0.02) gri.drawLine(xe, 0, xe, ym);
 
       drawLabel(ym, gri, fonts, str, left, length);
     }

@@ -102,7 +102,7 @@ public interface ASR {
    * @param possibleProns
    * @return
    */
-  String getHydraDict(String cleaned, String transliteration, List<String> possibleProns);
+  String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
   String getSegmented(String input);
 }

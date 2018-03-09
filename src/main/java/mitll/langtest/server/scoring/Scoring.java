@@ -407,7 +407,7 @@ public abstract class Scoring {
       if (key == NetPronImageType.WORD_TRANSCRIPT) {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
         for (Float timeStamp : timeToEvent.keySet()) {
-          String event = timeToEvent.get(timeStamp).event;
+          String event = timeToEvent.get(timeStamp).getEvent();
           String trim = event.trim();
           if (!trim.isEmpty() && !toSkip.contains(event)) {
 //            logger.debug("getRecoSentence including " + event + " trim '" + trim + "'");

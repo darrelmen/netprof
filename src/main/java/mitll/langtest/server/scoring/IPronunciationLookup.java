@@ -5,17 +5,17 @@ import java.util.List;
 
 public interface IPronunciationLookup {
   /**
-   * @see ASR#getHydraDict(String, String, List)
    * @param transcript
    * @param transliteration
    * @param possibleProns
    * @return
+   * @see ASR#getHydraDict(String, String, List)
    */
-  String createHydraDict(String transcript, String transliteration, List<String> possibleProns);
+  String createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns);
+
+  String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<WordAndProns> possible);
 
   int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration);
-
-  String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<String> possible);
 
   String getCleanedTranscript(String cleaned);
 

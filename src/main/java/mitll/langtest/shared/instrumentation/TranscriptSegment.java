@@ -33,6 +33,7 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -47,23 +48,27 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
   private int start;                  /// Start time in seconds
   private int end;                    /// End time in seconds
 
-  private  String displayEvent;
+  private String displayEvent;
 
   public TranscriptSegment() {
   }
 
+/*  public TranscriptSegment(TranscriptEvent event, String displayName) {
+    this(event.getStart(), event.getEnd(), event.getEvent(), event.getScore(), displayName);
+  }*/
+
   /**
    * Constructor
    *
-   * @param s     start time in seconds
-   * @param e     end time in seconds
-   * @param name  event name (i.e. phone, word, etc.)
+   * @param s           start time in seconds
+   * @param e           end time in seconds
+   * @param name        event name (i.e. phone, word, etc.)
    * @param score
    * @param displayName
    * @see mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes(Map)
    */
   public TranscriptSegment(float s, float e, String name, float score, String displayName) {
-    super(name,score);
+    super(name, score);
     start = toInt(s);
     end = toInt(e);
     this.displayEvent = displayName;

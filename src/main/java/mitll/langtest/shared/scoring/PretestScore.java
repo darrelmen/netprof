@@ -54,7 +54,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private float hydecScore = -1f;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
-  private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
+  private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
   private String recoSentence;
   private float wavFileLengthSeconds;
   private int processDur = 0;
@@ -92,7 +92,8 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
                       float wavFileLengthSeconds,
-                      int processDur, boolean isFullMatch) {
+                      int processDur,
+                      boolean isFullMatch) {
     super(sTypeToEndTimes);
     this.sTypeToImage = sTypeToImage;
     this.hydecScore = hydecScore;
@@ -165,10 +166,6 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   public boolean isFullMatch() {
     return fullMatch;
   }
-
-/*  public void setFullMatch(boolean fullMatch) {
-    this.fullMatch = fullMatch;
-  }*/
 
   public String toString() {
     return "hydec" +

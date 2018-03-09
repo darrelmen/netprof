@@ -43,8 +43,6 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.trie.StringValue;
-import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -332,10 +330,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Scores scores = precalcScores.getScores();
 
       if (cached == null) {
-        List<String> possibleProns = new ArrayList<>();
+        //List<String> possibleProns = new ArrayList<>();
+        List<WordAndProns> possibleProns = new ArrayList<>();
 
         String hydraDict = getHydraDict(sentence, "", possibleProns);
-        getTrie(possibleProns);
+        //getTrie(possibleProns);
 
         logger.info("getProxyScore " +
             "\n\tdict " + hydraDict +
@@ -344,7 +343,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         possibleProns.forEach(p -> logger.info("\t" + p));
 
-        cached = new HydraOutput(scores, "", "", getTrie(possibleProns));
+        cached = new HydraOutput(scores, "", "", possibleProns);//getTrie(possibleProns));
       } else {
         cached.setScores(scores);
       }
@@ -477,9 +476,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param processDur
    * @param usePhoneToDisplay
    * @return
-   * @paramx scores
-   * @paramx phoneLab
-   * @paramx wordLab
    * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir,
@@ -488,10 +484,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        boolean decode,
                                        String prefix,
                                        String noSuffix,
-//                                       Scores scores,
-//                                       String phoneLab,
-//                                       String wordLab,
-
                                        HydraOutput result,
                                        double duration,
                                        int processDur,
@@ -544,18 +536,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         // logger.info("using " + phoneToDisplay.size());
       }
 
-      List<String> recoPhones = getRecoPhones(eventAndFileInfo);
+/*      List<String> recoPhones = getRecoPhones(eventAndFileInfo);
       List<String> noSil = recoPhones.stream().filter(s -> !s.equalsIgnoreCase("sil")).collect(Collectors.toList());
       StringBuilder builder = new StringBuilder();
       noSil.forEach(builder::append);
       String pron = builder.toString();
       Collection<String> matchesLC = result.getTrie().getMatchesLC(pron);
-      List<String> exact = matchesLC.stream().filter(p -> p.equals(pron)).collect(Collectors.toList());
+      List<String> exact = matchesLC.stream().filter(p -> p.equals(pron)).collect(Collectors.toList());*/
+
+      List<WordAndProns> recoPhones = getRecoPhones(typeToEndTimes);
+
+      boolean match = result.isMatch(recoPhones);
       logger.info("getPretestScore : reco" +
           "\n\tphones " + recoPhones +
-          "\n\tphones " + pron +
-          "\n\tmatch  " + matchesLC +
-          "\n\texact  " + exact
+          // "\n\tphones " + pron +
+          "\n\texpect " + result.getWordAndProns() +
+          "\n\tmatch  " + match
       );
 
       Scores scores = result.getScores();
@@ -567,10 +563,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           typeToEndTimes,
           getRecoSentence(eventAndFileInfo),
           (float) duration,
-          processDur, !exact.isEmpty());
+          processDur,
+          match);
 
     } catch (Exception e) {
-      logger.error("Got " + e, e);
+      logger.error("getPretestScore got " + e, e);
       return new PretestScore(-1);
     }
   }
@@ -611,12 +608,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
     boolean removeAllPunct = !language.equalsIgnoreCase("french");
 
-    List<String> possibleProns = new ArrayList<>();
+    List<WordAndProns> possibleProns = new ArrayList<>();
 
     // generate dictionary
     String hydraDict = getHydraDict(cleaned, transliteration, possibleProns);
 
-    Trie<String> trie = getTrie(possibleProns);
+    //Trie<String> trie = getTrie(possibleProns);
 
     String smallLM = "[" +
         (SEND_GRAMMER_WITH_ALIGNMENT ?
@@ -678,11 +675,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return new HydraOutput(scores,
           results[1].replaceAll("#", ""),
           results[2].replaceAll("#", ""),
-          trie); // where are the # coming from?
+          possibleProns); // where are the # coming from?
     }
   }
 
-  @NotNull
+/*  @NotNull
   private Trie<String> getTrie(List<String> possibleProns) {
     Trie<String> trie = new Trie<>();
     trie.startMakingNodes();
@@ -690,10 +687,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 //    possibleProns.forEach(pron -> logger.info("\n\trunHydra : adding " + pron));
     trie.endMakingNodes();
     return trie;
-  }
+  }*/
 
   @Override
-  public String getHydraDict(String cleaned, String transliteration, List<String> possibleProns) {
+  public String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
     return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
   }
 
@@ -813,9 +810,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(netPronImageType, k2 -> new ArrayList<>());
       eventMap.values()
           .forEach(value -> {
-            String event = value.event;
+            String event = value.getEvent();
             String displayName = netPronImageType == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(event) : event;
-            endTimes.add(new TranscriptSegment(value.start, value.end, event, value.score, displayName));
+            endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
           });
     });
 
@@ -891,17 +888,56 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @param eventAndFileInfo
    * @return
+   * @see #getPretestScore
    */
-  List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
+  private List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
     List<String> phones = new ArrayList<>();
 
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       if (key == NetPronImageType.PHONE_TRANSCRIPT) {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.event));
+        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.getEvent()));
       }
     }
     return phones.stream().filter(p -> !toSkip.contains(p)).collect(Collectors.toList());
+  }
+
+/*
+  private List<HydraOutput.WordAndProns> getRecoSequence(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+  }
+*/
+
+  private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+    List<WordAndProns> wordAndProns = new ArrayList<>();
+
+    if (words != null) {
+      for (TranscriptSegment segment : words) {
+        String wordLabel = segment.getEvent();
+        if (keepEvent(wordLabel)) {
+          StringBuilder builder = new StringBuilder();
+          for (TranscriptSegment pseg : phones) {
+            if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+              String phoneLabel = pseg.getEvent();
+              if (keepEvent(phoneLabel)) {
+                builder.append(phoneLabel);
+              }
+            }
+          }
+          WordAndProns e = new WordAndProns(wordLabel, builder.toString());
+          wordAndProns.add(e);
+        }
+      }
+
+    }
+    return wordAndProns;
+  }
+
+  private boolean keepEvent(String event) {
+    return !event.equals(ASR.UNKNOWN_MODEL) && !toSkip.contains(event);
   }
 }

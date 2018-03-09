@@ -38,7 +38,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.result.ISlimResult;
-import mitll.langtest.server.database.result.Result;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -174,7 +173,7 @@ public class PrecalcScores {
     Map<String, Float> cvalue = new HashMap<>();
 
     for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
-      String event = ev.event;
+      String event = ev.getEvent();
       if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
       } else {
         Float orDefault = cvalue.getOrDefault(event, 0.0f);
@@ -182,7 +181,7 @@ public class PrecalcScores {
         cvalue.put(event, orDefault);
 
         Float orDefault1 = value.getOrDefault(event, 0.0f);
-        value.put(event, orDefault1 + ev.score);
+        value.put(event, orDefault1 + ev.getScore());
       }
     }
 

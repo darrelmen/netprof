@@ -64,7 +64,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @see ASR#getHydraDict
    */
   @Override
-  public String createHydraDict(String transcript, String transliteration, List<String> possibleProns) {
+  public String createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns) {
     if (lts == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
@@ -134,7 +134,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   /**
    * Don't strip accents from tokens used in dictionary lookup - like for French precisement.
-   *
+   * <p>
    * It would be good if the accent thing were consistent across dictionaries.
    *
    * @param transcript
@@ -148,7 +148,8 @@ public class PronunciationLookup implements IPronunciationLookup {
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones,
-                                               boolean makeCandidates, List<String> possible) {
+                                               boolean makeCandidates,
+                                               List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
     String[] translitTokens = transliteration.toLowerCase().split(" ");
 
@@ -166,8 +167,8 @@ public class PronunciationLookup implements IPronunciationLookup {
     boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((numTokens == translitTokens.length) || (numTokens == 1));
     int index = 0;
 
-    List<String> candidates = new ArrayList<>();
-    candidates.add("");
+    List<WordAndProns> candidates = new ArrayList<>();
+    //candidates.add("");
 
     if (numTokens > 50) logger.info("long transcript with " + numTokens + " num tokens " + transcript);
     for (String word : transcriptTokens) {
@@ -196,10 +197,11 @@ public class PronunciationLookup implements IPronunciationLookup {
 
           List<String> pronsForWord = addDictMatches(justPhones, dict, word, lookupToken);
 
-          if (candidates == null) candidates = pronsForWord;
+        /*  if (candidates == null) candidates = pronsForWord;
           else {
             candidates = getPermutations(candidates, pronsForWord);
-          }
+          }*/
+          candidates.add(new WordAndProns(word, pronsForWord));
         } else {  // not in the dictionary, let's ask LTS
           String optional = russian ? " or " + removeAccents(word) : "";
           logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
@@ -209,7 +211,9 @@ public class PronunciationLookup implements IPronunciationLookup {
           } else {
             if (LTSFactory.isEmpty(lts)) {
               dict.append(getUnkPron(word));
-              candidates = getPermutations(candidates, Collections.singletonList(UNK));
+              //   candidates = getPermutations(candidates, Collections.singletonList(UNK));
+              candidates.add(new WordAndProns(word, UNK));
+
             } else {
               String word1 = word.toLowerCase();
 
@@ -237,7 +241,8 @@ public class PronunciationLookup implements IPronunciationLookup {
                       dict.append(getPronStringForWord(word, pron, false));
                       prons.add(getPhoneSeq(pron));
                     }
-                    candidates = getPermutations(candidates, prons);
+                    // candidates = getPermutations(candidates, prons);
+                    candidates.add(new WordAndProns(word, prons));
 
                   } else {
                     translitWarning(transcript, lts, word1);
@@ -249,7 +254,8 @@ public class PronunciationLookup implements IPronunciationLookup {
                       for (String[] pron : translitprocess) {
                         prons.add(getPhoneSeq(pron));
                       }
-                      candidates = getPermutations(candidates, prons);
+                      //   candidates = getPermutations(candidates, prons);
+                      candidates.add(new WordAndProns(word, prons));
                     }
                   }
                 } else {
@@ -272,7 +278,8 @@ public class PronunciationLookup implements IPronunciationLookup {
 
                   logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript);
                   dict.append(getUnkPron(word));
-                  candidates = getPermutations(candidates, Collections.singletonList(UNK));
+//                  candidates = getPermutations(candidates, Collections.singletonList(UNK));
+                  candidates.add(new WordAndProns(word, UNK));
                 }
               } else { // it's ok -use it
                 if (process.length > 50) {
@@ -304,7 +311,8 @@ public class PronunciationLookup implements IPronunciationLookup {
                     logger.warn("getPronunciationsFromDictOrLTS : skipping invalid pron " + Arrays.asList(pron) + " for " + word);
                   }
                 }
-                candidates = getPermutations(candidates, prons);
+                candidates.add(new WordAndProns(word, prons));
+//                candidates = getPermutations(candidates, prons);
               }
             }
           }
@@ -319,7 +327,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     return dict.toString();
   }
 
-  @NotNull
+/*  @NotNull
   private List<String> getPermutations(List<String> candidates, List<String> pronsForWord) {
     List<String> nc = new ArrayList<>();
     for (String curr : candidates) {
@@ -331,7 +339,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       }
     }
     return nc;
-  }
+  }*/
 
   private void translitWarning(String transcript, LTS lts, String word1) {
     logger.info("getPronunciationsFromDictOrLTS transliteration LTS failed");

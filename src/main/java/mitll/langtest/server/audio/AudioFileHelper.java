@@ -1130,7 +1130,7 @@ public class AudioFileHelper implements AlignDecode {
           " '" + english + "' = '" + foreignLanguage + "'");
 
       {
-        List<String> possibleProns = new ArrayList<>();
+        List<WordAndProns> possibleProns = new ArrayList<>();
 
         logger.info("getProxyScore " +
             "\n\tfile " + theFile +
@@ -1147,7 +1147,7 @@ public class AudioFileHelper implements AlignDecode {
     return null;
   }
 
-  private String getHydraDict(String foreignLanguage, List<String> possibleProns) {
+  private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
     String s = new SLFFile().cleanToken(foreignLanguage, removeAccents);
     return asrScoring.getHydraDict(s.trim(), "", possibleProns);
   }
@@ -1244,7 +1244,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @see #getAlignment
+   * @see #getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,

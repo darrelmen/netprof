@@ -63,14 +63,30 @@ public class TranscriptEvent implements Comparable<TranscriptEvent> {
   }
 
   // Data Members
-  public float start;                  /// Start time in seconds
-  public float end;                    /// End time in seconds
-  public String event;                 /// Text to be displayed per event
-  public float score;                  /// posterior score
+  private float start;                  /// Start time in seconds
+  private float end;                    /// End time in seconds
+  private String event;                 /// Text to be displayed per event
+  private float score;                  /// posterior score
 
   @Override
   public int compareTo(TranscriptEvent o) {
     return Float.compare(start, o.start);
+  }
+
+  public float getStart() {
+    return start;
+  }
+
+  public float getEnd() {
+    return end;
+  }
+
+  public String getEvent() {
+    return event;
+  }
+
+  public float getScore() {
+    return score;
   }
 
   public String toString() {
