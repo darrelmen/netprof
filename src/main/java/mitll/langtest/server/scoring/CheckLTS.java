@@ -137,7 +137,7 @@ class CheckLTS {
 
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
-    Collection<String> translitTokens = smallVocabDecoder.getTokens(transliteration, removeAllAccents);
+    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
@@ -240,7 +240,8 @@ class CheckLTS {
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
     } else {
-      if (DEBUG) logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
+      if (DEBUG)
+        logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
     if (DEBUG)
       logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
@@ -302,7 +303,7 @@ class CheckLTS {
           if (DEBUG) logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
           numBad++;
         } else {
-         // logger.info("good " + c + "/" + n + " for " + token);
+          // logger.info("good " + c + "/" + n + " for " + token);
         }
         c++;
         //  valid &= allValid;
@@ -311,7 +312,7 @@ class CheckLTS {
         valid = false;
         //logger.info("isLegitLTS all bad " + numBad + " out of " + n + " for " + token);
       } else if (numBad > 0) {
-        if (DEBUG)  logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
+        if (DEBUG) logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
       }
     }
     return b && valid;

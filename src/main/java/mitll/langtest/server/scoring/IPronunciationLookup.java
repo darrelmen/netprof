@@ -19,7 +19,7 @@ public interface IPronunciationLookup {
 
   String getCleanedTranscript(String cleaned);
 
-  String getPronStringForWord(String word, String[] apply, boolean justPhones);
+  String getPronStringForWord(String word, Collection<String> apply, boolean justPhones);
 
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 

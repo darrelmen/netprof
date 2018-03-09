@@ -151,7 +151,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see Project#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, null);
+    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>());
+  }  public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
+    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>());
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {

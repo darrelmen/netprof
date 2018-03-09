@@ -18,6 +18,9 @@ public class PronunciationLookup implements IPronunciationLookup {
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
   private static final String UNK = "+UNK+";
+  /**
+   *
+   */
   private static final String SEMI = ";";
   public static final String SIL = "sil";
   private static final int MAX_FROM_ANY_TOKEN = 10;
@@ -147,7 +150,9 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   @Override
-  public String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones,
+  public String getPronunciationsFromDictOrLTS(String transcript,
+                                               String transliteration,
+                                               boolean justPhones,
                                                boolean makeCandidates,
                                                List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
@@ -168,6 +173,8 @@ public class PronunciationLookup implements IPronunciationLookup {
     int index = 0;
 
     List<WordAndProns> candidates = new ArrayList<>();
+
+    List<List<String>> wordProns = new ArrayList<>();
     //candidates.add("");
 
     if (numTokens > 50) logger.info("long transcript with " + numTokens + " num tokens " + transcript);
@@ -185,141 +192,97 @@ public class PronunciationLookup implements IPronunciationLookup {
             (lowerMatch = htkDictionary.contains(word.toLowerCase())) ||
             (russian && (stripMatch = htkDictionary.contains(removeAccents(word))))
             ) {
+          candidates.add(addDictMatch(justPhones, dict, word, easyMatch, lowerMatch, stripMatch));
+        } else if (!removeAllPunct && !(wordProns = hasParts(word)).isEmpty()) {
 
-          String lookupToken =
-              easyMatch ? word :
-                  lowerMatch ? word.toLowerCase() :
-                      stripMatch ? removeAccents(word) : word;
-
-          if (DEBUG) {
-            logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "' : '" + lookupToken + "'");
-          }
-
-          List<String> pronsForWord = addDictMatches(justPhones, dict, word, lookupToken);
-
-        /*  if (candidates == null) candidates = pronsForWord;
-          else {
-            candidates = getPermutations(candidates, pronsForWord);
-          }*/
-          candidates.add(new WordAndProns(word, pronsForWord));
-        } else {  // not in the dictionary, let's ask LTS
-          String optional = russian ? " or " + removeAccents(word) : "";
-          logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
-          LTS lts = getLTS();
-          if (lts == null) {
-            logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");
+          candidates.add(addDictParts(justPhones, dict, wordProns, word));
+        }
+      } else {  // not in the dictionary, let's ask LTS
+        String optional = russian ? " or " + removeAccents(word) : "";
+        logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+        LTS lts = getLTS();
+        if (lts == null) {
+          logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");
+        } else {
+          if (LTSFactory.isEmpty(lts)) {
+            dict.append(getUnkPron(word));
+            candidates.add(new WordAndProns(word, UNK));
           } else {
-            if (LTSFactory.isEmpty(lts)) {
-              dict.append(getUnkPron(word));
-              //   candidates = getPermutations(candidates, Collections.singletonList(UNK));
-              candidates.add(new WordAndProns(word, UNK));
+            String word1 = word.toLowerCase();
 
-            } else {
-              String word1 = word.toLowerCase();
+            //  logger.info("no dict entry for " + word1);
+            String[][] process = lts.process(word1);
 
-              //  logger.info("no dict entry for " + word1);
-              String[][] process = lts.process(word1);
+            if (!ltsOutputOk(process)) {
+              String key = transcript + "-" + transliteration;
+              if (canUseTransliteration) {
+                //              logger.info("trying transliteration LTS");
+                if (!seen.contains(key)) {
+                  logger.warn("getPronunciationsFromDictOrLTS (transliteration) couldn't get letter to sound map from " +
+                      lts + " for " + word1 + " in " + transcript);
+                }
 
-              if (!ltsOutputOk(process)) {
-                String key = transcript + "-" + transliteration;
-                if (canUseTransliteration) {
-                  //              logger.info("trying transliteration LTS");
-                  if (!seen.contains(key)) {
-                    logger.warn("getPronunciationsFromDictOrLTS (transliteration) couldn't get letter to sound map from " +
-                        lts + " for " + word1 + " in " + transcript);
-                  }
+                String[][] translitprocess = (numTokens == 1) ?
+                    lts.process(StringUtils.join(translitTokens, "")) :
+                    lts.process(translitTokens[index]);
 
-                  String[][] translitprocess = (numTokens == 1) ?
-                      lts.process(StringUtils.join(translitTokens, "")) :
-                      lts.process(translitTokens[index]);
-
-                  if (ltsOutputOk(translitprocess)) {
-                    logger.info("getPronunciationsFromDictOrLTS got pronunciation from transliteration");
+                if (ltsOutputOk(translitprocess)) {
+                  logger.info("getPronunciationsFromDictOrLTS got pronunciation from transliteration");
+                  candidates.add(addTranslitPhones(dict, word, translitprocess));
+                } else {
+                  translitWarning(transcript, lts, word1);
+                  if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
+                    String defaultPronStringForWord = getDefaultPronStringForWord(word, translitprocess, justPhones);
+                    dict.append(defaultPronStringForWord);
 
                     List<String> prons = new ArrayList<>();
                     for (String[] pron : translitprocess) {
-                      dict.append(getPronStringForWord(word, pron, false));
                       prons.add(getPhoneSeq(pron));
                     }
-                    // candidates = getPermutations(candidates, prons);
                     candidates.add(new WordAndProns(word, prons));
-
-                  } else {
-                    translitWarning(transcript, lts, word1);
-                    if (translitprocess != null && (translitprocess.length > 0) && (translitprocess[0].length > 1)) {
-                      String defaultPronStringForWord = getDefaultPronStringForWord(word, translitprocess, justPhones);
-                      dict.append(defaultPronStringForWord);
-
-                      List<String> prons = new ArrayList<>();
-                      for (String[] pron : translitprocess) {
-                        prons.add(getPhoneSeq(pron));
-                      }
-                      //   candidates = getPermutations(candidates, prons);
-                      candidates.add(new WordAndProns(word, prons));
-                    }
                   }
-                } else {
+                }
+              } else {
 //                logger.info("can't use transliteration");
-                  if (!seen.contains(key)) {
-                    logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts + " for '" + word1 + "' in " + transcript);
-                  }
-
-                  seen.add(key);
-//                logger.info("attempting to fall back to default pronunciation");
-
-                  // THIS is going to be the "a" pron...
-           /*     if (process != null && process.length > 0) {
-                  dict += getDefaultPronStringForWord(word, process, justPhones);
+                if (!seen.contains(key)) {
+                  logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts + " for '" + word1 + "' in " + transcript);
                 }
-                else {
-                  logger.info("using unk phone for " +word);
-                  dict += getUnkPron(word);
-                }*/
 
-                  logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript);
-                  dict.append(getUnkPron(word));
-//                  candidates = getPermutations(candidates, Collections.singletonList(UNK));
-                  candidates.add(new WordAndProns(word, UNK));
-                }
-              } else { // it's ok -use it
-                if (process.length > 50) {
-                  logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in " + transcript);
-                }
-                int max = MAX_FROM_ANY_TOKEN;
-                List<String> prons = new ArrayList<>();
-                for (String[] pron : process) {
-                  if (max-- == 0) break;
-
-
-         /*       if (korean) {
-                  for (String p : pron) {
-                    logger.info("got from lts '" + p + "'");
-                  }
-                }*/
-
-                  boolean allValid = areAllPhonesValid(pron);
-
-                  if (allValid) {
-                    String pronStringForWord = getPronStringForWord(word, pron, justPhones);
-                    if (korean) {
-                      logger.info("getPronunciationsFromDictOrLTS word " + word + " = " + pronStringForWord);
-                    }
-                    dict.append(pronStringForWord);
-                    prons.add(getPhoneSeq(pron));
-
-                  } else {
-                    logger.warn("getPronunciationsFromDictOrLTS : skipping invalid pron " + Arrays.asList(pron) + " for " + word);
-                  }
-                }
-                candidates.add(new WordAndProns(word, prons));
-//                candidates = getPermutations(candidates, prons);
+                seen.add(key);
+                logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript);
+                dict.append(getUnkPron(word));
+                candidates.add(new WordAndProns(word, UNK));
               }
+            } else { // it's ok -use it
+              if (process.length > 50) {
+                logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in " + transcript);
+              }
+              int max = MAX_FROM_ANY_TOKEN;
+              List<String> prons = new ArrayList<>();
+              for (String[] pron : process) {
+                if (max-- == 0) break;
+                boolean allValid = areAllPhonesValid(pron);
+
+                if (allValid) {
+                  String pronStringForWord = getPronStringForWord(word, pron, justPhones);
+                  if (korean) {
+                    logger.info("getPronunciationsFromDictOrLTS word " + word + " = " + pronStringForWord);
+                  }
+                  dict.append(pronStringForWord);
+                  prons.add(getPhoneSeq(pron));
+
+                } else {
+                  logger.warn("getPronunciationsFromDictOrLTS : skipping invalid pron " + Arrays.asList(pron) + " for " + word);
+                }
+              }
+              candidates.add(new WordAndProns(word, prons));
             }
           }
         }
       }
-      index += 1;
     }
+//    index += 1;
+
 
     if (candidates != null) {
       possible.addAll(candidates);
@@ -327,19 +290,131 @@ public class PronunciationLookup implements IPronunciationLookup {
     return dict.toString();
   }
 
-/*  @NotNull
-  private List<String> getPermutations(List<String> candidates, List<String> pronsForWord) {
-    List<String> nc = new ArrayList<>();
-    for (String curr : candidates) {
-      for (String pronForWord : pronsForWord) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(curr);
-        builder.append(pronForWord);
-        nc.add(builder.toString());
+  private WordAndProns addDictParts(boolean justPhones, StringBuilder dict, List<List<String>> wordProns, String word) {
+    List<String> possibleProns = new ArrayList<>(wordProns.size());
+    for (List<String> phoneSequence : wordProns) {
+      logger.warn("\tgot " + word + " : " + phoneSequence);
+      addPhoneSeq(possibleProns, phoneSequence);
+      String pronStringForWord = getPronStringForWord(word, phoneSequence, justPhones);
+      logger.warn("\tadd dict " + pronStringForWord);
+      dict.append(pronStringForWord);
+    }
+    WordAndProns wordAndProns = new WordAndProns(word, possibleProns);
+    logger.warn("\tmade " + wordAndProns);
+    return wordAndProns;
+  }
+
+  private WordAndProns addTranslitPhones(StringBuilder dict,
+                                         String word,
+                                         String[][] translitprocess) {
+    List<String> prons = new ArrayList<>();
+    for (String[] pron : translitprocess) {
+      dict.append(getPronStringForWord(word, pron, false));
+      prons.add(getPhoneSeq(pron));
+    }
+    return new WordAndProns(word, prons);
+  }
+
+  private List<List<String>> hasParts(String token) {
+    String[] split = token.split("'");
+
+    boolean match = true;
+
+     List<List<String>> candidates = new ArrayList<>();
+    candidates.add(new ArrayList<>());
+
+    if (split.length > 1) {
+      List<String> parts = Arrays.asList(split);
+
+      for (String part : parts) {
+        boolean easyMatch, lowerMatch = false, stripMatch = false;
+        match &=
+            (easyMatch = htkDictionary.contains(part)) ||
+                (lowerMatch = htkDictionary.contains(part.toLowerCase()));
+
+        if (match) {
+          String lookupToken = easyMatch ? part : part.toLowerCase();
+
+          scala.collection.immutable.List<String[]> prons = htkDictionary.apply(lookupToken);
+
+          int size = prons.size();
+          List<List<String>> possibleProns = new ArrayList<>(size);
+          logger.warn("for " + lookupToken + " found " + size + " possible prons.");
+          for (int i = 0; i < size; i++) {
+            String[] phoneSequence = prons.apply(i);
+            List<String> e = Arrays.asList(phoneSequence);
+            logger.warn("adding " + lookupToken + " : " + e);
+            possibleProns.add(e);
+          }
+
+          candidates = getPermutations(candidates, possibleProns);
+
+        } else break;
       }
     }
-    return nc;
-  }*/
+    return match ? candidates : Collections.emptyList();
+  }
+
+/*
+  private WordAndProns addDictMatch2(boolean justPhones,
+                                     StringBuilder dict,
+                                     String word, boolean easyMatch, boolean lowerMatch, boolean stripMatch) {
+    String lookupToken =
+        easyMatch ? word :
+            lowerMatch ? word.toLowerCase() :
+                stripMatch ? removeAccents(word) : word;
+
+    if (DEBUG) {
+      logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "' : '" + lookupToken + "'");
+    }
+
+    List<String> pronsForWord = addDictMatches(justPhones, dict, word, lookupToken);
+    return new WordAndProns(word, pronsForWord);
+  }
+*/
+
+
+  private WordAndProns addDictMatch(boolean justPhones, StringBuilder dict, String word, boolean easyMatch, boolean lowerMatch, boolean stripMatch) {
+    String lookupToken =
+        easyMatch ? word :
+            lowerMatch ? word.toLowerCase() :
+                stripMatch ? removeAccents(word) : word;
+
+    if (DEBUG) {
+      logger.info("getPronunciationsFromDictOrLTS found in dict : '" + word + "' : '" + lookupToken + "'");
+    }
+
+    return new WordAndProns(word, addDictMatches(justPhones, dict, word, lookupToken));
+  }
+
+  /**
+   * @param justPhones
+   * @param dict
+   * @param word
+   * @param lookupToken
+   * @return
+   */
+  private List<String> addDictMatches(boolean justPhones,
+                                      StringBuilder dict,
+                                      String word,
+                                      String lookupToken) {
+    scala.collection.immutable.List<String[]> prons = htkDictionary.apply(lookupToken);
+    int size = prons.size();
+    List<String> possibleProns = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      String[] phoneSequence = prons.apply(i);
+      addPhoneSeq(possibleProns, Arrays.asList(phoneSequence));
+      String pronStringForWord = getPronStringForWord(word, phoneSequence, justPhones);
+//      logger.warn("addDictMatches for word " + lookupToken + "\n\t" + pronStringForWord);
+      dict.append(pronStringForWord);
+    }
+    /*    logger.info("addDictMatches for" +
+        "\n\teasyMatch " + easyMatch +
+        "\n\tword " + word +
+        "\n\tdict " + dict);*/
+
+    return possibleProns;
+  }
 
   private void translitWarning(String transcript, LTS lts, String word1) {
     logger.info("getPronunciationsFromDictOrLTS transliteration LTS failed");
@@ -359,62 +434,67 @@ public class PronunciationLookup implements IPronunciationLookup {
     return p.equalsIgnoreCase(POUND);
   }
 
-  /**
-   * @param justPhones
-   * @param dict
-   * @param word
-   * @param lookupToken
-   * @return
-   */
-  private List<String> addDictMatches(boolean justPhones,
-                                      StringBuilder dict,
-                                      String word,
-                                      String lookupToken) {
-    scala.collection.immutable.List<String[]> prons = htkDictionary.apply(lookupToken);
-    int size = prons.size();
-    List<String> possibleProns = new ArrayList<>(size);
-    for (int i = 0; i < size; i++) {
 
-      String[] phoneSequence = prons.apply(i);
-    /*  if (project.getLanguage().equalsIgnoreCase("korean")) {
-        for (String p : phoneSequence) {
-          logger.info("got from dict  " + p);
-        }
-      }*/
+//
+//  List<String> getPhoneSeqs(String[] phoneSequence) {
+//    List<String> possibleProns = new ArrayList<>(1);
+//    addPhoneSeq(possibleProns, phoneSequence);
+//    return possibleProns;
+//  }
 
-      addPhoneSeq(possibleProns, phoneSequence);
-      dict.append(getPronStringForWord(word, phoneSequence, justPhones));
-    }
-    /*    logger.info("addDictMatches for" +
-        "\n\teasyMatch " + easyMatch +
-        "\n\tword " + word +
-        "\n\tdict " + dict);*/
-
-    return possibleProns;
-  }
-
-  List<String> getPhoneSeqs(String[] phoneSequence) {
-
-    List<String> possibleProns = new ArrayList<>(1);
-    addPhoneSeq(possibleProns, phoneSequence);
-    return possibleProns;
-  }
-
-  private void addPhoneSeq(List<String> possibleProns, String[] phoneSequence) {
+  private void addPhoneSeq(List<String> possibleProns, Collection<String> phoneSequence) {
     possibleProns.add(getPhoneSeq(phoneSequence));
   }
 
   @NotNull
+  private List<List<String>> getPermutations(List<List<String>> candidates, List<List<String>> pronsForWord) {
+    List<List<String>> nc = new ArrayList<>();
+    for (List<String> curr : candidates) {
+      for (List<String> pronForWord : pronsForWord) {
+        // StringBuilder builder = new StringBuilder();
+        // builder.append(curr);
+        // builder.append(pronForWord);
+        List<String> copy = new ArrayList<>(curr);
+        copy.addAll(pronForWord);
+        nc.add(copy);
+      }
+    }
+    return nc;
+  }
+
   private String getPhoneSeq(String[] phoneSequence) {
+    return getPhoneSeq(Arrays.asList(phoneSequence));
+  }
+
+  /**
+   * Mush them all together
+   *
+   * @param phoneSequence
+   * @return
+   */
+  @NotNull
+  private String getPhoneSeq(Collection<String> phoneSequence) {
     StringBuilder builder = new StringBuilder();
     for (String p : phoneSequence) builder.append(p);
     return builder.toString();
   }
 
-  public static String removeAccents(String text) {
+  private String removeAccents(String text) {
     return text == null ? null :
         Normalizer.normalize(text, Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+  }
+
+  /**
+   *
+   * @param word
+   * @param apply
+   * @param justPhones
+   * @return
+   */
+
+  private String getPronStringForWord(String word, String[] apply, boolean justPhones) {
+    return getPronStringForWord(word, Arrays.asList(apply), justPhones);
   }
 
   /**
@@ -427,9 +507,11 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @return
    */
   @Override
-  public String getPronStringForWord(String word, String[] apply, boolean justPhones) {
+  public String getPronStringForWord(String word, Collection<String> apply, boolean justPhones) {
     String s = listToSpaceSepSequence(apply);
-    return justPhones ? s + " " : word + "," + s + " sp" + SEMI;
+    return justPhones ?
+        (s + " ") :
+        word + "," + s + " sp" + SEMI;
   }
 
   public String getCleanedTranscript(String cleaned) {
@@ -480,14 +562,9 @@ public class PronunciationLookup implements IPronunciationLookup {
     return word + "," + UNK + " sp" + SEMI;
   }
 
-  private String listToSpaceSepSequence(String[] pron) {
+  private String listToSpaceSepSequence(Collection<String> pron) {
     StringBuilder builder = new StringBuilder();
-    for (String p : pron) {
-/*      if (korean && p.equalsIgnoreCase("aa")) {
-        p = UNK;
-      }*/
-      builder.append(p).append(" ");
-    }
+    pron.forEach(p -> builder.append(p).append(" "));
     return builder.toString().trim();
   }
 

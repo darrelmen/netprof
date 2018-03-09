@@ -171,6 +171,8 @@ public class SmallVocabDecoder {
     return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
   }
 
+
+
   /**
    * @param sentence
    * @param removeAllAccents
@@ -180,11 +182,14 @@ public class SmallVocabDecoder {
    */
   public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
-    logger.info("getTokens initial    '" + sentence + "'");
-    String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
-    if (removeAllAccents) {
-      logger.info("getTokens after trim '" + trimmedSent + "'");
+    if (sentence.isEmpty()) {
+      logger.warn("huh? empty ", new Exception());
     }
+  //  logger.info("getTokens initial    '" + sentence + "'");
+    String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
+    //if (removeAllAccents) {
+     // logger.info("getTokens after trim '" + trimmedSent + "'");
+   // }
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
