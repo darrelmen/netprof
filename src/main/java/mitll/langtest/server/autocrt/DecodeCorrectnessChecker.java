@@ -223,18 +223,20 @@ public class DecodeCorrectnessChecker {
       }
 
       List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted, removeAllAccents);
-      List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
+      List<String> recoTokens   = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
       if (answerTokens.size() == recoTokens.size()) {
         boolean same = true;
         for (int i = 0; i < answerTokens.size() && same; i++) {
-          String s = answerTokens.get(i);
-          String anotherString = recoTokens.get(i);
+          String expected = answerTokens.get(i);
+          String reco     = recoTokens.get(i);
           if (DEBUG)
-            logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
-          same = s.equalsIgnoreCase(anotherString);
+            logger.debug("isCorrect comparing '" + expected + "' " + expected.length() + " to '" + reco + "' " + reco.length());
+          same = expected.equalsIgnoreCase(reco);
           if (!same) {
-            if (DEBUG)
-              logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            if (DEBUG || true)
+              logger.debug("isCorrect NO MATCH " +
+                  "\n\tcomparing '" + expected + "' " + expected.length() +
+                  "\n\tto        '" + reco + "' " + reco.length());
           }
         }
         if (same) return true;
