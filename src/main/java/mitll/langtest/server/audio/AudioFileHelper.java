@@ -145,6 +145,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * TODO : Buggy.
+   *
    * @param transcript
    * @param transliteration
    * @return
@@ -152,12 +154,22 @@ public class AudioFileHelper implements AlignDecode {
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
     return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>());
-  }  public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
+  }
+
+  public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
     return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>());
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
     return webserviceScoring.getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
+  }
+
+  public String getLM(String fl, boolean removeAllAccents) {
+    return webserviceScoring.getLM(fl, removeAllAccents);
+  }
+
+  public String getHydraTranscript(String fl) {
+    return webserviceScoring.getHydraTranscriptTest(fl);
   }
 
   /**
@@ -1150,7 +1162,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
-    String s = new SLFFile().cleanToken(foreignLanguage, removeAccents);
+    String s = getSmallVocabDecoder().cleanToken(foreignLanguage, removeAccents);
     return asrScoring.getHydraDict(s.trim(), "", possibleProns);
   }
 

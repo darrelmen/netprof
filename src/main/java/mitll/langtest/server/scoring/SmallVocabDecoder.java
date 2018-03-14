@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.CharacterIterator;
+import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.*;
 
@@ -56,14 +57,19 @@ public class SmallVocabDecoder {
 
   /**
    * @see #getTrimmed(String)
-   * @see mitll.langtest.server.audio.SLFFile#cleanToken(String)
+   * @see #cleanToken
    * <p>
    * remove latin capital letter i with dot above - 0130
    */
-  public static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
+  private static final String OE = "oe";
+
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char ZERO = '0';
   private static final String P_Z = "\\p{Z}+";
+  private static final String FRENCH_PUNCT = "[,.?]";
+
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {
@@ -172,7 +178,6 @@ public class SmallVocabDecoder {
   }
 
 
-
   /**
    * @param sentence
    * @param removeAllAccents
@@ -185,11 +190,11 @@ public class SmallVocabDecoder {
     if (sentence.isEmpty()) {
       logger.warn("huh? empty ", new Exception());
     }
-  //  logger.info("getTokens initial    '" + sentence + "'");
+    //  logger.info("getTokens initial    '" + sentence + "'");
     String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
     //if (removeAllAccents) {
-     // logger.info("getTokens after trim '" + trimmedSent + "'");
-   // }
+    // logger.info("getTokens after trim '" + trimmedSent + "'");
+    // }
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
@@ -231,7 +236,7 @@ public class SmallVocabDecoder {
    * @param sentence
    * @return
    * @see #getTokens
-   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
+   * @see mitll.langtest.server.trie.ExerciseTrie#addSuffixes
    */
   public String getTrimmed(String sentence) {
     String trim = getTrimmedLeaveLastSpace(sentence)
@@ -241,13 +246,51 @@ public class SmallVocabDecoder {
     return trim;
   }
 
+  /**
+   * @param sentence
+   * @return
+   * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
+   */
+/*  public String getTrimmedRemoveAccents(String sentence) {
+    String trim = getTrimmedLeaveLastSpace(removeAccents(sentence))
+        //.replaceAll("\\s+", " ")
+        .trim();
+    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
+    return trim;
+  }*/
   public String getTrimmedLeaveAccents(String sentence) {
-    String trim = sentence.replaceAll("[.?]", "")
+    String trim = sentence
+        .replaceAll(FRENCH_PUNCT, "")
+        .replaceAll(REPLACE_ME_OE, OE)
         //.replaceAll("\\s+", " ")
         .trim();
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
     return trim;
   }
+
+  public String removeAccents(String text) {
+    return text == null ? null :
+        Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+  }
+
+  public String cleanToken(String token, boolean removeAllPunct) {
+    return removeAllPunct ?
+        getTrimmedLeaveLastSpace(token).toLowerCase() :
+        getTrimmedLeaveAccents(token).toLowerCase();
+  }
+/*
+  private String cleanToken(String token) {
+*//*    String s = token
+        .replaceAll(REMOVE_ME, " ")
+        .replaceAll("\\p{Z}+", " ")
+        .replaceAll("\\p{P}", "");
+
+    // return StringUtils.stripAccents(s).toLowerCase();*//*
+
+    String s = getTrimmedLeaveLastSpace(token);
+    return s.toLowerCase();
+  }*/
 
   /**
    * We want to keep accents - french accents especially...
@@ -269,7 +312,8 @@ public class SmallVocabDecoder {
         // .replaceAll("\\u2193", " ")
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
-        .replaceAll("\\p{P}", " ");
+        .replaceAll("\\p{P}", " ")
+        .replaceAll(REPLACE_ME_OE, OE);
     return s;//StringUtils.stripAccents(s);
   }
 

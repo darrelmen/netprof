@@ -36,12 +36,10 @@ import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 
-import java.io.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import static mitll.langtest.server.scoring.SmallVocabDecoder.REMOVE_ME;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -55,26 +53,28 @@ public class SLFFile {
   // private static final Logger logger = LogManager.getLogger(SLFFile.class);
 
   private static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
-  private static final String ENCODING = "UTF8";
+  //private static final String ENCODING = "UTF8";
 
   // private static final String LINK_WEIGHT = "-1.00";
-  private static final float EQUAL_LINK_CONSTANT = -1.00f;
+  //private static final float EQUAL_LINK_CONSTANT = -1.00f;
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
   private static final String STANDARD_WEIGHT = "-1.00";
   private static final String SIL = "SIL";
+  private SmallVocabDecoder svd = new SmallVocabDecoder();
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
    * <p>
-   * Writes a file into the temp directory, with name {@link mitll.langtest.server.scoring.ASRScoring#SMALL_LM_SLF}
+   * Writes a file into the temp directory, with name {@linkx mitll.langtest.server.scoring.ASRScoring#SMALL_LM_SLF}
    *
-   * @param lmSentences
-   * @param tmpDir
-   * @param unknownModelBiasWeight - a property you can set in the property file
-   * @param dontRemoveAccents
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#calcScoreForAudio
+   * @paramx lmSentences
+   * @paramx tmpDir
+   * @paramx unknownModelBiasWeight - a property you can set in the property file
+   * @paramx dontRemoveAccents
+   * @seex mitll.langtest.server.scoring.ASRScoring#calcScoreForAudio
    */
+/*
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight, boolean dontRemoveAccents) {
     String slfFile = getSLFPath(tmpDir);
 
@@ -132,7 +132,7 @@ public class SLFFile {
     //logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
     return slfFile;
   }
-
+*/
   private String getSLFPath(String tmpDir) {
     return tmpDir + File.separator + Scoring.SMALL_LM_SLF;
   }
@@ -172,7 +172,6 @@ public class SLFFile {
 
     String finalSentence = "";
 
-    SmallVocabDecoder svd = new SmallVocabDecoder();
     int ctr = 0;
     for (String sentence : sentencesToUse) {
 //      logger.info("createSimpleSLFFile sentence " + sentence);
@@ -190,7 +189,7 @@ public class SLFFile {
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
 //        logger.info("createSimpleSLFFile onLast " + onLast + " c " + c + " '" + token + "' tokens length = " + tokens.size());
-        String cleanedToken = cleanToken(token, removeAllAccents);
+        String cleanedToken = svd.cleanToken(token, removeAllAccents);
 
         if (!cleanedToken.isEmpty()) {
           int currentNode = newNodes++;
@@ -258,6 +257,20 @@ public class SLFFile {
   }
 
   /**
+   * Special rule for french.
+   *
+   * @param token
+   * @param removeAllPunct
+   * @return
+   * @see AudioFileHelper#
+   */
+/*  public String cleanToken(String token, boolean removeAllPunct) {
+    return removeAllPunct ?
+        cleanToken(token) :
+        svd.getTrimmedLeaveAccents(token).toLowerCase();
+  }*/
+
+  /**
    * NOPE don't want to strip accents.
    * Redundant with SmallVocabDecoder...
    *
@@ -266,17 +279,15 @@ public class SLFFile {
    * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
-  private String cleanToken(String token) {
-    String s = token
+/*  private String cleanToken(String token) {
+*//*    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")
         .replaceAll("\\p{P}", "");
 
-    // return StringUtils.stripAccents(s).toLowerCase();
-    return s.toLowerCase();
-  }
+    // return StringUtils.stripAccents(s).toLowerCase();*//*
 
-  public String cleanToken(String token, boolean removeAllPunct) {
-    return removeAllPunct ? cleanToken(token) : token.replaceAll("[.?]", "");
-  }
+    String s = svd.getTrimmedLeaveLastSpace(token);
+    return s.toLowerCase();
+  }*/
 }

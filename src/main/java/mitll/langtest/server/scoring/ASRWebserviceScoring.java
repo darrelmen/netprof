@@ -98,7 +98,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * Tell dcodr what grammar to use - include optional sils between words
    */
-  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = true;
+  //private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = true;
   /**
    * Add sils between words
    */
@@ -590,7 +590,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               boolean decode,
                               int end) {
     // reference trans
-    String cleaned = slfFile.cleanToken(transcript, removeAllAccents).trim();
+    String cleaned = getCleanedTranscript(transcript);
 
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
@@ -613,27 +613,31 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // generate dictionary
     String hydraDict = getHydraDict(cleaned, transliteration, possibleProns);
 
+    logger.info("runHydra : sending " + possibleProns.size());
+    possibleProns.forEach(p -> logger.info("\t" + p));
     //Trie<String> trie = getTrie(possibleProns);
 
-    String smallLM = "[" +
-        (SEND_GRAMMER_WITH_ALIGNMENT ?
-            slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK, removeAllPunct)[0] : "") +
-        "]";
+    String smallLM;
 
     // generate SLF file (if decoding)
     if (decode) {
       String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK, removeAllPunct);
       smallLM = "[" + slfOut[0] + "]";
-      cleaned = slfFile.cleanToken(slfOut[1], removeAllPunct);
+      cleaned = getSmallVocabDecoder().cleanToken(slfOut[1], removeAllPunct);
+    } else {
+      smallLM = getSmallLM(cleaned, removeAllPunct);
     }
 
+    String hydraTranscript = getHydraTranscript(cleaned);
     String hydraInput =
         tmpDir + "/:" +
             audioPath + ":" +
             hydraDict + ":" +
             smallLM + ":" +
             "xxx,0," + end + "," +
-            "[<s>" + pronunciationLookup.getCleanedTranscript(cleaned) + "</s>]";
+            "[<s>" + hydraTranscript + "</s>]";
+
+    logger.info("runHydra : sending " + hydraInput);
 
     long then = System.currentTimeMillis();
 
@@ -679,6 +683,32 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  private String getHydraTranscript(String cleaned) {
+    return pronunciationLookup.getCleanedTranscript(cleaned);
+  }
+
+  public String getHydraTranscriptTest(String transcript) {
+    return pronunciationLookup.getCleanedTranscript(getCleanedTranscript(transcript));
+  }
+
+  public String getLM(String transcript, boolean removeAllPunct) {
+    return getSmallLM(getCleanedTranscript(transcript), removeAllPunct);
+  }
+
+  @NotNull
+  private String getCleanedTranscript(String transcript) {
+    return getSmallVocabDecoder().cleanToken(transcript, removeAllAccents).trim();
+  }
+
+  @NotNull
+  private String getSmallLM(String cleaned, boolean removeAllPunct) {
+    return "[" +
+        //(SEND_GRAMMER_WITH_ALIGNMENT ?
+        slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK, removeAllPunct)[0] //: "")
+        +
+        "]";
+  }
+
 /*  @NotNull
   private Trie<String> getTrie(List<String> possibleProns) {
     Trie<String> trie = new Trie<>();
@@ -689,6 +719,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return trie;
   }*/
 
+  /**
+   * @param cleaned
+   * @param transliteration
+   * @param possibleProns
+   * @return
+   * @see #runHydra(String, String, String, Collection, String, boolean, int)
+   */
   @Override
   public String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
     return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
@@ -902,13 +939,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
     return phones.stream().filter(p -> !toSkip.contains(p)).collect(Collectors.toList());
   }
-
-/*
-  private List<HydraOutput.WordAndProns> getRecoSequence(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
-    List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-  }
-*/
 
   private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
