@@ -87,6 +87,25 @@ public class ProjectTest extends BaseTest {
 //    logger.info("Got " + exercises);
 //  }
 
+  @Test
+  public void testFrench() {
+    DatabaseImpl french = getDatabase();
+    Project project = french.getProject(22);
+    project.getRawExercises().forEach(exercise -> {
+
+      boolean ef = exercise.getForeignLanguage().contains("b");
+      if (ef) {
+        String pronunciationsFromDictOrLTS =
+            project.getAudioFileHelper().getPronunciationsFromDictOrLTSFull(exercise.getForeignLanguage(), "");
+
+        logger.warn("For " +
+            "\n\tfl " + exercise.getForeignLanguage() +
+            "\n\t   " + pronunciationsFromDictOrLTS);
+      }
+    });
+//    project.getAudioFileHelper().getPronunciationsFromDictOrLTS()
+  }
+
 
   @Test
   public void testSegmentation() {
@@ -104,7 +123,7 @@ public class ProjectTest extends BaseTest {
 
     String segmented = audioFileHelper.getSegmented(test);
 
-  logger.info("got " + segmented);
+    logger.info("got " + segmented);
     logger.info("1 got '" + test + "' = '" + segmented + "'");
 
     String pronunciationsFromDictOrLTS = audioFileHelper.getASR().getHydraDict(segmented, "",
