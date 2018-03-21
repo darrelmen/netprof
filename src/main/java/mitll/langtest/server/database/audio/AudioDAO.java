@@ -263,6 +263,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param exid
    * @return
    * @see #attachAudioToExercise
+   * @deprecated
    */
   protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid,Map<Integer, MiniUser> idToMini) {
     try {
@@ -536,6 +537,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @throws SQLException
    * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked
    * @see BaseAudioDAO#getAudioAttributesForExercise(int)
+   * @deprecated
    */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
