@@ -57,7 +57,6 @@ public class NewContentChooser implements INavigation {
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
 
- // private static final String LISTS = "Lists";
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 
@@ -109,7 +108,7 @@ public class NewContentChooser implements INavigation {
 
 //    logger.info("user userPerms " + userPerms + " overlap =  " + userPerms);
 
-    if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
+    if (userPerms.isEmpty() && !requiredPerms.isEmpty() || currentStoredView == NONE) { // if no overlap, you don't have permission
       logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
       currentStoredView = LEARN;
     }
@@ -214,38 +213,37 @@ public class NewContentChooser implements INavigation {
 
         MIN_POLYGLOT_SCORE,
         new DialogHelper.CloseListener() {
-      @Override
-      public boolean gotYes() {
-        mode = candidateMode;
-        if (mode == MODE_CHOICE.DRY_RUN) {
-          pushFirstUnit();
-        } else if (mode == MODE_CHOICE.POLYGLOT) {
-          pushSecondUnit();
-        } else {
-          return false;
-        }
+          @Override
+          public boolean gotYes() {
+            mode = candidateMode;
+            if (mode == MODE_CHOICE.DRY_RUN) {
+              pushFirstUnit();
+            } else if (mode == MODE_CHOICE.POLYGLOT) {
+              pushSecondUnit();
+            } else {
+              return false;
+            }
 
-        prompt = candidatePrompt;
+            prompt = candidatePrompt;
 
-        return true;
-      }
+            return true;
+          }
 
-      @Override
-      public void gotNo() {
-        setBannerVisible(true);
-        practiceHelper.setVisible(true);
-      }
+          @Override
+          public void gotNo() {
+            setBannerVisible(true);
+            practiceHelper.setVisible(true);
+          }
 
-      @Override
-      public void gotHidden() {
-        if (mode != MODE_CHOICE.NOT_YET) {
-          setBannerVisible(false);
-          practiceHelper.setVisible(false);
-        }
-//        logger.info("mode is " + mode);
-        showPractice();
-      }
-    },
+          @Override
+          public void gotHidden() {
+            if (mode != MODE_CHOICE.NOT_YET) {
+              setBannerVisible(false);
+              practiceHelper.setVisible(false);
+            }
+            showPractice();
+          }
+        },
         new PolyglotDialog.ModeChoiceListener() {
           @Override
           public void gotMode(MODE_CHOICE choice) {
@@ -394,6 +392,10 @@ public class NewContentChooser implements INavigation {
     banner.showLearn();
   }
 
+  /**
+   * @param listid
+   * @see mitll.langtest.client.LangTest#showDrillList
+   */
   @Override
   public void showDrillList(int listid) {
     setHistoryWithList(listid);

@@ -158,7 +158,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) throws Exception {
-              logger.info("Load " + key);
+             // logger.info("Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
