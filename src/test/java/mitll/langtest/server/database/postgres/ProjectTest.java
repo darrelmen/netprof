@@ -46,6 +46,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
@@ -59,6 +60,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import java.text.Normalizer;
 import java.util.*;
 
 public class ProjectTest extends BaseTest {
@@ -87,20 +89,64 @@ public class ProjectTest extends BaseTest {
 //    logger.info("Got " + exercises);
 //  }
 
+
+  @Test
+  public void testFrench2() {
+    SmallVocabDecoder svd = new SmallVocabDecoder();
+    {
+      String ff = "\uFB00";
+      String normalized = Normalizer.normalize(ff, Normalizer.Form.NFKC);
+      System.out.println(ff + " = " + normalized);
+    }
+    {
+      String oe = "\u0152";
+      String normalized2 = Normalizer.normalize(oe, Normalizer.Form.NFKC);
+      System.out.println(oe + " = " + normalized2 + " " + svd.getTrimmed(oe));
+    }
+    {
+      String oe = "\u0153";
+      String normalized2 = Normalizer.normalize(oe, Normalizer.Form.NFKC);
+      System.out.println(oe + " = " + normalized2 + " " + svd.getTrimmed(oe));
+    }
+  }
+
   @Test
   public void testFrench() {
+
+    {
+      String ff = "\uFB00";
+      String normalized = Normalizer.normalize(ff, Normalizer.Form.NFKC);
+      System.out.println(ff + " = " + normalized);
+    }
+    {
+      String oe = "\u0152";
+      String normalized2 = Normalizer.normalize(oe, Normalizer.Form.NFKC);
+      System.out.println(oe + " = " + normalized2);
+    }
+    {
+      String oe = "\u0153";
+      String normalized2 = Normalizer.normalize(oe, Normalizer.Form.NFKC);
+      System.out.println(oe + " = " + normalized2);
+    }
+
     DatabaseImpl french = getDatabase();
     Project project = french.getProject(22);
     project.getRawExercises().forEach(exercise -> {
 
-      boolean ef = exercise.getForeignLanguage().contains("b");
+      boolean ef = true;//exercise.getForeignLanguage().contains("b");
       if (ef) {
+        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+        String foreignLanguage = exercise.getForeignLanguage();
         String pronunciationsFromDictOrLTS =
-            project.getAudioFileHelper().getPronunciationsFromDictOrLTSFull(exercise.getForeignLanguage(), "");
+            audioFileHelper.getPronunciationsFromDictOrLTSFull(foreignLanguage, "");
 
         logger.warn("For " +
+            "\n\ten " + exercise.getEnglish() +
             "\n\tfl " + exercise.getForeignLanguage() +
-            "\n\t   " + pronunciationsFromDictOrLTS);
+            "\n\t   " + pronunciationsFromDictOrLTS+
+            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
+            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
+        );
       }
     });
 //    project.getAudioFileHelper().getPronunciationsFromDictOrLTS()
