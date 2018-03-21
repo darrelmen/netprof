@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
+  protected static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ALL_DONE = "All done!";
@@ -267,5 +268,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     } else {
       super.onSetComplete();
     }
+  }
+
+  @Override String getKeyBindings() {
+    return ARROW_KEY_TIP;
   }
 }

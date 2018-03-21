@@ -123,11 +123,11 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   @Deprecated
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
-  public static final String MAIL_SERVER = "mail.server";
-  public static final String SERVER_NAME = "SERVER_NAME";
-  public static final String DEBUG_ONE_PROJECT = "debugOneProject";
-  public static final String IOS_VERSION = "1.0.1";
-  public static final String I_OS_VERSION = "iOSVersion";
+  private static final String MAIL_SERVER = "mail.server";
+  private static final String SERVER_NAME = "SERVER_NAME";
+  private static final String DEBUG_ONE_PROJECT = "debugOneProject";
+  private static final String IOS_VERSION = "1.0.1";
+  private static final String I_OS_VERSION = "iOSVersion";
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
@@ -154,8 +154,8 @@ public class ServerProperties {
   /**
    * For development, from a laptop.
    */
-//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
-  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
+  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
+//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
@@ -189,7 +189,7 @@ public class ServerProperties {
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
-  private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
+ // private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
@@ -199,7 +199,7 @@ public class ServerProperties {
 
   private static final int MIN_SCORE_TO_SHOW = 0;//20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
-  private static final int USER_FINAL_SCORES = 30;
+ // private static final int USER_FINAL_SCORES = 30;
 
   /**
    * Note netprof is all lower case.
@@ -637,9 +637,9 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
-  private String getProperty(String prop) {
+/*  private String getProperty(String prop) {
     return props.getProperty(prop);
-  }
+  }*/
 
   private String getProperty(ProjectProperty prop) {
     return props.getProperty(prop.getName());
@@ -781,9 +781,9 @@ public class ServerProperties {
     return emailList.getReportEmails();
   }
 
-  public int getUserInitialScores() {
+/*  public int getUserInitialScores() {
     return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
-  }
+  }*/
 
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
@@ -801,9 +801,9 @@ public class ServerProperties {
    *
    * @return
    */
-  public boolean shouldDoDecodeWithHydec() {
+/*  public boolean shouldDoDecodeWithHydec() {
     return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
-  }
+  }*/
 
   public String getMiraClassifierURL() {
     return miraClassifierURL;

@@ -97,6 +97,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   /**
    * @see #addControlsBelowAudio
+   * @see #getKeyBindings()
    */
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
   //private static final String ARROW_KEY_TIP2 = "<b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";

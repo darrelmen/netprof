@@ -49,11 +49,10 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.User;
+
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -62,7 +61,9 @@ import java.util.logging.Logger;
  * @since 2/4/16.
  */
 public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("PracticeHelper");
+ // private final Logger logger = Logger.getLogger("PracticeHelper");
+
+  private static final String PRACTICE = "practice";
 
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
@@ -85,25 +86,25 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
-      if (isPolyglotUser()) {
-        polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "practice");
-      } else {
-        polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
-      }
+    //  if (isPolyglotUser()) {
+        polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, PRACTICE);
+//      } else {
+//        polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, "practice");
+//      }
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
-      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, "practice");
+      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, PRACTICE);
     }
 
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }
 
-  private boolean isPolyglotUser() {
+ /* private boolean isPolyglotUser() {
     Collection<User.Permission> permissions = controller.getPermissions();
     boolean b = permissions.size() == 1 && permissions.iterator().next() == User.Permission.POLYGLOT;
     return b;
-  }
+  }*/
 
   /**
    *
@@ -170,7 +171,8 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       @Override
       protected void styleBottomRow(Panel bottomRow) {
         bottomRow.addStyleName("centerPractice");
-        setVisible(!isPolyglotUser());
+       // setVisible(!isPolyglotUser());
+       // setVisible(false);
         outerBottomRow = bottomRow;
       }
     };
@@ -182,6 +184,10 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     if (polyglotFlashcardFactory != null) {
       polyglotFlashcardFactory.setMode(mode, promptChoice);
     }
+  }
+
+  public void setVisible(boolean visible) {
+    flexListLayout.setVisible(visible);
   }
 
   public void setNavigation(NewContentChooser navigation) {
