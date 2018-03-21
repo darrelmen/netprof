@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
+public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize, IVisible {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;
@@ -66,7 +66,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    */
   public FlexListLayout(ExerciseController controller) {
     this.controller = controller;
-   }
+  }
 
   /**
    * TODO : don't pass in user list
@@ -138,11 +138,16 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return twoRows;
   }
 
+  private boolean visible = true;
+
+  @Override
   public void setVisible(boolean vis) {
-    section.setVisible(vis);
+    if (section != null) {
+      section.setVisible(vis);
+    }
+    visible = vis;
   }
 
-  ///  boolean atTop = true;
   private FlowPanel section;
 
   /**
@@ -162,6 +167,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
     FlowPanel section = new FlowPanel("section");
     this.section = section;
+    section.setVisible(visible);
     section.addStyleName("sidebar");
 //    section.addStyleName("scrolledpos");
 

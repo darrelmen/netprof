@@ -86,7 +86,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
 
-  private static final boolean DEBUG_AUDIO_REPORT = true;
+  private static final boolean DEBUG_AUDIO_REPORT = false;
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
@@ -577,7 +577,7 @@ public abstract class BaseAudioDAO extends DAO {
     getCountForGender(projid, AudioType.REGULAR, exerciseIDs, exToTranscript, maleReg, femaleReg);
 
     float maleFast = (float) maleReg.size();
-    if (DEBUG_AUDIO_REPORT) logger.info("male fast " + maleFast);
+    if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male fast " + maleFast);
     float femaleFast = (float) femaleReg.size();
 
     Set<Integer> maleSlowSpeed = new HashSet<>();
@@ -586,7 +586,7 @@ public abstract class BaseAudioDAO extends DAO {
     float maleSlow = (float) maleSlowSpeed.size();
     float femaleSlow = (float) femaleSlowSpeed.size();
 
-    if (DEBUG_AUDIO_REPORT) logger.info("male slow " + maleSlow);
+    if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male slow " + maleSlow);
 
     maleReg.retainAll(maleSlowSpeed);
     float male = maleReg.size();

@@ -60,13 +60,14 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
     implements RequiresResize, ExerciseListContent {
-  public static final int RIGHT_SIDE_MARGIN = 155;//120;
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+
+  public static final int RIGHT_SIDE_MARGIN = 155;//120;
   private boolean madeNPFContent = false;
 
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
-  private final FlexListLayout<T, U> flexListLayout;
+  protected final FlexListLayout<T, U> flexListLayout;
 
   /**
    * @param controller
@@ -104,7 +105,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see #showNPF
    */
   @Override
-  public void showContent(Panel listContent, String instanceName) { listContent.add(doNPF(instanceName));  }
+  public void showContent(Panel listContent, String instanceName) {
+    listContent.add(doNPF(instanceName));
+  }
 
   /**
    * Make the instance name uses the unique id for the list.
@@ -114,7 +117,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see #showContent
    */
   private Panel doNPF(String instanceName) {
-   // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
+    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -124,7 +127,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @return
    * @seez SimpleChapterNPFHelper#getCreatedPanel
    */
-  public ListInterface<?,?> getExerciseList() {
+  public ListInterface<?, ?> getExerciseList() {
     return npfExerciseList;
   }
 
@@ -140,7 +143,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   public void hideList() {
     npfExerciseList.hide();
   }
-  public void loadExercise(int exid) { npfExerciseList.loadExercise(exid);  }
+
+  public void loadExercise(int exid) {
+    npfExerciseList.loadExercise(exid);
+  }
 
   /**
    * This is important - this is where the actual content is chosen.
@@ -165,7 +171,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     //private final Logger logger = Logger.getLogger("MyFlexListLayout");
 
     /**
-     *  @param controller
+     * @param controller
      * @param outer
      */
     protected MyFlexListLayout(ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
@@ -174,7 +180,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
 
     /**
-     *
      * @param exerciseList
      * @return
      * @see FlexListLayout#makeNPFExerciseList

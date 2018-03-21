@@ -6,7 +6,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -98,9 +97,13 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void stopTimedRun() {
-    controller.setBannerVisible(true);
+    setBannerVisible(true);
     inLightningRound = false;
     cancelRoundTimer();
+  }
+
+  private void setBannerVisible(boolean b) {
+    controller.setBannerVisible(b);
   }
 
   @Override
@@ -109,7 +112,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void startRoundTimer(boolean isDry) {
-    controller.setBannerVisible(false);
+    setBannerVisible(false);
 
     if (isRoundTimerNotRunning()) {
       clearAnswerMemory();
@@ -201,8 +204,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   @Override
   public void cancelRoundTimer() {
-
-    logger.info("cancel round timer -");
+    //logger.info("cancel round timer -");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     roundTimeLeftMillis = 0;

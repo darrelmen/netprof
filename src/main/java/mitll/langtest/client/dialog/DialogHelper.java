@@ -35,8 +35,6 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -62,22 +59,13 @@ public class DialogHelper {
 
   public interface CloseListener {
     boolean gotYes();
-
     void gotNo();
-
     void gotHidden();
   }
 
   public DialogHelper(boolean doYesAndNo) {
     this.doYesAndNo = doYesAndNo;
   }
-
-/*
-  public DialogHelper(String title, Collection<String> msgs, CloseListener listener) {
-    this.doYesAndNo = true;
-    show(title, msgs, null, "Yes", "No", listener);
-  }
-*/
 
   public void showErrorMessage(String title, String msg) {
     List<String> msgs = new ArrayList<>();

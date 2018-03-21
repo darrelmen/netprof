@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.database.user;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mongodb.MongoTimeoutException;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.MongoGroupDAO;
@@ -46,6 +49,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -78,6 +82,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -143,9 +149,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
 
+  private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
+    //  .concurrencyLevel(4)
+    //  .weakKeys()
+      .maximumSize(10000)
+      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, DBUser>() {
+            @Override
+            public DBUser load(Integer key) throws Exception {
+              logger.info("Load " + key);
+              return delegate.lookupDBUser(key);
+            }
+          });
+
   /**
    * @param database
-   * @param userProjectDAO
+   * @paramx userProjectDAO
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
@@ -756,8 +776,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return getByID(userid);
   }
 
+  /**
+   * Use a cache.
+   *
+   * Keys age out at 10 minutes
+   * @see #idToDBUser
+   *
+   * @param id
+   * @return
+   */
   private DBUser lookupUser(int id) {
-    return delegate.lookupDBUser(id);
+    try {
+      return idToDBUser.get(id);
+    } catch (ExecutionException e) {
+      logger.warn("lookupUser got " + e);
+      return delegate.lookupDBUser(id);
+    }
   }
 
   @Override
@@ -1165,6 +1199,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see Analysis#getUserInfos
    * @see BaseAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked(int, boolean)
+   * @see AudioDAO#getResultsForQuery
    */
   @Override
   public synchronized Map<Integer, MiniUser> getMiniUsers() {

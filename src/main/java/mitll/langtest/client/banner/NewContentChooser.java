@@ -57,7 +57,7 @@ public class NewContentChooser implements INavigation {
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
 
-  private static final String LISTS = "Lists";
+ // private static final String LISTS = "Lists";
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 
@@ -232,12 +232,15 @@ public class NewContentChooser implements INavigation {
 
       @Override
       public void gotNo() {
+        setBannerVisible(true);
+        practiceHelper.setVisible(true);
       }
 
       @Override
       public void gotHidden() {
         if (mode != MODE_CHOICE.NOT_YET) {
-          controller.setBannerVisible(false);
+          setBannerVisible(false);
+          practiceHelper.setVisible(false);
         }
 //        logger.info("mode is " + mode);
         showPractice();
@@ -256,6 +259,10 @@ public class NewContentChooser implements INavigation {
         }
     );
   }
+
+//  private void setBannerVisible(boolean vi) {
+//    controller.setBannerVisible(false);
+//  }
 
   private void showPractice() {
     practiceHelper.setMode(mode, prompt);
@@ -394,7 +401,9 @@ public class NewContentChooser implements INavigation {
   }
 
   @Override
-  public void setBannerVisible(boolean visible) { banner.setVisible(visible);}
+  public void setBannerVisible(boolean visible) {
+    banner.setVisible(visible);
+  }
 
   private void setHistoryWithList(int listid) {
     History.newItem(FacetExerciseList.LISTS + "=" + listid);

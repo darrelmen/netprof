@@ -10,8 +10,18 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L,T> {
-  private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
+  /**
+   * @see HidePolyglotFactory#getCurrentFlashcard
+   * @param statsFlashcardFactory
+   * @param controlState
+   * @param controller
+   * @param soundFeedback
+   * @param prompt
+   * @param e
+   * @param stickyState
+   * @param exerciseListToUse
+   */
   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
                     ControlState controlState,
                     ExerciseController controller,
@@ -59,7 +69,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
     return null;
   }
 
-  String getKeyBindings() {
-    return ARROW_KEY_TIP;
-  }
+//  @Override String getKeyBindings() {
+//    return ARROW_KEY_TIP;
+//  }
 }
