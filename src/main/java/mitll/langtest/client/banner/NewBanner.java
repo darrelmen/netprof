@@ -31,6 +31,8 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
+ // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
+
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
       Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
 
@@ -42,14 +44,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
-  private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
 
   public static final String SHOW = "showStorage";
   /**
    * @see #getImage
    */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
+
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
+  private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
+  private static final String MAIL_TO = "mailto:" + NETPROF_HELP_LL_MIT_EDU + "?" + "Subject=" + MAILTO_SUBJECT;
+
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
   private static final String DOCUMENTATION = "User Manual";
   /**
@@ -64,7 +69,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private Dropdown cog;
 
   private INavigation navigation;
-  private final Map<String, NavLink> nameToLink = new HashMap<>();
+  private final Collection<NavLink> navLinks = new ArrayList<>();
   private Dropdown userDrop;
   /**
    * @see #addChoicesForUser(ComplexWidget)
@@ -79,7 +84,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final ExerciseController controller;
 
   /**
-   * setInverse = white on black background
    *
    * @param userManager
    * @param lifecycle
@@ -91,9 +95,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
                    Breadcrumbs breadcrumbs,
                    ExerciseController controller) {
     setPosition(NavbarPosition.TOP);
-    // we do white on black now
-//    setInverse(true);
-
     this.controller = controller;
     this.lifecycle = lifecycle;
     addWidgets(userManager, userMenu, breadcrumbs);
@@ -103,8 +104,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     add(getImage());
     add(getBrand());
     add(breadcrumbs);
-
-    styleBreadcrumbs(breadcrumbs);
 
     NavCollapse navCollapse = new NavCollapse();
     navCollapse.addStyleName("topFiveMargin");
@@ -170,16 +169,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     netprof.addStyleName("topFiveMargin");
     addHomeClick(netprof);
     netprof.addStyleName("handCursor");
-    new TooltipHelper().addTooltip(netprof, "Choose a different language or project.");
-
     return netprof;
-  }
-
-  private void styleBreadcrumbs(Breadcrumbs breadcrumbs) {
-    breadcrumbs.addStyleName("floatLeft");
-    Style style = breadcrumbs.getElement().getStyle();
-    style.setMarginTop(7, Style.Unit.PX);
-    breadcrumbs.addStyleName("rightTwentyMargin");
   }
 
   @NotNull
@@ -303,12 +293,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see NewContentChooser#getShowTab
+   * @see NewContentChooser#showLearnList
    */
   public void showLearn() {
     gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN));
   }
 
+  /**
+   * @see NewContentChooser#showDrillList
+   */
   public void showDrill() {
     gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL));
   }
@@ -323,7 +316,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     try {
       choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.info("can't parse " + instance1);
+      logger.info("showSection can't parse " + instance1);
 
     }
     navigation.showView(choices, false);
@@ -335,29 +328,30 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #gotClickOnChoice
    */
   private void showActive(NavLink learn) {
-    for (NavLink link : nameToLink.values()) link.setActive(false);
+    navLinks.forEach(link->link.setActive(false));
     learn.setActive(true);
   }
 
   @NotNull
   private NavLink getLink(ComplexWidget nav, String learn1) {
     NavLink learn = new NavLink(learn1);
-    nameToLink.put(learn1, learn);
+    //nameToLink.put(learn1, learn);
+    navLinks.add(learn);
     nav.add(learn);
     return learn;
   }
 
   private Image getImage() {
-    Image flashcardImage = new Image(LangTest.LANGTEST_IMAGES + NEW_PRO_F1_PNG);
-    flashcardImage.addStyleName("floatLeftAndClear");
-    flashcardImage.addStyleName("rightFiveMargin");
-    flashcardImage.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    addHomeClick(flashcardImage);
-    return flashcardImage;
+    Image npImage = new Image(LangTest.LANGTEST_IMAGES + NEW_PRO_F1_PNG);
+    npImage.addStyleName("floatLeftAndClear");
+    npImage.addStyleName("rightFiveMargin");
+    npImage.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    addHomeClick(npImage);
+    return npImage;
   }
 
-  private void addHomeClick(HasClickHandlers flashcardImage) {
-    flashcardImage.addClickHandler(event -> lifecycle.chooseProjectAgain());
+  private void addHomeClick(HasClickHandlers npImage) {
+    npImage.addClickHandler(event -> lifecycle.chooseProjectAgain());
   }
 
   @Override
@@ -447,7 +441,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (linkToShow == null) {
       logger.warning("checkProjectSelected Current view is " + currentView);
-      logger.warning("checkProjectSelected Current view link is " + linkToShow);
+      logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
       linkToShow = viewToLink.get(INavigation.VIEWS.LEARN);
     }
@@ -472,12 +466,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private NavLink getContactUs() {
-    return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, getMailTo());
-  }
-
-  @NotNull
-  private String getMailTo() {
-    return "mailto:" + NETPROF_HELP_LL_MIT_EDU + "?" + "Subject=" + MAILTO_SUBJECT;
+    return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, MAIL_TO);
   }
 
   /**

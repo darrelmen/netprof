@@ -52,6 +52,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  public static final String PRONUNCIATION_FEEDBACK = "Netprof";//"Pronunciation Feedback";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   private static final String CPW_TOKEN = "CPWtoken";
@@ -271,7 +272,7 @@ public class PropertyHandler {
   }
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " " + PRONUNCIATION_FEEDBACK;
   }
 
   public String getInitialPrompt() {

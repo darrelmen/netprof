@@ -543,21 +543,7 @@ public class ProjectChoices {
 
         boolean hasChildren = projectForLang.hasChildren();
 
-        ProjectType projectType = projectForLang.getProjectType();
-        // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
-        {
-          if (hasChildren) {
-            addPolyglotIcon(projectForLang, button);
-          } else {
-            if (projectType == ProjectType.POLYGLOT) {
-              //   logger.info("adding poly icon to " +projectForLang);
-              addPolyIcon(button);
-            }
-//          else {
-            //logger.info("not adding poly icon to " +projectForLang);
-            //        }
-          }
-        }
+        maybeAddPolyglotIcon(projectForLang, button, hasChildren);
 
         if (isQC) {
           if (!hasChildren) {
@@ -579,6 +565,24 @@ public class ProjectChoices {
       horiz.add(getContainerWithButtons(name, projectForLang, isQC, numVisibleChildren));
 
       return thumbnail;
+    }
+  }
+
+  private void maybeAddPolyglotIcon(SlimProject projectForLang, PushButton button, boolean hasChildren) {
+    ProjectType projectType = projectForLang.getProjectType();
+    // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
+    {
+      if (hasChildren) {
+        addPolyglotIcon(projectForLang, button);
+      } else {
+        if (projectType == ProjectType.POLYGLOT) {
+          //   logger.info("adding poly icon to " +projectForLang);
+          addPolyIcon(button);
+        }
+//          else {
+        //logger.info("not adding poly icon to " +projectForLang);
+        //        }
+      }
     }
   }
 
@@ -943,12 +947,11 @@ public class ProjectChoices {
           */
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
-
       //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
-        SlimProject projectForLang1 = projectForLang;
+        //SlimProject projectForLang1 = projectForLang;
         //  logger.info("Click on crumb " + projectForLang1.getName());
-        uiLifecycle.clickOnParentCrumb(projectForLang1);
+        uiLifecycle.clickOnParentCrumb(projectForLang);
       });
 
       uiLifecycle.clearContent();
