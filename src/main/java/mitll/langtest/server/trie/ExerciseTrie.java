@@ -59,12 +59,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private static final int TOOLONG_TO_WAIT = 150;
 
-//  private static final String ENGLISH = "English";
-
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
-
+  private boolean removeAllPunct;
   private SmallVocabDecoder smallVocabDecoder;
 
   private static boolean DEBUG = false;
@@ -95,7 +93,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     boolean isKorean = language.equalsIgnoreCase(KOREAN);
     boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
     boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
-
+    removeAllPunct = !language.equalsIgnoreCase("french");
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
     for (T exercise : exercisesForState) {
       if (doExercise) {
@@ -122,7 +120,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       String meaning = exercise.getMeaning().trim();
       if (!meaning.isEmpty()) {
         smallVocabDecoder
-            .getTokens(getTrimmed(meaning))
+            .getTokens(getTrimmed(meaning), false)
             .forEach(token -> addEntry(exercise, token));
       }
     }
@@ -165,12 +163,14 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
                           boolean hasClickableCharacters, T exercise, String fl, String transliteration) {
     if (fl != null && !fl.isEmpty()) {
       addFL(isMandarin, hasClickableCharacters, exercise, fl);
-      addTransliteration(transliteration, exercise);
+      if (!transliteration.isEmpty()) {
+        addTransliteration(transliteration, exercise);
+      }
     }
   }
 
   private void addTransliteration(String transliteration, T exercise) {
-    for (String token : smallVocabDecoder.getTokens(transliteration)) {
+    for (String token : smallVocabDecoder.getTokens(transliteration, false)) {
       addEntry(exercise, token);
       String noAccents = StringUtils.stripAccents(token);
 
@@ -188,7 +188,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
     addSuffixes(exToReturnOnMatch, fl);
 
-    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl);
+    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
     for (String token : tokens) {
       addEntry(exToReturnOnMatch, token);
       // String noAccents = removeDiacritics(token);
@@ -221,7 +221,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addSuffixes(T exercise, String trimmed) {
-    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed);
+    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
 
     if (tokens.size() > 1) {
       for (String token : tokens) {

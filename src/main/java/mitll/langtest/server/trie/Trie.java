@@ -62,7 +62,7 @@ public class Trie<T> {
   private static final int MAX_LEN = 1000;
 
   private final TrieNode<T> root;
-  private Map<String, String> tempCache;
+  private Map<String, String> tempCache = null;
   private boolean convertToUpper = true;
 
   private static final boolean DEBUG = false;
@@ -330,5 +330,9 @@ public class Trie<T> {
 
     //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
     return ids;
+  }
+
+  public boolean isEmpty() {
+    return tempCache == null;
   }
 }

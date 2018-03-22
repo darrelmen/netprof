@@ -254,7 +254,8 @@ public class HTTPClient {
   }
 
   private BufferedReader getReader(HttpURLConnection httpConn) throws IOException {
-    return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
+    InputStream inputStream = httpConn.getInputStream();
+    return new BufferedReader(new InputStreamReader(inputStream, "UTF8"));
   }
 
   private String receive(HttpURLConnection httpConn, BufferedReader reader) throws IOException {

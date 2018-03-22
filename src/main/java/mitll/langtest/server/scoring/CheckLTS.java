@@ -56,7 +56,7 @@ class CheckLTS {
   private final String language;
 
   private final HTKDictionary htkDictionary;
-  private final boolean isAsianLanguage, urdu;
+  private final boolean isAsianLanguage, removeAllAccents;
 
   private static final boolean DEBUG = false;
   private static final String POUND = "#";
@@ -76,7 +76,7 @@ class CheckLTS {
     }
     this.language = languageProperty != null ? languageProperty : "";
     this.isAsianLanguage = isAsianLanguage;
-    urdu = languageProperty.equalsIgnoreCase("urdu");
+    removeAllAccents = !language.equalsIgnoreCase("french");
 
     if (isAsianLanguage) logger.warn("using mandarin segmentation.");
   }
@@ -99,7 +99,7 @@ class CheckLTS {
    * @see mitll.langtest.server.scoring.Scoring#validLTS(String, String)
    */
   Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
-    return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
+    return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration, removeAllAccents);
   }
 
   /**
@@ -122,10 +122,11 @@ class CheckLTS {
    *
    * @param lts
    * @param foreignLanguagePhrase
+   * @param removeAllAccents
    * @return set of oov tokens
    * @see #checkLTS(String, String)
    */
-  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
+  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration, boolean removeAllAccents) {
     boolean isEmptyLTS = LTSFactory.isEmpty(lts);
     if (isDictEmpty() && isEmptyLTS) {
       if (shown++ < WARN_LTS_COUNT) {
@@ -135,8 +136,8 @@ class CheckLTS {
     }
 
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-    Collection<String> translitTokens = smallVocabDecoder.getTokens(transliteration);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
+    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
@@ -239,7 +240,8 @@ class CheckLTS {
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
     } else {
-      if (DEBUG) logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
+      if (DEBUG)
+        logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
     if (DEBUG)
       logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
@@ -301,7 +303,7 @@ class CheckLTS {
           if (DEBUG) logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
           numBad++;
         } else {
-         // logger.info("good " + c + "/" + n + " for " + token);
+          // logger.info("good " + c + "/" + n + " for " + token);
         }
         c++;
         //  valid &= allValid;
@@ -310,7 +312,7 @@ class CheckLTS {
         valid = false;
         //logger.info("isLegitLTS all bad " + numBad + " out of " + n + " for " + token);
       } else if (numBad > 0) {
-        if (DEBUG)  logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
+        if (DEBUG) logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
       }
     }
     return b && valid;
@@ -326,7 +328,7 @@ class CheckLTS {
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
   private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false);
 
     List<String> firstPron = new ArrayList<>();
     Set<String> uphones = new TreeSet<>();

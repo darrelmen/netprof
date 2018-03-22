@@ -1247,47 +1247,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return new BothMaps(oldToNew);//, dominoToNew);
   }
 
-  /**
-   * TODO : Do we need to set the english field to meaning for english items???
-   *
-   * @param userExercises2
-   * @param userExercises
-   * @deprecated not needed with postgres
-   */
-/*  void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
-    int c = 0;
-    for (CommonExercise ue : userExercises) {
-      // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getOldID() + " / " + ue.getUniqueID() + " : " + ue);
-      if (ue.isPredefined()) {
-        CommonExercise byID = getExercise(ue);
-
-        if (byID != null) {
-          userExercises2.add(new Exercise(byID)); // all predefined references
-          /// TODO : put this back???
-          // if (isEnglish) {
-          //    e.setEnglish(exercise.getMeaning());
-          //  }
-
-        } else {
-          if (c++ < 10)
-            logger.error("getOnList: huh can't find user exercise '" + ue.getOldID() + "'");
-        }
-      } else {
-        userExercises2.add(ue);
-      }
-    }
-    if (c > 0) logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
-  }*/
-
-  /**
-   * @param ue
-   * @return
-   * @see #enrichWithPredefInfo
-   */
-  private CommonExercise getExercise(HasID ue) {
-    return exerciseDAO.getExercise(ue.getID());
-  }
-
   public class BothMaps {
     private final Map<String, Integer> oldToNew;
     //  private final Map<Integer, Integer> dominoToNew;

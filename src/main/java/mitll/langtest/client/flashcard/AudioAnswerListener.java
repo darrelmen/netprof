@@ -41,5 +41,9 @@ import mitll.langtest.shared.answer.AudioAnswer;
  * @since 2/11/14.
  */
 public interface AudioAnswerListener {
+  /**
+   * @see FlashcardRecordButtonPanel#receivedAudioAnswer
+   * @param result
+   */
   void receivedAudioAnswer(AudioAnswer result);
 }

@@ -83,8 +83,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         soundFeedback,
         null,
         "",//statsFlashcardFactory.instance,
-        exerciseListToUse,
-        prompt);
+        exerciseListToUse
+    );
     this.sticky = stickyState;
     this.statsFlashcardFactory = statsFlashcardFactory;
     soundFeedback.setEndListener(new SoundFeedback.EndListener() {
@@ -170,7 +170,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
-    if (result.getValidity() == Validity.OK) {
+    if (result.isValid()) {
       sticky.storeAnswer(result, exercise.getID());
       setStateFeedback();
     }

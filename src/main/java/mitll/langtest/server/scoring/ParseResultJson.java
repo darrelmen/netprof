@@ -95,8 +95,8 @@ public class ParseResultJson {
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event) : value.event;
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.getEvent()) : value.getEvent();
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
       }
     }
 
@@ -121,7 +121,7 @@ public class ParseResultJson {
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        endTimes.add(new SlimSegment(value.event, value.score));
+        endTimes.add(new SlimSegment(value.getEvent(), value.getScore()));
       }
     }
 
