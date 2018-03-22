@@ -162,20 +162,20 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     this.score = toInt(score);
   }
 
-  private int toInt(float value) {
-    return (int) (value * SCALE);
-  }
-
-  private float fromInt(int value) {
-    return ((float) value) / SCALE;
-  }
-
   /**
    * @return
    * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    */
   public float getScore() {
     return fromInt(score);
+  }
+
+  private int toInt(float value) {
+    return (int) (value * SCALE);
+  }
+
+  private float fromInt(int value) {
+    return ((float) value) / SCALE;
   }
 
   public int getRawScore() {

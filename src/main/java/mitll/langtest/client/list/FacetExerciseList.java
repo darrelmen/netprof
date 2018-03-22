@@ -76,6 +76,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
+  public static final String PRACTICED = " practiced.";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
   /**
    *
@@ -129,7 +130,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    *
    */
-  private final ProgressBar progressBar;
+  private final ProgressBar practicedProgress, scoreProgress;
   private final DivWidget pagerAndSortRow;
 
   private List<String> typeOrder;
@@ -182,10 +183,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");
     breadRow.getElement().setId("breadRow");
-    //  breadRow.addStyleName("floatLeftList");
+    //    breadRow.addStyleName("floatLeftList");
 
-    breadRow.add(progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-    styleProgressBarContainer(progressBar);
+    {
+      breadRow.add(practicedProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      styleProgressBarContainer(practicedProgress);
+      practicedProgress.addStyleName("floatLeft");
+      styleProgressBarContainer(scoreProgress);
+      scoreProgress.addStyleName("floatRight");
+    }
     // Todo : add this?
     // breadRow.add(new HTML("breadcrumbs go here"));
     {
@@ -251,7 +258,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     style.setHeight(25, Style.Unit.PX);
     style.setFontSize(16, Style.Unit.PX);
 
-
+    progressBar.setWidth("49%");
     progressBar.setVisible(false);
   }
 
@@ -1439,7 +1446,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void hidePrevNext() {
     hidePrevNextWidgets();
-    progressBar.setVisible(false);
+    setProgressVisible(false);
   }
 
   /**
@@ -1454,7 +1461,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void showPrevNext() {
     pageSizeContainer.setVisible(true);
     sortBox.setVisible(true);
-    progressBar.setVisible(true);
+    setProgressVisible(true);
     pagerAndSortRow.setVisible(true);
   }
 
@@ -1702,7 +1709,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         showExercises(toShow, reqID);
 
         if (isDrillView()) { // hack for avp
-          progressBar.setVisible(false);
+          setProgressVisible(false);
         }
       }
     } else {
@@ -1711,6 +1718,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       }
     }
   }
+
 
   private final Set<Integer> exercisesWithScores = new HashSet<>();
   private final Map<Integer, CommonExercise> fetched = new ConcurrentHashMap<>();
@@ -1973,12 +1981,18 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    */
   private void setProgressBarScore(Collection<CommonShell> result, final int reqid) {
     exercisesWithScores.clear();
-    long then = System.currentTimeMillis();
+    float total = 0f;
+    int withScore = 0;
+    // long then = System.currentTimeMillis();
     //logger.info("setProgressBarScore checking " + result.size());
     for (CommonShell exercise : result) {
       if (exercise.hasScore()) {
         // logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         exercisesWithScores.add(exercise.getID());
+        float score = exercise.getScore();
+        total += score;
+        //logger.info("# " + exercise.getID() + " Score " + score);
+        withScore++;
       }
       // if (!isCurrentReq(reqid)) break;
     }
@@ -1990,6 +2004,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
     if (isCurrentReq(reqid)) {
       showScore(exercisesWithScores.size(), result.size());
+      float a = total * 10f;
+      int denom = withScore * 10;
+      float fdenom=(float) denom;
+      float avg=a/fdenom;
+      //logger.info("total " + avg + " " + denom);
+      showAvgScore(Math.round(avg*100), 100);
     }
   }
 
@@ -2010,17 +2030,40 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   }
 
   private void showScore(int num, int denom) {
+//    showProgressScore(num, denom, this.practicedProgress);
+    showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED);
+  }
+
+  private void showAvgScore(int num, int denom) {
+//    showProgressScore(num, denom, this.scoreProgress);
+    showProgress(num, denom, scoreProgress, "No score", "100% Perfect!", " avg. score");
+  }
+
+  private void setProgressVisible(boolean visible) {
+    practicedProgress.setVisible(visible);
+    scoreProgress.setVisible(visible);
+  }
+
+//  private void showProgressScore(int num, int denom, ProgressBar practicedProgress) {
+//    showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED);
+//  }
+
+  private void showProgress(int num,
+                            int denom,
+                            ProgressBar practicedProgress, String zeroPercent,
+                            String oneHundredPercent, String suffix) {
     double score = (float) num / (float) denom;
     double percent = 100 * score;
-    progressBar.setPercent(num == 0 ? 10 : percent);
+    practicedProgress.setPercent(num == 0 ? 10 : percent);
     boolean allDone = num == denom;
 
-    String text =
-        num == 0 ? NONE_PRACTICED_YET :
-            allDone ? ALL_PRACTICED : (num + " practiced.");
 
-    progressBar.setText(text);
-    progressBar.setColor(
+    String text =
+        num == 0 ? zeroPercent :
+            allDone ? oneHundredPercent : (num + suffix);
+
+    practicedProgress.setText(text);
+    practicedProgress.setColor(
         allDone ? ProgressBarBase.Color.SUCCESS :
             percent > SECOND_STEP ?
                 ProgressBarBase.Color.DEFAULT :
@@ -2028,13 +2071,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                     ProgressBarBase.Color.INFO :
                     ProgressBarBase.Color.WARNING);
 
-    progressBar.setVisible(true);
- /*   if (progressTooltip == null) {
-      progressTooltip = new TooltipHelper().addTooltip(progressBar, text);
-    } else {
-      progressTooltip.setText(text);
-      progressTooltip.reconfigure();
-    }*/
+    practicedProgress.setVisible(true);
   }
 
   /**

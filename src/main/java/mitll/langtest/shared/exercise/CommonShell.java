@@ -74,7 +74,7 @@ public interface CommonShell extends Shell {
   int getNumPhones();
 
   int getRawScore();
-
+  float getScore();
   boolean hasScore();
 
   /**

@@ -1070,7 +1070,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
     englishWidget.addStyleName("leftFiveMargin");
-    englishWidget.setWidth("90%");
+   // englishWidget.setWidth("90%");
     return englishWidget;
   }
 
