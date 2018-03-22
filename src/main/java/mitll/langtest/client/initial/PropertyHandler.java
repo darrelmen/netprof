@@ -52,9 +52,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  public static final String PRONUNCIATION_FEEDBACK = "Netprof";//"Pronunciation Feedback";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
+  private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
   private static final String CPW_TOKEN2 = "CPW-token";
 

@@ -158,14 +158,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) throws Exception {
-              logger.info("Load " + key);
+             // logger.info("Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
 
   /**
    * @param database
-   * @paramx userProjectDAO
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
@@ -183,7 +182,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (servletContext != null) {
         Enumeration<String> attributeNames = servletContext.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
-          logger.info("domino user dao: no user service (" + USER_SVC + ")" + attributeNames.nextElement());
+          logger.warn("DominoUserDAOImpl : domino user dao: no user service (" + USER_SVC + ")" + attributeNames.nextElement());
         }
       }
       usedDominoResources = false;
@@ -198,8 +197,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
-
-    //if (pool != null) {
     serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
@@ -231,9 +228,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
 
     doAfterGetDelegate();
-    //} else {
-    //  logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
-    // }
   }
 
   private void doAfterGetDelegate() {

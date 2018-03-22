@@ -64,6 +64,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String ITEM = "Item";
+  private static final int MAXLEN = 12;
 
   private final Collection<String> typeOrder;
 
@@ -110,38 +111,9 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return w;
   }
 
-/*  public Widget getSmall(T e) {
-    FlowPanel fp = new FlowPanel("small");
-    int dominoID = e.getDominoID();
-    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    fp.getElement().setInnerText("" + idToUse);// + "/" + e.getOldID());
-    return fp;
-  }*/
-
-/*
-  public Widget getSmall2(T e) {
-    FlowPanel fp = new FlowPanel("small");
-    String text = getID(e);
-    fp.getElement().setInnerText(text);// + "/" + e.getOldID());
-    new TooltipHelper().addTooltip(fp, getUnitLessonForExercise2(e));
-    return fp;
-  }
-*/
-
   @NotNull
   private String getID(T e) {
     return "" + e.getID();
-//    int dominoID = e.getDominoID();
-//    int idToUse = dominoID != -1 ? dominoID : e.getID();
-//    return "" + idToUse;
-  }
-
-  private InlineLabel getLabel(T e) {
-    String unitChapterLabel = getUnitChapterLabel(e.getUnitToValue());
-    // String val = "<span style='white-space:nowrap;'>" + unitChapterLabel + "</span>";
-    InlineLabel inlineLabel = new InlineLabel(unitChapterLabel);
-    inlineLabel.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
-    return inlineLabel;
   }
 
   protected SafeHtml getSafeHtml(String columnText) {
@@ -195,6 +167,22 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return itemHeader;
   }
 
+  /**
+   * Polyglot > Regular Verb
+   * 123456789012345678901234567890
+   *
+   * @param e
+   * @return
+   */
+  private InlineLabel getLabel(T e) {
+    String unitChapterLabel = getUnitChapterLabel(e.getUnitToValue());
+    // String val = "<span style='white-space:nowrap;'>" + unitChapterLabel + "</span>";
+    if (unitChapterLabel.length() > MAXLEN) unitChapterLabel = unitChapterLabel.substring(0, MAXLEN) + "...";
+    InlineLabel inlineLabel = new InlineLabel(unitChapterLabel);
+    inlineLabel.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
+    return inlineLabel;
+  }
+
   public void showPopup(InlineLabel label, String toShow) {
     label.addMouseOverHandler(event -> new BasicDialog().showPopover(
         label,
@@ -217,7 +205,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   }
 
   @NotNull
-  public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id) {
+  private String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id) {
     StringBuilder builder = new StringBuilder();
     for (String type : typeOrder) {
       String subtext = unitToValue.get(type);
