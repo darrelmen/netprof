@@ -57,7 +57,6 @@ public class NewContentChooser implements INavigation {
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
 
- // private static final String LISTS = "Lists";
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 

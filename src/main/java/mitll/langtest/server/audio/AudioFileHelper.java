@@ -1457,9 +1457,7 @@ public class AudioFileHelper implements AlignDecode {
     String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
-
-    logger.info("makeDict :" +
-        "\n\tdictFile    " + dictFile);
+//    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();

@@ -67,7 +67,6 @@ import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -436,23 +435,27 @@ public class InitialUI implements UILifecycle {
     crumbs.addStyleName("rightTwentyMargin");
     style.clearProperty("backgroundColor");
     crumbs.setVisible(false);
-    addCrumbs(crumbs);
+    addCrumbs(crumbs, true);
     // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
     return crumbs;
   }
 
   /**
    * @param crumbs
+   * @param showOnlyHomeLink
    * @see #chooseProjectAgain()
    * @see #getBreadcrumbs()
    */
-  private void addCrumbs(Breadcrumbs crumbs) {
+  private void addCrumbs(Breadcrumbs crumbs, boolean showOnlyHomeLink) {
     User current = userManager.getCurrent();
     if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo == null) {
-        logger.info("addCrumbs no project startup info yet for " + current.getUserID());
-        addAllLink(crumbs);
+      //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
+        if (showOnlyHomeLink) {
+        //  logger.info("\taddCrumbs add all link");
+          addAllLink(crumbs);
+        }
       } else {
         addBreadcrumbLevels(crumbs, startupInfo);
       }
@@ -514,7 +517,7 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-      logger.info("getLangBreadcrumb got click on " + project.getName());
+     // logger.info("getLangBreadcrumb got click on " + project.getName());
 
       resetLanguageSelection(2);
 
@@ -562,7 +565,7 @@ public class InitialUI implements UILifecycle {
         clearStartupInfo();
 
         clearBreadcrumbs();
-        addCrumbs(breadcrumbs);
+        addCrumbs(breadcrumbs, true);
 
         clearContent();
         addProjectChoices(0, null);
@@ -574,7 +577,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void clearBreadcrumbs() {
-    logger.info("breadcrumbs clear");
+   // logger.info("breadcrumbs clear");
     breadcrumbs.clear();
   }
 
@@ -785,7 +788,11 @@ public class InitialUI implements UILifecycle {
    */
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
-    addBreadcrumbs();
+    //logger.info("addProjectChoices level " + level + " parent " + parent);
+    // if (level == 0) {
+    ///  logger.info("\taddProjectChoices level " + level + " parent " + parent);
+    addCrumbs(breadcrumbs, level == 0);
+    //}
     choices.showProjectChoices(parent, level);
   }
 
@@ -799,7 +806,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void addBreadcrumbs() {
-    addCrumbs(breadcrumbs);
+    addCrumbs(breadcrumbs, true);
   }
 
   /**
@@ -811,7 +818,7 @@ public class InitialUI implements UILifecycle {
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
-    logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
+  //  logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;

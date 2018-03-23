@@ -949,8 +949,8 @@ public class ProjectChoices {
     } else { // at this point, the breadcrumb should be empty?
       //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
-        //SlimProject projectForLang1 = projectForLang;
-        //  logger.info("Click on crumb " + projectForLang1.getName());
+//        SlimProject projectForLang1 = projectForLang;
+//        logger.info("gotClickOnFlag Click on crumb " + projectForLang1.getName() + " nest " + nest);
         uiLifecycle.clickOnParentCrumb(projectForLang);
       });
 

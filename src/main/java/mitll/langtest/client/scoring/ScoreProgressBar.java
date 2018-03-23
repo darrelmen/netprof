@@ -66,7 +66,7 @@ public class ScoreProgressBar {
 //      setPercent(percent, round, styleWidget);
       setPercentLater(progressBar, percent, round, color);
     } else {
-       logger.info("showScore : color " + color + " for %" + percent + " and " + round);
+   //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
       Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
     }
   }

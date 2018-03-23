@@ -1726,7 +1726,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 
   private final Set<Integer> exercisesWithScores = new HashSet<>();
-  private final Map<Integer,Float> exerciseToScore = new HashMap<>();
+  private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, CommonExercise> fetched = new ConcurrentHashMap<>();
 
   /**
@@ -1981,6 +1981,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
+  private static final boolean DEBUGSCORE = false;
+
   /**
    * @param result
    * @see #showExercises
@@ -1993,12 +1995,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     //logger.info("setProgressBarScore checking " + result.size());
     for (CommonShell exercise : result) {
       if (exercise.hasScore()) {
-        // logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
+        if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         exercisesWithScores.add(exercise.getID());
         float score = exercise.getScore();
         total += score;
-        exerciseToScore.put(exercise.getID(),score);
-        //logger.info("# " + exercise.getID() + " Score " + score);
+        exerciseToScore.put(exercise.getID(), score);
+        if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
         withScore++;
       }
       // if (!isCurrentReq(reqid)) break;
@@ -2011,30 +2013,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
     if (isCurrentReq(reqid)) {
       showScore(exercisesWithScores.size(), result.size());
+      if (DEBUGSCORE) logger.info("setProgressBarScore total " + total + " denom " + withScore);
+
       showAvgScore(total, withScore);
     }
   }
 
-  private void showAvgScore() {
-    float total = 0f;
-    int withScore = exerciseToScore.size();
-    // long then = System.currentTimeMillis();
-    //logger.info("setProgressBarScore checking " + result.size());
-    for (float score : exerciseToScore.values()) {
-      total += score;
-    }
-    showAvgScore(total, withScore);
-    // if (!isCurrentReq(reqid)) break;
-  }
-
-  private void showAvgScore(float total, int withScore) {
-    float a = total * 10f;
-    int denom = withScore * 10;
-    float fdenom = (float) denom;
-    float avg = a / fdenom;
-    //logger.info("total " + avg + " " + denom);
-    showAvgScore(Math.round(avg * 100));
-  }
 
   /**
    * @param id
@@ -2046,11 +2030,38 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     super.setScore(id, hydecScore);
     if (hydecScore > -1f) {
       exercisesWithScores.add(id);
+
+      if (DEBUGSCORE) logger.info("setScore # " + id + " Score " + hydecScore);
+
+      exerciseToScore.put(id, hydecScore);
     } else {
       logger.info("skipping low score for " + id);
     }
     showScore(exercisesWithScores.size(), pagingContainer.getSize());
     showAvgScore();
+  }
+
+  private void showAvgScore() {
+    float total = 0f;
+    int withScore = exerciseToScore.size();
+    // long then = System.currentTimeMillis();
+    if (DEBUGSCORE) logger.info("showAvgScore checking " + withScore);
+    for (float score : exerciseToScore.values()) {
+      total += score;
+    }
+    if (DEBUGSCORE) logger.info("showAvgScore total " + total + " denom " + withScore);
+
+    showAvgScore(total, withScore);
+    // if (!isCurrentReq(reqid)) break;
+  }
+
+  private void showAvgScore(float total, int withScore) {
+    float a = total * 10f;
+    int denom = withScore * 10;
+    float fdenom = (float) denom;
+    float avg = a / fdenom;
+    //logger.info("total " + avg + " " + denom);
+    showAvgScore(Math.round(avg * 100));
   }
 
   private void showScore(int num, int denom) {
@@ -2091,12 +2102,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     double round = Math.max(percent, 30);
     if (percent == 0d) round = 100d;
 
-    if (useColorGradient) {
+    if (useColorGradient && num > 0) {
 //      if (score == 0f) {
 //        //logger.warning("score now 50 ");
 //        score = 50f;
 //      }
-
       new ScoreProgressBar(false).setColor(practicedProgress, score, round, false);
     } else {
       practicedProgress.setColor(
