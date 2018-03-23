@@ -86,7 +86,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
 
-  private static final boolean DEBUG_AUDIO_REPORT = true;
+  private static final boolean DEBUG_AUDIO_REPORT = false;
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
