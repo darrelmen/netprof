@@ -558,6 +558,15 @@ public class ProjectManagement implements IProjectManagement {
     return getProjectOrFirst(projectid).getExerciseByID(id);
   }
 
+  @Override
+  public CommonExercise getExercise(int id) {
+    for (Project project : idToProject.values()) {
+      CommonExercise exerciseByID = project.getExerciseByID(id);
+      if (exerciseByID != null) return exerciseByID;
+    }
+    return null;
+  }
+
   /**
    * exercises are in the context of a project
    * <p>

@@ -73,6 +73,13 @@ public interface IProjectManagement {
 
   CommonExercise getExercise(int projectid, int id);
 
+  /**
+   * Only for testing
+   * @param id
+   * @return
+   */
+  CommonExercise getExercise(int id);
+
   List<CommonExercise> getExercises(int projectid);
 
   Project getProject(int projectid);

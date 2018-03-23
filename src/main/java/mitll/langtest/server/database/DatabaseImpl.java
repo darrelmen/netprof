@@ -1268,13 +1268,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }*/
+
+    if (toRet == null) {
+      logger.info("getCustomOrPredefExercise OK - try all projects for exercise #" +id);
+      toRet = projectManagement.getExercise(id);
+    }
+
     if (toRet == null) {
       String message = "getCustomOrPredefExercise couldn't find exercise " + id + " (context?) in project #" + projid +
           " after looking in exercise table.";
+
       if (id == 0) {
         logger.info(message);
       } else {
-        logger.error(message);
+        logger.warn(message);
       }
     }
 

@@ -884,19 +884,31 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                     boolean onlyExamples) {
 
     Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
+
+    Map<Integer, String> exToTranscript = new HashMap<>();
+
     for (CommonExercise exercise : exercises) {
       if (onlyExamples) {
-        exercise.getDirectlyRelated().forEach(dir -> unrecordedIDs.add(dir.getID()));
+        exercise.getDirectlyRelated().forEach(dir -> {
+          int id = dir.getID();
+          unrecordedIDs.add(id);
+          exToTranscript.put(id, dir.getForeignLanguage());
+        });
       } else {
-        unrecordedIDs.add(exercise.getID());
+        int id = exercise.getID();
+        unrecordedIDs.add(id);
+        exToTranscript.put(id, exercise.getForeignLanguage());
       }
     }
 
-    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples);
-    logger.debug("getUnrecordedExercisesMatchingGender all exercises " + unrecordedIDs.size() +
-        " for project #" + projid +
-        " userid # " + userID +
-        " removing " + recordedBySameGender.size());
+    logger.debug("getUnrecordedExercisesMatchingGender " + onlyExamples+
+        "\n\texToTranscript " + exToTranscript.size());
+    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
+    logger.debug("getUnrecordedExercisesMatchingGender" +
+        "\n\tall exercises " + unrecordedIDs.size() +
+        "\n\tfor project #" + projid +
+        "\n\tuserid # " + userID +
+        "\n\tremoving " + recordedBySameGender.size());
     unrecordedIDs.removeAll(recordedBySameGender);
     logger.debug("getUnrecordedExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
@@ -928,12 +940,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #getUnrecordedExercisesMatchingGender
    */
-  private Collection<Integer> getRecordedByMatchingGender(int userID, int projid, boolean onlyExamples) {
-    logger.debug("getRecordedByMatchingGender : for " + userID + " only by same gender examples only " + onlyExamples);// + " from " + exercises.size());
+  private Collection<Integer> getRecordedByMatchingGender(int userID,
+                                                          int projid,
+                                                          boolean onlyExamples,
+                                                          Map<Integer, String> exToTranscript) {
+    logger.debug("getRecordedByMatchingGender : for " + userID +
+        " only by same gender examples only " + onlyExamples);// + " from " + exercises.size());
 
     return onlyExamples ?
-        db.getAudioDAO().getWithContext(userID, projid) :
-        db.getAudioDAO().getRecordedBySameGender(userID, projid);
+        db.getAudioDAO().getRecordedBySameGenderContext(userID, projid, exToTranscript) :
+        db.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript);
   }
 
   /**

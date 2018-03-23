@@ -117,7 +117,7 @@ public class AudioTest extends BaseTest {
     List<User> users = spanish.getUsers();
     long then = System.currentTimeMillis();
     for (User user : users) {
-      Collection<Integer> recordedBy = dao.getWithContext(user.getID());
+      Collection<Integer> recordedBy = dao.getRecordedBySameGenderContext(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " with context " + recordedBy.size());
       }
@@ -130,7 +130,7 @@ public class AudioTest extends BaseTest {
     AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
     then = System.currentTimeMillis();
     for (User user : h2UserDAO.getUsers()) {
-      Collection<Integer> recordedBy = audioDAO.getWithContext(user.getID());
+      Collection<Integer> recordedBy = audioDAO.getRecordedBySameGenderContext(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("h2 for " + user.getUserID() + " with context " + recordedBy.size());
       }

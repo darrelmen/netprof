@@ -86,7 +86,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
 
-  private static final boolean DEBUG_AUDIO_REPORT = false;
+  private static final boolean DEBUG_AUDIO_REPORT = true;
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
@@ -152,7 +152,7 @@ public abstract class BaseAudioDAO extends DAO {
    * So we remember domino users for the lifetime of the app - maybe we should clear it periodically?
    * Or will we restart the server every day?
    * Don't want to keep hitting domino for user info...
-   *
+   * <p>
    * Concurrent since could be multiple threads coming through.
    */
   protected Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
@@ -182,7 +182,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
 
-  //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
+    //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
 
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAudioAttributesForExercises(exerciseIDs, idToMini);
@@ -504,17 +504,22 @@ public abstract class BaseAudioDAO extends DAO {
    * TODO : don't do this - won't scale with users
    * TODO : use the transcript map
    *
-   * @param userid only used to determine the gender we should show
+   * @param userid         only used to determine the gender we should show
    * @param projid
+   * @param exToTranscript
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-  public Collection<Integer> getRecordedBySameGender(int userid, int projid) {
-    return getAudioExercisesForGenderBothSpeeds(
-        userDAO.isMale(userid),
+  public Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript) {
+  /*  return getAudioExercisesForGenderBothSpeeds(
+        projid, userDAO.isMale(userid),
         AudioType.REGULAR.toString(),
-        AudioType.SLOW.toString(),
-        projid
+        AudioType.SLOW.toString()
+    );   */
+    return getAudioExercisesForGenderBothSpeeds(
+        projid,
+        userDAO.isMale(userid),
+        exToTranscript
     );
   }
 
@@ -564,7 +569,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param total
    * @param exerciseIDs
    * @return
-   * @see DatabaseImpl#getMaleFemaleProgress
+   * @see #getMaleFemaleProgress
    */
   private Map<String, Float> getRecordedReport(int projid,
                                                float total,
@@ -603,10 +608,12 @@ public abstract class BaseAudioDAO extends DAO {
     // overlap
     femaleReg.retainAll(femaleSlowSpeed);
     float female = femaleReg.size();
+
     if (DEBUG_AUDIO_REPORT) logger.info("female total " + female);
 
     Set<Integer> conMaleReg = new HashSet<>();
     Set<Integer> conFemaleReg = new HashSet<>();
+
 
     // TODO : add male/female fast/slow for context
     getCountForGender(projid, AudioType.CONTEXT_REGULAR, exToContextTranscript.keySet(), exToContextTranscript, conMaleReg, conFemaleReg);
@@ -835,38 +842,49 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param userid
    * @param projid
+   * @param exToTranscript
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getRecordedByMatchingGender
    */
-  public Set<Integer> getWithContext(int userid, int projid) {
-    return getWithContext(userDAO.isMale(userid), projid);
+  public Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript) {
+    //return getRecordedBySameGenderContext(userDAO.isMale(userid), projid);
+    return getContextAudioExercises(projid, userDAO.isMale(userid), exToTranscript);
   }
 
-  private Set<Integer> getWithContext(boolean male, int projid) {
-    Set<Integer> audioExercisesForGender = getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
+/*  private Set<Integer> getWithContext(boolean male, int projid) {
+    Set<Integer> audioExercisesForGender =
+        getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
 
     //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
 
-/*    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
+*//*    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
         male,
         AudioType.REGULAR.toString(),
         AudioType.SLOW.toString(),
         projid
     ));
 
-    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);*/
+    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);*//*
 
     return audioExercisesForGender;
-  }
+  }*/
 
   abstract Set<Integer> getAudioExercisesForGender(boolean male,
                                                    String audioSpeed,
                                                    int projid);
 
-  abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
+/*  abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
+                                                             boolean isMale,
                                                              String regSpeed,
-                                                             String slowSpeed,
-                                                             int projid);
+                                                             String slowSpeed);*/
+
+  abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
+                                                             boolean isMale,
+                                                             Map<Integer, String> exToTranscript);
+
+  abstract Set<Integer> getContextAudioExercises(int projid,
+                                                 boolean isMale,
+                                                 Map<Integer, String> exToContextTranscript);
 
   /**
    * @param transcript
