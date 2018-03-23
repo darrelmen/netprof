@@ -48,7 +48,6 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -456,7 +455,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return typeToEndTimes;
   }
 
-  protected String getDisplayName(String event, Map<String, String> phoneToDisplay) {
+  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
     String displayName = phoneToDisplay.get(event);
     displayName = displayName == null ? event : displayName;
     return displayName;
@@ -642,9 +641,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param reqid
    * @param device
    * @return
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
    */
-  @Override
+/*  @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
                                   String transliteration,
@@ -660,7 +659,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       logEvent(identifier, device, -1);
     }
     return audioAnswer;
-  }
+  }*/
 
   /**
    * @param projid

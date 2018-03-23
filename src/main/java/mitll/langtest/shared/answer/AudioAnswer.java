@@ -83,8 +83,8 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param score
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   public void setScore(double score) {
@@ -108,8 +108,8 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param correct
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   public void setCorrect(boolean correct) {
@@ -153,11 +153,14 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   *
    * @return
    */
   public Validity getValidity() {
     return validity;
+  }
+
+  public void setValidity(Validity validity) {
+    this.validity = validity;
   }
 
   public String getDecodeOutput() {

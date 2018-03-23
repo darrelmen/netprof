@@ -6,7 +6,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -20,11 +19,9 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
+  //private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
   protected static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
-  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ALL_DONE = "All done!";
 
@@ -138,9 +135,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     super.recordingStarted();
   }
 
-  protected void maybeAdvance(double score) {
+  protected void maybeAdvance(double score, boolean isFullMatch) {
     if (polyglotFlashcardContainer.isInLightningRound()) {
-      if (isCorrect(score)) {
+      if (isFullMatch && isCorrect(score)) {
         timer.scheduleIn(NEXT_EXERCISE_DELAY);
         wrongCount = 0;
       } else {
@@ -269,6 +266,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       super.onSetComplete();
     }
   }
+
+  void playRefOnError(){}
 
   @Override String getKeyBindings() {
     return ARROW_KEY_TIP;

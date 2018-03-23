@@ -809,7 +809,7 @@ public class LangTest implements
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
     if (projectStartupInfo == null) {
-      logger.warning("setProjectStartupInfo project startup null for " + user);
+      logger.warning("setProjectStartupInfo project startup " + projectStartupInfo + " for " + user);
     }
     initialUI.showCogMenu();
   }

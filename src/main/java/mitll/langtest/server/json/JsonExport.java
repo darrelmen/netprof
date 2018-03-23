@@ -306,13 +306,13 @@ public class JsonExport {
     }
 
     if (removeCantDecode) {
-      logger.info("getJsonForSelection before had " + exercisesForState.size());
+//      logger.info("getJsonForSelection before had " + exercisesForState.size());
       Iterator<CommonExercise> iterator = copy.iterator();
       for (; iterator.hasNext(); ) {
         CommonExercise next = iterator.next();
         if (!next.isSafeToDecode()) iterator.remove();
       }
-      logger.info("getJsonForSelection after  had " + exercisesForState.size());
+  //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
     }
     getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
     return getJsonArray(copy);

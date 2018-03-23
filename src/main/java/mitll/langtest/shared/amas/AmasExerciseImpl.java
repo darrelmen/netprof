@@ -308,6 +308,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
+  public float getScore() {
+    return 0;
+  }
+
+  @Override
   public boolean hasScore() {
     return false;
   }

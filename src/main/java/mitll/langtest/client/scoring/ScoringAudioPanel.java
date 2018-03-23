@@ -179,17 +179,21 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
                            boolean scoredBefore,
                            String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
+    {
     String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
     if (words != null) {
       showImageAndCheck(words, wordTranscript);
     } else {
       wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
+    }
+    {
     String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null) {
       showImageAndCheck(phones, phoneTranscript);
     } else {
       phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+    }
     }
     if (!scoredBefore && miniScoreListener != null) {
       miniScoreListener.gotScore(result, path);

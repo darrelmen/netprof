@@ -165,8 +165,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
                           boolean hasClickableCharacters, T exercise, String fl, String transliteration) {
     if (fl != null && !fl.isEmpty()) {
       addFL(isMandarin, hasClickableCharacters, exercise, fl);
+      if (!transliteration.isEmpty()) {
       addTransliteration(transliteration, exercise);
     }
+  }
   }
 
   private void addTransliteration(String transliteration, T exercise) {

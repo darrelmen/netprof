@@ -64,11 +64,11 @@ public interface ScoringServiceAsync {
    * @param async
    * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
    */
-  void getAlignment(String base64EncodedString,
+/*  void getAlignment(String base64EncodedString,
                     String textToAlign,
                     String transliteration,
                     String identifier,
-                    int reqid, String device, AsyncCallback<AudioAnswer> async);
+                    int reqid, String device, AsyncCallback<AudioAnswer> async);*/
 
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 

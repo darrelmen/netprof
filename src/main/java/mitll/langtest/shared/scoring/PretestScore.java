@@ -54,12 +54,13 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private float hydecScore = -1f;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
-  private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
+  private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
   private String recoSentence;
   private float wavFileLengthSeconds;
   private int processDur = 0;
   private String json;
   private transient boolean ranNormally;
+  private boolean fullMatch = true;
 
   public PretestScore() {
   } // required for serialization
@@ -81,6 +82,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
    * @param sTypeToEndTimes
    * @param recoSentence
    * @param processDur
+   * @param isFullMatch
     * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
   public PretestScore(float hydecScore,
@@ -90,7 +92,8 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
                       float wavFileLengthSeconds,
-                      int processDur) {
+                      int processDur,
+                      boolean isFullMatch) {
     super(sTypeToEndTimes);
     this.sTypeToImage = sTypeToImage;
     this.hydecScore = hydecScore;
@@ -100,6 +103,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
     this.ranNormally = true;
+    this.fullMatch = isFullMatch;
   }
 
   public float getHydecScore() {
@@ -143,27 +147,34 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   }
 
   /**
-   * @see AlignDecode#getASRScoreForAudio
-   * @see AlignDecode#getASRScoreForAudio
    * @param json
+   * @see AlignDecode#getASRScoreForAudio
+   * @see AlignDecode#getASRScoreForAudio
    */
   public void setJson(String json) {
     this.json = json;
   }
 
   /**
-   * @see mitll.langtest.server.autocrt.AutoCRT#markCorrectnessOnAnswer
    * @return
+   * @see mitll.langtest.server.autocrt.AutoCRT#markCorrectnessOnAnswer
    */
   public boolean isRanNormally() {
     return ranNormally;
   }
 
+  public boolean isFullMatch() {
+    return fullMatch;
+  }
+
   public String toString() {
-    return "hydec score " + hydecScore +
-        " phones " + getPhoneScores() +
-        " type->image " + getsTypeToImage() +
-        " type->endtimes " + getTypeToSegments() + " took " + processDur + " millis"
+    return "hydec" +
+        "\n\tscore          " + hydecScore +
+        "\n\tphones         " + getPhoneScores() +
+        "\n\ttype->image    " + getsTypeToImage() +
+        "\n\ttype->endtimes " + getTypeToSegments() +
+        "\n\ttook           " + processDur + " millis" +
+        "\n\tfull match     " + fullMatch
         ;
   }
 }

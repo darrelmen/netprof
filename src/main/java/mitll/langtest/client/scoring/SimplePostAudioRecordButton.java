@@ -69,8 +69,8 @@ import java.util.logging.Logger;
  * <p>
  * TODO : make PostAudioRecordButton extend this class.
  */
-public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
-  private final Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
+public abstract class SimplePostAudioRecordButton {//extends RecordButton implements RecordButton.RecordingListener {
+/*  private final Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
   private static final String RELEASE_TO_STOP = "Release";
 
@@ -83,38 +83,38 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final String identifier;
   private AudioAnswer lastResult;
 
-  /**
+  *//**
    * Make a record button that returns the alignment and score.
    *
    * @param controller  needed for recording
    * @param service     to post the audio to
    * @param textToAlign to align the audio to
-   */
+   *//*
   protected SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                         String textToAlign, String transliteration) {
     this(controller, service, textToAlign, transliteration, "item");
   }
 
-  /**
+  *//**
    * Make a record button that returns the alignment and score.
    *
    * @param controller  needed for recording
    * @param service     to post the audio to
    * @param textToAlign to align the audio to
    * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
-   */
+   *//*
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                       String textToAlign, String transliteration, String identifier) {
     this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, transliteration, identifier);
   }
 
-  /**
+  *//**
    * @param controller
    * @param service
    * @param recordButtonTitle
    * @param stopButtonTitle
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
-   */
+   *//*
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                       String recordButtonTitle, String stopButtonTitle, String textToAlign, String transliteration, String identifier) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
@@ -129,10 +129,10 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
   }
 
-  /**
+  *//**
    * @param duration
    * @see RecordButton#stop(long)
-   */
+   *//*
   public boolean stopRecording(long duration) {
     controller.stopRecording(new WavCallback() {
       @Override
@@ -167,10 +167,10 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         controller.handleNonFatalError("get alignment",caught);
       }
 
-      /**
-       * Feedback for when audio isn't valid for some reason.
-       * @param toShow
-       */
+      *//**
+   * Feedback for when audio isn't valid for some reason.
+   * @param toShow
+   *//*
       private void showPopup(String toShow) {
         new PopupHelper().showPopup(toShow, getOuter(), 3000);
       }
@@ -281,5 +281,5 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
     tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
     return bar;
-  }
+  }*/
 }
