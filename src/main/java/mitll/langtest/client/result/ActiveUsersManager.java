@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class ActiveUsersManager {
+  private static final int HOUR = 60 * 60 * 1000;
   //private final Logger logger = Logger.getLogger("ActiveUsersManager");
 
   private final ExerciseController controller;
@@ -30,7 +31,7 @@ public class ActiveUsersManager {
     this.controller = controller;
   }
 
-  public void show() {
+  public void show(int hours) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Active Users (last hour)");
@@ -44,7 +45,7 @@ public class ActiveUsersManager {
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
 
-    controller.getUserService().getUsersSince(System.currentTimeMillis() - 60 * 60 * 1000, new AsyncCallback<List<FirstLastUser>>() {
+    controller.getUserService().getUsersSince(System.currentTimeMillis() - hours * HOUR, new AsyncCallback<List<FirstLastUser>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.getMessageHelper().handleNonFatalError("getting active users", caught);

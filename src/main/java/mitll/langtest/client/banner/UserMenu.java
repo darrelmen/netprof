@@ -85,10 +85,11 @@ public class UserMenu {
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
+    choices.add(new LinkAndTitle("Active Users", new ActiveUsersHandler()));
+   // choices.add(new LinkAndTitle("Active Today", new ActiveUsersHandlerDay()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
     choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
-    choices.add(new LinkAndTitle("Active Users", new ActiveUsersHandler()));
 
     return choices;
   }
@@ -252,12 +253,26 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new ActiveUsersManager(controller).show();
+          new ActiveUsersManager(controller).show(1);
         }
       });
     }
   }
+ /* private class ActiveUsersHandlerDay implements ClickHandler {
+    final EventRegistration outer = lifecycleSupport;
 
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          new ActiveUsersManager(controller).show(24);
+        }
+      });
+    }
+  }*/
 
   private void downloadFailedAlert() {
     Window.alert("Code download failed");
