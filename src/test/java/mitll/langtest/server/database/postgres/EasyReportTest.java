@@ -52,12 +52,12 @@ public class EasyReportTest extends BaseTest {
   public static final int MAX = 200;
 
 
-  @Test
+/*  @Test
   public void testReport() {
     DatabaseImpl andPopulate = getAndPopulate();
     andPopulate.getReport();
     andPopulate.close();
-  }
+  }*/
 
   @Test
   public void testSendReport() {

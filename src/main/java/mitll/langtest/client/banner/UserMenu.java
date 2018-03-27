@@ -13,12 +13,12 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
-import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.*;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
+import mitll.langtest.client.result.ActiveUsersManager;
 import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.LangTestDatabase;
@@ -35,13 +35,12 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private final Logger logger = Logger.getLogger("UserMenu");
-  private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
+  //private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
 
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   private static final String STATUS_REPORT_SENT = "Status report sent";
   private static final String MANAGE_USERS = "Manage Users";
   private static final String EVENTS = "Events";
- // private static final String DOWNLOAD_CONTEXT = "Download Context";
   private static final String SEND_REPORT = "Send Report to You";
   private static final String REPORT_LIST = "Weekly Report List";
 
@@ -89,6 +88,7 @@ public class UserMenu {
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
     choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
+    choices.add(new LinkAndTitle("Active Users", new ActiveUsersHandler()));
 
     return choices;
   }
@@ -206,34 +206,6 @@ public class UserMenu {
     }
   }
 
- /* private class DownloadContentsClickHandler implements ClickHandler {
-    Widget menu;
-    boolean isMale;
-
-    *//**
-     *
-     * @paramx menu
-     * @paramx isMale
-     *//*
-    public DownloadContentsClickHandler(Widget menu, boolean isMale) {
-      this.menu = menu;
-      this.isMale = isMale;
-    }
-
-    public void onClick(ClickEvent event) {
-      new PopupHelper().showPopup(PLEASE_WAIT, menu, 5000);
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new DownloadHelper(controller).downloadContext(controller.getHost(), isMale);
-        }
-      });
-    }
-  }
-*/
   private class ResultsClickHandler implements ClickHandler {
     final EventRegistration outer = lifecycleSupport;
 
@@ -265,14 +237,22 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          ReportListManager reportListManager = new ReportListManager(controller);
-          reportListManager.showReportList();
-//          ResultManager resultManager = new ResultManager(
-//              props.getNameForAnswer(),
-//              lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
-//              outer,
-//              controller);
-//          resultManager.showResults();
+          new ReportListManager(controller).showReportList();
+        }
+      });
+    }
+  }
+  private class ActiveUsersHandler implements ClickHandler {
+    final EventRegistration outer = lifecycleSupport;
+
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          new ActiveUsersManager(controller).show();
         }
       });
     }

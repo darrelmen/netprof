@@ -32,18 +32,64 @@
 
 package mitll.langtest.client.analysis;
 
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.user.SimpleUser;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Short page size is for laptops...
+ *
  * @param <T>
  */
-public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<T> {
-  BasicUserContainer(ExerciseController controller,
-                     String selectedUserKey,
-                     String header) {
+public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContainer<T> {
+  private static final int MAX_LENGTH = 11;
+  private static final int TABLE_WIDTH = 600;
+  private static final int FIRST_WIDTH = 90;
+  private static final int LAST_WIDTH = 100;
+  private static final String FIRST = "First";
+
+  public BasicUserContainer(ExerciseController controller,
+                            String selectedUserKey,
+                            String header) {
     super(controller, selectedUserKey, header, 10, 7);
+  }
+
+  @Override
+  public Panel getTableWithPager(Collection<T> users) {
+    Panel tableWithPager = super.getTableWithPager(users);
+    tableWithPager.getElement().getStyle().setProperty("minHeight", 250 + "px");
+    return tableWithPager;
+  }
+
+  /**
+   * @see SimplePagingContainer#configureTable
+   */
+  @Override
+  protected void addColumnsToTable(boolean sortEnglish) {
+    List<T> list = getList();
+    addItemID(list, 20);
+
+    addFirstName(list);
+    addLastName(list);
+
+    addDateCol(list);
+
+    table.setWidth("100%", true);
+
+   // addTooltip();
   }
 
   /**
@@ -66,7 +112,7 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
     return -1;
   }
 
-   int getFirstCompare(T o1, T o2) {
+  int getFirstCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }
@@ -136,5 +182,65 @@ public class BasicUserContainer<T extends UserInfo> extends MemoryItemContainer<
 
   public Long getItemDate(T shell) {
     return shell.getTimestampMillis();
+  }
+
+  protected int getMaxLengthId() {
+    return MAX_LENGTH;
+  }
+
+  protected int getMaxTableWidth() {
+    return TABLE_WIDTH;
+  }
+
+  protected void addFirstName(List<T> list) {
+    Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getSafeHtml(shell.getFirst());
+      }
+    };
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, FIRST_WIDTH + "px");
+    addColumn(userCol, new TextHeader(FIRST));
+    table.addColumnSortHandler(getFirstSorter(userCol, list));
+  }
+
+  private ColumnSortEvent.ListHandler<T> getFirstSorter(Column<T, SafeHtml> englishCol,
+                                                        List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getFirstCompare);
+    return columnSortHandler;
+  }
+
+  protected void addLastName(List<T> list) {
+    Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getSafeHtml(shell.getLast());
+      }
+    };
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, LAST_WIDTH + "px");
+    addColumn(userCol, new TextHeader("Last"));
+    table.addColumnSortHandler(getLastSorter(userCol, list));
+  }
+
+  private ColumnSortEvent.ListHandler<T> getLastSorter(Column<T, SafeHtml> englishCol,
+                                                       List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getLastCompare);
+    return columnSortHandler;
   }
 }

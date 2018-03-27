@@ -101,15 +101,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private static final String MINE_ONLY = "Mine Only";
 
-  private static final int MAX_LENGTH = 11;
-  private static final int TABLE_WIDTH = 600;
+
   private static final String TRYING_TO_GET_STUDENTS = "trying to get students";
 
   private static final String FILTER_BY1 = "Filter by";
 
   private static final int LIST_BOX_WIDTH = 150;
-  private static final int FIRST_WIDTH = 90;
-  private static final int LAST_WIDTH = 100;
 
   private static final String NO_LIST = "(No List)";
   //private static final int FILTER_BY = 19;
@@ -131,7 +128,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final String MY_STUDENT = "My Student";
   private static final int NUM_WIDTH = 50;
-  private static final String FIRST = "First";
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
@@ -161,14 +157,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     this.rightSide = rightSide;
     this.overallBottom = overallBottom;
     myStudents = new HashSet<>();
-  }
-
-  protected int getMaxLengthId() {
-    return MAX_LENGTH;
-  }
-
-  protected int getMaxTableWidth() {
-    return TABLE_WIDTH;
   }
 
   /**
@@ -227,15 +215,17 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * Min height is so that when the table is only a few rows, the buttons below the table don't roll up.
    *
-   * @param users
+   * @paramx users
    * @return
    */
+/*
   @Override
   public Panel getTableWithPager(Collection<UserInfo> users) {
     Panel tableWithPager = super.getTableWithPager(users);
     tableWithPager.getElement().getStyle().setProperty("minHeight", 250 + "px");
     return tableWithPager;
   }
+*/
 
   private boolean showOnlyMine() {
     return SHOW_MY_STUDENTS && controller.getStorage().isTrue("mineOnly");
@@ -520,32 +510,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     addTooltip();
   }
 
-  private void addFirstName(List<UserInfo> list) {
-    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(shell.getFirst());
-      }
-    };
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, FIRST_WIDTH + "px");
-    addColumn(userCol, new TextHeader(FIRST));
-    table.addColumnSortHandler(getFirstSorter(userCol, list));
-  }
-
-  private ColumnSortEvent.ListHandler<UserInfo> getFirstSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                               List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, this::getFirstCompare);
-    return columnSortHandler;
-  }
-
   private void addName(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -569,32 +533,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getNameCompare);
-    return columnSortHandler;
-  }
-
-  private void addLastName(List<UserInfo> list) {
-    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(shell.getLast());
-      }
-    };
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, LAST_WIDTH + "px");
-    addColumn(userCol, new TextHeader("Last"));
-    table.addColumnSortHandler(getLastSorter(userCol, list));
-  }
-
-  private ColumnSortEvent.ListHandler<UserInfo> getLastSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                              List<UserInfo> dataList) {
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, this::getLastCompare);
     return columnSortHandler;
   }
 

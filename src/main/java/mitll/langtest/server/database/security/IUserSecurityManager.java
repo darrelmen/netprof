@@ -2,11 +2,13 @@ package mitll.langtest.server.database.security;
 
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * Created by go22670 on 12/5/16.
@@ -73,4 +75,6 @@ public interface IUserSecurityManager {
   void setSessionUser(HttpSession session, User loggedInUser, boolean madeNewSession);
 
   String getRemoteAddr(HttpServletRequest request);
+
+  List<FirstLastUser> getActiveSince(long when);
 }

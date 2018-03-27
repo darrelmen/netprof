@@ -141,8 +141,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final int DAY = 24 * 60 * 60 * 1000;
-  private static final boolean REPORT_ALL_PROJECTS = false;
+
+  private static final boolean REPORT_ALL_PROJECTS = true;
   private static final boolean SEND_ALL_YEARS = true;
+  private static final int REPORT_THIS_PROJECT = 9;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -1658,7 +1660,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         .forEach(project -> {
 
           int id = project.getID();
-          if (REPORT_ALL_PROJECTS || id == 9) {
+          if (REPORT_ALL_PROJECTS || id == REPORT_THIS_PROJECT) {
             stats.addAll(report
                 .doReport(id,
                     project.getLanguage(),

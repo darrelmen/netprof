@@ -38,6 +38,7 @@ import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public interface UserService extends RemoteService {
    */
   User getUserFromSession() throws DominoSessionException;
 
+  List<FirstLastUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException;
   void logout() throws DominoSessionException;
 
   /**

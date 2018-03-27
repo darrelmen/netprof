@@ -36,6 +36,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 public interface IUserSessionDAO extends IDAO {
   /**
@@ -49,6 +50,9 @@ public interface IUserSessionDAO extends IDAO {
   //int getUserForSV(String s, String v);
 
   void removeAllSessionsForUser(int userId);
+
+  //@Override
+  Map<Integer, Long> getActiveSince(long when);
 
   int getNumRows();
 }

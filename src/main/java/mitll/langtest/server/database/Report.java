@@ -42,7 +42,6 @@ import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.UserTimeBase;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
@@ -134,9 +133,11 @@ public class Report implements IReport {
    * When sending all years, don't go back before this year.
    */
   private static final int EARLIEST_YEAR = 2015;
-  public static final String DATA = "data";
-  public static final String WEEK_OF_YEAR = "weekOfYear";
-  public static final String DATE = "date";
+  private static final String DATA = "data";
+  private static final String WEEK_OF_YEAR = "weekOfYear";
+  private static final String DATE = "date";
+  private static final String YYYY_MM_DD = "yyyy_MM_dd";
+  private static final String DLIFLC_NET_PRO_F_QUICK_LOOK_SUMMARY = "_DLIFLC_NetProF_Quick-Look-Summary";
 
   /**
    * @see #getReportForProject
@@ -174,7 +175,7 @@ public class Report implements IReport {
   private final Set<Integer> allTeachers = new HashSet<>();
   private final Set<Integer> allStudents = new HashSet<>();
   private final List<ReportUser> deviceUsers;
-  private final String hostname;
+  // private final String hostname;
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
 
@@ -205,7 +206,7 @@ public class Report implements IReport {
     });
 
     this.deviceUsers = deviceUsers;
-    this.hostname = hostname;
+    // this.hostname = hostname;
     this.userToProject = userToProject;
     this.logAndNotify = logAndNotify;
   }
@@ -303,36 +304,12 @@ public class Report implements IReport {
 
 /*
     File file2 = getReportPath(pathHelper, reportStats.getLanguage(), reportStats.getName(), ".xlsx");
-
-
     new ReportToExcel(logAndNotify).toXLSX(reportStats1, new FileOutputStream(file2));
     logger.debug("writeReportToFile wrote to " + file2.getAbsolutePath());
 */
     //logger.debug("\n" + jsonObject.toString());
     return reportStats.getJsonObject();
   }
-
-  /**
-   * Label report with hostname.
-   *
-   * @param stats
-   * @param mailSupport
-   * @param reportEmails
-   * @see #writeReport
-   */
-/*
-  private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails) {
-    String suffix = " (" + stats.getName() + ") on " + getHostInfo();
-    String subject = "Weekly Usage Report for " + stats.getLanguage() + suffix;
-    //  File file = getReportPath(pathHelper, language, name);
-
-    reportEmails.forEach(dest -> {
-      if (!mailSupport.sendEmail(hostname, dest, MY_EMAIL, subject, stats.getHtml())) {
-      }
-    });
-    //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
-  }
-*/
 
   /**
    * @param mailSupport
@@ -368,10 +345,6 @@ public class Report implements IReport {
       }
     }
   }
-/*
-  private String getHostName() throws UnknownHostException {
-    return InetAddress.getLocalHost().getHostName();
-  }*/
 
   /**
    * @param allReports
@@ -427,9 +400,9 @@ public class Report implements IReport {
 
   @NotNull
   private String getFileName() {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy_MM_dd");
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(YYYY_MM_DD);
     String today = simpleDateFormat2.format(new Date());
-    return today + "_DLIFLC_NetProF_Quick-Look-Summary";
+    return today + DLIFLC_NET_PRO_F_QUICK_LOOK_SUMMARY;
   }
 
   private File getReportFile(PathHelper pathHelper, String today, String language, String site, String suffix) {
@@ -861,18 +834,6 @@ public class Report implements IReport {
     osToCount.put(host, osToCount.getOrDefault(host, 0) + 1);
   }
 
-/*
-  private void openCSVWriter(PathHelper pathHelper, String language) {
-    try {
-      File reportPath = getReportPath(pathHelper, language);
-      String s = reportPath.getAbsolutePath().replaceAll(".html", ".csv");
-      this.csv = new BufferedWriter(new FileWriter(s));
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
-  }
-*/
-
   /**
    * @param builder
    * @param usersForProject
@@ -967,7 +928,7 @@ public class Report implements IReport {
     Map<Integer, Integer> tweekToCount = tcounts.getWeekToCount();
 
     //if (!users.isEmpty()) {
-    logger.info(language + " : " + users1 + " examining " + users.size() + " users - year " + year);
+    if (DEBUG) logger.info(language + " : " + users1 + " examining " + users.size() + " users - year " + year);
     // }
 
     for (ReportUser user : users) {
@@ -1047,10 +1008,10 @@ public class Report implements IReport {
     calendar.setTimeInMillis(userCreated);
 
     int month = calendar.get(Calendar.MONTH);
-    monthToCount.put(month, monthToCount.getOrDefault(month, 0) + 1);
+    tallyWeek(monthToCount, month);
 
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
-    weekToCount.put(w, weekToCount.getOrDefault(w, 0) + 1);
+    tallyWeek(weekToCount, w);
   }
 
   private void ensureYTDEntries0(int year, Map<Integer, Long> monthToCount) {
@@ -1493,6 +1454,11 @@ public class Report implements IReport {
     int firstDayOfWeek = Calendar.getInstance(Locale.US).getFirstDayOfWeek();
     if (DEBUG) logger.info("getResultsForSet first day of week " + firstDayOfWeek + " vs monday " + Calendar.MONDAY);
 
+    Map<Integer, Integer> weekToTeacher = new HashMap<>();
+    Map<Integer, Integer> weekToTooShort = new HashMap<>();
+    Map<Integer, Integer> weekToInvalid = new HashMap<>();
+    Map<Integer, Integer> weekToAll = new HashMap<>();
+    Map<Integer, Integer> weekToValid = new HashMap<>();
     try {
       BufferedWriter writer = null;
       teacherAudio = 0;
@@ -1504,56 +1470,65 @@ public class Report implements IReport {
       for (MonitorResult result : results) {
         long timestamp = result.getTimestamp();
 
-        calendar.setTimeInMillis(timestamp);
-        int w = calendar.get(Calendar.WEEK_OF_YEAR);
-        boolean firstWeeks = false;// w==5;
-        if (yearTimeRange.inYear(timestamp)) {
-          if (result.isValid()) {
-            if (!isRefAudioResult(result)) {
-              int userid = result.getUserid();
-              if (students.contains(userid) || allStudents.contains(userid)) {
-                if (isResultReallyValid(result, seen)) {
-                  if (true) {
-           /*         if (WRITE_RESULTS_TO_FILE) {
-                      writer.write(result.toString());
-                      writer.write("\n");
-                    }*/
-                    ytd++;
 
-                    // if (w==5) logger.info("include " + result);
-                    tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
-                    seen.add(result.getAnswer());
-                  } else {
-                    if (firstWeeks) logger.warn(w + " by me " + result);
-                    me++;
+        if (yearTimeRange.inYear(timestamp)) {  // if it's in the requested year
+          calendar.setTimeInMillis(timestamp);
+          int w = calendar.get(Calendar.WEEK_OF_YEAR);
+          boolean firstWeeks = w == 8;// w==5;
+
+          if (!isRefAudioResult(result)) {      // and not ref audio
+            tallyWeek(weekToAll, w);
+            if (result.isValid()) {             // and valid
+              tallyWeek(weekToValid, w);
+              int userid = result.getUserid();
+              if (isStudentUser(students, userid)) {  // and by a student
+                if (isAboveMinDuration(result, seen)) {    // and is long enough
+                  ytd++;
+                  tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
+                  if (firstWeeks) {
+                    logger.info("getResultsForSet " +
+                        " weekToCount " + weekToCount.get(w) +
+                        " week        " + w +
+                        " include " + result.getUniqueID() + " " + new Date(result.getTimestamp()));
                   }
-                } else {
+                  seen.add(result.getAnswer());
+                } else {  // too short
                   if (firstWeeks) logger.warn(w + " min duration too short " + result);
                   invalidScore++;
+                  tallyWeek(weekToTooShort, w);
                 }
-              } else {
-                if (firstWeeks) logger.warn(w + " teacher score " + result);
+              } else {  // it's a teacher
+                if (firstWeeks) {
+                  logger.warn(w + " teacher score " + result);
+                }
+                tallyWeek(weekToTeacher, w);
+
                 boolean add = skipped.add(userid);
                 if (add) {
-                  if (DEBUG) logger.info(language + " skipping not a student " + userid);
+                  if (DEBUG) logger.info(language + " " + w +
+                      " skipping not a student " + userid + " " + result.getUniqueID() + " " + new Date(result.getTimestamp()));
+
                   if (!allTeachers.contains(userid)) {
                     logger.warn("hmm " + userid + "is not a teacher?");
                   }
                 }
 
-                idToCount.put(userid, idToCount.getOrDefault(userid, 0) + 1);
+                tallyWeek(idToCount, userid);
                 Set<MonitorResult> orDefault = userToRecordings.getOrDefault(userid, new HashSet<>());
                 orDefault.add(result);
                 userToRecordings.put(userid, orDefault);
 
                 teacherAudio++;
               }
+            } else { //it's invalid
+              if (firstWeeks) logger.warn(w + " invalid score " + result);
+              invalid++;
+              tallyWeek(weekToInvalid, w);
             }
-          } else {
-            if (firstWeeks) logger.warn(w + " invalid score " + result);
-            invalid++;
+          } else {  // ref audio
+
           }
-        } else {
+        } else {  // wrong year
           beforeJanuary++;
         }
       }
@@ -1566,11 +1541,19 @@ public class Report implements IReport {
 
     if (DEBUG) {
       logger.debug("getResultsForSet" +
+          "\n\tyear     " + year +
           "\n\tout of   " + size +
           "\n\tSkipped  " + invalid + " invalid recordings, " +
           "\n\tinvalid  " + invalidScore + " -1 score items, " +
-          "\n\tgvidaver " + me + " by gvidaver, " +
-          "\n\tbefore   " + beforeJanuary + " beforeJan1st");
+          (me > 0 ? "\n\tgvidaver " + me + " by gvidaver, " : "") +
+          "\n\tbefore   " + beforeJanuary + " beforeJan1st" +
+          "\n\tweek->all       " + weekToAll +
+          "\n\tweek->valid     " + weekToValid +
+          "\n\tweekToCount     " + weekToCount +
+          "\n\tweek->teacher   " + weekToTeacher +
+          "\n\tweek->too short " + weekToTooShort +
+          "\n\tweek->invalid   " + weekToInvalid
+      );
     }
     if (teacherAudio > 0) {
       StringBuilder builder1 = new StringBuilder();
@@ -1601,6 +1584,14 @@ public class Report implements IReport {
     }
   }
 
+  private void tallyWeek(Map<Integer, Integer> weekToAll, int w) {
+    weekToAll.put(w, weekToAll.getOrDefault(w, 0) + 1);
+  }
+
+  private boolean isStudentUser(Set<Integer> students, int userid) {
+    return students.contains(userid) || allStudents.contains(userid);
+  }
+
   /**
    * Don't childCount the same audio twice.
    *
@@ -1608,7 +1599,7 @@ public class Report implements IReport {
    * @param seen
    * @return
    */
-  private boolean isResultReallyValid(MonitorResult result, Set<String> seen) {
+  private boolean isAboveMinDuration(MonitorResult result, Set<String> seen) {
     return
         result.getDurationInMillis() > MIN_DURATION &&
             !seen.contains(result.getAnswer());
@@ -1729,21 +1720,26 @@ public class Report implements IReport {
     tallyByMonthAndWeek(calendar, monthToCount, weekToCount, userToDayToCount, result.getTimestamp(), result.getUserid());
   }
 
-  private void tallyByMonthAndWeek(Calendar calendar, Map<Integer, Integer> monthToCount,
+  private void tallyByMonthAndWeek(Calendar calendar,
+                                   Map<Integer, Integer> monthToCount,
                                    Map<Integer, Integer> weekToCount,
-                                   Map<Integer, Map<String, Integer>> userToDayToCount, long timestamp, int userid) {
+                                   Map<Integer, Map<String, Integer>> userToDayToCount,
+                                   long timestamp,
+                                   int userid) {
     calendar.setTimeInMillis(timestamp);
 
     int month = calendar.get(Calendar.MONTH);
-    monthToCount.put(month, monthToCount.getOrDefault(month, 0) + 1);
+    tallyWeek(monthToCount, month);
 
-    Map<String, Integer> dayToCount = userToDayToCount.computeIfAbsent(userid, k -> new TreeMap<>());
+    {
+      Map<String, Integer> dayToCount = userToDayToCount.computeIfAbsent(userid, k -> new TreeMap<>());
+      String yearMonthDayKey =
+          calendar.get(Calendar.YEAR) + "," +
+              month + "," +
+              calendar.get(Calendar.DAY_OF_MONTH);
 
-    String yearMonthDayKey = calendar.get(Calendar.YEAR) + "," +
-        month + "," +
-        calendar.get(Calendar.DAY_OF_MONTH);
-
-    dayToCount.put(yearMonthDayKey, dayToCount.getOrDefault(yearMonthDayKey, 0) + 1);
+      dayToCount.put(yearMonthDayKey, dayToCount.getOrDefault(yearMonthDayKey, 0) + 1);
+    }
 
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
     Integer orDefault = weekToCount.getOrDefault(w, 0);
@@ -1777,19 +1773,20 @@ public class Report implements IReport {
     }
     return skip;
   }*/
-  private String getFile(AudioAttribute attribute) {
+/*  private String getFile(AudioAttribute attribute) {
     return getFile(attribute.getAudioRef());
   }
 
   private String getFile(MonitorResult result) {
     return getFile(result.getAnswer());
-  }
+  }*/
 
+/*
   private String getFile(String audioRef) {
     String[] bestAudios = audioRef.split(File.separator);
     return bestAudios[bestAudios.length - 1];
   }
-
+*/
   private Date getJanuaryFirst(Calendar calendar, int year) {
     setToFirstMoment(calendar);
     calendar.set(Calendar.YEAR, year);

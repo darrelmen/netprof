@@ -77,9 +77,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -150,15 +153,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
-    //  .concurrencyLevel(4)
-    //  .weakKeys()
+      //  .concurrencyLevel(4)
+      //  .weakKeys()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) throws Exception {
-             // logger.info("Load " + key);
+              // logger.info("Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
@@ -677,7 +680,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Boolean isRememberedMatch = encodedToMatch.get(encodedPassword);
 
     if (isRememberedMatch != null) {
-    //  logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
+      //  logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
       return isRememberedMatch;
     }
 
@@ -772,12 +775,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Use a cache.
-   *
+   * <p>
    * Keys age out at 10 minutes
-   * @see #idToDBUser
    *
    * @param id
    * @return
+   * @see #idToDBUser
    */
   private DBUser lookupUser(int id) {
     try {
@@ -795,6 +798,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public ReportUsers getReportUsers() {
+//    long then = System.currentTimeMillis();
+//    Map<Integer, ReportUser> reportUsersQuick = getReportUsersQuick();
+//    long now = System.currentTimeMillis();
+//    logger.info("took " + (now - then) +
+//        " got " + reportUsersQuick.size());
     List<ReportUser> copy = new ArrayList<>();
     getAll().forEach(u -> copy.add(toUser(u)));
     return new ReportUsers(copy, getUsersDevices(copy));
@@ -1100,6 +1108,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return kindToUse;
   }
 
+  /**
+   * @param permissionSet     populate this set
+   * @param roleAbbreviations from these
+   * @return
+   */
   @NotNull
   private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<Kind> seen = new HashSet<>();
@@ -1235,7 +1248,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
-    logger.warn("getAll calling get all users");
+    logger.info("getAll calling get all users");
     FindOptions<UserColumn> opts = getUserColumnFindOptions();
     List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();
@@ -1276,10 +1289,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 */
 
-/*  private Map<Integer, ReportUser> getReportUsers() {
+/*  private Map<Integer, ReportUser> getReportUsersQuick() {
     Collection<List<Object>> userFields =
-        delegate.getUserFields("_id", "userId", "firstName", "lastName");
+        delegate.getUserFields("_id", "userId", "acctDtl.createTime", "roles", "acctDtl.device");
     long now = System.currentTimeMillis();
+    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     Map<Integer, ReportUser> idToFirstLast = new HashMap<>();
     for (List<Object> userField : userFields) {
@@ -1287,12 +1301,82 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Object o = userField.get(i++);
       Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
       String o2 = (String) userField.get(i++);
-      String o3 = (String) userField.get(i++);
-      String o4 = (String) userField.get(i++);
-      idToFirstLast.put(o1, new ReportUser(o1, o2, o3, o4, now));
+
+
+      Object o3 = userField.get(i++);
+      long time = now;
+      try {
+        if (o3 == null) {
+          logger.warn("no create time?");
+        }
+        else {
+          time = inputFormat.parse((String)o3).getTime();
+        }
+      } catch (ParseException e) {
+        logger.warn("couldn't parse " + o3);
+      }
+
+
+      Object roles = userField.get(i++);
+     // logger.info("got " + roles + " " + roles.getClass());
+
+      String dev = (String) userField.get(i++);
+      logger.info("dev " +dev+
+          " got " + roles + " " + roles.getClass());
+
+      idToFirstLast.put(o1, new ReportUserImpl(o1,
+          o2,
+          time, Kind.STUDENT, dev));
     }
     return idToFirstLast;
   }*/
+
+  private static class ReportUserImpl implements ReportUser {
+
+    int id;
+    String userID, device;
+    long timestamp;
+    Kind kind;
+
+    public ReportUserImpl(int id, String userID, long timestamp,
+                          Kind kind, String device) {
+      this.id = id;
+      this.userID = userID;
+      this.timestamp = timestamp;
+      this.kind = kind;
+      this.device = device;
+    }
+
+    @Override
+    public int getID() {
+      return id;
+    }
+
+    @Override
+    public String getUserID() {
+      return userID;
+    }
+
+    @Override
+    public long getTimestampMillis() {
+      return timestamp;
+    }
+
+    @Override
+    public String getIpaddr() {
+      return "";
+    }
+
+    @Override
+    public Kind getUserKind() {
+      return kind;
+    }
+
+    @Override
+    public String getDevice() {
+      return device;
+    }
+  }
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 

@@ -49,6 +49,7 @@ import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -62,6 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
@@ -249,6 +251,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       return null;
     }
   }
+
 
   /**
    * Get the current user from the session
