@@ -65,6 +65,8 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  private static final String POLYGLOT_ICON = LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png";
+
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
   private static final String COURSES = COURSE1 + "s";
@@ -203,7 +205,7 @@ public class ProjectChoices {
       if (status == ProjectStatus.PRODUCTION) {
         filtered.add(project);
       } else {
-        if (status == ProjectStatus.RETIRED) {
+        if (status.shouldShowOnlyToAdmins()) { // retired are only visible to admins
           if (admin) {
             filtered.add(project);
           }
@@ -216,7 +218,7 @@ public class ProjectChoices {
     List<SlimProject> filtered2 = new ArrayList<>();
     if (isPoly) {
       for (SlimProject project : filtered) {
-        if (project.getProjectType() == ProjectType.POLYGLOT || project.hasChildren()) {
+        if (isPolyglot(project) || project.hasChildren()) {
           filtered2.add(project);
         }
       }
@@ -224,6 +226,10 @@ public class ProjectChoices {
       filtered2 = filtered;
     }
     return filtered2;
+  }
+
+  private boolean isPolyglot(SlimProject project) {
+    return project.getProjectType() == ProjectType.POLYGLOT;
   }
 
   private boolean isCanRecord(Collection<Permission> permissions) {
@@ -595,7 +601,7 @@ public class ProjectChoices {
   private void addPolyglotIcon(SlimProject projectForLang, UIObject container) {
     boolean hasPoly = !projectForLang.getChildren()
         .stream()
-        .filter(slimProject -> slimProject.getProjectType() == ProjectType.POLYGLOT).collect(Collectors.toList()).isEmpty();
+        .filter(this::isPolyglot).collect(Collectors.toList()).isEmpty();
 /*    logger.info("addPolyglotIcon : found " + projectForLang.getChildren().size() + " children  of " + projectForLang.getName() +
         " has poly " + hasPoly);*/
     if (hasPoly) {
@@ -604,7 +610,7 @@ public class ProjectChoices {
   }
 
   private void addPolyIcon(UIObject container) {
-    Image polyglot = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png"));
+    Image polyglot = new Image(UriUtils.fromSafeConstant(POLYGLOT_ICON));
     polyglot.addStyleName("floatRight");
     polyglot.getElement().getStyle().setMarginTop(9, Style.Unit.PX);
     DOM.appendChild(container.getElement(), polyglot.getElement());

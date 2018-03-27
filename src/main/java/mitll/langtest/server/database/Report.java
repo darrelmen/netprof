@@ -135,6 +135,8 @@ public class Report implements IReport {
    */
   private static final int EARLIEST_YEAR = 2015;
   public static final String DATA = "data";
+  public static final String WEEK_OF_YEAR = "weekOfYear";
+  public static final String DATE = "date";
 
   /**
    * @see #getReportForProject
@@ -1143,6 +1145,14 @@ public class Report implements IReport {
 
     JSONArray weekArray = new JSONArray();
     String weekCol = getWC(weekToCount, WEEK, users1, weekArray, year);
+
+    if (DEBUG) {
+      logger.info("getSectionReport :" +
+          "\n\tsection     '" + users1 + "' " +
+          "\n\tyear        " + year +
+          "\n\tweek->count " + weekToCount);
+    }
+
     jsonObject.put(WEEK1, weekArray);
 //    logger.debug("getSectionReport json " + jsonObject);
 
@@ -1356,8 +1366,15 @@ public class Report implements IReport {
         "</table><br/>\n";
   }
 
+  /**
+   * @param weekToCount
+   * @param year
+   * @return
+   * @see #getResultsForSet(StringBuilder, Set, Collection, String, JSONObject, int, ReportStats, String)
+   */
   private Map<String, Integer> getWeekToCount(Map<Integer, ?> weekToCount,
                                               int year) {
+    if (DEBUG) logger.info("getWeekToCount " + year + " num weeks = " + weekToCount.size());
     Calendar calendar = getCalendarForYear(year);
     Integer max = getMax(weekToCount);
     //long initial = calendar.getTimeInMillis();
@@ -1368,6 +1385,7 @@ public class Report implements IReport {
 
     for (int week = 1; week <= max; week++) {
       String format1 = df.format(getThisWeek(year, calendar, week));
+      if (DEBUG) logger.info("getWeekToCount " + year + "  week " + week + " = " + format1);
       weekToCountFormatted.put(format1, getCountAtWeek(weekToCount, week));
     }
 
@@ -1379,9 +1397,9 @@ public class Report implements IReport {
                               Object value,
                               String format) {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("weekOfYear", week);
+    jsonObject.put(WEEK_OF_YEAR, week);
     jsonObject.put(COUNT, value);
-    jsonObject.put("date", format);
+    jsonObject.put(DATE, format);
     jsonArray.add(jsonObject);
   }
 
@@ -1395,12 +1413,27 @@ public class Report implements IReport {
     return value instanceof Integer ? (Integer) value : ((Long) value).intValue();
   }
 
+  /**
+   * The week runs from Sunday->Saturday - saturday is the last day of the week (7)
+   * For example, 1/06/18 is a saturday and the last day of the first week of 2018.
+   *
+   * @param year
+   * @param calendar
+   * @param week
+   * @return
+   */
   @NotNull
   private Date getThisWeek(int year, Calendar calendar, int week) {
     calendar.set(Calendar.WEEK_OF_YEAR, week);
-    calendar.set(Calendar.DAY_OF_WEEK, 1);
+    calendar.set(Calendar.DAY_OF_WEEK, 7);
     calendar.set(Calendar.YEAR, year);
 
+    if (calendar.get(Calendar.YEAR) != year) {
+      // logger.warn("getThisWeek after year is " + calendar.get(Calendar.YEAR) + " vs " + year);
+      calendar.set(Calendar.YEAR, year);
+      calendar.set(Calendar.MONTH, 11); // 11 = december
+      calendar.set(Calendar.DAY_OF_MONTH, 31); // new years eve
+    }
     return calendar.getTime();
   }
 
@@ -1452,10 +1485,13 @@ public class Report implements IReport {
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
 
-    logger.info(language + " : Year " + year + " Students num = " + students.size());
+    if (DEBUG) logger.info("getResultsForSet " + language + " : Year " + year + " Students num = " + students.size());
 
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
+
+    int firstDayOfWeek = Calendar.getInstance(Locale.US).getFirstDayOfWeek();
+    if (DEBUG) logger.info("getResultsForSet first day of week " + firstDayOfWeek + " vs monday " + Calendar.MONDAY);
 
     try {
       BufferedWriter writer = null;
@@ -1528,7 +1564,7 @@ public class Report implements IReport {
       logger.error("got " + e, e);
     }
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.debug("getResultsForSet" +
           "\n\tout of   " + size +
           "\n\tSkipped  " + invalid + " invalid recordings, " +
@@ -1561,7 +1597,7 @@ public class Report implements IReport {
     reportStats.putInt(allRecordings ? INFO.ALL_RECORDINGS : INFO.DEVICE_RECORDINGS, ytd);
 
     if (allRecordings) {
-      reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, getThisYear()));
+      reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year));
     }
   }
 
@@ -1866,7 +1902,7 @@ public class Report implements IReport {
         }
       } else if (!students.contains(creatorID)) {
         //  skipped++;
-  //      teachers.add(creatorID);
+        //      teachers.add(creatorID);
       }
     }
     //dumpActiveUsers(activeUsers, teachers, skipped, users);

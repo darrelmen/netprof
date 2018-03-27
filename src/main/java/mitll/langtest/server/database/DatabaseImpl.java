@@ -114,6 +114,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.text.CollationKey;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
@@ -140,7 +141,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final int DAY = 24 * 60 * 60 * 1000;
-  private static final boolean REPORT_ALL_PROJECTS = true;
+  private static final boolean REPORT_ALL_PROJECTS = false;
   private static final boolean SEND_ALL_YEARS = true;
 
   private IUserDAO userDAO;
@@ -991,7 +992,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         language);
   }
 */
-
   @Override
   public Connection getConnection(String who) {
     return null;
@@ -1645,19 +1645,29 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private List<ReportStats> getReportStats(IReport report, boolean forceSend) {
     List<ReportStats> stats = new ArrayList<>();
 
-    getProjects().forEach(project -> {
+    List<Project> collect = getProjects()
+        .stream()
+        .filter(project -> project.getStatus().shouldLoad()).collect(Collectors.toList());
 
-      int id = project.getID();
-      if (REPORT_ALL_PROJECTS || id == 9) {
-        stats.addAll(report
-            .doReport(id,
-                project.getLanguage(),
-                project.getProject().name(),
-                pathHelper,
-                forceSend,
-                SEND_ALL_YEARS));
-      }
-    });
+    StringBuilder names = new StringBuilder();
+    collect.forEach(project -> names.append(project.getName()).append(", "));
+    logger.info("getReportStats : reporting on " + collect.size() + " projects:" +
+        "\n\tnames " + names);
+
+    collect
+        .forEach(project -> {
+
+          int id = project.getID();
+          if (REPORT_ALL_PROJECTS || id == 9) {
+            stats.addAll(report
+                .doReport(id,
+                    project.getLanguage(),
+                    project.getProject().name(),
+                    pathHelper,
+                    forceSend,
+                    SEND_ALL_YEARS));
+          }
+        });
     return stats;
   }
 
