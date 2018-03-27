@@ -78,7 +78,7 @@ class CheckLTS {
     this.isAsianLanguage = isAsianLanguage;
     urdu = languageProperty.equalsIgnoreCase("urdu");
 
-    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
+//    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
   }
 
   private boolean areAllPhonesValid(String[] pron) {

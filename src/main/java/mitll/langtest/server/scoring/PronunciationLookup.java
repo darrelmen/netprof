@@ -28,6 +28,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private final HTKDictionary htkDictionary;
   private final LTS lts;
   private boolean korean, russian;
+  int count = 0;
 
   /**
    * @param dictionary
@@ -186,7 +187,11 @@ public class PronunciationLookup implements IPronunciationLookup {
           addDictMatches(justPhones, dict, word, lookupToken);
         } else {  // not in the dictionary, let's ask LTS
           String optional = russian ? " or " + removeAccents(word) : "";
-          logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+
+          if (count++ % 1000 == 0) {
+            logger.info("getPronunciationsFromDictOrLTS NOT found in dict (" +count+  "): '" + word + "'" + optional);
+          }
+
           LTS lts = getLTS();
           if (lts == null) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");

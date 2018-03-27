@@ -217,7 +217,7 @@ public class Report implements IReport {
    * Also writes the report out to the report directory... TODO : necessary?
    *
    * @see ReportingServices#doReport
-   * @see DatabaseImpl#getReportStats(IReport, boolean, MailSupport)
+   * @see DatabaseImpl#getReportStats
    */
   @Override
   public List<ReportStats> doReport(int projid,
@@ -318,6 +318,7 @@ public class Report implements IReport {
    * @param reportEmails
    * @see #writeReport
    */
+/*
   private void sendEmails(ReportStats stats, MailSupport mailSupport, List<String> reportEmails) {
     String suffix = " (" + stats.getName() + ") on " + getHostInfo();
     String subject = "Weekly Usage Report for " + stats.getLanguage() + suffix;
@@ -329,6 +330,7 @@ public class Report implements IReport {
     });
     //sendExcelViaEmail(mailSupport, reportEmails, reportStats, pathHelper);
   }
+*/
 
   /**
    * @param mailSupport
@@ -346,26 +348,28 @@ public class Report implements IReport {
     sendReports(mailSupport, reportEmails, receiverNames, getSummaryReport(reportStats, pathHelper));
   }
 
-  private void sendReports(MailSupport mailSupport, List<String> reportEmails, List<String> receiverNames, File summaryReport) {
+  private void sendReports(MailSupport mailSupport, List<String> reportEmails,
+                           List<String> receiverNames, File summaryReport) {
     String subject = getFileName();
     String messageBody = "Hi,<br>Here is the current usage report for NetProF on " + getHostInfo() +
         ".<br>Thanks, Administrator";
 
     logger.info("sending excel to recipients " + reportEmails + " using file " + summaryReport.getAbsolutePath());
 
-    for (int i = 0; i < reportEmails.size(); i++) {
-      String dest = reportEmails.get(i);
-      String name = receiverNames.get(i);
-      if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport, name)) {
-        logger.warn("couldn't send email to " + dest);
+    if (!reportEmails.isEmpty() && !receiverNames.isEmpty()) {
+      for (int i = 0; i < reportEmails.size(); i++) {
+        String dest = reportEmails.get(i);
+        String name = receiverNames.get(i);
+        if (!mailSupport.emailAttachment(dest, subject, messageBody, summaryReport, name)) {
+          logger.warn("couldn't send email to " + dest);
+        }
       }
     }
   }
-
+/*
   private String getHostName() throws UnknownHostException {
     return InetAddress.getLocalHost().getHostName();
-  }
-
+  }*/
 
   /**
    * @param allReports

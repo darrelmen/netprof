@@ -629,6 +629,16 @@ public class ProjectManagement implements IProjectManagement {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<Project> getPolyglotMatchingProjects(Language languageMatchingGroup) {
+    List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
+    return projectByLangauge.stream()
+        .filter(project ->
+            project.getKind() == ProjectType.POLYGLOT &&
+                project.getStatus() == ProjectStatus.PRODUCTION)
+        .collect(Collectors.toList());
+  }
+
   /**
    * Try to deal with project set changing out from underneath us...
    *

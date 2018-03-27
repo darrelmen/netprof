@@ -300,10 +300,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
     logger.info("getCountForGender" +
-        "\n\tfor '" + speed + "'" +
+        "\n\tfor       '" + speed + "'" +
         "\n\tgiven ids " + uniqueIDs.size() +
-        "\n\tand " + exToTranscript.size() +
-        "\n\tgot " + countForGender4.size());
+        "\n\tex->trans " + exToTranscript.size() +
+        "\n\tgot       " + countForGender4.size());
 
 //    countForGender4.forEach((k,v)->{});
 
@@ -319,6 +319,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
+
+    logger.info("getCountForGender " +
+        "\n\tfor     '" + speed + "'" +
+        "\n\tmales   " + idsOfRecordedExercisesForMales.size() +
+        "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
   }
 
   @Override

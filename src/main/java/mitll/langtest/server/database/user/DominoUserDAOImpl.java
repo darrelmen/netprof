@@ -677,7 +677,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Boolean isRememberedMatch = encodedToMatch.get(encodedPassword);
 
     if (isRememberedMatch != null) {
-      logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
+    //  logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
       return isRememberedMatch;
     }
 
@@ -981,7 +981,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Group next = secondaryGroups.iterator().next();
       Language languageMatchingGroup = getLanguageMatchingGroup(next);
       if (languageMatchingGroup != Language.UNKNOWN) {
-        List<Project> collect = getMatchingProjects(languageMatchingGroup);
+        List<Project> collect = projectManagement.getPolyglotMatchingProjects(languageMatchingGroup);
 
         if (!collect.isEmpty()) {
           if (collect.size() > 1) {
@@ -1000,15 +1000,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("getProjectAssignment no groups for user id " + id);
     }
     return projID;
-  }
-
-  private List<Project> getMatchingProjects(Language languageMatchingGroup) {
-    List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
-    return projectByLangauge.stream()
-        .filter(project ->
-            project.getKind() == ProjectType.POLYGLOT &&
-                project.getStatus() == ProjectStatus.PRODUCTION)
-        .collect(Collectors.toList());
   }
 
   /**
@@ -1172,9 +1163,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see Report#getReport
    */
-//  public List<ReportUser> getUsersDevices() {
-//    return getUsersDevices(getUsers());
-//  }
   private List<ReportUser> getUsersDevices(List<ReportUser> users) {
     return users
         .stream()
@@ -1287,6 +1275,24 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return idToFirstLast;
   }
 */
+
+/*  private Map<Integer, ReportUser> getReportUsers() {
+    Collection<List<Object>> userFields =
+        delegate.getUserFields("_id", "userId", "firstName", "lastName");
+    long now = System.currentTimeMillis();
+
+    Map<Integer, ReportUser> idToFirstLast = new HashMap<>();
+    for (List<Object> userField : userFields) {
+      int i = 0;
+      Object o = userField.get(i++);
+      Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
+      String o2 = (String) userField.get(i++);
+      String o3 = (String) userField.get(i++);
+      String o4 = (String) userField.get(i++);
+      idToFirstLast.put(o1, new ReportUser(o1, o2, o3, o4, now));
+    }
+    return idToFirstLast;
+  }*/
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
