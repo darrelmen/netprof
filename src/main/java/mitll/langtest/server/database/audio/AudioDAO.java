@@ -66,7 +66,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final String TRANSCRIPT = "transcript";
   private static final String DNR = "dnr";
 
-  private final boolean DEBUG = false;
+  private final boolean DEBUG = true;
   private final Connection connection;
   private final IUserDAO userDAO;
 
@@ -323,7 +323,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   }
 
-//  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext,int projid) {
+//  public Set<Integer> getRecordedBySameGenderContext(int userid, Map<Integer, String> exToContext,int projid) {
 //    //  return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
 //    return null;
 //  }
@@ -379,11 +379,23 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return new HashSet<>();
   }
 
+/*
   @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale, String regSpeed, String slowSpeed, int projid) {
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid, boolean isMale, String regSpeed, String slowSpeed) {
+    return null;
+  }
+*/
+
+  @Override
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid, boolean isMale, Map<Integer, String> exToTranscript) {
     return null;
   }
 
+
+  @Override
+  Set<Integer> getContextAudioExercises(int projid, boolean isMale, Map<Integer, String> exToContextTranscript) {
+    return null;
+  }
 
   /**
    * select childCount(*) from (select childCount(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)

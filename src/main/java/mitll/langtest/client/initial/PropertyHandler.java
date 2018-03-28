@@ -54,6 +54,7 @@ import java.util.logging.Logger;
 public class PropertyHandler {
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
+  private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
   private static final String CPW_TOKEN2 = "CPW-token";
 
@@ -271,7 +272,7 @@ public class PropertyHandler {
   }
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " " + PRONUNCIATION_FEEDBACK;
   }
 
   public String getInitialPrompt() {

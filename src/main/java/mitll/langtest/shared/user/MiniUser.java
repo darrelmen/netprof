@@ -33,7 +33,6 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.HasID;
@@ -45,7 +44,7 @@ public class MiniUser extends FirstLastUser {
   private Gender realGender = Gender.Unspecified;
 
   private boolean isAdmin;
-  protected long timestamp;
+ // protected long timestamp;
 
   public enum Gender implements IsSerializable {
     Unspecified,
@@ -111,11 +110,6 @@ public class MiniUser extends FirstLastUser {
   }
 
   @Override
-  public int compareTo(HasID o) {
-    return Integer.compare(getID(), o.getID());
-  }
-
-  @Override
   public boolean equals(Object obj) {
     return (obj instanceof MiniUser) && compareTo((MiniUser) obj) == 0;
   }
@@ -141,17 +135,21 @@ public class MiniUser extends FirstLastUser {
    * @see Report#getUsers
    * @return
    */
+/*
   public long getTimestampMillis() {
     return timestamp;
   }
+*/
 
   /**
-   * @param startTime
+   * @paramx startTime
    * @see mitll.langtest.server.database.user.DominoUserDAOImpl#getMini
    */
   public void setTimestampMillis(long startTime) {
-    this.timestamp = startTime;
+    setLastChecked(startTime);
+//    this.timestamp = startTime;
   }
+
 
   public boolean isAdmin() {
     return isAdmin;

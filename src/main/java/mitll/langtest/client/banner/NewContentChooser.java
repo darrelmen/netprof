@@ -276,34 +276,42 @@ public class NewContentChooser implements INavigation {
   private PROMPT_CHOICE prompt = PROMPT_CHOICE.NOT_YET;
 
   private void pushFirstUnit() {
-    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    if (!typeOrder.isEmpty()) {
-      String s = typeOrder.get(0);
-      //  logger.info("First " + s);
-      Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
-      if (!matchInfos.isEmpty()) {
-        MatchInfo next = matchInfos.iterator().next();
-        String value = next.getValue();
-        //  logger.info("First " + s + " = "+ value);
-        History.newItem(s + "=" + value);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+    if (projectStartupInfo != null) {
+      List<String> typeOrder = projectStartupInfo.getTypeOrder();
+      if (!typeOrder.isEmpty()) {
+        String s = typeOrder.get(0);
+        //  logger.info("First " + s);
+        Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
+        if (!matchInfos.isEmpty()) {
+          MatchInfo next = matchInfos.iterator().next();
+          String value = next.getValue();
+          //  logger.info("First " + s + " = "+ value);
+          History.newItem(s + "=" + value);
+        }
       }
     }
   }
 
   private void pushSecondUnit() {
-    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    if (!typeOrder.isEmpty()) {
-      String s = typeOrder.get(0);
-      //  logger.info("First " + s);
-      Set<MatchInfo> matchInfos = controller.getProjectStartupInfo().getTypeToDistinct().get(s);
-      if (!matchInfos.isEmpty()) {
-        Iterator<MatchInfo> iterator = matchInfos.iterator();
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-        MatchInfo next = iterator.next();
-        if (iterator.hasNext()) next = iterator.next();
-        String value = next.getValue();
-        //  logger.info("First " + s + " = "+ value);
-        History.newItem(s + "=" + value);
+    if (projectStartupInfo != null) {
+      List<String> typeOrder = projectStartupInfo.getTypeOrder();
+      if (!typeOrder.isEmpty()) {
+        String s = typeOrder.get(0);
+        //  logger.info("First " + s);
+        Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
+        if (!matchInfos.isEmpty()) {
+          Iterator<MatchInfo> iterator = matchInfos.iterator();
+
+          MatchInfo next = iterator.next();
+          if (iterator.hasNext()) next = iterator.next();
+          String value = next.getValue();
+          //  logger.info("First " + s + " = "+ value);
+          History.newItem(s + "=" + value);
+        }
       }
     }
   }

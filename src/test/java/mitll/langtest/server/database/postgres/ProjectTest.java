@@ -448,25 +448,27 @@ public class ProjectTest extends BaseTest {
     logger.info(maleFemaleProgress.toString());
   }
 
+/*
   @Test
   public void testMaleFemaleFilterBySameGender() {
     DatabaseImpl database = getAndPopulate();
     IAudioDAO audioDAO = database.getAudioDAO();
-    Collection<Integer> recordedBy = audioDAO.getRecordedBySameGender(2, 3);
+    Collection<Integer> recordedBy = audioDAO.getRecordedBySameGender(2, 3, exToTranscript);
     logger.info("found english " + recordedBy.size());
 
-    Collection<Integer> frecordedBy = audioDAO.getRecordedBySameGender(133, 3);
+    Collection<Integer> frecordedBy = audioDAO.getRecordedBySameGender(133, 3, exToTranscript);
     logger.info("found female english " + frecordedBy.size());
 
-    Collection<Integer> recordedBy2 = audioDAO.getRecordedBySameGender(2, 2);
+    Collection<Integer> recordedBy2 = audioDAO.getRecordedBySameGender(2, 2, exToTranscript);
     logger.info("found hindi   " + recordedBy2.size());
 
-    Collection<Integer> frecordedBy2 = audioDAO.getRecordedBySameGender(133, 2);
+    Collection<Integer> frecordedBy2 = audioDAO.getRecordedBySameGender(133, 2, exToTranscript);
     logger.info("found female hindi   " + frecordedBy2.size());
 
     Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(3);
     logger.info(maleFemaleProgress.toString());
   }
+*/
 
   @Test
   public void testSearch() {

@@ -57,6 +57,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.IUserList;
@@ -77,6 +78,11 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+  private static final String PRACTICED = " practiced.";
+  private static final String NO_SCORE = "No score yet.";
+  private static final String PERFECT = "100% Perfect!";
+  private static final String AVG_SCORE = " avg. score";
   /**
    *
    */
@@ -129,7 +135,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   /**
    *
    */
-  private final ProgressBar progressBar;
+  private final ProgressBar practicedProgress, scoreProgress;
   private final DivWidget pagerAndSortRow;
 
   private List<String> typeOrder;
@@ -182,10 +188,16 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");
     breadRow.getElement().setId("breadRow");
-    //  breadRow.addStyleName("floatLeftList");
+    //    breadRow.addStyleName("floatLeftList");
 
-    breadRow.add(progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-    styleProgressBarContainer(progressBar);
+    {
+      breadRow.add(practicedProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      styleProgressBarContainer(practicedProgress);
+      practicedProgress.addStyleName("floatLeft");
+      styleProgressBarContainer(scoreProgress);
+      scoreProgress.addStyleName("floatRight");
+    }
     // Todo : add this?
     // breadRow.add(new HTML("breadcrumbs go here"));
     {
@@ -251,7 +263,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     style.setHeight(25, Style.Unit.PX);
     style.setFontSize(16, Style.Unit.PX);
 
-
+    progressBar.setWidth("49%");
     progressBar.setVisible(false);
   }
 
@@ -1439,7 +1451,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private void hidePrevNext() {
     hidePrevNextWidgets();
-    progressBar.setVisible(false);
+    setProgressVisible(false);
   }
 
   /**
@@ -1454,7 +1466,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private void showPrevNext() {
     pageSizeContainer.setVisible(true);
     sortBox.setVisible(true);
-    progressBar.setVisible(true);
+    setProgressVisible(true);
     pagerAndSortRow.setVisible(true);
   }
 
@@ -1702,7 +1714,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         showExercises(toShow, reqID);
 
         if (isDrillView()) { // hack for avp
-          progressBar.setVisible(false);
+          setProgressVisible(false);
         }
       }
     } else {
@@ -1712,7 +1724,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
+
   private final Set<Integer> exercisesWithScores = new HashSet<>();
+  private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, CommonExercise> fetched = new ConcurrentHashMap<>();
 
   /**
@@ -1967,18 +1981,27 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
+  private static final boolean DEBUGSCORE = false;
+
   /**
    * @param result
    * @see #showExercises
    */
   private void setProgressBarScore(Collection<CommonShell> result, final int reqid) {
     exercisesWithScores.clear();
-    long then = System.currentTimeMillis();
+    float total = 0f;
+    int withScore = 0;
+    // long then = System.currentTimeMillis();
     //logger.info("setProgressBarScore checking " + result.size());
     for (CommonShell exercise : result) {
       if (exercise.hasScore()) {
-        // logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
+        if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         exercisesWithScores.add(exercise.getID());
+        float score = exercise.getScore();
+        total += score;
+        exerciseToScore.put(exercise.getID(), score);
+        if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
+        withScore++;
       }
       // if (!isCurrentReq(reqid)) break;
     }
@@ -1990,8 +2013,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
     if (isCurrentReq(reqid)) {
       showScore(exercisesWithScores.size(), result.size());
+      if (DEBUGSCORE) logger.info("setProgressBarScore total " + total + " denom " + withScore);
+
+      showAvgScore(total, withScore);
     }
   }
+
 
   /**
    * @param id
@@ -2003,38 +2030,94 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     super.setScore(id, hydecScore);
     if (hydecScore > -1f) {
       exercisesWithScores.add(id);
+
+      if (DEBUGSCORE) logger.info("setScore # " + id + " Score " + hydecScore);
+
+      exerciseToScore.put(id, hydecScore);
     } else {
       logger.info("skipping low score for " + id);
     }
     showScore(exercisesWithScores.size(), pagingContainer.getSize());
+    showAvgScore();
+  }
+
+  private void showAvgScore() {
+    float total = 0f;
+    int withScore = exerciseToScore.size();
+    // long then = System.currentTimeMillis();
+    if (DEBUGSCORE) logger.info("showAvgScore checking " + withScore);
+    for (float score : exerciseToScore.values()) {
+      total += score;
+    }
+    if (DEBUGSCORE) logger.info("showAvgScore total " + total + " denom " + withScore);
+
+    showAvgScore(total, withScore);
+    // if (!isCurrentReq(reqid)) break;
+  }
+
+  private void showAvgScore(float total, int withScore) {
+    float a = total * 10f;
+    int denom = withScore * 10;
+    float fdenom = (float) denom;
+    float avg = a / fdenom;
+    //logger.info("total " + avg + " " + denom);
+    showAvgScore(Math.round(avg * 100));
   }
 
   private void showScore(int num, int denom) {
+    showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED, false);
+  }
+
+  private void showAvgScore(int num) {
+    showProgress(num, 100, scoreProgress, NO_SCORE, PERFECT, AVG_SCORE, true);
+  }
+
+  private void setProgressVisible(boolean visible) {
+    practicedProgress.setVisible(visible);
+    scoreProgress.setVisible(visible);
+  }
+
+//  private void showProgressScore(int num, int denom, ProgressBar practicedProgress) {
+//    showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED);
+//  }
+
+  private void showProgress(int num,
+                            int denom,
+                            ProgressBar practicedProgress,
+                            String zeroPercent,
+                            String oneHundredPercent,
+                            String suffix, boolean useColorGradient) {
     double score = (float) num / (float) denom;
     double percent = 100 * score;
-    progressBar.setPercent(num == 0 ? 10 : percent);
+    practicedProgress.setPercent(num == 0 ? 100 : percent);
     boolean allDone = num == denom;
 
+
     String text =
-        num == 0 ? NONE_PRACTICED_YET :
-            allDone ? ALL_PRACTICED : (num + " practiced.");
+        num == 0 ? zeroPercent :
+            allDone ? oneHundredPercent : (num + suffix);
 
-    progressBar.setText(text);
-    progressBar.setColor(
-        allDone ? ProgressBarBase.Color.SUCCESS :
-            percent > SECOND_STEP ?
-                ProgressBarBase.Color.DEFAULT :
-                percent > FIRST_STEP ?
-                    ProgressBarBase.Color.INFO :
-                    ProgressBarBase.Color.WARNING);
+    practicedProgress.setText(text);
 
-    progressBar.setVisible(true);
- /*   if (progressTooltip == null) {
-      progressTooltip = new TooltipHelper().addTooltip(progressBar, text);
+    double round = Math.max(percent, 30);
+    if (percent == 0d) round = 100d;
+
+    if (useColorGradient && num > 0) {
+//      if (score == 0f) {
+//        //logger.warning("score now 50 ");
+//        score = 50f;
+//      }
+      new ScoreProgressBar(false).setColor(practicedProgress, score, round, false);
     } else {
-      progressTooltip.setText(text);
-      progressTooltip.reconfigure();
-    }*/
+      practicedProgress.setColor(
+          allDone ? ProgressBarBase.Color.SUCCESS :
+              percent > SECOND_STEP ?
+                  ProgressBarBase.Color.DEFAULT :
+                  percent > FIRST_STEP ?
+                      ProgressBarBase.Color.INFO :
+                      ProgressBarBase.Color.WARNING);
+    }
+    practicedProgress.setVisible(true);
   }
 
   /**

@@ -116,9 +116,9 @@ public abstract class Scoring {
     this.language = language;
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
-    if (isAsianLanguage) {
-      logger.warn("using mandarin segmentation.");
-    }
+//    if (isAsianLanguage) {
+//      logger.warn("using mandarin segmentation.");
+//    }
     setLTSFactory();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel(), isAsianLanguage);
   }

@@ -54,7 +54,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends AudioPanel<T> {
-//  private Logger logger = Logger.getLogger("ScoringAudioPanel");
+  //  private Logger logger = Logger.getLogger("ScoringAudioPanel");
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
@@ -103,7 +103,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
         exercise, exerciseID, instance);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
-    this.clickableTranscript = new ClickableTranscript(words,phones,controller.getButtonFactory(),exerciseID,playAudio);
+    this.clickableTranscript = new ClickableTranscript(words, phones, controller.getButtonFactory(), exerciseID, playAudio);
   }
 
 
@@ -219,5 +219,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void showChart() {   miniScoreListener.showChart(controller.getHost());  }
+  public void showChart() {
+    miniScoreListener.showChart(controller.getHost());
+  }
 }

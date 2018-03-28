@@ -59,12 +59,12 @@ import java.util.Map;
 public class UnitChapterItemHelper<T extends CommonExercise> {
   //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
 
+  private static final int MAXLEN = 10;
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
    */
   private static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String ITEM = "Item";
-  private static final int MAXLEN = 15;
 
   private final Collection<String> typeOrder;
 
@@ -115,7 +115,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   private String getID(T e) {
     return "" + e.getID();
   }
-
 
   protected SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();

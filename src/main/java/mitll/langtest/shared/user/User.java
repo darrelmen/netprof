@@ -159,7 +159,7 @@ public class User extends MiniUser implements ReportUser {
    * @param password
    * @param enabled
    * @param permissions
-   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser()
+   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser
    */
   public User(int id, int age, int gender, Gender realGender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
@@ -170,28 +170,21 @@ public class User extends MiniUser implements ReportUser {
         System.currentTimeMillis(), "OTHER", true);
   }
 
-/*  public User(User copy) {
-    this(copy.getID(),
-        copy.getUserID(), copy.getAge(),
-        copy.getGender(),
-        copy.getRealGender(),
-        copy.getExperience(),
-        copy.getIpaddr(),
-        copy.getPasswordHash(),
-        copy.getNativeLang(),
-        copy.getDialect(),
-        copy.isEnabled(),
-        copy.isAdmin(),
-        copy.getPermissions(),
-        copy.getUserKind(),
-        copy.getEmail(),
-        copy.getDevice(),
-        copy.getResetKey(),
-        copy.getTimestampMillis(),
-        copy.getAffiliation(),
-        copy.isHasAppPermission());
-  }*/
-
+  /**
+   * @see DominoUserDAOImpl#toUser
+   * @param id
+   * @param userID
+   * @param gender
+   * @param realGender
+   * @param enabled
+   * @param isAdmin
+   * @param userKind
+   * @param email
+   * @param device
+   * @param timestamp
+   * @param affiliation
+   * @param hasAppPermission
+   */
   public User(int id,
               String userID,
               int gender,
@@ -277,7 +270,8 @@ public class User extends MiniUser implements ReportUser {
     this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
-    this.timestamp = timestamp;
+    setLastChecked(timestamp);
+//    this.timestamp = timestamp;
     this.affiliation = affiliation;
     this.hasAppPermission = hasAppPermission;
   }
@@ -415,7 +409,7 @@ public class User extends MiniUser implements ReportUser {
 
   /**
    * @param email
-   * @see mitll.langtest.server.services.UserServiceImpl#addUser
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
    */
   public void setEmail(String email) {
     this.email = email;
@@ -427,7 +421,7 @@ public class User extends MiniUser implements ReportUser {
 
 
   public String getFullName() {
-    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
+    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
   }
 
   public void setAdmin(boolean admin) {

@@ -39,6 +39,7 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.FirstLastUser;
+import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -49,20 +50,20 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/29/15.
  */
-public class UserInfo implements HasID {
+public class UserInfo extends SimpleUser {
   private int current;
   private int lastSessionScore;
   private int lastSessionNum;
   private int lastSessionSize;
   private int num;
-  private long startTime;
+//  private long startTime;
 
   private transient List<BestScore> bestScores;
-
-  private int id;
-  private String userID;
-  private String first;
-  private String last;
+//
+//  private int id;
+//  private String userID;
+//  private String first;
+//  private String last;
 
   public UserInfo() {
   }
@@ -74,7 +75,8 @@ public class UserInfo implements HasID {
   public UserInfo(List<BestScore> bestScores, long startTime) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
-    this.startTime = startTime;
+    setLastChecked(startTime);
+//    this.startTime = startTime;
 
     // done on server
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
@@ -115,9 +117,9 @@ public class UserInfo implements HasID {
     return Math.round(100f * total / size);
   }
 
-  public long getTimestampMillis() {
-    return startTime;
-  }
+/*  public long getTimestampMillis() {
+    return getLastChecked();
+  }*/
 
   /**
    * @return
@@ -144,9 +146,9 @@ public class UserInfo implements HasID {
     this.current = current;
   }
 
-  public String getUserID() {
-    return userID;
-  }
+//  public String getUserID() {
+//    return userID;
+//  }
 
   public void setUserID(String userID) {
     this.userID = userID;
@@ -180,22 +182,6 @@ public class UserInfo implements HasID {
   @Override
   public int compareTo(@NotNull HasID o) {
     return Integer.compare(id, o.getID());
-  }
-
-  /**
-   * @return
-   * @see UserContainer#addFirstName(List)
-   */
-  public String getFirst() {
-    return first;
-  }
-
-  public String getLast() {
-    return last;
-  }
-
-  public String getName() {
-    return first + " " + last;
   }
 
   public int getLastSessionScore() {

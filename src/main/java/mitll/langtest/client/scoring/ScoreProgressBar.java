@@ -9,12 +9,18 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 
+import java.util.logging.Logger;
+
 public class ScoreProgressBar {
+  private Logger logger = Logger.getLogger("ScoreProgressBar");
   private static final String AUDIO_CUT_OFF = "Audio cut off.";
-  protected final ProgressBar progressBar;
+  protected ProgressBar progressBar;
 
   public ScoreProgressBar() {
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+  }
+
+  public ScoreProgressBar(boolean nope) {
   }
 
   /**
@@ -47,38 +53,43 @@ public class ScoreProgressBar {
 //                ProgressBarBase.Color.WARNING :
 //                ProgressBarBase.Color.DANGER);
 
-    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+    setColor(progressBar, percent, round, showNow);
+    return progressBar;
+  }
+
+  public void setColor(ProgressBar progressBar, double percent, double round, boolean showNow) {
+     String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
 
     if (showNow) {
 //      Style styleWidget = getStyleWidget();
 //      styleWidget.setBackgroundColor(color);
 //      setPercent(percent, round, styleWidget);
 
-      setPercentLater(percent, round, color);
+      setPercentLater(progressBar, percent, round, color);
     } else {
-      // logger.info("showScore : color " + color + " for " + percent);
-      Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(percent, round, color));
+   //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
+      Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
     }
-    return progressBar;
   }
 
-  private void setPercentLater(double percent, double round, String color) {
-    Style style = getStyleWidget();
-    style.setBackgroundImage("linear-gradient(to bottom," +
+  private void setPercentLater(ProgressBar progressBar, double percent, double round, String color) {
+    Style style = getStyleWidget(progressBar);
+     style.setBackgroundImage("linear-gradient(to bottom," +
         color +
         "," +
         color +
         ")");
 
-    setPercent(percent, round, style);
+    setPercent(progressBar, percent, round, style);
   }
 
-  private Style getStyleWidget() {
-    Widget theBar = progressBar.getWidget(0);
+  private Style getStyleWidget(ProgressBar progressBar) {
+     Widget theBar = progressBar.getWidget(0);
     return theBar.getElement().getStyle();
   }
 
-  private void setPercent(double percent, double round, Style style) {
+
+  private void setPercent(ProgressBar progressBar, double percent, double round, Style style) {
     if (percent > 0.4) style.setColor("black");
 
     progressBar.setPercent(round);

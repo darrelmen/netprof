@@ -1438,7 +1438,7 @@ public class Report implements IReport {
     Map<Integer, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     int teacherAudio = 0;
-    int invalid=0;
+    int invalid;
     int invalidScore = 0;
 
     int beforeJanuary = 0;

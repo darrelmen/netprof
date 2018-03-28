@@ -565,7 +565,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           (float) duration,
           processDur,
           match);
-
     } catch (Exception e) {
       logger.error("getPretestScore got " + e, e);
       return new PretestScore(-1);
@@ -832,7 +831,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
    * Note we have to adjust the last segment time to be the audio duration, so we can correct for wav vs mp3 time
    * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
-   * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
+   * The consumer of this map is at {@linkx mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
    *
    * @param eventAndFileInfo
    * @return

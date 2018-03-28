@@ -261,7 +261,7 @@ public class ProjectManagement implements IProjectManagement {
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
     long then = System.currentTimeMillis();
 
-    boolean skipRetired = project.isRetired() && !configureEvenRetired;
+    boolean skipRetired = !project.shouldLoad() && !configureEvenRetired;
     boolean isConfigured = project.getExerciseDAO().isConfigured();
     if (!forceReload) {
       if (skipRetired || isConfigured) {
@@ -301,7 +301,7 @@ public class ProjectManagement implements IProjectManagement {
     if (!rawExercises.isEmpty()) {
       logger.debug("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
     } else {
-      if (project.getStatus() == ProjectStatus.PRODUCTION) {
+      if (isProduction(project)) {
         logger.error("configureProject no exercises in project? " + project);
       } else {
         logger.warn("configureProject no exercises in project? " + project);
@@ -320,7 +320,7 @@ public class ProjectManagement implements IProjectManagement {
               (SlickResultDAO) db.getResultDAO(),
               project.getLanguage(),
               id,
-              project.getKind() == ProjectType.POLYGLOT)
+              isPolyglot(project))
       );
 
       if (myProject) {
@@ -350,6 +350,14 @@ public class ProjectManagement implements IProjectManagement {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
       return 0;
     }
+  }
+
+  private boolean isProduction(Project project) {
+    return project.getStatus() == ProjectStatus.PRODUCTION;
+  }
+
+  private boolean isPolyglot(Project project) {
+    return project.getKind() == ProjectType.POLYGLOT;
   }
 
   private void rememberUsers(int projectID) {
@@ -497,16 +505,20 @@ public class ProjectManagement implements IProjectManagement {
     return getFirst ? getFirstProject() : getProject(projectid);
   }
 
+  /**
+   * If the project has become retired or deleted, they get kicked out.
+   * @param userid
+   * @return
+   */
   @Override
   public Project getProjectForUser(int userid) {
     Project project = getProject(db.getUserProjectDAO().getCurrentProjectForUser(userid));
 
-    if (project != null &&
-        project.getStatus() == ProjectStatus.RETIRED) {
+    if (project != null && !project.getStatus().shouldLoad()) {
       return null;
+    } else {
+      return project;
     }
-
-    return project;
   }
 
   @Override
@@ -556,6 +568,15 @@ public class ProjectManagement implements IProjectManagement {
   @Override
   public CommonExercise getExercise(int projectid, int id) {
     return getProjectOrFirst(projectid).getExerciseByID(id);
+  }
+
+  @Override
+  public CommonExercise getExercise(int id) {
+    for (Project project : idToProject.values()) {
+      CommonExercise exerciseByID = project.getExerciseByID(id);
+      if (exerciseByID != null) return exerciseByID;
+    }
+    return null;
   }
 
   /**
@@ -617,6 +638,16 @@ public class ProjectManagement implements IProjectManagement {
         .values()
         .stream()
         .filter(project -> project.getLanguageEnum() == name)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Project> getPolyglotMatchingProjects(Language languageMatchingGroup) {
+    List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
+    return projectByLangauge.stream()
+        .filter(project ->
+            isPolyglot(project) &&
+                isProduction(project))
         .collect(Collectors.toList());
   }
 
@@ -698,7 +729,7 @@ public class ProjectManagement implements IProjectManagement {
   private List<Project> getProductionProjects(Collection<Project> toFilter) {
     return toFilter
         .stream()
-        .filter(p -> p.getStatus() == ProjectStatus.PRODUCTION)
+        .filter(this::isProduction)
         .collect(Collectors.toList());
   }
 
@@ -733,7 +764,7 @@ public class ProjectManagement implements IProjectManagement {
       Project project = getProject(projid);
 
       if (project != null) {
-        if (project.getStatus() == ProjectStatus.RETIRED && !userWhere.isAdmin()) {
+        if (!project.getStatus().shouldLoad() && !userWhere.isAdmin()) {
           logger.info("setStartupInfo project is retired - so kicking the user back to project choice screen.");
           clearStartupInfo(userWhere);
         } else {
@@ -898,7 +929,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info) {
     boolean isRTL = false;
-    if (getProjectStatus(project) != ProjectStatus.RETIRED) {
+    if (getProjectStatus(project).shouldLoad()) {
       List<CommonExercise> exercises = db.getExercises(project.id());
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());

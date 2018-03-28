@@ -73,11 +73,19 @@ public interface IProjectManagement {
 
   CommonExercise getExercise(int projectid, int id);
 
+  /**
+   * Only for testing
+   * @param id
+   * @return
+   */
+  CommonExercise getExercise(int id);
+
   List<CommonExercise> getExercises(int projectid);
 
   Project getProject(int projectid);
   Project getProjectByName(String name);
   List<Project> getProjectByLangauge(Language name);
+  List<Project> getPolyglotMatchingProjects(Language languageMatchingGroup);
 
   Collection<Project> getProjects();
 

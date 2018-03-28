@@ -660,7 +660,12 @@ public class ScoreServlet extends DatabaseServlet {
         case ALIGN:
         case DECODE:
         case RECORD:
-          jsonObject = getJsonForAudio(request, realRequest, deviceType, device);
+          try {
+            jsonObject = getJsonForAudio(request, realRequest, deviceType, device);
+          } catch (IOException e) {
+            logger.error("doPost got " + e, e);
+            jsonObject.put(ERROR, "got except " + e.getMessage());
+          }
           break;
         case EVENT:
           gotLogEvent(request, device, jsonObject);
@@ -674,7 +679,12 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } else {
       logger.info("doPost request type is null - assume align.");
-      jsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
+      try {
+        jsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
+      } catch (Exception e) {
+        logger.error("doPost got " + e, e);
+        jsonObject.put(ERROR, "got except " + e.getMessage());
+      }
     }
 
     writeJsonToOutput(response, jsonObject);
@@ -956,6 +966,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
 
+    logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
 
@@ -1063,13 +1074,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForAudio
    * @param inputStream
    * @param project
    * @param realExID
    * @param userid
    * @return
    * @throws IOException
+   * @see #getJsonForAudio
    */
   @NotNull
   private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid) throws IOException {

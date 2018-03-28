@@ -114,6 +114,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.text.CollationKey;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
@@ -140,6 +141,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
   private static final int DAY = 24 * 60 * 60 * 1000;
+
+  private static final boolean REPORT_ALL_PROJECTS = true;
+  private static final boolean SEND_ALL_YEARS = true;
+  private static final int REPORT_THIS_PROJECT = 9;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -969,9 +974,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @return
    * @paramx listid
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
+   * @seex mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
+/*
   @Override
   public AVPScoreReport getUserHistoryForList(int userid,
                                               Collection<Integer> ids,
@@ -987,7 +993,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         resultDAO,
         language);
   }
-
+*/
   @Override
   public Connection getConnection(String who) {
     return null;
@@ -1268,13 +1274,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
           " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }*/
+
+    if (toRet == null) {
+      logger.info("getCustomOrPredefExercise OK - try all projects for exercise #" + id);
+      toRet = projectManagement.getExercise(id);
+    }
+
     if (toRet == null) {
       String message = "getCustomOrPredefExercise couldn't find exercise " + id + " (context?) in project #" + projid +
           " after looking in exercise table.";
+
       if (id == 0) {
         logger.info(message);
       } else {
-        logger.error(message);
+        logger.warn(message);
       }
     }
 
@@ -1580,70 +1593,84 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #sendReport
    */
   private void sendReports(IReport report, boolean forceSend, int userID) {
-    MailSupport mailSupport = getMailSupport();
-    List<ReportStats> stats = getReportStats(report, forceSend, mailSupport);
+    List<String> reportEmails = new ArrayList<>();
+    List<String> receiverNames = new ArrayList<>();
 
-    {
-      List<String> reportEmails = new ArrayList<>();
-      List<String> receiverNames = new ArrayList<>();
+    populateRecipients(userID, reportEmails, receiverNames);
 
-      populateRecipients(userID, reportEmails, receiverNames);
+    logger.info("sendReports to" +
+        "\n\temails : " + reportEmails +
+        "\n\tnames  : " + receiverNames
+    );
+    report.sendExcelViaEmail(getMailSupport(),
+        reportEmails,
+        receiverNames,
+        getReportStats(report, forceSend), pathHelper);
 
-      logger.info("sendReports to" +
-          "\n\temails : " + reportEmails +
-          "\n\tnames  : " + receiverNames
-      );
-      report.sendExcelViaEmail(mailSupport, reportEmails, receiverNames, stats, pathHelper);
-    }
   }
 
   private void populateRecipients(int userID, List<String> reportEmails, List<String> receiverNames) {
     if (userID != -1) {
-      User byID = userDAO.getByID(userID);
-      if (byID == null) {
-        logger.error("huh? can't find user " + userID + " in db?");
-      } else {
-//          logger.info("using user email " + byID.getEmail());
-        reportEmails.add(byID.getEmail());
-        receiverNames.add(byID.getFullName());
-      }
+      sendToRequester(userID, reportEmails, receiverNames);
     } else {
       reportEmails.addAll(projectDAO.getListProp(getDefaultProject(), ProjectProperty.REPORT_LIST));
 
       for (String email : reportEmails) {
         String trim = email.trim();
-        String nameForEmail = userDAO.getNameForEmail(trim);
-        if (nameForEmail == null) nameForEmail = trim;
-        receiverNames.add(nameForEmail);
+        if (!trim.isEmpty()) {
+          String nameForEmail = userDAO.getNameForEmail(trim);
+          if (nameForEmail == null) nameForEmail = trim;
+          receiverNames.add(nameForEmail);
+        }
       }
+    }
+  }
+
+  private void sendToRequester(int userID, List<String> reportEmails, List<String> receiverNames) {
+    User byID = userDAO.getByID(userID);
+    if (byID == null) {
+      logger.error("huh? can't find user " + userID + " in db?");
+    } else {
+//          logger.info("using user email " + byID.getEmail());
+      reportEmails.add(byID.getEmail());
+      receiverNames.add(byID.getFullName());
     }
   }
 
   /**
    * @param report
    * @param forceSend
-   * @param mailSupport
    * @return
    * @see #sendReports(IReport, boolean, int)
    */
   @NotNull
-  private List<ReportStats> getReportStats(IReport report, boolean forceSend, MailSupport mailSupport) {
+  private List<ReportStats> getReportStats(IReport report, boolean forceSend) {
     List<ReportStats> stats = new ArrayList<>();
-    List<String> reportEmails = getReportEmails();
 
-    getProjects().forEach(project -> {
-      stats.addAll(report
-          .doReport(project.getID(),
-              project.getLanguage(),
-              project.getProject().name(),
-              pathHelper,
-              forceSend, true));
-    });
+    List<Project> collect = getProjects()
+        .stream()
+        .filter(project -> project.getStatus().shouldLoad()).collect(Collectors.toList());
+
+    StringBuilder names = new StringBuilder();
+    collect.forEach(project -> names.append(project.getName()).append(", "));
+    logger.info("getReportStats : reporting on " + collect.size() + " projects:" +
+        "\n\tnames " + names);
+
+    collect
+        .forEach(project -> {
+
+          int id = project.getID();
+          if (REPORT_ALL_PROJECTS || id == REPORT_THIS_PROJECT) {
+            stats.addAll(report
+                .doReport(id,
+                    project.getLanguage(),
+                    project.getProject().name(),
+                    pathHelper,
+                    forceSend,
+                    SEND_ALL_YEARS));
+          }
+        });
     return stats;
-  }
-
-  private List<String> getReportEmails() {
-    return projectDAO.getListProp(projectDAO.getDefault(), ProjectProperty.REPORT_LIST);
   }
 
   private MailSupport getMailSupport() {
@@ -1662,10 +1689,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, reportStats);
   }
 
-  public IReport getReport() {
+  private IReport getReport() {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
     return new Report(resultDAO, eventDAO, audioDAO,
-        reportUsers.getAllUsers(), reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(),
+        reportUsers.getAllUsers(),
+        reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(),
         serverProps.getNPServer(), this.getLogAndNotify());
   }
 
@@ -1707,20 +1735,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     report.getSummaryReport(allReports, pathHelper);
     return jsons;
   }
-
-/*  private File getSummaryReport(IReport report, List<ReportStats> allReports) {
-    try {
-      File file2 = report.getReportPathDLI(pathHelper, ".xlsx");
-      new ReportToExcel(logAndNotify).toXLSX(allReports, new FileOutputStream(file2));
-      logger.info("writeReportToFile wrote to " + file2.getAbsolutePath());
-      return file2;
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-      logAndNotify(e);
-      return null;
-    }
-
-  }*/
 
   /**
    * @param projID

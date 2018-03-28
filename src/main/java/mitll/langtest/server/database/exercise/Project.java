@@ -74,6 +74,7 @@ public class Project implements IPronunciationLookup {
   private static final String HYDRA_2 = "hydra2";
   private static final String H_2 = "h2";
   private static final String HYDRA = "hydra";
+  private static final Set<ProjectStatus> toSkip = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, ProjectStatus.DELETED));
 
   /**
    * @see #getWebserviceHost
@@ -189,10 +190,9 @@ public class Project implements IPronunciationLookup {
     return ProjectType.valueOf(project.kind());
   }
 
-  private Set<ProjectStatus> toSkip = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, ProjectStatus.DELETED));
 
-  public boolean isRetired() {
-    return project != null && toSkip.contains(ProjectStatus.valueOf(project.status()));
+  public boolean shouldLoad() {
+    return project != null && !toSkip.contains(ProjectStatus.valueOf(project.status()));
   }
 
   /**

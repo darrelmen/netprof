@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.audio;
 
-import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
@@ -45,7 +44,6 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -104,12 +102,13 @@ public interface IAudioDAO extends IDAO {
   /**
    * @param userid
    * @param projid
+   * @param exToTranscript
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
    */
-  Collection<Integer> getRecordedBySameGender(int userid, int projid);
+  Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript);
 
-  Set<Integer> getWithContext(int userid, int projid);
+  Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript);
 
 
   boolean hasAudio(int exid);

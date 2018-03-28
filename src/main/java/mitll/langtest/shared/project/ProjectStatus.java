@@ -35,23 +35,55 @@ package mitll.langtest.shared.project;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum ProjectStatus implements IsSerializable {
+  /**
+   * Everyone can see projects in production - students, teachers, everyone
+   */
   PRODUCTION,
+  /**
+   * Only admins and content developers can see projects in development.
+   */
   DEVELOPMENT,
+  /**
+   * The final stage before Production - when we have a model and we're testing it.
+   * Only visible to admins, content developers.
+   */
   EVALUATION,
-  RETIRED,
-  DELETED(false);
+  /**
+   * Projects that have become obsolete but we might want to examine or report on.
+   * Only admins can see them.
+   */
+  RETIRED(true, true, false),
+  /**
+   * Projects that just exist to demonstrate a new feature - they should not be reported on.
+   */
+  DEMO,
+  /**
+   * Completed removed projects that can't be reloaded.
+   */
+  DELETED(false, true, false);
 
-  private boolean show;
+  private boolean show = true; // as a choice
+  private boolean showOnlyToAdmins = false; // as a choice
+  private boolean load = true; // should load the project
 
   ProjectStatus() {
-    this.show = true;
   }
 
-  ProjectStatus(boolean show) {
+  ProjectStatus(boolean show, boolean showOnlyToAdmins, boolean load) {
     this.show = show;
+    this.showOnlyToAdmins = showOnlyToAdmins;
+    this.load = load;
   }
 
   public boolean shouldShow() {
     return show;
+  }
+
+  public boolean shouldLoad() {
+    return load;
+  }
+
+  public boolean shouldShowOnlyToAdmins() {
+    return showOnlyToAdmins;
   }
 }

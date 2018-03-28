@@ -37,17 +37,29 @@ import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * These calls require a session.
- *
  */
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
+
+  @Override
+  public List<FirstLastUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminPerm(userIDFromSessionOrDB)) {
+      return securityManager.getActiveSince(when);
+    } else return Collections.emptyList();
+  }
 
   /**
    * @see InitialUI#logout
@@ -57,9 +69,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     int sessionUserID = getSessionUserID();
     if (sessionUserID == -1) {
       logger.warn("logout : no session user on logout?");
-    }
-    else {
-     // String userID = sessionUser.getUserID();
+    } else {
+      // String userID = sessionUser.getUserID();
       logger.info("logout : logging out " + sessionUserID);
       securityManager.logoutUser(getThreadLocalRequest(), sessionUserID, true);
     }

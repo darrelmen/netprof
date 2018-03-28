@@ -12,14 +12,10 @@ public class ReportStats {
   private final String language;
   private final String name;
   private int year;
-  //private int recordings;
   private final JSONObject jsonObject;
   private String html;
-//  private final Map<INFO, String> keyToValue = new HashMap<>();
 
   public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
-
-  ;
 
   private final Map<INFO, Integer> intKeyToValue = new HashMap<>();
   private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();

@@ -37,6 +37,7 @@ import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserSession;
@@ -48,8 +49,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Enumeration;
+import java.util.*;
 
 /**
  * NPUserSecurityManager: Provide top level security management.
@@ -584,13 +584,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
-
   /**
    * Get the userid from the session.
    *
    * @param request
    * @return
-   * @see mitll.langtest.server.DatabaseServlet#getProject
+   * @see mitll.langtest.server.DatabaseServlet#getProjectID
    */
   public int getUserIDFromRequest(HttpServletRequest request) {
     if (request == null) {
@@ -605,6 +604,22 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         return getUserIDFromSession(session);
       }
     }
+  }
+
+  public List<FirstLastUser> getActiveSince(long when) {
+    Map<Integer, Long> activeSince = userSessionDAO.getActiveSince(when);
+    List<FirstLastUser> since=new ArrayList<>();
+    Map<Integer, FirstLastUser> firstLastFor = userDAO.getFirstLastFor(activeSince.keySet());
+    activeSince.forEach((k,v) -> {
+      FirstLastUser firstLastUser = firstLastFor.get(k);
+      if (firstLastUser != null) {
+        firstLastUser.setLastChecked(v);
+        since.add(firstLastUser);
+      }
+    });
+    since.sort(Comparator.comparingLong(FirstLastUser::getLastChecked));
+
+    return since;
   }
 
   /**

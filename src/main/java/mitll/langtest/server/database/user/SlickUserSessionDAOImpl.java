@@ -42,7 +42,10 @@ import mitll.npdata.dao.user.UserSessionDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
@@ -56,6 +59,8 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   public SlickUserSessionDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserSessionDAOWrapper(dbConnection);
+
+    logger.info("since last week " + lastWeek());
   }
 
   public void createTable() {
@@ -78,7 +83,6 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   }
 
   /**
-   *
    * @param sesssion
    * @return -1 if not in the database
    */
@@ -96,18 +100,30 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   }*/
 
   /**
-   * @see IUserSecurityManager#logoutUser
    * @paramx session
+   * @see IUserSecurityManager#logoutUser
    */
 /*
   @Override
   public void removeSession(String session) {    dao.removeSession(session);  }
 */
-
   @Override
   public void removeAllSessionsForUser(int userId) {
     dao.removeAllSessionsForUser(userId);
   }
 
-  public int getNumRows() {    return dao.numRows();  }
+  private Map<Integer, Long> lastWeek() {
+    return getActiveSince(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
+  }
+
+  @Override
+  public Map<Integer, Long> getActiveSince(long when) {
+    Map<Integer, Long> since = dao.since(new Timestamp(when));
+    since.forEach((k, v) -> logger.info(k + "->" + new Date(v)));
+    return since;
+  }
+
+  public int getNumRows() {
+    return dao.numRows();
+  }
 }

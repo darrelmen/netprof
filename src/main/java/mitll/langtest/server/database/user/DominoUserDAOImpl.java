@@ -77,9 +77,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -150,8 +153,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
-    //  .concurrencyLevel(4)
-    //  .weakKeys()
+      //  .concurrencyLevel(4)
+      //  .weakKeys()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -165,7 +168,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * @param database
-   * @paramx userProjectDAO
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
@@ -198,8 +200,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
-
-    //if (pool != null) {
     serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
@@ -231,9 +231,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
 
     doAfterGetDelegate();
-    //} else {
-    //  logger.error("DominoUserDAOImpl couldn't connect to user service - no pool!\n\n");
-    // }
   }
 
   private void doAfterGetDelegate() {
@@ -683,7 +680,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Boolean isRememberedMatch = encodedToMatch.get(encodedPassword);
 
     if (isRememberedMatch != null) {
-      logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
+      //  logger.info("isMatchingPassword return remembered match for " + userID + " in " + dominoToEncodedToMatch.size() + " and " + encodedToMatch.size());
       return isRememberedMatch;
     }
 
@@ -778,12 +775,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Use a cache.
-   *
+   * <p>
    * Keys age out at 10 minutes
-   * @see #idToDBUser
    *
    * @param id
    * @return
+   * @see #idToDBUser
    */
   private DBUser lookupUser(int id) {
     try {
@@ -801,6 +798,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public ReportUsers getReportUsers() {
+//    long then = System.currentTimeMillis();
+//    Map<Integer, ReportUser> reportUsersQuick = getReportUsersQuick();
+//    long now = System.currentTimeMillis();
+//    logger.info("took " + (now - then) +
+//        " got " + reportUsersQuick.size());
     List<ReportUser> copy = new ArrayList<>();
     getAll().forEach(u -> copy.add(toUser(u)));
     return new ReportUsers(copy, getUsersDevices(copy));
@@ -987,7 +989,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Group next = secondaryGroups.iterator().next();
       Language languageMatchingGroup = getLanguageMatchingGroup(next);
       if (languageMatchingGroup != Language.UNKNOWN) {
-        List<Project> collect = getMatchingProjects(languageMatchingGroup);
+        List<Project> collect = projectManagement.getPolyglotMatchingProjects(languageMatchingGroup);
 
         if (!collect.isEmpty()) {
           if (collect.size() > 1) {
@@ -1006,15 +1008,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("getProjectAssignment no groups for user id " + id);
     }
     return projID;
-  }
-
-  private List<Project> getMatchingProjects(Language languageMatchingGroup) {
-    List<Project> projectByLangauge = projectManagement.getProjectByLangauge(languageMatchingGroup);
-    return projectByLangauge.stream()
-        .filter(project ->
-            project.getKind() == ProjectType.POLYGLOT &&
-                project.getStatus() == ProjectStatus.PRODUCTION)
-        .collect(Collectors.toList());
   }
 
   /**
@@ -1115,6 +1108,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return kindToUse;
   }
 
+  /**
+   * @param permissionSet     populate this set
+   * @param roleAbbreviations from these
+   * @return
+   */
   @NotNull
   private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<Kind> seen = new HashSet<>();
@@ -1178,9 +1176,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see Report#getReport
    */
-//  public List<ReportUser> getUsersDevices() {
-//    return getUsersDevices(getUsers());
-//  }
   private List<ReportUser> getUsersDevices(List<ReportUser> users) {
     return users
         .stream()
@@ -1253,7 +1248,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
-    logger.warn("getAll calling get all users");
+    logger.info("getAll calling get all users");
     FindOptions<UserColumn> opts = getUserColumnFindOptions();
     List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();
@@ -1293,6 +1288,95 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return idToFirstLast;
   }
 */
+
+/*  private Map<Integer, ReportUser> getReportUsersQuick() {
+    Collection<List<Object>> userFields =
+        delegate.getUserFields("_id", "userId", "acctDtl.createTime", "roles", "acctDtl.device");
+    long now = System.currentTimeMillis();
+    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    Map<Integer, ReportUser> idToFirstLast = new HashMap<>();
+    for (List<Object> userField : userFields) {
+      int i = 0;
+      Object o = userField.get(i++);
+      Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
+      String o2 = (String) userField.get(i++);
+
+
+      Object o3 = userField.get(i++);
+      long time = now;
+      try {
+        if (o3 == null) {
+          logger.warn("no create time?");
+        }
+        else {
+          time = inputFormat.parse((String)o3).getTime();
+        }
+      } catch (ParseException e) {
+        logger.warn("couldn't parse " + o3);
+      }
+
+
+      Object roles = userField.get(i++);
+     // logger.info("got " + roles + " " + roles.getClass());
+
+      String dev = (String) userField.get(i++);
+      logger.info("dev " +dev+
+          " got " + roles + " " + roles.getClass());
+
+      idToFirstLast.put(o1, new ReportUserImpl(o1,
+          o2,
+          time, Kind.STUDENT, dev));
+    }
+    return idToFirstLast;
+  }*/
+
+  private static class ReportUserImpl implements ReportUser {
+
+    int id;
+    String userID, device;
+    long timestamp;
+    Kind kind;
+
+    public ReportUserImpl(int id, String userID, long timestamp,
+                          Kind kind, String device) {
+      this.id = id;
+      this.userID = userID;
+      this.timestamp = timestamp;
+      this.kind = kind;
+      this.device = device;
+    }
+
+    @Override
+    public int getID() {
+      return id;
+    }
+
+    @Override
+    public String getUserID() {
+      return userID;
+    }
+
+    @Override
+    public long getTimestampMillis() {
+      return timestamp;
+    }
+
+    @Override
+    public String getIpaddr() {
+      return "";
+    }
+
+    @Override
+    public Kind getUserKind() {
+      return kind;
+    }
+
+    @Override
+    public String getDevice() {
+      return device;
+    }
+  }
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 

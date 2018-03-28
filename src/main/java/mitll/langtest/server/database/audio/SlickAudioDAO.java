@@ -273,6 +273,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param audioSpeed
    * @param uniqueIDs
    * @param exToTranscript
+   * @param idsOfRecordedExercisesForMales
    * @param idsOfRecordedExercisesForFemales
    * @return
    * @see BaseAudioDAO#getRecordedReport
@@ -284,14 +285,25 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                          Map<Integer, String> exToTranscript,
                          Set<Integer> idsOfRecordedExercisesForMales,
                          Set<Integer> idsOfRecordedExercisesForFemales) {
-    //String speed = audioSpeed.toString();
+    String speed = audioSpeed.toString();
 
+/*    List<Integer> max = new ArrayList<>();
+
+    for (Map.Entry<Integer, String> pair : exToTranscript.entrySet()) {
+      max.add(pair.getKey());
+
+      if (max.size() == 2) break;
+
+      logger.info("getCountForGender " + speed + " " + pair.getKey() + " " + pair.getValue());
+    }*/
     Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
-/*    logger.info("for '" + speed + "' given ids " + uniqueIDs.size() +
-            " and " + exToTranscript.size() +
-        " got " + countForGender4.size());*/
+    logger.info("getCountForGender" +
+        "\n\tfor       '" + speed + "'" +
+        "\n\tgiven ids " + uniqueIDs.size() +
+        "\n\tex->trans " + exToTranscript.size() +
+        "\n\tgot       " + countForGender4.size());
 
 //    countForGender4.forEach((k,v)->{});
 
@@ -307,6 +319,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
+
+    logger.info("getCountForGender " +
+        "\n\tfor     '" + speed + "'" +
+        "\n\tmales   " + idsOfRecordedExercisesForMales.size() +
+        "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
   }
 
   @Override
@@ -349,7 +366,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param projid
    * @return modifiable set - what's returned from scala isn't
    * @paramx userIDs
-   * @see #getWithContext
+   * @see #getRecordedBySameGenderContext
    */
   @Override
   Set<Integer> getAudioExercisesForGender(boolean isMale,
@@ -364,18 +381,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * @param projid
    * @param isMale
    * @param regSpeed
    * @param slowSpeed
-   * @param projid
    * @return
    * @see #getRecordedBySameGender
    */
-  @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(boolean isMale,
+/*  @Override
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
+                                                    boolean isMale,
                                                     String regSpeed,
-                                                    String slowSpeed,
-                                                    int projid) {
+                                                    String slowSpeed) {
 //    if (database.getServerProps().shouldCheckAudioTranscript()) {
 //      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
 //    }
@@ -398,6 +415,78 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     logger.info("getAudioExercisesForGenderBothSpeeds found " + regExids.size() + " for " + isMale + " " + regSpeed + " " + slowSpeed + " for " + projid);
     return regExids;
+  }*/
+
+  private static final boolean DEBUG_AUDIO_REPORT = true;
+
+  @Override
+  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
+                                                    boolean isMale,
+                                                    //Set<Integer> exerciseIDs,
+                                                    Map<Integer, String> exToTranscript) {
+    Set<Integer> maleReg = new HashSet<>();
+    Set<Integer> femaleReg = new HashSet<>();
+    Set<Integer> uniqueIDs = exToTranscript.keySet();
+    logger.info("check " + uniqueIDs.size() + " exercises");
+    getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, maleReg, femaleReg);
+
+    float maleFast = (float) maleReg.size();
+    if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male fast " + maleFast);
+    float femaleFast = (float) femaleReg.size();
+
+    Set<Integer> maleSlowSpeed = new HashSet<>();
+    Set<Integer> femaleSlowSpeed = new HashSet<>();
+    getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, maleSlowSpeed, femaleSlowSpeed);
+    float maleSlow = (float) maleSlowSpeed.size();
+    float femaleSlow = (float) femaleSlowSpeed.size();
+
+    if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male slow " + maleSlow);
+
+    maleReg.retainAll(maleSlowSpeed);
+    //  float male = maleReg.size();
+    //  if (DEBUG_AUDIO_REPORT) logger.info("male total " + male);
+
+//    Set<Integer> femaleIDs = userMapFemales.keySet();
+    //   femaleIDs = new HashSet<>(femaleIDs);
+    //  femaleIDs.add(BaseUserDAO.DEFAULT_FEMALE_ID);
+//    float femaleFast = getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, femaleReg, , false);
+//    float femaleSlow = getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed, , false);
+
+    if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
+
+    // overlap
+    femaleReg.retainAll(femaleSlowSpeed);
+//    float female = femaleReg.size();
+    return isMale ? maleReg : femaleReg;
+  }
+
+  /**
+   * Never going to record slow speec context audio, at least per DLI's request.
+   * @param projid
+   * @param isMale
+   * @param exToContextTranscript
+   * @return
+   */
+  @Override
+  Set<Integer> getContextAudioExercises(int projid,
+                                        boolean isMale,
+                                        Map<Integer, String> exToContextTranscript) {
+    logger.info("getContextAudioExercises  : checking " + exToContextTranscript.size() + " context exerises");
+    Set<Integer> conMaleReg = new HashSet<>();
+    Set<Integer> conFemaleReg = new HashSet<>();
+
+    getCountForGender(projid, AudioType.CONTEXT_REGULAR, exToContextTranscript.keySet(), exToContextTranscript, conMaleReg, conFemaleReg);
+
+    /*Set<Integer> conMaleSlow = new HashSet<>();
+    Set<Integer> conFemaleSlow = new HashSet<>();
+
+    // TODO : add male/female fast/slow for context
+    getCountForGender(projid, AudioType.CONTEXT_SLOW, exToContextTranscript.keySet(), exToContextTranscript, conMaleSlow, conFemaleSlow);
+*/
+  /*  conMaleReg.retainAll(conMaleSlow);
+    conFemaleReg.retainAll(conFemaleSlow);
+*/
+    return isMale ? conMaleReg : conFemaleReg;
   }
 
   @NotNull
@@ -647,7 +736,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
 //    logger.info("toAudioAttribute " + all.size());
-   // Map<Integer, MiniUser> idToMini = new HashMap<>();
+    // Map<Integer, MiniUser> idToMini = new HashMap<>();
     all.forEach(slickAudio -> copy.add(getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio)));
 //    for (SlickAudio s : all) {
 //      copy.add(getAudioAttribute(s, idToMini, hasProjectSpecificAudio));
@@ -657,6 +746,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Avoid asking domino for the same user over and over.
+   *
    * @param s
    * @param idToMini
    * @param hasProjectSpecificAudio
