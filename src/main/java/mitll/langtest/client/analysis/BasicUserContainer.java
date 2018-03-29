@@ -36,6 +36,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -55,6 +56,7 @@ import java.util.List;
  * @param <T>
  */
 public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContainer<T> {
+  protected static final int NAME_WIDTH = 130;
   private static final int MAX_LENGTH = 11;
   private static final int TABLE_WIDTH = 600;
   private static final int FIRST_WIDTH = 90;
@@ -129,7 +131,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return -1;
   }
 
-  int getLastCompare(T o1, T o2) {
+  private int getLastCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }
@@ -242,5 +244,15 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getLastCompare);
     return columnSortHandler;
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 }

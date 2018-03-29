@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
+import java.util.Date;
 import java.util.Map;
 
 public interface IUserSessionDAO extends IDAO {
@@ -57,7 +58,7 @@ public interface IUserSessionDAO extends IDAO {
     private long when;
     private int projid;
 
-    public ActiveInfo(int userid, long when, int projid) {
+    ActiveInfo(int userid, long when, int projid) {
       this.userid = userid;
       this.when = when;
       this.projid = projid;
@@ -73,6 +74,10 @@ public interface IUserSessionDAO extends IDAO {
 
     public int getProjid() {
       return projid;
+    }
+
+    public String toString() {
+      return "user " + userid + " proj " + projid + " at " + new Date(when);
     }
   }
 }

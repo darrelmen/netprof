@@ -91,7 +91,6 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -112,7 +111,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.text.CollationKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -725,7 +723,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
           }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
       }
     }
   }

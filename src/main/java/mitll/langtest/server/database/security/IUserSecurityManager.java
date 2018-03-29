@@ -2,6 +2,7 @@ package mitll.langtest.server.database.security;
 
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
@@ -76,5 +77,10 @@ public interface IUserSecurityManager {
 
   String getRemoteAddr(HttpServletRequest request);
 
-  List<FirstLastUser> getActiveSince(long when);
+  /**
+   *
+   * @param when
+   * @return
+   */
+  List<ActiveUser> getActiveSince(long when);
 }

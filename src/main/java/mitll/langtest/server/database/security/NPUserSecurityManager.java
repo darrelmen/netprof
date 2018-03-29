@@ -32,11 +32,14 @@
 
 package mitll.langtest.server.database.security;
 
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
@@ -62,6 +65,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
+  private IProjectManagement projectManagement;
+
   private static boolean DEBUG = false;
 
   /**
@@ -69,12 +74,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    *
    * @param userDAO
    * @param userSessionDAO
+   * @param projectManagement
    * @see
    */
   public NPUserSecurityManager(IUserDAO userDAO,
                                IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
+    this.projectManagement = projectManagement;
     //startShiro();
   }
 
@@ -299,7 +306,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       throws RestrictedOperationException, DominoSessionException {
     User user = lookupUserFromSessionOrDB(request, throwOnFail);
     if (user == null && throwOnFail) {
-      throwException(opName, user, null);
+      throwException(opName, null, null);
     }
     return user;
   }
@@ -606,15 +613,23 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
-  public List<FirstLastUser> getActiveSince(long when) {
+  public List<ActiveUser> getActiveSince(long when) {
     Map<Integer, IUserSessionDAO.ActiveInfo> activeSince = userSessionDAO.getActiveSince(when);
-    List<FirstLastUser> since = new ArrayList<>();
+    List<ActiveUser> since = new ArrayList<>();
     Map<Integer, FirstLastUser> firstLastFor = userDAO.getFirstLastFor(activeSince.keySet());
     activeSince.forEach((k, v) -> {
       FirstLastUser firstLastUser = firstLastFor.get(k);
       if (firstLastUser != null) {
         firstLastUser.setLastChecked(v.getWhen());
-        since.add(firstLastUser);
+        ActiveUser e = new ActiveUser(firstLastUser);
+        since.add(e);
+        if (v.getProjid() > 0) {
+          Project project = projectManagement.getProject(v.getProjid());
+          if (project != null) {
+            e.setProjectName(project.getName());
+            e.setLanguage(project.getLanguage());
+          }
+        }
       }
     });
 
@@ -691,5 +706,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     RestrictedOperationException ex = new RestrictedOperationException(opName, true);
     log.error("Access check failed! User={}, Checking={}, op={}", cUserID, checkDesc, opName);
     throw ex;
+  }
+
+  public void setProjectManagement(IProjectManagement projectManagement) {
+    this.projectManagement = projectManagement;
   }
 }

@@ -33,8 +33,6 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
@@ -42,11 +40,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,16 +52,15 @@ import java.util.List;
 public class UserManagement {
   private static final Logger logger = LogManager.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
-  private final IResultDAO resultDAO;
+  //private final IResultDAO resultDAO;
 
   /**
    * @param userDAO
-   * @param resultDAO
    * @see DatabaseImpl#makeDAO
    */
-  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO) {
+  public UserManagement(IUserDAO userDAO) {
     this.userDAO = userDAO;
-    this.resultDAO = resultDAO;
+  //  this.resultDAO = resultDAO;
   }
 
   /**
