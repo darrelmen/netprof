@@ -174,7 +174,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     HasDirection.Direction direction = rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
 
     HTML html = new HTML(content, direction);
-    html.setWidth("100%");
+//    html.setWidth("100%");
     if (rightAlignContent) {
       html.addStyleName("rightAlign");
     }

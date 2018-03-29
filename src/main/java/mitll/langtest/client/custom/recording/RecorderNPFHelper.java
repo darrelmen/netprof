@@ -72,7 +72,8 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise>
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  //private final Logger logger = Logger.getLogger("RecorderNPFHelper");
+  private final Logger logger = Logger.getLogger("RecorderNPFHelper");
+
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   /**
    *
@@ -290,8 +291,15 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
           getContentScroller(maybeRTLContent)
           : maybeRTLContent;
 
-      Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, isRTLContent(content));
-      entry.addStyleName("floatLeftAndClear");
+      boolean rtlContent = isRTLContent(e.getForeignLanguage());
+      Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
+      logger.info("rtl " + rtlContent + " for " + content);
+      if (rtlContent) {
+        entry.addStyleName("floatRight");
+      }
+      else {
+        entry.addStyleName("floatLeftAndClear");
+      }
 
       return entry;
     }
