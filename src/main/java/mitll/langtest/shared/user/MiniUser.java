@@ -44,7 +44,6 @@ public class MiniUser extends FirstLastUser {
   private Gender realGender = Gender.Unspecified;
 
   private boolean isAdmin;
- // protected long timestamp;
 
   public enum Gender implements IsSerializable {
     Unspecified,

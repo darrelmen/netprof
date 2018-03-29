@@ -145,7 +145,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    */
   @NotNull
   private LoginResult getValidLogin(HttpSession session, User loggedInUser, boolean strictValidity) {
-    LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+    LoginResult loginResult = new LoginResult(loggedInUser);
     boolean valid = strictValidity ? loggedInUser.isValid() : loggedInUser.isForgivingValid();
     if (valid) {
       setSessionUser(session, loggedInUser, true);
@@ -608,16 +608,17 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   public List<FirstLastUser> getActiveSince(long when) {
     Map<Integer, Long> activeSince = userSessionDAO.getActiveSince(when);
-    List<FirstLastUser> since=new ArrayList<>();
+    List<FirstLastUser> since = new ArrayList<>();
     Map<Integer, FirstLastUser> firstLastFor = userDAO.getFirstLastFor(activeSince.keySet());
-    activeSince.forEach((k,v) -> {
+    activeSince.forEach((k, v) -> {
       FirstLastUser firstLastUser = firstLastFor.get(k);
       if (firstLastUser != null) {
         firstLastUser.setLastChecked(v);
         since.add(firstLastUser);
       }
     });
-    since.sort(Comparator.comparingLong(FirstLastUser::getLastChecked));
+
+    since.sort((o1, o2) -> -1 * Long.compare(o1.getLastChecked(), o2.getLastChecked()));
 
     return since;
   }
@@ -651,6 +652,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     log.info("lookupUserFromDBSession Lookup user from DB session. SID: {} = {}", sid, userForSession);
     if (userForSession == -1 && sid != null) {
       log.warn("lookupUserFromDBSession no user for session " + sid + " in database?");
+      return null;
+    } else if (userForSession == -1) {
+      log.info("lookupUserFromDBSession no user and no session ");
       return null;
     } else {
       User byID = userDAO.getByID(userForSession);

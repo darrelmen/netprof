@@ -51,7 +51,6 @@ public interface IUserSessionDAO extends IDAO {
 
   void removeAllSessionsForUser(int userId);
 
-  //@Override
   Map<Integer, Long> getActiveSince(long when);
 
   int getNumRows();

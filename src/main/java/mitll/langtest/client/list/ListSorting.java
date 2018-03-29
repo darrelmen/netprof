@@ -58,7 +58,6 @@ class ListSorting<T extends CommonShell, U extends Shell> {
    * @see FacetExerciseList#addSortBox
    */
   ListBox getSortBox() {
-
     ListBox w1 = new ListBox();
 
     if (language != null) {
@@ -107,19 +106,17 @@ class ListSorting<T extends CommonShell, U extends Shell> {
    * @param w1
    * @see FacetExerciseList#resort
    */
-  public void sortLater(List<T> toSort, ListBox w1) {
-    if (w1.getSelectedIndex() != 0) {
+  void sortLater(List<T> toSort, ListBox w1) {
+    if (w1.getSelectedIndex() != 0 && (toSort.size() > 1)) {
       String langASC = getLangASC(language, ASCENDING);
       String langDSC = getLangASC(language, DESCENDING);
-      final String fvalue = getNormValue(w1.getSelectedValue(), langASC, langDSC);
+      String selectedValue = w1.getSelectedValue();  // not sure how this can be null but saw it in an exception
 
+      final String fvalue = selectedValue == null ? langASC : getNormValue(selectedValue, langASC, langDSC);
       // logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
-
-      if (toSort.size() > 1) {
-        sortByValue(toSort, fvalue, langASC, langDSC);
-      }
-//      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));
+      sortByValue(toSort, fvalue, langASC, langDSC);
     }
+//      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));
   }
 
   private String getNormValue(String value, String langASC, String langDSC) {
@@ -202,6 +199,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
 
   /**
    * Sort -1 items after un-practiced items.
+   *
    * @param o1
    * @param o2
    * @return
