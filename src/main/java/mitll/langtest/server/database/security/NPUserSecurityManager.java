@@ -607,13 +607,13 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   public List<FirstLastUser> getActiveSince(long when) {
-    Map<Integer, Long> activeSince = userSessionDAO.getActiveSince(when);
+    Map<Integer, IUserSessionDAO.ActiveInfo> activeSince = userSessionDAO.getActiveSince(when);
     List<FirstLastUser> since = new ArrayList<>();
     Map<Integer, FirstLastUser> firstLastFor = userDAO.getFirstLastFor(activeSince.keySet());
     activeSince.forEach((k, v) -> {
       FirstLastUser firstLastUser = firstLastFor.get(k);
       if (firstLastUser != null) {
-        firstLastUser.setLastChecked(v);
+        firstLastUser.setLastChecked(v.getWhen());
         since.add(firstLastUser);
       }
     });

@@ -335,7 +335,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
-    this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
+    userProjectDAO = new UserProjectDAO(dbConnection);
+    this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO,dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -364,7 +365,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);
-    userProjectDAO = new UserProjectDAO(dbConnection);
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 

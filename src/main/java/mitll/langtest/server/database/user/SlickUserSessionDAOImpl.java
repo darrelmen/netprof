@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
@@ -45,21 +46,24 @@ import org.apache.logging.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
   private final UserSessionDAOWrapper dao;
+  private IUserProjectDAO userProjectDAO;
 
   /**
    * @param database
+   * @param userProjectDAO
    * @param dbConnection
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public SlickUserSessionDAOImpl(Database database, DBConnection dbConnection) {
+  public SlickUserSessionDAOImpl(Database database, IUserProjectDAO userProjectDAO, DBConnection dbConnection) {
     super(database);
     dao = new UserSessionDAOWrapper(dbConnection);
-
+    this.userProjectDAO = userProjectDAO;
     logger.info("since last week " + lastWeek());
   }
 
@@ -101,27 +105,32 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
 
   /**
    * @paramx session
-   * @see IUserSecurityManager#logoutUser
+   * @see NPUserSecurityManager#logoutUser
    */
-/*
-  @Override
-  public void removeSession(String session) {    dao.removeSession(session);  }
-*/
   @Override
   public void removeAllSessionsForUser(int userId) {
     dao.removeAllSessionsForUser(userId);
   }
 
-  private Map<Integer, Long> lastWeek() {
+  private Map<Integer, ActiveInfo> lastWeek() {
     return getActiveSince(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
   }
 
   @Override
-  public Map<Integer, Long> getActiveSince(long when) {
+  public Map<Integer, ActiveInfo> getActiveSince(long when) {
     Map<Integer, Long> since = dao.since(new Timestamp(when));
-    since.forEach((k, v) -> logger.info(k + "->" + new Date(v)));
-    return since;
+
+    Map<Integer, Integer> usersToProject = userProjectDAO.getUsersToProject(since.keySet());
+
+    Map<Integer, ActiveInfo> integerActiveInfoHashMap = new HashMap<>();
+
+    since.forEach((k, v) -> {
+      logger.info(k + "->" + new Date(v));
+      integerActiveInfoHashMap.put(k, new ActiveInfo(k, v, usersToProject.getOrDefault(k, -1)));
+    });
+    return integerActiveInfoHashMap;
   }
+
 
   public int getNumRows() {
     return dao.numRows();
