@@ -99,8 +99,7 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void logEvent(final UIObject button, String widgetType, EventContext context) {
-    final String id = button.getElement().getId();
-    logEvent(id, widgetType, context);
+    logEvent(button.getElement().getId(), widgetType, context);
   }
 
   @Override
@@ -161,7 +160,7 @@ public class ButtonFactory implements EventLogger {
 
           @Override
           public void onSuccess(Void result) {
-            //logger.info("logEvent sent event for " + widgetID);
+            logger.info("logEvent sent event for " + widgetID);
           }
         });
   }

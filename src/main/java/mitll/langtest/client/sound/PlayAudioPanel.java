@@ -70,7 +70,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
- // private static final boolean LOCAL_TESTING = false;
   protected static final IconType PLAY = IconType.PLAY;
 
   /**
@@ -252,7 +251,10 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
 
-    playButton.addClickHandler(event -> doClick());
+    playButton.addClickHandler(event -> {
+      doClick();
+      controller.logEvent(playButton, "play audio", exercise.getID(), "");
+    });
 
     showPlayIcon(playButton);
     stylePlayButton(playButton);
@@ -293,6 +295,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    */
   protected void doClick() {
     //logger.info("PlayAudioPanel doClick " + playing + " " +currentPath);
+
     if (playButton.isVisible() && isEnabled()) {
       if (isPlaying()) {
         if (DEBUG) logger.info("PlayAudioPanel doClick pause " + playing + " " + currentPath);
@@ -309,23 +312,16 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #doClick
    */
   private void startPlaying() {
-//    if (LOCAL_TESTING) {
-//      logger.info("startPlaying " + currentPath);
-//      startSong(currentPath);
-//    }
-
     markPlaying();
-
     // tell other widgets to pause if they are playing audio
 
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(id));
 
-   // logger.info("startPlaying tell " + playListeners.size() + " listeners play started");
+    // logger.info("startPlaying tell " + playListeners.size() + " listeners play started");
     playListeners.forEach(PlayListener::playStarted);
 
     play();
   }
-
 
   public void doPause() {
     if (isPlaying()) {
@@ -475,7 +471,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
   /**
    * @param path
-   * @seex mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
   protected void playAudio(String path) {
@@ -491,7 +486,6 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
           Scheduler.get().scheduleDeferred(() -> doClick());
         }
         // if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
-
         @Override
         public void songFinished() {
           if (DEBUG) logger.info("playAudio - songFinished " + path + " this " + this);
@@ -534,7 +528,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * <p>
    * Check if soundmanager loaded properly, warn if it didn't.
    *
-   * @param path to audio file on server
+   * @param path       to audio file on server
    * @param doAutoload
    * @see mitll.langtest.client.scoring.AudioPanel#getReadyToPlayAudio
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#getReadyToPlayAudio
@@ -660,7 +654,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 //      logger.info("no listener for song loaded " + duration);
 //    }
     setEnabled(true);
-    if (DEBUG)  logger.info("song loaded : reinit");
+    if (DEBUG) logger.info("song loaded : reinit");
     reinitialize();
   }
 
@@ -697,7 +691,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @see #doClick
    */
   private void play() {
-    if (DEBUG /*|| LOCAL_TESTING*/) {
+    if (DEBUG) {
       logger.info("PlayAudioPanel playing now = " + isPlaying() + " path " + currentPath);
     }
     markPlaying();

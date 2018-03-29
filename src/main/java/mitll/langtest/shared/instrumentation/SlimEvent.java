@@ -45,16 +45,24 @@ public class SlimEvent implements IsSerializable, Comparable<SlimEvent> {
   private long timestamp;
   private int exid;
 
-  public SlimEvent() {}
+  public SlimEvent() {
+  }
+
   public SlimEvent(int userID, long timestamp, int exid) {
     this.userID = userID;
     this.timestamp = timestamp;
     this.exid = exid;
   }
 
+  /**
+   * Descending
+   *
+   * @param o
+   * @return
+   */
   @Override
   public int compareTo(SlimEvent o) {
-    return Long.compare(timestamp, o.timestamp);
+    return -1 * Long.compare(timestamp, o.timestamp);
   }
 
   public int getUserID() {

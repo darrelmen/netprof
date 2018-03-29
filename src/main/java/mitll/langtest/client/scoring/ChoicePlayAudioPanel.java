@@ -118,7 +118,12 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
   }
 
   private void configureButton2(SplitDropdownButton playButton) {
-    playButton.addClickHandler(event -> playAudio());
+    playButton.addClickHandler(event ->
+        {
+          playAudio();
+          controller.logEvent(playButton, "playButton", exid, currentAudioAttr == null ? "unknown file?" : currentAudioAttr.getAudioRef());
+        }
+    );
 
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
