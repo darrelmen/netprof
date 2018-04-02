@@ -36,10 +36,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
-import mitll.langtest.shared.user.ChoosePasswordResult;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 @RemoteServiceRelativePath("open-user-manager")
 public interface OpenUserService extends RemoteService {
@@ -95,7 +92,7 @@ public interface OpenUserService extends RemoteService {
   /**
    * @param projectid
    * @return
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   User setProject(int projectid);
 
@@ -109,5 +106,7 @@ public interface OpenUserService extends RemoteService {
    * @param projid
    * @return
    */
-  boolean setCurrentUserToProject(int projid);
+  HeartbeatStatus setCurrentUserToProject(int projid, String implVersion);
+
+  HeartbeatStatus checkHeartbeat(String implVersion);
 }

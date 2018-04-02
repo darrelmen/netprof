@@ -34,6 +34,7 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.Affiliation;
 
@@ -57,6 +58,11 @@ public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private List<SlimProject> projects;
   private String message = "";
+  private String implementationVersion;
+  /**
+   * Name.IMPLEMENTATION_VERSION
+   */
+  private static final String IMPL_VERSION = "Implementation-Version";
 
   public StartupInfo() {
   } // for serialization
@@ -73,6 +79,7 @@ public class StartupInfo implements IsSerializable {
     this.projects = projects;
     this.message = message;
     this.affiliations = affiliations;
+    this.implementationVersion = properties.get(IMPL_VERSION);
   }
 
   /**
@@ -135,6 +142,8 @@ public class StartupInfo implements IsSerializable {
     return message;
   }
   public List<Affiliation> getAffiliations() {    return affiliations;  }
+
+  public String getImplementationVersion() {   return implementationVersion;  }
 
   public String toString() {
     return "Message = '" + message + "', " + getProjects().size() + " projects.";

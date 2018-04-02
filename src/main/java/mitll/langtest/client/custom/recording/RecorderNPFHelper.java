@@ -287,9 +287,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       maybeRTLContent.addStyleName("rightTenMargin");
       maybeRTLContent.addStyleName("topMargin");
 
-      Widget contentWidget = (content.length() > 200) ?
-          getContentScroller(maybeRTLContent)
-          : maybeRTLContent;
+      Widget contentWidget = (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
 
       boolean rtlContent = isRTLContent(e.getForeignLanguage());
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);

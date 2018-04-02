@@ -272,9 +272,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    *
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {
-    return getLanguage(getProject());
-  }
+  protected String getLanguage() throws DominoSessionException {  return getLanguage(getProject());  }
 
   protected String getLanguage(Project project) {
     if (project == null) {

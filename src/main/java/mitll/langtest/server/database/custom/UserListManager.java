@@ -150,10 +150,10 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  @Override
+/*  @Override
   public int getNumLists(int userid, int projid) {
     return userListDAO.getNumMineAndPublic(userid, projid);
-  }
+  }*/
 
   /**
    * @param userid
@@ -676,10 +676,10 @@ public class UserListManager implements IUserListManager {
    * @return
    * @seex mitll.langtest.server.services.ListServiceImpl#getUserListsForText
    */
-  @Override
+/*  @Override
   public List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid) {
     return userListDAO.getAllPublic(userid, projid);
-  }
+  }*/
 
   /**
    * Really create a new exercise and associated context exercise in database.

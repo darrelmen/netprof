@@ -63,7 +63,7 @@ public interface IUserProjectDAO extends IDAO {
    */
   int getCurrentProjectForUser(int user);
 
-  boolean setCurrentProjectForUser(int userid, int projid);
+  int setCurrentProjectForUser(int userid, int projid);
 
   /**
    * @param userid

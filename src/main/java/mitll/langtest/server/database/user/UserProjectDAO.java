@@ -95,25 +95,30 @@ public class UserProjectDAO implements IUserProjectDAO {
   /**
    * A no-op if the current project for the user is as expected, but will switch project if not.
    *
+   * Only way this should return false if if the user is logged out and we assume we check the session before we get here.
    * @param userid
    * @param projid
+   *
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
    */
   @Override
-  public boolean setCurrentProjectForUser(int userid, int projid) {
+  public int setCurrentProjectForUser(int userid, int projid) {
     int mostRecentByUser = getCurrentProjectForUser(userid);
 
     if (mostRecentByUser == -1) { // they logged out!
       logger.info("setCurrentProjectForUser no most recent project " + mostRecentByUser + " did they log out?");
-      return false;
-    } else if (mostRecentByUser != projid) {
+      //return false;
+    }
+
+    if (mostRecentByUser != projid) {
       logger.info("setCurrentProjectForUser switched tabs, was " + mostRecentByUser + " but now will be " + projid);
       add(userid, projid);
-      return true;
+    //  return true;
     } else {
      // logger.info("OK, just confirming current project for " + getCurrentProjectForUser + " is " + projid);
-      return true;
+      //return true;
     }
+    return mostRecentByUser;
   }
 
   /**

@@ -224,7 +224,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         HttpSession currentSession = getCurrentSession();
         if (currentSession == null) {
           currentSession = createSession();
-          newSession=true;
+          newSession = true;
         }
         securityManager.setSessionUser(currentSession, userByID, newSession);
       }
@@ -326,34 +326,69 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * <p>
    * This should support Paul's language eval comparison. (1/22/18).
    *
+   * So what can happen
+   * - a user can choose a different project in a different tab, and this makes sure the current client one is the current one
+   * - a user can have a browser open so long it's javascript is out of date and should reload.
+   *
    * @param projid
-   * @return
+   * @return false if no session
    * @see InitialUI#confirmCurrentProject
    */
   @Override
-  public boolean setCurrentUserToProject(int projid) {
+  public HeartbeatStatus setCurrentUserToProject(int projid, String implVersion) {
     try {
-      long then = System.currentTimeMillis();
       int sessionUserID = getSessionUserID();
-      boolean b = sessionUserID != -1 && db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
+      if (sessionUserID == -1) { // dude - they have no session
+        logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
+        return new HeartbeatStatus(false, false);
+      } else {
+        logger.info("setCurrentProjectForUser : session user " + sessionUserID + " for " + projid);
+        long then = System.currentTimeMillis();
 
-      long now = System.currentTimeMillis();
-      if (now - then > 10) {
-        logger.info("setCurrentProjectForUser : took " + (now - then) + " to get current session user " + sessionUserID +
-            " and set project to " + projid);
-      }
-      if (!b) {
-        if (sessionUserID == -1) {
-          logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
-        } else {
-          logger.info("setCurrentProjectForUser : no most recent project for " + sessionUserID + ", tried " + projid);
+        int before = db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
+
+        long now = System.currentTimeMillis();
+        if (now - then > 0 && projid != before) {
+          logger.info("setCurrentProjectForUser : took " + (now - then) + " to set current session user " + sessionUserID +
+              " and set project to " + projid + " from " + before);
         }
+     /*   if (!b) {
+          if (hasSession) {
+            logger.info("setCurrentProjectForUser : no most recent project for " + sessionUserID + ", tried " + projid);
+          } else {
+            logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
+          }
+        }
+*/
+        boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
+        if (codeHasUpdated) {
+          logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+        }
+        return new HeartbeatStatus(true, codeHasUpdated);
       }
-
-      return b;
     } catch (DominoSessionException e) {
       logger.error("setCurrentProjectForUser got  " + e, e);
-      return false;
+      return new HeartbeatStatus(false, false);
+    }
+  }
+
+  @Override
+  public HeartbeatStatus checkHeartbeat(String implVersion) {
+    try {
+      int sessionUserID = getSessionUserID();
+      if (sessionUserID == -1) { // dude - they have no session
+        logger.info("setCurrentProjectForUser : no current session user " + sessionUserID);
+        return new HeartbeatStatus(false, false);
+      } else {
+        boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
+        if (codeHasUpdated) {
+          logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+        }
+        return new HeartbeatStatus(true, codeHasUpdated);
+      }
+    } catch (DominoSessionException e) {
+      logger.error("setCurrentProjectForUser got  " + e, e);
+      return new HeartbeatStatus(false, false);
     }
   }
 }

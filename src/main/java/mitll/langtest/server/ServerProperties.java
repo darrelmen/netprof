@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.jar.Attributes;
 
 import static mitll.langtest.shared.project.ProjectProperty.MODELS_DIR;
 import static mitll.langtest.shared.project.ProjectProperty.WEBSERVICE_HOST_PORT;
@@ -128,6 +129,7 @@ public class ServerProperties {
   private static final String DEBUG_ONE_PROJECT = "debugOneProject";
   private static final String IOS_VERSION = "1.0.1";
   private static final String I_OS_VERSION = "iOSVersion";
+  private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
@@ -135,7 +137,6 @@ public class ServerProperties {
   private static final String USE_H_2 = "useH2";
 
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
-  //public static final String MODELS_DIR = "MODELS_DIR";
   private static final String DB_CONFIG = "dbConfig";
   private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
@@ -145,7 +146,7 @@ public class ServerProperties {
    */
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
-  private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
+  //  private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
@@ -189,7 +190,7 @@ public class ServerProperties {
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
- // private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
+  // private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
@@ -199,14 +200,14 @@ public class ServerProperties {
 
   private static final int MIN_SCORE_TO_SHOW = 0;//20;// 0.20f;
   private static final int USER_INITIAL_SCORES = 20;
- // private static final int USER_FINAL_SCORES = 30;
+  // private static final int USER_FINAL_SCORES = 30;
 
   /**
    * Note netprof is all lower case.
    */
   public static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netprof/";
   private static final String DEFAULT_DCODR_DIR = "/opt/dcodr/";
-  private static final String APPLICATION_CONF = DEFAULT_NETPROF_AUDIO_DIR +"/config/application.conf";
+  private static final String APPLICATION_CONF = DEFAULT_NETPROF_AUDIO_DIR + "/config/application.conf";
 
   public static final String BEST_AUDIO = "bestAudio";
   private static final String ANSWERS = "answers";
@@ -218,6 +219,11 @@ public class ServerProperties {
 
   // just for automated testing
   private boolean quietAudioOK;
+  /**
+   * @see #useProperties
+   * @see #ServerProperties(Properties, Map, File)
+   */
+  private Map<String, String> manifest = new HashMap<>();
 
   /**
    * TODO : revisit
@@ -229,9 +235,7 @@ public class ServerProperties {
   //  private final Map<String, String> phoneToDisplay = new HashMap<>();
   private final Map<String, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
 
-
   private List<Affiliation> affliations = new ArrayList<>();
-  //public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
 
   /**
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
@@ -241,25 +245,6 @@ public class ServerProperties {
       WEBSERVICE_HOST_PORT
   );
   private String configFileFullPath;
-  private String IOSVersion;
-
-/*
-  private final Set<String> lincoln = new HashSet<>(Arrays.asList(
-      "gvidaver",
-      "rbudd",
-      "jmelot",
-      "esalesky",
-      "gatewood",
-      "testing",
-      "grading",
-      "fullperm",
-      //"0001abcd",
-      "egodoy",
-      "rb2rb2",
-      "dajone3",
-      //"WagnerSandy",
-      "rbtrbt"));
-      */
 
   public ServerProperties() {
     Map<String, String> value = new HashMap<>();
@@ -295,7 +280,6 @@ public class ServerProperties {
 //    logger.info("now " + langToPhoneToDisplay);
   }
 
-  private Map<String, String> manifest = new HashMap<>();
 
   /**
    * @param props
@@ -308,7 +292,7 @@ public class ServerProperties {
     this();
     this.props = props;
     this.manifest = manifest;
-
+    manifest.putIfAbsent(IMPL_VERSION, "blank");
     try {
       useProperties(configDir, manifest.getOrDefault(ServerInitializationManagerNetProf.BUILT_DATE, "Unknown"));
     } catch (FileNotFoundException e) {
@@ -743,7 +727,6 @@ public class ServerProperties {
     }
   }
 */
-
   public boolean usePhoneToDisplay() {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
@@ -804,7 +787,6 @@ public class ServerProperties {
 /*  public boolean shouldDoDecodeWithHydec() {
     return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
   }*/
-
   public String getMiraClassifierURL() {
     return miraClassifierURL;
   }
@@ -940,7 +922,7 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  public List<Affiliation> getAffiliations() {
+  List<Affiliation> getAffiliations() {
     return affliations;
   }
 
@@ -957,7 +939,11 @@ public class ServerProperties {
     return new HashSet<>(Arrays.asList(property.split(",")));
   }
 
-  public String getIOSVersion() {
+  String getIOSVersion() {
     return props.getProperty(I_OS_VERSION, IOS_VERSION);
+  }
+
+  public String getImplementationVersion() {
+    return manifest.getOrDefault(IMPL_VERSION, "unset");
   }
 }

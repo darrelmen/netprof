@@ -72,6 +72,11 @@ public interface AudioAttributeExercise extends AudioRefExercise {
 
   AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular);
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
+   * @param isMale
+   * @return
+   */
   AudioAttribute getAudioAttrPrefGender(boolean isMale);
 
   /**

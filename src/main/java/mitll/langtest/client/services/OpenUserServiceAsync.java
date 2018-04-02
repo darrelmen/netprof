@@ -35,10 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.ChoosePasswordResult;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 public interface OpenUserServiceAsync {
   /**
@@ -75,5 +72,6 @@ public interface OpenUserServiceAsync {
    */
   void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 
-  void setCurrentUserToProject(int projid, AsyncCallback<Boolean> async);
+  void setCurrentUserToProject(int projid, String implVersion, AsyncCallback<HeartbeatStatus> async);
+  void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
 }

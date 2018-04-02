@@ -44,7 +44,7 @@ public class UserMenu {
   private static final String SEND_REPORT = "Send Report to You";
   private static final String REPORT_LIST = "Weekly Report List";
 
-  private static final String ABOUT_NET_PRO_F = "About Netprof";
+  private static final String ABOUT_NETPROF = "About Netprof";
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String LOG_OUT = "Sign Out";
 
@@ -279,14 +279,14 @@ public class UserMenu {
   }
 
   public NavLink getAbout() {
-    NavLink about = new NavLink(ABOUT_NET_PRO_F);
+    NavLink about = new NavLink(ABOUT_NETPROF);
     about.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
         Map<String, String> props = UserMenu.this.props.getProps();
         List<String> strings = new ArrayList<>();
         try {
-          String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
+          String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
           props.put("Recording type", recordingInfo);
           props.remove("domino.url");
           Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
@@ -299,7 +299,7 @@ public class UserMenu {
           //logger.warning("got " + e);
         }
 
-        new ModalInfoDialog(ABOUT_NET_PRO_F, strings, props.values(), null, null, false, true, 600, 400) {
+        new ModalInfoDialog(ABOUT_NETPROF, strings, props.values(), null, null, false, true, 600, 400) {
           @Override
           protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
             FlexTable flexTable = super.addContent(messages, values, modal, bigger);

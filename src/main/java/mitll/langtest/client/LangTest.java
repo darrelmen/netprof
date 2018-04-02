@@ -369,11 +369,19 @@ public class LangTest implements
   private void rememberStartup(StartupInfo startupInfo, boolean reloadWindow) {
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
-    if (reloadWindow) initialUI.chooseProjectAgain();
+    logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
+    if (reloadWindow) {
+      initialUI.chooseProjectAgain();
+      //initialUI.setImplVersion(startupInfo.getImplementationVersion());
+    }
 
     List<SlimProject> projects = getAllProjects();
-    projectToAudioService = createHostSpecificServices(projects);
+    projectToAudioService   = createHostSpecificServices(projects);
     projectToScoringService = createHostSpecificServicesScoring(projects);
+
+/*    if (initialUI != null) {
+      initialUI.setImplVersion(startupInfo.getImplementationVersion());
+    }*/
   }
 
   @Override
@@ -1126,10 +1134,7 @@ public class LangTest implements
    * @see RecordButtonPanel#startRecording()
    * @see PostAudioRecordButton#startRecording()
    */
-  public void startRecording() {
-//    then = System.currentTimeMillis();
-    flashRecordPanel.recordOnClick();
-  }
+  public void startRecording() {    flashRecordPanel.recordOnClick();  }
 
   /**
    * Recording interface

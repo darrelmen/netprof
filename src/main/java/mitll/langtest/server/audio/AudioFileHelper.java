@@ -85,6 +85,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final ImageOptions NO_IMAGE_PLEASE = new ImageOptions(-1, -1, false, false);
   private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
   private static final String OGG = "ogg";
+  public static final boolean DEBUG = false;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -181,7 +182,7 @@ public class AudioFileHelper implements AlignDecode {
           phoneToCount = new HashMap<>();
           Set<Integer> safe = new HashSet<>();
           Set<Integer> unsafe = new HashSet<>();
-          logger.info("checkLTSAndCountPhones : " +language+ " checking " + exercises.size() + " exercises...");
+          logger.info("checkLTSAndCountPhones : " + language + " checking " + exercises.size() + " exercises...");
 
           for (CommonExercise exercise : exercises) {
             boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
@@ -546,8 +547,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
-    logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
-    boolean doHydec = false;
+    if (DEBUG) logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
+//    boolean doHydec = false;
     // Do alignment...
     if (absoluteFile == null) {
       absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
@@ -981,7 +982,6 @@ public class AudioFileHelper implements AlignDecode {
    * Get score when doing autoCRT on an audio file.
    * <p>
    * TODO : why even generate images here???
-   *
    *
    * @param reqid
    * @param testAudioFile   audio file to score

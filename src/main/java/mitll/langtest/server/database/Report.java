@@ -175,7 +175,6 @@ public class Report implements IReport {
   private final Set<Integer> allTeachers = new HashSet<>();
   private final Set<Integer> allStudents = new HashSet<>();
   private final List<ReportUser> deviceUsers;
-  // private final String hostname;
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
 

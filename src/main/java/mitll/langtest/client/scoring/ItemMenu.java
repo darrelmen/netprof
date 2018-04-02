@@ -53,7 +53,7 @@ public class ItemMenu {
       dropdownContainer.setRightDropdown(true);
       dropdownContainer.getMenuWiget().getElement().getStyle().setTop(10, Style.Unit.PCT);
 
-      dropdownContainer.addStyleName("leftThirtyMargin");
+      dropdownContainer.addStyleName("leftTenMargin");
       dropdownContainer.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
       dropdownContainer.getTriggerWidget().setCaret(false);
 

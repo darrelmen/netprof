@@ -55,7 +55,7 @@ public interface IUserListManager   {
 
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
-  int getNumLists(int userid, int projid);
+ // int getNumLists(int userid, int projid);
 
   Collection<IUserListLight> getNamesForUser(int userid,
                                              int projid,
@@ -106,7 +106,9 @@ public interface IUserListManager   {
    */
  // UserList<CommonExercise> getUserListByIDExercises(int id, int projid, Collection<String> typeOrder, Set<Integer> ids);
 
+/*
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
+*/
 
   UserList getUserListNoExercises(int userListID);
 

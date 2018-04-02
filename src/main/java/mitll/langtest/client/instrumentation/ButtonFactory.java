@@ -160,7 +160,7 @@ public class ButtonFactory implements EventLogger {
 
           @Override
           public void onSuccess(Void result) {
-            logger.info("logEvent sent event for " + widgetID);
+            //logger.info("logEvent sent event for " + widgetID);
           }
         });
   }

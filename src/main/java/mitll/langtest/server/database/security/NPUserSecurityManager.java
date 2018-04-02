@@ -67,21 +67,21 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private final IUserSessionDAO userSessionDAO;
   private IProjectManagement projectManagement;
 
-  private static boolean DEBUG = false;
+  private static boolean DEBUG = true;
 
   /**
    * Only made once but shared with servlets.
    *
    * @param userDAO
    * @param userSessionDAO
-   * @param projectManagement
+   * @paramx projectManagement
    * @see
    */
   public NPUserSecurityManager(IUserDAO userDAO,
                                IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-    this.projectManagement = projectManagement;
+   // this.projectManagement = projectManagement;
     //startShiro();
   }
 
@@ -311,9 +311,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return user;
   }
 
-  private Integer getLoggedInUserLight(HttpServletRequest request,
-                                       String opName,
-                                       boolean throwOnFail)
+  private Integer getLoggedInUserLight(HttpServletRequest request, String opName, boolean throwOnFail)
       throws RestrictedOperationException, DominoSessionException {
     int userID = lookupUserIDFromSessionOrDB(request, throwOnFail);
     if (userID == -1 && throwOnFail) {
@@ -395,16 +393,21 @@ public class NPUserSecurityManager implements IUserSecurityManager {
           log.error("huh? couldn't create a new session?");
         } else {
           setSessionUserAndRemember(currentOrNewSession, sessUserID);
+          if (DEBUG) {
+            log.info("lookupUserFromSessionOrDB set session - " + currentOrNewSession + " for user id " + sessUserID + " sid " + sid);
+          }
         }
 
       } else {
-        if (DEBUG)
+        if (DEBUG) {
           log.info("lookupUserFromSessionOrDB no user for session - " + getCurrentSession(request) + " logged out?");
+        }
       }
 
     } else {
-      if (DEBUG)
+      if (DEBUG) {
         log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUserID, request.getRequestedSessionId());
+      }
     }
 
     //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));

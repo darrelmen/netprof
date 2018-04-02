@@ -64,6 +64,7 @@ import mitll.langtest.client.user.*;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
+import mitll.langtest.shared.user.HeartbeatStatus;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -131,13 +132,14 @@ public class InitialUI implements UILifecycle {
   private INavigation navigation;
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
+ // private String implVersion;
 
   private static final boolean DEBUG = false;
 
   /**
    * @param langTest
    * @param userManager
-   * @see LangTest#onModuleLoad2()
+   * @see LangTest#onModuleLoad2
    */
   public InitialUI(LangTest langTest, UserManager userManager) {
     this.lifecycleSupport = langTest;
@@ -310,8 +312,9 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().clear();   // necessary?
 
     DivWidget verticalContainer = new FluidContainer();
+    verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
-
+    logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
@@ -331,18 +334,39 @@ public class InitialUI implements UILifecycle {
   private void confirmCurrentProject() {
     if (userManager.getCurrent() != null) {
       ProjectStartupInfo projectStartupInfo = lifecycleSupport.getProjectStartupInfo();
-      if (projectStartupInfo != null) {
+      String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
+      if (projectStartupInfo == null) {
         long then = System.currentTimeMillis();
-        controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), new AsyncCallback<Boolean>() {
+        controller.getOpenUserService().checkHeartbeat(implementationVersion, new AsyncCallback<HeartbeatStatus>() {
           @Override
           public void onFailure(Throwable caught) {
 
           }
 
           @Override
-          public void onSuccess(Boolean result) {
+          public void onSuccess(HeartbeatStatus result) {
             long now = System.currentTimeMillis();
-            if (!result) {
+            if (result.isCodeHasUpdated()) {
+              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+              Window.Location.reload();
+            }
+          }
+        });
+      } else {
+        long then = System.currentTimeMillis();
+        controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(HeartbeatStatus result) {
+            long now = System.currentTimeMillis();
+            if (result.isCodeHasUpdated()) {
+              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+              Window.Location.reload();
+            } else if (!result.isHasSession()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
               logout();
             }
@@ -381,7 +405,6 @@ public class InitialUI implements UILifecycle {
     {
       child = new Heading(3, PLEASE_ALLOW_RECORDING);
       child.setVisible(false);
-
 
       Timer waitTimer = new Timer() {
         @Override
@@ -451,9 +474,9 @@ public class InitialUI implements UILifecycle {
     if (current != null) {
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo == null) {
-      //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
+        //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
         if (showOnlyHomeLink) {
-        //  logger.info("\taddCrumbs add all link");
+          //  logger.info("\taddCrumbs add all link");
           addAllLink(crumbs);
         }
       } else {
@@ -517,7 +540,7 @@ public class InitialUI implements UILifecycle {
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
-     // logger.info("getLangBreadcrumb got click on " + project.getName());
+      // logger.info("getLangBreadcrumb got click on " + project.getName());
 
       resetLanguageSelection(2);
 
@@ -577,7 +600,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void clearBreadcrumbs() {
-   // logger.info("breadcrumbs clear");
+    // logger.info("breadcrumbs clear");
     breadcrumbs.clear();
   }
 
@@ -631,7 +654,7 @@ public class InitialUI implements UILifecycle {
     }
 
     if (!props.getSendResetPassToken().isEmpty()) {
-      handleSendResetPass(verticalContainer, contentRow, eventRegistration, resetPassToken);
+      handleSendResetPass(verticalContainer, contentRow, eventRegistration);
       return true;
     }
     // are we here to show the login screen?
@@ -684,8 +707,7 @@ public class InitialUI implements UILifecycle {
 
   private void handleSendResetPass(final DivWidget verticalContainer,
                                    final Panel firstRow,
-                                   final EventRegistration eventRegistration,
-                                   final String resetPassToken) {
+                                   final EventRegistration eventRegistration) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
     firstRow.add(new SendResetPassword(props, eventRegistration, userManager).getResetPassword());
     clearPadding(verticalContainer);
@@ -818,7 +840,7 @@ public class InitialUI implements UILifecycle {
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
-  //  logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
+    //  logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;
@@ -880,4 +902,8 @@ public class InitialUI implements UILifecycle {
   public void setVisible(boolean visible) {
     banner.setVisible(visible);
   }
+
+/*  public void setImplVersion(String implVersion) {
+    this.implVersion = implVersion;
+  }*/
 }
