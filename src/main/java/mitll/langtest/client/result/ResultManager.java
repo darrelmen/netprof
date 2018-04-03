@@ -365,6 +365,7 @@ public class ResultManager extends PagerTable {
   private void ensureAudio(List<MonitorResult> results) {
     ScoringServiceAsync scoringService = controller.getScoringService();
 
+//    logger.info("ensureAudio ensure audio for " + results.size() + " results");
     for (MonitorResult result : results) {
       scoringService.ensureAudio(result.getUniqueID(), new AsyncCallback<Void>() {
         @Override
