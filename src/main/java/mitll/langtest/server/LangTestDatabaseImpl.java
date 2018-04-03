@@ -171,9 +171,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @throws DominoSessionException
    * @see LangTestDatabaseImpl#getUserHistoryForList
    */
-  private Collection<CommonExercise> getExercisesForUser() throws DominoSessionException {
+/*  private Collection<CommonExercise> getExercisesForUser() throws DominoSessionException {
     return db.getExercises(getProjectIDFromUser());
-  }
+  }*/
 
   /**
    * This report is for on demand sending the report to the current user.
@@ -212,6 +212,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.info("getStartupInfo no db yet...");
     } else {
       IProjectManagement projectManagement = db.getProjectManagement();
+      ((NPUserSecurityManager) securityManager).setProjectManagement(projectManagement);
       if (projectManagement == null) {
         logger.error("getStartupInfo : config error - didn't make project management");
       } else {
@@ -286,11 +287,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * @return
    * @paramx ids            items the user has actually practiced/recorded audio for
    * @paramx latestResultID
    * @paramx typeToSection  indicates the unit and chapter(s) we're asking about
    * @paramx userListID     if we're asking about a list and not predef items
-   * @return
    * @seex mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
 /*

@@ -32,8 +32,7 @@
 
 package mitll.langtest.shared.user;
 
-import java.io.Serializable;
-import java.util.Date;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * LoginResult
@@ -42,8 +41,8 @@ import java.util.Date;
  * @since Oct 15, 2014 11:59:31 PM
  */
 
-public class LoginResult implements Serializable {
-  public enum ResultType {
+public class LoginResult implements IsSerializable {
+  public enum ResultType implements IsSerializable {
     Success,
     Failed,
     AcctExpired,
@@ -57,43 +56,31 @@ public class LoginResult implements Serializable {
     Exists
   }
 
-  private static final long serialVersionUID = -8359612864581208214L;
+  //private static final long serialVersionUID = -8359612864581208214L;
   private User loggedInUser;
   private ResultType resultType;
 
   public LoginResult() {
   }
 
+  public LoginResult(ResultType resultType) {
+    this(null, resultType);
+  }
+  public LoginResult(User loggedInUser) {
+    this(loggedInUser, ResultType.Success);
+  }
   public LoginResult(User loggedInUser, ResultType resultType) {
     this.loggedInUser = loggedInUser;
     this.resultType = resultType;
   }
 
-  public LoginResult(ResultType resultType) {
-    this(null, resultType);
-  }
-
-  public LoginResult(User loggedInUser, Date serverTime) {
-    this(loggedInUser, ResultType.Success);
-  }
 
   public User getLoggedInUser() {
     return loggedInUser;
   }
-
-
   public ResultType getResultType() {
     return resultType;
   }
-
-/*  public void setrKey(long rKey) {
-    this.rKey = rKey;
-  }*/
-/*
-  public long getrKey() {
-    return rKey;
-  }
-*/
 
   public String toString() {
     return "Login result " + resultType + " : " + loggedInUser;

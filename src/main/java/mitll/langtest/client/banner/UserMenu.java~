@@ -253,7 +253,7 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new ActiveUsersManager(controller).show(24);
+          new ActiveUsersManager(controller).show(1);
         }
       });
     }

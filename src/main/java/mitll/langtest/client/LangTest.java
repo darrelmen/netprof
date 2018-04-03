@@ -227,8 +227,9 @@ import java.util.logging.Logger;
  */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
-  public static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
   private final Logger logger = Logger.getLogger("LangTest");
+
+  private static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 

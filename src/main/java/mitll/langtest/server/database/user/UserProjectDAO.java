@@ -150,4 +150,9 @@ public class UserProjectDAO implements IUserProjectDAO {
   public Collection<Integer> getUsersForProject(int projid) {
     return dao.usersOnProject(projid);
   }
+
+  @Override
+  public Map<Integer,Integer> getUsersToProject(Collection<Integer> userids) {
+    return dao.getUserToProjects(userids);
+  }
 }

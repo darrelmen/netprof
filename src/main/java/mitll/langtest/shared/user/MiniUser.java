@@ -44,7 +44,6 @@ public class MiniUser extends FirstLastUser {
   private Gender realGender = Gender.Unspecified;
 
   private boolean isAdmin;
- // protected long timestamp;
 
   public enum Gender implements IsSerializable {
     Unspecified,
@@ -132,24 +131,12 @@ public class MiniUser extends FirstLastUser {
   }
 
   /**
-   * @see Report#getUsers
-   * @return
-   */
-/*
-  public long getTimestampMillis() {
-    return timestamp;
-  }
-*/
-
-  /**
    * @paramx startTime
    * @see mitll.langtest.server.database.user.DominoUserDAOImpl#getMini
    */
   public void setTimestampMillis(long startTime) {
     setLastChecked(startTime);
-//    this.timestamp = startTime;
   }
-
 
   public boolean isAdmin() {
     return isAdmin;

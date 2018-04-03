@@ -57,9 +57,9 @@ public interface IUserProjectDAO extends IDAO {
   void forgetUsersBulk(Collection<Integer> bulk);
 
   /**
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
    * @param user
    * @return -1 if has no project
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
    */
   int getCurrentProjectForUser(int user);
 
@@ -75,4 +75,6 @@ public interface IUserProjectDAO extends IDAO {
   Map<Integer, Integer> getUserToProject();
 
   Collection<Integer> getUsersForProject(int projid);
+
+  Map<Integer, Integer> getUsersToProject(Collection<Integer> userids);
 }

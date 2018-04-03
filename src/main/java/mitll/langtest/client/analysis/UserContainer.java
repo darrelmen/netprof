@@ -75,7 +75,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see #addName
    */
   private static final String NAME = "Name";
-  private static final int NAME_WIDTH = 130;
 
   private static final String MINE = "Mine";
 
@@ -880,16 +879,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         return getNoWrapContent(columnText);
       }
     };
-  }
-
-  protected SafeHtml getNoWrapContent(String noWrapContent) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-        noWrapContent +
-        "</span>");
-
-    sb.appendHtmlConstant("</div>");
-    return sb.toSafeHtml();
   }
 
 

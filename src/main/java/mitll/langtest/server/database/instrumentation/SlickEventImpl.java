@@ -178,16 +178,16 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   /**
    * @param event
    * @param projid
-   * @paramx oldToNewUser
    * @param exToID
    * @return
+   * @paramx oldToNewUser
    * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)
    */
   private SlickEvent getSlickEvent(Event event,
                                    int projid,
                                    Integer newUserID,
                                    Map<String, Integer> exToID) {
- //   Integer newUserID = oldToNewUser.get(event.getUserID());
+    //   Integer newUserID = oldToNewUser.get(event.getUserID());
     return /*newUserID == null ? null :*/ toSlick(event, projid, exToID, newUserID);
   }
 
@@ -213,9 +213,8 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
 
   private List<Event> getEvents(Collection<SlickEvent> all) {
     List<Event> copy = new ArrayList<>();
-    for (SlickEvent event : all) {
-      copy.add(fromSlick(event));
-    }
+    all.forEach(slickEvent -> copy.add(fromSlick(slickEvent)));
+    Collections.sort(copy);
     return copy;
   }
 

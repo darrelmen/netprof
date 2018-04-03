@@ -31,7 +31,7 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
- // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
+  // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
 
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
       Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
@@ -84,7 +84,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final ExerciseController controller;
 
   /**
-   *
    * @param userManager
    * @param lifecycle
    * @see InitialUI#InitialUI
@@ -286,6 +285,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
       //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
+      controller.logEvent("ViewLink", instanceName, "N/A","click on view");
       gotClickOnChoice(instanceName, learn);
       // setHistoryItem(historyToken);
     });
@@ -328,14 +328,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #gotClickOnChoice
    */
   private void showActive(NavLink learn) {
-    navLinks.forEach(link->link.setActive(false));
+    navLinks.forEach(link -> link.setActive(false));
     learn.setActive(true);
   }
 
   @NotNull
   private NavLink getLink(ComplexWidget nav, String learn1) {
     NavLink learn = new NavLink(learn1);
-    //nameToLink.put(learn1, learn);
     navLinks.add(learn);
     nav.add(learn);
     return learn;
@@ -351,7 +350,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void addHomeClick(HasClickHandlers npImage) {
-    npImage.addClickHandler(event -> lifecycle.chooseProjectAgain());
+    npImage.addClickHandler(event -> {
+      controller.logEvent("HomeIcon", "Image", "N/A","click on home icon");
+      lifecycle.chooseProjectAgain();
+    });
   }
 
   @Override

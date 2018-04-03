@@ -2,8 +2,6 @@ package mitll.langtest.server.database;
 
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.*;
 
@@ -27,16 +25,23 @@ public class ReportStats {
     DEVICE_RECORDINGS,
     /**
      * @see mitll.langtest.server.database.excel.ReportToExcel#writeWeeklySheet
-     * @see Report#getResultsForSet(StringBuilder, Set, Collection, String, JSONObject, int, ReportStats, String)
+     * @see Report#getResultsForSet
      **/
     ALL_RECORDINGS_WEEKLY,
     DEVICE_RECORDINGS_WEEKLY
   }
 
   private final Map<INFO, Integer> intKeyToValue = new HashMap<>();
-  private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
+  private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new LinkedHashMap<>();
 
-  public void merge(ReportStats reportStats) {
+
+  public ReportStats getMerged(ReportStats toMerge) {
+    ReportStats copy = new ReportStats(true, this);
+    copy.merge(toMerge);
+    return copy;
+  }
+
+  private void merge(ReportStats reportStats) {
     Map<INFO, Integer> intKeyToValue = getIntKeyToValue();
     Map<INFO, Integer> otherMap = reportStats.getIntKeyToValue();
     mergeKeyToValue(intKeyToValue, otherMap);
@@ -55,6 +60,10 @@ public class ReportStats {
     otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
   }
 
+  /**
+   * @param year
+   * @see Report#getReportForProject
+   */
   public void setYear(int year) {
     this.year = year;
   }
@@ -68,6 +77,21 @@ public class ReportStats {
         reportStats.name,
         reportStats.year,
         reportStats.jsonObject);
+  }
+
+  public ReportStats(boolean full, ReportStats toCopy) {
+    this(toCopy);
+
+    intKeyToValue.putAll(toCopy.intKeyToValue);
+
+
+    Map<INFO, Map<String, Integer>> intMultiKeyToValue = toCopy.intMultiKeyToValue;
+
+    intMultiKeyToValue.forEach((k, v) -> {
+      this.intMultiKeyToValue.put(k, new LinkedHashMap<>(v));
+    });
+    // intMultiKeyToValue.putAll(toCopy.intMultiKeyToValue);
+    this.html = toCopy.html;
   }
 
   ReportStats(SlickProject project, int year) {
@@ -87,7 +111,6 @@ public class ReportStats {
     this.language = language;
     this.name = name;
     this.year = year;
-    //s this.recordings = recordings;
     this.jsonObject = jsonObject;
   }
 

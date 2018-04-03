@@ -38,6 +38,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +55,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
 
   @Override
-  public List<FirstLastUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException {
+  public List<ActiveUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       return securityManager.getActiveSince(when);

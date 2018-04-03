@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.project.ProjectEditForm;
 
 public enum ProjectStatus implements IsSerializable {
   /**
@@ -52,29 +53,35 @@ public enum ProjectStatus implements IsSerializable {
    * Projects that have become obsolete but we might want to examine or report on.
    * Only admins can see them.
    */
-  RETIRED(true, true, false),
+  RETIRED(true, true, false, true),
   /**
    * Projects that just exist to demonstrate a new feature - they should not be reported on.
    */
-  DEMO,
+  DEMO(true, true, true, false),
   /**
    * Completed removed projects that can't be reloaded.
    */
-  DELETED(false, true, false);
+  DELETED(false, false, false, false);
 
   private boolean show = true; // as a choice
-  private boolean showOnlyToAdmins = false; // as a choice
+  private boolean showOnlyToAdmins = false; // in the project display
   private boolean load = true; // should load the project
+  private boolean reportOn = true; // should include in reports on usage
 
   ProjectStatus() {
   }
 
-  ProjectStatus(boolean show, boolean showOnlyToAdmins, boolean load) {
+  ProjectStatus(boolean show, boolean showOnlyToAdmins, boolean load, boolean reportOn) {
     this.show = show;
     this.showOnlyToAdmins = showOnlyToAdmins;
     this.load = load;
+    this.reportOn=reportOn;
   }
 
+  /**
+   * @see ProjectEditForm#getBox
+   * @return
+   */
   public boolean shouldShow() {
     return show;
   }
@@ -83,7 +90,15 @@ public enum ProjectStatus implements IsSerializable {
     return load;
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#getVisibleProjects
+   * @return
+   */
   public boolean shouldShowOnlyToAdmins() {
     return showOnlyToAdmins;
+  }
+
+  public boolean shouldReportOn() {
+    return reportOn;
   }
 }

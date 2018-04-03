@@ -480,6 +480,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   public void gotClickOnItem(final T user) {
-    storeSelectedUser(user.getID());
+    if (user != null) {
+      storeSelectedUser(user.getID());
+    }
   }
 }

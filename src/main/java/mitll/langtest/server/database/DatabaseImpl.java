@@ -91,7 +91,6 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -112,7 +111,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.text.CollationKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -335,7 +333,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
-    this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
+    userProjectDAO = new UserProjectDAO(dbConnection);
+    this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO,dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -364,7 +363,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);
-    userProjectDAO = new UserProjectDAO(dbConnection);
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
@@ -725,7 +723,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
             userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
           }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
       }
     }
   }
@@ -1641,22 +1639,35 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param report
    * @param forceSend
    * @return
-   * @see #sendReports(IReport, boolean, int)
+   * @see #sendReports
    */
   @NotNull
   private List<ReportStats> getReportStats(IReport report, boolean forceSend) {
-    List<ReportStats> stats = new ArrayList<>();
+    return getReportStats(report, forceSend, getReportableProjects());
+  }
 
-    List<Project> collect = getProjects()
+  /**
+   * Don't want to report on deleted or demo projects.
+   * @return
+   */
+  @NotNull
+  private List<Project> getReportableProjects() {
+    List<Project> filtered = getProjects()
         .stream()
-        .filter(project -> project.getStatus().shouldLoad()).collect(Collectors.toList());
+        .filter(project -> project.getStatus().shouldReportOn())
+        .collect(Collectors.toList());
 
     StringBuilder names = new StringBuilder();
-    collect.forEach(project -> names.append(project.getName()).append(", "));
-    logger.info("getReportStats : reporting on " + collect.size() + " projects:" +
+    filtered.forEach(project -> names.append(project.getName()).append(", "));
+    logger.info("getReportStats : reporting on " + filtered.size() + " projects:" +
         "\n\tnames " + names);
+    return filtered;
+  }
 
-    collect
+  @NotNull
+  private List<ReportStats> getReportStats(IReport report, boolean forceSend, List<Project> filtered) {
+    List<ReportStats> stats = new ArrayList<>();
+    filtered
         .forEach(project -> {
 
           int id = project.getID();

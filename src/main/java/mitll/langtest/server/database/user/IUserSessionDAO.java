@@ -35,24 +35,49 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
-import javax.servlet.http.HttpSession;
+import java.util.Date;
 import java.util.Map;
 
 public interface IUserSessionDAO extends IDAO {
   /**
-   * @see mitll.langtest.server.database.security.NPUserSecurityManager#setSessionUserAndRemember
    * @param user
+   * @see mitll.langtest.server.database.security.NPUserSecurityManager#setSessionUserAndRemember
    */
   void add(SlickUserSession user);
 
   int getUserForSession(String sesssion);
 
-  //int getUserForSV(String s, String v);
-
   void removeAllSessionsForUser(int userId);
 
-  //@Override
-  Map<Integer, Long> getActiveSince(long when);
+  Map<Integer, ActiveInfo> getActiveSince(long when);
 
   int getNumRows();
+
+  class ActiveInfo {
+    private int userid;
+    private long when;
+    private int projid;
+
+    ActiveInfo(int userid, long when, int projid) {
+      this.userid = userid;
+      this.when = when;
+      this.projid = projid;
+    }
+
+    public int getUserid() {
+      return userid;
+    }
+
+    public long getWhen() {
+      return when;
+    }
+
+    public int getProjid() {
+      return projid;
+    }
+
+    public String toString() {
+      return "user " + userid + " proj " + projid + " at " + new Date(when);
+    }
+  }
 }
