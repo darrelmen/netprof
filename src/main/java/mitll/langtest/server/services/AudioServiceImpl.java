@@ -168,18 +168,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript);
 
-/*    DecoderOptions options = new DecoderOptions()
-        .setRecordInResults(recordInResults)
-        .setDoDecode(doFlashcard)
-        .setRefRecording(addToAudioTable)
-        .setAllowAlternates(allowAlternates);*/
-
 //    logger.info("writeAudioFile recording info " + recordingInfo);
-    AudioAnswer audioAnswer = amas ?
+    AudioAnswer audioAnswer =
+        amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(
             base64EncodedString,
-            exercise1,
+            commonExercise,
             audioContext,
             recordingInfo,
 
@@ -205,8 +200,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, device, projectID);
       } else {
         String path = audioAnswer.getPath();
-        Map<Integer, User> idToUser = new HashMap<>();
-        String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language, idToUser);
+        String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language, new HashMap<>());
         logger.info("writeAudioFile initial path " + path +" compressed actual " + actualPath);
         if (actualPath.startsWith(serverProps.getAudioBaseDir())) {
           actualPath = actualPath.substring(serverProps.getAudioBaseDir().length());

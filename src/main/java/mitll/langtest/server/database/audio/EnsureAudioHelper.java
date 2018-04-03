@@ -203,7 +203,9 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       String path,
                                       AudioType audioType,
                                       String language, Map<Integer, User> idToUser) {
-    if (checkedExists.contains(path)) return path;
+    if (checkedExists.contains(path)) {
+      return path;
+    }
 
     User userBy = idToUser.get(user);
 
