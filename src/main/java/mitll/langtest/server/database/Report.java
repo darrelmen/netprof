@@ -1481,7 +1481,7 @@ public class Report implements IReport {
         if (yearTimeRange.inYear(timestamp)) {  // if it's in the requested year
           calendar.setTimeInMillis(timestamp);
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          boolean firstWeeks = w == 8;// w==5;
+          boolean firstWeeks = DEBUG & w == 8;// w==5;
 
           if (!isRefAudioResult(result)) {      // and not ref audio
             tallyWeek(weekToAll, w);
