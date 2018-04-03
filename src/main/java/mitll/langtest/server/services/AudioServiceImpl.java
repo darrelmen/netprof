@@ -207,8 +207,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         String path = audioAnswer.getPath();
         Map<Integer, User> idToUser = new HashMap<>();
         String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language, idToUser);
-        //logger.info("Was " + path);
-        // logger.info("Now " + actualPath);
+        logger.info("writeAudioFile initial path " + path +" compressed actual " + actualPath);
         if (actualPath.startsWith(serverProps.getAudioBaseDir())) {
           actualPath = actualPath.substring(serverProps.getAudioBaseDir().length());
           // logger.info("Now " + actualPath);

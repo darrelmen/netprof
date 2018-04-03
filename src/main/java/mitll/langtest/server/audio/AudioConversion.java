@@ -445,7 +445,7 @@ public class AudioConversion extends AudioBase {
     }
   }
 
-  public String getMP3ForWav(String absolutePath) {
+  String getMP3ForWav(String absolutePath) {
     return absolutePath.replace(WAV, MP3);
   }
 

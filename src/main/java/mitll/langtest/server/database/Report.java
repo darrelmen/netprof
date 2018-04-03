@@ -1446,7 +1446,14 @@ public class Report implements IReport {
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
 
-    if (DEBUG) logger.info("getResultsForSet " + language + " : Year " + year + " Students num = " + students.size());
+    if (DEBUG || true) {
+      logger.info("getResultsForSet " +
+          "\n\tlanguage     " + language +
+          "\n\tyear         " + year +
+          "\n\tStudents num " + students.size() +
+          "\n\trecordings   " + recordings
+      );
+    }
 
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
@@ -1581,6 +1588,8 @@ public class Report implements IReport {
 
     if (allRecordings) {
       reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year));
+    } else {
+      reportStats.putIntMulti(INFO.DEVICE_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year));
     }
   }
 

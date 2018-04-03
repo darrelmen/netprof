@@ -2,9 +2,10 @@ package mitll.langtest.server.database;
 
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ReportStats {
   private final int projid;
@@ -14,7 +15,23 @@ public class ReportStats {
   private final JSONObject jsonObject;
   private String html;
 
-  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
+  public enum INFO {
+    /**
+     * @see Report#getResultsForSet
+     * @see mitll.langtest.server.database.excel.ReportToExcel#writeHistoricalSheet
+     */
+    ALL_RECORDINGS,
+    /**
+     * @see Report#getResultsForSet
+     */
+    DEVICE_RECORDINGS,
+    /**
+     * @see mitll.langtest.server.database.excel.ReportToExcel#writeWeeklySheet
+     * @see Report#getResultsForSet(StringBuilder, Set, Collection, String, JSONObject, int, ReportStats, String)
+     **/
+    ALL_RECORDINGS_WEEKLY,
+    DEVICE_RECORDINGS_WEEKLY
+  }
 
   private final Map<INFO, Integer> intKeyToValue = new HashMap<>();
   private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
@@ -43,7 +60,6 @@ public class ReportStats {
   }
 
   /**
-   *
    * @param reportStats
    */
   ReportStats(ReportStats reportStats) {
@@ -152,7 +168,7 @@ public class ReportStats {
   }
 
   public String toString() {
-    return "stats for " + language +"/"+ name + " : " + year +// " = " + keyToValue;
+    return "stats for " + language + "/" + name + " : " + year +// " = " + keyToValue;
         intKeyToValue;
   }
 }

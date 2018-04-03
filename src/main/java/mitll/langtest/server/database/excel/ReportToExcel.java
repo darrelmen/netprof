@@ -26,10 +26,10 @@ public class ReportToExcel {
   private static final String NET_PRO_F_HISTORICAL = "NetProF Historical";
   private static final String NET_PRO_F_YTD = "NetProF-Vrt";
   private static final String INCREASE = "INCREASE";
-  public static final String LANGUAGE = "Language";
-  public static final String PROJECT = "Project";
-  public static final String LANGUAGES = LANGUAGE + "s";
-  public static final String PROJECTS = PROJECT + "s";
+  private static final String LANGUAGE = "Language";
+  private static final String PROJECT = "Project";
+  private static final String LANGUAGES = LANGUAGE + "s";
+  private static final String PROJECTS = PROJECT + "s";
 
   public static final boolean DEBUG = false;
 
@@ -53,41 +53,51 @@ public class ReportToExcel {
       stats.forEach(stat -> logger.info("\t" + stat));
     }
 
-    writeSheets(stats, wb);
+    writeSheets(stats, wb, false);
+    writeSheets(stats, wb, true);
     writeTheFile(out, wb);
   }
 
   /**
    * Write out both a per language and a per project set of sheets - ytd and yearly historical for each
+   *
    * @param stats
    * @param wb
    */
-  private void writeSheets(List<ReportStats> stats, XSSFWorkbook wb) {
+  private void writeSheets(List<ReportStats> stats, XSSFWorkbook wb, boolean deviceRecordings) {
     {
       Map<String, Map<Integer, ReportStats>> langToYearToStats = getLangToYearToStats(stats, true);
-      writeYTDAndHistorical(stats, wb, langToYearToStats, false);
+      writeYTDAndHistorical(stats, wb, langToYearToStats, false, deviceRecordings);
     }
     {
       Map<String, Map<Integer, ReportStats>> nameToYearToStats = getLangToYearToStats(stats, false);
-      writeYTDAndHistorical(stats, wb, nameToYearToStats, true);
+      writeYTDAndHistorical(stats, wb, nameToYearToStats, true, deviceRecordings);
     }
   }
 
   private void writeYTDAndHistorical(List<ReportStats> stats,
                                      XSSFWorkbook wb,
                                      Map<String, Map<Integer, ReportStats>> langToYearToStats,
-                                     boolean perProject) {
+                                     boolean perProject, boolean deviceRecordings) {
     // write the vert sheet
     long then = System.currentTimeMillis();
     String suffix = perProject ? "_project" : "";
-    int rownum = langToYearToStats.isEmpty() ? 1 : writeWeeklySheet(wb, wb.createSheet(NET_PRO_F_YTD + suffix), langToYearToStats, perProject);
+    suffix += deviceRecordings ? "_ios" : "";
 
-    long now = System.currentTimeMillis();
-    if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
-        " rows to sheet, or " + (now - then) / rownum + " millis/row");
+    {
+      INFO allRecordingsWeekly = deviceRecordings ? INFO.DEVICE_RECORDINGS_WEEKLY : INFO.ALL_RECORDINGS_WEEKLY;
+      int rownum = langToYearToStats.isEmpty() ? 1 :
+          writeWeeklySheet(wb, wb.createSheet(NET_PRO_F_YTD + suffix), langToYearToStats, perProject, allRecordingsWeekly);
+      long now = System.currentTimeMillis();
+      if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
+          " rows to sheet, or " + (now - then) / rownum + " millis/row");
+    }
 
     // write the historical sheet
-    writeHistoricalSheet(wb, stats, wb.createSheet(NET_PRO_F_HISTORICAL + suffix), langToYearToStats, perProject);
+    {
+      writeHistoricalSheet(wb, stats, wb.createSheet(NET_PRO_F_HISTORICAL + suffix), langToYearToStats, perProject,
+          deviceRecordings ? INFO.DEVICE_RECORDINGS : INFO.ALL_RECORDINGS);
+    }
   }
 
   /**
@@ -102,7 +112,12 @@ public class ReportToExcel {
   private int writeHistoricalSheet(XSSFWorkbook workbook,
                                    List<ReportStats> stats,
                                    Sheet sheet,
-                                   Map<String, Map<Integer, ReportStats>> langToYearToStats, boolean perProject) {
+                                   Map<String, Map<Integer, ReportStats>> langToYearToStats,
+                                   boolean perProject,
+                                   INFO recordingType) {
+    //INFO recordingType = INFO.ALL_RECORDINGS;
+
+    logger.info("writeHistoricalSheet sheet for " + langToYearToStats.size() + " projects, for " + recordingType);
     int rownum = 0;
 
     short yellow = IndexedColors.YELLOW.getIndex();
@@ -130,7 +145,7 @@ public class ReportToExcel {
         Map<Integer, ReportStats> yearToStats = langToYearToStats.get(lang);
         ReportStats reportStats = yearToStats.get(year);
 //        logger.info("For " + lang + " " + year + " got " + reportStats);
-        Integer orDefault = reportStats == null ? 0 : reportStats.getIntKeyToValue().getOrDefault(INFO.ALL_RECORDINGS, 0);
+        Integer orDefault = reportStats == null ? 0 : reportStats.getIntKeyToValue().getOrDefault(recordingType, 0);
         {
           Cell cell = row.createCell(col++);
           cell.setCellStyle(cellStyle);
@@ -285,15 +300,18 @@ public class ReportToExcel {
    * @param sheet
    * @param langToYearToStats
    * @param perProject
+   * @param recordingType
    * @return
    * @see #toXLSX
    */
   private int writeWeeklySheet(XSSFWorkbook workbook,
                                Sheet sheet,
-                               Map<String, Map<Integer, ReportStats>> langToYearToStats, boolean perProject) {
+                               Map<String, Map<Integer, ReportStats>> langToYearToStats,
+                               boolean perProject, INFO recordingType) {
+    //INFO allRecordingsWeekly = INFO.ALL_RECORDINGS_WEEKLY;
     int rownum = 0;
 
-    short yellow = IndexedColors.YELLOW.getIndex();
+    //short yellow = IndexedColors.YELLOW.getIndex();
     int thisYear = getThisYear();
     Set<String> sortedLang = new TreeSet<>(langToYearToStats.keySet());
 
@@ -332,7 +350,7 @@ public class ReportToExcel {
       for (String lang : sortedLang) {
         Map<Integer, ReportStats> yearToStats = langToYearToStats.get(lang);
         ReportStats reportStats = yearToStats.get(thisYear);
-        Map<String, Integer> weekToCountForLang = reportStats.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+        Map<String, Integer> weekToCountForLang = reportStats.getKeyToValue(recordingType);
 
         Integer count = weekToCountForLang.getOrDefault(week, 0);
 
@@ -416,7 +434,7 @@ public class ReportToExcel {
     XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
     XSSFCellStyle yellowStyle = getYellowStyle(workbook);
 
-  //  logger.info("doIncreaseRow marginal " + marginalDiff);
+    //  logger.info("doIncreaseRow marginal " + marginalDiff);
 
     {
       Cell cell = row.createCell(col++);
@@ -430,7 +448,7 @@ public class ReportToExcel {
         logger.error("doIncreaseRow no value for " + lang);
         value = 0;
       } else {
-       // logger.info("doIncreaseRow Got " + lang + " = " + value);
+        // logger.info("doIncreaseRow Got " + lang + " = " + value);
       }
 
       {

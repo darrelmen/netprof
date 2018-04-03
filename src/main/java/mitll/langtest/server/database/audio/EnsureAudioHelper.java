@@ -262,7 +262,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param wavFile
    * @param trackInfo
    * @param language
-   * @return true if mp3 file exists
+   * @return file path of mp3 file
    * @see IEnsureAudioHelper#ensureCompressedAudio(int, CommonExercise, String, AudioType, String, Map)
    */
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
