@@ -5,7 +5,6 @@ import net.sf.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class ReportStats {
   private final int projid;
@@ -43,7 +42,11 @@ public class ReportStats {
     this.year = year;
   }
 
-  public ReportStats(ReportStats reportStats) {
+  /**
+   *
+   * @param reportStats
+   */
+  ReportStats(ReportStats reportStats) {
     this(reportStats.projid,
         reportStats.getLanguage(),
         reportStats.name,
@@ -51,15 +54,15 @@ public class ReportStats {
         reportStats.jsonObject);
   }
 
-  public ReportStats(SlickProject project, int year) {
+  ReportStats(SlickProject project, int year) {
     this(project.id(), project.language(), project.name(), year, new JSONObject());
   }
 
-  public ReportStats(SlickProject project, int year, JSONObject jsonObject) {
+  ReportStats(SlickProject project, int year, JSONObject jsonObject) {
     this(project.id(), project.language(), project.name(), year, jsonObject);
   }
 
-  public ReportStats(int projid, String language, String name, int year) {
+  ReportStats(int projid, String language, String name, int year) {
     this(projid, language, name, year, new JSONObject());
   }
 
@@ -149,7 +152,7 @@ public class ReportStats {
   }
 
   public String toString() {
-    return "stats for " + name + " : " + year +// " = " + keyToValue;
+    return "stats for " + language +"/"+ name + " : " + year +// " = " + keyToValue;
         intKeyToValue;
   }
 }
