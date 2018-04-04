@@ -85,7 +85,6 @@ public class Report implements IReport {
   private static final String DEVICE_RECORDINGS = "Device Recordings";
   private static final String ALL_RECORDINGS = "All Recordings";
   private static final String MM_DD_YY = "MM_dd_yy";
-  //  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
   private static final boolean SHOW_TEACHER_SKIPS = false;
 
   private static final String NEW_I_PAD_I_PHONE_USERS = "New iPad/iPhone Users";
@@ -95,7 +94,6 @@ public class Report implements IReport {
   private static final String I_PAD_USERS = "iPadUsers";
   private static final String OVERALL_TIME_ON_TASK = "overallTimeOnTask";
   private static final String DEVICE_TIME_ON_TASK = "deviceTimeOnTask";
-  //  private static final String UNIQUE_USERS_YTD = "uniqueUsersYTD";
   private static final String ALL_RECORDINGS1 = "allRecordings";
   private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
   private static final String MONTH1 = "month";
@@ -142,7 +140,6 @@ public class Report implements IReport {
   private final IAudioDAO audioDAO;
 
   private final Map<Integer, Long> userToStart = new HashMap<>();
-  private static final boolean DEBUG = false;
 
   private final Map<Integer, String> idToUser = new HashMap<>();
 
@@ -171,8 +168,11 @@ public class Report implements IReport {
   private final Set<Integer> allStudents = new HashSet<>();
   private final List<ReportUser> deviceUsers;
   // private final String hostname;
+
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param resultDAO
@@ -1481,7 +1481,7 @@ public class Report implements IReport {
         if (yearTimeRange.inYear(timestamp)) {  // if it's in the requested year
           calendar.setTimeInMillis(timestamp);
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          boolean firstWeeks = DEBUG & year == 2018 && w > 12;// w==5;
+          boolean firstWeeks = DEBUG & year == 2018 && w == 7;// w==5;
 
           if (!isRefAudioResult(result)) {      // and not ref audio
             tallyWeek(weekToAll, w);

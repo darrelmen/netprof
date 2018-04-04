@@ -519,7 +519,7 @@ public abstract class Analysis extends DAO {
     List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
-    int skipped = 0;
+ //   int skipped = 0;
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
@@ -536,7 +536,7 @@ public abstract class Analysis extends DAO {
         results.add(new WordScore(bs, netPronImageTypeListMap));
       } else {
 //        logger.warn("getWordScore score " + bs.getScore()  + " is below threshold.");
-        skipped++;
+   //     skipped++;
       }
     }
 
@@ -549,7 +549,7 @@ public abstract class Analysis extends DAO {
       then = System.currentTimeMillis();
       Collections.sort(results);
       now = System.currentTimeMillis();
-      if (now - then > 20) {
+      if (now - then > 0) {
         logger.debug("getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
       }
     }

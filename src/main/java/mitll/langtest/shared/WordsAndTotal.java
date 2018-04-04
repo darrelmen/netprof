@@ -50,17 +50,21 @@ public class WordsAndTotal implements IsSerializable {
   private List<WordScore> results;
   private int numTotal;
   private int req;
-  public WordsAndTotal() {}
+  private boolean allSameDay;
+
+  public WordsAndTotal() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getWordScoresForPeriod
    * @param results
    * @param n
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getWordScoresForPeriod
    */
-  public WordsAndTotal(List<WordScore> results, int n) {
+  public WordsAndTotal(List<WordScore> results, int n, boolean allSameDay) {
     this.results = results;
     this.numTotal = n;
-   }
+    this.allSameDay = allSameDay;
+  }
 
   public List<WordScore> getResults() {
     return results;
@@ -76,5 +80,9 @@ public class WordsAndTotal implements IsSerializable {
 
   public void setReq(int req) {
     this.req = req;
+  }
+
+  public boolean isAllSameDay() {
+    return allSameDay;
   }
 }

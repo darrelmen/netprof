@@ -33,6 +33,7 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -41,10 +42,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
@@ -76,7 +74,7 @@ public class AnalysisTab extends DivWidget {
    *
    * @see #showWordScores
    */
-  private static final int WORD_WIDTH = 459;
+  private static final int WORD_WIDTH = 489;//459;
 
   private static final String WORDS = "Vocabulary";
   /**
@@ -184,7 +182,7 @@ public class AnalysisTab extends DivWidget {
     addStyleName("leftFiveMargin");
     this.controller = controller;
 
-    Icon playFeedback = getPlayFeedback();
+    Widget playFeedback = getPlayFeedback();
 
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
@@ -303,11 +301,16 @@ public class AnalysisTab extends DivWidget {
   }
 
   @NotNull
-  private Icon getPlayFeedback() {
+  private Widget getPlayFeedback() {
     Icon playFeedback = new Icon(IconType.VOLUME_UP);
     playFeedback.addStyleName("leftFiveMargin");
-    playFeedback.setVisible(false);
-    return playFeedback;
+
+    DivWidget div = new DivWidget();
+    div.addStyleName("topFiveMargin");
+    div.add(playFeedback);
+    div.setVisible(false);
+
+    return div;
   }
 
   /**
@@ -484,7 +487,7 @@ public class AnalysisTab extends DivWidget {
           controller, analysisPlot,
           wordsTitle);
 
-      tableWithPager.setWidth(WORD_WIDTH + "px");
+      //  tableWithPager.setWidth(WORD_WIDTH + "px");
 
       {
         DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);

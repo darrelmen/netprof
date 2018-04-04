@@ -253,7 +253,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
 
     playButton.addClickHandler(event -> {
       doClick();
-      controller.logEvent(playButton, "play audio", exercise.getID(), "");
+      int id = exercise == null ? -1 : exercise.getID();
+      controller.logEvent(playButton, "play audio", id, "");
     });
 
     showPlayIcon(playButton);
@@ -485,6 +486,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
           if (DEBUG) logger.info("playAudio - songLoaded " + path + " this " + this);
           Scheduler.get().scheduleDeferred(() -> doClick());
         }
+
         // if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
         @Override
         public void songFinished() {

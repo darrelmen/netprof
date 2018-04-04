@@ -57,6 +57,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
@@ -113,6 +114,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private boolean available = false;
   private final Project project;
   private final IPronunciationLookup pronunciationLookup;
+
+  private final AtomicInteger hydraReqCounter = new AtomicInteger();
 
   /**
    * @param deployPath
@@ -229,7 +232,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   /**
-   * Use hydec to do scoring<br></br>
+   * Use hydra to do scoring<br></br>
    * <p>
    * Some magic happens in {@link Scoring#writeTranscripts } where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
@@ -240,6 +243,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * spoken sentence is utterly unrelated to the reference.)).
    * <p>
    * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
+   *
+   * Note we have to worry about to different threads asking for the same file at the same millisecond.
+   * In which case we use atomic integer to create non-colliding requests.
    *
    * @param testAudioDir          where the audio is
    * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
@@ -341,11 +347,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     int processDur = 0;
     if (scores == null) {
       long then = System.currentTimeMillis();
-      int end = (int) (cachedDuration * 100.0);
       Path tempDir = null;
-      long uniqueTimestamp2 = System.currentTimeMillis();
-
-      String rawAudioPath = getRawAudioPath(filePath, uniqueTimestamp2);
+      String rawAudioPath = getUniqueRawAudioPath(filePath);
       try {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + language);
 
@@ -361,6 +364,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           return new PretestScore(0);
         }
 
+        int end = (int) (cachedDuration * 100.0);
         Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
             tempFile.getAbsolutePath(), decode, end);
         if (result == null) {
@@ -406,6 +410,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         cachedDuration, processDur, usePhoneToDisplay, jsonObject);
   }
 
+
   /**
    * We don't need it after sending it to dcodr
    *
@@ -427,6 +432,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  @NotNull
+  private String getUniqueRawAudioPath(String filePath) {
+    return getRawAudioPath(filePath, hydraReqCounter.getAndIncrement());
+  }
+
+  /**
+   * Make sure that two requests on the same file don't collide with each other.
+   * I.e. don't write to the same file at the same time, or delete the same file on one thread while another is using it.
+   * @see #scoreRepeatExercise
+   * @see #hydraReqCounter
+   * @param filePath
+   * @param unique
+   * @return
+   */
   @NotNull
   private String getRawAudioPath(String filePath, long unique) {
     return filePath.replaceAll("\\=", "") + "_" + unique + ".raw";
