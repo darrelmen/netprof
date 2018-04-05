@@ -1639,22 +1639,35 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param report
    * @param forceSend
    * @return
-   * @see #sendReports(IReport, boolean, int)
+   * @see #sendReports
    */
   @NotNull
   private List<ReportStats> getReportStats(IReport report, boolean forceSend) {
-    List<ReportStats> stats = new ArrayList<>();
+    return getReportStats(report, forceSend, getReportableProjects());
+  }
 
-    List<Project> collect = getProjects()
+  /**
+   * Don't want to report on deleted or demo projects.
+   * @return
+   */
+  @NotNull
+  private List<Project> getReportableProjects() {
+    List<Project> filtered = getProjects()
         .stream()
-        .filter(project -> project.getStatus().shouldLoad()).collect(Collectors.toList());
+        .filter(project -> project.getStatus().shouldReportOn())
+        .collect(Collectors.toList());
 
     StringBuilder names = new StringBuilder();
-    collect.forEach(project -> names.append(project.getName()).append(", "));
-    logger.info("getReportStats : reporting on " + collect.size() + " projects:" +
+    filtered.forEach(project -> names.append(project.getName()).append(", "));
+    logger.info("getReportStats : reporting on " + filtered.size() + " projects:" +
         "\n\tnames " + names);
+    return filtered;
+  }
 
-    collect
+  @NotNull
+  private List<ReportStats> getReportStats(IReport report, boolean forceSend, List<Project> filtered) {
+    List<ReportStats> stats = new ArrayList<>();
+    filtered
         .forEach(project -> {
 
           int id = project.getID();

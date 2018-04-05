@@ -59,16 +59,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     realAddWidgets(e, controller, controlState);
   }
 
-
   @Override
   void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
   }
 
-  //  @Override
   private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
     hideClickToFlip();
-
   }
 
   /**
@@ -234,7 +231,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   void flipCard() {
   }
 
-  public void showTimeRemaining(long l) {
+  void showTimeRemaining(long l) {
     String value;
     if (l > 0) {
       long min = l / ONE_MIN;

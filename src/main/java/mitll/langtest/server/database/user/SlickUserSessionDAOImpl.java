@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.security.IUserSecurityManager;
@@ -45,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +62,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     super(database);
     dao = new UserSessionDAOWrapper(dbConnection);
     this.userProjectDAO = userProjectDAO;
-    logger.info("since last week " + lastWeek());
+  //  logger.info("since last week " + lastWeek());
   }
 
   public void createTable() {

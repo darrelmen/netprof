@@ -3,9 +3,7 @@ package mitll.langtest.server.database;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ReportStats {
   private final int projid;
@@ -15,12 +13,35 @@ public class ReportStats {
   private final JSONObject jsonObject;
   private String html;
 
-  public enum INFO {ALL_RECORDINGS, DEVICE_RECORDINGS, ALL_RECORDINGS_WEEKLY}
+  public enum INFO {
+    /**
+     * @see Report#getResultsForSet
+     * @see mitll.langtest.server.database.excel.ReportToExcel#writeHistoricalSheet
+     */
+    ALL_RECORDINGS,
+    /**
+     * @see Report#getResultsForSet
+     */
+    DEVICE_RECORDINGS,
+    /**
+     * @see mitll.langtest.server.database.excel.ReportToExcel#writeWeeklySheet
+     * @see Report#getResultsForSet
+     **/
+    ALL_RECORDINGS_WEEKLY,
+    DEVICE_RECORDINGS_WEEKLY
+  }
 
   private final Map<INFO, Integer> intKeyToValue = new HashMap<>();
-  private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new HashMap<>();
+  private final Map<INFO, Map<String, Integer>> intMultiKeyToValue = new LinkedHashMap<>();
 
-  public void merge(ReportStats reportStats) {
+
+  public ReportStats getMerged(ReportStats toMerge) {
+    ReportStats copy = new ReportStats(true, this);
+    copy.merge(toMerge);
+    return copy;
+  }
+
+  private void merge(ReportStats reportStats) {
     Map<INFO, Integer> intKeyToValue = getIntKeyToValue();
     Map<INFO, Integer> otherMap = reportStats.getIntKeyToValue();
     mergeKeyToValue(intKeyToValue, otherMap);
@@ -39,11 +60,18 @@ public class ReportStats {
     otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
   }
 
+  /**
+   * @param year
+   * @see Report#getReportForProject
+   */
   public void setYear(int year) {
     this.year = year;
   }
 
-  public ReportStats(ReportStats reportStats) {
+  /**
+   * @param reportStats
+   */
+  ReportStats(ReportStats reportStats) {
     this(reportStats.projid,
         reportStats.getLanguage(),
         reportStats.name,
@@ -51,15 +79,30 @@ public class ReportStats {
         reportStats.jsonObject);
   }
 
-  public ReportStats(SlickProject project, int year) {
+  public ReportStats(boolean full, ReportStats toCopy) {
+    this(toCopy);
+
+    intKeyToValue.putAll(toCopy.intKeyToValue);
+
+
+    Map<INFO, Map<String, Integer>> intMultiKeyToValue = toCopy.intMultiKeyToValue;
+
+    intMultiKeyToValue.forEach((k, v) -> {
+      this.intMultiKeyToValue.put(k, new LinkedHashMap<>(v));
+    });
+    // intMultiKeyToValue.putAll(toCopy.intMultiKeyToValue);
+    this.html = toCopy.html;
+  }
+
+  ReportStats(SlickProject project, int year) {
     this(project.id(), project.language(), project.name(), year, new JSONObject());
   }
 
-  public ReportStats(SlickProject project, int year, JSONObject jsonObject) {
+  ReportStats(SlickProject project, int year, JSONObject jsonObject) {
     this(project.id(), project.language(), project.name(), year, jsonObject);
   }
 
-  public ReportStats(int projid, String language, String name, int year) {
+  ReportStats(int projid, String language, String name, int year) {
     this(projid, language, name, year, new JSONObject());
   }
 
@@ -68,7 +111,6 @@ public class ReportStats {
     this.language = language;
     this.name = name;
     this.year = year;
-    //s this.recordings = recordings;
     this.jsonObject = jsonObject;
   }
 
@@ -149,7 +191,7 @@ public class ReportStats {
   }
 
   public String toString() {
-    return "stats for " + name + " : " + year +// " = " + keyToValue;
+    return "stats for " + language + "/" + name + " : " + year +// " = " + keyToValue;
         intKeyToValue;
   }
 }

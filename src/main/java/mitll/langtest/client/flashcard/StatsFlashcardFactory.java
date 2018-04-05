@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
- // private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final boolean ADD_KEY_BINDING = true;
 
@@ -80,7 +80,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private Widget contentPanel;
 
-  StatsPracticePanel currentFlashcard = null;
+  //StatsPracticePanel currentFlashcard = null;
+  FlashcardPanel<?> currentFlashcard = null;
   private NewContentChooser navigation;
   final KeyStorage storage;
 
@@ -148,34 +149,40 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
 
-    boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
+   // boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
 
-    Panel widgets = showRecordingFlashcard ?
-        currentFlashcard = new StatsPracticePanel<L, T>(this,
-            controlState,
-            controller,
-            soundFeedback,
-            PolyglotDialog.PROMPT_CHOICE.NOT_YET,
-            e.getCommonAnnotatable(),
-            sticky,
-            exerciseList) :
+    currentFlashcard = controller.shouldRecord() || true ?
+        currentFlashcard = getFlashcard(e) :
         getNoRecordFlashcardPanel(e.getCommonAnnotatable());
-    if (!showRecordingFlashcard) {
+/*    if (!showRecordingFlashcard) {
 //      logger.info("getExercisePanel no recording ");
       currentFlashcard = null;
-    }
+    }*/
 
-    return widgets;
+    //logger.info("getExercisePanel return flashcard ");
+    return currentFlashcard;
   }
 
-  boolean shouldShowRecordingFlashcard() {
+  @NotNull
+  protected StatsPracticePanel<L, T> getFlashcard(T e) {
+    return new StatsPracticePanel<L, T>(this,
+        controlState,
+        controller,
+        soundFeedback,
+        PolyglotDialog.PROMPT_CHOICE.NOT_YET,
+        e.getCommonAnnotatable(),
+        sticky,
+        exerciseList);
+  }
+
+/*  boolean shouldShowRecordingFlashcard() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
     return hasModel && controller.isRecordingEnabled();
-  }
+  }*/
 
-  FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
-    return new FlashcardPanel<CommonAnnotatable>(e,
+  private FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
+    FlashcardPanel<CommonAnnotatable> noRecord = new FlashcardPanel<CommonAnnotatable>(e,
         StatsFlashcardFactory.this.controller,
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
@@ -191,6 +198,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         super.gotShuffleClick(b);
       }
     };
+    noRecord.addWidgets(e, controller, controlState);
+    return noRecord;
   }
 
   void reset() {

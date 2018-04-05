@@ -75,9 +75,11 @@ import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
-  public static final int TOP = 56;
-  public static final String DOWNLOAD_EXCEL = "Download Excel";
   private final Logger logger = Logger.getLogger("ResultManager");
+
+
+  public static final int TOP = 56;
+  private static final String DOWNLOAD_EXCEL = "Download Excel";
 
   private static final String YES = "Yes";
   private static final String NO = "No";
@@ -363,6 +365,7 @@ public class ResultManager extends PagerTable {
   private void ensureAudio(List<MonitorResult> results) {
     ScoringServiceAsync scoringService = controller.getScoringService();
 
+//    logger.info("ensureAudio ensure audio for " + results.size() + " results");
     for (MonitorResult result : results) {
       scoringService.ensureAudio(result.getUniqueID(), new AsyncCallback<Void>() {
         @Override

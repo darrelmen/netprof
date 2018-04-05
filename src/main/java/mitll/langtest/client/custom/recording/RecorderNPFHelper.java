@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -85,10 +86,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   /**
    * @param controller
    * @param doNormalRecording
+   * @param viewContaner
+   * @param myView
    * @see INavigation#showView
    */
-  public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording) {
-    super(controller);
+  public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording, IViewContaner viewContaner, INavigation.VIEWS myView) {
+    super(controller, viewContaner, myView);
     this.doNormalRecording = doNormalRecording;
   }
 
@@ -97,9 +100,10 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
       private final Logger logger = Logger.getLogger("RecorderNPFHelper_ExercisePanelFactory");
+
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        logger.info("make rec panel for " +e.getID() + " " + e.getClass() + " " + e.isContext());
+        //     logger.info("make rec panel for " +e.getID() + " " + e.getClass() + " " + e.isContext());
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
@@ -236,6 +240,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
+
     /**
      * @param e
      * @param controller1
@@ -291,13 +296,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
       boolean rtlContent = isRTLContent(e.getForeignLanguage());
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
-      logger.info("rtl " + rtlContent + " for " + content);
-      if (rtlContent) {
-        entry.addStyleName("floatRight");
-      }
-      else {
-        entry.addStyleName("floatLeftAndClear");
-      }
+
+      //   logger.info("rtl " + rtlContent + " for " + content);
+      entry.addStyleName(rtlContent ? "floatRight" : "floatLeftAndClear");
 
       return entry;
     }
@@ -340,7 +341,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
     /**
      * @param exid
-     * @param field  @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+     * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      * @param commentToPost
      */
     @Override

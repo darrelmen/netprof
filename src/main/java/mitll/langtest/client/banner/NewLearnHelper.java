@@ -2,6 +2,8 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
@@ -22,8 +24,8 @@ import java.util.Map;
  */
 public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
 //  private final Logger logger = Logger.getLogger("NewLearnHelper");
-  NewLearnHelper(ExerciseController controller) {
-    super(controller);
+  NewLearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+    super(controller, viewContaner, myView);
   }
 
   @Override

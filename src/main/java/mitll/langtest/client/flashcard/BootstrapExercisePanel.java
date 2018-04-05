@@ -226,6 +226,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
     realRecordButton = answerWidget.getRealRecordButton();
+    realRecordButton.setVisible(controller.shouldRecord());
 
     return getRecordButtonRow(button);
   }
@@ -270,6 +271,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     return recordButtonRow;
   }
 
+/*
   private Panel getCenteredWrapper(Widget recordButton) {
     Panel recordButtonRow = new FluidRow();
     Paragraph recordButtonContainer = new Paragraph();
@@ -279,6 +281,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     recordButtonRow.add(new Column(12, recordButtonContainer));
     return recordButtonRow;
   }
+*/
 
   /**
    * @param exerciseID
@@ -358,7 +361,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected void gotEnter() {
-
             playRef();
           }
 

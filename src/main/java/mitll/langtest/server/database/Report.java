@@ -73,8 +73,6 @@ import java.util.*;
 public class Report implements IReport {
   private static final Logger logger = LogManager.getLogger(Report.class);
 
-  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
-
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
   private static final boolean WRITE_RESULTS_TO_FILE = false;
@@ -87,7 +85,6 @@ public class Report implements IReport {
   private static final String DEVICE_RECORDINGS = "Device Recordings";
   private static final String ALL_RECORDINGS = "All Recordings";
   private static final String MM_DD_YY = "MM_dd_yy";
-  //  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
   private static final boolean SHOW_TEACHER_SKIPS = false;
 
   private static final String NEW_I_PAD_I_PHONE_USERS = "New iPad/iPhone Users";
@@ -97,7 +94,6 @@ public class Report implements IReport {
   private static final String I_PAD_USERS = "iPadUsers";
   private static final String OVERALL_TIME_ON_TASK = "overallTimeOnTask";
   private static final String DEVICE_TIME_ON_TASK = "deviceTimeOnTask";
-  //  private static final String UNIQUE_USERS_YTD = "uniqueUsersYTD";
   private static final String ALL_RECORDINGS1 = "allRecordings";
   private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
   private static final String MONTH1 = "month";
@@ -118,16 +114,13 @@ public class Report implements IReport {
   private static final String SKIP_USER = "gvidaver";
   static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
   private static final int MIN_DURATION = 250;
-  // private static final String MITLL = "mitll";
-  private static final String WEEK1 = "week";
+   private static final String WEEK1 = "week";
   private static final String YEAR = "year";
   private static final String REFERENCE_RECORDINGS = "referenceRecordings";
-  // public static final String HOST_INFO = "hostInfo";
-  private static final String HOST = "host";
+   private static final String HOST = "host";
   private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
   private static final int ALL_YEARS = -1;
   private static final String FOOTER = "</body></head></html>";
-//  private static final boolean SEND_EACH_REPORT = false;
 
   /**
    * When sending all years, don't go back before this year.
@@ -147,7 +140,6 @@ public class Report implements IReport {
   private final IAudioDAO audioDAO;
 
   private final Map<Integer, Long> userToStart = new HashMap<>();
-  private static final boolean DEBUG = false;
 
   private final Map<Integer, String> idToUser = new HashMap<>();
 
@@ -175,8 +167,11 @@ public class Report implements IReport {
   private final Set<Integer> allTeachers = new HashSet<>();
   private final Set<Integer> allStudents = new HashSet<>();
   private final List<ReportUser> deviceUsers;
+
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param resultDAO
@@ -564,7 +559,7 @@ public class Report implements IReport {
     builder.append("<h1>").append(i).append("</h1>");
     builder.append(getReportForYear(forYear,
         i, allSlim, allDevicesSlim,
-        audioAttributes, results, resultsDevices, language, usersForProject, reportStats));
+        audioAttributes, results, resultsDevices, language, getFileName(), usersForProject, reportStats));
     dataArray.add(forYear);
   }
 
@@ -572,6 +567,7 @@ public class Report implements IReport {
    * @param jsonObject
    * @param year
    * @param language
+   * @param name
    * @param usersForProject
    * @return
    * @see #addYear
@@ -586,7 +582,7 @@ public class Report implements IReport {
                                   Collection<MonitorResult> results,
                                   Collection<MonitorResult> resultsDevices,
                                   String language,
-                                  Collection<Integer> usersForProject,
+                                  String name, Collection<Integer> usersForProject,
                                   ReportStats reportStats) {
     jsonObject.put("forYear", year);
 
@@ -615,9 +611,9 @@ public class Report implements IReport {
     events.addAll(eventsDevices);
 
     logger.info(language + " : doing year " + year + " got " + results.size() + " recordings");
-    addRecordings(jsonObject, year, results, builder, users, reportStats, language);
+    addRecordings(jsonObject, year, results, builder, users, reportStats, language, name);
 
-    addDeviceRecordings(jsonObject, year, resultsDevices, builder, users, reportStats, language);
+    addDeviceRecordings(jsonObject, year, resultsDevices, builder, users, reportStats, language, name);
 
     Calendar calendar = getCalendarForYear(year);
 //    Date january1st = getJanuaryFirst(calendar, year);
@@ -651,21 +647,22 @@ public class Report implements IReport {
    * @param users
    * @param reportStats
    * @param language
-   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @param name
+   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
    */
   private void addRecordings(JSONObject jsonObject, int year,
                              Collection<MonitorResult> results, StringBuilder builder,
-                             Set<Integer> users, ReportStats reportStats, String language) {
+                             Set<Integer> users, ReportStats reportStats, String language, String name) {
     JSONObject allRecordings = new JSONObject();
-    getResults(builder, users, allRecordings, year, results, reportStats, language);
+    getResults(builder, users, allRecordings, year, results, reportStats, language, name);
     jsonObject.put(ALL_RECORDINGS1, allRecordings);
   }
 
   private void addDeviceRecordings(JSONObject jsonObject, int year,
                                    Collection<MonitorResult> resultsDevices,
-                                   StringBuilder builder, Set<Integer> users, ReportStats reportStats, String language) {
+                                   StringBuilder builder, Set<Integer> users, ReportStats reportStats, String language, String name) {
     JSONObject deviceRecordings = new JSONObject();
-    getResultsDevices(builder, users, deviceRecordings, year, resultsDevices, reportStats, language);
+    getResultsDevices(builder, users, deviceRecordings, year, resultsDevices, reportStats, language, name);
     jsonObject.put(DEVICE_RECORDINGS1, deviceRecordings);
   }
 
@@ -695,7 +692,7 @@ public class Report implements IReport {
    * @param builder
    * @param language
    * @return
-   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, Collection, ReportStats)
+   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
    */
   private Set<Integer> getUserIDs(JSONObject jsonObject,
                                   int year,
@@ -1330,23 +1327,24 @@ public class Report implements IReport {
    * @param weekToCount
    * @param year
    * @return
-   * @see #getResultsForSet(StringBuilder, Set, Collection, String, JSONObject, int, ReportStats, String)
+   * @see #getResultsForSet
    */
   private Map<String, Integer> getWeekToCount(Map<Integer, ?> weekToCount,
-                                              int year) {
+                                              int year,
+                                              String language) {
     if (DEBUG) logger.info("getWeekToCount " + year + " num weeks = " + weekToCount.size());
     Calendar calendar = getCalendarForYear(year);
     Integer max = getMax(weekToCount);
-    //long initial = calendar.getTimeInMillis();
-
     SimpleDateFormat df = new SimpleDateFormat("MM-dd");
 
     Map<String, Integer> weekToCountFormatted = new TreeMap<>();
 
     for (int week = 1; week <= max; week++) {
       String format1 = df.format(getThisWeek(year, calendar, week));
-      if (DEBUG) logger.info("getWeekToCount " + year + "  week " + week + " = " + format1);
-      weekToCountFormatted.put(format1, getCountAtWeek(weekToCount, week));
+      Integer countAtWeek = getCountAtWeek(weekToCount, week);
+      if (DEBUG && year == 2018)
+        logger.info("getWeekToCount " + language + " year " + year + "  week " + week + " = " + format1 + " = " + countAtWeek);
+      weekToCountFormatted.put(format1, countAtWeek);
     }
 
     return weekToCountFormatted;
@@ -1401,22 +1399,25 @@ public class Report implements IReport {
    * @param builder
    * @param year
    * @param language
-   * @see #addRecordings(JSONObject, int, Collection, StringBuilder, Set, ReportStats, String)
+   * @see #addRecordings(JSONObject, int, Collection, StringBuilder, Set, ReportStats, String, String)
    */
   private void getResults(StringBuilder builder,
                           Set<Integer> students,
                           JSONObject jsonObject,
                           int year,
                           Collection<MonitorResult> results,
-                          ReportStats reportStats, String language) {
-    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, reportStats, language);
+                          ReportStats reportStats,
+                          String language,
+                          String name) {
+    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, reportStats, language, name);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
                                  JSONObject jsonObject, int year,
                                  Collection<MonitorResult> results,
-                                 ReportStats reportStats, String language) {
-    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, reportStats, language);
+                                 ReportStats reportStats, String language,
+                                 String name) {
+    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, reportStats, language, name);
   }
 
   private void getResultsForSet(StringBuilder builder,
@@ -1426,7 +1427,9 @@ public class Report implements IReport {
                                 JSONObject jsonObject,
                                 int year,
                                 ReportStats reportStats,
-                                String language) {
+                                String language,
+
+                                String name) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
@@ -1437,14 +1440,22 @@ public class Report implements IReport {
     Map<Integer, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     int teacherAudio = 0;
-    int invalid=0;
+    int invalid = 0;
     int invalidScore = 0;
 
     int beforeJanuary = 0;
     Set<Integer> skipped = new TreeSet<>();
     int size = results.size();
 
-    if (DEBUG) logger.info("getResultsForSet " + language + " : Year " + year + " Students num = " + students.size());
+    if (DEBUG) {
+      logger.info("getResultsForSet " +
+          "\n\tlanguage     " + language +
+          "\n\tname         " + name +
+          "\n\tyear         " + year +
+          "\n\tStudents num " + students.size() +
+          "\n\trecordings   " + recordings
+      );
+    }
 
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<MonitorResult>> userToRecordings = new HashMap<>();
@@ -1469,7 +1480,7 @@ public class Report implements IReport {
         if (yearTimeRange.inYear(timestamp)) {  // if it's in the requested year
           calendar.setTimeInMillis(timestamp);
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          boolean firstWeeks = false;//w == 8;// w==5;
+          boolean firstWeeks = DEBUG & year == 2018 && w == 7;// w==5;
 
           if (!isRefAudioResult(result)) {      // and not ref audio
             tallyWeek(weekToAll, w);
@@ -1482,6 +1493,8 @@ public class Report implements IReport {
                   tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
                   if (firstWeeks) {
                     logger.info("getResultsForSet " +
+                        " year " + year +
+                        " name " + name +
                         " weekToCount " + weekToCount.get(w) +
                         " week        " + w +
                         " include " + result.getUniqueID() + " " + new Date(result.getTimestamp()));
@@ -1540,7 +1553,7 @@ public class Report implements IReport {
           "\n\tout of   " + size +
           "\n\tSkipped  " + invalid + " invalid recordings, " +
           "\n\tinvalid  " + invalidScore + " -1 score items, " +
-		   //          (me > 0 ? "\n\tgvidaver " + me + " by gvidaver, " : "") +
+          //          (me > 0 ? "\n\tgvidaver " + me + " by gvidaver, " : "") +
           "\n\tbefore   " + beforeJanuary + " beforeJan1st" +
           "\n\tweek->all       " + weekToAll +
           "\n\tweek->valid     " + weekToValid +
@@ -1575,7 +1588,9 @@ public class Report implements IReport {
     reportStats.putInt(allRecordings ? INFO.ALL_RECORDINGS : INFO.DEVICE_RECORDINGS, ytd);
 
     if (allRecordings) {
-      reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year));
+      reportStats.putIntMulti(INFO.ALL_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year, language));
+    } else {
+      reportStats.putIntMulti(INFO.DEVICE_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year, language));
     }
   }
 

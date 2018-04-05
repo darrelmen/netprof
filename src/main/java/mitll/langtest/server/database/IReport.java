@@ -29,7 +29,9 @@ public interface IReport {
    */
   String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports);
 
-  void sendExcelViaEmail(MailSupport mailSupport, List<String> reportEmails, List<String> receiverNames,
+  void sendExcelViaEmail(MailSupport mailSupport,
+                         List<String> reportEmails,
+                         List<String> receiverNames,
                          List<ReportStats> reportStats, PathHelper pathHelper);
 
   File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper);

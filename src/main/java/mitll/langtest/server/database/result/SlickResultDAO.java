@@ -192,7 +192,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.model());
   }
 
-  private MonitorResult fromSlick2(SlickResult slick) {
+  private MonitorResult fromSlickToMonitorResult(SlickResult slick) {
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
     String simpleDevice = slick.device();
@@ -271,13 +271,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
     List<MonitorResult> copy = new ArrayList<>();
-    for (SlickResult result : all) copy.add(fromSlick2(result));
+    for (SlickResult result : all) copy.add(fromSlickToMonitorResult(result));
     return copy;
   }
 
   @Override
-  public List<MonitorResult> getMonitorResultsByID(int id) {
+  public List<MonitorResult> getMonitorResultsByExerciseID(int id) {
     return getMonitorResults(dao.byExID(id));
+  }
+
+  @Override
+  public MonitorResult getMonitorResultByID(int id) {
+    SlickResult slick = dao.byID(id);
+    return slick == null ? null : fromSlickToMonitorResult(slick);
   }
 
   /**
@@ -399,7 +405,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .map(HasID::getID)
         .collect(Collectors.toSet());
 
- //   Map<Integer, SlickExerciseScore> correctAndScoresForReal;
+    //   Map<Integer, SlickExerciseScore> correctAndScoresForReal;
 
     if (idsToFind.size() < 2000) {
       long then = System.currentTimeMillis();

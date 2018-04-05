@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.scoring.RefAudioListener;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
@@ -261,7 +262,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param projid
    * @param audioIDs
    * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getAlignments
+   * @see mitll.langtest.client.scoring.AlignmentFetcher#getAlignments
+   * @see mitll.langtest.client.scoring.AlignmentFetcher#cacheOthers
    */
   @Override
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
@@ -745,19 +747,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @Override
   public void ensureAudio(int resultID) throws DominoSessionException {
-    int projectIDFromUser = getProjectIDFromUser();
-    List<MonitorResult> monitorResultsByID = db.getResultDAO().getMonitorResultsByID(resultID);
-    ensureAudioForAnswers(projectIDFromUser, monitorResultsByID);
+    ensureAudioForAnswers(getProjectIDFromUser(), db.getResultDAO().getMonitorResultByID(resultID));
   }
 
-  private void ensureAudioForAnswers(int projectID, List<MonitorResult> resultList) {
+  private void ensureAudioForAnswers(int projectID, MonitorResult result) {
     String language = db.getLanguage(projectID);
     Map<Integer, User> idToUser = new HashMap<>();
 
-    for (MonitorResult result : resultList) {
+    if (result == null) logger.error("couldn't find result in " + projectID);
+    else {
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
-      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+      String actualPath = ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+//    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
   }
 }

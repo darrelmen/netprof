@@ -34,7 +34,7 @@ package mitll.langtest.client.analysis;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 class PlayAudio {
   private final Logger logger = Logger.getLogger("PlayAudio");
   private final SoundPlayer soundFeedback;
-  private final Widget playFeedback;
+  private final UIObject playFeedback;
   private Timer t;
   private ExerciseServiceAsync exerciseService;
   private ExceptionSupport exceptionSupport;
@@ -65,7 +65,7 @@ class PlayAudio {
    * @see AnalysisPlot#AnalysisPlot
    */
   PlayAudio(SoundPlayer soundFeedback,
-            Widget playFeedback,
+            UIObject playFeedback,
             ExerciseServiceAsync exerciseService, ExceptionSupport exceptionSupport) {
     this.exerciseService = exerciseService;
     this.soundFeedback = soundFeedback;

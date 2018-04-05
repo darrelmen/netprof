@@ -87,7 +87,8 @@ public interface IResultDAO extends IDAO {
 
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);
 
-  List<MonitorResult> getMonitorResultsByID(int id);
+  List<MonitorResult> getMonitorResultsByExerciseID(int id);
+  MonitorResult getMonitorResultByID(int id);
 
   Collection<UserAndTime> getUserAndTimes();
 

@@ -33,21 +33,16 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ResultService;
-import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.database.audio.EnsureAudioHelper;
-import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.*;
 
 @SuppressWarnings("serial")
@@ -142,7 +137,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
       List<MonitorResult> monitorResultsByID =
-          db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(i), projectID);
+          db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByExerciseID(i), projectID);
       logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
       return monitorResultsByID;
     }

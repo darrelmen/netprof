@@ -116,7 +116,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
-        //  getWordScores(bestForUser.values()),
         getPhoneReport(userid, firstUser, project),
         getCount(userInfos),
         req);
@@ -144,9 +143,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                                             int rangeStart, int rangeEnd,
                                             String sort) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
-
     Collection<UserInfo> userInfos = bestForUser.values();
-    logger.info("getWordScoresForUser for user " + userid + " got " + userInfos.size() + " from " + rangeStart + " to " + rangeEnd + " sort " + sort);
+    logger.info("getWordScoresForUser for user " + userid + " got " + userInfos.size() + " user from " + rangeStart + " to " + rangeEnd + " sort " + sort);
     return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
   }
 
@@ -167,45 +165,83 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                                                String sortInfo) {
     if (userInfos.isEmpty()) {
       //logger.warn("no best values for " + id);
-      return new WordsAndTotal(Collections.emptyList(), 0);
+      return new WordsAndTotal(Collections.emptyList(), 0, false);
     } else {
-      List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
-
-      if (DEBUG) logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
-
-      List<BestScore> inTime =
-          resultsForQuery
-              .stream()
-              .filter(bestScore -> from <= bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
-              .collect(Collectors.toList());
-      if (DEBUG)
-        logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
-
-      //if (DEBUG) logger.warn("getWordScoresForUser " + resultsForQuery.size());
-
-      inTime.sort(getComparator(project, Arrays.asList(sortInfo.split(",")), inTime));
-
-      List<WordScore> wordScore = getWordScore(inTime, false);
-      int totalSize = wordScore.size();
+      List<WordScore> wordScores = getWordScores(userInfos, from, to, sortInfo);
+      int totalSize = wordScores.size();
       //logger.info("getWordScoresForUser got " + totalSize + " word and score ");
+      // wordScores.forEach(bestScore -> logger.info("after " + bestScore));
 
       // sublist is not serializable!
-      int min = Math.min(wordScore.size(), rangeEnd);
+      int min = Math.min(wordScores.size(), rangeEnd);
 
       // prevent sublist range error
       int startToUse = min < rangeStart ? 0 : rangeStart;
 
 
-      wordScore = new ArrayList<>(wordScore.subList(startToUse, min));
-      if (DEBUG) {
-        logger.warn("getWordScoresForUser wordScore " + totalSize);
-      }
-      if (DEBUG) logger.warn("getWordScoresForUser wordScore " + totalSize + " vs " + wordScore.size() + "/" + min);
+      wordScores = new ArrayList<>(wordScores.subList(startToUse, min));
 
-      return new WordsAndTotal(wordScore, totalSize);
+      ;
+      if (DEBUG) {
+        logger.warn("getWordScoresForUser wordScores " + totalSize);
+      }
+      if (DEBUG) logger.warn("getWordScoresForUser wordScores " + totalSize + " vs " + wordScores.size() + "/" + min);
+
+      return new WordsAndTotal(wordScores, totalSize, areAllSameDay(wordScores));
     }
   }
 
+  private boolean areAllSameDay(List<WordScore> wordScores) {
+    boolean allSameDay = true;
+    int dayOfYear = -1;
+    Calendar instance = Calendar.getInstance();
+    for (WordScore ws : wordScores) {
+      instance.setTimeInMillis(ws.getTimestamp());
+      int i = instance.get(Calendar.DAY_OF_YEAR);
+
+      logger.info("day of year " + i + " for " + new Date(ws.getTimestamp()) + " ws " + ws);
+      if (dayOfYear == -1) {
+        dayOfYear = i;
+      } else if (i != dayOfYear) {
+        logger.info("day of year " + i + " vs " +dayOfYear+
+            "  for " + new Date(ws.getTimestamp()) + " ws " + ws);
+        allSameDay = false;
+        break;
+      }
+    }
+    logger.info("allSameDay " +allSameDay);
+
+    return allSameDay;
+  }
+
+  private List<WordScore> getWordScores(Collection<UserInfo> userInfos, long from, long to, String sortInfo) {
+    List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
+
+    if (DEBUG) logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
+
+    List<BestScore> inTime =
+        resultsForQuery
+            .stream()
+            .filter(bestScore -> from <= bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
+            .collect(Collectors.toList());
+    if (DEBUG)
+      logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
+
+    //if (DEBUG) logger.warn("getWordScoresForUser " + resultsForQuery.size());
+
+    inTime.sort(getComparator(project, Arrays.asList(sortInfo.split(",")), inTime));
+
+    // inTime.forEach(bestScore -> logger.info("sorted " + bestScore));
+    return getWordScore(inTime, false);
+  }
+
+  /**
+   * @param project
+   * @param criteria
+   * @param inTime
+   * @return
+   * @see #getWordScoresForPeriod
+   */
   private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
     if (criteria.isEmpty() || criteria.iterator().next().equals("")) {
       return Comparator.comparingLong(SimpleTimeAndScore::getTimestamp);
@@ -226,10 +262,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
             scoreToFL.put(bestScore, transcriptFromJSON);
           } else {
-            scoreToFL.put(bestScore, exerciseByID.getForeignLanguage());
+            String foreignLanguage = exerciseByID.getForeignLanguage();
+            scoreToFL.put(bestScore, foreignLanguage);
+            logger.info("map " + bestScore + " = " + foreignLanguage);
           }
         });
       }
+
+//      logger.info("getComparator " + scoreToFL.size() + " field " + field + " col " + col + " asc " + asc);
 
       return new Comparator<BestScore>() {
         @Override
@@ -238,8 +278,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           int comp = 0;
           switch (field) {
             case WORD:
-              comp = scoreToFL.get(o1).compareTo(scoreToFL.get(o2));
+              comp = scoreToFL.get(o1).compareToIgnoreCase(scoreToFL.get(o2));
               if (comp == 0) {
+                logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
                 comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
               }
               break;
@@ -252,6 +293,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                 comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
               }
               break;
+            default:
+              logger.warn("huh? field '" + field + "' is not defined?");
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -335,7 +378,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         resultDAO.getPerfForUserOnList(id, listid);
     long now = System.currentTimeMillis();
 
-    if (DEBUG)  logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
+    if (DEBUG) logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
         " were " + perfForUser.size());
 
     long diff = now - then;
@@ -444,7 +487,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       String device = perf.devicetype();
       Long sessionTime = getSessionTime(sessionToLong, perf.device());
-      Integer sessionSize  = getNumInSession(sessionNumToInteger, perf.devicetype());
+      Integer sessionSize = getNumInSession(sessionNumToInteger, perf.devicetype());
       String path = perf.answer();
 
       boolean isiPad = device != null && device.startsWith("i");

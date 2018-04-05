@@ -69,6 +69,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
+  private static final int MAX_NAME_LENGTH = 16;
   private final Logger logger = Logger.getLogger("UserContainer");
 
   /**
@@ -519,7 +520,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getNoWrapContent(shell.getName());
+        return getNoWrapContent(truncate(shell.getName(), MAX_NAME_LENGTH));
       }
     };
     userCol.setSortable(true);

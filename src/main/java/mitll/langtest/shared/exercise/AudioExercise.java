@@ -289,7 +289,10 @@ public class AudioExercise extends ExerciseShell {
 
 
   private void sortByAge(List<AudioAttribute> males) {
-    males.sort(Comparator.comparingInt(o -> o.getUser().getAge()));
+    males.sort(Comparator.comparingInt(o -> {
+      MiniUser user = o.getUser();
+      return user == null ? 100 : user.getAge();
+    }));
   }
 
   /**
@@ -420,7 +423,7 @@ public class AudioExercise extends ExerciseShell {
    * @param isMale
    * @param includeContext
    * @return
-   * @see ChoicePlayAudioPanel#addChoices
+   * @see import mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    */
   public synchronized  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext) {
     Map<Integer, List<AudioAttribute>> userToAudio = simpleByGenderByContext(isMale, includeContext);

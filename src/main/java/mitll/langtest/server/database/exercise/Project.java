@@ -415,7 +415,7 @@ public class Project implements IPronunciationLookup {
     } else {
       CommonExercise exercise = exerciseDAO.getExercise(id);
       if (exercise == null) {
-        logger.warn("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
+        logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
       }
 //    else {
 //      logger.info("getExerciseByID " + id + " = " + exercise);

@@ -59,6 +59,7 @@ import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -86,7 +87,12 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  private static final int SIGNED_UP_WIDTH = 100;
+  private static final int DATE_WIDTH = 150;
+  private static final int WIDE_DATE_WIDTH = 160;
+
+  /**
+   * @see #addColumnsToTable
+   */
   private static final String DATE = "Date";
 
   private final Heading heading;
@@ -96,6 +102,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private final DateTimeFormat yearShortFormat = DateTimeFormat.getFormat("MMM d yy");
+  private final DateTimeFormat longerFormat = DateTimeFormat.getFormat("MMM d h:mm a");
+  private final DateTimeFormat longerYearFormat = DateTimeFormat.getFormat("MMM d yy h:mm a");
 
   private final WordTable wordTable = new WordTable();
 
@@ -104,6 +112,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final TableSortHelper tableSortHelper = new TableSortHelper();
   private final AnalysisServiceAsync analysisServiceAsync;
   private final AnalysisTab.ReqInfo reqInfo;
+  private boolean isAllSameDay = false;
 
   /**
    * What sort order do we want?
@@ -159,7 +168,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-      //  logger.info("createProvider sort " + builder.toString());
+        //  logger.info("createProvider sort " + builder.toString());
 
         analysisServiceAsync.getWordScoresForUser(
             reqInfo.getUserid(),
@@ -190,6 +199,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
                   updateRowData(start, result.getResults());
+                  isAllSameDay = result.isAllSameDay();
+                  if (isAllSameDay) {
+                    table.setColumnWidth(theDateCol, WIDE_DATE_WIDTH + "px");
+                  }
 /*                  if (numTotal > 0) {
                     WordScore object = result.getResults().get(0);
 *//*
@@ -239,6 +252,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     return tableWithPager;
   }
 
+  private Column<WordScore, SafeHtml> theDateCol;
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -246,9 +260,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     {
       Column<WordScore, SafeHtml> dateCol = getDateColumn();
+      this.theDateCol = dateCol;
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(DATE));
-      table.setColumnWidth(dateCol, SIGNED_UP_WIDTH + "px");
+      table.setColumnWidth(dateCol, DATE_WIDTH + "px");
 
       if (!isPolyglot()) {
         table.getColumnSortList().push(dateCol);
@@ -299,15 +314,35 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private String getVariableInfoDateStamp(WordScore shell) {
     Date date = new Date(shell.getTimestamp());
-    String signedUp = format.format(date);
+    String timeFormatted = format.format(date);
 
-    // drop year if this year
-    if (signedUp.equals(todaysDate)) {
-      signedUp = todayTimeFormat.format(date);
-    } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
-      signedUp = signedUp.substring(0, signedUp.length() - 4);
+    if (isToday(timeFormatted)) {
+      timeFormatted = todayTimeFormat.format(date);
+    } else if (isSameYear(timeFormatted)) {    // drop year if this year
+      if (isAllSameDay) {
+        timeFormatted = longerFormat.format(date);
+      } else {
+        timeFormatted = yearRemoved(timeFormatted);
+      }
+    } else {
+      if (isAllSameDay) {
+        timeFormatted = longerYearFormat.format(date);
+      }
     }
-    return signedUp;
+    return timeFormatted;
+  }
+
+  @NotNull
+  private String yearRemoved(String timeFormatted) {
+    return timeFormatted.substring(0, timeFormatted.length() - 4);
+  }
+
+  private boolean isSameYear(String timeFormatted) {
+    return todayYear.equals(timeFormatted.substring(timeFormatted.length() - 2));
+  }
+
+  private boolean isToday(String timeFormatted) {
+    return timeFormatted.equals(todaysDate);
   }
 
   private void addReview() {
@@ -353,7 +388,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 //            logger.warning("getItemColumn no transcript for " + shell);
             columnText = "";
           } else if (transcript.get(NetPronImageType.WORD_TRANSCRIPT) == null) {
-          //  logger.warning("getItemColumn no word transcript for " + shell);
+            //  logger.warning("getItemColumn no word transcript for " + shell);
             columnText = "";
           } else {
             columnText = wordTable.makeColoredTableReally(transcript);

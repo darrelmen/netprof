@@ -44,7 +44,7 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @see mitll.langtest.client.analysis.WordContainer#getTableWithPager(List)
+ * @see mitll.langtest.client.analysis.WordContainerAsync#getTableWithPager
  * @since 10/21/15.
  */
 public class WordScore implements Serializable, Comparable<WordScore> {

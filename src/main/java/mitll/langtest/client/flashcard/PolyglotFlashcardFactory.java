@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
-    extends StatsFlashcardFactory<L, T>  implements PolyglotFlashcardContainer {
+    extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
 
   static final int MIN_POLYGLOT_SCORE = 35;
@@ -38,24 +38,18 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    * @see mitll.langtest.client.list.ExerciseList#addExerciseWidget
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
-  @Override
+/*  @Override
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
 
-    boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
-
-    Panel widgets = showRecordingFlashcard ?
-        currentFlashcard = getCurrentFlashcard(e) :
+    currentFlashcard = controller.shouldRecord()?
+        getFlashcard(e) :
         getNoRecordFlashcardPanel(e.getCommonAnnotatable());
-    if (!showRecordingFlashcard) {
-      currentFlashcard = null;
-    }
 
-    return widgets;
-  }
-
+    return currentFlashcard;
+  }*/
   @NotNull
-  PolyglotPracticePanel getCurrentFlashcard(T e) {
+  protected PolyglotPracticePanel getFlashcard(T e) {
     return new PolyglotPracticePanel<L, T>(this,
         controlState,
         controller,
@@ -70,7 +64,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public void startOver() {
     super.startOver();
     stopTimedRun();
-
   }
 
   @Override

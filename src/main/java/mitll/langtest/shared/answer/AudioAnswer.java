@@ -85,7 +85,6 @@ public class AudioAnswer implements IsSerializable {
   /**
    * @param score
    * @see DecodeCorrectnessChecker#getDecodeScore
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   public void setScore(double score) {
     this.score = score;
@@ -110,7 +109,6 @@ public class AudioAnswer implements IsSerializable {
   /**
    * @param correct
    * @see DecodeCorrectnessChecker#getDecodeScore
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   public void setCorrect(boolean correct) {
     this.correct = correct;

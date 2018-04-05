@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -26,7 +27,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
- // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -41,7 +42,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private RecorderPlayAudioPanel playAudioPanel;
   private MiniScoreListener miniScoreListener;
 
-  private WaitCursorHelper waitCursorHelper;
+  private WaitCursorHelper waitCursorHelper = null;
 
   private String audioPath;
 
@@ -95,11 +96,11 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
   private void addWidgets() {
-    long then = System.currentTimeMillis();
+    //long then = System.currentTimeMillis();
 
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
-    scoreFeedback.getElement().setId("scoreFeedback_"+exercise.getID());
+    scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
 
     {
       DivWidget historyHoriz = new DivWidget();
@@ -113,7 +114,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       col.add(historyHoriz);
     }
 
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(waitCursorHelper.getWaitCursor());
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor(), controller.shouldRecord());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
     scoreFeedback.add(recordFeedback);
@@ -122,10 +123,11 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
 
     add(col);
 
-   // long now = System.currentTimeMillis();
-   // logger.info("addWidgets "+ (now-then)+ " millis");
+    // long now = System.currentTimeMillis();
+    // logger.info("addWidgets "+ (now-then)+ " millis");
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
+
 
   private void addMiniScoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
@@ -141,7 +143,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    * @see #addWidgets
    */
   private RecorderPlayAudioPanel makePlayAudioPanel() {
-    long then = System.currentTimeMillis();
+    //long then = System.currentTimeMillis();
     makeWaitCursor();
 
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
@@ -155,15 +157,16 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.hidePlayButton();
 
 //    long now = System.currentTimeMillis();
-   // logger.info("took " + (now-then) + " for makeAudioPanel");
+    // logger.info("took " + (now-then) + " for makeAudioPanel");
     return playAudioPanel;
   }
 
-  private void makeWaitCursor() {
-    //if (waitCursorHelper == null) {
+  private WaitCursorHelper makeWaitCursor() {
+    if (waitCursorHelper == null) {
       waitCursorHelper = new WaitCursorHelper();
       waitCursorHelper.showFinished();
-   // }
+    }
+    return waitCursorHelper;
   }
 
   /**
@@ -315,7 +318,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + hydecScore);
         hydecScore = wordScore;
       }
-      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED),true,false);
+      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), true, false);
       listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       scoreFeedbackDiv.hideScore();

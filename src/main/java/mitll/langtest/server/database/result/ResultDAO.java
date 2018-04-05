@@ -213,7 +213,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
 
   @Override
-  public List<MonitorResult> getMonitorResultsByID(int id) {
+  public List<MonitorResult> getMonitorResultsByExerciseID(int id) {
     try {
       String sql = "SELECT * FROM " + RESULTS + " WHERE " + EXID + "='" + id + "'";
       return getMonitorResultsSQL(sql);
@@ -468,16 +468,6 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises) {
     return null;
   }
-
-//  @Override
-//  public <T extends CommonShell> Map<Integer, Float> addScores(int userid, Collection<T> exercises) {
-//
-//  }
-//
-//  @Override
-//  public <T extends CommonShell> void addScoresForAll(int userid, Collection<T> exercises) {
-//
-//  }
 
   /**
    * Get a list of Results for this Query.
@@ -884,6 +874,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         ")");
     statement.execute();
     statement.close();
+  }
+
+  @Override
+  public MonitorResult getMonitorResultByID(int id) {
+    return null;
   }
 
   private void addColumnToTable(Connection connection) {

@@ -32,13 +32,13 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
@@ -147,7 +147,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   public AnalysisPlot(ExerciseServiceAsync service,
                       int userid,
                       SoundManagerAPI soundManagerAPI,
-                      Icon playFeedback,
+                      UIObject playFeedback,
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean isTeacherView,

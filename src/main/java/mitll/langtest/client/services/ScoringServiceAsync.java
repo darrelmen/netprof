@@ -56,13 +56,13 @@ public interface ScoringServiceAsync {
   /**
    * JUST FOR DIALOG DEMO
    *
-   * @param base64EncodedString
-   * @param textToAlign
-   * @param identifier
-   * @param reqid
-   * @param device
+   * @paramx base64EncodedString
+   * @paramx textToAlign
+   * @paramx identifier
+   * @paramx reqid
+   * @paramx device
    * @param async
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
+   * @seex mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
    */
 /*  void getAlignment(String base64EncodedString,
                     String textToAlign,

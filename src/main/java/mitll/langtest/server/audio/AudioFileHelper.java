@@ -39,6 +39,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
@@ -109,6 +110,7 @@ public class AudioFileHelper implements AlignDecode {
   private AudioConversion audioConversion;
   private boolean isNoModel;
   private String language;
+  private EnsureAudioHelper ensureAudioHelper;
 
   /**
    * @param pathHelper
@@ -136,6 +138,7 @@ public class AudioFileHelper implements AlignDecode {
     isNoModel = project.isNoModel();
     makeASRScoring(project);
     this.project = project;
+    ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
 
     makeDecodeCorrectnessChecker();
   }
@@ -284,6 +287,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * Write the wav file given the posted audio in base 64.
+   *
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
    * <p>
@@ -298,7 +303,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
-                                    CommonShell exercise1,
+                                    CommonExercise exercise1,
                                     AudioContext audioContext,
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
 
@@ -306,51 +311,66 @@ public class AudioFileHelper implements AlignDecode {
     String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
     String relPath = pathHelper.getRelToAnswer(wavPath);
 
-    File file = new File(wavPath);
-    String absolutePath = file.getAbsolutePath();
-    logger.debug("writeAudioFile got req" +
-        "\n\tex  " + exercise1 +
-        "\n\tfor " + audioContext +
-        "\n\trec " + recordingInfoInitial +
-        "\n\tto  " + wavPath +
-        "\n\tand " + absolutePath);
+    File wavFile = new File(wavPath);
+    String absolutePath = wavFile.getAbsolutePath();
 
-    //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, options.isRefRecording(),
+        audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(),
             isQuietAudioOK());
 
     logger.debug("writeAudioFile writing" +
-        " to" +
-        "\n\t" + absolutePath +
-        "\n\tvalidity " + validity +
+        //"\n\tex         " + exercise1 +
+        "\n\tfor        " + audioContext +
+        "\n\trec        " + recordingInfoInitial +
+        "\n\twav        " + wavPath +
+        "\n\tabs        " + absolutePath +
+        "\n\tvalidity   " + validity +
         "\n\ttranscript " + recordingInfoInitial.getTranscript());
-/*    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + validity.durationInMillis +
-          " millis long");
-    }*/
 
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath());
+    if (options.isRefRecording() && validity.isValid()) {
+      // make sure there's a compressed version for later review.
+      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath)).start();
+    }
 
-    // remember who recorded this audio file.
-    Project project = db.getProjectManagement().getProject(audioContext.getProjid());
-    int userid = audioContext.getUserid();
-    project.addAnswerToUser(relPath, userid);  //not needed
-    project.addAnswerToUser(absolutePath, userid);
+    // remember who recorded this audio wavFile.
+    rememberWhoRecordedAudio(audioContext, relPath, absolutePath);
 
-//    logger.info("tr = " + recordingInfo.getTranscript());
     return getAudioAnswerDecoding(exercise1,
         audioContext,
-        recordingInfo,
+        new AnswerInfo.RecordingInfo(recordingInfoInitial, wavFile.getPath()),
 
         relPath,
-        file,
+        wavFile,
 
         validity,
         options
     );
+  }
+
+  /**
+   * So we can check later if they have permission to hear it.
+   * @param audioContext
+   * @param relPath
+   * @param absolutePath
+   */
+  private void rememberWhoRecordedAudio(AudioContext audioContext, String relPath, String absolutePath) {
+    int userid = audioContext.getUserid();
+
+    int projid = audioContext.getProjid();
+    boolean match = projid == project.getID();
+    if (!match) {
+      logger.error("huh? audio context proj id " + projid + " but this project is " + project.getID());
+    }
+    Project project = match ? this.project : db.getProjectManagement().getProject(projid);
+    project.addAnswerToUser(relPath, userid);  //not needed
+    project.addAnswerToUser(absolutePath, userid);
+  }
+
+  private void ensureCompressed(CommonExercise exercise1, AudioContext audioContext, String wavPath) {
+    //   String actualPath =
+    ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
+        audioContext.getAudioType(), language, new HashMap<>());
+    //logger.info("writeAudioFile wav path " + wavPath +" compressed actual " + actualPath);
   }
 
   @Deprecated
