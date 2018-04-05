@@ -82,7 +82,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         controlState,
         soundFeedback,
         null,
-        "",//statsFlashcardFactory.instance,
+        "",
         exerciseListToUse
     );
     this.sticky = stickyState;
@@ -191,8 +191,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    * @see #loadNext()
    */
   public void onSetComplete() {
-
-
     startOver.setVisible(false);
     seeScores.setVisible(false);
     setPrevNextVisible(false);
@@ -210,7 +208,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   /**
    * TODO: get last session...
    *
-   * @paramx sortedHistory
+   * @see #onSetComplete
+   * @seex #getButtonsBelowScoreHistory
+   * @seex #showFlashcardDisplay
    */
   private void showFeedbackCharts() {
     setMainContentVisible(false);
@@ -220,19 +220,27 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
     container = widgets;
 
-    AnalysisTab scoreHistory = getScoreHistory();
+    {
+      AnalysisTab scoreHistory = getScoreHistory();
 
-    scoreHistory.add(getButtonsBelowScoreHistory());
-    DivWidget w = new DivWidget();
-    w.addStyleName("floatRight");
+      scoreHistory.add(getButtonsBelowScoreHistory());
 
-    HTML test = new HTML("");
-    w.add(test);
-    test.setHeight("60px");
-    //  w.setHeight("20px");
-    w.setWidth("100%");
-    scoreHistory.add(w);
-    widgets.add(scoreHistory);
+      {
+        DivWidget w = new DivWidget();
+        w.addStyleName("floatRight");
+
+        {
+          HTML test = new HTML("");
+          w.add(test);
+          test.setHeight("60px");
+        }
+        //  w.setHeight("20px");
+        w.setWidth("100%");
+        scoreHistory.add(w);
+      }
+
+      widgets.add(scoreHistory);
+    }
     belowContentDiv.clear();
     belowContentDiv.add(container);
   }

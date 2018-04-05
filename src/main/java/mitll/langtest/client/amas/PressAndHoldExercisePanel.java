@@ -147,7 +147,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
     realRecordButton = answerWidget.getRealRecordButton();
-    realRecordButton.setEnabled(controller.isMicAvailable());
+    realRecordButton.setEnabled(controller.shouldRecord());
 
     return getRecordButtonRow(button);
   }
@@ -169,7 +169,7 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
     configureIconContainer();
     recordButtonRow.add(iconContainer);
 
-    if (!controller.isMicAvailable()) {
+    if (!controller.shouldRecord()) {
       addIcon(IconType.MICROPHONE_OFF);
     }
 

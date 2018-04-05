@@ -190,7 +190,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
                 dateToShow +
 
             (showEx ?
-                "<br/>" + "<b>Click to hear</b>"
+                "<br/>" + "<b>Click to hear vs. reference</b>"
                 : "")
         ;
   }

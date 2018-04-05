@@ -137,7 +137,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #ExerciseList
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
-//    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
+    if (DEBUG||true) {
+      logger.info("ExerciseList.addWidgets for currentExerciseVPanel " +
+          currentExerciseVPanel.getElement().getId() + " instance " + getInstance());
+    }
+
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     innerContainer.setWidth("100%");
@@ -719,7 +723,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void addExerciseWidget(U commonExercise) {
     createdPanel = factory.getExercisePanel(commonExercise);
-    // logger.info("Add exercise widget "  + commonExercise.getID());
+     logger.info("addExerciseWidget for "  + commonExercise.getID());
     innerContainer.setWidget(createdPanel);
   }
 

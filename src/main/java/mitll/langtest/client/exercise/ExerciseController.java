@@ -108,11 +108,13 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
 
+  boolean shouldRecord();
+
   boolean isRecordingEnabled();
 
   boolean usingFlashRecorder();
 
-  boolean isMicAvailable();
+  //boolean isMicAvailable();
 
   KeyStorage getStorage();
 

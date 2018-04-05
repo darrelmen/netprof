@@ -1034,7 +1034,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
     {
-    //  FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
+      //  FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
       Widget englishPhrase = makeEnglishPhrase(englishTranslations);
       english = englishPhrase;
       moveEnglishForComment(englishPhrase);
@@ -1212,6 +1212,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
+
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
@@ -1309,6 +1310,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   @Override
   public void timerCancelled() {
     removePlayingHighlight(foreign);
+  }
+
+  public void onSetComplete() {
   }
 
   private class ClickableSimplePanel extends SimplePanel {

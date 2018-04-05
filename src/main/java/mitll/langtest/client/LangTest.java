@@ -229,6 +229,9 @@ public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
   private final Logger logger = Logger.getLogger("LangTest");
 
+  private static final String CAN_T_RECORD_AUDIO = "Can't record audio";
+  private static final String RECORDING_AUDIO_IS_NOT_SUPPORTED = "Recording audio is not supported.";
+
   private static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
@@ -754,12 +757,7 @@ public class LangTest implements
       public void noRecordingMethodAvailable() {
         logger.info("\tmakeFlashContainer - no way to record");
         hideFlash();
-        new ModalInfoDialog("Can't record audio", "Recording audio is not supported.", new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            checkLogin();
-          }
-        });
+        new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
 
         initialUI.setSplash();
         isMicConnected = false;
@@ -1171,6 +1169,13 @@ public class LangTest implements
   }
 
   @Override
+  public boolean shouldRecord() {
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+    boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
+    return hasModel && isRecordingEnabled();
+  }
+
+  @Override
   public boolean isRecordingEnabled() {
     return flashRecordPanel.gotPermission();
   }
@@ -1180,6 +1185,10 @@ public class LangTest implements
     return flashRecordPanel.usingFlash();
   }
 
+  /**
+   * @see
+   * @return
+   */
   public boolean isMicAvailable() {
     return isMicConnected;
   }

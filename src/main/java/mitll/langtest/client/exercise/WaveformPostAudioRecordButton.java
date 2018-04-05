@@ -91,6 +91,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + index);
     this.audioType = audioType;
+    setEnabled(controller.isRecordingEnabled());
     addStyleName("minWidthRecordButton");
   }
 

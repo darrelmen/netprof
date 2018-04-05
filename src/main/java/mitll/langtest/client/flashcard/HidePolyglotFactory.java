@@ -18,7 +18,7 @@ public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise
 
   @NotNull
   @Override
-  protected PolyglotPracticePanel<L,T> getCurrentFlashcard(T e) {
+  protected PolyglotPracticePanel<L,T> getFlashcard(T e) {
     return new HidePolyglotPanel<L,T>(this,
         controlState,
         controller,
