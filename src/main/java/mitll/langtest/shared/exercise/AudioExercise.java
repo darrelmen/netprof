@@ -72,7 +72,6 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   *
    * @param id
    * @param projectid
    */
@@ -310,7 +309,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   private void sortByAge(List<AudioAttribute> males) {
-    males.sort(Comparator.comparingInt(o -> o.getUser().getAge()));
+    males.sort(Comparator.comparingInt(o -> {
+      MiniUser user = o.getUser();
+      return user == null ? 100 : user.getAge();
+    }));
   }
 
   /**

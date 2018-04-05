@@ -582,7 +582,7 @@ public class AnalysisTab extends DivWidget {
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
 
-    if (!isPolyglot) {
+    if (false) {//!isPolyglot) {
       // #3 - phone plot
       phonePlot.addStyleName("topMargin");
       lowerHalf.add(phonePlot);

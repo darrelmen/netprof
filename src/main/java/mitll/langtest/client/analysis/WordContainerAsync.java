@@ -87,7 +87,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  private static final int DATE_WIDTH = 90;
+  private static final int DATE_WIDTH = 150;
   private static final int WIDE_DATE_WIDTH = 160;
 
   /**

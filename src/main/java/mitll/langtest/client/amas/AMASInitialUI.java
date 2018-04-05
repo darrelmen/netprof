@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.amas;
 
-import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -86,7 +85,7 @@ public class AMASInitialUI extends InitialUI {
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
     LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-    learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller, exerciseServiceAsync);
+    learnHelper = new AutoCRTChapterNPFHelper(controller);
     learnHelper.showContent(contentRow, "");
   }
 

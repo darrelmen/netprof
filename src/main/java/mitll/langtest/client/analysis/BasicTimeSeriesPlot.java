@@ -177,16 +177,18 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     String dateToShow = getDateToShow(toolTipData);
 
     return
-        "<b>" + seriesName + "</b>" +
-            "<br/>" +
-            dateToShow +
+       // "<b>" + seriesName + "</b>" + "<br/>" +
             (showEx ?
-                "<br/>Exercise " + exid + "<br/>" +
+                //"<br/>Exercise " + exid +
                     "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
                     englishTool
                 : "")
             +
             "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
+
+                "<br/>" +
+                dateToShow +
+
             (showEx ?
                 "<br/>" + "<b>Click to hear</b>"
                 : "")

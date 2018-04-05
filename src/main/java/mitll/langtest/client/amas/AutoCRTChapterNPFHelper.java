@@ -41,10 +41,6 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 
 /**
@@ -59,16 +55,11 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   private ResponseExerciseList exerciseList;
 
   /**
-   * @param service
-   * @param feedback
-   * @param userManager
    * @param controller
-   * @param exerciseServiceAsync
    * @see AMASInitialUI#populateBelowHeader
    */
-  AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                          ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(controller);
+  AutoCRTChapterNPFHelper(ExerciseController controller) {
+    super(controller, null, null);
   }
 
   /**

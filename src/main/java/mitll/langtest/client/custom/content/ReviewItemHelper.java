@@ -93,8 +93,9 @@ public class ReviewItemHelper extends NPFHelper {
   @Override
   protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
     logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-    this.flexListLayout = new ReviewFlexListLayout(ul.getID());
-    Panel widgets = flexListLayout.doInternalLayout(ul == null ? -1 : ul.getID(), instanceName, true);
+    int id = ul.getID();
+    this.flexListLayout = new ReviewFlexListLayout(id);
+    Panel widgets = flexListLayout.doInternalLayout(id, instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
   }

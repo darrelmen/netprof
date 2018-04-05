@@ -404,58 +404,62 @@ public abstract class Analysis extends DAO {
     userToBest.forEach((userID, bestScores1) -> {
       List<BestScore> bestScores = userToBest2.get(userID);
 
-      int last = -1;
+      if (bestScores == null) {
+        logger.warn("getBestForQuery : huh? no user " + userID + " in " + userToBest2.keySet());
+      } else {
+        int last = -1;
 
-      long lastTimestamp = 0;
-      long currentSession = 0;
+        long lastTimestamp = 0;
+        long currentSession = 0;
 
-      BestScore lastBest = null;
-      Set<Integer> seen = new HashSet<>();
+        BestScore lastBest = null;
+        Set<Integer> seen = new HashSet<>();
 
-      if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
+        if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
 
-      // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
-      // consider it a new score
-      for (BestScore bs : bestScores1) {
-        int id = bs.getResultID();
-        int exid = bs.getExId();
-        long time = bs.getTimestamp();
+        // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
+        // consider it a new score
+        for (BestScore bs : bestScores1) {
+          int id = bs.getResultID();
+          int exid = bs.getExId();
+          long time = bs.getTimestamp();
 
-        {
-          Long aLong = userToEarliest.get(userID);
-          if (aLong == null || time < aLong) userToEarliest.put(userID, time);
-        }
-
-        // So the purpose here is to skip over multiple tries for an item within a sort session (5 minutes)
-        long sessionStart = bs.getSessionStart();
-        if ((last != -1 && last != exid) ||
-            (currentSession > 0 && sessionStart != currentSession) ||
-            (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)
-
-            ) {
-          if (seen.contains(id)) {
-            logger.warn("getBestForQuery skipping " + id); // surprising if this were true
-          } else {
-            bestScores.add(lastBest);
-            seen.add(lastBest.getResultID());
-            if (DEBUG)
-              logger.info("getBestForQuery Adding " + lastBest + " now " + seen.size() + " vs " + bestScores.size());
+          {
+            Long aLong = userToEarliest.get(userID);
+            if (aLong == null || time < aLong) userToEarliest.put(userID, time);
           }
-          lastTimestamp = time;
-        }
-        if (lastTimestamp == 0) lastTimestamp = time;
-        last = exid;
-        lastBest = bs;
-        currentSession = sessionStart;
-      }
 
-      if (lastBest != null) {
-        if (seen.contains(lastBest.getResultID())) { // how could this happen?
-          logger.warn("getBestForQuery skipping result id " + lastBest.getResultID() + " b/c already added to (" + seen.size() +
-              ") " + seen + "\n\tvs " + bestScores.size());
-        } else {
-          if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
-          bestScores.add(lastBest);
+          // So the purpose here is to skip over multiple tries for an item within a sort session (5 minutes)
+          long sessionStart = bs.getSessionStart();
+          if ((last != -1 && last != exid) ||
+              (currentSession > 0 && sessionStart != currentSession) ||
+              (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)
+
+              ) {
+            if (seen.contains(id)) {
+              logger.warn("getBestForQuery skipping " + id); // surprising if this were true
+            } else {
+              bestScores.add(lastBest);
+              seen.add(lastBest.getResultID());
+              if (DEBUG)
+                logger.info("getBestForQuery Adding " + lastBest + " now " + seen.size() + " vs " + bestScores.size());
+            }
+            lastTimestamp = time;
+          }
+          if (lastTimestamp == 0) lastTimestamp = time;
+          last = exid;
+          lastBest = bs;
+          currentSession = sessionStart;
+        }
+
+        if (lastBest != null) {
+          if (seen.contains(lastBest.getResultID())) { // how could this happen?
+            logger.warn("getBestForQuery skipping result id " + lastBest.getResultID() + " b/c already added to (" + seen.size() +
+                ") " + seen + "\n\tvs " + bestScores.size());
+          } else {
+            if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
+            bestScores.add(lastBest);
+          }
         }
       }
     });
@@ -519,7 +523,7 @@ public abstract class Analysis extends DAO {
     List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
- //   int skipped = 0;
+    //   int skipped = 0;
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
@@ -536,7 +540,7 @@ public abstract class Analysis extends DAO {
         results.add(new WordScore(bs, netPronImageTypeListMap));
       } else {
 //        logger.warn("getWordScore score " + bs.getScore()  + " is below threshold.");
-   //     skipped++;
+        //     skipped++;
       }
     }
 

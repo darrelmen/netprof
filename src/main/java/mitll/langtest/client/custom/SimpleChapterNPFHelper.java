@@ -62,21 +62,27 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     implements RequiresResize, ExerciseListContent {
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
-  public static final int RIGHT_SIDE_MARGIN = 155;//120;
+  public static final int RIGHT_SIDE_MARGIN = 155;
   private boolean madeNPFContent = false;
 
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
   protected final FlexListLayout<T, U> flexListLayout;
+  protected IViewContaner viewContaner;
+  protected INavigation.VIEWS myView;
 
   /**
    * @param controller
-   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean)
+   * @param viewContaner
+   * @param myView
+   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, IViewContaner, INavigation.VIEWS)
    */
-  public SimpleChapterNPFHelper(ExerciseController controller) {
+  public SimpleChapterNPFHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
     this.controller = controller;
     final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(outer);
+    this.viewContaner = viewContaner;
+    this.myView = myView;
   }
 
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
@@ -85,13 +91,13 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * Add npf widget to content of a tab - here marked tabAndContent
    *
    * @param instanceName flex, review, etc.
-   * @see INavigation#showView
+   * @see NewContentChooser#showView
    */
   public void showNPF(DivWidget content, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-      logger.info("\t: adding npf content instanceName = " + instanceName);
+      //logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
       showContent(content, instanceName);
       npfExerciseList.reloadWithCurrent();
     } else {
@@ -106,7 +112,15 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   @Override
   public void showContent(Panel listContent, String instanceName) {
-    listContent.add(doNPF(instanceName));
+    Panel child = doNPF(instanceName);
+
+/*
+    logger.info("showContent - (" + instanceName + " ) " +
+        myView + " vs " + viewContaner.getCurrentView() +
+        " adding " + child.getElement().getId() + " to " + listContent.getElement().getId() + " with " + listContent.getElement().getChildCount());
+*/
+
+    listContent.add(child);
   }
 
   /**

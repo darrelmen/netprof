@@ -105,7 +105,9 @@ public class NPFHelper implements RequiresResize {
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
       rememberAndLoadFirstFromUserList(ul, toSelect);
-    } else logger.warning("not loading exercises?");
+    } else {
+      logger.warning("not loading exercises?");
+    }
     return hp;
   }
 
@@ -180,7 +182,7 @@ public class NPFHelper implements RequiresResize {
     List<CommonShell> copy = new ArrayList<>(ul.getExercises());
 
     int id = toSelect == null ? -1 : toSelect.getID();
-    logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
+   // logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");

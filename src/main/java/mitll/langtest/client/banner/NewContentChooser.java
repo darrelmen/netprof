@@ -7,7 +7,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
-import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
@@ -67,8 +66,8 @@ public class NewContentChooser implements INavigation {
    * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
-    learnHelper = new NewLearnHelper(controller);
-    practiceHelper = new PracticeHelper(controller);
+    learnHelper = new NewLearnHelper(controller, this, LEARN);
+    practiceHelper = new PracticeHelper(controller, this, DRILL);
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -161,15 +160,15 @@ public class NewContentChooser implements INavigation {
           break;
         case RECORD:
           clear();
-          new RecorderNPFHelper(controller, true).showNPF(divWidget, RECORD.toString());
+          new RecorderNPFHelper(controller, true, this, RECORD).showNPF(divWidget, RECORD.toString());
           break;
         case CONTEXT:
           clear();
-          new RecorderNPFHelper(controller, false).showNPF(divWidget, CONTEXT.toString());
+          new RecorderNPFHelper(controller, false, this, CONTEXT).showNPF(divWidget, CONTEXT.toString());
           break;
         case DEFECTS:
           clear();
-          new MarkDefectsChapterNPFHelper(controller).showNPF(divWidget, DEFECTS.toString());
+          new MarkDefectsChapterNPFHelper(controller, this, DEFECTS).showNPF(divWidget, DEFECTS.toString());
           break;
         case FIX:
           clear();
@@ -345,7 +344,12 @@ public class NewContentChooser implements INavigation {
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
     Panel review = new ReviewItemHelper(controller)
         .doNPF(result, "review", true, toSelect);
-    divWidget.add(review);
+    if (getCurrentView() == VIEWS.FIX) {
+      divWidget.add(review);
+    }
+    else {
+      logger.warning("not adding review since current is " + getCurrentView());
+    }
   }
 
   public void showProgress() {

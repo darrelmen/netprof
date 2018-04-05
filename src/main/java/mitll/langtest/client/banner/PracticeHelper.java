@@ -35,6 +35,8 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
@@ -74,9 +76,11 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   /**
    * @param controller
+   * @param viewContaner
+   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  PracticeHelper(ExerciseController controller) {    super(controller);  }
+  PracticeHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {    super(controller, viewContaner, myView);  }
 
   /**
    * @param exerciseList
