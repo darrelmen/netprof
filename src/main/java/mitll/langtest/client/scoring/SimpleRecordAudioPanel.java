@@ -114,7 +114,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
       col.add(historyHoriz);
     }
 
-    //Widget waitCursor = controller.isMicAvailable() ? makeWaitCursor().getWaitCursor() : getRedX();
     recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor(), controller.shouldRecord());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
@@ -165,7 +164,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private WaitCursorHelper makeWaitCursor() {
     if (waitCursorHelper == null) {
       waitCursorHelper = new WaitCursorHelper();
-      logger.info("makeWaitCursor -- " + waitCursorHelper);
       waitCursorHelper.showFinished();
     }
     return waitCursorHelper;
