@@ -100,6 +100,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #showScore
    */
   private static final String ALL_PRACTICED = "All practiced!";
+
+  /**
+   *
+   */
   public static final String LISTS = "Lists";
 
   /**
@@ -138,7 +142,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   private final ProgressBar practicedProgress, scoreProgress;
   private final DivWidget pagerAndSortRow;
 
-  private List<String> typeOrder;
+  protected List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
   private Panel tableWithPager;
@@ -151,7 +155,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #addChoicesForType
    */
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
-  private List<String> rootNodesInOrder = new ArrayList<>();
+  protected List<String> rootNodesInOrder = new ArrayList<>();
   private final Map<Integer, String> idToListName = new HashMap<>();
   private int freqid = 0;
   private DivWidget sortBox;
@@ -481,7 +485,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return container;
   }
 
-  private void getTypeOrder() {
+  protected void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
@@ -492,7 +496,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  private List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
+  protected List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
     return projectStartupInfo.getTypeOrder();
   }
 
@@ -562,7 +566,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
-    allTypesContainer.add(liForDimensionForList = addListFacet(typeToValues));
+    liForDimensionForList = addListFacet(typeToValues);
+    if (liForDimensionForList != null) {
+      allTypesContainer.add(liForDimensionForList);
+    }
   }
 
   private ListItem liForDimensionForList;
@@ -576,8 +583,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-  @NotNull
-  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
+  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(LISTS);
     populateListChoices(liForDimensionForType, typeToValues);
     return liForDimensionForType;
@@ -1139,7 +1145,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return reqid++;
   }
 
-  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get type to values.");
 
     changeSelection(response.getTypesToInclude(), typeToSelection);

@@ -33,6 +33,7 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,12 +52,11 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -66,8 +66,7 @@ import java.util.logging.Logger;
  * @since 2/4/16.
  */
 public class QuizHelper extends PracticeHelper {
-   private final Logger logger = Logger.getLogger("QuizHelper");
-
+  private final Logger logger = Logger.getLogger("QuizHelper");
 
   /**
    * @param controller
@@ -79,7 +78,16 @@ public class QuizHelper extends PracticeHelper {
     super(controller, viewContaner, myView);
   }
 
+  @Override
+  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
 
+      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "Quiz");
+      statsFlashcardFactory = polyglotFlashcardFactory;
+
+
+    statsFlashcardFactory.setContentPanel(outerBottomRow);
+    return statsFlashcardFactory;
+  }
 
   /**
    * @param outer
@@ -94,11 +102,33 @@ public class QuizHelper extends PracticeHelper {
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller,QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
+        return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
           @NotNull
           protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
             return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
           }
+
+          protected void getTypeOrder() {
+            typeOrder = getTypeOrder(null);
+            //    logger.info("getTypeOrder type order " + typeOrder);
+            this.rootNodesInOrder = new ArrayList<>(typeOrder);
+          }
+
+          protected List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
+            return Arrays.asList("QUIZ");
+          }
+
+          protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
+            return null;
+          }
+
+          @Override
+          protected ExerciseListRequest getRequest(String prefix) {
+            ExerciseListRequest request = super.getRequest(prefix);
+            request.setQuiz(true);
+            return request;
+          }
+
         };
       }
 

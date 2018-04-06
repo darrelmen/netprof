@@ -70,6 +70,7 @@ public class ExerciseListRequest implements IsSerializable {
   private int limit = -1;
   private boolean QC = false;
   private boolean addContext = false;
+  private boolean quiz = false;
 
   public ExerciseListRequest() {
   }
@@ -348,5 +349,13 @@ public class ExerciseListRequest implements IsSerializable {
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;
+  }
+
+  public boolean isQuiz() {
+    return quiz;
+  }
+
+  public void setQuiz(boolean quiz) {
+    this.quiz = quiz;
   }
 }

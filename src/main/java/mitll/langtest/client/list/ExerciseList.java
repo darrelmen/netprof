@@ -76,6 +76,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private static final String GETTING_EXERCISE = "getting exercise";
 
+  /***
+   * @see #showEmptyExercise
+   */
   private static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>" +
       "<p>Try clearing one of your selections or changing the search.</p>";
 
@@ -106,7 +109,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final UserState userState;
   final ListOptions listOptions;
 

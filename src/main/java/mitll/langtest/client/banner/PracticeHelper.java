@@ -61,9 +61,9 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   private static final String PRACTICE = "practice";
 
-  private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
-  private PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
-   Widget outerBottomRow;
+  protected StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
+  protected PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
+  Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private NewContentChooser navigation;
@@ -109,7 +109,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller,PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+        return new PracticeFacetExerciseList(controller, PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
       }
 
       @Override
@@ -131,6 +131,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   public void setVisible(boolean visible) {
     flexListLayout.setVisible(visible);
   }
+
   public void setNavigation(NewContentChooser navigation) {
     this.navigation = navigation;
   }
