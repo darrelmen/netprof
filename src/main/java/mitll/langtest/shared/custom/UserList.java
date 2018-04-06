@@ -185,8 +185,9 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   /**
    * @param exercises
-   * @see UserListDAO#populateList(UserList)
-   * @see SlickUserListDAO#populateList(UserList)
+   * @seex UserListDAO#populateList(UserList)
+   * @see SlickUserListDAO#populateList
+   * @see SlickUserListDAO#populateListEx
    */
   public void setExercises(List<T> exercises) {
     this.exercises = exercises;

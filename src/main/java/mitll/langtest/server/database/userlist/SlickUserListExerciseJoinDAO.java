@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 
@@ -46,9 +47,9 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
   private final UserExerciseListJoinDAOWrapper dao;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param database
    * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
     super(database);
@@ -68,13 +69,10 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
    * @param userListID
    * @param ignoredUniqueID
    * @param exid
-   * @see IUserListManager#addItemToList
+   * @see UserListManager#addItemToList
    */
   @Override
-  public void add(int userListID, String ignoredUniqueID, int exid) {
-   // int id = userListID.getID();
-    addPair(userListID, exid);
-  }
+  public void add(int userListID, String ignoredUniqueID, int exid) {  addPair(userListID, exid);  }
 
   /**
    * Just for copying from h2 initially
@@ -83,27 +81,34 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
    * @paramz exerciseID
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUserExerciseListJoin
    */
-  public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
+  public void addPair(int userlistid, int exid) {
+      dao.insert(userlistid, exid);
+  }
 
   @Override
-  public void removeListRefs(long listid) {}
+  public void removeListRefs(long listid) {
+  }
 
   @Override
   public boolean remove(long listid, int exid) {
     return dao.remove((int) listid, exid) == 1;
   }
+
   public boolean isEmpty() {
     return dao.getNumRows() == 0;
   }
 
-  public Collection<Integer> getExidsForList(int listid) {    return dao.realExids(listid);  }
+  public Collection<Integer> getExidsForList(int listid) {
+    return dao.realExids(listid);
+  }
+
   @Override
   public Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids) {
     return dao.listToExids(listids);
-   }
+  }
 
   @Override
-  public Map<Integer,Integer> getNumExidsForList(Collection<Integer> listids) {
+  public Map<Integer, Integer> getNumExidsForList(Collection<Integer> listids) {
     return dao.listToNumExids(listids);
   }
 }

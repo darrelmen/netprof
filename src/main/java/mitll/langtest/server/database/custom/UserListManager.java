@@ -150,6 +150,16 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  /**
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @param isPublic
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.services.ListServiceImpl#addUserList
+   */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
     UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid);
@@ -191,12 +201,12 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private UserList createQuiz(int userid,
-                              String name,
-                              String description,
-                              String dliClass,
-                              boolean isPrivate,
-                              int projid) {
+  private UserList<CommonShell> createQuiz(int userid,
+                                              String name,
+                                              String description,
+                                              String dliClass,
+                                              boolean isPrivate,
+                                              int projid) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -204,31 +214,39 @@ public class UserListManager implements IUserListManager {
     } else {
       long now = System.currentTimeMillis();
 
-      UserList quiz = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+      UserList<CommonShell> quiz = new UserList<CommonShell>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
           now, "", "", projid, UserList.LIST_TYPE.QUIZ);
       int userListID = rememberList(projid, quiz);
 
-       List<CommonExercise> rawExercises = databaseServices.getProject(projid).getRawExercises();
+      logger.info("createQuiz made new quiz " + quiz);
+      List<CommonExercise> rawExercises = databaseServices.getProject(projid).getRawExercises();
       Random random = new Random();
       int size = rawExercises.size();
 
       Set<Integer> exids = new TreeSet<>();
-
+      List<CommonExercise> items = new ArrayList<>();
       while (exids.size() < 100) {
         int i = random.nextInt(size);
         CommonExercise commonExercise = rawExercises.get(i);
-        exids.add(commonExercise.getID());
+        boolean add = exids.add(commonExercise.getID());
+        if (add) {
+          items.add(commonExercise);
+          //  quiz.addExercise(getShells(commonExercise));
+        }
       }
+      logger.info("createQuiz made randome ex list of size " + exids.size());
 
+      quiz.setExercises(getShells(items));
       exids.forEach(id -> addItemToList(userListID, id));
 
+      logger.info("createQuiz quiz has " + quiz.getExercises().size());
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return quiz;
     }
   }
 
   private int rememberList(int projid, UserList e) {
-   return userListDAO.add(e, projid);
+    return userListDAO.add(e, projid);
   }
 
   @Override
