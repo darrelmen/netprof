@@ -617,7 +617,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public void rememberUsersCurrentProject(int userid, int projectid) {
     //  logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
-    getUserProjectDAO().add(userid, projectid);
+    getUserProjectDAO().upsert(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
 

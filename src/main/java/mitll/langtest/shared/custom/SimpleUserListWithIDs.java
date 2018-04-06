@@ -14,9 +14,9 @@ public class SimpleUserListWithIDs extends SimpleUserList implements IUserListWi
     this.ids = ids;
   }
 
-  public Collection<Integer> getIds() {
+/*  public Collection<Integer> getIds() {
     return ids;
-  }
+  }*/
 
   public boolean containsByID(int id) {
     return ids.contains(id);

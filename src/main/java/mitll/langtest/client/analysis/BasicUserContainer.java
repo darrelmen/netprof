@@ -194,7 +194,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return TABLE_WIDTH;
   }
 
-  protected void addFirstName(List<T> list) {
+  void addFirstName(List<T> list) {
     Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {

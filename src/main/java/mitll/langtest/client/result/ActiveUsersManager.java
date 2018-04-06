@@ -29,6 +29,8 @@ import java.util.List;
 public class ActiveUsersManager {
   private static final int HOUR = 60 * 60 * 1000;
   //private final Logger logger = Logger.getLogger("ActiveUsersManager");
+  private static final String LOGGED_IN = "Logged In";
+  private static final String LAST_ACTIVITY = "Last Active";
 
   private final ExerciseController controller;
   private static final int TOP = 56;
@@ -91,13 +93,14 @@ public class ActiveUsersManager {
 
     @Override
     protected String getDateColHeader() {
-      return "Last Activity";
+      return LOGGED_IN;
     }
 
     @Override
     protected void addColumnsToTable(boolean sortEnglish) {
       super.addColumnsToTable(sortEnglish);
 
+      addVisitedCol(getList());
       addLang(getList());
       addProj(getList());
     }
@@ -127,6 +130,57 @@ public class ActiveUsersManager {
       addColumn(userCol, new TextHeader("Project"));
       table.addColumnSortHandler(getProjSorter(userCol, list));
     }
+
+    private void addVisitedCol(List<ActiveUser> list) {
+      Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();
+      dateCol.setSortable(true);
+      addColumn(dateCol, new TextHeader(LAST_ACTIVITY));
+      table.setColumnWidth(dateCol, STARTED_WIDTH + "px");
+      table.addColumnSortHandler(getVisitedSorter(dateCol, list));
+    }
+
+    private ColumnSortEvent.ListHandler<ActiveUser> getVisitedSorter(Column<ActiveUser, SafeHtml> englishCol,
+                                                         List<ActiveUser> dataList) {
+      ColumnSortEvent.ListHandler<ActiveUser> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+      columnSortHandler.setComparator(englishCol, this::getVisitedCompare);
+      return columnSortHandler;
+    }
+
+    private int getVisitedCompare(ActiveUser o1, ActiveUser o2) {
+      if (o1 == o2) {
+        return 0;
+      }
+
+      // Compare the name columns.
+      if (o1 != null) {
+        if (o2 == null) return 1;
+        else {
+          return Long.compare(o1.getVisited(), o2.getVisited());
+        }
+      }
+      return -1;
+    }
+
+    private Column<ActiveUser, SafeHtml> getVisitedColumn() {
+      return new Column<ActiveUser, SafeHtml>(new PagingContainer.ClickableCell()) {
+        @Override
+        public void onBrowserEvent(Cell.Context context, Element elem, ActiveUser object, NativeEvent event) {
+          super.onBrowserEvent(context, elem, object, event);
+          checkGotClick(object, event);
+        }
+
+        @Override
+        public boolean isDefaultSortAscending() {
+          return false;
+        }
+
+        @Override
+        public SafeHtml getValue(ActiveUser shell) {
+          return getFormattedDate(shell.getVisited());
+        }
+      };
+    }
+
 
     private ColumnSortEvent.ListHandler<ActiveUser> getLangSorter(Column<ActiveUser, SafeHtml> englishCol,
                                                                   List<ActiveUser> dataList) {

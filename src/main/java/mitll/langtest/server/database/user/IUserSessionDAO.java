@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Map;
 
@@ -45,22 +46,37 @@ public interface IUserSessionDAO extends IDAO {
    */
   void add(SlickUserSession user);
 
-  int getUserForSession(String sesssion);
+  /**
+   * @param session
+   * @return
+   * @see mitll.langtest.server.database.security.NPUserSecurityManager#lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
+   */
+  int getUserForSession(String session);
+
+  boolean updateVisitedForSession(String session);
 
   void removeAllSessionsForUser(int userId);
 
   Map<Integer, ActiveInfo> getActiveSince(long when);
 
-  int getNumRows();
+//  int getNumRows();
 
   class ActiveInfo {
     private int userid;
     private long when;
+    private long visited;
     private int projid;
 
-    ActiveInfo(int userid, long when, int projid) {
+    /**
+     * @param userid
+     * @param loggedInTime
+     * @param projid
+     * @see SlickUserSessionDAOImpl#getActiveSince
+     */
+    ActiveInfo(int userid, long loggedInTime, long visited, int projid) {
       this.userid = userid;
-      this.when = when;
+      this.when = loggedInTime;
+      this.visited = visited;
       this.projid = projid;
     }
 
@@ -68,6 +84,10 @@ public interface IUserSessionDAO extends IDAO {
       return userid;
     }
 
+    /**
+     * @see mitll.langtest.server.database.security.NPUserSecurityManager#getActiveSince
+     * @return
+     */
     public long getWhen() {
       return when;
     }
@@ -76,8 +96,12 @@ public interface IUserSessionDAO extends IDAO {
       return projid;
     }
 
+    public long getVisited() {
+      return visited;
+    }
+
     public String toString() {
-      return "user " + userid + " proj " + projid + " at " + new Date(when);
+      return "user " + userid + " proj " + projid + " logged in at " + new Date(when) + " visited " + new Date(visited);
     }
   }
 }

@@ -3,7 +3,6 @@ package mitll.langtest.server.database.security;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
-import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
@@ -18,21 +17,12 @@ public interface IUserSecurityManager {
   /**
    * The key to get/set the id of the user stored in the session
    * @see NPUserSecurityManager#getUserIDFromRequest
-   * @see IUserSecurityManager#getUserIDFromSession
+   * @seex IUserSecurityManager#getUserIDFromSession
    * @see IUserSecurityManager#logoutUser
    */
   String USER_SESSION_ATT = "user-db-id";
 
-  /**
-   * @deprecated
-   * @param threadLocalRequest
-   * @return
-   * @throws DominoSessionException
-   */
-  int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException;
-
   int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException;
-
   int getUserIDFromRequest(HttpServletRequest request);
 
   /**
@@ -45,6 +35,8 @@ public interface IUserSecurityManager {
   User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
 
   int getLoggedInUserID(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException;
+
+  String getSessionID(HttpServletRequest request);
 
   void logoutUser(HttpServletRequest request, int userId, boolean killAllSessions);
 

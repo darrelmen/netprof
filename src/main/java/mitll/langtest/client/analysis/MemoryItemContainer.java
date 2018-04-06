@@ -236,9 +236,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return idWidth;
   }
 
-  @NotNull
-  protected String getDateColHeader() {
-    return SIGNED_UP1;
+  protected String getDateColHeader() {   return SIGNED_UP1;
   }
 
   /**
@@ -452,19 +450,23 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
       @Override
       public SafeHtml getValue(T shell) {
-        Date date = new Date(getItemDate(shell));
-        String signedUp = format.format(date);
-
-        // drop year if this year
-        if (signedUp.equals(todaysDate)) {
-          signedUp = todayTimeFormat.format(date);
-        } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
-          signedUp = signedUp.substring(0, signedUp.length() - 4);
-        }
-
-        return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
+        return getFormattedDate(getItemDate(shell));
       }
     };
+  }
+
+  protected SafeHtml getFormattedDate(Long itemDate) {
+    Date date = new Date(itemDate);
+    String signedUp = format.format(date);
+
+    // drop year if this year
+    if (signedUp.equals(todaysDate)) {
+      signedUp = todayTimeFormat.format(date);
+    } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
+      signedUp = signedUp.substring(0, signedUp.length() - 4);
+    }
+
+    return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
   }
 
   protected abstract Long getItemDate(T shell);

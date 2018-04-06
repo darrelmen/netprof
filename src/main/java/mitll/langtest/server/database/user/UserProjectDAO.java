@@ -75,7 +75,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    * @see ProjectServices#rememberUsersCurrentProject
    */
   @Override
-  public void add(int userid, int projid) {
+  public void upsert(int userid, int projid) {
     dao.upsert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
@@ -112,7 +112,7 @@ public class UserProjectDAO implements IUserProjectDAO {
 
     if (mostRecentByUser != projid) {
       logger.info("setCurrentProjectForUser switched tabs, was " + mostRecentByUser + " but now will be " + projid);
-      add(userid, projid);
+      upsert(userid, projid);
     //  return true;
     } else {
      // logger.info("OK, just confirming current project for " + getCurrentProjectForUser + " is " + projid);

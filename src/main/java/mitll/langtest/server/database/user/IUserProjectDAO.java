@@ -46,7 +46,7 @@ public interface IUserProjectDAO extends IDAO {
    * @see UserProjectDAO#setCurrentProjectForUser
    * @see
    */
-  void add(int userid, int projid);
+  void upsert(int userid, int projid);
 
   /**
    * @param bulk

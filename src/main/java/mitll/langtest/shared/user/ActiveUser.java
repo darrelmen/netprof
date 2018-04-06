@@ -1,17 +1,25 @@
 package mitll.langtest.shared.user;
 
 /**
- * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos
+ * @seex mitll.langtest.server.database.analysis.Analysis#getUserInfos
+ * @see mitll.langtest.client.result.ActiveUsersManager#show
  */
 public class ActiveUser extends SimpleUser {
   private String projectName = "";
   private String language = "";
+  private long visited;
 
   public ActiveUser() {
   }
 
   public ActiveUser(int id) {
     super(id);
+  }
+
+  public ActiveUser(FirstLastUser firstLast, long visited) {
+    this(firstLast.id, firstLast.getUserID(),
+        firstLast.getFirst(), firstLast.getLast(),
+        firstLast.getLastChecked(), visited,"", "");
   }
 
   /**
@@ -23,17 +31,23 @@ public class ActiveUser extends SimpleUser {
    * @paramz affiliation
    * @see mitll.langtest.server.database.user.DominoUserDAOImpl#refreshUserCache
    */
-  public ActiveUser(int id, String userid, String first, String last, long lastChecked, String name, String language) {
+  private ActiveUser(int id, String userid, String first, String last, long lastChecked, long visited, String name, String language) {
     super(id, userid, first, last, lastChecked);
     this.projectName = name;
     this.language = language;
+    this.visited=visited;
   }
 
-  public ActiveUser(FirstLastUser firstLast) {
-    this(firstLast.id, firstLast.getUserID(),
-        firstLast.getFirst(), firstLast.getLast(), firstLast.getLastChecked(), "", "");
-  }
 
+  public long getVisited() {
+    return visited;
+  }
+/*
+
+  public void setVisited(long visited) {
+    this.visited = visited;
+  }
+*/
 
   public String getProjectName() {
     return projectName;

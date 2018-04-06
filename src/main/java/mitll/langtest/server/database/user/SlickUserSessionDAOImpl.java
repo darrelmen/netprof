@@ -41,6 +41,7 @@ import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.Tuple2;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -94,6 +95,11 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
   }
 
+  @Override
+  public boolean updateVisitedForSession(String session) {
+    return dao.updateVisitedForSession(session);
+  }
+
 /*
   @Override
   public int getUserForSV(String sesssion, String v) {
@@ -110,28 +116,29 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     dao.removeAllSessionsForUser(userId);
   }
 
+/*
   private Map<Integer, ActiveInfo> lastWeek() {
     return getActiveSince(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
   }
+*/
 
   @Override
   public Map<Integer, ActiveInfo> getActiveSince(long when) {
-    Map<Integer, Long> since = dao.since(new Timestamp(when));
+    Map<Integer, Tuple2<Long, Long>> since = dao.since(new Timestamp(when));
 
     Map<Integer, Integer> usersToProject = userProjectDAO.getUsersToProject(since.keySet());
 
     Map<Integer, ActiveInfo> integerActiveInfoHashMap = new HashMap<>();
 
-    since.forEach((k, v) -> {
-      ActiveInfo value = new ActiveInfo(k, v, usersToProject.getOrDefault(k, -1));
+    since.forEach((k, pair) -> {
+      ActiveInfo value = new ActiveInfo(k, pair._1(), pair._2(), usersToProject.getOrDefault(k, -1));
       logger.info(k + "->" + value);
       integerActiveInfoHashMap.put(k, value);
     });
     return integerActiveInfoHashMap;
   }
 
-
-  public int getNumRows() {
+/*  public int getNumRows() {
     return dao.numRows();
-  }
+  }*/
 }

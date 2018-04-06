@@ -189,7 +189,7 @@ public class UserListManager implements IUserListManager {
         }
       } else {*/
       UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid);
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL);
       userListDAO.add(e, projid);
       new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -563,7 +563,7 @@ public class UserListManager implements IUserListManager {
   private UserList<CommonShell> getQCList(String name, String description, int userListID) {
     User qcUser = getQCUser();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1);
+        false, System.currentTimeMillis(), "", "", -1, UserList.LIST_TYPE.NORMAL);
   }
 
   @NotNull
@@ -578,7 +578,7 @@ public class UserListManager implements IUserListManager {
                                                    int userListID) {
     User qcUser = getQCUser();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1);
+        false, System.currentTimeMillis(), "", "", -1, UserList.LIST_TYPE.NORMAL);
     return getCommonUserList(userList, allKnown);
   }
 

@@ -81,7 +81,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
                                IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-   // this.projectManagement = projectManagement;
+    // this.projectManagement = projectManagement;
     //startShiro();
   }
 
@@ -203,13 +203,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     session.setAttribute(USER_SESSION_ATT, id1);
     String sessionID = session.getId();
 
+    Timestamp modified = new Timestamp(System.currentTimeMillis());
     userSessionDAO.add(
         new SlickUserSession(-1,
             id1,
             sessionID,
             "",
             "",
-            new Timestamp(System.currentTimeMillis())));
+            modified, modified));
 
     logSetSession(session, sessionID);
   }
@@ -293,11 +294,16 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return getLoggedInUserLight(request, "", false);
   }
 
+  @Override
+  public String getSessionID(HttpServletRequest request) {
+    return request.getRequestedSessionId();
+  }
+
 
   /**
    * Get the currently logged in user.
    *
-   * @see #getUserIDFromSession(HttpServletRequest)
+   * @see #getUserIDFromSession
    * @see #getLoggedInUser(HttpServletRequest)
    */
   private User getLoggedInUser(HttpServletRequest request,
@@ -548,8 +554,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    *
    * @return
    */
-  @Override
-  public int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException {
+  //@Override
+/*
+  private int getUserIDFromSession(HttpServletRequest threadLocalRequest) throws DominoSessionException {
     int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it?
@@ -569,6 +576,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       return userIDFromSession;
     }
   }
+*/
 
   //  @Override
   @Override
@@ -624,7 +632,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       FirstLastUser firstLastUser = firstLastFor.get(k);
       if (firstLastUser != null) {
         firstLastUser.setLastChecked(v.getWhen());
-        ActiveUser e = new ActiveUser(firstLastUser);
+        // firstLastUser.setVisited(v.getVisited());
+
+        ActiveUser e = new ActiveUser(firstLastUser, v.getVisited());
         since.add(e);
         if (v.getProjid() > 0) {
           Project project = projectManagement.getProject(v.getProjid());

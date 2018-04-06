@@ -277,7 +277,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * Maybe someone else has deleted it while you were looking at it?
    *
    * @param projectid
-   * @see mitll.langtest.client.project.ProjectChoices#reallySetTheProject
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
    */
   public User setProject(int projectid) {
     try {
@@ -342,13 +342,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
         return new HeartbeatStatus(false, false);
       } else {
-        logger.info("setCurrentProjectForUser : session user " + sessionUserID + " for " + projid);
+        // logger.info("setCurrentProjectForUser : session user " + sessionUserID + " for " + projid);
         long then = System.currentTimeMillis();
-
         int before = db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
-
         long now = System.currentTimeMillis();
-        if (now - then > 0 && projid != before) {
+        if (now - then > 10 || projid != before) {
           logger.info("setCurrentProjectForUser : took " + (now - then) + " to set current session user " + sessionUserID +
               " and set project to " + projid + " from " + before);
         }
@@ -360,16 +358,38 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           }
         }
 */
-        boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
-        if (codeHasUpdated) {
-          logger.info("\n\n\nsetCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+        {
+          final String sid = getSessionID();
+          // TODO : expensive?
+          new Thread(() -> updateVisited(sid)).start();
         }
-        return new HeartbeatStatus(true, codeHasUpdated);
+
+        return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
       }
     } catch (DominoSessionException e) {
       logger.error("setCurrentProjectForUser got  " + e, e);
       return new HeartbeatStatus(false, false);
     }
+  }
+
+  private void updateVisited(String sid) {
+   // String sid = getSessionID();
+
+    if (sid == null) {
+      logger.error("updateVisited : no session?");
+    } else {
+      if (!db.getUserSessionDAO().updateVisitedForSession(sid)) {
+        logger.warn("updateVisited didn't update session " + sid);
+      }
+    }
+  }
+
+  private boolean checkCodeHasUpdated(int projid, String implVersion, int sessionUserID) {
+    boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
+    if (codeHasUpdated) {
+      logger.info("\n\n\nsetCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+    }
+    return codeHasUpdated;
   }
 
   @Override

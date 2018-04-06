@@ -267,12 +267,20 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return securityManager.getLoggedInUserID(getThreadLocalRequest());
   }
 
+  String getSessionID() {
+    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+    if (threadLocalRequest == null) return null;
+    else return securityManager.getSessionID(threadLocalRequest);
+  }
+
   /**
    * This is safe!
    *
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {  return getLanguage(getProject());  }
+  protected String getLanguage() throws DominoSessionException {
+    return getLanguage(getProject());
+  }
 
   protected String getLanguage(Project project) {
     if (project == null) {

@@ -57,8 +57,6 @@ import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
@@ -77,12 +75,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -966,7 +961,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (mostRecentByUser == -1) {  // none yet...
       if (projectAssignment != -1) {
-        userProjectDAO.add(id, projectAssignment);
+        userProjectDAO.upsert(id, projectAssignment);
       }
     } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
       logger.info("handlePolyglotUser before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);

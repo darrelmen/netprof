@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.custom;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
@@ -41,9 +40,7 @@ import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -57,6 +54,19 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
+  public LIST_TYPE getListType() {
+    return listType;
+  }
+
+  public void setListType(LIST_TYPE listType) {
+    this.listType = listType;
+  }
+
+  public enum LIST_TYPE {
+    NORMAL,
+    QUIZ
+  }
+
   private int projid;
 
   private int userid;
@@ -65,9 +75,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private String name;
   private String description;
   private String classMarker;
+  private LIST_TYPE listType;
 
   private boolean isPrivate;
   private boolean isReview;
+
   //private boolean isDeleted;
   private long modified;
   private String contextURL;
@@ -88,7 +100,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param classMarker
    * @param richText
    * @param projid
-   * @paramx user
+   * @param listType
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
@@ -102,7 +114,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   long modified,
                   String contextURL,
                   String richText,
-                  int projid) {
+                  int projid,
+                  LIST_TYPE listType) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -114,6 +127,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.contextURL = contextURL;
     this.richText = richText;
     this.projid = projid;
+    this.listType = listType;
     //this.isDeleted = isDeleted;
   }
 
@@ -122,14 +136,14 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return userid;
   }
 
-  public void addExerciseAfter(T after, T toAdd) {
+/*  public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
       addExercise(toAdd);
     } else {
       exercises.add(index + 1, toAdd);
     }
-  }
+  }*/
 
   /**
    * @param toAdd
@@ -220,9 +234,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   /**
    * @return
-   * @see ListManager#selectTabGivenHistory
-   * @see Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.UserListCallback#addUserListsToDisplay(Collection, Panel, Map)
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#EditableExerciseList
    */
   public boolean isEmpty() {
     return getExercises().isEmpty();
@@ -240,9 +252,9 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return modified;
   }
 
-  public void setModified(long modified) {
+/*  public void setModified(long modified) {
     this.modified = modified;
-  }
+  }*/
 
   @Override
   public String getUserChosenID() {
