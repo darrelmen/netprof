@@ -132,7 +132,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.modified().getTime(),
         slick.contexturl(),
         slick.richtext(),
-        slick.projid(), slick.isdeleted());
+        slick.projid());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -146,7 +146,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.isprivate(),
         slick.modified().getTime(),
         slick.contexturl(), slick.richtext(),
-        slick.projid(), slick.isdeleted());
+        slick.projid());
   }
 
   public void insert(SlickUserExerciseList UserExercise) {

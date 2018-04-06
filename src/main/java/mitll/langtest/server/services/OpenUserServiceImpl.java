@@ -362,7 +362,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
 */
         boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
         if (codeHasUpdated) {
-          logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+          logger.info("\n\n\nsetCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
         }
         return new HeartbeatStatus(true, codeHasUpdated);
       }

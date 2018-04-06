@@ -474,7 +474,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           rs.getString("description"), // exp
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
-          rs.getTimestamp("modified").getTime(), "", "", -1, false)
+          rs.getTimestamp("modified").getTime(), "", "", -1)
       );
     }
     //logger.debug("getWhere : got " + lists);

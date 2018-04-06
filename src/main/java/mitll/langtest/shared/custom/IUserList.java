@@ -1,11 +1,10 @@
 package mitll.langtest.shared.custom;
 
 public interface IUserList extends IUserListLight {
+  int getProjid();
+
   int getUserID();
-
-  int getNumItems();
-
   String getUserChosenID();
 
-  int getProjid();
+  int getNumItems();
 }

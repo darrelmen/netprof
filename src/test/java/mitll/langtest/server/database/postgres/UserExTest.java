@@ -91,7 +91,7 @@ public class UserExTest extends BaseTest {
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
       for (CommonShell ex : list.getExercises()) {
-        logger.info("\t" + list.getID() +"/" +list.getOldID() + " has " + ex);
+        logger.info("\t" + list.getID() +" has " + ex);
       }
     }
   }

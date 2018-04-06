@@ -34,12 +34,10 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.exercise.BaseExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
@@ -59,26 +57,23 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
-  @Deprecated
-  protected String oldid = "";
-
   private int projid;
+
   private int userid;
   private String userChosenID;
 
   private String name;
-
   private String description;
   private String classMarker;
 
   private boolean isPrivate;
   private boolean isReview;
-  private boolean isDeleted;
+  //private boolean isDeleted;
   private long modified;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
-  private int count;
+  //private int count;
   private String richText;
 
   public UserList() {
@@ -93,7 +88,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param classMarker
    * @param richText
    * @param projid
-   * @param isDeleted
    * @paramx user
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
@@ -108,7 +102,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   long modified,
                   String contextURL,
                   String richText,
-                  int projid, boolean isDeleted) {
+                  int projid) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -120,7 +114,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.contextURL = contextURL;
     this.richText = richText;
     this.projid = projid;
-    this.isDeleted = isDeleted;
+    //this.isDeleted = isDeleted;
   }
 
   @Override
@@ -171,9 +165,9 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return exercises.size();
   }
 
-  public T getLast() {
+/*  public T getLast() {
     return exercises.get(exercises.size() - 1);
-  }
+  }*/
 
   /**
    * @param exercises
@@ -184,9 +178,9 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.exercises = exercises;
   }
 
-  public boolean remove(T newUserExercise) {
+/*  public boolean remove(T newUserExercise) {
     return exercises.remove(newUserExercise);
-  }
+  }*/
 
   public boolean removeAndCheck(int id) {
     return remove(id) != null;
@@ -250,20 +244,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.modified = modified;
   }
 
-  @Deprecated
-  public String getOldID() {
-    return oldid;
-  }
-
-  /**
-   * @param id
-   * @see IUserExerciseDAO#add(CommonExercise, boolean, boolean, List)
-   */
-  @Deprecated
-  public void setOldID(String id) {
-    this.oldid = id;
-  }
-
   @Override
   public String getUserChosenID() {
     return userChosenID;
@@ -286,17 +266,21 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return projid;
   }
 
+/*
   public boolean isDeleted() {
     return isDeleted;
   }
+*/
 
+/*
   public int getCount() {
     return count;
   }
-
+*/
+/*
   public void setCount(int count) {
     this.count = count;
-  }
+  }*/
 
   public void setDescription(String description) {
     this.description = description;
