@@ -890,10 +890,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return getUserExercises(onList);
   }
 
-/*  public int getNumOnList(int listID) {
-    return dao.getNumOnList(listID);
-  }*/
-
   /**
    * Pull out of the database.
    *

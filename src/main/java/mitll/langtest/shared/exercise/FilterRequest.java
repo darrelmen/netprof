@@ -49,6 +49,7 @@ public class FilterRequest implements IsSerializable {
   private String prefix = "";
   private int limit = -1;
   private int userListID = -1;
+  private boolean isQuiz =false;
 
   public FilterRequest() {
   }
@@ -113,6 +114,19 @@ public class FilterRequest implements IsSerializable {
     return this;
   }
 
+  public int getUserListID() {
+    return userListID;
+  }
+
+  public boolean isQuiz() {
+    return isQuiz;
+  }
+
+  public FilterRequest setQuiz(boolean quiz) {
+    isQuiz = quiz;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -123,13 +137,4 @@ public class FilterRequest implements IsSerializable {
             (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
-
-  public int getUserListID() {
-    return userListID;
-  }
-/*
-  public void setUserListID(int userListID) {
-    this.userListID = userListID;
-  }
-*/
 }

@@ -19,7 +19,7 @@ public interface ISection<T> {
   List<String> getTypeOrder();
 
   /**
-   * @see ExcelImport#readExercises(InputStream)
+   * @see ExcelImport#readExercises
    * @return
    */
   boolean allKeysValid();

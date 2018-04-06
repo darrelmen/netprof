@@ -34,8 +34,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
 
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
-      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
-
+      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, VIEWS.QUIZ, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
 
   private static final List<INavigation.VIEWS> POLY_VIEWS =
       Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS);

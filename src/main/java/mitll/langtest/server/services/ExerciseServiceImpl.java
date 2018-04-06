@@ -88,29 +88,46 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
+
+    if (request.isQuiz()) {
+      return getQuizTypeToValues(request);
+    }
+    else {
+      //List<Pair> typeToSelection = request.getTypeToSelection();
+//    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
+      ISection<CommonExercise> sectionHelper = getSectionHelper();
+      if (sectionHelper == null) {
+        logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+        return new FilterResponse();
+      } else {
+        FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
+
+        int userListID = request.getUserListID();
+        UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
+
+        if (next != null) {  // echo it back
+          //logger.info("\tgetTypeToValues " + request + " include list " + next);
+          typeToValues.getTypesToInclude().add(LISTS);
+          Set<MatchInfo> value = new HashSet<>();
+          value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
+          typeToValues.getTypeToValues().put(LISTS, value);
+        }
+        return typeToValues;
+      }
+    }
+  }
+
+  public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
     //List<Pair> typeToSelection = request.getTypeToSelection();
 //    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
-    ISection<CommonExercise> sectionHelper = getSectionHelper();
+    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(getProjectIDFromUser());
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
-
-      int userListID = request.getUserListID();
-      UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
-
-      if (next != null) {  // echo it back
-        //logger.info("\tgetTypeToValues " + request + " include list " + next);
-        typeToValues.getTypesToInclude().add(LISTS);
-        Set<MatchInfo> value = new HashSet<>();
-        value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-        typeToValues.getTypeToValues().put(LISTS, value);
-      }
-      return typeToValues;
+      return sectionHelper.getTypeToValues(request);
     }
   }
-
   /**
    * Complicated.
    * <p>

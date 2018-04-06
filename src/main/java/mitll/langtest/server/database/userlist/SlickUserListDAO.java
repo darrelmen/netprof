@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -292,20 +293,20 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param projectID
    * @return non empty public lists
    */
-  @Override
+/*  @Override
   public List<UserList<CommonShell>> getAllPublic(long userid, int projectID) {
     List<UserList<CommonShell>> userExerciseLists = fromSlick(dao.allPublic(projectID));
     populateLists(userExerciseLists, userid);
 
-    List<UserList<CommonShell>> toReturn = new ArrayList<>();
-    for (UserList<CommonShell> ul : userExerciseLists) {
+    List<UserList<CommonShell>> toReturn = new ArrayList<>(userExerciseLists.size());
+    userExerciseLists.forEach(ul -> {
       if (!ul.isEmpty()) {
         toReturn.add(ul);
       }
-    }
+    });
 
     return toReturn;
-  }
+  }*/
 
   /**
    * @return
@@ -314,14 +315,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see IUserListDAO#getAllPublic
    * @see IUserListDAO#getWhere(int, boolean)
    */
-  private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
+/*  private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
     for (UserList<CommonShell> ul : lists) {
       if (userid == -1 || ul.getUserID() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }
-  }
-
+  }*/
   @Override
   public boolean hasByName(long userid, String name, int projid) {
     return dao.hasByName((int) userid, name, projid);
@@ -390,6 +390,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @param projid
    * @return
+   * @see ListServiceImpl#getLists
    */
   @Override
   public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
@@ -400,6 +401,41 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
     return getNonEmpty(ret);
   }
+
+  /**
+   * Both created, visited, and public
+   *
+   * @param userid don't return lists by this user
+   * @param projid for this project
+   * @return
+   * @see #getAllPublicNotMine
+   */
+  @NotNull
+  private List<SlickUserExerciseList> getAllListsForUser(int userid, int projid) {
+    List<SlickUserExerciseList> temp = new ArrayList<>();
+    {
+      dao.allPublic(projid).forEach(ue -> {
+        if (ue.userid() != userid) temp.add(ue);
+      });
+    }
+    return temp;
+  }
+
+  @Override public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
+/*    List<SlickUserExerciseList> temp = new ArrayList<>();
+    {
+      dao.allQuiz(projid).forEach(ue -> {
+        if (ue.userid() != userid) temp.add(ue);
+      });
+    }*/
+    Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
+
+    List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
+    slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
+
+    return ret;
+  }
+
 
   @NotNull
   private Collection<UserList<CommonShell>> getNonEmpty(List<UserList<CommonShell>> ret) {
@@ -429,46 +465,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return ret;
   }
 
-  /**
-   * Both created, visited, and public
-   *
-   * @param userid
-   * @param projid
-   * @return
-   */
-  @NotNull
-  private List<SlickUserExerciseList> getAllListsForUser(int userid, int projid) {
-/*    Set<Integer> unique = new HashSet<>();
-
-    {
-      getByUser(userid, projid).forEach(ue -> {
-        temp.add(ue);
-        unique.add(ue.id());
-      });
-    }
-
-    logger.info("unique now " + unique.size());
-    {
-      getVisitedBy(userid, projid).forEach(ue -> {
-            int id = ue.id();
-            if (!unique.contains(id)) {
-              temp.add(ue);
-            }
-            unique.add(id);
-          }
-      );
-
-      logger.info("2 unique now " + unique.size());
-    }*/
-
-    List<SlickUserExerciseList> temp = new ArrayList<>();
-    {
-      dao.allPublic(projid).forEach(ue -> {
-        if (ue.userid() != userid) temp.add(ue);
-      });
-    }
-    return temp;
-  }
 
   @Override
   public Collection<SlickUserExerciseList> getByUser(int userid, int projid) {

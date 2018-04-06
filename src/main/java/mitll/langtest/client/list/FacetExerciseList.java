@@ -93,7 +93,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private static final String ADDING_VISITOR = "adding visitor";
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
-  private static final String GETTING_TYPE_VALUES = "getting type->values";
+  protected static final String GETTING_TYPE_VALUES = "getting type->values";
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
@@ -1102,15 +1102,14 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getChoiceHandler
    * @see #getSectionWidgetContainer()
    */
-  private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
-    boolean hasUser = isThereALoggedInUser();
-    if (!hasUser) return;
+  protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
+    if (!isThereALoggedInUser()) return;
 
     List<Pair> pairs = getPairs(typeToSelection);
     // logger.info("getTypeToValues request " + pairs + " list " + userListID);
     final long then = System.currentTimeMillis();
 
-    controller.getExerciseService().getTypeToValues(new FilterRequest(reqid++, pairs, userListID),
+    service.getTypeToValues(getRequest(userListID, pairs),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1126,14 +1125,27 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
            */
           @Override
           public void onSuccess(FilterResponse response) {
-            logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get type to values.");
-
-            changeSelection(response.getTypesToInclude(), typeToSelection);
-            setTypeToSelection(typeToSelection);
-            addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
-            gotSelection();
+            gotFilterResponse(response, then, typeToSelection);
           }
         });
+  }
+
+  @NotNull
+  protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
+    return new FilterRequest(incrReqID(), pairs, userListID);
+  }
+
+  protected int incrReqID() {
+    return reqid++;
+  }
+
+  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+    logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get type to values.");
+
+    changeSelection(response.getTypesToInclude(), typeToSelection);
+    setTypeToSelection(typeToSelection);
+    addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
+    gotSelection();
   }
 
   private boolean isThereALoggedInUser() {

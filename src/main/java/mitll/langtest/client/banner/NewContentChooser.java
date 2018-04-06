@@ -46,7 +46,7 @@ public class NewContentChooser implements INavigation {
   private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
-  private final PracticeHelper practiceHelper;
+  private final PracticeHelper practiceHelper, quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
   private final ListView listView;
@@ -68,6 +68,7 @@ public class NewContentChooser implements INavigation {
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new NewLearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
+    quizHelper = new QuizHelper(controller, this, QUIZ);
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -148,6 +149,9 @@ public class NewContentChooser implements INavigation {
         case DRILL:
           showDrill();
           break;
+        case QUIZ:
+          showQuiz();
+          break;
         case PROGRESS:
           clear();
           fixDivToNotScrollUnderHeader();
@@ -194,16 +198,22 @@ public class NewContentChooser implements INavigation {
     fixDivToNotScrollUnderHeader();
 
     if (isPolyglot()) {
-      showPolyDialog();
+      showPolyDialog(false);
     } else {
       showPractice();
     }
   }
 
+  public void showQuiz() {
+    clear();
+    fixDivToNotScrollUnderHeader();
+    showQuizForReal();
+  }
+
   /**
-   *
+   * @see #showDrill
    */
-  private void showPolyDialog() {
+  private void showPolyDialog(boolean isQuiz) {
     mode = MODE_CHOICE.NOT_YET;
 
     new PolyglotDialog(
@@ -212,38 +222,40 @@ public class NewContentChooser implements INavigation {
 
         MIN_POLYGLOT_SCORE,
         new DialogHelper.CloseListener() {
-      @Override
-      public boolean gotYes() {
-        mode = candidateMode;
-        if (mode == MODE_CHOICE.DRY_RUN) {
-          pushFirstUnit();
-        } else if (mode == MODE_CHOICE.POLYGLOT) {
-          pushSecondUnit();
-        } else {
-          return false;
-        }
+          @Override
+          public boolean gotYes() {
+            mode = candidateMode;
+            if (mode == MODE_CHOICE.DRY_RUN) {
+              pushFirstUnit();
+            } else if (mode == MODE_CHOICE.POLYGLOT) {
+              pushSecondUnit();
+            } else {
+              return false;
+            }
 
-        prompt = candidatePrompt;
+            prompt = candidatePrompt;
 
-        return true;
-      }
+            return true;
+          }
 
-      @Override
-      public void gotNo() {
-        setBannerVisible(true);
-        practiceHelper.setVisible(true);
-      }
+          @Override
+          public void gotNo() {
+            setBannerVisible(true);
+            PracticeHelper practiceHelper = isQuiz ? quizHelper : NewContentChooser.this.practiceHelper;
+            practiceHelper.setVisible(true);
+          }
 
-      @Override
-      public void gotHidden() {
-        if (mode != MODE_CHOICE.NOT_YET) {
-          setBannerVisible(false);
-          practiceHelper.setVisible(false);
-        }
+          @Override
+          public void gotHidden() {
+            if (mode != MODE_CHOICE.NOT_YET) {
+              setBannerVisible(false);
+              PracticeHelper practiceHelper = isQuiz ? quizHelper : NewContentChooser.this.practiceHelper;
+              practiceHelper.setVisible(false);
+            }
 //        logger.info("mode is " + mode);
-        showPractice();
-      }
-    },
+            showPractice();
+          }
+        },
         new PolyglotDialog.ModeChoiceListener() {
           @Override
           public void gotMode(MODE_CHOICE choice) {
@@ -258,15 +270,18 @@ public class NewContentChooser implements INavigation {
     );
   }
 
-//  private void setBannerVisible(boolean vi) {
-//    controller.setBannerVisible(false);
-//  }
-
   private void showPractice() {
     practiceHelper.setMode(mode, prompt);
     practiceHelper.setNavigation(this);
     practiceHelper.showContent(divWidget, DRILL.toString());
     practiceHelper.hideList();
+  }
+
+  private void showQuizForReal() {
+    quizHelper.setMode(mode, prompt);
+    quizHelper.setNavigation(this);
+    quizHelper.showContent(divWidget, QUIZ.toString());
+    quizHelper.hideList();
   }
 
   private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
@@ -346,8 +361,7 @@ public class NewContentChooser implements INavigation {
         .doNPF(result, "review", true, toSelect);
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
-    }
-    else {
+    } else {
       logger.warning("not adding review since current is " + getCurrentView());
     }
   }

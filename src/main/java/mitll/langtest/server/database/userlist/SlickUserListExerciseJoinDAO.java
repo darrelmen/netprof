@@ -102,6 +102,11 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
     return dao.realExids(listid);
   }
 
+  /**
+   * @see UserListManager#getListsWithIdsForUser
+   * @param listids
+   * @return
+   */
   @Override
   public Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids) {
     return dao.listToExids(listids);

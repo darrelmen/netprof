@@ -258,7 +258,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param projectID
    * @return
    */
-  @Override
+/*
   public List<UserList<CommonShell>> getAllPublic(long userid, int projectID) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -285,6 +285,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
     }
     return Collections.emptyList();
   }
+*/
 
   @Override
   public boolean hasByName(long userid, String name, int projid) {
@@ -404,6 +405,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
     return null;
   }
 

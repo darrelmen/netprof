@@ -93,6 +93,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
+  ISection<CommonExercise> getQuizSectionHelper(int projectid);
 
   void markAudioDefect(AudioAttribute audioAttribute);
 

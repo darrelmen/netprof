@@ -2,12 +2,13 @@ package mitll.langtest.client.flashcard;
 
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
+ * @see mitll.langtest.client.banner.PracticeHelper#getFactory
  * @param <L>
  * @param <T>
  */

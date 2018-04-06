@@ -506,7 +506,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * Only on import...
    *
-   * @see #getRawExercises()
+   * @see #getRawExercises
    */
   private void addNewExercises() {
     if (addRemoveDAO != null) {
@@ -532,7 +532,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private boolean isKnownExercise(int id) {
     return idToExercise.containsKey(id);
   }
-
   private boolean isKnownExercise(String id) {
     return oldidToExercise.containsKey(id);
   }

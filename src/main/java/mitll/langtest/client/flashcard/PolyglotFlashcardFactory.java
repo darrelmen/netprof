@@ -10,6 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+/**
+ * @see mitll.langtest.client.banner.PracticeHelper
+ * @param <L>
+ * @param <T>
+ */
 public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
@@ -38,18 +43,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    * @see mitll.langtest.client.list.ExerciseList#addExerciseWidget
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
-/*  @Override
-  public Panel getExercisePanel(T e) {
-    sticky.storeCurrent(e);
-
-    currentFlashcard = controller.shouldRecord()?
-        getFlashcard(e) :
-        getNoRecordFlashcardPanel(e.getCommonAnnotatable());
-
-    return currentFlashcard;
-  }*/
   @NotNull
-  protected PolyglotPracticePanel getFlashcard(T e) {
+  protected PolyglotPracticePanel<L, T> getFlashcard(T e) {
     return new PolyglotPracticePanel<L, T>(this,
         controlState,
         controller,
@@ -197,7 +192,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   @Override
   public void cancelRoundTimer() {
-    //logger.info("cancel round timer -");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     roundTimeLeftMillis = 0;

@@ -87,10 +87,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -334,7 +331,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     this.userDAO = dominoUserDAO;
     userProjectDAO = new UserProjectDAO(dbConnection);
-    this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO,dbConnection);
+    this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -487,13 +484,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public ISection<CommonExercise> getSectionHelper(int projectid) {
     if (projectid == -1) {
       return null;
-    }
+    } else {
+      if (isAmas()) {
+        return new SectionHelper<>();
+      }
 
-    if (isAmas()) {
-      return new SectionHelper<>();
+      getExercises(projectid);
+      return getSectionHelperForProject(projectid);
     }
+  }
 
-    getExercises(projectid);
+  @Nullable
+  private ISection<CommonExercise> getSectionHelperForProject(int projectid) {
     Project project = getProject(projectid);
     if (project == null) {
       logger.error("getSectionHelper huh? couldn't find project with id " + projectid);
@@ -503,6 +505,34 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  //@Override
+  public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
+    if (projectid == -1) {
+      return null;
+    } else {
+      SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
+      getExercises(projectid);
+
+      Collection<UserList<CommonShell>> allQuiz = getUserListManager().getUserListDAO().getAllQuiz(projectid);
+      List<Integer> listIDs =new ArrayList<>();
+      allQuiz.forEach(quiz->listIDs.add(quiz.getID()));
+      Map<Integer, Collection<Integer>> exidsForList = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listIDs);
+
+      allQuiz.forEach(quiz->{
+        Collection<Integer> exids = exidsForList.get(quiz.getID());
+        exids.forEach(exid->{
+          CommonExercise exercise = getExercise(projectid, exid);
+          List<Pair> pairs = new ArrayList<>();
+          pairs.add(new Pair("QUIZ", quiz.getName()));
+          pairs.add(new Pair("Unit", "Quiz"));
+          sectionHelper.addPairs(exercise, pairs);
+        });
+      });
+
+//      getUserListManager().getListsForUser(userid, projectid,true,false);
+      return sectionHelper;//getSectionHelperForProject(projectid);
+    }
+  }
   private boolean isAmas() {
     return serverProps.isAMAS();
   }
@@ -1648,6 +1678,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * Don't want to report on deleted or demo projects.
+   *
    * @return
    */
   @NotNull

@@ -86,7 +86,9 @@ public interface IUserListDAO extends IDAO {
 
   List<UserList<CommonShell>> getAllByUser(int userid, int projectID);
 
+/*
   List<UserList<CommonShell>> getAllPublic(long userid, int projectID);
+*/
 
   boolean hasByName(long userid, String name, int projid);
 
@@ -105,6 +107,7 @@ public interface IUserListDAO extends IDAO {
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
+  Collection<UserList<CommonShell>> getAllQuiz(int projid);
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)

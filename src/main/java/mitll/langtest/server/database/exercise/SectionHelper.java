@@ -35,6 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.*;
+import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -625,17 +626,20 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     return pair;
   }
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
+   * @param exercise
+   * @param pairs
+   */
   public void addPairs(T exercise, List<Pair> pairs) {
-    for (Pair pair : pairs) addExerciseToLesson(exercise, pair);
+    pairs.forEach(pair -> addExerciseToLesson(exercise, pair));
   }
 
-//  @Override
-private void addExerciseToLesson(T exercise, Pair pair) {
+  private void addExerciseToLesson(T exercise, Pair pair) {
     addPairEntry(exercise, pair);
     exercise.addPair(pair);
   }
 
-  //@Override
   private Pair getPairForExerciseAndLesson(T exercise, String type, String unitName) {
     addPairEntry(exercise, type, unitName);
     return new Pair(type, unitName);
@@ -984,8 +988,8 @@ private void addExerciseToLesson(T exercise, Pair pair) {
 
   @NotNull
   private List<String> getTypesFromRequest(List<Pair> typeToSelection) {
-    List<String> typesInOrder = new ArrayList<>();
-    for (Pair pair : typeToSelection) typesInOrder.add(pair.getProperty());
+    List<String> typesInOrder = new ArrayList<>(typeToSelection.size());
+    typeToSelection.forEach(pair -> typesInOrder.add(pair.getProperty()));
     return typesInOrder;
   }
 
