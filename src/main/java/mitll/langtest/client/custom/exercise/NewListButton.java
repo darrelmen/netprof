@@ -96,7 +96,7 @@ public class NewListButton {
         title,
         "",
         "",
-        isPublic, new AsyncCallback<UserList>() {
+        isPublic, UserList.LIST_TYPE.NORMAL, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

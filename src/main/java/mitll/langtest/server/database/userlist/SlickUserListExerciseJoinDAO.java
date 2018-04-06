@@ -35,7 +35,6 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.shared.custom.UserList;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 
@@ -66,14 +65,15 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
   }
 
   /**
-   * @param userList
+   * @param userListID
    * @param ignoredUniqueID
    * @param exid
    * @see IUserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String ignoredUniqueID, int exid) {
-    addPair(userList.getID(), exid);
+  public void add(int userListID, String ignoredUniqueID, int exid) {
+   // int id = userListID.getID();
+    addPair(userListID, exid);
   }
 
   /**
@@ -81,10 +81,9 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
    *
    * @param userlistid
    * @paramz exerciseID
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUserExerciseListJoin
    */
-  public void addPair(int userlistid, int exid) {
-    dao.insert(userlistid, exid);
-  }
+  public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
 
   @Override
   public void removeListRefs(long listid) {}

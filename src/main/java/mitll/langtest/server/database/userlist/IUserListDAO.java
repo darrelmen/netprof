@@ -68,7 +68,13 @@ public interface IUserListDAO extends IDAO {
 
   void removeVisitor(int listid, int userid);
 
-  void add(UserList<CommonShell> userList, int projid);
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#rememberList
+   * @param userList
+   * @param projid
+   * @return
+   */
+  int add(UserList<?> userList, int projid);
 
   /**
    * JUST FOR DEBUGGING

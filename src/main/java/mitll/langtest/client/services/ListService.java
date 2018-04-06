@@ -33,16 +33,9 @@
 package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.DropdownBase;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.UserContainer;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.custom.userlist.ListContainer;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.IUserList;
@@ -68,10 +61,11 @@ public interface ListService extends RemoteService {
    * @param description
    * @param dliClass
    * @param isPublic
+   * @param listType
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
-  UserList addUserList(String name, String description, String dliClass, boolean isPublic) throws DominoSessionException;
+  UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 
@@ -117,6 +111,7 @@ public interface ListService extends RemoteService {
   Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
   Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
+
   /**
    * @param userListID
    * @param exID

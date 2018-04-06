@@ -96,13 +96,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   void markAudioDefect(AudioAttribute audioAttribute);
 
-/*  AVPScoreReport getUserHistoryForList(int userid,
-                                       Collection<Integer> ids,
-                                       int latestResultID,
-                                       Collection<Integer> allIDs,
-                                       Map<Integer, CollationKey> idToKey,
-                                       String language);*/
-
   /**
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
    * @see mitll.langtest.server.services.ResultServiceImpl#getMonitorResults(int)

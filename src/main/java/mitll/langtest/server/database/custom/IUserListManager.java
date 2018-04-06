@@ -55,7 +55,7 @@ public interface IUserListManager   {
 
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
- // int getNumLists(int userid, int projid);
+  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   Collection<IUserListLight> getNamesForUser(int userid,
                                              int projid,
@@ -114,7 +114,7 @@ public interface IUserListManager   {
 
   void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
-  void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
+  //void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);
 

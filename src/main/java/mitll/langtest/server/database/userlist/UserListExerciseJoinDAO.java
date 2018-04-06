@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.custom.UserList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -103,10 +102,10 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
    * @see UserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String uniqueID, int exid) {
+  public void add(int userListID, String uniqueID, int exid) {
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getID() + " exercise id '" + uniqueID + "'");
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userListID + " exercise id '" + uniqueID + "'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -118,7 +117,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
               ") " +
               "VALUES(?,?);");
       int i = 1;
-      statement.setLong(i++, userList.getID());
+      statement.setLong(i++, userListID);
       statement.setString(i++, uniqueID);
 
       int j = statement.executeUpdate();
@@ -128,7 +127,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
 
       finish(connection, statement);
 
-      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
+      logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userListID);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }

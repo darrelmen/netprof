@@ -150,10 +150,16 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-/*  @Override
-  public int getNumLists(int userid, int projid) {
-    return userListDAO.getNumMineAndPublic(userid, projid);
-  }*/
+  @Override
+  public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid);
+    if (userList == null) {
+      logger.warn("addUserList no user list??? for " + userid + " " + name);
+      return null;
+    } else {
+      return userList;
+    }
+  }
 
   /**
    * @param userid
@@ -177,24 +183,52 @@ public class UserListManager implements IUserListManager {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
-      //logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
-/*      List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name, projid);
-      if (!byName.isEmpty()) {
-        UserList<CommonShell> commonShellUserList = byName.get(0);
-        if (commonShellUserList.isDeleted()) {
-          userListDAO.bringBack(commonShellUserList.getID());
-          return commonShellUserList;
-        } else {
-          return null;
-        }
-      } else {*/
       UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
           System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL);
-      userListDAO.add(e, projid);
-      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
+      rememberList(projid, e);
+//      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
-      //    }
     }
+  }
+
+  private UserList createQuiz(int userid,
+                              String name,
+                              String description,
+                              String dliClass,
+                              boolean isPrivate,
+                              int projid) {
+    String userChosenID = userDAO.getUserChosenID(userid);
+    if (userChosenID == null) {
+      logger.error("createUserList huh? no user with id " + userid);
+      return null;
+    } else {
+      long now = System.currentTimeMillis();
+
+      UserList quiz = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ);
+      int userListID = rememberList(projid, quiz);
+
+       List<CommonExercise> rawExercises = databaseServices.getProject(projid).getRawExercises();
+      Random random = new Random();
+      int size = rawExercises.size();
+
+      Set<Integer> exids = new TreeSet<>();
+
+      while (exids.size() < 100) {
+        int i = random.nextInt(size);
+        CommonExercise commonExercise = rawExercises.get(i);
+        exids.add(commonExercise.getID());
+      }
+
+      exids.forEach(id -> addItemToList(userListID, id));
+
+//      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
+      return quiz;
+    }
+  }
+
+  private int rememberList(int projid, UserList e) {
+   return userListDAO.add(e, projid);
   }
 
   @Override
@@ -306,7 +340,7 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param projid
    * @param listsICreated true if want to include my lists
-   * @param visitedLists true if want to include other's lists I've visited
+   * @param visitedLists  true if want to include other's lists I've visited
    * @return
    */
   @NotNull
@@ -533,8 +567,7 @@ public class UserListManager implements IUserListManager {
     IProjectManagement projectManagement = databaseServices.getProjectManagement();
     if (projectManagement == null) {
       logger.error("\n\n no projec management???");
-    }
-    else {
+    } else {
       incorrectAnnotations.forEach(id -> {
         CommonExercise byExID = projectManagement.getExercise(projID, id);
         if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
@@ -601,11 +634,6 @@ public class UserListManager implements IUserListManager {
     logger.debug("getCommonUserList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
- /* private List<CommonExercise> getReviewedExercises(Collection<CommonExercise> allKnown, Collection<Integer> ids) {
-    Map<Integer, CommonExercise> idToEx = new HashMap<>();
-    for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
-    return getReviewedUserExercises(idToEx, ids);
-  }*/
 
   /**
    * Need a bogus user for the list.
@@ -701,10 +729,9 @@ public class UserListManager implements IUserListManager {
     return userListDAO.getWhere(userListID, true);
   }
 
-  public void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
+  private void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
     int projectID = userExercise.getProjectID();
-    int newExerciseID = userExerciseDAO.add(userExercise, false, false,
-        getTypeOrder(projectID));
+    int newExerciseID = userExerciseDAO.add(userExercise, false, false, getTypeOrder(projectID));
     logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     int contextID = 0;
@@ -716,7 +743,7 @@ public class UserListManager implements IUserListManager {
 
     logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
-    addItemToGivenList(userList, userExercise.getOldID(), newExerciseID);
+    addItemToList(userList.getID(), userExercise.getOldID(), newExerciseID);
 
     // TODO : necessary?
     fixAudioPaths(userExercise, true, mediaDir);
@@ -734,6 +761,11 @@ public class UserListManager implements IUserListManager {
     return contextID;
   }
 
+
+  private void addItemToList(int userListID, int exid) {
+    addItemToList(userListID, "", exid);
+  }
+
   /**
    * @param userListID
    * @param exerciseID
@@ -742,19 +774,20 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void addItemToList(int userListID, @Deprecated String exerciseID, int exid) {
-    UserList where = getUserListNoExercises(userListID);
+/*
+    //UserList where = getUserListNoExercises(userListID);
 
-    if (where != null) {
-      addItemToGivenList(where, exerciseID, exid);
-    } else {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
-    }
+   // if (where != null) {
+      addItemToGivenList(userListID, exerciseID, exid);
+//    } else {
+//      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
+//    }
   }
 
-  private void addItemToGivenList(UserList where, @Deprecated String exerciseID, int exid) {
-    long userListID = where.getID();
+  private void addItemToGivenList(int userListID, @Deprecated String exerciseID, int exid) {
+*/
 
-    userListExerciseJoinDAO.add(where, exerciseID, exid);
+    userListExerciseJoinDAO.add(userListID, exerciseID, exid);
     userListDAO.updateModified(userListID);
   }
 

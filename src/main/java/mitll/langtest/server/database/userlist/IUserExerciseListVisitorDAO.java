@@ -39,8 +39,4 @@ public interface IUserExerciseListVisitorDAO {
    * @param visitor
    */
   void add(long listID, long visitor, long modified);
-
- // Collection<Integer> getListsForVisitor(int userid);
-
- // boolean remove(long listid);
 }

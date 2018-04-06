@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 public class PolyglotChart extends BasicTimeSeriesPlot {
-  private final Logger logger = Logger.getLogger("PolyglotChart");
+  //private final Logger logger = Logger.getLogger("PolyglotChart");
 
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";

@@ -99,7 +99,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return toSlick2(shared, shared.getUserID(), shared.getProjid(), shared.getID());
   }
 
-  public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
+  public SlickUserExerciseList toSlick(UserList<?> shared, int projid) {
     return toSlick2(shared, shared.getUserID(), projid, -1);
   }
 
@@ -116,11 +116,14 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.getID(),
         projid,
         false, // not homework list
-        "", ""
+        "", "",
+        shared.getListType().toString()
     );
   }
 
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
+    UserList.LIST_TYPE list_type = getListType(slick);
+
     return new UserList<>(
         slick.id(),
         slick.userid(),
@@ -132,7 +135,20 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.modified().getTime(),
         slick.contexturl(),
         slick.richtext(),
-        slick.projid(), UserList.LIST_TYPE.NORMAL);
+        slick.projid(),
+        list_type);
+  }
+
+  @NotNull
+  private UserList.LIST_TYPE getListType(SlickUserExerciseList slick) {
+    String listtype = slick.listtype();
+
+    try {
+      return listtype.isEmpty() ? UserList.LIST_TYPE.NORMAL : UserList.LIST_TYPE.valueOf(listtype);
+    } catch (IllegalArgumentException e) {
+      logger.warn("can't parse " + listtype);
+      return UserList.LIST_TYPE.NORMAL;
+    }
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -146,7 +162,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.isprivate(),
         slick.modified().getTime(),
         slick.contexturl(), slick.richtext(),
-        slick.projid(), UserList.LIST_TYPE.NORMAL);
+        slick.projid(),
+        getListType(slick));
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -162,24 +179,17 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     visitorDAOWrapper.insert(listid, userid, System.currentTimeMillis());
   }
 
-//  public void update(int id) {
-//    visitorDAOWrapper.update(id);
-//  }
-
   @Override
   public void removeVisitor(int listid, int userid) {
-    //logger.info("remove " +userid + " From " +listid);
     visitorDAOWrapper.remove(listid, userid);
   }
 
   @Override
-  public void add(UserList<CommonShell> userList, int projid) {
-    userList.setUniqueID(dao.insert(toSlick(userList, projid)));
+  public int add(UserList<?> userList, int projid) {
+    int insert = dao.insert(toSlick(userList, projid));
+    userList.setUniqueID(insert);
+    return insert;
   }
-
-//  public void addWithUser(UserList<CommonShell> userList, int userid, int projid) {
-//    userList.setUniqueID(dao.insert(toSlick2(userList, userid, projid, -1)));
-//  }
 
   @Override
   public void updateModified(long uniqueID) {
@@ -247,7 +257,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see #populateLists(Collection, long)
    */
   private void populateList(UserList<CommonShell> where) {
- //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
+    //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(userExerciseDAO.getOnList(where.getID()));
     // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
 /*
@@ -480,10 +490,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getNumLists
    * @param userid
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getNumLists
    */
   @Override
   public int getNumMineAndPublic(int userid, int projid) {
@@ -502,8 +512,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#createTables
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#createTables
    */
   public UserExerciseListVisitorDAOWrapper getVisitorDAOWrapper() {
     return visitorDAOWrapper;

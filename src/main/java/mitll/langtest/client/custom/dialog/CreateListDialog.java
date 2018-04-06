@@ -38,10 +38,13 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -49,6 +52,8 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import net.sf.qualitycheck.Check;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -59,8 +64,17 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
-  public static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
   private final Logger logger = Logger.getLogger("CreateListDialog");
+
+  public static final String PUBLIC = "Public";
+  public static final String PRIVATE = "Private";
+  public static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep List Public/Private?";
+  public static final String CREATE_NEW_LIST = "Create New List";
+  public static final String TEXT_BOX = "TextBox";
+  public static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
+  public static final String QUIZ_GROUP = "Quiz_Group";
+
+  private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
   private static final String CLASS = "Course Info (optional)";
   private static final String CREATE_LIST = "Create List";
@@ -92,14 +106,7 @@ public class CreateListDialog extends BasicDialog {
    */
   public void doCreate(Panel thirdRow) {
     thirdRow.clear();
-    enterKeyButtonHelper = new KeyPressHelper(true);
-    Panel child = new DivWidget() {
-      @Override
-      protected void onUnload() {
-        super.onUnload();
-        enterKeyButtonHelper.removeKeyHandler();
-      }
-    };
+    Panel child = addEnterKeyBinding();
     thirdRow.add(child);
     zeroPadding(child);
     child.addStyleName("userListContainer");
@@ -112,7 +119,7 @@ public class CreateListDialog extends BasicDialog {
       final TextBoxBase box = titleBox.box;
       if (current != null) box.setText(current.getName());
       box.getElement().setId("CreateListDialog_Title");
-      box.addBlurHandler(event -> controller.logEvent(box, "TextBox", "Create New List", "Title = " + box.getValue()));
+      box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "Title = " + box.getValue()));
     }
 
     {
@@ -123,7 +130,7 @@ public class CreateListDialog extends BasicDialog {
       if (current != null) theDescription.setText(current.getDescription());
       final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
       description.box.getElement().setId("CreateListDialog_Description");
-      description.box.addBlurHandler(event -> controller.logEvent(description.box, "TextBox", "Create New List", "Description = " + description.box.getValue()));
+      description.box.addBlurHandler(event -> controller.logEvent(description.box, TEXT_BOX, CREATE_NEW_LIST, "Description = " + description.box.getValue()));
     }
 
     {
@@ -133,51 +140,79 @@ public class CreateListDialog extends BasicDialog {
       classBox = addControlFormField(row, CLASS);
       if (current != null) classBox.setText(current.getClassMarker());
       classBox.box.getElement().setId("CreateListDialog_CourseInfo");
-      classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, "TextBox", "Create New List", "CourseInfo = " + classBox.box.getValue()));
+      classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
     }
 
-    {
-      row = new FluidRow();
-      child.add(row);
-
-      radioButton = new RadioButton("Public_Private_Group", "Public");
-      RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
-
-      // students by default have private lists - ?
-      boolean isPrivate = controller.getUserState().getCurrent().isStudent();
-
-      if (current != null) isPrivate = current.isPrivate();
-
-      radioButton.setValue(!isPrivate);
-      radioButton2.setValue(isPrivate);
-
-
-      Panel hp = new HorizontalPanel();
-      hp.add(radioButton);
-      radioButton2.addStyleName("leftFiveMargin");
-      hp.add(radioButton2);
-
-      ControlGroup widgets = addControlGroupEntry(row, "Keep List Public/Private?", hp, "");
-
-      row.add(widgets);
-    }
-
-    //row = new FluidRow();
-    // child.add(row);
-
-    /*submit =*/
+    child.add(getPrivacyChoices());
+    child.add(getQuizChoices());
     makeCreateButton(enterKeyButtonHelper, theDescription, classBox, radioButton);
-    //row.add(submit);
-
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
-  //private Button submit;
+  private boolean isQuiz = false;
+
+  @NotNull
+  private Widget getQuizChoices() {
+    FluidRow row = new FluidRow();
+
+    CheckBox checkBox = new CheckBox("Create a new quiz.");
+    checkBox.addValueChangeHandler(event -> isQuiz = checkBox.getValue());
+
+    Panel hp = new HorizontalPanel();
+    checkBox.addStyleName("leftFiveMargin");
+    hp.add(checkBox);
+
+    row.add(addControlGroupEntry(row, "Make a quiz?", hp, ""));
+    return row;
+  }
+
+  @NotNull
+  private Widget getPrivacyChoices() {
+    FluidRow row = new FluidRow();
+
+    radioButton = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
+    RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
+
+    // students by default have private lists - ?
+    {
+      boolean isPrivate = getDefaultPrivacy();
+
+      radioButton.setValue(!isPrivate);
+      radioButton2.setValue(isPrivate);
+    }
+
+    Panel hp = new HorizontalPanel();
+    hp.add(radioButton);
+    radioButton2.addStyleName("leftFiveMargin");
+    hp.add(radioButton2);
+
+    row.add(addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
+    return row;
+  }
+
+  private boolean getDefaultPrivacy() {
+    boolean isPrivate = controller.getUserState().getCurrent().isStudent();
+
+    if (current != null) isPrivate = current.isPrivate();
+    return isPrivate;
+  }
+
+  @NotNull
+  private Panel addEnterKeyBinding() {
+    enterKeyButtonHelper = new KeyPressHelper(true);
+    return new DivWidget() {
+      @Override
+      protected void onUnload() {
+        super.onUnload();
+        enterKeyButtonHelper.removeKeyHandler();
+      }
+    };
+  }
 
   private void makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
-                                  final TextArea area,
-                                  final FormField classBox,
-                                  final RadioButton publicRadio) {
+                                final TextArea area,
+                                final FormField classBox,
+                                final RadioButton publicRadio) {
     Button submit = new Button(CREATE_LIST);
     submit.setType(ButtonType.PRIMARY);
     submit.getElement().setId("CreateList_Submit");
@@ -195,7 +230,6 @@ public class CreateListDialog extends BasicDialog {
       }
     });
     enterKeyButtonHelper.addKeyHandler(submit);
-//    return submit;
   }
 
   public void doCreate() {
@@ -208,7 +242,7 @@ public class CreateListDialog extends BasicDialog {
                          FormField classBox,
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
-    addUserList(titleBox, area, classBox, publicRadio.getValue());
+    addUserList(titleBox, area, classBox, publicRadio.getValue(), isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL);
   }
 
   public boolean isOKToCreate(Set<String> names) {
@@ -224,15 +258,17 @@ public class CreateListDialog extends BasicDialog {
    * @param area
    * @param classBox
    * @param isPublic
+   * @param listType
    * @see #gotCreate
    */
-  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
+  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic, UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
+    // UserList.LIST_TYPE normal = UserList.LIST_TYPE.NORMAL;
     controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
-        classBox.getSafeText(), isPublic, new AsyncCallback<UserList>() {
+        classBox.getSafeText(), isPublic, listType, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("making a new list", caught);

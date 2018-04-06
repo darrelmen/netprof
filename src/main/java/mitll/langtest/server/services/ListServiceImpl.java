@@ -32,10 +32,9 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.base.ListItem;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.IUserList;
@@ -65,13 +64,19 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param description
    * @param dliClass
    * @param isPublic
+   * @param listType
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public UserList addUserList(String name, String description, String dliClass, boolean isPublic) throws DominoSessionException {
+  public UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return getUserListManager().addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, getProjectIDFromUser(userIDFromSessionOrDB));
+    IUserListManager userListManager = getUserListManager();
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+
+    return listType == UserList.LIST_TYPE.NORMAL ?
+        userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser);
   }
 
   @Override

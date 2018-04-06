@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListLight;
@@ -43,7 +41,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
-import java.util.Map;
 
 public interface ListServiceAsync {
   void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
@@ -70,10 +67,11 @@ public interface ListServiceAsync {
    * @param description
    * @param dliClass
    * @param isPublic
+   * @param listType
    * @param async
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

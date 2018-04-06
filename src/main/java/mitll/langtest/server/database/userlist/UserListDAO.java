@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -127,10 +128,10 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem
+   * @see UserListManager#rememberList
    */
   @Override
-  public void add(UserList userList, int projid) {
+  public int add(UserList userList, int projid) {
     int id = 0;
 
     try {
@@ -172,9 +173,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
       finish(connection, statement);
 
       logger.debug("add : now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
+
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
+    return id;
   }
 
   @Override
