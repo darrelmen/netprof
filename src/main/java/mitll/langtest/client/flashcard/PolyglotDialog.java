@@ -13,7 +13,7 @@ public class PolyglotDialog {
   private static final String LIGHTNING_ROUND = "Test your pronunciation!";
   private static final String GENDER_GROUP = "GenderGroup";
   private static final String DRY_RUN = "Dry Run (Just Practice!)";
-  private static final String POLYGLOT_COMPETITION = "Polyglot Competition";
+  private static final String POLYGLOT_COMPETITION = "Timed Quiz";//"Polyglot Competition";
   private static final String START = "Start!";
   private static final String CANCEL = "Cancel";
   private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";

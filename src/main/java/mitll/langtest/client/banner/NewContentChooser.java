@@ -112,10 +112,10 @@ public class NewContentChooser implements INavigation {
 
   @NotNull
   private VIEWS getInitialView() {
-    return isPolyglot() ? DRILL : LEARN;
+    return isPolyglotProject() ? DRILL : LEARN;
   }
 
-  private boolean isPolyglot() {
+  private boolean isPolyglotProject() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
@@ -196,7 +196,7 @@ public class NewContentChooser implements INavigation {
     clear();
     fixDivToNotScrollUnderHeader();
 
-    if (isPolyglot()) {
+    if (isPolyglotProject()) {
       showPolyDialog();
     } else {
       showPractice();
@@ -364,7 +364,7 @@ public class NewContentChooser implements INavigation {
   public void showProgress() {
     divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
-        new AnalysisTab(controller, isPolyglot(), 0, () -> 1));
+        new AnalysisTab(controller, isPolyglotProject(), 0, () -> 1));
 
     currentSection = PROGRESS;
   }

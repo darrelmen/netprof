@@ -77,14 +77,6 @@ public class QuizHelper extends PracticeHelper {
   public static final String QUIZ = "QUIZ";
   public static final String Unit = "Unit";
 
-/*  private static final int DRY_RUN_MINUTES = 1;
-  private static final int ROUND_MINUTES = 10;
-
-  private static final int DRY_NUM = 10;
-  private static final int COMP_NUM = 100;
-
-  private static final int MIN_POLYGLOT_SCORE = 35;*/
-
   private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
 
   private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
@@ -115,13 +107,19 @@ public class QuizHelper extends PracticeHelper {
       @Override
       public void showQuiz() {
         super.showQuiz();
+        HistoryExerciseList historyExerciseList = (HistoryExerciseList) this.exerciseList;
+
         if (historyToken == null) {
+          SelectionState selectionState = historyExerciseList.getSelectionState();
+          selectionState.getTypeToSection().remove(Unit);
+
+          ((PracticeFacetExerciseList) exerciseList).restoreUI(selectionState);
+
           logger.warning("huh? no selection state?");
         } else {
           logger.info("showQuiz current history " + History.getToken());
           logger.info("showQuiz nw      history " + historyToken);
 
-          HistoryExerciseList historyExerciseList = (HistoryExerciseList) this.exerciseList;
           if (historyToken.equals(History.getToken())) {
             showQuizDialog(historyToken, historyExerciseList);
           } else {
@@ -207,12 +205,9 @@ public class QuizHelper extends PracticeHelper {
 
             Set<String> strings = typeToSelection.keySet();
             if (strings.contains(QUIZ) && !strings.contains(Unit)) {
-
               showQuizDialog(getHistoryToken(), this);
             }
           }
-
-
         };
       }
 

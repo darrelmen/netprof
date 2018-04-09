@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 
 import java.util.Collection;
 import java.util.Map;
@@ -60,5 +61,9 @@ class PracticeFacetExerciseList extends NPFlexSectionExerciseList {
    //   logger.info("getMyListLayout : got loadExercisesUsingPrefix " +prefix + " WERE NOT USING PREFIX");
     super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
     practiceHelper.getStatsFlashcardFactory().setSelection(typeToSection);
+  }
+
+  public void restoreUI(SelectionState selectionState) {
+    restoreUIState(selectionState);
   }
 }

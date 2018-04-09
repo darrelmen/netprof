@@ -141,8 +141,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final boolean SEND_ALL_YEARS = true;
   private static final int REPORT_THIS_PROJECT = 9;
   public static final String QUIZ = "QUIZ";
-  public static final String UNIT = "Unit";
-  public static final String QUIZ1 = "Quiz";
+  private static final String UNIT = "Unit";
+  private static final String QUIZ1 = "Quiz";
   public static final String DRY_RUN = "Dry Run";
 
   private IUserDAO userDAO;
@@ -311,11 +311,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
 //      logger.info("populateProjects --- ");
-
       projectManagement.populateProjects();
-
       userDAO.setProjectManagement(getProjectManagement());
-
     }
     return this;
   }
@@ -547,18 +544,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
         second.add(new Pair(QUIZ, name));
         second.add(new Pair(UNIT, QUIZ1));
 
-//
-//        allAttributes.add(first);
-//        allAttributes.add(second);
-
         List<Integer> included = new ArrayList<>();
         exids.forEach(exid -> {
           included.add(exid);
 
           CommonExercise exercise = getExercise(projectid, exid);
-          //List<Pair> pairs = new ArrayList<>(2);
-          // pairs.add(new Pair(QUIZ, name));
-          // pairs.add(new Pair(UNIT, included.size() <= 10 ? DRY_RUN : QUIZ1));
           List<Pair> pairs = included.size() <= 10 ? first : second;
           allAttributes.add(pairs);
           sectionHelper.addPairs(exercise, pairs);
@@ -947,8 +937,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userExercise;
   }
 
-  private void clearDefects(//Set<AudioAttribute> original,
-                            Set<AudioAttribute> defects, CommonExercise exercise) {
+  private void clearDefects(Set<AudioAttribute> defects, CommonExercise exercise) {
     //boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
     //logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
 

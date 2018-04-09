@@ -49,6 +49,7 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -163,7 +164,7 @@ public class AnalysisTab extends DivWidget {
    * @param isPolyglot
    * @param req
    * @see AnalysisTab#AnalysisTab
-   * @see UserContainer#gotClickOnItem
+   * @see UserContainer#changeSelectedUser
    */
   public AnalysisTab(final ExerciseController controller,
                      int minRecordings,
@@ -188,7 +189,7 @@ public class AnalysisTab extends DivWidget {
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(), isTeacherView,
-        controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
+        isPolyglot);
 
     {
       Panel timeControls = getTimeControls(playFeedback);

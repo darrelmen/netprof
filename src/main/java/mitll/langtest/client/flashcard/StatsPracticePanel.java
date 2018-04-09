@@ -55,7 +55,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private static final String START_OVER = "Start Over";
 
   /**
-   * @see StatsPracticePanel#getSkipToEnd
+   * @see #getSkipToEnd
    */
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
@@ -221,9 +221,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     container = widgets;
 
     {
-      AnalysisTab scoreHistory = getScoreHistory();
-
-      scoreHistory.add(getButtonsBelowScoreHistory());
+      AnalysisTab ananlysisView = getScoreHistory();
+      ananlysisView.add(getButtonsBelowScoreHistory());
 
       {
         DivWidget w = new DivWidget();
@@ -236,10 +235,10 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         }
         //  w.setHeight("20px");
         w.setWidth("100%");
-        scoreHistory.add(w);
+        ananlysisView.add(w);
       }
 
-      widgets.add(scoreHistory);
+      widgets.add(ananlysisView);
     }
     belowContentDiv.clear();
     belowContentDiv.add(container);
