@@ -88,7 +88,7 @@ public class UserListManager implements IUserListManager {
 
 
   private static final boolean DEBUG = false;
-  private static final int NUM_TO_CREATE_FOR_QUIZ = 10+100;
+  private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -203,11 +203,11 @@ public class UserListManager implements IUserListManager {
   }
 
   private UserList<CommonShell> createQuiz(int userid,
-                                              String name,
-                                              String description,
-                                              String dliClass,
-                                              boolean isPrivate,
-                                              int projid) {
+                                           String name,
+                                           String description,
+                                           String dliClass,
+                                           boolean isPrivate,
+                                           int projid) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);

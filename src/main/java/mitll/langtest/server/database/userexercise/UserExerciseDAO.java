@@ -48,6 +48,9 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+/**
+ * @deprecated
+ */
 public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
   private static final Logger logger = LogManager.getLogger(UserExerciseDAO.class);
 

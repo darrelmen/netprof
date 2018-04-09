@@ -153,6 +153,8 @@ class CheckLTS {
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
     Set<String> indict = new HashSet<>();
+
+    Map<String, String[][]> tokenToLTSResult = new HashMap<>();
     try {
       int i = 0;
       for (String token : tokens) {
@@ -167,7 +169,15 @@ class CheckLTS {
             oov.add(trim);
           }
         } else {
-          String[][] process = (!isEmptyLTS) ? lts.process(token) : null;
+          String[][] process = /*(!isEmptyLTS) ? lts.process(token) :*/ null;
+
+          if (!isEmptyLTS) {
+            String[][] cached = tokenToLTSResult.get(token);
+            if (cached == null) {
+              tokenToLTSResult.put(token, cached = lts.process(token));
+            }
+            process = cached;
+          }
 
           if (DEBUG) {
             if (process != null) {
@@ -239,7 +249,8 @@ class CheckLTS {
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
     } else {
-      if (DEBUG) logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
+      if (DEBUG)
+        logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
     if (DEBUG)
       logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
@@ -301,7 +312,7 @@ class CheckLTS {
           if (DEBUG) logger.warn("isLegitLTS bad  " + c + "/" + n + " for " + token);
           numBad++;
         } else {
-         // logger.info("good " + c + "/" + n + " for " + token);
+          // logger.info("good " + c + "/" + n + " for " + token);
         }
         c++;
         //  valid &= allValid;
@@ -310,7 +321,7 @@ class CheckLTS {
         valid = false;
         //logger.info("isLegitLTS all bad " + numBad + " out of " + n + " for " + token);
       } else if (numBad > 0) {
-        if (DEBUG)  logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
+        if (DEBUG) logger.info("isLegitLTS not all bad " + numBad + " out of " + n + " for " + token);
       }
     }
     return b && valid;
