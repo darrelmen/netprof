@@ -35,7 +35,6 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -65,21 +64,24 @@ import java.util.logging.Logger;
 public class CreateListDialog extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
+  private static final String SHOW_AS_QUIZ = "Show as Quiz";
+  private static final String CREATE_A_NEW_QUIZ = "Create a new quiz.";
+  private static final String IS_A_QUIZ = "Is a quiz?";
 
-  public static final String MAKE_A_QUIZ = "Make a quiz?";
+  private static final String MAKE_A_QUIZ = "Make a quiz?";
 
-  public static final String PUBLIC = "Public";
-  public static final String PRIVATE = "Private";
-  public static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep List Public/Private?";
-  public static final String CREATE_NEW_LIST = "Create New List";
-  public static final String TEXT_BOX = "TextBox";
-  public static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
+  private static final String PUBLIC = "Public";
+  private static final String PRIVATE = "Private";
+  private static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep Public/Private?";
+  private static final String CREATE_NEW_LIST = "Create New List";
+  private static final String TEXT_BOX = "TextBox";
+  private static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
   // public static final String QUIZ_GROUP = "Quiz_Group";
 
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
   private static final String CLASS = "Course Info (optional)";
-  private static final String CREATE_LIST = "Create List";
+ // private static final String CREATE_LIST = "Create List";
   private static final String TITLE = "Title";
   private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
   private final CreateListComplete listView;
@@ -150,7 +152,7 @@ public class CreateListDialog extends BasicDialog {
 
     child.add(getQuizChoices());
     child.add(getPrivacyChoices());
-  //  makeCreateButton(enterKeyButtonHelper, theDescription, classBox, publicChoice);
+    //  makeCreateButton(enterKeyButtonHelper, theDescription, classBox, publicChoice);
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
@@ -160,7 +162,7 @@ public class CreateListDialog extends BasicDialog {
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
-    CheckBox checkBox = new CheckBox(isEdit ? "Show as Quiz" : "Create a new quiz.");
+    CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
       publicChoice.setValue(isQuiz);
@@ -171,7 +173,14 @@ public class CreateListDialog extends BasicDialog {
     checkBox.addStyleName("leftFiveMargin");
     hp.add(checkBox);
 
-    row.add(addControlGroupEntry(row, isEdit ? "Is a quiz?" : MAKE_A_QUIZ, hp, ""));
+    if (current != null) {
+      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
+      checkBox.setValue(isQuiz);
+      this.isQuiz = isQuiz;
+    }
+
+
+    row.add(addControlGroupEntry(row, isEdit ? IS_A_QUIZ : MAKE_A_QUIZ, hp, ""));
     return row;
   }
 
@@ -243,6 +252,9 @@ public class CreateListDialog extends BasicDialog {
     }
   }*/
 
+  /**
+   * @see ListView#doAdd
+   */
   public void doCreate() {
     gotCreate(enterKeyButtonHelper, theDescription, classBox, publicChoice);
   }
@@ -356,8 +368,15 @@ public class CreateListDialog extends BasicDialog {
     currentSelection.setName(titleBox.getSafeText());
     currentSelection.setDescription(sanitize(theDescription.getText()));
     currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
-    currentSelection.setPrivate(!publicChoice.getValue());
-    currentSelection.setListType(isQuiz?UserList.LIST_TYPE.QUIZ:UserList.LIST_TYPE.NORMAL);
+    boolean aPrivate = !publicChoice.getValue();
+    currentSelection.setPrivate(aPrivate);
+    UserList.LIST_TYPE listType = isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL;
+    currentSelection.setListType(listType);
+
+    logger.info("doEdit is " +
+        "\n\tprivate " + aPrivate +
+        "\n\ttype    " + listType
+    );
 
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

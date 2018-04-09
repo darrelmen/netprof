@@ -37,14 +37,16 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  private final Logger logger = Logger.getLogger("ListView");
+
   private static final String ITEMS = "Items";
   public static final String ADD = "Add";
   public static final String CANCEL = "Cancel";
   public static final String LEARN_THE_LIST = "Learn the list.";
-  private final Logger logger = Logger.getLogger("ListView");
+  public static final String EDIT_TITLE = "";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
-  private static final String YOUR_LISTS = "Your Lists";
+  private static final String YOUR_LISTS = "Your Lists and Quizes";
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
@@ -234,7 +236,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private Button getEdit() {
-    Button successButton = getSuccessButton("Title");
+    Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, "Edit the list title or make it public.");
@@ -599,7 +601,8 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doShare() {
     UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
-    String mailToList = new UserListSupport(controller).getMailToList(currentSelection);
+    boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
+    String mailToList = new UserListSupport(controller).getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
 
     DivWidget contents = new DivWidget();
     String name = currentSelection.getName();
@@ -610,8 +613,9 @@ public class ListView implements ContentView, CreateListComplete {
     contents.add(w);
 
     DialogHelper dialogHelper = new DialogHelper(false);
+    String share_list = isQuiz ? "Share Quiz" : "Share List";
     Button closeButton = dialogHelper.show(
-        "Share List",
+        share_list,
         Collections.emptyList(),
         contents,
         "OK",
@@ -638,7 +642,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   /**
-   * @see CreateListDialog#makeCreateButton
+   * @seex CreateListDialog#makeCreateButton
    */
   @Override
   public void gotEdit() {

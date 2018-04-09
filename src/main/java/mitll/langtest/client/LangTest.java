@@ -54,6 +54,8 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.userlist.ListContainer;
+import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -1216,15 +1218,24 @@ public class LangTest implements
     return storage;
   }
 
+  /**
+   * @see ListView#showLearnList
+   * @param id
+   */
   @Override
   public void showLearnList(int id) {
     initialUI.getNavigation().showLearnList(id);
   }
+
   @Override
   public void showQuiz(String listName) {
     initialUI.getNavigation().showQuiz(listName);
   }
 
+  /**
+   * @see ListView#getDrillButton
+   * @param id
+   */
   @Override
   public void showDrillList(int id) {
     initialUI.getNavigation().showDrillList(id);

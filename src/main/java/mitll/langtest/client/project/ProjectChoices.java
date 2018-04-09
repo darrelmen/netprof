@@ -65,7 +65,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  private static final String POLYGLOT_ICON = LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png";
+//  private static final String POLYGLOT_ICON = LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png";
 
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
@@ -549,7 +549,9 @@ public class ProjectChoices {
 
         boolean hasChildren = projectForLang.hasChildren();
 
+/*
         maybeAddPolyglotIcon(projectForLang, button, hasChildren);
+*/
 
         if (isQC) {
           if (!hasChildren) {
@@ -574,7 +576,7 @@ public class ProjectChoices {
     }
   }
 
-  private void maybeAddPolyglotIcon(SlimProject projectForLang, PushButton button, boolean hasChildren) {
+/*  private void maybeAddPolyglotIcon(SlimProject projectForLang, PushButton button, boolean hasChildren) {
     ProjectType projectType = projectForLang.getProjectType();
     // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
     {
@@ -590,7 +592,7 @@ public class ProjectChoices {
         //        }
       }
     }
-  }
+  }*/
 
   /**
    * Add poly icon to parent if any child is a polyglot game project.
@@ -598,23 +600,22 @@ public class ProjectChoices {
    * @param projectForLang
    * @param container
    */
-  private void addPolyglotIcon(SlimProject projectForLang, UIObject container) {
+/*  private void addPolyglotIcon(SlimProject projectForLang, UIObject container) {
     boolean hasPoly = !projectForLang.getChildren()
         .stream()
         .filter(this::isPolyglot).collect(Collectors.toList()).isEmpty();
-/*    logger.info("addPolyglotIcon : found " + projectForLang.getChildren().size() + " children  of " + projectForLang.getName() +
-        " has poly " + hasPoly);*/
+
     if (hasPoly) {
       addPolyIcon(container);
     }
-  }
+  }*/
 
-  private void addPolyIcon(UIObject container) {
+/*  private void addPolyIcon(UIObject container) {
     Image polyglot = new Image(UriUtils.fromSafeConstant(POLYGLOT_ICON));
     polyglot.addStyleName("floatRight");
     polyglot.getElement().getStyle().setMarginTop(9, Style.Unit.PX);
     DOM.appendChild(container.getElement(), polyglot.getElement());
-  }
+  }*/
 
   /**
    * @param name

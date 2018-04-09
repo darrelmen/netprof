@@ -62,7 +62,7 @@ public class SelectionState {
   private static final String ITEM_SEPARATOR = "&#44";
   private static final String SHOWING_ALL_ENTRIES = "All entries";
 
-  static final String INSTANCE = "instance";
+  public  static final String INSTANCE = "instance";
   private int item = -1;
   private final Map<String, Collection<String>> typeToSection = new HashMap<>();
   private String instance = "";

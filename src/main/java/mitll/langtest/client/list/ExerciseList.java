@@ -786,19 +786,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     showEmptySelection();
   }
 
-  protected void showEmptySelection() {
-    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
-  }
-
   void clearExerciseContainer() {
     innerContainer.clear();
   }
 
+  protected void showEmptySelection() {
+    Scheduler.get().scheduleDeferred((Command) () -> showEmptyExercise(getEmptySearchMessage()));
+  }
+
   /**
    * Compare with google response for this state.
+   * @param message
    */
-  private void showEmptyExercise() {
-    createdPanel = new SimplePanel(new Heading(3, getEmptySearchMessage()));
+  protected void showEmptyExercise(String message) {
+    createdPanel = new SimplePanel(new Heading(3, message));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);

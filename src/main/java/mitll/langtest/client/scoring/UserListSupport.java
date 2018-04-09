@@ -233,23 +233,31 @@ public class UserListSupport {
   }*/
 
   public String getMailToList(IUserList ul) {
-    return getMailTo(ul.getID(), ul.getName());
+    return getMailTo(ul.getID(), ul.getName(), false);
   }
 
   @NotNull
-  private String getMailTo(int listid, String name) {
+  public String getMailTo(int listid, String name, boolean isQuiz) {
+    String selector = isQuiz ? "QUIZ=" + name.replaceAll("\\s+","+") : "Lists=" + listid;
+    String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
     String s = trimURL(Window.Location.getHref()) +
         "#" +
-        SelectionState.SECTION_SEPARATOR + "Lists=" + listid +
-        getProjectParam();
+        SelectionState.SECTION_SEPARATOR + selector +
+        getProjectParam() +
+        suffix;
 
     String encode = URL.encode(s);
+    String type = isQuiz ? "quiz" : "list";
+
     return "mailto:" +
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
-        " list " + name +
+        " " +
+        type +
+        " " + name +
         "&body=" +
-        getPrefix() + name + " list : " + encode + getSuffix();
+        getPrefix() + name + " " +
+        type + " : " + encode + getSuffix();
   }
 
   @NotNull
@@ -274,9 +282,9 @@ public class UserListSupport {
         token +
         SelectionState.SECTION_SEPARATOR + "project=" + projectStartupInfo.getProjectid();
 
-    String encode = s.replaceAll("\\s","+");//URL.encode(s);
+    String encode = s.replaceAll("\\s", "+");//URL.encode(s);
 
-   // logger.info("getMailToThese : encode " +encode);
+    // logger.info("getMailToThese : encode " +encode);
     return "mailto:" +
         "?" +
         "Subject=Share netprof " + controller.getLanguage() +
@@ -285,7 +293,7 @@ public class UserListSupport {
         getPrefix() +
         selectionState.getDescription(projectStartupInfo.getTypeOrder(), false) + " : " +
         //"<" +
-        encode+
+        encode +
         //">" +
         getSuffix();
   }

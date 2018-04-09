@@ -34,6 +34,8 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -73,6 +75,9 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QUIZ;
  */
 public class QuizHelper extends PracticeHelper {
   private final Logger logger = Logger.getLogger("QuizHelper");
+
+  private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz on the left.";
+  private static final String NO_QUIZZES_YET = "No quizzes yet - please come back later.";
 
   public static final String QUIZ = "QUIZ";
   public static final String Unit = "Unit";
@@ -115,16 +120,16 @@ public class QuizHelper extends PracticeHelper {
 
           ((PracticeFacetExerciseList) exerciseList).restoreUI(selectionState);
 
-          logger.warning("huh? no selection state?");
+          logger.warning("showQuiz using selection " + selectionState);
         } else {
           logger.info("showQuiz current history " + History.getToken());
-          logger.info("showQuiz nw      history " + historyToken);
+          logger.info("showQuiz now     history " + historyToken);
 
-          if (historyToken.equals(History.getToken())) {
+          //if (historyToken.equals(History.getToken())) {
             showQuizDialog(historyToken, historyExerciseList);
-          } else {
+          //} else {
             historyExerciseList.setHistoryItem(historyToken);
-          }
+         // }
 
         }
       }
@@ -151,14 +156,21 @@ public class QuizHelper extends PracticeHelper {
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
 
+          private boolean hasValues = true;
+
           @NotNull
           @Override
           protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
             return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
           }
 
+          /**
+           * @see #showEmptySelection
+           * @return
+           */
           protected String getEmptySearchMessage() {
-            return "Please choose a quiz on the left.";
+            logger.info("getEmptySearchMessage -- ");
+            return hasValues ? PLEASE_CHOOSE_A_QUIZ : NO_QUIZZES_YET;
           }
 
           @Override
@@ -200,12 +212,23 @@ public class QuizHelper extends PracticeHelper {
           protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
             super.gotFilterResponse(response, then, typeToSelection);
 
+            Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
+            Set<MatchInfo> matchInfos = typeToValues.get(QUIZ);
+            hasValues = !matchInfos.isEmpty();
             logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
-                "\n\ttype to values : " + typeToSelection);
+                "\n\ttype to select : " + typeToSelection +
+                "\n\ttype to values : " + response.getTypeToValues() +
+                "\n\thas values     : " + hasValues
+            );
 
-            Set<String> strings = typeToSelection.keySet();
-            if (strings.contains(QUIZ) && !strings.contains(Unit)) {
+            Set<String> knownTypes = typeToSelection.keySet();
+            if (knownTypes.contains(QUIZ) && !knownTypes.contains(Unit)) {
               showQuizDialog(getHistoryToken(), this);
+            } else if (knownTypes.isEmpty()) {
+              logger.info("no known types");
+//              Scheduler.get().scheduleDeferred((Command) () -> showEmptyExercise("No quizes yet - please come back later."));
+
+//              showEmptyExercise("No quizes yet - please come back later.");
             }
           }
         };

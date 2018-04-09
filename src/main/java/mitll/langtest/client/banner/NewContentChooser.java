@@ -21,6 +21,7 @@ import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
 import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
@@ -54,7 +55,6 @@ public class NewContentChooser implements INavigation {
   private VIEWS currentSection = VIEWS.NONE;
 
 
-
   /**
    * @param controller
    * @see InitialUI#makeNavigation
@@ -62,7 +62,7 @@ public class NewContentChooser implements INavigation {
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new NewLearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
-    quizHelper = new QuizHelper(controller, this, QUIZ,this);
+    quizHelper = new QuizHelper(controller, this, QUIZ, this);
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -91,7 +91,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    //   logger.info("currentView " + currentView);
+       logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView() : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -236,7 +236,7 @@ public class NewContentChooser implements INavigation {
           @Override
           public void gotNo() {
             setBannerVisible(true);
-            PracticeHelper practiceHelper =   NewContentChooser.this.practiceHelper;
+            PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
             practiceHelper.setVisible(true);
           }
 
@@ -244,7 +244,7 @@ public class NewContentChooser implements INavigation {
           public void gotHidden() {
             if (mode != MODE_CHOICE.NOT_YET) {
               setBannerVisible(false);
-              PracticeHelper practiceHelper =  NewContentChooser.this.practiceHelper;
+              PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
               practiceHelper.setVisible(false);
             }
 //        logger.info("mode is " + mode);
@@ -341,7 +341,9 @@ public class NewContentChooser implements INavigation {
   }
 
   private String getCurrentStoredView() {
-    return controller.getStorage().getValue(CURRENT_VIEW);
+    SelectionState selectionState = new SelectionState(History.getToken(), false);
+    boolean isQuiz = selectionState.getInstance().equalsIgnoreCase("Quiz");
+    return isQuiz ? QUIZ.toString().toUpperCase() : controller.getStorage().getValue(CURRENT_VIEW).toUpperCase();
   }
 
   private void storeValue(VIEWS view) {
