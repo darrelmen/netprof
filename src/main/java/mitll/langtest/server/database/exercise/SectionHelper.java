@@ -75,7 +75,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private final boolean DEBUG = false;
+  private final boolean DEBUG = true;
   private final boolean DEBUG_TYPE_ORDER = false;
 
   public SectionHelper() {
@@ -316,7 +316,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-    if (DEBUG) logger.info("to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+    if (DEBUG) logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (!node.isLeaf() && node.getChildType().equals(type)) {
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
@@ -627,9 +627,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    * @param exercise
    * @param pairs
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    */
   public void addPairs(T exercise, List<Pair> pairs) {
     pairs.forEach(pair -> addExerciseToLesson(exercise, pair));
@@ -950,9 +950,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     List<String> typesInOrder = getTypesFromRequest(typeToSelection);
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
-    logger.info("getTypeToValues request is       " + typeToSelection);
+    logger.info("getTypeToValues typesToInclude1 " + typesToInclude1);
+    logger.info("getTypeToValues request is      " + typeToSelection);
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-   logger.info("getTypeToValues typeToMatches is " + typeToMatches, new Exception());
+    logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
@@ -1001,7 +1002,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       Set<MatchInfo> matches = typeToMatches.get(type);
       if (matches == null || matches.isEmpty()) {
         typesToInclude1.remove(type);
-        logger.info("getTypeToValues removing " + type);
+        logger.info("checkIfAnyTypesAreEmpty removing " + type + " matches = " + matches);
         someEmpty = true;
       }
     }

@@ -50,7 +50,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private static final String CORRECT = "Correct";
   private static final String AVG_SCORE = "Pronunciation";
   /**
-   *
+   * @see #getStartOver
    */
   private static final String START_OVER = "Start Over";
 

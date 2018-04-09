@@ -68,7 +68,7 @@ public class NewContentChooser implements INavigation {
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new NewLearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
-    quizHelper = new QuizHelper(controller, this, QUIZ);
+    quizHelper = new QuizHelper(controller, this, QUIZ,this);
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -124,6 +124,11 @@ public class NewContentChooser implements INavigation {
   private boolean isPolyglot() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
+  }
+
+  @Override
+  public void showView(VIEWS view) {
+    showView(view, false);
   }
 
   @Override
@@ -192,8 +197,8 @@ public class NewContentChooser implements INavigation {
     divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
   }
 
-  @Override
-  public void showDrill() {
+  //  @Override
+  private void showDrill() {
     clear();
     fixDivToNotScrollUnderHeader();
 
@@ -204,7 +209,7 @@ public class NewContentChooser implements INavigation {
     }
   }
 
-  public void showQuiz() {
+  private void showQuiz() {
     clear();
     fixDivToNotScrollUnderHeader();
     showQuizForReal();

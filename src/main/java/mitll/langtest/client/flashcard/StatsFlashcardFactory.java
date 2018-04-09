@@ -34,7 +34,7 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -43,7 +43,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -82,7 +81,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   //StatsPracticePanel currentFlashcard = null;
   FlashcardPanel<?> currentFlashcard = null;
-  private NewContentChooser navigation;
+  private INavigation navigation;
   final KeyStorage storage;
 
   final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
@@ -149,7 +148,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
 
-   // boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
+    // boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
 
     currentFlashcard = controller.shouldRecord() || true ?
         currentFlashcard = getFlashcard(e) :
@@ -229,7 +228,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
 //  private int counter = 0;
 
-  public void setNavigation(NewContentChooser navigation) {
+  public void setNavigation(INavigation navigation) {
     this.navigation = navigation;
   }
 
@@ -266,8 +265,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   }
 
   /**
-   * @see PolyglotPracticePanel#getDeviceTypeValue
    * @return
+   * @see PolyglotPracticePanel#getDeviceTypeValue
    */
   @Override
   public int getNumExercises() {
@@ -275,10 +274,18 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   }
 
   public void showDrill() {
-    navigation.showDrill();
-  }  public void showQuiz() {
-    navigation.showQuiz();
+    navigation.showView(INavigation.VIEWS.DRILL);
   }
+
+  public void showQuiz() {
+    navigation.showView(INavigation.VIEWS.QUIZ);
+
+
+  }
+/*
+  public void gotStartOver() {
+
+  }*/
 
   public void styleContent(boolean showCard) {
     if (showCard) {

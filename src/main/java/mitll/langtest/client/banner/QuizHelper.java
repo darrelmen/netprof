@@ -34,6 +34,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,14 +43,17 @@ import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -58,6 +62,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.custom.INavigation.VIEWS.QUIZ;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -70,7 +76,25 @@ public class QuizHelper extends PracticeHelper {
 
   public static final String QUIZ = "QUIZ";
   public static final String Unit = "Unit";
+
+  private static final int DRY_RUN_MINUTES = 1;
+  private static final int ROUND_MINUTES = 10;
+
+  private static final int DRY_NUM = 10;
+  private static final int COMP_NUM = 100;
+
+  private static final int MIN_POLYGLOT_SCORE = 35;
+
   private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
+
+  private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+
+  private PolyglotDialog.PROMPT_CHOICE candidatePrompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
+  private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
+
+  private INavigation navigation;
+  private String historyToken;
 
   /**
    * @param controller
@@ -78,14 +102,35 @@ public class QuizHelper extends PracticeHelper {
    * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  QuizHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  QuizHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView,
+             INavigation navigation) {
     super(controller, viewContaner, myView);
+    this.navigation = navigation;
   }
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
 
-    polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "Quiz");
+    polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, "Quiz") {
+      @Override
+      public void showQuiz() {
+        super.showQuiz();
+        if (historyToken == null) {
+          logger.warning("huh? no selection state?");
+        } else {
+          logger.info("showQuiz current history " + History.getToken());
+          logger.info("showQuiz nw      history " + historyToken);
+
+          HistoryExerciseList historyExerciseList = (HistoryExerciseList) this.exerciseList;
+          if (historyToken.equals(History.getToken())) {
+            showQuizDialog(historyToken, historyExerciseList);
+          } else {
+            historyExerciseList.setHistoryItem(historyToken);
+          }
+
+        }
+      }
+    };
     statsFlashcardFactory = polyglotFlashcardFactory;
 
 
@@ -117,7 +162,6 @@ public class QuizHelper extends PracticeHelper {
           protected String getEmptySearchMessage() {
             return "Please choose a quiz on the left.";
           }
-
 
           @Override
           protected void getTypeOrder() {
@@ -155,6 +199,20 @@ public class QuizHelper extends PracticeHelper {
             return request;
           }
 
+          protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+            super.gotFilterResponse(response, then, typeToSelection);
+
+            logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
+                "\n\ttype to values : " + typeToSelection);
+
+            Set<String> strings = typeToSelection.keySet();
+            if (strings.contains(QUIZ) && !strings.contains(Unit)) {
+
+              showQuizDialog(getHistoryToken(), this);
+            }
+          }
+
+
         };
       }
 
@@ -166,4 +224,84 @@ public class QuizHelper extends PracticeHelper {
     };
   }
 
+  private void showQuizDialog(String historyToken, HistoryExerciseList historyExerciseList) {
+    rememberHistoryToken(historyToken);
+
+    logger.info("current selection state " + historyToken);
+
+    String first = historyToken
+        + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Dry Run";
+    String second = historyToken
+        + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Quiz";
+
+    showPolyDialog(first, second, historyExerciseList);
+  }
+
+  /**
+   * @seex #showDrill
+   */
+  private void showPolyDialog(String first, String second, HistoryExerciseList historyExerciseList) {
+    mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+
+    new PolyglotDialog(
+        DRY_RUN_MINUTES, DRY_NUM,
+        ROUND_MINUTES, COMP_NUM,
+
+        MIN_POLYGLOT_SCORE,
+        new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            mode = candidateMode;
+            if (mode == PolyglotDialog.MODE_CHOICE.DRY_RUN) {
+              historyExerciseList.setHistoryItem(first);
+            } else if (mode == PolyglotDialog.MODE_CHOICE.POLYGLOT) {
+              historyExerciseList.setHistoryItem(second);
+            } else {
+              return false;
+            }
+
+            prompt = candidatePrompt;
+
+            return true;
+          }
+
+          @Override
+          public void gotNo() {  // or cancel
+            navigation.setBannerVisible(true);
+            QuizHelper.this.setVisible(true);
+          }
+
+          @Override
+          public void gotHidden() {
+            if (mode != PolyglotDialog.MODE_CHOICE.NOT_YET) {
+              navigation.setBannerVisible(false);
+              QuizHelper.this.setVisible(false);
+            }
+//        logger.info("mode is " + mode);
+            showQuizForReal();
+          }
+        },
+        new PolyglotDialog.ModeChoiceListener() {
+          @Override
+          public void gotMode(PolyglotDialog.MODE_CHOICE choice) {
+            candidateMode = choice;
+          }
+
+          @Override
+          public void gotPrompt(PolyglotDialog.PROMPT_CHOICE choice) {
+            candidatePrompt = choice;
+          }
+        }
+    );
+  }
+
+  private void showQuizForReal() {
+    setMode(mode, prompt);
+    setNavigation(navigation);
+    hideList();
+  }
+
+  public void rememberHistoryToken(String historyToken) {
+    this.historyToken = historyToken;
+  }
 }

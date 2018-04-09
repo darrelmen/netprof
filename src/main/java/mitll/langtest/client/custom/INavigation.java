@@ -46,6 +46,8 @@ public interface INavigation extends IViewContaner {
     }
   }
 
+  void showView(VIEWS view);
+
   void showView(VIEWS view, boolean isFirstTime);
 
   void showInitialState();
@@ -55,7 +57,7 @@ public interface INavigation extends IViewContaner {
 
   void showDrillList(int listid);
 
-  void showDrill();
+ // void showDrill();
 
   Widget getNavigation();
 

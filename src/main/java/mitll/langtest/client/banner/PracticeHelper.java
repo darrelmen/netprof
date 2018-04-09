@@ -66,7 +66,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
-  private NewContentChooser navigation;
+  private INavigation navigation;
 
   /**
    * @param controller
@@ -132,7 +132,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     flexListLayout.setVisible(visible);
   }
 
-  public void setNavigation(NewContentChooser navigation) {
+  public void setNavigation(INavigation navigation) {
     this.navigation = navigation;
   }
 
@@ -152,7 +152,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
     return promptChoice;
   }
 
-  public NewContentChooser getNavigation() {
+  public INavigation getNavigation() {
     return navigation;
   }
 }

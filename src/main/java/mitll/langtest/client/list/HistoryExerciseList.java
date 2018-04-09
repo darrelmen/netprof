@@ -306,7 +306,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param historyToken
    * @see #pushNewItem
    */
-  protected void setHistoryItem(String historyToken) {
+  public void setHistoryItem(String historyToken) {
     if (DEBUG_PUSH) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
