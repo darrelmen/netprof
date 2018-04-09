@@ -75,7 +75,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private final boolean DEBUG = true;
+  private final boolean DEBUG = false;
   private final boolean DEBUG_TYPE_ORDER = false;
 
   public SectionHelper() {

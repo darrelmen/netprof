@@ -39,6 +39,10 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
+  public static final String CLICK_HERE_TO_SHARE = "Click here to share ";
+  public static final String SHARE_QUIZ = "Share Quiz";
+  public static final String SHARE_LIST = "Share List";
+
   private static final String ITEMS = "Items";
   public static final String ADD = "Add";
   public static final String CANCEL = "Cancel";
@@ -606,14 +610,14 @@ public class ListView implements ContentView, CreateListComplete {
 
     DivWidget contents = new DivWidget();
     String name = currentSelection.getName();
-    logger.info("name " + name);
-    NavLink w = new NavLink("Click here to share " + name + ".", mailToList);
+//    logger.info("name " + name);
+    NavLink w = new NavLink(CLICK_HERE_TO_SHARE + name + ".", mailToList);
     w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
 
     contents.add(w);
 
     DialogHelper dialogHelper = new DialogHelper(false);
-    String share_list = isQuiz ? "Share Quiz" : "Share List";
+    String share_list = isQuiz ? SHARE_QUIZ : SHARE_LIST;
     Button closeButton = dialogHelper.show(
         share_list,
         Collections.emptyList(),
