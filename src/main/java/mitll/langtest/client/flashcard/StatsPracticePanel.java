@@ -8,7 +8,10 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
@@ -18,7 +21,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -221,8 +223,8 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     container = widgets;
 
     {
-      AnalysisTab ananlysisView = getScoreHistory();
-      ananlysisView.add(getButtonsBelowScoreHistory());
+      AnalysisTab scoreHistory = getScoreHistory();
+      scoreHistory.add(getButtonsBelowScoreHistory());
 
       {
         DivWidget w = new DivWidget();
@@ -235,10 +237,10 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         }
         //  w.setHeight("20px");
         w.setWidth("100%");
-        ananlysisView.add(w);
+        scoreHistory.add(w);
       }
 
-      widgets.add(ananlysisView);
+      widgets.add(scoreHistory);
     }
     belowContentDiv.clear();
     belowContentDiv.add(container);

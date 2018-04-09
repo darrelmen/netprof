@@ -250,11 +250,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
-   // Panel recordButtonRow = getCenteredWrapper(recordButton);
+    // Panel recordButtonRow = getCenteredWrapper(recordButton);
     Panel recordButtonRow = new DivWidget();
     recordButtonRow.setWidth("100%");
 
-    DivWidget bDiv =new DivWidget();
+    DivWidget bDiv = new DivWidget();
     bDiv.add(recordButton);
     recordButtonRow.add(bDiv);
     recordButtonRow.getElement().setId("recordButtonRow");
@@ -264,9 +264,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     recordButton.addStyleName("alignCenter");
 
 
-   // recordButtonRow.addStyleName("leftTenMargin");
-  //  recordButtonRow.addStyleName("rightTenMargin");
-   // recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
+    // recordButtonRow.addStyleName("leftTenMargin");
+    //  recordButtonRow.addStyleName("rightTenMargin");
+    // recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
 
     return recordButtonRow;
   }
@@ -418,29 +418,29 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     container.setId("feedbackContainerAndBar");
 
     {
-    IconAnchor correctIcon = new IconAnchor();
-    correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
+      IconAnchor correctIcon = new IconAnchor();
+      correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
-    DivWidget iconContainer = new DivWidget();
-    iconContainer.addStyleName("floatLeft");
+      DivWidget iconContainer = new DivWidget();
+      iconContainer.addStyleName("floatLeft");
 
-    iconContainer.add(correctIcon);
-    container.add(iconContainer);
+      iconContainer.add(correctIcon);
+      container.add(iconContainer);
     }
 
     {
-    DivWidget scoreContainer = new DivWidget();
-    scoreContainer.addStyleName("floatLeft");
+      DivWidget scoreContainer = new DivWidget();
+      scoreContainer.addStyleName("floatLeft");
 
-    scoreContainer.addStyleName("topMargin");
-    scoreContainer.addStyleName("leftFiveMargin");
+      scoreContainer.addStyleName("topMargin");
+      scoreContainer.addStyleName("leftFiveMargin");
       scoreContainer.add(getProgressBar(score, isFullMatch));
 
-    scoreContainer.setWidth("73%");
+      scoreContainer.setWidth("73%");
 
-    container.setWidth("78%");
-    container.getElement().getStyle().setMarginLeft(FEEDBACK_LEFT_MARGIN, Style.Unit.PCT);
-    container.add(scoreContainer);
+      container.setWidth("78%");
+      container.getElement().getStyle().setMarginLeft(FEEDBACK_LEFT_MARGIN, Style.Unit.PCT);
+      container.add(scoreContainer);
     }
 
     return container;
@@ -450,7 +450,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private DivWidget getProgressBar(double score, boolean isFullMatch) {
 //    if (score < 0) score = 0;
 //    double percent = 100 * score;
-
     DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
     widgets.setHeight("25px");
     return widgets;
@@ -518,21 +517,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   private void onBadRecording(AudioAnswer result) {
-      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
-      putBackText();
-      if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
-        if (button instanceof ComplexPanel) {
-          button = ((ComplexPanel) button).getWidget(0);
-          logger.info("receivedAudioAnswer: show popup for " + result.getValidity() + " on " + button.getElement().getId());
-        }
+    controller.logEvent(button, "Button", exercise.getID(), "bad recording");
+    putBackText();
+    if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
+      if (button instanceof ComplexPanel) {
+        button = ((ComplexPanel) button).getWidget(0);
+        logger.info("receivedAudioAnswer: show popup for " + result.getValidity() + " on " + button.getElement().getId());
+      }
 //        else {
 //          logger.info("receivedAudioAnswer: NOPE : show popup for " + result.getValidity() + " on " + button.getElement().getId());
 //        }
-        showPopup(result.getValidity().getPrompt(), button);
-      }
-      initRecordButton();
-      clearFeedback();
-      recoOutput.clear();
+      showPopup(result.getValidity().getPrompt(), button);
+    }
+    initRecordButton();
+    clearFeedback();
+    recoOutput.clear();
   }
 
   boolean isCorrect(boolean correct, double score) {
@@ -617,12 +616,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
     showOtherText();
 
-
-      logger.info("showIncorrectFeedback : " +
-          "said answer " +result.isSaidAnswer()+
-          "result " + result +
-          " score " + score +
-          " has ref " + hasRefAudio);
+    logger.info("showIncorrectFeedback : " +
+        "said answer " + result.isSaidAnswer() +
+        "result " + result +
+        " score " + score +
+        " has ref " + hasRefAudio);
 
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
@@ -643,13 +641,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * don't play ref in polyglot -subclass there
    */
   void playRefOnError() {
-        String path = getRefAudioToPlay();
-        if (path == null) {
-          playIncorrect(); // this should never happen
-        } else {
+    String path = getRefAudioToPlay();
+    if (path == null) {
+      playIncorrect(); // this should never happen
+    } else {
       logger.info("showIncorrectFeedback play ref audio on error");
-          playRef();
-        }
+      playRef();
+    }
   }
 
   boolean showScoreFeedback(AudioAnswer result) {
@@ -698,6 +696,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void disableRecord() {
     realRecordButton.setEnabled(false);
   }
+
   void enableRecord() {
     realRecordButton.setEnabled(true);
   }

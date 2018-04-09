@@ -1,6 +1,8 @@
 package mitll.langtest.client.custom.userlist;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -11,20 +13,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.client.services.ListServiceAsync;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -39,18 +41,22 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
-  public static final String CLICK_HERE_TO_SHARE = "Click here to share ";
-  public static final String SHARE_QUIZ = "Share Quiz";
-  public static final String SHARE_LIST = "Share List";
+  private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
+  private static final String SHARE_QUIZ = "Share Quiz";
+  private static final String SHARE_LIST = "Share List";
 
   private static final String ITEMS = "Items";
-  public static final String ADD = "Add";
-  public static final String CANCEL = "Cancel";
-  public static final String LEARN_THE_LIST = "Learn the list.";
-  public static final String EDIT_TITLE = "";
+  private static final String ADD = "Add";
+  private static final String CANCEL = "Cancel";
+  private static final String LEARN_THE_LIST = "Learn the list.";
+  private static final String EDIT_TITLE = "";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
+
+  private static final String YOUR_LISTS1 = "Your Lists";
+
   private static final String YOUR_LISTS = "Your Lists and Quizes";
+
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
@@ -67,7 +73,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
   private static final String CREATE_NEW_LIST = "Create New List";
-  public static final String EDIT1 = "Edit";
+  private static final String EDIT1 = "Edit";
   private static final String EDIT = EDIT1;
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
@@ -78,12 +84,19 @@ public class ListView implements ContentView, CreateListComplete {
 
   private final ExerciseController controller;
   private ListContainer myLists;
+  private final Set<String> names = new HashSet<>();
 
+  /**
+   * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
+   * @param controller
+   */
   public ListView(ExerciseController controller) {
     this.controller = controller;
   }
 
   public void showContent(Panel listContent, String instanceName) {
+    names.clear();
+
     listContent.clear();
     DivWidget leftRight = new DivWidget();
     leftRight.addStyleName("inlineFlex");
@@ -128,7 +141,7 @@ public class ListView implements ContentView, CreateListComplete {
 
         new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
 
-        addPagerAndHeader(tableWithPager, YOUR_LISTS, left);
+        addPagerAndHeader(tableWithPager, canMakeQuiz()?YOUR_LISTS: YOUR_LISTS1, left);
         tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
 
         left.add(getButtons(ListView.this.myLists));
@@ -210,6 +223,13 @@ public class ListView implements ContentView, CreateListComplete {
     });
   }
 
+
+  private boolean canMakeQuiz() {
+    Collection<User.Permission> permissions = controller.getPermissions();
+    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+  }
+
+
   private void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
     Heading w = new Heading(HEADING_SIZE, visited);
     w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
@@ -220,7 +240,6 @@ public class ListView implements ContentView, CreateListComplete {
     tableWithPager.setWidth("100%");
   }
 
-  private final Set<String> names = new HashSet<>();
 
   @NotNull
   private DivWidget getButtons(ListContainer container) {
@@ -638,6 +657,9 @@ public class ListView implements ContentView, CreateListComplete {
   @Override
   public void madeIt(UserList userList) {
     dialogHelper.hide();
+
+    logger.info("made it " + userList.getName());
+
     //logger.info("\n\n\ngot made list");
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());

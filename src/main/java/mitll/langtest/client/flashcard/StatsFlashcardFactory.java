@@ -150,9 +150,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     // boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
 
-    currentFlashcard = controller.shouldRecord() || true ?
-        currentFlashcard = getFlashcard(e) :
-        getNoRecordFlashcardPanel(e.getCommonAnnotatable());
+    currentFlashcard =   //true ?
+        currentFlashcard = getFlashcard(e);
+        ///:
+       // getNoRecordFlashcardPanel(e.getCommonAnnotatable());
 /*    if (!showRecordingFlashcard) {
 //      logger.info("getExercisePanel no recording ");
       currentFlashcard = null;

@@ -51,8 +51,10 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -76,12 +78,10 @@ public class CreateListDialog extends BasicDialog {
   private static final String CREATE_NEW_LIST = "Create New List";
   private static final String TEXT_BOX = "TextBox";
   private static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
-  // public static final String QUIZ_GROUP = "Quiz_Group";
 
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
   private static final String CLASS = "Course Info (optional)";
- // private static final String CREATE_LIST = "Create List";
   private static final String TITLE = "Title";
   private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
   private final CreateListComplete listView;
@@ -150,7 +150,10 @@ public class CreateListDialog extends BasicDialog {
       classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
     }
 
-    child.add(getQuizChoices());
+    if (canMakeQuiz()) {
+      child.add(getQuizChoices());
+    }
+
     child.add(getPrivacyChoices());
     //  makeCreateButton(enterKeyButtonHelper, theDescription, classBox, publicChoice);
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
@@ -178,7 +181,6 @@ public class CreateListDialog extends BasicDialog {
       checkBox.setValue(isQuiz);
       this.isQuiz = isQuiz;
     }
-
 
     row.add(addControlGroupEntry(row, isEdit ? IS_A_QUIZ : MAKE_A_QUIZ, hp, ""));
     return row;
@@ -226,32 +228,6 @@ public class CreateListDialog extends BasicDialog {
       }
     };
   }
-/*
-  private void makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
-                                final TextArea area,
-                                final FormField classBox,
-                                final RadioButton publicRadio) {
-    Button submit = new Button(CREATE_LIST);
-    submit.setType(ButtonType.PRIMARY);
-    submit.getElement().setId("CreateList_Submit");
-    controller.register(submit, "CreateList");
-
-    submit.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-
-    submit.addStyleName("leftFiveMargin");
-    submit.addClickHandler(event -> gotSubmit(enterKeyButtonHelper, area, classBox, publicRadio));
-    enterKeyButtonHelper.addKeyHandler(submit);
-  }*/
-
-/*  private void gotSubmit(KeyPressHelper enterKeyButtonHelper, TextArea area, FormField classBox, RadioButton publicRadio) {
-    logger.info("makeCreateButton creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
-    if (current == null) {
-      gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
-    } else {
-      listView.gotEdit();
-    }
-  }*/
-
   /**
    * @see ListView#doAdd
    */
@@ -265,7 +241,18 @@ public class CreateListDialog extends BasicDialog {
                          FormField classBox,
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
-    addUserList(titleBox, area, classBox, publicRadio.getValue(), isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL);
+    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType());
+  }
+
+  @NotNull
+  private UserList.LIST_TYPE getListType() {
+    boolean canMakeQuiz = canMakeQuiz();
+    return canMakeQuiz && isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL;
+  }
+
+  private boolean canMakeQuiz() {
+    Collection<User.Permission> permissions = controller.getPermissions();
+    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
   /**
@@ -370,7 +357,7 @@ public class CreateListDialog extends BasicDialog {
     currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
     boolean aPrivate = !publicChoice.getValue();
     currentSelection.setPrivate(aPrivate);
-    UserList.LIST_TYPE listType = isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL;
+    UserList.LIST_TYPE listType = getListType();
     currentSelection.setListType(listType);
 
     logger.info("doEdit is " +
