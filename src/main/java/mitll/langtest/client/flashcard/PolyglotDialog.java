@@ -23,24 +23,37 @@ public class PolyglotDialog {
 
   public enum PROMPT_CHOICE {NOT_YET, PLAY, DONT_PLAY}
 
+  private static final int DRY_RUN_MINUTES = 1;
+  private static final int ROUND_MINUTES = 10;
+
+  private static final int DRY_NUM = 10;
+  private static final int COMP_NUM = 100;
+
+  private static final int MIN_POLYGLOT_SCORE = 35;
 
   public interface ModeChoiceListener {
     void gotMode(MODE_CHOICE choice);
+
     void gotPrompt(PROMPT_CHOICE choice);
   }
 
   private final Button closeButton;
   private final ModeChoiceListener modeListener;
 
+  public PolyglotDialog(DialogHelper.CloseListener closeListener, ModeChoiceListener modeChoice) {
+    this(DRY_RUN_MINUTES, DRY_NUM, ROUND_MINUTES, COMP_NUM, MIN_POLYGLOT_SCORE,
+        closeListener, modeChoice);
+  }
+
   /**
    * @param closeListener
    * @see mitll.langtest.client.banner.NewContentChooser#showPolyDialog
    */
-  public PolyglotDialog(int dryMin, int dryNum,
-                        int compMin, int compNum,
-                        int minScore,
-                        DialogHelper.CloseListener closeListener,
-                        ModeChoiceListener modeChoice) {
+  private PolyglotDialog(int dryMin, int dryNum,
+                         int compMin, int compNum,
+                         int minScore,
+                         DialogHelper.CloseListener closeListener,
+                         ModeChoiceListener modeChoice) {
     DivWidget container = new DivWidget();
 
     this.modeListener = modeChoice;

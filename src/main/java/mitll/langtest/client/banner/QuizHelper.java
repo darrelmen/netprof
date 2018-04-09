@@ -77,13 +77,13 @@ public class QuizHelper extends PracticeHelper {
   public static final String QUIZ = "QUIZ";
   public static final String Unit = "Unit";
 
-  private static final int DRY_RUN_MINUTES = 1;
+/*  private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
 
   private static final int DRY_NUM = 10;
   private static final int COMP_NUM = 100;
 
-  private static final int MIN_POLYGLOT_SCORE = 35;
+  private static final int MIN_POLYGLOT_SCORE = 35;*/
 
   private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
 
@@ -244,10 +244,6 @@ public class QuizHelper extends PracticeHelper {
     mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
 
     new PolyglotDialog(
-        DRY_RUN_MINUTES, DRY_NUM,
-        ROUND_MINUTES, COMP_NUM,
-
-        MIN_POLYGLOT_SCORE,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {

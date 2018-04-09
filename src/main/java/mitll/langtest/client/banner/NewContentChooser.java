@@ -53,13 +53,7 @@ public class NewContentChooser implements INavigation {
 
   private VIEWS currentSection = VIEWS.NONE;
 
-  private static final int DRY_RUN_MINUTES = 1;
-  private static final int ROUND_MINUTES = 10;
 
-  private static final int DRY_NUM = 10;
-  private static final int COMP_NUM = 100;
-
-  private static final int MIN_POLYGLOT_SCORE = 35;
 
   /**
    * @param controller
@@ -203,7 +197,7 @@ public class NewContentChooser implements INavigation {
     fixDivToNotScrollUnderHeader();
 
     if (isPolyglot()) {
-      showPolyDialog(false);
+      showPolyDialog();
     } else {
       showPractice();
     }
@@ -218,14 +212,10 @@ public class NewContentChooser implements INavigation {
   /**
    * @see #showDrill
    */
-  private void showPolyDialog(boolean isQuiz) {
+  private void showPolyDialog() {
     mode = MODE_CHOICE.NOT_YET;
 
     new PolyglotDialog(
-        DRY_RUN_MINUTES, DRY_NUM,
-        ROUND_MINUTES, COMP_NUM,
-
-        MIN_POLYGLOT_SCORE,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
@@ -246,7 +236,7 @@ public class NewContentChooser implements INavigation {
           @Override
           public void gotNo() {
             setBannerVisible(true);
-            PracticeHelper practiceHelper = isQuiz ? quizHelper : NewContentChooser.this.practiceHelper;
+            PracticeHelper practiceHelper =   NewContentChooser.this.practiceHelper;
             practiceHelper.setVisible(true);
           }
 
@@ -254,7 +244,7 @@ public class NewContentChooser implements INavigation {
           public void gotHidden() {
             if (mode != MODE_CHOICE.NOT_YET) {
               setBannerVisible(false);
-              PracticeHelper practiceHelper = isQuiz ? quizHelper : NewContentChooser.this.practiceHelper;
+              PracticeHelper practiceHelper =  NewContentChooser.this.practiceHelper;
               practiceHelper.setVisible(false);
             }
 //        logger.info("mode is " + mode);

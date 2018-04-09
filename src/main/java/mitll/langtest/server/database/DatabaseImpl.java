@@ -143,6 +143,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String QUIZ = "QUIZ";
   public static final String UNIT = "Unit";
   public static final String QUIZ1 = "Quiz";
+  public static final String DRY_RUN = "Dry Run";
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -509,9 +510,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
    * @param projectid
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
    */
   public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
     if (projectid == -1) {
@@ -531,19 +532,35 @@ public class DatabaseImpl implements Database, DatabaseServices {
       Map<Integer, Collection<Integer>> exidsForList =
           getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listIDs);
 
-      List<Integer> included = new ArrayList<>();
       List<List<Pair>> allAttributes = new ArrayList<>();
       allQuiz.forEach(quiz -> {
         Collection<Integer> exids = exidsForList.get(quiz.getID());
-        logger.info("\tquiz " + quiz.getID() + " = " + exids.size());
+        String name = quiz.getName();
+        logger.info("\tquiz " + quiz.getID() + " '" + name + "'  = " + exids.size());
+
+        List<Pair> first = new ArrayList<>(2);
+        //allAttributes.add(pairs);
+        first.add(new Pair(QUIZ, name));
+        first.add(new Pair(UNIT, DRY_RUN));
+
+        List<Pair> second = new ArrayList<>(2);
+        second.add(new Pair(QUIZ, name));
+        second.add(new Pair(UNIT, QUIZ1));
+
+//
+//        allAttributes.add(first);
+//        allAttributes.add(second);
+
+        List<Integer> included = new ArrayList<>();
         exids.forEach(exid -> {
           included.add(exid);
 
           CommonExercise exercise = getExercise(projectid, exid);
-          List<Pair> pairs = new ArrayList<>(2);
+          //List<Pair> pairs = new ArrayList<>(2);
+          // pairs.add(new Pair(QUIZ, name));
+          // pairs.add(new Pair(UNIT, included.size() <= 10 ? DRY_RUN : QUIZ1));
+          List<Pair> pairs = included.size() <= 10 ? first : second;
           allAttributes.add(pairs);
-          pairs.add(new Pair(QUIZ, quiz.getName()));
-          pairs.add(new Pair(UNIT, included.size() <= 10 ? "Dry Run" : QUIZ1));
           sectionHelper.addPairs(exercise, pairs);
         });
       });
