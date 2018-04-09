@@ -17,6 +17,7 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
   boolean isInLightningRound();
 
   void showDrill();
+  void showQuiz();
 
   boolean isComplete();
 }

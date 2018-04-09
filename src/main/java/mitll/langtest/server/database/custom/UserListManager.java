@@ -88,6 +88,7 @@ public class UserListManager implements IUserListManager {
 
 
   private static final boolean DEBUG = false;
+  private static final int NUM_TO_CREATE_FOR_QUIZ = 10+100;
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -225,7 +226,7 @@ public class UserListManager implements IUserListManager {
 
       Set<Integer> exids = new TreeSet<>();
       List<CommonExercise> items = new ArrayList<>();
-      while (exids.size() < 100) {
+      while (exids.size() < NUM_TO_CREATE_FOR_QUIZ) {
         int i = random.nextInt(size);
         CommonExercise commonExercise = rawExercises.get(i);
         boolean add = exids.add(commonExercise.getID());

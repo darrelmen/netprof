@@ -49,7 +49,7 @@ public class SelectionState {
 
   private static final String POUND = "#";
 
-  public static final String ITEM = "item";
+  static final String ITEM = "item";
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
 
@@ -69,7 +69,7 @@ public class SelectionState {
   private String search = "";
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private int project = -1;
 
   /**

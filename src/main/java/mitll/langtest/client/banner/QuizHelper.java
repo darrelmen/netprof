@@ -68,6 +68,10 @@ import java.util.logging.Logger;
 public class QuizHelper extends PracticeHelper {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
+  public static final String QUIZ = "QUIZ";
+  public static final String Unit = "Unit";
+  private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
+
   /**
    * @param controller
    * @param viewContaner
@@ -103,22 +107,40 @@ public class QuizHelper extends PracticeHelper {
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
+
           @NotNull
           @Override
           protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
             return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
           }
 
+          protected String getEmptySearchMessage() {
+            return "Please choose a quiz on the left.";
+          }
+
+
           @Override
           protected void getTypeOrder() {
             typeOrder = getTypeOrderSimple();
             //    logger.info("getTypeOrder type order " + typeOrder);
-            this.rootNodesInOrder = new ArrayList<>(typeOrder);
+            this.rootNodesInOrder = Collections.singletonList(QUIZ);
           }
 
           @Override
           protected List<String> getTypeOrderSimple() {
-            return Arrays.asList("QUIZ");
+            return QUIZ_TYPE_ORDER;
+          }
+
+          @Override
+          protected String getChildForParent(String childType) {
+            Map<String, String> parentToChild = new HashMap<>();
+            parentToChild.put(QUIZ, Unit);
+
+            //Map<String, String> parentToChild = parentToChild;
+            String s = parentToChild.get(childType);
+//    logger.info("getChildForParent parent->child " + parentToChild);
+//    logger.info("getChildForParent childType     " + childType + " = " + s);
+            return s;
           }
 
           @Override

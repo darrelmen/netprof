@@ -969,8 +969,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       }
       logger.info("getTypeToValues try search again with " + typeToSelection2);
 
-      return new FilterResponse(request.getReqID(), getTypeToMatches(typeToSelection2), typesToInclude1, userListID);
+      Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2);
+      return new FilterResponse(request.getReqID(), typeToMatches1, typesToInclude1, userListID);
     } else {
+      logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
+
       return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
     }
   }

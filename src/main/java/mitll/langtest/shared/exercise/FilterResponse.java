@@ -54,6 +54,13 @@ public class FilterResponse implements IsSerializable {
   public FilterResponse() {
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.SectionHelper#getTypeToValues(FilterRequest)
+   * @param reqid
+   * @param typeToValues
+   * @param typesToInclude
+   * @param userListID
+   */
   public FilterResponse(int reqid,
                         Map<String, Set<MatchInfo>> typeToValues,
                         Set<String> typesToInclude,

@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
   //private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
-  protected static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
+  private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
 
@@ -224,7 +225,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   void reallyStartOver() {
-    polyglotFlashcardContainer.showDrill();
+    if (instance.equalsIgnoreCase(INavigation.VIEWS.DRILL.toString())) {
+      polyglotFlashcardContainer.showDrill();
+    }
+    else {
+      polyglotFlashcardContainer.showQuiz();
+    }
   }
 
   @Override

@@ -38,7 +38,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    */
   private static final int BUTTON_RIGHT_MARGIN = 8;
   /**
-   *
+   * @see #getSummaryStartOver
    */
   private static final String TRY_AGAIN = "Try Again?";
   private static final String START_OVER_FROM_THE_BEGINNING = "Start over from the beginning.";

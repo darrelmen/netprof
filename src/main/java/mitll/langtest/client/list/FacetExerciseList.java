@@ -534,12 +534,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getTypeToValues
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-/*
+
     logger.info("addFacetsForReal" +
         "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
         "\n\ttype->distinct " + typeToValues.keySet() +
         "\n\ttype->sel      " + typeToSelection);
-        */
 
     // nav -
     //   ul
@@ -567,6 +566,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (liForDimensionForList != null) {
       allTypesContainer.add(liForDimensionForList);
     }
+
+
   }
 
   private ListItem liForDimensionForList;
@@ -736,12 +737,12 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    //logger.info("addChoices " + type + "=" + selectionForType);
+    if (DEBUG) logger.info("addChoices " + type + "=" + selectionForType);
 
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
-        //  logger.info("addChoices for " + type + "=" + keys.size());
+        if (DEBUG) logger.info("addChoices for " + type + "=" + keys.size());
         addChoicesForType(typeToValues, type, choices, keys);
       }
     } else {
@@ -1052,7 +1053,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return did;
   }
 
-  private String getChildForParent(String childType) {
+  protected String getChildForParent(String childType) {
     Map<String, String> parentToChild = getStartupInfo().getParentToChild();
     String s = parentToChild.get(childType);
 //    logger.info("getChildForParent parent->child " + parentToChild);
@@ -1135,9 +1136,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
 
   /**
-   * @see #getTypeToValues
    * @param typeToSelection
    * @return
+   * @see #getTypeToValues
    */
   @NotNull
   private List<Pair> getPairs(Map<String, String> typeToSelection) {
@@ -1162,8 +1163,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     return reqid++;
   }
 
-  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get type to values.");
+  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+    logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
+        "\n\ttype to values : " + typeToSelection);
 
     changeSelection(response.getTypesToInclude(), typeToSelection);
     setTypeToSelection(typeToSelection);
@@ -1201,7 +1203,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    //logger.info("restoreListBoxState = '" + selectionState + "'");
+    if (DEBUG) logger.info("restoreListBoxState = '" + selectionState + "'");
     super.restoreListBoxState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
@@ -1257,7 +1259,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
        */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-        logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
+        if (DEBUG) logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
 //          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);

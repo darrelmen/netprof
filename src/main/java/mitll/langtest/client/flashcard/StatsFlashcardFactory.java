@@ -276,6 +276,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   public void showDrill() {
     navigation.showDrill();
+  }  public void showQuiz() {
+    navigation.showQuiz();
   }
 
   public void styleContent(boolean showCard) {

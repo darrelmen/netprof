@@ -508,7 +508,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  //@Override
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
+   * @param projectid
+   * @return
+   */
   public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
     if (projectid == -1) {
       return null;

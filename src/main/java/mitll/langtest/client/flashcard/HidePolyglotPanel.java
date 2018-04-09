@@ -68,8 +68,4 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
   Widget getHasAudioIndicator(boolean hasRefAudio) {
     return null;
   }
-
-//  @Override String getKeyBindings() {
-//    return ARROW_KEY_TIP;
-//  }
 }

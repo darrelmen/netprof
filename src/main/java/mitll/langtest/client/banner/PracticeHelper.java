@@ -61,8 +61,8 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
 
   private static final String PRACTICE = "practice";
 
-  protected StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
-  protected PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
+   StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
+   PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;

@@ -317,7 +317,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param newState
    */
   private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-    logger.info("loadFromSelectionState" +
+    if (DEBUG) logger.info("loadFromSelectionState" +
         " old state " + selectionState.getInfo() +
         " new state " + newState.getInfo());
 
