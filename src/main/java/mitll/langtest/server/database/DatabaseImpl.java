@@ -142,8 +142,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final int REPORT_THIS_PROJECT = 9;
   public static final String QUIZ = "QUIZ";
   private static final String UNIT = "Unit";
+  public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
   private static final String QUIZ1 = "Quiz";
   public static final String DRY_RUN = "Dry Run";
+  public static final int MAX_PHONES = 7;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -507,6 +509,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * make sure dry run is easy
+   *
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
@@ -516,8 +520,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return null;
     } else {
       SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
-      List<String> quiz1 = Arrays.asList(QUIZ, UNIT);
-      sectionHelper.setPredefinedTypeOrder(quiz1);
+      sectionHelper.setPredefinedTypeOrder(QUIZ_TYPES);
       getExercises(projectid);
 
       Collection<UserList<CommonShell>> allQuiz = getUserListManager().getUserListDAO().getAllQuiz(projectid);
@@ -531,35 +534,64 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
       List<List<Pair>> allAttributes = new ArrayList<>();
       allQuiz.forEach(quiz -> {
-        Collection<Integer> exids = exidsForList.get(quiz.getID());
-        String name = quiz.getName();
-        logger.info("\tquiz " + quiz.getID() + " '" + name + "'  = " + exids.size());
+        int id = quiz.getID();
+        Collection<Integer> exids = exidsForList.get(id);
+        if (exids == null) {
+        } else {
+          List<CommonExercise> first = new ArrayList<>();
+          int misses = 0;
+//          while (first.size() < 10 && misses < 100) {
+          for (int exid : exids) {
+            CommonExercise exercise = getExercise(projectid, exid);
+            if (exercise.getNumPhones() < MAX_PHONES || misses++ > 100) {
+              first.add(exercise);
+              if (first.size() == 10) break;
+            }
+          }
+          //        }
 
-        List<Pair> first = new ArrayList<>(2);
-        //allAttributes.add(pairs);
-        first.add(new Pair(QUIZ, name));
-        first.add(new Pair(UNIT, DRY_RUN));
 
-        List<Pair> second = new ArrayList<>(2);
-        second.add(new Pair(QUIZ, name));
-        second.add(new Pair(UNIT, QUIZ1));
+          // dry run set
+          List<Integer> toAdd = new ArrayList<>();
+          first.forEach(commonExercise -> toAdd.add(commonExercise.getID()));
+          addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, toAdd, true);
 
-        List<Integer> included = new ArrayList<>();
-        exids.forEach(exid -> {
-          included.add(exid);
-
-          CommonExercise exercise = getExercise(projectid, exid);
-          List<Pair> pairs = included.size() <= 10 ? first : second;
-          allAttributes.add(pairs);
-          sectionHelper.addPairs(exercise, pairs);
-        });
+          // quiz set
+          List<Integer> copy = new ArrayList<>(exids);
+          copy.removeAll(toAdd);
+          addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, copy, false);
+        }
       });
 
-      sectionHelper.rememberTypesInOrder(quiz1, allAttributes);
+      sectionHelper.rememberTypesInOrder(QUIZ_TYPES, allAttributes);
 
       sectionHelper.report();
       return sectionHelper;
     }
+  }
+
+  private void addExercisesForQuiz(int projectid, SectionHelper<CommonExercise> sectionHelper,
+                                   List<List<Pair>> allAttributes, UserList<CommonShell> quiz, Collection<Integer> exids, boolean useFirst) {
+    int id = quiz.getID();
+    String name = quiz.getName();
+
+    logger.info("\tquiz " + id + " '" + name + "'  = " + exids.size());
+
+    List<Pair> first = new ArrayList<>(2);
+
+    first.add(new Pair(QUIZ, name));
+    first.add(new Pair(UNIT, DRY_RUN));
+
+    List<Pair> second = new ArrayList<>(2);
+    second.add(new Pair(QUIZ, name));
+    second.add(new Pair(UNIT, QUIZ1));
+
+    exids.forEach(exid -> {
+      CommonExercise exercise = getExercise(projectid, exid);
+      List<Pair> pairs = useFirst ? first : second;
+      allAttributes.add(pairs);
+      sectionHelper.addPairs(exercise, pairs);
+    });
   }
 
   private boolean isAmas() {
@@ -594,7 +626,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param projectid
    * @return
-   * @see ScoreServlet#getJSONForExercises
+   * @seex ScoreServlet#getJSONForExercises
    * @see ScoreServlet#getJsonNestedChapters
    */
   public JsonExport getJSONExport(int projectid) {

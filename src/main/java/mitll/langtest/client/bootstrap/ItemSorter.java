@@ -118,7 +118,9 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       firstHasSep = true;
       String[] first = o1.split("\\s");
       left1 = first[0];
-      right1 = first[1];
+      if (first.length == 2) {
+        right1 = first[1];
+      }
     }
 
     if (secondHasSep) {
@@ -129,7 +131,9 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       secondHasSep = true;
       String[] second = o2.split("\\s");
       left2 = second[0];
-      right2 = second[1];
+      if (second.length == 2) {
+        right2 = second[1];
+      }
     }
 
     if (firstHasSep || secondHasSep) {
@@ -172,8 +176,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
           int r1 = Integer.parseInt(first);
           int r2 = Integer.parseInt(second);
           return Integer.compare(r1, r2);
-        }
-        else {
+        } else {
           return first.compareToIgnoreCase(second);
         }
       } catch (NumberFormatException e) {

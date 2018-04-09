@@ -89,6 +89,9 @@ public class UserListManager implements IUserListManager {
 
   private static final boolean DEBUG = false;
   private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
+  public static final int DRY_RUN_ITEMS = 10;
+  public static final int MIN_PHONE = 4;
+  public static final int MAX_PHONE = 7;
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -226,19 +229,36 @@ public class UserListManager implements IUserListManager {
 
       Set<Integer> exids = new TreeSet<>();
       List<CommonExercise> items = new ArrayList<>();
-      while (exids.size() < NUM_TO_CREATE_FOR_QUIZ) {
+
+      int misses = 0;
+      while (items.size() < NUM_TO_CREATE_FOR_QUIZ) {
         int i = random.nextInt(size);
         CommonExercise commonExercise = rawExercises.get(i);
         boolean add = exids.add(commonExercise.getID());
         if (add) {
-          items.add(commonExercise);
+          int numPhones = commonExercise.getNumPhones();
+          if (numPhones > 0 || misses > 100) {
+            if (numPhones > 3) {
+              if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
+                items.add(commonExercise);
+                logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+              }
+            }
+          } else {
+            logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+            misses++;
+          }
           //  quiz.addExercise(getShells(commonExercise));
         }
       }
-      logger.info("createQuiz made randome ex list of size " + exids.size());
 
-      quiz.setExercises(getShells(items));
-      exids.forEach(id -> addItemToList(userListID, id));
+      List<CommonShell> shells = getShells(items);
+      logger.info("createQuiz made random ex list of size " + items.size() +
+          " items " + items.size() +
+          " shells " + shells.size()
+      );
+      quiz.setExercises(shells);
+      items.forEach(ex -> addItemToList(userListID, ex.getID()));
 
       logger.info("createQuiz quiz has " + quiz.getExercises().size());
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
@@ -493,8 +513,6 @@ public class UserListManager implements IUserListManager {
     }
 
     if (visitedLists) {
-      //Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getListsForUser(userid, projid, 0, 10);
-      //   Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getAllPublicNotMine(userid, projid);
       long then = System.currentTimeMillis();
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
       long now = System.currentTimeMillis();
