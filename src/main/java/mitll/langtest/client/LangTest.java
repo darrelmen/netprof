@@ -1220,6 +1220,10 @@ public class LangTest implements
   public void showLearnList(int id) {
     initialUI.getNavigation().showLearnList(id);
   }
+  @Override
+  public void showQuiz(String listName) {
+    initialUI.getNavigation().showQuiz(listName);
+  }
 
   @Override
   public void showDrillList(int id) {

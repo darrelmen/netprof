@@ -284,7 +284,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
       //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
-      controller.logEvent("ViewLink", instanceName, "N/A","click on view");
+      controller.logEvent("ViewLink", instanceName, "N/A", "click on view");
       gotClickOnChoice(instanceName, learn);
       // setHistoryItem(historyToken);
     });
@@ -296,6 +296,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void showLearn() {
     gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN));
+  }
+
+  public void showQuiz() {
+    gotClickOnChoice(VIEWS.QUIZ.toString(), viewToLink.get(INavigation.VIEWS.QUIZ));
   }
 
   /**
@@ -350,7 +354,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private void addHomeClick(HasClickHandlers npImage) {
     npImage.addClickHandler(event -> {
-      controller.logEvent("HomeIcon", "Image", "N/A","click on home icon");
+      controller.logEvent("HomeIcon", "Image", "N/A", "click on home icon");
       lifecycle.chooseProjectAgain();
     });
   }

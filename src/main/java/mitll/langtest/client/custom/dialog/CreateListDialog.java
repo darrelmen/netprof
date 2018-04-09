@@ -36,23 +36,22 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.userlist.ListContainer;
+import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
-import net.sf.qualitycheck.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -66,13 +65,16 @@ import java.util.logging.Logger;
 public class CreateListDialog extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
+
+  public static final String MAKE_A_QUIZ = "Make a quiz?";
+
   public static final String PUBLIC = "Public";
   public static final String PRIVATE = "Private";
   public static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep List Public/Private?";
   public static final String CREATE_NEW_LIST = "Create New List";
   public static final String TEXT_BOX = "TextBox";
   public static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
-  public static final String QUIZ_GROUP = "Quiz_Group";
+  // public static final String QUIZ_GROUP = "Quiz_Group";
 
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
@@ -86,12 +88,15 @@ public class CreateListDialog extends BasicDialog {
   private KeyPressHelper enterKeyButtonHelper;
   private TextArea theDescription;
   private FormField classBox;
-  private RadioButton radioButton;
+  private RadioButton publicChoice, privateChoice;
   private UserList current = null;
+  private boolean isEdit;
+  private ControlGroup publicPrivateGroup;
 
-  public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current) {
+  public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current, boolean isEdit) {
     this(listView, controller);
     this.current = current;
+    this.isEdit = isEdit;
   }
 
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
@@ -143,9 +148,9 @@ public class CreateListDialog extends BasicDialog {
       classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
     }
 
-    child.add(getPrivacyChoices());
     child.add(getQuizChoices());
-    makeCreateButton(enterKeyButtonHelper, theDescription, classBox, radioButton);
+    child.add(getPrivacyChoices());
+  //  makeCreateButton(enterKeyButtonHelper, theDescription, classBox, publicChoice);
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
@@ -155,14 +160,18 @@ public class CreateListDialog extends BasicDialog {
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
-    CheckBox checkBox = new CheckBox("Create a new quiz.");
-    checkBox.addValueChangeHandler(event -> isQuiz = checkBox.getValue());
+    CheckBox checkBox = new CheckBox(isEdit ? "Show as Quiz" : "Create a new quiz.");
+    checkBox.addValueChangeHandler(event -> {
+      isQuiz = checkBox.getValue();
+      publicChoice.setValue(isQuiz);
+      privateChoice.setValue(!isQuiz);
+    });
 
     Panel hp = new HorizontalPanel();
     checkBox.addStyleName("leftFiveMargin");
     hp.add(checkBox);
 
-    row.add(addControlGroupEntry(row, "Make a quiz?", hp, ""));
+    row.add(addControlGroupEntry(row, isEdit ? "Is a quiz?" : MAKE_A_QUIZ, hp, ""));
     return row;
   }
 
@@ -170,23 +179,23 @@ public class CreateListDialog extends BasicDialog {
   private Widget getPrivacyChoices() {
     FluidRow row = new FluidRow();
 
-    radioButton = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
+    publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
     RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
-
+    privateChoice = radioButton2;
     // students by default have private lists - ?
     {
       boolean isPrivate = getDefaultPrivacy();
 
-      radioButton.setValue(!isPrivate);
+      publicChoice.setValue(!isPrivate);
       radioButton2.setValue(isPrivate);
     }
 
     Panel hp = new HorizontalPanel();
-    hp.add(radioButton);
+    hp.add(publicChoice);
     radioButton2.addStyleName("leftFiveMargin");
     hp.add(radioButton2);
 
-    row.add(addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
+    row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
     return row;
   }
 
@@ -208,7 +217,7 @@ public class CreateListDialog extends BasicDialog {
       }
     };
   }
-
+/*
   private void makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
                                 final TextArea area,
                                 final FormField classBox,
@@ -221,19 +230,21 @@ public class CreateListDialog extends BasicDialog {
     submit.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
 
     submit.addStyleName("leftFiveMargin");
-    submit.addClickHandler(event -> {
-      logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
-      if (current == null) {
-        gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
-      } else {
-        listView.gotEdit();
-      }
-    });
+    submit.addClickHandler(event -> gotSubmit(enterKeyButtonHelper, area, classBox, publicRadio));
     enterKeyButtonHelper.addKeyHandler(submit);
-  }
+  }*/
+
+/*  private void gotSubmit(KeyPressHelper enterKeyButtonHelper, TextArea area, FormField classBox, RadioButton publicRadio) {
+    logger.info("makeCreateButton creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
+    if (current == null) {
+      gotCreate(enterKeyButtonHelper, area, classBox, publicRadio);
+    } else {
+      listView.gotEdit();
+    }
+  }*/
 
   public void doCreate() {
-    gotCreate(enterKeyButtonHelper, theDescription, classBox, radioButton);
+    gotCreate(enterKeyButtonHelper, theDescription, classBox, publicChoice);
   }
 
   private void gotCreate(KeyPressHelper enterKeyButtonHelper,
@@ -245,10 +256,34 @@ public class CreateListDialog extends BasicDialog {
     addUserList(titleBox, area, classBox, publicRadio.getValue(), isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL);
   }
 
+  /**
+   * @param names
+   * @return
+   * @see ListView#doAdd
+   */
   public boolean isOKToCreate(Set<String> names) {
-    return isValidName() && !names.contains(titleBox.getSafeText());
+    boolean ret = true;
+
+    if (!isValidName()) {
+      ret = false;
+    } else if (names.contains(titleBox.getSafeText())) {
+      markError(titleBox, "Name already used. Please choose another.");
+      ret = false;
+    } else if ((!publicChoice.getValue() && !privateChoice.getValue())) {
+      markErrorBlur(publicPrivateGroup,
+          publicChoice,
+          "",
+          "Please mark either public or private.",
+          Placement.TOP, true);
+      ret = false;
+    }
+    return ret;
   }
 
+  /**
+   * @return
+   * @see #isOKToCreate
+   */
   public boolean isValidName() {
     return validateCreateList(titleBox);
   }
@@ -294,6 +329,10 @@ public class CreateListDialog extends BasicDialog {
     createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
+  /**
+   * @param titleBox
+   * @return
+   */
   private boolean validateCreateList(FormField titleBox) {
     if (titleBox.getSafeText().isEmpty()) {
       markError(titleBox, PLEASE_FILL_IN_A_TITLE);
@@ -307,11 +346,18 @@ public class CreateListDialog extends BasicDialog {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
+  /**
+   * @param currentSelection
+   * @param container
+   * @see ListView#doEdit
+   * @see ListView#gotEdit
+   */
   public void doEdit(UserList<CommonShell> currentSelection, ListContainer container) {
     currentSelection.setName(titleBox.getSafeText());
     currentSelection.setDescription(sanitize(theDescription.getText()));
     currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
-    currentSelection.setPrivate(!radioButton.getValue());
+    currentSelection.setPrivate(!publicChoice.getValue());
+    currentSelection.setListType(isQuiz?UserList.LIST_TYPE.QUIZ:UserList.LIST_TYPE.NORMAL);
 
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

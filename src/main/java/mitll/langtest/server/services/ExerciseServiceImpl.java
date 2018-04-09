@@ -91,8 +91,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     if (request.isQuiz()) {
       return getQuizTypeToValues(request);
-    }
-    else {
+    } else {
       //List<Pair> typeToSelection = request.getTypeToSelection();
 //    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
       ISection<CommonExercise> sectionHelper = getSectionHelper();
@@ -118,8 +117,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
-    //List<Pair> typeToSelection = request.getTypeToSelection();
-//    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
+    List<Pair> typeToSelection = request.getTypeToSelection();
+
+    logger.info("getQuizTypeToValues " +
+        "\n\trequest         " + request +
+        "\n\ttype->selection " + typeToSelection);
+
     ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(getProjectIDFromUser());
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
@@ -128,6 +131,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return sectionHelper.getTypeToValues(request);
     }
   }
+
   /**
    * Complicated.
    * <p>
@@ -203,8 +207,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises;
     boolean predefExercises = userListByID == null;
-    exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
-
+    if (request.isQuiz()) {
+      exercises = Collections.emptyList();
+    } else {
+      exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
+    }
     // now if there's a prefix, filter by prefix match
 
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
@@ -455,7 +462,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Collection<CommonExercise> exercisesForState = getSectionHelper(projid).getExercisesForSelectionState(request.getTypeToSelection());
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
+    if (request.isQuiz()) {
+      sectionHelper = db.getQuizSectionHelper(projid);
+    }
+    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
     exercisesForState = filterExercises(request, copy, projid);
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
@@ -918,7 +929,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
 
-    logger.debug("getUnrecordedExercisesMatchingGender " + onlyExamples+
+    logger.debug("getUnrecordedExercisesMatchingGender " + onlyExamples +
         "\n\texToTranscript " + exToTranscript.size());
     Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
     logger.debug("getUnrecordedExercisesMatchingGender" +

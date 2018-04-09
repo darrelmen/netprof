@@ -140,6 +140,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final boolean REPORT_ALL_PROJECTS = true;
   private static final boolean SEND_ALL_YEARS = true;
   private static final int REPORT_THIS_PROJECT = 9;
+  public static final String QUIZ = "QUIZ";
+  public static final String UNIT = "Unit";
+  public static final String QUIZ1 = "Quiz";
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -511,28 +514,43 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return null;
     } else {
       SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
+      List<String> quiz1 = Arrays.asList(QUIZ, UNIT);
+      sectionHelper.setPredefinedTypeOrder(quiz1);
       getExercises(projectid);
 
       Collection<UserList<CommonShell>> allQuiz = getUserListManager().getUserListDAO().getAllQuiz(projectid);
-      List<Integer> listIDs =new ArrayList<>();
-      allQuiz.forEach(quiz->listIDs.add(quiz.getID()));
-      Map<Integer, Collection<Integer>> exidsForList = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listIDs);
 
-      allQuiz.forEach(quiz->{
+      logger.info("getQuizSectionHelper count " + allQuiz.size());
+
+      List<Integer> listIDs = new ArrayList<>();
+      allQuiz.forEach(quiz -> listIDs.add(quiz.getID()));
+      Map<Integer, Collection<Integer>> exidsForList =
+          getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listIDs);
+
+      List<Integer> included = new ArrayList<>();
+      List<List<Pair>> allAttributes = new ArrayList<>();
+      allQuiz.forEach(quiz -> {
         Collection<Integer> exids = exidsForList.get(quiz.getID());
-        exids.forEach(exid->{
+        logger.info("\tquiz " + quiz.getID() + " = " + exids.size());
+        exids.forEach(exid -> {
+          included.add(exid);
+
           CommonExercise exercise = getExercise(projectid, exid);
-          List<Pair> pairs = new ArrayList<>();
-          pairs.add(new Pair("QUIZ", quiz.getName()));
-          pairs.add(new Pair("Unit", "Quiz"));
+          List<Pair> pairs = new ArrayList<>(2);
+          allAttributes.add(pairs);
+          pairs.add(new Pair(QUIZ, quiz.getName()));
+          pairs.add(new Pair(UNIT, included.size() <= 10 ? "Dry Run" : QUIZ1));
           sectionHelper.addPairs(exercise, pairs);
         });
       });
 
-//      getUserListManager().getListsForUser(userid, projectid,true,false);
-      return sectionHelper;//getSectionHelperForProject(projectid);
+      sectionHelper.rememberTypesInOrder(quiz1, allAttributes);
+
+      sectionHelper.report();
+      return sectionHelper;
     }
   }
+
   private boolean isAmas() {
     return serverProps.isAMAS();
   }

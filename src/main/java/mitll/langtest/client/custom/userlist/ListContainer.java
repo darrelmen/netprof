@@ -23,6 +23,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.shared.custom.UserList.LIST_TYPE.QUIZ;
+
 /**
  * Created by go22670 on 7/6/17.
  */
@@ -32,9 +34,12 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";
+  /**
+   * @see #addIsPublic
+   */
   private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
-  private boolean slim = false;
+  private boolean slim;
 
   private List<Button> buttons = new ArrayList<>();
 
@@ -59,6 +64,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
+
   void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }
@@ -82,7 +88,6 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   /**
-   *
    * @param sortEnglish
    * @see #configureTable
    */
@@ -99,6 +104,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       addOwner();
     } else {
       addIsPublic();
+      addIsQuiz();
     }
   }
 
@@ -162,6 +168,14 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     table.setColumnWidth(diff, 50 + "px");
   }
 
+  private void addIsQuiz() {
+    Column<UserList<CommonShell>, SafeHtml> diff = getQuiz();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("Quiz?"));
+    table.addColumnSortHandler(getQuizSorted(diff, getList()));
+    table.setColumnWidth(diff, 50 + "px");
+  }
+
   private Column<UserList<CommonShell>, SafeHtml> getNum() {
     return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -172,7 +186,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(""+shell.getNumItems());
+        return getSafeHtml("" + shell.getNumItems());
       }
     };
   }
@@ -189,9 +203,9 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
         String description = shell.getDescription();
-     //   logger.info("Desc " + description + " length " + description.length());
+        //   logger.info("Desc " + description + " length " + description.length());
         String truncate = truncate(description);
-     //   logger.info("truncate " + truncate + " length " + truncate.length());
+        //   logger.info("truncate " + truncate + " length " + truncate.length());
         return getSafeHtml(truncate);
       }
     };
@@ -240,10 +254,23 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         return getSafeHtml(shell.isPrivate() ? "No" : "Yes");
       }
     };
+  }  private Column<UserList<CommonShell>, SafeHtml> getQuiz() {
+    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserList<CommonShell> shell) {
+        return getSafeHtml(shell.getListType()==QUIZ ? "Yes" : "No");
+      }
+    };
   }
 
   private ColumnSortEvent.ListHandler<UserList<CommonShell>> getNumSorter(Column<UserList<CommonShell>, SafeHtml> englishCol,
-                                                                           List<UserList<CommonShell>> dataList) {
+                                                                          List<UserList<CommonShell>> dataList) {
     ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getNumItems));
     return columnSortHandler;
@@ -267,6 +294,13 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
                                                                              List<UserList<CommonShell>> dataList) {
     ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::isPrivate));
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserList<CommonShell>> getQuizSorted(Column<UserList<CommonShell>, SafeHtml> englishCol,
+                                                                           List<UserList<CommonShell>> dataList) {
+    ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getListType));
     return columnSortHandler;
   }
 

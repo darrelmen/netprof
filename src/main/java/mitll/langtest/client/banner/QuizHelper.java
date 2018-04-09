@@ -81,8 +81,8 @@ public class QuizHelper extends PracticeHelper {
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
 
-      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "Quiz");
-      statsFlashcardFactory = polyglotFlashcardFactory;
+    polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, "Quiz");
+    statsFlashcardFactory = polyglotFlashcardFactory;
 
 
     statsFlashcardFactory.setContentPanel(outerBottomRow);
@@ -104,20 +104,24 @@ public class QuizHelper extends PracticeHelper {
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
           @NotNull
+          @Override
           protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
             return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
           }
 
+          @Override
           protected void getTypeOrder() {
-            typeOrder = getTypeOrder(null);
+            typeOrder = getTypeOrderSimple();
             //    logger.info("getTypeOrder type order " + typeOrder);
             this.rootNodesInOrder = new ArrayList<>(typeOrder);
           }
 
-          protected List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
+          @Override
+          protected List<String> getTypeOrderSimple() {
             return Arrays.asList("QUIZ");
           }
 
+          @Override
           protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
             return null;
           }

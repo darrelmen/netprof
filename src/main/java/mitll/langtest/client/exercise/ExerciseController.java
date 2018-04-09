@@ -119,6 +119,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   KeyStorage getStorage();
 
   void showLearnList(int id);
+  void showQuiz(String listName);
   void showDrillList(int id);
   void setBannerVisible(boolean visible);
 

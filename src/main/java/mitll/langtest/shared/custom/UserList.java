@@ -54,13 +54,7 @@ import java.util.List;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
-  public LIST_TYPE getListType() {
-    return listType;
-  }
 
-  public void setListType(LIST_TYPE listType) {
-    this.listType = listType;
-  }
 
   public enum LIST_TYPE {
     NORMAL,
@@ -305,6 +299,14 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   public void setPrivate(boolean aPrivate) {
     isPrivate = aPrivate;
+  }
+
+  public LIST_TYPE getListType() {
+    return listType;
+  }
+
+  public void setListType(LIST_TYPE listType) {
+    this.listType = listType;
   }
 
   @Override

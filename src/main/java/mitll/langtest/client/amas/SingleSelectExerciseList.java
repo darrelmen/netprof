@@ -151,9 +151,9 @@ public abstract class SingleSelectExerciseList
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+    typeOrder = getStartupInfo().getTypeOrder();
     // logger.info("type order is " +typeOrder);
-    addButtonRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
+    addButtonRow(getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
 /*  @Override

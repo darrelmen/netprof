@@ -149,6 +149,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     removeHistoryListener();
   }
 
+  protected ProjectStartupInfo getStartupInfo() {
+    return controller.getProjectStartupInfo();
+  }
+
   /**
    * So we have a catch-22 -
    * <p>
@@ -313,11 +317,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param newState
    */
   private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-/*
     logger.info("loadFromSelectionState" +
         " old state " + selectionState.getInfo() +
         " new state " + newState.getInfo());
-    */
+
 
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),
@@ -359,11 +362,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
-      List<String> typeOrder = projectStartupInfo.getTypeOrder();
       if (sectionWidgetContainer != null) {
-        sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
+        sectionWidgetContainer.restoreListBoxState(selectionState, getTypeOrderSimple());
       }
     }
+  }
+
+  protected List<String> getTypeOrderSimple() {
+    return getStartupInfo().getTypeOrder();
   }
 
   /**
@@ -574,7 +580,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   /**
    * @param typeToSection
-   * @see StatsFlashcardFactory.StatsPracticePanel#doIncorrectFirst
+   * @see StatsFlashcardFactory#reload
    */
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {

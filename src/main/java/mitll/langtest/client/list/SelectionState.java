@@ -69,7 +69,7 @@ public class SelectionState {
   private String search = "";
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private int project = -1;
 
   /**
@@ -173,7 +173,7 @@ public class SelectionState {
       }
     }
 
-    if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
+    if (DEBUG) logger.info("parseToken : got state = '" + this + "' from token '" + token + "'");
   }
 
   public Map<String, Collection<String>> getTypeToSection() {

@@ -458,8 +458,8 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     sectionPanel.add(typeOrderContainer = getWidgetsForTypes());
     SelectionState selectionState = getSelectionState(getHistoryToken());
 
-    if (controller.getProjectStartupInfo() != null) {
-      maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
+    if (getStartupInfo() != null) {
+      maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
     restoreUIState(selectionState);
@@ -489,16 +489,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
-      typeOrder = getTypeOrder(projectStartupInfo);
+      typeOrder = getTypeOrderSimple();
       //    logger.info("getTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
   }
 
-  protected List<String> getTypeOrder(ProjectStartupInfo projectStartupInfo) {
-    return projectStartupInfo.getTypeOrder();
-  }
 
   /**
    * @param typeToSelection
@@ -1136,6 +1133,26 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
         });
   }
 
+
+  /**
+   * @see #getTypeToValues
+   * @param typeToSelection
+   * @return
+   */
+  @NotNull
+  private List<Pair> getPairs(Map<String, String> typeToSelection) {
+    List<Pair> pairs = new ArrayList<>();
+
+    for (String type : getTypeOrderSimple()) {
+      String s = typeToSelection.get(type);
+      pairs.add(new Pair(type, (s == null) ? ANY : s));
+    }
+    if (typeToSelection.containsKey(LISTS)) {
+      pairs.add(new Pair(LISTS, typeToSelection.get(LISTS)));
+    }
+    return pairs;
+  }
+
   @NotNull
   protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID);
@@ -1156,20 +1173,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private boolean isThereALoggedInUser() {
     return controller.getUser() > 0;
-  }
-
-  @NotNull
-  private List<Pair> getPairs(Map<String, String> typeToSelection) {
-    List<Pair> pairs = new ArrayList<>();
-
-    for (String type : getTypeOrder(getStartupInfo())) {
-      String s = typeToSelection.get(type);
-      pairs.add(new Pair(type, (s == null) ? ANY : s));
-    }
-    if (typeToSelection.containsKey(LISTS)) {
-      pairs.add(new Pair(LISTS, typeToSelection.get(LISTS)));
-    }
-    return pairs;
   }
 
   private void changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
@@ -1254,7 +1257,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
        */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-//        logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
+        logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
 //          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
@@ -1351,10 +1354,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private int getCurrentProject() {
     return getStartupInfo().getProjectid();
-  }
-
-  private ProjectStartupInfo getStartupInfo() {
-    return controller.getProjectStartupInfo();
   }
 
   @NotNull

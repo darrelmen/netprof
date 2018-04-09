@@ -1,8 +1,6 @@
 package mitll.langtest.client.custom.userlist;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -19,9 +17,11 @@ import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.client.services.ListServiceAsync;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -38,9 +38,12 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   private static final String ITEMS = "Items";
+  public static final String ADD = "Add";
+  public static final String CANCEL = "Cancel";
+  public static final String LEARN_THE_LIST = "Learn the list.";
   private final Logger logger = Logger.getLogger("ListView");
 
-  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click on a list to learn it.";
+  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
   private static final String YOUR_LISTS = "Your Lists";
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";
@@ -58,7 +61,8 @@ public class ListView implements ContentView, CreateListComplete {
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
   private static final String CREATE_NEW_LIST = "Create New List";
-  private static final String EDIT = "Edit";
+  public static final String EDIT1 = "Edit";
+  private static final String EDIT = EDIT1;
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
   private static final int MY_LIST_HEIGHT = 560;
@@ -177,9 +181,14 @@ public class ListView implements ContentView, CreateListComplete {
               protected boolean hasDoubleClick() {
                 return true;
               }
+
               @Override
               protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-                showLearnList(this);
+                if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
+                  showQuiz(this);
+                } else {
+                  showLearnList(this);
+                }
               }
             };
         Panel tableWithPager = listContainer.getTableWithPager(result);
@@ -347,16 +356,22 @@ public class ListView implements ContentView, CreateListComplete {
     Button learn = getSuccessButton(LEARN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
-    addTooltip(learn, "Learn the list.");
+    addTooltip(learn, LEARN_THE_LIST);
     learn.setEnabled(!container.isEmpty());
     container.addButton(learn);
     return learn;
   }
 
   private void showLearnList(ListContainer container) {
-    //if (!container.isEmpty()) {
-    controller.showLearnList(getCurrentSelection(container).getID());
-    //}
+    controller.showLearnList(getListID(container));
+  }
+
+  private int getListID(ListContainer container) {
+    return getCurrentSelection(container).getID();
+  }
+
+  private void showQuiz(ListContainer container) {
+    controller.showQuiz(getCurrentSelection(container).getName());//getListID(container));
   }
 
   @NotNull
@@ -366,7 +381,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     drill.addClickHandler(event -> {
       //   if (!container.isEmpty()) {
-      controller.showDrillList(getCurrentSelection(container).getID());
+      controller.showDrillList(getListID(container));
       // }
     });
     addTooltip(drill, "Drill the list.");
@@ -514,15 +529,17 @@ public class ListView implements ContentView, CreateListComplete {
         CREATE_NEW_LIST,
         Collections.emptyList(),
         contents,
-        "Add",
-        "Cancel",
+        ADD,
+        CANCEL,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
+            //closeButton.setEnabled(false);
             boolean okToCreate = createListDialog.isOKToCreate(names);
             if (okToCreate) {
               createListDialog.doCreate();
-
+            } else {
+              logger.info("doAdd dialog not valid ");
             }
             return okToCreate;
           }
@@ -547,7 +564,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doEdit() {
     DivWidget contents = new DivWidget();
-    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection());
+    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true);
     editDialog.doCreate(contents);
 
     DialogHelper dialogHelper = new DialogHelper(true);
@@ -555,8 +572,8 @@ public class ListView implements ContentView, CreateListComplete {
         EDIT,
         Collections.emptyList(),
         contents,
-        "Edit",
-        "Cancel",
+        EDIT1,
+        CANCEL,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
@@ -598,7 +615,7 @@ public class ListView implements ContentView, CreateListComplete {
         Collections.emptyList(),
         contents,
         "OK",
-        "Cancel",
+        CANCEL,
         null
         , 250);
 
@@ -620,6 +637,9 @@ public class ListView implements ContentView, CreateListComplete {
     names.add(userList.getName());
   }
 
+  /**
+   * @see CreateListDialog#makeCreateButton
+   */
   @Override
   public void gotEdit() {
     //  logger.info("\n\n\ngot edit");
@@ -638,7 +658,11 @@ public class ListView implements ContentView, CreateListComplete {
 
     @Override
     protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-      showLearnList(this);
+      if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
+        showQuiz(this);
+      } else {
+        showLearnList(this);
+      }
     }
   }
 }

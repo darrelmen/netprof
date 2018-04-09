@@ -292,7 +292,7 @@ public class BasicDialog {
    * @param right
    * @param setFocus
    */
-  void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right, boolean setFocus) {
+  protected void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right, boolean setFocus) {
     if (DEBUG) logger.info("markErrorBlur " + header + " message " + message);
 
     markErrorOnGroup(dialectGroup);

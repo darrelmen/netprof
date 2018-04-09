@@ -374,7 +374,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       Map<String, MatchInfo> matchesForType = typeToMatchInfo.get(type);
       if (matchesForType == null) {
         if (!type.equals(LISTS)) {
-          logger.warn("getTypeToMatchPairs no known type " + type);
+          logger.warn("getTypeToMatchPairs no known type " + type + " in " + typeToMatchInfo.keySet());
         }
       } else {
         matches.putAll(matchesForType);
@@ -745,19 +745,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
-  // private final File temp = new File("output.txt");
-
   @Override
   public void report() {
     logger.debug("report : type order " + getTypeOrder());
-
-//    for (Map.Entry<String, Map<String, Map<String, Collection<String>>>> pair : typeToSectionToTypeToSections.entrySet()) {
-//      logger.debug("pair " + pair.getKey() + " " + pair.getValue().size());
-//
-//    }
-//    try {
-    //FileWriter writer = new FileWriter(temp);
-    //logger.info("write to " + temp.getName());
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
       Set<String> sections = new TreeSet<>(categoryToLesson.keySet());
@@ -821,7 +811,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
     SectionNode child = root;
-
     //if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
     if (DEBUG) {
@@ -961,9 +950,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     List<String> typesInOrder = getTypesFromRequest(typeToSelection);
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
-//    logger.info("getTypeToValues request is       " + typeToSelection);
+    logger.info("getTypeToValues request is       " + typeToSelection);
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-//    logger.info("getTypeToValues typeToMatches is " + typeToMatches);
+   logger.info("getTypeToValues typeToMatches is " + typeToMatches, new Exception());
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 

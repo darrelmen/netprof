@@ -35,5 +35,6 @@ public interface IBanner {
   void checkProjectSelected();
 
   void showLearn();
+  void showQuiz();
   void showDrill();
 }

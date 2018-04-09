@@ -507,7 +507,7 @@ public class InitialUI implements UILifecycle {
     //   logger.info("addBreadcrumb " + projects.size());
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        //logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         addProjectCrumb(crumbs, project.getChild(currentProject));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
@@ -515,11 +515,11 @@ public class InitialUI implements UILifecycle {
         }*/
         break;
       } else if (project.getID() == currentProject) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+      //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       } else {
-        logger.info("addBreadcrumbLevels skipping project " + project);
+       // logger.info("addBreadcrumbLevels skipping project " + project);
       }
     }
   }

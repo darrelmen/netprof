@@ -117,7 +117,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.getID(),
         projid,
         false, // not homework list
-        "", "",
+        "",
+        "",
         shared.getListType().toString()
     );
   }
@@ -503,9 +504,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void update(UserList userList) {
-    dao.update(toSlick(userList));
-  }
+  public void update(UserList userList) {  dao.update(toSlick(userList));  }
 
   /**
    * @return
