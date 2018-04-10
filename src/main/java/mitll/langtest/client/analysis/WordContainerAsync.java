@@ -164,11 +164,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         end = end >= numResults ? numResults : end;
         //logger.info("createProvider asking for " + start +"->" + end);
 
-        StringBuilder builder = tableSortHelper.getColumnSortedState(table);
+        StringBuilder columnSortedState = tableSortHelper.getColumnSortedState(table);
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-        //  logger.info("createProvider sort " + builder.toString());
+        //  logger.info("createProvider sort " + columnSortedState.toString());
 
         analysisServiceAsync.getWordScoresForUser(
             reqInfo.getUserid(),
@@ -178,7 +178,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
             to,
             start,
             end,
-            builder.toString(),
+            columnSortedState.toString(),
             val,
             new AsyncCallback<WordsAndTotal>() {
               @Override

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.image.TranscriptReader;
@@ -385,6 +386,10 @@ public abstract class Scoring {
 
   public abstract SmallVocabDecoder getSmallVocabDecoder();
 
+  /**
+   * @see AudioFileHelper#getCollator
+   * @return
+   */
   public Collator getCollator() {
     return ltsFactory.getCollator();
   }

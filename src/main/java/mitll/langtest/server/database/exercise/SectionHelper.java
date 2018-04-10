@@ -805,15 +805,16 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     seen = null;
   }
 
+  /**
+   * Get the first chapter inside a unit or the first unit if no chapter.
+   * get the exercises for that first section.
+   * @return
+   */
   @Override
   public Collection<T> getFirst() {
     String first = getTypeOrder().iterator().next();
 
-    Map<String, Set<MatchInfo>> all = getTypeToMatches(Arrays.asList(new Pair(first, "All")));
-
-    String unitFirst = all.keySet().iterator().next();
-
-    logger.warn(first + " = " + unitFirst);
+    Map<String, Set<MatchInfo>> all = getTypeToMatches(Collections.singletonList(new Pair(first, ALL)));
     Set<MatchInfo> matchInfos = all.get(first);
     //String firstUnit = matchInfos.iterator().next().getValue();
 
@@ -821,8 +822,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String firstUnit = getFirstMatchLargerThan(matchInfos, minFirstSize);
 
     //matchInfos.forEach(matchInfo -> logger.info("\tgot " + matchInfo.getValue() + " = " + matchInfo.getCount()));
-    Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Arrays.asList(new Pair(first, firstUnit)));
-    logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
+    Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Collections.singletonList(new Pair(first, firstUnit)));
+  //  logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
 
     Map<String, Collection<String>> typeToSection = new HashMap<>();
     typeToSection.put(first, Collections.singleton(firstUnit));
@@ -837,16 +838,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToSection.put(secondType, Collections.singleton(second));
     }
 
-    logger.info("getFirst matching " + typeToSection);
+   // logger.info("getFirst matching " + typeToSection);
     Collection<T> exercisesForSelectionState = getExercisesForSelectionState(typeToSection);
     if (exercisesForSelectionState.size() < minFirstSize) {
       logger.info("getFirst Fall back to " + firstOnly);
       exercisesForSelectionState = getExercisesForSelectionState(firstOnly);
     }
     return exercisesForSelectionState;
-
-//    Map<String, Lesson<T>> sectionToLesson = getCategoryToLesson(first);
-//    sectionToLesson.keySet().iterator().next();
   }
 
   private String getFirstMatchLargerThan(Set<MatchInfo> matchInfos1, int i) {

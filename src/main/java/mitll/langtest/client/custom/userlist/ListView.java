@@ -55,6 +55,9 @@ public class ListView implements ContentView, CreateListComplete {
 
   private static final String YOUR_LISTS1 = "Your Lists";
 
+  /**
+   * @see #showContent
+   */
   private static final String YOUR_LISTS = "Your Lists and Quizes";
 
   private static final String LEARN = "Learn";
@@ -87,8 +90,8 @@ public class ListView implements ContentView, CreateListComplete {
   private final Set<String> names = new HashSet<>();
 
   /**
-   * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
    * @param controller
+   * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
    */
   public ListView(ExerciseController controller) {
     this.controller = controller;
@@ -141,7 +144,7 @@ public class ListView implements ContentView, CreateListComplete {
 
         new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
 
-        addPagerAndHeader(tableWithPager, canMakeQuiz()?YOUR_LISTS: YOUR_LISTS1, left);
+        addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
         tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
 
         left.add(getButtons(ListView.this.myLists));

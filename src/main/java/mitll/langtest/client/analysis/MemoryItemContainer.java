@@ -420,7 +420,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
       @Override
       public SafeHtml getValue(T shell) {
-        return getSafeHtml(getTruncatedItemLabel(shell, maxLength));
+        return getNoWrapContent(getTruncatedItemLabel(shell, maxLength));
       }
     };
   }
@@ -485,5 +485,15 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     if (user != null) {
       storeSelectedUser(user.getID());
     }
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 }

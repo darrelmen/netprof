@@ -53,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +75,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
   private final boolean sortByPolyScore;
+  Collator collator;
 
   /**
    * @param database
@@ -88,13 +90,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        IAudioDAO audioDAO,
                        SlickResultDAO resultDAO,
                        String language,
-                       int projid, boolean sortByPolyScore) {
+                       int projid,
+                       boolean sortByPolyScore) {
     super(database, phoneDAO, language);
     this.resultDAO = resultDAO;
     this.language = language;
     this.projid = projid;
     this.audioDAO = audioDAO;
     project = database.getProject(projid);
+    collator = project.getAudioFileHelper().getCollator();
     this.sortByPolyScore = sortByPolyScore;
   }
 
@@ -144,7 +148,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                                             String sort) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
     Collection<UserInfo> userInfos = bestForUser.values();
-    logger.info("getWordScoresForUser for user " + userid + " got " + userInfos.size() + " user from " + rangeStart + " to " + rangeEnd + " sort " + sort);
+    logger.info("getWordScoresForUser for user " + userid +
+        " got " + userInfos.size() + " user from " + rangeStart + " to " + rangeEnd + " sort " + sort);
     return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
   }
 
@@ -203,13 +208,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (dayOfYear == -1) {
         dayOfYear = i;
       } else if (i != dayOfYear) {
-        logger.info("day of year " + i + " vs " +dayOfYear+
+        logger.info("day of year " + i + " vs " + dayOfYear +
             "  for " + new Date(ws.getTimestamp()) + " ws " + ws);
         allSameDay = false;
         break;
       }
     }
-    logger.info("allSameDay " +allSameDay);
+    logger.info("allSameDay " + allSameDay);
 
     return allSameDay;
   }
@@ -236,6 +241,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
+   * Support word async table sort columns
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    * @param project
    * @param criteria
    * @param inTime
@@ -253,61 +260,72 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       Map<BestScore, String> scoreToFL = new HashMap<>();
       if (field.equalsIgnoreCase(WORD)) {
-        inTime.forEach(bestScore -> {
-          CommonExercise exerciseByID = project.getExerciseByID(bestScore.getExId());
-          if (exerciseByID == null) {
-            String transcriptFromJSON = getTranscriptFromJSON(bestScore);
-
-            logger.info("getComparator no ex for " + bestScore.getExId() + " so " + transcriptFromJSON);
-
-            scoreToFL.put(bestScore, transcriptFromJSON);
-          } else {
-            String foreignLanguage = exerciseByID.getForeignLanguage();
-            scoreToFL.put(bestScore, foreignLanguage);
-            logger.info("map " + bestScore + " = " + foreignLanguage);
-          }
-        });
+        populateScoreToFL(project, inTime, scoreToFL);
       }
 
 //      logger.info("getComparator " + scoreToFL.size() + " field " + field + " col " + col + " asc " + asc);
 
-      return new Comparator<BestScore>() {
-        @Override
-        public int compare(BestScore o1, BestScore o2) {
-          // text
-          int comp = 0;
-          switch (field) {
-            case WORD:
-              comp = scoreToFL.get(o1).compareToIgnoreCase(scoreToFL.get(o2));
-              if (comp == 0) {
-                logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
-                comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
-              }
-              break;
-            case TIMESTAMP:
-              comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
-              break;
-            case SCORE:
-              comp = Float.compare(o1.getScore(), o2.getScore());
-              if (comp == 0) {
-                comp = Long.compare(o1.getTimestamp(), o2.getTimestamp());
-              }
-              break;
-            default:
-              logger.warn("huh? field '" + field + "' is not defined?");
-          }
-          if (comp != 0) return getComp(asc, comp);
-
-          return comp;
-        }
-
-        int getComp(boolean asc, int comp) {
-          return (asc ? comp : -1 * comp);
-        }
-      };
+      return getBestScoreComparator(field, asc, scoreToFL);
     }
+  }
 
+  private void populateScoreToFL(Project project, List<BestScore> inTime, Map<BestScore, String> scoreToFL) {
+    inTime.forEach(bestScore -> {
+      CommonExercise exerciseByID = project.getExerciseByID(bestScore.getExId());
+      if (exerciseByID == null) {
+        String transcriptFromJSON = getTranscriptFromJSON(bestScore);
+        logger.info("populateScoreToFL no ex for " + bestScore.getExId() + " so " + transcriptFromJSON);
+        scoreToFL.put(bestScore, transcriptFromJSON);
+      } else {
+        String foreignLanguage = exerciseByID.getForeignLanguage();
+        scoreToFL.put(bestScore, foreignLanguage);
+        logger.info("populateScoreToFL " + bestScore + " = " + foreignLanguage);
+      }
+    });
+  }
 
+  @NotNull
+  private Comparator<BestScore> getBestScoreComparator(String field, boolean asc, Map<BestScore, String> scoreToFL) {
+    return new Comparator<BestScore>() {
+      @Override
+      public int compare(BestScore o1, BestScore o2) {
+        // text
+        int comp = 0;
+        switch (field) {
+          case WORD:
+            String s1 = scoreToFL.get(o1);
+            String s2 = scoreToFL.get(o2);
+            comp = collator.compare(s1, s2);  // remember to do locale aware string sorting.
+            if (comp == 0) {
+              logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
+              comp = compareTimes(o1, o2);
+            }
+            break;
+          case TIMESTAMP:
+            comp = compareTimes(o1, o2);
+            break;
+          case SCORE:
+            comp = Float.compare(o1.getScore(), o2.getScore());
+            if (comp == 0) {
+              comp = compareTimes(o1, o2);
+            }
+            break;
+          default:
+            logger.warn("huh? field '" + field + "' is not defined?");
+        }
+        if (comp != 0) return getComp(asc, comp);
+
+        return comp;
+      }
+
+      int getComp(boolean asc, int comp) {
+        return (asc ? comp : -1 * comp);
+      }
+    };
+  }
+
+  private int compareTimes(BestScore o1, BestScore o2) {
+    return Long.compare(o1.getTimestamp(), o2.getTimestamp());
   }
 
   @NotNull

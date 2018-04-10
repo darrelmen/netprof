@@ -63,6 +63,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,7 +128,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Project project = db.getProject(projectIDFromUser);
 
 
-     ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser,project.getSectionHelper().getFirst());
+    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser, project.getSectionHelper().getFirst());
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
@@ -225,7 +226,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // now do a trie over matches
       exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID());
       if (request.getLimit() > 0) {
-        exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise()));
+        exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
       }
     }
 //    logger.info("triple resp " + exercisesForSearch);
@@ -351,11 +352,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param request
    * @param exercises
+   * @param projid
    * @return
    */
   @NotNull
-  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises) {
+  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises,
+                                           int projid) {
     //logger.info("getFirstFew only taking " + request.getLimit() + " from " + exercises.size() + " that match " + prefix);
+    Collator collator = getAudioFileHelper(projid).getCollator();
 
     exercises.sort((o1, o2) -> {
       String foreignLanguage = o1.getForeignLanguage();
@@ -367,12 +371,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       else if (hasSearch2 && !hasSearch1) return +1;
       else if (hasSearch1 && hasSearch2) {
         int i = Integer.compare(foreignLanguage.length(), foreignLanguage1.length());
-        return i == 0 ? foreignLanguage.compareTo(foreignLanguage1) : i;
+        return i == 0 ? collator.compare(foreignLanguage, foreignLanguage1) : i;
       } else {
         String cforeignLanguage = o1.getContext();
         String cforeignLanguage1 = o2.getContext();
         int i = Integer.compare(cforeignLanguage.length(), cforeignLanguage1.length());
-        return i == 0 ? cforeignLanguage.compareTo(cforeignLanguage1) : i;
+        return i == 0 ? collator.compare(cforeignLanguage, cforeignLanguage1) : i;
       }
     });
 
@@ -393,7 +397,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
-    //int projectID = getProjectIDFromUser();
     List<CommonExercise> exercises = db.getExercises(projectID);
     long now = System.currentTimeMillis();
     if (now - then > 200) {
@@ -402,10 +405,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     return exercises;
   }
-
-//  private Collator getCollator() {
-//    return getAudioFileHelper().getCollator();
-//  }
 
   /**
    * Marks each exercise - first state - with whether this user has recorded audio for this item
@@ -475,11 +474,35 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
 
     if (request.isQuiz()) {
-      copy.sort(Comparator.comparingInt(CommonShell::getNumPhones));
+      Collator collator = getAudioFileHelper(projid).getCollator();
+      copy.sort((o1, o2) -> compareExercisesByLength(o1, o2, collator));
+//      copy.forEach(commonExercise -> logger.info("1 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
     }
 
     exercisesForState = filterExercises(request, copy, projid);
+//    exercisesForState.forEach(commonExercise -> logger.info("2 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
+  }
+
+  /**
+   * TODO : unfortunately num phones is not correct right now.
+   * @param o1
+   * @param o2
+   * @param collator
+   * @return
+   */
+  private int compareExercisesByLength(CommonExercise o1, CommonExercise o2, Collator collator) {
+    int i = 0;//Integer.compare(o1.getNumPhones(), o2.getNumPhones());
+    if (i == 0) {
+      String f1 = o1.getForeignLanguage();
+      String f2 = o2.getForeignLanguage();
+      i = Integer.compare(f1.length(), f2.length());
+    }
+    if (i == 0) {
+      i = collator.compare(o1.getForeignLanguage(), o2.getForeignLanguage());
+    }
+    if (i == 0) i = Integer.compare(o1.getID(), o2.getID());
+    return i;
   }
 
 
@@ -526,7 +549,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguage(projID));
     } else {
       copy = new ArrayList<>(exercisesForState);
-      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
+
+      if (!request.isQuiz()){
+        sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
+      }
     }
 
     return makeExerciseListWrapper(request, copy, projID);
@@ -841,7 +867,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection, int)
    * @see #getSortedExercises
    */
-  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL, String searchTerm) {
+  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL,
+                                                     String searchTerm) {
     new ExerciseSorter().getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
   }
 

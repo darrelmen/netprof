@@ -220,7 +220,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return columnSortHandler;
   }
 
-  protected void addLastName(List<T> list) {
+  void addLastName(List<T> list) {
     Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -246,13 +246,4 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return columnSortHandler;
   }
 
-  protected SafeHtml getNoWrapContent(String noWrapContent) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-        noWrapContent +
-        "</span>");
-
-    sb.appendHtmlConstant("</div>");
-    return sb.toSafeHtml();
-  }
 }

@@ -36,8 +36,10 @@ import corpus.EmptyLTS;
 import corpus.LTS;
 import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -110,7 +112,7 @@ public class LTSFactory {
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
-  public LTS getLTSClass() {
+  LTS getLTSClass() {
     return ltsForLanguage;
   }
 
@@ -136,21 +138,24 @@ public class LTSFactory {
    * @param <T>
    * @see Scoring#sort
    */
-  public <T extends CommonExercise> void sort(List<T> toSort) {
+/*  public <T extends CommonExercise> void sort(List<T> toSort) {
     Collator collator = getCollator();
     final Map<T, CollationKey> exToKey = new HashMap<T, CollationKey>();
-    for (T t : toSort) {
-      CollationKey collationKey = collator.getCollationKey(t.getForeignLanguage());
-      exToKey.put(t, collationKey);
-    }
+
+    toSort.forEach(t -> exToKey.put(t, collator.getCollationKey(t.getForeignLanguage())));
 
     toSort.sort((o1, o2) -> {
       CollationKey collationKey1 = exToKey.get(o1);
       CollationKey collationKey2 = exToKey.get(o2);
       return collationKey1.compareTo(collationKey2);
     });
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
+   * @param language1
+   * @return
+   */
   public static String getLocale(String language1) {
     Language lang;
     try {

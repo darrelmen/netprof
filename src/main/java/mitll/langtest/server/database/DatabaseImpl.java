@@ -616,7 +616,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     List<CommonExercise> toAdd = new ArrayList<>();
     exids.forEach(exid -> toAdd.add(getExercise(projectid, exid)));
-    toAdd.sort(Comparator.comparingInt(CommonShell::getNumPhones));
+    //toAdd.sort(Comparator.comparingInt(CommonShell::getNumPhones));
 
     toAdd.forEach(exercise -> {
     //  CommonExercise exercise = getExercise(projectid, exid);
