@@ -55,7 +55,7 @@ class TimeSeriesPlot extends DivWidget {
   static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
-  private final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+  protected final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
   private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
   private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");

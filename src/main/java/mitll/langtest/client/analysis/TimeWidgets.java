@@ -50,6 +50,7 @@ class TimeWidgets {
   private final Button prevButton;
   private final Button nextButton;
   private final Button all;
+  private final Button day;
   private final Button week;
   private final Button minute;
   private final Button month;
@@ -65,11 +66,18 @@ class TimeWidgets {
    * @param month
    * @see AnalysisTab#getTimeWindowStepper
    */
-  TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month, Button minute, Heading score) {
+  TimeWidgets(Button prevButton, Button nextButton, HTML display,
+              Button all,
+              Button day,
+              Button week,
+              Button month,
+              Button minute,
+              Heading score) {
     this.prevButton = prevButton;
     this.nextButton = nextButton;
     this.display = display;
     this.all = all;
+    this.day = day;
     this.week = week;
     this.month = month;
     this.minute = minute;
@@ -93,6 +101,7 @@ class TimeWidgets {
   public void reset() {
     all.setActive(true);
 
+    if (day != null) day.setActive(false);
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
 
@@ -101,10 +110,9 @@ class TimeWidgets {
     }
   }
 
-  public Button getPrevButton() {
+  Button getPrevButton() {
     return prevButton;
   }
-
   public Button getNextButton() {
     return nextButton;
   }

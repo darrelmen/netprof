@@ -113,6 +113,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final AnalysisServiceAsync analysisServiceAsync;
   private final AnalysisTab.ReqInfo reqInfo;
   private boolean isAllSameDay = false;
+  private long from = 0, to = Long.MAX_VALUE;
 
   /**
    * What sort order do we want?
@@ -162,12 +163,15 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        //logger.info("createProvider asking for " + start +"->" + end);
+
+/*        logger.info("createProvider asking for " + start +"->" + end + " num " + numResults);
+        logger.info("createProvider asking from " + from + "/"+
+            new Date(from) +"->" + to +"/"+new Date(to));*/
 
         StringBuilder columnSortedState = tableSortHelper.getColumnSortedState(table);
 
         int val = req++;
-        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+       // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         //  logger.info("createProvider sort " + columnSortedState.toString());
 
         analysisServiceAsync.getWordScoresForUser(
@@ -200,6 +204,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                   cellTable.setRowCount(numTotal, true);
                   updateRowData(start, result.getResults());
                   isAllSameDay = result.isAllSameDay();
+
+      /*            logger.info("\t getResults req " +val+
+                      " got back " + numTotal );*/
+
                   if (isAllSameDay) {
                     table.setColumnWidth(theDateCol, WIDE_DATE_WIDTH + "px");
                   }
@@ -417,11 +425,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     };
   }
 
-  private void redraw() {
-    RangeChangeEvent.fire(table, table.getVisibleRange());
-  }
-
-  private long from = 0, to = Long.MAX_VALUE;
 
   /**
    * @param from
@@ -433,13 +436,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     if (from == 0) {
       heading.setSubtext("");
     } else {
-//       logger.info("Starting from " +from + " : " +to);
-//      logger.info("timeChanged : from " + yearShortFormat2.format(new Date(from)) + " to " + yearShortFormat2.format(new Date(to)));
+/*       logger.info("timeChanged Starting from " +from + " : " +to);
+      logger.info("timeChanged : from " + format.format(new Date(from)) + " to " + format.format(new Date(to)));*/
       heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
       this.from = from;
       this.to = to;
     }
 
     redraw();
+    //table.redraw();
+  }
+
+  private void redraw() {
+    RangeChangeEvent.fire(table, table.getVisibleRange());
   }
 }

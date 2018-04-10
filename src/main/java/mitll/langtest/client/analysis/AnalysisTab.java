@@ -109,6 +109,7 @@ public class AnalysisTab extends DivWidget {
   enum TIME_HORIZON {
     SESSION("Session", -1),
     TENMIN("Minute", TENMIN_DUR),
+    DAY("Day", DAY_DUR),
     WEEK("Week", WEEK_DUR),
     MONTH("Month", MONTH_DUR),
     ALL("All", YEARS);
@@ -137,6 +138,7 @@ public class AnalysisTab extends DivWidget {
   private final int listid;
 
   private final boolean isPolyglot;
+  private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
 
   /**
    * @param controller
@@ -365,6 +367,7 @@ public class AnalysisTab extends DivWidget {
     }
 
     timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice,
+        dayChoice,
         weekChoice,
         monthChoice,
         sessionChoice,
@@ -409,10 +412,6 @@ public class AnalysisTab extends DivWidget {
     return right;
   }
 
-  private Button allChoice;
-  private Button weekChoice;
-  private Button sessionChoice;
-  private Button monthChoice;
 
   /**
    * @return
@@ -420,11 +419,13 @@ public class AnalysisTab extends DivWidget {
    */
   private Widget getTimeGroup() {
     ButtonToolbar w = new ButtonToolbar();
+
     ButtonGroup buttonGroup = new ButtonGroup();
-    w.add(buttonGroup);
     buttonGroup.addStyleName("topMargin");
     buttonGroup.addStyleName("leftTenMargin");
     buttonGroup.setToggle(ToggleType.RADIO);
+
+    w.add(buttonGroup);
 
     if (isPolyglot) {
       buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION));
@@ -432,11 +433,12 @@ public class AnalysisTab extends DivWidget {
     }
 
     if (!isPolyglot) {
+      buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY));
       buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
       buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
     }
-    allChoice = getAllChoice();
-    buttonGroup.add(allChoice);
+
+    buttonGroup.add(allChoice = getAllChoice());
 
     return buttonGroup;
   }
@@ -584,11 +586,11 @@ public class AnalysisTab extends DivWidget {
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
 
-    if (false) {//!isPolyglot) {
+/*    if (false) {//!isPolyglot) {
       // #3 - phone plot
       phonePlot.addStyleName("topMargin");
       lowerHalf.add(phonePlot);
-    }
+    }*/
 
     phoneContainer.showExamplesForSelectedSound();
   }

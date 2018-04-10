@@ -45,13 +45,13 @@ import mitll.langtest.client.initial.BrowserCheck;
  * To change this template use File | Settings | File Templates.
  */
 public class ExceptionHandlerDialog {
-  public ExceptionHandlerDialog(Throwable throwable) { showException(null, throwable);  }
+/*  public ExceptionHandlerDialog(Throwable throwable) { showException(null, throwable);  }
 
   private void showException(BrowserCheck browserCheck, Throwable throwable) {
-    String text = getExceptionAsString(throwable);
-    showExceptionInDialog(browserCheck, text);
-  }
+    showExceptionInDialog(browserCheck, getExceptionAsString(throwable));
+  }*/
 
+/*
   private void showExceptionInDialog(BrowserCheck browserCheck, String text) {
     if (browserCheck != null && browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
       return;
@@ -64,6 +64,7 @@ public class ExceptionHandlerDialog {
     dialogBox.setHTML("<pre>" + text + "</pre>");
     dialogBox.center();
   }
+*/
 
   public static String getExceptionAsString(Throwable throwable) {
     String text = "Uncaught exception: ";
