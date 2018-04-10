@@ -88,7 +88,7 @@ public class UserListManager implements IUserListManager {
 
 
   private static final boolean DEBUG = false;
-  private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
+  // private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
   public static final int DRY_RUN_ITEMS = 10;
   public static final int MIN_PHONE = 4;
   public static final int MAX_PHONE = 7;
@@ -224,15 +224,22 @@ public class UserListManager implements IUserListManager {
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz);
-      List<CommonExercise> rawExercises = databaseServices.getProject(projid).getRawExercises();
+      Project project = databaseServices.getProject(projid);
+      List<CommonExercise> rawExercises = project.getRawExercises();
       Random random = new Random();
       int size = rawExercises.size();
 
       Set<Integer> exids = new TreeSet<>();
       List<CommonExercise> items = new ArrayList<>();
+      int dryRunNum = 10;
+      getFirstEasyLength(project.getSectionHelper().getFirst());
+      for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
+        items.add(exercise);
+        if (items.size() == dryRunNum) break;
+      }
 
       int misses = 0;
-      while (items.size() < reqSize) {
+      while (items.size() < reqSize + dryRunNum) {
         int i = random.nextInt(size);
         CommonExercise commonExercise = rawExercises.get(i);
         boolean add = exids.add(commonExercise.getID());
@@ -242,7 +249,7 @@ public class UserListManager implements IUserListManager {
             if (numPhones > 3) {
               if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
                 items.add(commonExercise);
-                logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+                // logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
               }
             }
           } else {
@@ -267,6 +274,22 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  @NotNull
+  private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
+    List<CommonExercise> first = new ArrayList<>();
+    int misses = 0;
+//          while (first.size() < 10 && misses < 100) {
+    for (CommonExercise candidate : firstCandidates) {
+      //CommonExercise exercise = getExercise(projectid, exid);
+      int length = candidate.getForeignLanguage().length();
+      if (length > 4 && length < 10 || misses++ > 100) {
+        first.add(candidate);
+        if (first.size() == 10) break;
+      }
+    }
+    return first;
+  }
+
   private int rememberList(int projid, UserList e) {
     return userListDAO.add(e, projid);
   }
@@ -276,10 +299,14 @@ public class UserListManager implements IUserListManager {
                                                     int projid,
                                                     boolean listsICreated,
                                                     boolean visitedLists) {
-    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+  /*  List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+
+    Collection<UserList<CommonShell>> allQuiz = getUserListDAO().getAllQuiz(projid);
     List<IUserListLight> names = new ArrayList<>(lists.size());
     lists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
-    return names;
+    return names;*/
+
+    return getUserListDAO().getAllQuizLight(projid);
   }
 
   @Override

@@ -128,7 +128,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Project project = db.getProject(projectIDFromUser);
 
 
-    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser, project.getSectionHelper().getFirst());
+    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser);
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
@@ -467,7 +467,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     if (request.isQuiz()) {
-      sectionHelper = db.getQuizSectionHelper(projid, getProject(projid).getSectionHelper().getFirst());
+      sectionHelper = db.getQuizSectionHelper(projid);
     }
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
 

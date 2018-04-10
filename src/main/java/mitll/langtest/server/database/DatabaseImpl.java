@@ -517,7 +517,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
    */
-  public ISection<CommonExercise> getQuizSectionHelper(int projectid, Collection<CommonExercise> firstCandidates) {
+  public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
     if (projectid == -1) {
       return null;
     } else {
@@ -541,10 +541,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
         if (exids == null) {
           logger.error("getQuizSectionHelper : no exercises in list " + id);
         } else {
-          List<CommonExercise> first = getFirstEasyLength(firstCandidates);
+          List<CommonExercise> firstCandidates = new ArrayList<>();
+
+          exids.forEach(exid->firstCandidates.add(getExercise(projectid,exid)));
+          //List<CommonExercise> first = getFirstEasyLength(firstCandidates);
 
           // dry run set
-          List<Integer> toAdd = addDryRunSet(projectid, sectionHelper, allAttributes, quiz, first);
+          List<Integer> toAdd = addDryRunSet(projectid, sectionHelper, allAttributes, quiz, firstCandidates.subList(0,10));
 
           // quiz set
           addQuizSet(projectid, sectionHelper, allAttributes, quiz, exids, toAdd);
@@ -558,7 +561,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  @NotNull
+ /* @NotNull
   private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
     List<CommonExercise> first = new ArrayList<>();
     int misses = 0;
@@ -571,7 +574,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
     return first;
-  }
+  }*/
 
   @NotNull
   private List<Integer> addDryRunSet(int projectid,

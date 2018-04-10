@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -191,6 +192,13 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return listsForUser;
   }
 
+  /**
+   * @see UserContainer#getListBox
+   * @param onlyCreated
+   * @param visited
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
   public Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();

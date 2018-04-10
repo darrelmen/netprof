@@ -38,7 +38,9 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.services.ListServiceImpl;
+import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.UserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
@@ -313,7 +315,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @return
    * @throws SQLException
    * @seex #getAllPredef(long)
-   * @see IUserListDAO#getAllPublic
+   * @seex IUserListDAO#getAllPublic
    * @see IUserListDAO#getWhere(int, boolean)
    */
 /*  private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
@@ -422,19 +424,23 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return temp;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getQuizSectionHelper
+   * @param projid
+   * @return
+   */
   @Override public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-/*    List<SlickUserExerciseList> temp = new ArrayList<>();
-    {
-      dao.allQuiz(projid).forEach(ue -> {
-        if (ue.userid() != userid) temp.add(ue);
-      });
-    }*/
     Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
-
     List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
-
     return ret;
+  }
+
+  @Override public Collection<IUserListLight> getAllQuizLight(int projid) {
+    Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
+    List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
+    slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
+    return names;
   }
 
 

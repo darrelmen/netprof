@@ -120,10 +120,10 @@ public class QuizHelper extends PracticeHelper {
 
           ((PracticeFacetExerciseList) exerciseList).restoreUI(selectionState);
 
-          logger.warning("showQuiz using selection " + selectionState);
+     //     logger.warning("showQuiz using selection " + selectionState);
         } else {
-          logger.info("showQuiz current history " + History.getToken());
-          logger.info("showQuiz now     history " + historyToken);
+//          logger.info("showQuiz current history " + History.getToken());
+//          logger.info("showQuiz now     history " + historyToken);
 
           //if (historyToken.equals(History.getToken())) {
             showQuizDialog(historyToken, historyExerciseList);
@@ -215,11 +215,14 @@ public class QuizHelper extends PracticeHelper {
             Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
             Set<MatchInfo> matchInfos = typeToValues.get(QUIZ);
             hasValues = !matchInfos.isEmpty();
+
+            /*
             logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
                 "\n\ttype to select : " + typeToSelection +
                 "\n\ttype to values : " + response.getTypeToValues() +
                 "\n\thas values     : " + hasValues
             );
+*/
 
             Set<String> knownTypes = typeToSelection.keySet();
             if (knownTypes.contains(QUIZ) && !knownTypes.contains(Unit)) {
@@ -291,7 +294,6 @@ public class QuizHelper extends PracticeHelper {
               navigation.setBannerVisible(false);
               QuizHelper.this.setVisible(false);
             }
-//        logger.info("mode is " + mode);
             showQuizForReal();
           }
         },

@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -108,6 +109,7 @@ public interface IUserListDAO extends IDAO {
 
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
   Collection<UserList<CommonShell>> getAllQuiz(int projid);
+  Collection<IUserListLight> getAllQuizLight(int projid);
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)

@@ -56,14 +56,8 @@ public class UserInfo extends SimpleUser {
   private int lastSessionNum;
   private int lastSessionSize;
   private int num;
-//  private long startTime;
 
   private transient List<BestScore> bestScores;
-//
-//  private int id;
-//  private String userID;
-//  private String first;
-//  private String last;
 
   public UserInfo() {
   }
@@ -76,7 +70,6 @@ public class UserInfo extends SimpleUser {
     this.bestScores = bestScores;
     this.num = bestScores.size();
     setLastChecked(startTime);
-//    this.startTime = startTime;
 
     // done on server
     bestScores.sort(Comparator.comparingLong(SimpleTimeAndScore::getTimestamp));
@@ -117,10 +110,6 @@ public class UserInfo extends SimpleUser {
     return Math.round(100f * total / size);
   }
 
-/*  public long getTimestampMillis() {
-    return getLastChecked();
-  }*/
-
   /**
    * @return
    * @see UserContainer#getCurrent
@@ -141,14 +130,9 @@ public class UserInfo extends SimpleUser {
     return bestScores;
   }
 
-
   private void setCurrent(int current) {
     this.current = current;
   }
-
-//  public String getUserID() {
-//    return userID;
-//  }
 
   public void setUserID(String userID) {
     this.userID = userID;
