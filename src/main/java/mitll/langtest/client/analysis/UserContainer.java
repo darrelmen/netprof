@@ -64,8 +64,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
-  private static final int MAX_NAME_LENGTH = 16;
   private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final int MAX_NAME_LENGTH = 16;
 
   /**
    * @see #addName
@@ -89,7 +90,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final int COMPLETED_WIDTH = 60;
   private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
- // private static final int CURRENT_WIDTH = 60;
+  // private static final int CURRENT_WIDTH = 60;
 
   private static final boolean SHOW_MY_STUDENTS = false;
   private static final String Y = "Y";
@@ -99,17 +100,20 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private static final String TRYING_TO_GET_STUDENTS = "trying to get students";
 
-  private static final String FILTER_BY1 = "Filter by";
+//  private static final String FILTER_BY1 = "Filter by";
 
   private static final int LIST_BOX_WIDTH = 150;
 
-  private static final String NO_LIST = "(No List)";
+  /**
+   * @see #useLists
+   */
+  private static final String NO_LIST = "(No Quiz)";
   //private static final int FILTER_BY = 19;
 
   /**
    *
    */
-  private static final String CURRENT = "Avg";
+  //private static final String CURRENT = "Avg";
 
 
   private static final int MIN_RECORDINGS = AnalysisServiceImpl.MIN_RECORDINGS;
@@ -210,8 +214,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * Min height is so that when the table is only a few rows, the buttons below the table don't roll up.
    *
-   * @paramx users
    * @return
+   * @paramx users
    */
 /*
   @Override
@@ -221,7 +225,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return tableWithPager;
   }
 */
-
   private boolean showOnlyMine() {
     return SHOW_MY_STUDENTS && controller.getStorage().isTrue("mineOnly");
   }
@@ -345,14 +348,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     filterContainer.add(userTypeahead.getSearch());
 
-   // if (!isPolyglot()) {
-      DivWidget c = new DivWidget();
-      c.addStyleName("leftFiveMargin");
-      c.addStyleName("floatRight");
-      //     c.add(getFilterLabel());
-           c.add(getListBox());
-      filterContainer.add(c);
-   // }
+    // if (!isPolyglot()) {
+    DivWidget c = new DivWidget();
+    c.addStyleName("leftFiveMargin");
+    c.addStyleName("floatRight");
+    //     c.add(getFilterLabel());
+    c.add(getListBox());
+    filterContainer.add(c);
+    // }
     return filterContainer;
   }
 
@@ -465,7 +468,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       }
 
       changeSelectedUser(getSelected());
-
     });
   }
 
@@ -476,13 +478,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserInfo> list = getList();
     addItemID(list, 20);
-   // boolean polyglot = isPolyglot();
-   // if (polyglot) {
-      addName(list);
-   // } else {
-   //   addFirstName(list);
+    // boolean polyglot = isPolyglot();
+    // if (polyglot) {
+    addName(list);
+    // } else {
+    //   addFirstName(list);
     //  addLastName(list);
-   // }
+    // }
     addDateCol(list);
 
     addNumber(list);
@@ -495,10 +497,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 */
 
 //    if (polyglot) {
-      addPolyNumber(list);
-      addLastSession(list);
-      table.getColumnSortList().push(addLastOverallScore(list));
-  //  }
+    addPolyNumber(list);
+    addLastSession(list);
+    table.getColumnSortList().push(addLastOverallScore(list));
+    //  }
 
 /*    if (!polyglot) {
       table.getColumnSortList().push(dateCol);
@@ -545,8 +547,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 //    boolean polyglot = isPolyglot();
 //    String current1 = polyglot ? LIFETIME_AVG : CURRENT;
     addColumn(current, new TextHeader(LIFETIME_AVG));
-   // int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
-    int currentWidth =  LIFETIME_AVG_WIDTH;
+    // int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
+    int currentWidth = LIFETIME_AVG_WIDTH;
     table.setColumnWidth(current, currentWidth + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
@@ -590,7 +592,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     addColumn(num, new TextHeader(LIFETIME));
     table.addColumnSortHandler(getNumSorter(num, list));
-  ///  int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
+    ///  int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
     int numWidth = LIFETIME_WIDTH;
     table.setColumnWidth(num, numWidth + "px");
   }
@@ -932,11 +934,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         req++,
         this));
   }
-
-/*  private boolean isPolyglot() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
-  }*/
 
   public Button getAdd() {
     return add;

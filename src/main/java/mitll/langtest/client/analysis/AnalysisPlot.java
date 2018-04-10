@@ -135,7 +135,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private TimeWidgets timeWidgets;
   private MessageHelper messageHelper;
   protected Chart chart = null;
-  //private boolean isPolyglot;
+ private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
 
   /**
@@ -156,8 +156,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
-    //this.isPolyglot = isPolyglot;
-    int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
+    this.isPolyglot = isPolyglot;
+  //  int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
 
 /*    if (!isPolyglot) {
       setWidth(width + "px");
@@ -348,10 +348,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     setRawBestScores(rawBestScores);
     showSeriesByVisible();
 
-/*    if (isPolyglot) {
+    if (isPolyglot) {
       //setTimeHorizon(possible < 50 ? AnalysisTab.TIME_HORIZON.ONEMIN : TENMIN);
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
-    }*/
+    }
   }
 
   @NotNull

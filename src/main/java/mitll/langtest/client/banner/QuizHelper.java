@@ -245,7 +245,7 @@ public class QuizHelper extends PracticeHelper {
   private void showQuizDialog(String historyToken, HistoryExerciseList historyExerciseList) {
     rememberHistoryToken(historyToken);
 
-    logger.info("current selection state " + historyToken);
+  //  logger.info("current selection state " + historyToken);
 
     String first = historyToken
         + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Dry Run";

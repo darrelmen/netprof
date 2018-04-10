@@ -231,6 +231,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     else {
       polyglotFlashcardContainer.showQuiz();
     }
+    super.reallyStartOver();
   }
 
   @Override

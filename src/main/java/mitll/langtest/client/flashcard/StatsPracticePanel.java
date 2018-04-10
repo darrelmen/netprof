@@ -408,7 +408,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     sticky.clearCurrent();
     startOver.setEnabled(false);
 
-
     reallyStartOver();
   }
 

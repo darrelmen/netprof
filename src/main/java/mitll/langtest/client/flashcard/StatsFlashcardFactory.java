@@ -79,7 +79,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private Widget contentPanel;
 
-  //StatsPracticePanel currentFlashcard = null;
   FlashcardPanel<?> currentFlashcard = null;
   private INavigation navigation;
   final KeyStorage storage;
@@ -147,19 +146,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   @Override
   public Panel getExercisePanel(T e) {
     sticky.storeCurrent(e);
-
-    // boolean showRecordingFlashcard = shouldShowRecordingFlashcard();
-
-    currentFlashcard =   //true ?
-        currentFlashcard = getFlashcard(e);
-        ///:
-       // getNoRecordFlashcardPanel(e.getCommonAnnotatable());
-/*    if (!showRecordingFlashcard) {
-//      logger.info("getExercisePanel no recording ");
-      currentFlashcard = null;
-    }*/
-
-    //logger.info("getExercisePanel return flashcard ");
+    currentFlashcard = getFlashcard(e);
     return currentFlashcard;
   }
 
@@ -173,33 +160,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         e.getCommonAnnotatable(),
         sticky,
         exerciseList);
-  }
-
-/*  boolean shouldShowRecordingFlashcard() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
-    return hasModel && controller.isRecordingEnabled();
-  }*/
-
-  private FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
-    FlashcardPanel<CommonAnnotatable> noRecord = new FlashcardPanel<CommonAnnotatable>(e,
-        StatsFlashcardFactory.this.controller,
-        ADD_KEY_BINDING,
-        StatsFlashcardFactory.this.controlState,
-        soundFeedback,
-        soundFeedback.getEndListener(),
-        StatsFlashcardFactory.this.instance,
-        exerciseList
-    ) {
-
-      @Override
-      protected void gotShuffleClick(boolean b) {
-        sticky.resetStorage();
-        super.gotShuffleClick(b);
-      }
-    };
-    noRecord.addWidgets(e, controller, controlState);
-    return noRecord;
   }
 
   void reset() {
@@ -253,7 +213,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  private void reallyStartOver() {
+  protected void reallyStartOver() {
     sticky.reset();
     sticky.resetStorage();
     loadFirstExercise();
@@ -280,13 +240,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   public void showQuiz() {
     navigation.showView(INavigation.VIEWS.QUIZ);
-
-
   }
-/*
-  public void gotStartOver() {
-
-  }*/
 
   public void styleContent(boolean showCard) {
     if (showCard) {
