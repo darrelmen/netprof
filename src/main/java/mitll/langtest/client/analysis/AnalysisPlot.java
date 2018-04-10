@@ -135,7 +135,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private TimeWidgets timeWidgets;
   private MessageHelper messageHelper;
   protected Chart chart = null;
-  private boolean isPolyglot;
+  //private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
 
   /**
@@ -156,23 +156,23 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
-    this.isPolyglot = isPolyglot;
+    //this.isPolyglot = isPolyglot;
     int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
 
-    if (!isPolyglot) {
+/*    if (!isPolyglot) {
       setWidth(width + "px");
     }
-    {
-      getElement().setId("AnalysisPlot");
-      Style style = getElement().getStyle();
-      style.setMarginLeft(10, Style.Unit.PX);
-      style.setMarginRight(10, Style.Unit.PX);
-      style.setMarginBottom(10, Style.Unit.PX);
-      addStyleName("cardBorderShadow");
+    {*/
+    getElement().setId("AnalysisPlot");
+    Style style = getElement().getStyle();
+    style.setMarginLeft(10, Style.Unit.PX);
+    style.setMarginRight(10, Style.Unit.PX);
+    style.setMarginBottom(10, Style.Unit.PX);
+    addStyleName("cardBorderShadow");
 
-      getElement().getStyle().setProperty("maxWidth", STUDENT_WIDTH + "px");
+    getElement().getStyle().setProperty("maxWidth", STUDENT_WIDTH + "px");
 
-    }
+    //  }
 
     /**
      * setRawBestScores
@@ -209,7 +209,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
-      if (isPolyglot) {
+      //if (isPolyglot)
+      {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
         sessions.addAll(getEasyPeriods(phoneSessions));
       }
@@ -347,10 +348,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     setRawBestScores(rawBestScores);
     showSeriesByVisible();
 
-    if (isPolyglot) {
+/*    if (isPolyglot) {
       //setTimeHorizon(possible < 50 ? AnalysisTab.TIME_HORIZON.ONEMIN : TENMIN);
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
-    }
+    }*/
   }
 
   @NotNull
@@ -682,7 +683,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         .setType(Axis.Type.DATE_TIME)
         .setAxisSetExtremesEventHandler(axisSetExtremesEvent -> {
           if (axisSetExtremesEvent != null) {
-         //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
+            //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
             gotExtremes(axisSetExtremesEvent);
           }
           return true;
@@ -927,7 +928,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private long getOffsetPerSession() {
     long offset = getOffset();
-    if (isPolyglot && timeHorizon == SESSION) {
+    if (//isPolyglot &&
+        timeHorizon == SESSION) {
       Long thisPeriodStart = getPeriods().get(index);
 
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());

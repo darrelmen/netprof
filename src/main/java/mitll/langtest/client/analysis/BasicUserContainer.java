@@ -194,7 +194,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return TABLE_WIDTH;
   }
 
-  void addFirstName(List<T> list) {
+  private  void addFirstName(List<T> list) {
     Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -220,7 +220,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return columnSortHandler;
   }
 
-  void addLastName(List<T> list) {
+  private void addLastName(List<T> list) {
     Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {

@@ -530,7 +530,7 @@ public abstract class Analysis extends DAO {
         //c++;
         logger.error("getWordScore huh? no json for " + bs);
       } else if (json.equals(EMPTY_JSON)) {
-        logger.warn("getWordScore json is empty for " + bs);
+//        logger.warn("getWordScore json is empty for " + bs);
         // skip low scores
       } else if (bs.getScore() > database.getServerProps().getMinAnalysisScore()) {
         if (json.isEmpty()) logger.warn("no json for " + bs);

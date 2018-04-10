@@ -35,28 +35,23 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -94,7 +89,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final int COMPLETED_WIDTH = 60;
   private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
-  private static final int CURRENT_WIDTH = 60;
+ // private static final int CURRENT_WIDTH = 60;
 
   private static final boolean SHOW_MY_STUDENTS = false;
   private static final String Y = "Y";
@@ -244,7 +239,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
 
-    if (!isPolyglot() && SHOW_MY_STUDENTS) {
+/*    if (!isPolyglot() && SHOW_MY_STUDENTS) {
       buttons.add(new HTML(MY_STUDENT));
       DivWidget addC = new DivWidget();
       addC.add(add = getAddButton());
@@ -253,12 +248,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       removeC.add(remove = getRemoveButton());
       buttons.add(removeC);
       buttons.add(mineOnly = getMyStudents());
-    }
+    }*/
 
     return buttons;
   }
 
-
+/*
   @NotNull
   private Button getAddButton() {
     final Button add = new Button(Y, IconType.PLUS);
@@ -287,7 +282,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     });
     add.setType(ButtonType.SUCCESS);
     return add;
-  }
+  }*/
 
   private void enableButtons() {
     UserInfo currentSelection = getCurrentSelection();
@@ -299,7 +294,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     }
   }
 
-  @NotNull
+/*  @NotNull
   private Button getRemoveButton() {
     final Button remove = new Button("N", IconType.MINUS);
     remove.setSize(ButtonSize.MINI);
@@ -333,7 +328,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     });
     remove.setType(ButtonType.SUCCESS);
     return remove;
-  }
+  }*/
 
 
   /**
@@ -350,17 +345,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     filterContainer.add(userTypeahead.getSearch());
 
-    if (!isPolyglot()) {
+   // if (!isPolyglot()) {
       DivWidget c = new DivWidget();
       c.addStyleName("leftFiveMargin");
       c.addStyleName("floatRight");
       //     c.add(getFilterLabel());
-      //     c.add(getListBox());
+           c.add(getListBox());
       filterContainer.add(c);
-    }
+   // }
     return filterContainer;
   }
 
+/*
   @NotNull
   private HTML getFilterLabel() {
     HTML filterLabel = new HTML(FILTER_BY1);
@@ -374,8 +370,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     filterLabel.getElement().getStyle().setColor("#999");
     return filterLabel;
   }
+*/
 
-
+/*
   @NotNull
   private Button getMyStudents() {
     Button mineOnly = new Button(MINE_ONLY);
@@ -395,7 +392,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     });
 
     return mineOnly;
-  }
+  }*/
 
   private void showAllUsers() {
     setStorageMineOnly(false);
@@ -407,7 +404,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 
   /**
-   * @see #getMyStudents
+   * @seex #getMyStudents
    */
   private void rememberAndFilter() {
     remembered = new ArrayList<>(getList());
@@ -479,31 +476,33 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserInfo> list = getList();
     addItemID(list, 20);
-    boolean polyglot = isPolyglot();
-    if (polyglot) {
+   // boolean polyglot = isPolyglot();
+   // if (polyglot) {
       addName(list);
-    } else {
-      addFirstName(list);
-      addLastName(list);
-    }
+   // } else {
+   //   addFirstName(list);
+    //  addLastName(list);
+   // }
     addDateCol(list);
 
     addNumber(list);
     addCurrent(list);
 
+/*
     if (!polyglot) {
       if (SHOW_MY_STUDENTS) addMine(list);
     }
+*/
 
-    if (polyglot) {
+//    if (polyglot) {
       addPolyNumber(list);
       addLastSession(list);
       table.getColumnSortList().push(addLastOverallScore(list));
-    }
+  //  }
 
-    if (!polyglot) {
+/*    if (!polyglot) {
       table.getColumnSortList().push(dateCol);
-    }
+    }*/
 
     table.setWidth("100%", true);
 
@@ -523,9 +522,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         return getNoWrapContent(truncate(shell.getName(), MAX_NAME_LENGTH));
       }
     };
+
     userCol.setSortable(true);
+
     table.setColumnWidth(userCol, NAME_WIDTH + "px");
+
     addColumn(userCol, new TextHeader(NAME));
+
     table.addColumnSortHandler(getNameSorter(userCol, list));
   }
 
@@ -539,10 +542,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
-    boolean polyglot = isPolyglot();
-    String current1 = polyglot ? LIFETIME_AVG : CURRENT;
-    addColumn(current, new TextHeader(current1));
-    int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
+//    boolean polyglot = isPolyglot();
+//    String current1 = polyglot ? LIFETIME_AVG : CURRENT;
+    addColumn(current, new TextHeader(LIFETIME_AVG));
+   // int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
+    int currentWidth =  LIFETIME_AVG_WIDTH;
     table.setColumnWidth(current, currentWidth + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, list));
@@ -581,12 +585,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
 
-    boolean polyglot = isPolyglot();
-    String text = polyglot ? LIFETIME : "#";
+    //boolean polyglot = isPolyglot();
+    //String text = polyglot ? LIFETIME : "#";
 
-    addColumn(num, new TextHeader(text));
+    addColumn(num, new TextHeader(LIFETIME));
     table.addColumnSortHandler(getNumSorter(num, list));
-    int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
+  ///  int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
+    int numWidth = LIFETIME_WIDTH;
     table.setColumnWidth(num, numWidth + "px");
   }
 
@@ -923,15 +928,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         selectedUser.getID(),
         selectedUser.getUserID(),
         listid,
-        isPolyglot(),
+        true,//isPolyglot(),
         req++,
         this));
   }
 
-  private boolean isPolyglot() {
+/*  private boolean isPolyglot() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
-  }
+  }*/
 
   public Button getAdd() {
     return add;
@@ -964,9 +969,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     String prefix = text.toLowerCase();
 
     for (UserInfo user : orig) {
+      //String formattedDateString = getFormattedDateString(getItemDate(user)).toLowerCase();
+      //logger.info("user "+ user.getID() + " " + user.getUserID() + " " + formattedDateString);
+
       if (user.getUserID().toLowerCase().startsWith(prefix)
           || user.getFirst().toLowerCase().startsWith(prefix)
           || user.getLast().toLowerCase().startsWith(prefix)
+          || getFormattedDateString(getItemDate(user)).toLowerCase().startsWith(prefix)
           ) {
         matches.add(user);
       }

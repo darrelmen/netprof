@@ -22,7 +22,7 @@ public class UserTypeahead {
 
   private static final int DISPLAY_ITEMS = 15;
   private static final int BOX_WIDTH = 150;
-  private static final String HINT = "user id or name";
+  private static final String HINT = "user id or name or date";
   private static final int SEARCH_FONT = 14;
   private final TextBox box;
   //private Collection<UserInfo> choices;
@@ -31,8 +31,7 @@ public class UserTypeahead {
   UserTypeahead(TypeaheadListener listener) {
     TextBox box = getTextBox();
     box.setPlaceholder(HINT);
-
-      box.addKeyUpHandler(event -> listener.gotKey(box.getText()));
+    box.addKeyUpHandler(event -> listener.gotKey(box.getText()));
 /*
     Typeahead typeahead = new Typeahead(new MultiWordSuggestOracle() {
       @Override
@@ -137,11 +136,13 @@ public class UserTypeahead {
       return repl;
     }
 
-    *//**
-     * @param repl
-     * @param userInfo
-     * @see
-     *//*
+    */
+
+  /**
+   * @paramx repl
+   * @paramx userInfo
+   * @see
+   *//*
     UserSuggestion(String repl, UserInfo userInfo) {
       super(repl, userInfo.getFirst() + " " + userInfo.getLast());
       this.repl = repl;
@@ -155,7 +156,6 @@ public class UserTypeahead {
       return userInfo;
     }
   }*/
-
   private TextBox getTextBox() {
     TextBox quickAddText = new TextBox();
     quickAddText.setMaxLength(100);

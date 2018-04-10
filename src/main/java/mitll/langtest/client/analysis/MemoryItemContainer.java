@@ -456,6 +456,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   protected SafeHtml getFormattedDate(Long itemDate) {
+    String signedUp = getFormattedDateString(itemDate);
+
+    return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
+  }
+
+  protected String getFormattedDateString(Long itemDate) {
     Date date = new Date(itemDate);
     String signedUp = format.format(date);
 
@@ -465,8 +471,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
       signedUp = signedUp.substring(0, signedUp.length() - 4);
     }
-
-    return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
+    return signedUp;
   }
 
   protected abstract Long getItemDate(T shell);

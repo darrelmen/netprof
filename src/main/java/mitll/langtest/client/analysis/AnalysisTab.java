@@ -137,7 +137,7 @@ public class AnalysisTab extends DivWidget {
   private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
   private final int listid;
 
-  private final boolean isPolyglot;
+ // private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
 
   /**
@@ -179,7 +179,7 @@ public class AnalysisTab extends DivWidget {
                      ReqCounter reqCounter) {
     this.userid = userid;
     this.listid = listid;
-    this.isPolyglot = isPolyglot;
+  //  this.isPolyglot = isPolyglot;
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
@@ -357,14 +357,14 @@ public class AnalysisTab extends DivWidget {
     Button nextButton = getNextButton();
     stepper.add(nextButton);
 
-    if (isPolyglot) {
+    //if (isPolyglot) {
       Heading scoreHeader = new Heading(3);
       scoreHeader.addStyleName("leftFiveMargin");
       scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
       scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
       stepper.add(this.scoreHeader = scoreHeader);
       //    logger.info("add score header");
-    }
+   // }
 
     timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice,
         dayChoice,
@@ -427,16 +427,16 @@ public class AnalysisTab extends DivWidget {
 
     w.add(buttonGroup);
 
-    if (isPolyglot) {
+    //if (isPolyglot) {
       buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION));
-      sessionChoice.setActive(true);
-    }
+     // sessionChoice.setActive(true);
+   // }
 
-    if (!isPolyglot) {
+   // if (!isPolyglot) {
       buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY));
       buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
       buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
-    }
+   // }
 
     buttonGroup.add(allChoice = getAllChoice());
 
@@ -449,7 +449,7 @@ public class AnalysisTab extends DivWidget {
 
   private Button getAllChoice() {
     Button all = getButtonChoice(TIME_HORIZON.ALL);
-    all.setActive(!isPolyglot);
+    all.setActive(true);//!isPolyglot);
     return all;
   }
 
