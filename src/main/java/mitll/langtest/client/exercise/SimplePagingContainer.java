@@ -45,10 +45,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListOptions;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -123,6 +120,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected void addTable(Panel column) {
     column.add(table);
     table.addStyleName("floatLeftAndClear");
+  }
+
+  public Map<Integer, T> getIdToExercise() {
+    return Collections.emptyMap();
   }
 
   public boolean hasNextPage() {

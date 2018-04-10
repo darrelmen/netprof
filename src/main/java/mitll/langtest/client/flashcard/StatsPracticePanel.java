@@ -65,7 +65,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private static final String N_A = "N/A";
 
   private final FlashcardContainer statsFlashcardFactory;
-  private Widget container;
   SpeedChoices speedChoices;
   final StickyState sticky;
   private Label remain, incorrectBox, correctBox, pronScore;
@@ -220,7 +219,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
     Panel widgets = new DivWidget();
 
-    container = widgets;
+    Widget container = widgets;
 
     {
       AnalysisTab scoreHistory = getScoreHistory();

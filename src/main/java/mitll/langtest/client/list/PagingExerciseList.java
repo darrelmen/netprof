@@ -89,6 +89,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     getElement().setId("PagingExerciseList_" + getInstance());
   }
 
+  public Map<Integer, T> getIdToExercise() {
+    Map<Integer, T> idToExercise = pagingContainer.getIdToExercise();
+    logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
+    return idToExercise;
+  }
+
   /**
    * @param comp
    * @see ListSorting#sortBy
@@ -139,7 +145,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setActivityType(getActivityType())
         .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
-       // .setIncorrectFirstOrder(listOptions.isIncorrectFirst())
+        // .setIncorrectFirstOrder(listOptions.isIncorrectFirst())
         .setOnlyDefaultAudio(false)
         .setOnlyUninspected(false);
   }
@@ -514,7 +520,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public T getCurrentExercise() {  return pagingContainer.getCurrentSelection();  }
+  public T getCurrentExercise() {
+    return pagingContainer.getCurrentSelection();
+  }
 
   @Override
   protected int getRealIndex(T t) {

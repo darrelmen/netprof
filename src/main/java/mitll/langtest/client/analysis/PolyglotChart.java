@@ -2,14 +2,15 @@ package mitll.langtest.client.analysis;
 
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.shared.answer.AudioAnswer;
+import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class PolyglotChart extends BasicTimeSeriesPlot {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
-
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
 
@@ -17,14 +18,23 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
 
   protected Chart chart = null;
 
+  /**
+   * @param exceptionSupport
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#getChart
+   */
   public PolyglotChart(ExceptionSupport exceptionSupport) {
     super(exceptionSupport);
   }
 
+  /**
+   * @param answers
+   * @param duration
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#getChart
+   */
   public void addChart(Collection<AudioAnswer> answers, long duration) {
     clear();
 
-    chart = getChart("");
+    chart = getChart();
 
     int size = answers.size();
 //    logger.info("addChart : plotting " + size + " items.");
@@ -55,7 +65,7 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     }
 
     chart.addSeries(getScatterSeries(chart, RECORDINGS, data2));
-    chart.addSeries(getSplineSeries (chart, AVG_SCORE, data));
+    chart.addSeries(getSplineSeries(chart, AVG_SCORE, data));
     if (first > 0)
       setExtremes(first, duration);
     add(chart);
@@ -68,8 +78,8 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     //  logger.info("xAxis from " + new Date(start) + " - " + new Date(end) + " duration  " + duration);
   }
 
-  private Chart getChart(String title) {
-    final Chart chart = getHighchartChart(title, false);
+  private Chart getChart() {
+    final Chart chart = getHighchartChart("", false);
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
@@ -87,12 +97,27 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     chart.getXAxis()
         .setStartOnTick(true)
         .setEndOnTick(true)
-        .setType(Axis.Type.DATE_TIME)
-    ;
+        .setType(Axis.Type.DATE_TIME);
 
-    //  int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(HEIGHT + "px");
-//    chart.setWidth(width + // 1378
-//        "px");
+  }
+
+  public void setTimeToID(Map<Long, Integer> timeToID) {
+    this.timeToId = timeToID;
+  }
+
+  @Override
+  boolean shouldShowExercise(String seriesName) {
+    return true;
+  }
+
+
+  /**
+   * TODO : for now, no hint
+   * @return
+   */
+  @Override
+  String getTooltipHint() {
+    return "<br/>";
   }
 }

@@ -18,10 +18,14 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-  //private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
@@ -99,7 +103,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   protected void showEnglishOrForeign() {
     showBoth();
-
   }
 
   @Override
@@ -133,6 +136,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     super.recordingStarted();
   }
 
+  /**
+   * @see #showCorrectFeedback
+   * @param score
+   * @param isFullMatch
+   */
   protected void maybeAdvance(double score, boolean isFullMatch) {
     if (polyglotFlashcardContainer.isInLightningRound()) {
       if (isFullMatch && isCorrect(score)) {
@@ -215,6 +223,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     pChart.setWidth("100%");
     pChart.setHeight(CHART_HEIGHT + "px");
     pChart.addStyleName("floatLeftAndClear");
+    //logger.info("got " +exerciseList.getIdToExercise().size());
+    pChart.setIdToEx(exerciseList.getIdToExercise());
+    pChart.setTimeToID(sticky.getTimeToID());
     return pChart;
   }
 

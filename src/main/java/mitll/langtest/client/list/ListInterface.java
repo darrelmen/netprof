@@ -62,6 +62,8 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
    */
   T byID(int name);
 
+  Map<Integer, T> getIdToExercise();
+
   void addExercise(T es);
 
   T simpleRemove(int id);

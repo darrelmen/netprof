@@ -101,7 +101,6 @@ class StickyState {
   }
 
 
-
   public void populateCorrectMap() {
     String value = getCorrect();
     if (value != null && !value.trim().isEmpty()) {
@@ -208,10 +207,20 @@ class StickyState {
     return exToScore.values();
   }
 
-  public boolean isComplete(int num) { return num == exToScore.size(); }
+  public boolean isComplete(int num) {
+    return num == exToScore.size();
+  }
 
   Collection<AudioAnswer> getAnswers() {
     return exToAnswer.values();
+  }
+
+  public Map<Long, Integer> getTimeToID() {
+    Map<Long, Integer> timeToID = new HashMap<>();
+    exToAnswer.forEach((k, v) -> {
+      timeToID.put(v.getTimestamp(), k);
+    });
+    return timeToID;
   }
 
   void clearAnswers() {

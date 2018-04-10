@@ -1,6 +1,7 @@
 package mitll.langtest.client.analysis;
 
 import mitll.langtest.client.exercise.ExceptionSupport;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
+  public static final String SCORE = "Score";
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
   static final String I_PAD_I_PHONE = "iPad/iPhone";
@@ -30,8 +32,8 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private static final int X_OFFSET_LEGEND = 65;
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
-  private final Map<Long, Integer> timeToId = new TreeMap<>();
-  private final Map<Integer, CommonShell> idToEx = new TreeMap<>();
+  Map<Long, Integer> timeToId = new TreeMap<>();
+  private Map<Integer, CommonShell> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
 
@@ -98,7 +100,6 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   }
 
   protected void gotClickOnExercise(int exid, long nearestXAsLong) {
-
   }
 
   /**
@@ -158,13 +159,15 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @see #getToolTip()
    */
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
-    return getExerciseTooltip(toolTipData, exid, commonShell, toolTipData.getSeriesName());
+    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
+    return getExerciseTooltip(toolTipData, commonShell, toolTipData.getSeriesName());
   }
 
   @NotNull
-  private String getExerciseTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell, String seriesName) {
-    boolean showEx = toShowExercise.contains(seriesName);
+  private String getExerciseTooltip(ToolTipData toolTipData, CommonShell commonShell, String seriesName) {
+    boolean showEx = shouldShowExercise(seriesName);
+
+    logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
 
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
@@ -177,22 +180,33 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     String dateToShow = getDateToShow(toolTipData);
 
     return
-       // "<b>" + seriesName + "</b>" + "<br/>" +
-            (showEx ?
-                //"<br/>Exercise " + exid +
-                    "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
-                    englishTool
-                : "")
+        // "<b>" + seriesName + "</b>" + "<br/>" +
+        (showEx ?
+            //"<br/>Exercise " + exid +
+            "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
+                englishTool
+            : "")
             +
-            "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
+            "<br/>" +
+            SCORE +
+            " <b>" + toolTipData.getYAsLong() + "</b>%" +
 
-                "<br/>" +
-                dateToShow +
+            "<br/>" +
+            dateToShow +
 
             (showEx ?
-                "<br/>" + "<b>Click to hear vs. reference</b>"
+                getTooltipHint()
                 : "")
         ;
+  }
+
+  @NotNull
+   String getTooltipHint() {
+    return "<br/>" + "<b>Click to hear vs. reference</b>";
+  }
+
+  boolean shouldShowExercise(String seriesName) {
+    return toShowExercise.contains(seriesName);
   }
 
   /**
@@ -203,6 +217,10 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return idToEx;
   }
 
+  public void setIdToEx(Map<Integer, CommonShell> idToEx) {
+    this.idToEx = idToEx;
+  }
+
   public boolean isKnown(int exid) {
     return idToEx.containsKey(exid);
   }
@@ -211,6 +229,10 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     timeToId.put(time, id);
   }
 
+  /**
+   * @param commonShell
+   * @see AnalysisPlot#populateExerciseMap
+   */
   void rememberExercise(CommonShell commonShell) {
     idToEx.put(commonShell.getID(), commonShell);
   }

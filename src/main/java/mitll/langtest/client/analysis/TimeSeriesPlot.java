@@ -78,7 +78,6 @@ class TimeSeriesPlot extends DivWidget {
   private String getTooltipText(ToolTipData toolTipData) {
     try {
       String seriesName1 = toolTipData.getSeriesName();
-
       if (seriesName1.equals(AVERAGE)) {
         return getAvgTooltip(toolTipData, seriesName1);
       } else {

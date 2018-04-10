@@ -84,7 +84,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    *
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
-  public static final String SCORE = "";// "score ";
+  public static final String SCORE = "";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   protected final int userid;
@@ -1102,7 +1102,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    // logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
     String seriesName = toolTipData.getSeriesName();
 
     if (granToLabel.values().contains(seriesName)) {

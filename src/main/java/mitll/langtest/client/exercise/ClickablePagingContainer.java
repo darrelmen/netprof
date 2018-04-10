@@ -315,6 +315,10 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     table.redraw();
   }
 
+  public Map<Integer, T> getIdToExercise() {
+    return idToExercise;
+  }
+
   public static class ClickableCell extends SafeHtmlCell {
     @Override
     public Set<String> getConsumedEvents() {

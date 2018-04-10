@@ -78,8 +78,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
-  public static final boolean SORT_BY_RANK = false;
   private final Logger logger = Logger.getLogger("PhoneContainer");
+
+  private static final boolean SORT_BY_RANK = false;
 
   /**
    * @see #getTableWithPagerForHistory
@@ -116,7 +117,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private static final boolean DEBUG = false;
   private final AnalysisServiceAsync analysisServiceAsync;
-  //private final boolean isPoly;
 
   /**
    * @param controller
@@ -549,6 +549,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         });
     return columnSortHandler;
   }
+
+
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
