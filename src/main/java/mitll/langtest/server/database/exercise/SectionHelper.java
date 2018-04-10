@@ -63,7 +63,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private static final String GRAMMAR = "Grammar";
   private static final String DIALECT = "Dialect";
   private static final String DIFFICULTY = "Difficulty";
+  /**
+   * @see #getTypeToMatchPairs(List, SectionNode)
+   */
   private static final String ANY = "any";
+  /**
+   * @see #getTypeToMatchPairs(List, SectionNode)
+   */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
   private List<String> predefinedTypeOrder = new ArrayList<>();
@@ -119,8 +125,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder after sort now " + types);
       } else {
         types.sort((o1, o2) -> {
-          int first = typeToUnitToLesson.get(o1).size();
-          int second = typeToUnitToLesson.get(o2).size();
+          int first = getCategoryToLesson(o1).size();
+          int second = getCategoryToLesson(o2).size();
           int i = Integer.compare(first, second);
           return i == 0 ? o1.compareTo(o2) : i;
         });
@@ -316,7 +322,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-    if (DEBUG) logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+    if (DEBUG)
+      logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     if (!node.isLeaf() && node.getChildType().equals(type)) {
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
@@ -387,8 +394,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       } else {
         for (SectionNode child : node.getChildren()) {
-          Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(pairs, child);
-          mergeMaps2(typeToMatch, typeToMatchPairs);
+          mergeMaps2(typeToMatch, getTypeToMatchPairs(pairs, child));
         }
       }
     }
@@ -567,7 +573,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @see #getExercisesForSelectionState(java.util.Map)
    */
   private Collection<T> getExercisesForSection(String type, Collection<String> sections) {
-    Map<String, Lesson<T>> sectionToLesson = typeToUnitToLesson.get(type);
+    Map<String, Lesson<T>> sectionToLesson = getCategoryToLesson(type);
     if (sectionToLesson == null) {
       return Collections.emptyList();
     } else {
@@ -622,7 +628,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public Pair addExerciseToLesson(T exercise, String type, String unitName) {
     Pair pair = getPairForExerciseAndLesson(exercise, type, unitName);
     exercise.addUnitToValue(type, unitName);
-
     return pair;
   }
 
@@ -702,7 +707,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @param type
    * @param unitName
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem(CommonExercise, boolean)
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
@@ -729,11 +734,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     if (section.isEmpty()) {
       logger.error("huh? section is empty ", new Exception());
     }
-    Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
-    if (unit == null) {
-      typeToUnitToLesson.put(section, unit = new HashMap<>());
-    }
-    return unit;
+    return typeToUnitToLesson.computeIfAbsent(section, k -> new HashMap<>());
   }
 
   /**
@@ -749,7 +750,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public void report() {
     logger.debug("report : type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
+      Map<String, Lesson<T>> categoryToLesson = getCategoryToLesson(key);
       Set<String> sections = new TreeSet<>(categoryToLesson.keySet());
       if (!sections.isEmpty()) {
         String message = "\treport : " + key + " = (" + sections.size() + ") " + sections;
@@ -783,6 +784,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //   }
   }
 
+  private Map<String, Lesson<T>> getCategoryToLesson(String key) {
+    return typeToUnitToLesson.get(key);
+  }
+
   private List<List<Pair>> seen = new ArrayList<>();
 
   public void rememberPairs(List<Pair> pairs) {
@@ -798,6 +803,62 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     rememberTypesInOrder(predefinedTypeOrder, seen);
     //logger.info("rememberTypes root now " + root.easy());
     seen = null;
+  }
+
+  @Override
+  public Collection<T> getFirst() {
+    String first = getTypeOrder().iterator().next();
+
+    Map<String, Set<MatchInfo>> all = getTypeToMatches(Arrays.asList(new Pair(first, "All")));
+
+    String unitFirst = all.keySet().iterator().next();
+
+    logger.warn(first + " = " + unitFirst);
+    Set<MatchInfo> matchInfos = all.get(first);
+    //String firstUnit = matchInfos.iterator().next().getValue();
+
+    int minFirstSize = 20;
+    String firstUnit = getFirstMatchLargerThan(matchInfos, minFirstSize);
+
+    //matchInfos.forEach(matchInfo -> logger.info("\tgot " + matchInfo.getValue() + " = " + matchInfo.getCount()));
+    Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Arrays.asList(new Pair(first, firstUnit)));
+    logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
+
+    Map<String, Collection<String>> typeToSection = new HashMap<>();
+    typeToSection.put(first, Collections.singleton(firstUnit));
+    Map<String, Collection<String>> firstOnly = new HashMap<>(typeToSection);
+
+
+    if (getTypeOrder().size() > 1) {
+      String secondType = getTypeOrder().get(1);
+      Set<MatchInfo> matchInfos1 = childrenOfFirst.get(secondType);
+
+      String second = getFirstMatchLargerThan(matchInfos1, minFirstSize);
+      typeToSection.put(secondType, Collections.singleton(second));
+    }
+
+    logger.info("getFirst matching " + typeToSection);
+    Collection<T> exercisesForSelectionState = getExercisesForSelectionState(typeToSection);
+    if (exercisesForSelectionState.size() < minFirstSize) {
+      logger.info("getFirst Fall back to " + firstOnly);
+      exercisesForSelectionState = getExercisesForSelectionState(firstOnly);
+    }
+    return exercisesForSelectionState;
+
+//    Map<String, Lesson<T>> sectionToLesson = getCategoryToLesson(first);
+//    sectionToLesson.keySet().iterator().next();
+  }
+
+  private String getFirstMatchLargerThan(Set<MatchInfo> matchInfos1, int i) {
+    String second = matchInfos1.iterator().next().getValue();
+    for (MatchInfo matchInfo : matchInfos1) {
+      if (matchInfo.getCount() > i) {
+        second = matchInfo.getValue();
+        logger.info("getFirst choose " +matchInfo);
+        break;
+      }
+    }
+    return second;
   }
 
   private Map<String, Set<String>> typeToCount = new HashMap<>();

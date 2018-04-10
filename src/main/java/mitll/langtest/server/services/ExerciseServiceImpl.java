@@ -123,7 +123,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         "\n\trequest         " + request +
         "\n\ttype->selection " + typeToSelection);
 
-    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(getProjectIDFromUser());
+    int projectIDFromUser = getProjectIDFromUser();
+    Project project = db.getProject(projectIDFromUser);
+
+
+     ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser,project.getSectionHelper().getFirst());
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
@@ -385,7 +389,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Called from the client:
    *
    * @return
-   * @see mitll.langtest.client.list.ListInterface#getExercises
+   * @see #getExerciseWhenNoUnitChapter
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
@@ -464,10 +468,16 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     if (request.isQuiz()) {
-      sectionHelper = db.getQuizSectionHelper(projid);
+      sectionHelper = db.getQuizSectionHelper(projid, getProject(projid).getSectionHelper().getFirst());
     }
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
+
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
+
+    if (request.isQuiz()) {
+      copy.sort(Comparator.comparingInt(CommonShell::getNumPhones));
+    }
+
     exercisesForState = filterExercises(request, copy, projid);
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
   }

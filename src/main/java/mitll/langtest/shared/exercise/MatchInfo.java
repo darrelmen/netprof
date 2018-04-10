@@ -21,6 +21,10 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   public MatchInfo() {
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addOrMerge
+   * @param node
+   */
   public MatchInfo(SectionNode node) {
     this.value = node.getName();
     this.count = node.getCount();

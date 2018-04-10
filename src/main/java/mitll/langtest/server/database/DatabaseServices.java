@@ -47,13 +47,11 @@ import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 
 import javax.servlet.ServletContext;
-import java.text.CollationKey;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +91,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
-  ISection<CommonExercise> getQuizSectionHelper(int projectid);
+  ISection<CommonExercise> getQuizSectionHelper(int projectid, Collection<CommonExercise> first);
 
   void markAudioDefect(AudioAttribute audioAttribute);
 

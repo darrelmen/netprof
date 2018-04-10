@@ -166,7 +166,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid);
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -210,7 +210,8 @@ public class UserListManager implements IUserListManager {
                                            String description,
                                            String dliClass,
                                            boolean isPrivate,
-                                           int projid) {
+                                           int projid,
+                                           int reqSize) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -231,7 +232,7 @@ public class UserListManager implements IUserListManager {
       List<CommonExercise> items = new ArrayList<>();
 
       int misses = 0;
-      while (items.size() < NUM_TO_CREATE_FOR_QUIZ) {
+      while (items.size() < reqSize) {
         int i = random.nextInt(size);
         CommonExercise commonExercise = rawExercises.get(i);
         boolean add = exids.add(commonExercise.getID());

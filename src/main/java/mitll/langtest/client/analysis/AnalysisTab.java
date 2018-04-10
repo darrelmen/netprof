@@ -540,6 +540,7 @@ public class AnalysisTab extends DivWidget {
     soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
     soundsDiv.addStyleName("leftFiveMargin");
+    soundsDiv.addStyleName("rightFiveMargin");
     soundsDiv.addStyleName("inlineFlex");
     return soundsDiv;
   }

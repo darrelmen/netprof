@@ -512,10 +512,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * make sure dry run is easy
    *
    * @param projectid
+   * @param first
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
    */
-  public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
+  public ISection<CommonExercise> getQuizSectionHelper(int projectid, Collection<CommonExercise> firstCandidates) {
     if (projectid == -1) {
       return null;
     } else {
@@ -537,29 +539,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
         int id = quiz.getID();
         Collection<Integer> exids = exidsForList.get(id);
         if (exids == null) {
+          logger.error("getQuizSectionHelper : no exercises in list " + id);
         } else {
-          List<CommonExercise> first = new ArrayList<>();
-          int misses = 0;
-//          while (first.size() < 10 && misses < 100) {
-          for (int exid : exids) {
-            CommonExercise exercise = getExercise(projectid, exid);
-            if (exercise.getNumPhones() < MAX_PHONES || misses++ > 100) {
-              first.add(exercise);
-              if (first.size() == 10) break;
-            }
-          }
-          //        }
-
+          List<CommonExercise> first = getFirstEasyLength(firstCandidates);
 
           // dry run set
-          List<Integer> toAdd = new ArrayList<>();
-          first.forEach(commonExercise -> toAdd.add(commonExercise.getID()));
-          addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, toAdd, true);
+          List<Integer> toAdd = addDryRunSet(projectid, sectionHelper, allAttributes, quiz, first);
 
           // quiz set
-          List<Integer> copy = new ArrayList<>(exids);
-          copy.removeAll(toAdd);
-          addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, copy, false);
+          addQuizSet(projectid, sectionHelper, allAttributes, quiz, exids, toAdd);
         }
       });
 
@@ -570,8 +558,48 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  private void addExercisesForQuiz(int projectid, SectionHelper<CommonExercise> sectionHelper,
-                                   List<List<Pair>> allAttributes, UserList<CommonShell> quiz, Collection<Integer> exids, boolean useFirst) {
+  @NotNull
+  private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
+    List<CommonExercise> first = new ArrayList<>();
+    int misses = 0;
+//          while (first.size() < 10 && misses < 100) {
+    for (CommonExercise candidate : firstCandidates) {
+      //CommonExercise exercise = getExercise(projectid, exid);
+      if (candidate.getNumPhones() < MAX_PHONES || misses++ > 100) {
+        first.add(candidate);
+        if (first.size() == 10) break;
+      }
+    }
+    return first;
+  }
+
+  @NotNull
+  private List<Integer> addDryRunSet(int projectid,
+                                     SectionHelper<CommonExercise> sectionHelper,
+                                     List<List<Pair>> allAttributes,
+                                     UserList<CommonShell> quiz,
+                                     Collection<CommonExercise> first) {
+    List<Integer> toAdd = new ArrayList<>();
+    first.forEach(commonExercise -> toAdd.add(commonExercise.getID()));
+    addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, toAdd, true);
+    return toAdd;
+  }
+
+  private void addQuizSet(int projectid, SectionHelper<CommonExercise> sectionHelper,
+                          List<List<Pair>> allAttributes,
+                          UserList<CommonShell> quiz,
+                          Collection<Integer> exids,
+                          Collection<Integer> toAdd) {
+    List<Integer> copy = new ArrayList<>(exids);
+    copy.removeAll(toAdd);
+    addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, copy, false);
+  }
+
+  private void addExercisesForQuiz(int projectid,
+                                   SectionHelper<CommonExercise> sectionHelper,
+                                   List<List<Pair>> allAttributes,
+                                   UserList<CommonShell> quiz,
+                                   Collection<Integer> exids, boolean useFirst) {
     int id = quiz.getID();
     String name = quiz.getName();
 
@@ -586,8 +614,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
     second.add(new Pair(QUIZ, name));
     second.add(new Pair(UNIT, QUIZ1));
 
-    exids.forEach(exid -> {
-      CommonExercise exercise = getExercise(projectid, exid);
+    List<CommonExercise> toAdd = new ArrayList<>();
+    exids.forEach(exid -> toAdd.add(getExercise(projectid, exid)));
+    toAdd.sort(Comparator.comparingInt(CommonShell::getNumPhones));
+
+    toAdd.forEach(exercise -> {
+    //  CommonExercise exercise = getExercise(projectid, exid);
       List<Pair> pairs = useFirst ? first : second;
       allAttributes.add(pairs);
       sectionHelper.addPairs(exercise, pairs);

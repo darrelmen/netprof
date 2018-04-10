@@ -64,7 +64,9 @@ public interface ISection<T> {
 
   void report();
 
- /**
+  Collection<T> getFirst();
+
+  /**
   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
   * @param predefinedTypeOrder
   * @param seen
