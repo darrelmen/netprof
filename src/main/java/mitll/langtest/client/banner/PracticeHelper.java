@@ -56,7 +56,7 @@ import mitll.langtest.shared.project.ProjectType;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
 
   private static final String PRACTICE = "practice";
@@ -103,7 +103,7 @@ public class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonEx
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-      final FlexListLayout outer = this;
+      //final FlexListLayout outer = this;
 
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,

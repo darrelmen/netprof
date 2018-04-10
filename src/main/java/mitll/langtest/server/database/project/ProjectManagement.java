@@ -341,6 +341,8 @@ public class ProjectManagement implements IProjectManagement {
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
 
+
+      db.getUserListManager().ensureDryRun(projectID);
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.

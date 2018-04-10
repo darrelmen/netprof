@@ -38,6 +38,8 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -168,8 +170,8 @@ public class CreateListDialog extends BasicDialog {
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
-      publicChoice.setValue(isQuiz);
-      privateChoice.setValue(!isQuiz);
+/*      publicChoice.setValue(isQuiz);
+      privateChoice.setValue(!isQuiz);*/
     });
 
     Panel hp = new HorizontalPanel();
@@ -191,6 +193,7 @@ public class CreateListDialog extends BasicDialog {
     FluidRow row = new FluidRow();
 
     publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
+    publicChoice.addClickHandler(event -> gotClickOnPublic());
     RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
     privateChoice = radioButton2;
     // students by default have private lists - ?
@@ -208,6 +211,10 @@ public class CreateListDialog extends BasicDialog {
 
     row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
     return row;
+  }
+
+  private void gotClickOnPublic() {
+
   }
 
   private boolean getDefaultPrivacy() {

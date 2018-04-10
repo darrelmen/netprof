@@ -9,12 +9,11 @@ import mitll.langtest.client.list.SelectionState;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 class PracticeFacetExerciseList extends NPFlexSectionExerciseList {
   //private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
 
-  private PracticeHelper practiceHelper;
+  private final PracticeHelper practiceHelper;
 
   PracticeFacetExerciseList(ExerciseController controller,
                             PracticeHelper practiceHelper,

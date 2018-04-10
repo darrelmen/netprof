@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by go22670 on 4/10/17.
  */
-public class LinkAndTitle {
+class LinkAndTitle {
   private final ClickHandler clickHandler;
   private final String title;
-  private String linkURL = null;
+  private String linkURL;
   private NavLink myLink;
 
   /**
@@ -37,11 +37,13 @@ public class LinkAndTitle {
     this.clickHandler = null;
   }
 
+/*
   public NavLink add(Dropdown dropdown) {
     NavLink monitoringC = makeNewLink();
     dropdown.add(monitoringC);
     return monitoringC;
   }
+*/
 
   @NotNull
   NavLink makeNewLink() {

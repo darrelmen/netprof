@@ -44,7 +44,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
 
-  public static final String SHOW = "showStorage";
+  //public static final String SHOW = "showStorage";
   /**
    * @see #getImage
    */
@@ -198,7 +198,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
       userMenu.getCogMenuChoicesForAdmin().forEach(lt -> cog.add(lt.makeNewLink()));
 
-      hasProjectChoices = userMenu.getProjectSpecificChoices(cog);
+      hasProjectChoices = userMenu.getProjectSpecificChoices();
       hasProjectChoices.forEach(lt -> cog.add(lt.makeNewLink()));
 
       rnav.add(cog);

@@ -9,7 +9,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
@@ -94,7 +93,7 @@ public class UserMenu {
     return choices;
   }
 
-  List<LinkAndTitle> getProjectSpecificChoices(Widget menu) {
+  List<LinkAndTitle> getProjectSpecificChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
     String nameForAnswer = props.getNameForAnswer() + "s";
     choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
@@ -229,14 +228,12 @@ public class UserMenu {
   }
 
   private class ReportListHandler implements ClickHandler {
-    final EventRegistration outer = lifecycleSupport;
-
+    //final EventRegistration outer = lifecycleSupport;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new ReportListManager(controller).showReportList();
         }
@@ -244,14 +241,12 @@ public class UserMenu {
     }
   }
   private class ActiveUsersHandler implements ClickHandler {
-    final EventRegistration outer = lifecycleSupport;
-
+    //final EventRegistration outer = lifecycleSupport;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new ActiveUsersManager(controller).show(24);
         }

@@ -363,7 +363,7 @@ public class NewContentChooser implements INavigation {
     }
   }
 
-  public void showProgress() {
+  private void showProgress() {
     divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
         new AnalysisTab(controller, isPolyglotProject(), 0, () -> 1));

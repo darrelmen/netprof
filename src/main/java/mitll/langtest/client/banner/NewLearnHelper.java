@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
 //  private final Logger logger = Logger.getLogger("NewLearnHelper");
   NewLearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
     super(controller, viewContaner, myView);

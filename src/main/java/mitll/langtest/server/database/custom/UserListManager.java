@@ -89,9 +89,11 @@ public class UserListManager implements IUserListManager {
 
   private static final boolean DEBUG = false;
   // private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
-  public static final int DRY_RUN_ITEMS = 10;
-  public static final int MIN_PHONE = 4;
-  public static final int MAX_PHONE = 7;
+  private static final int DRY_RUN_ITEMS = 10;
+  private static final int MIN_PHONE = 4;
+  private static final int MAX_PHONE = 7;
+  public static final String DRY_RUN = "Dry Run";
+  public static final String DESCRIP = "Dry run to prep for quizzes.";
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -102,8 +104,8 @@ public class UserListManager implements IUserListManager {
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
-  private IStateManager stateManager;
-  private DatabaseServices databaseServices;
+  private final IStateManager stateManager;
+  private final DatabaseServices databaseServices;
 
   /**
    * @param userDAO
@@ -131,7 +133,6 @@ public class UserListManager implements IUserListManager {
     this.databaseServices = databaseServices;
   }
 
-
   /**
    * @param userid
    * @param name
@@ -154,6 +155,21 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  @Override
+  public void ensureDryRun(int projid) {
+    List<IUserListLight> collect = getDryRunList(projid);
+    if (collect.isEmpty()) {
+      int defaultUser = userDAO.getDefaultUser();
+      createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true);
+      boolean addedit = getDryRunList(projid).size() == 1;
+      if (!addedit) logger.error("ensureDryRun couldn't add dry run ?");
+    }
+  }
+
+  private List<IUserListLight> getDryRunList(int projid) {
+    return userListDAO.getAllQuizLight(projid).stream().filter(iUserListLight -> iUserListLight.getName().equalsIgnoreCase(DRY_RUN)).collect(Collectors.toList());
+  }
+
   /**
    * @param userid
    * @param name
@@ -166,7 +182,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100);
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100, false);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -205,13 +221,24 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  /**
+   * @param userid
+   * @param name
+   * @param description
+   * @param dliClass
+   * @param isPrivate
+   * @param projid
+   * @param reqSize
+   * @return
+   */
   private UserList<CommonShell> createQuiz(int userid,
                                            String name,
                                            String description,
                                            String dliClass,
                                            boolean isPrivate,
                                            int projid,
-                                           int reqSize) {
+                                           int reqSize,
+                                           boolean isDryRun) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -219,44 +246,47 @@ public class UserListManager implements IUserListManager {
     } else {
       long now = System.currentTimeMillis();
 
-      UserList<CommonShell> quiz = new UserList<CommonShell>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+      UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
           now, "", "", projid, UserList.LIST_TYPE.QUIZ);
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz);
       Project project = databaseServices.getProject(projid);
-      List<CommonExercise> rawExercises = project.getRawExercises();
-      Random random = new Random();
-      int size = rawExercises.size();
 
-      Set<Integer> exids = new TreeSet<>();
       List<CommonExercise> items = new ArrayList<>();
-      int dryRunNum = 10;
-      getFirstEasyLength(project.getSectionHelper().getFirst());
-      for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
-        items.add(exercise);
-        if (items.size() == dryRunNum) break;
-      }
 
-      int misses = 0;
-      while (items.size() < reqSize + dryRunNum) {
-        int i = random.nextInt(size);
-        CommonExercise commonExercise = rawExercises.get(i);
-        boolean add = exids.add(commonExercise.getID());
-        if (add) {
-          int numPhones = commonExercise.getNumPhones();
-          if (numPhones > 0 || misses > 100) {
-            if (numPhones > 3) {
-              if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
-                items.add(commonExercise);
-                // logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+      if (isDryRun) {
+        getFirstEasyLength(project.getSectionHelper().getFirst());
+        for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
+          items.add(exercise);
+          if (items.size() == reqSize) break;
+        }
+      } else {
+        int misses = 0;
+        List<CommonExercise> rawExercises = project.getRawExercises();
+        Random random = new Random();
+
+        int size = rawExercises.size();
+        Set<Integer> exids = new TreeSet<>();
+        while (items.size() < reqSize) {
+          int i = random.nextInt(size);
+          CommonExercise commonExercise = rawExercises.get(i);
+          boolean add = exids.add(commonExercise.getID());
+          if (add) {
+            int numPhones = commonExercise.getNumPhones();
+            if (numPhones > 0 || misses > 100) {
+              if (numPhones > 3) {
+                if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
+                  items.add(commonExercise);
+                  // logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+                }
               }
+            } else {
+              logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+              misses++;
             }
-          } else {
-            logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
-            misses++;
+            //  quiz.addExercise(getShells(commonExercise));
           }
-          //  quiz.addExercise(getShells(commonExercise));
         }
       }
 
@@ -269,7 +299,6 @@ public class UserListManager implements IUserListManager {
       items.forEach(ex -> addItemToList(userListID, ex.getID()));
 
       logger.info("createQuiz quiz has " + quiz.getExercises().size());
-//      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return quiz;
     }
   }
@@ -586,9 +615,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void createFavorites(int userid, int projid) {
-    List<UserList<CommonShell>> byName = userListDAO.getByName(userid, UserList.MY_LIST, projid);
-
-    if (byName.isEmpty()) {
+    if (userListDAO.getByName(userid, UserList.MY_LIST, projid).isEmpty()) {
       createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
     }
   }
@@ -706,7 +733,7 @@ public class UserListManager implements IUserListManager {
    * @return
    */
   private User getQCUser() {
-    List<User.Permission> permissions = new ArrayList<User.Permission>();
+    List<User.Permission> permissions = new ArrayList<>();
     permissions.add(User.Permission.QUALITY_CONTROL);
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
   }

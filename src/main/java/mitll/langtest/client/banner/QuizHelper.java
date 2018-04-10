@@ -34,38 +34,24 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
-import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
-import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.custom.INavigation.VIEWS.QUIZ;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -79,8 +65,8 @@ public class QuizHelper extends PracticeHelper {
   private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz on the left.";
   private static final String NO_QUIZZES_YET = "No quizzes yet - please come back later.";
 
-  public static final String QUIZ = "QUIZ";
-  public static final String Unit = "Unit";
+  private static final String QUIZ = "QUIZ";
+  private static final String Unit = "Unit";
 
   private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
 
@@ -90,7 +76,7 @@ public class QuizHelper extends PracticeHelper {
   private PolyglotDialog.PROMPT_CHOICE candidatePrompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
 
-  private INavigation navigation;
+  private final INavigation navigation;
   private String historyToken;
 
   /**
@@ -120,16 +106,16 @@ public class QuizHelper extends PracticeHelper {
 
           ((PracticeFacetExerciseList) exerciseList).restoreUI(selectionState);
 
-     //     logger.warning("showQuiz using selection " + selectionState);
+          //     logger.warning("showQuiz using selection " + selectionState);
         } else {
 //          logger.info("showQuiz current history " + History.getToken());
 //          logger.info("showQuiz now     history " + historyToken);
 
           //if (historyToken.equals(History.getToken())) {
-            showQuizDialog(historyToken, historyExerciseList);
+          showQuizDialog(historyToken, historyExerciseList);
           //} else {
-            historyExerciseList.setHistoryItem(historyToken);
-         // }
+          historyExerciseList.setHistoryItem(historyToken);
+          // }
 
         }
       }
@@ -148,7 +134,7 @@ public class QuizHelper extends PracticeHelper {
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-      final FlexListLayout outer = this;
+     // final FlexListLayout outer = this;
 
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
@@ -214,7 +200,8 @@ public class QuizHelper extends PracticeHelper {
 
             Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
             Set<MatchInfo> matchInfos = typeToValues.get(QUIZ);
-            hasValues = !matchInfos.isEmpty();
+
+            hasValues = matchInfos != null && !matchInfos.isEmpty();
 
             /*
             logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
@@ -229,9 +216,6 @@ public class QuizHelper extends PracticeHelper {
               showQuizDialog(getHistoryToken(), this);
             } else if (knownTypes.isEmpty()) {
               logger.info("no known types");
-//              Scheduler.get().scheduleDeferred((Command) () -> showEmptyExercise("No quizes yet - please come back later."));
-
-//              showEmptyExercise("No quizes yet - please come back later.");
             }
           }
         };
@@ -248,7 +232,7 @@ public class QuizHelper extends PracticeHelper {
   private void showQuizDialog(String historyToken, HistoryExerciseList historyExerciseList) {
     rememberHistoryToken(historyToken);
 
-  //  logger.info("current selection state " + historyToken);
+    //  logger.info("current selection state " + historyToken);
 
     String first = historyToken
         + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Dry Run";
@@ -317,7 +301,7 @@ public class QuizHelper extends PracticeHelper {
     hideList();
   }
 
-  public void rememberHistoryToken(String historyToken) {
+  private void rememberHistoryToken(String historyToken) {
     this.historyToken = historyToken;
   }
 }
