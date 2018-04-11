@@ -110,6 +110,7 @@ public interface IUserListDAO extends IDAO {
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
   Collection<UserList<CommonShell>> getAllQuiz(int projid);
   Collection<IUserListLight> getAllQuizLight(int projid);
+  Collection<SlickUserExerciseList> getSlickAllQuiz(int projid);
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)

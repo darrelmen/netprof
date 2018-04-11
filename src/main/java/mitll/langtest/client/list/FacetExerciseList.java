@@ -76,7 +76,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
-public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
+public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String PRACTICED = " practiced.";
@@ -93,7 +93,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   private static final String ADDING_VISITOR = "adding visitor";
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
-  protected static final String GETTING_TYPE_VALUES = "getting type->values";
+  private static final String GETTING_TYPE_VALUES = "getting type->values";
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
@@ -169,7 +169,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @param listOptions
    * @param listHeader
    * @param isDrillView           hack - should not have drill stuff in here... although eventually there won't be a drill view
-   * @see mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
+   * @seex mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FacetExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
@@ -496,16 +496,13 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
-
   /**
    * @param typeToSelection
-   * @see #getTypeToValues
+   * @see #gotFilterResponse
    */
-
   private void setTypeToSelection(Map<String, String> typeToSelection) {
     this.typeToSelection = typeToSelection;
   }
-
 
   /**
    * structure
@@ -534,7 +531,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    * @see #getTypeToValues
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-
     logger.info("addFacetsForReal" +
         "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
         "\n\ttype->distinct " + typeToValues.keySet() +
@@ -566,8 +562,6 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     if (liForDimensionForList != null) {
       allTypesContainer.add(liForDimensionForList);
     }
-
-
   }
 
   private ListItem liForDimensionForList;
@@ -581,6 +575,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     }
   }
 
+  /**
+   * @see #addFacetsForReal
+   * @param typeToValues
+   * @return
+   */
   protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(LISTS);
     populateListChoices(liForDimensionForType, typeToValues);
@@ -637,10 +636,10 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
    *
    * @param liForDimensionForType
    * @param typeToValues          - need to remember this and pass it through so later link clicks will have it
-   * @see #addFacetsForReal
+   * @see #addListFacet
    */
   private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
-    ListServiceAsync listService = controller.getListService();
+   // ListServiceAsync listService = controller.getListService();
     //logger.info("populateListChoices --- ");
 
     if (typeToValues == null) {
@@ -654,7 +653,7 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     final Map<String, Set<MatchInfo>> finalTypeToValues = typeToValues;
     final long then = System.currentTimeMillis();
 
-    listService.getSimpleListsForUser(true, true, new AsyncCallback<Collection<IUserList>>() {
+    controller.getListService().getSimpleListsForUser(true, true, getListType(), new AsyncCallback<Collection<IUserList>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError(GETTING_LISTS_FOR_USER, caught);
@@ -667,7 +666,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
     });
   }
 
-  private void addListsAsLinks(Collection<IUserList> result, long then, Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
+  protected UserList.LIST_TYPE getListType() {
+    return UserList.LIST_TYPE.NORMAL;
+  }
+
+  protected void addListsAsLinks(Collection<IUserList> result, long then, Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
     long l = System.currentTimeMillis();
     if (l - then > 150) {
       logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
@@ -1109,11 +1112,11 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    List<Pair> pairs = getPairs(typeToSelection);
+    //List<Pair> pairs = getPairs(typeToSelection);
     // logger.info("getTypeToValues request " + pairs + " list " + userListID);
     final long then = System.currentTimeMillis();
 
-    service.getTypeToValues(getRequest(userListID, pairs),
+    service.getTypeToValues(getRequest(userListID, getPairs(typeToSelection)),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1165,7 +1168,9 @@ public abstract class FacetExerciseList extends HistoryExerciseList<CommonShell,
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
-        "\n\ttype to values : " + typeToSelection);
+        "\n\ttype to selection " + typeToSelection+
+        "\n\ttype to values    " + response.getTypeToValues()
+    );
 
     changeSelection(response.getTypesToInclude(), typeToSelection);
     setTypeToSelection(typeToSelection);
@@ -2152,5 +2157,10 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   @Override
   public void gotShow() {
     askServerForExercise(-1);
+  }
+
+  @Override
+  protected void noSectionsGetExercises(int exerciseID) {
+    simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
   }
 }

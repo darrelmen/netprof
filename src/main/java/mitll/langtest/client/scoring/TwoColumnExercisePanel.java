@@ -158,7 +158,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
     } else {
-    //  logger.warning("addWidgets no project startup info?");
+      //  logger.warning("addWidgets no project startup info?");
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
     }
@@ -174,7 +174,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return controller.getProjectStartupInfo();
   }
 
-  public Set<Integer> getReqAudio() { return alignmentFetcher.getReqAudio();  }
+  public Set<Integer> getReqAudio() {
+    return alignmentFetcher.getReqAudio();
+  }
 
   /**
    * @param req
@@ -818,8 +820,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       addContext(e, card);
     }
 
-    long now = System.currentTimeMillis();
-    logger.info("getItemContent for " + e.getID() + " took " + (now - then));
+    if (DEBUG) {
+      long now = System.currentTimeMillis();
+      logger.info("getItemContent for " + e.getID() + " took " + (now - then));
+    }
     return card;
   }
 
@@ -1067,7 +1071,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
     englishWidget.addStyleName("leftFiveMargin");
-   // englishWidget.setWidth("90%");
+    // englishWidget.setWidth("90%");
     return englishWidget;
   }
 

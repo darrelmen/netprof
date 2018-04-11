@@ -38,9 +38,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.services.ListServiceImpl;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.custom.UserListLight;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
@@ -430,17 +428,31 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @return
    */
   @Override public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
+    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
     List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
     return ret;
   }
 
   @Override public Collection<IUserListLight> getAllQuizLight(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
+    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
     List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
     return names;
+  }
+
+/*  @Override public Collection<IUserList> getAllQuizUserList(int projid) {
+    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
+    List<IUserList> names = new ArrayList<>(slickUserExerciseLists.size());
+    slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(
+        new SimpleUserList(
+            slickUserExerciseList.id(),
+            slickUserExerciseList.name(),projid,)));
+    return names;
+  }*/
+
+  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid) {
+    return dao.allQuiz(projid);
   }
 
 

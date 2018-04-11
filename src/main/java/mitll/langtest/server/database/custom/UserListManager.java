@@ -93,7 +93,7 @@ public class UserListManager implements IUserListManager {
   private static final int MIN_PHONE = 4;
   private static final int MAX_PHONE = 7;
   public static final String DRY_RUN = "Dry Run";
-  public static final String DESCRIP = "Dry run to prep for quizzes.";
+  private static final String DESCRIP = "Dry run to prep for quizzes.";
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -344,8 +344,12 @@ public class UserListManager implements IUserListManager {
                                                      boolean listsICreated,
                                                      boolean visitedLists) {
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
-
     logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
+    return getSimpleLists(lists);
+  }
+
+  @NotNull
+  private Collection<IUserList> getSimpleLists(Collection<SlickUserExerciseList> lists) {
 //    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
     Set<Integer> listIDs = getListIDs(lists);
     Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
@@ -373,6 +377,11 @@ public class UserListManager implements IUserListManager {
     });
     return names;
   }
+
+  @Override public Collection<IUserList> getAllQuizUserList(int projid) {
+    return getSimpleLists(userListDAO.getSlickAllQuiz(projid));
+  }
+
 
   @Nullable
   private String getUserName(int userid, Map<Integer, String> idToName) {
@@ -423,7 +432,7 @@ public class UserListManager implements IUserListManager {
     return names;
   }
 
-  private Set<Integer> getListIDs(List<SlickUserExerciseList> lists) {
+  private Set<Integer> getListIDs(Collection<SlickUserExerciseList> lists) {
     return lists
         .stream()
         .map(SlickUserExerciseList::id)

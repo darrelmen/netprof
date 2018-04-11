@@ -53,7 +53,7 @@ public interface ListServiceAsync {
    * @param visited
    * @param async
    */
-  void getSimpleListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserList>> async);
+  void getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type,AsyncCallback<Collection<IUserList>> async);
 
   void getListsWithIDsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListWithIDs>> async);
 

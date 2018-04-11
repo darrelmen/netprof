@@ -54,8 +54,6 @@ import java.util.List;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
-
-
   public enum LIST_TYPE {
     NORMAL,
     QUIZ

@@ -88,20 +88,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void removeVisitor(int listid, int userid) {
-
-  }
-
-  /**
-   * @paramx listid
-   * @see IUserListDAO#remove
-   */
-/*
-  private void removeVisitor(long listid) {
-    logger.debug("remove visitor reference " + listid);
-    userListVisitorJoinDAO.remove(listid);
-  }
-*/
+  public void removeVisitor(int listid, int userid) {}
 
   private void createUserListTable(Database database) throws SQLException {
 //    logger.debug("createUserListTable --- ");
@@ -251,43 +238,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return Collections.emptyList();
   }
 
-  /**
-   * Get lists by others that have not yet been visited.
-   * Since your lists will appear under your lists, and visited lists will appear under other's lists.
-   *
-   * @param userid
-   * @param projectID
-   * @return
-   */
-/*
-  public List<UserList<CommonShell>> getAllPublic(long userid, int projectID) {
-    try {
-      String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
-          ISPRIVATE +
-          "=false" +
-          " order by modified DESC ";
-
-      List<UserList<CommonShell>> userLists = getUserLists(sql, userid);
-      List<UserList<CommonShell>> toReturn = new ArrayList<>();
-      for (UserList<CommonShell> ul : userLists) {
-        if (!ul.isEmpty()) {
-          //logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
-
-          toReturn.add(ul);
-        } else {
-          //  logger.info("\tgetAllPublic : skipping for " + userid + " : " +ul);
-        }
-      }
-      //   logger.debug("toReturn for " + userid + " : " +toReturn);
-
-      return toReturn;
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }
-*/
-
   @Override
   public boolean hasByName(long userid, String name, int projid) {
     try {
@@ -416,6 +366,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid) {
     return null;
   }
 

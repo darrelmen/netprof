@@ -47,6 +47,8 @@ import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -134,8 +136,6 @@ public class QuizHelper extends PracticeHelper {
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-     // final FlexListLayout outer = this;
-
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
@@ -143,11 +143,15 @@ public class QuizHelper extends PracticeHelper {
         return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
 
           private boolean hasValues = true;
-
+/*
           @NotNull
           @Override
           protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
             return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
+          }*/
+
+          protected UserList.LIST_TYPE getListType() {
+            return UserList.LIST_TYPE.QUIZ;
           }
 
           /**
@@ -159,6 +163,12 @@ public class QuizHelper extends PracticeHelper {
             return hasValues ? PLEASE_CHOOSE_A_QUIZ : NO_QUIZZES_YET;
           }
 
+     /*     protected void addListsAsLinks(Collection<IUserList> result, long then,
+                                         Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
+            hasValues=
+          super.addListsAsLinks(result,then,finalTypeToValues,liForDimensionForType);
+          }*/
+/*
           @Override
           protected void getTypeOrder() {
             typeOrder = getTypeOrderSimple();
@@ -186,9 +196,9 @@ public class QuizHelper extends PracticeHelper {
           @Override
           protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
             return null;
-          }
+          }*/
 
-          @Override
+/*          @Override
           protected ExerciseListRequest getRequest(String prefix) {
             ExerciseListRequest request = super.getRequest(prefix);
             request.setQuiz(true);
@@ -203,13 +213,13 @@ public class QuizHelper extends PracticeHelper {
 
             hasValues = matchInfos != null && !matchInfos.isEmpty();
 
-            /*
+            *//*
             logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
                 "\n\ttype to select : " + typeToSelection +
                 "\n\ttype to values : " + response.getTypeToValues() +
                 "\n\thas values     : " + hasValues
             );
-*/
+*//*
 
             Set<String> knownTypes = typeToSelection.keySet();
             if (knownTypes.contains(QUIZ) && !knownTypes.contains(Unit)) {
@@ -217,7 +227,7 @@ public class QuizHelper extends PracticeHelper {
             } else if (knownTypes.isEmpty()) {
               logger.info("no known types");
             }
-          }
+          }*/
         };
       }
 

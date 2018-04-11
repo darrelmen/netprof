@@ -6,9 +6,7 @@ public class UserListLight implements IUserListLight {
   private int id = -1;
   private String name;
 
-  public UserListLight() {
-
-  }
+  public UserListLight() {}
 
   public UserListLight(int id, String name) {
     this.id = id;

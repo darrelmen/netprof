@@ -76,6 +76,7 @@ public interface IUserListManager   {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
+  Collection<IUserList> getAllQuizUserList(int projid);
   /**
    * @param userid
    * @param projid
@@ -98,25 +99,9 @@ public interface IUserListManager   {
 
   UserList<CommonShell> getSimpleUserListByID(int id);
 
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises(int, int)
-   * @params id
-   * @paramx xprojid
-   * @paramx xtypeOrder
-   * @paramx ids
-   * @return
-   */
- // UserList<CommonExercise> getUserListByIDExercises(int id, int projid, Collection<String> typeOrder, Set<Integer> ids);
-
-/*
-  List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
-*/
-
   UserList getUserListNoExercises(int userListID);
 
   void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
-
-  //void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);
 

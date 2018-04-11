@@ -56,9 +56,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final boolean DEBUG = false;
 
   /**
-   * @see mitll.langtest.client.custom.userlist.ListView#showContent
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.custom.userlist.ListView#showContent
    */
   @Override
   public Collection<UserList<CommonShell>> getLists() throws DominoSessionException {
@@ -180,24 +180,32 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
    */
   @Override
-  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
-    Collection<IUserList> listsForUser = getUserListManager()
-        .getSimpleListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    IUserListManager userListManager = getUserListManager();
+
+    Collection<IUserList> listsForUser = list_type == UserList.LIST_TYPE.NORMAL ? userListManager
+        .getSimpleListsForUser(userIDFromSessionOrDB, projectIDFromUser, onlyCreated, visited) :
+        userListManager.getAllQuizUserList(projectIDFromUser);
 
     long now = System.currentTimeMillis();
 
-    logger.info("getSimpleListsForUser took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    if (now-then>10) {
+      logger.info("getSimpleListsForUser took " + (now - then) + " to get " + listsForUser.size() +
+          " lists for user " + userIDFromSessionOrDB + " type " + list_type);
+    }
+
     return listsForUser;
   }
 
   /**
-   * @see UserContainer#getListBox
    * @param onlyCreated
    * @param visited
    * @return
    * @throws DominoSessionException
+   * @see UserContainer#getListBox
    */
   @Override
   public Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {

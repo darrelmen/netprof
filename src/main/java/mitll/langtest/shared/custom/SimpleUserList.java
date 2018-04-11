@@ -44,8 +44,4 @@ public class SimpleUserList extends UserListLight implements IUserList {
   public int getProjid() {
     return projid;
   }
-
-/*  public void setNumItems(int numItems) {
-    this.numItems = numItems;
-  }*/
 }
