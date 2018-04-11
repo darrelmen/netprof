@@ -69,23 +69,8 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 public class QuizHelper extends PracticeHelper {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
-//  private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz on the left.";
-/*
-  private static final String NO_QUIZZES_YET = "No quizzes yet - please come back later.";
-
-  private static final String QUIZ = "QUIZ";
-  private static final String Unit = "Unit";
-*/
-
-//  private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
-
-  // private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-  private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-  //
-//  private PolyglotDialog.PROMPT_CHOICE candidatePrompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
   private final INavigation navigation;
-  //private String historyToken;
 
   /**
    * @param controller
@@ -107,8 +92,7 @@ public class QuizHelper extends PracticeHelper {
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
 
     polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, "Quiz") {
-
-      int chosenList = -1;
+      private int chosenList = -1;
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {
@@ -119,7 +103,6 @@ public class QuizHelper extends PracticeHelper {
         } else {
           return new QuizIntro(exerciseList.getIdToList(), listid -> {
             // logger.info("got yes " + listid);
-
             Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
             candidate.put(LISTS, "" + listid);
             exerciseList.setHistory(candidate);
@@ -131,17 +114,40 @@ public class QuizHelper extends PracticeHelper {
       }
 
       @Override
+      public PolyglotDialog.MODE_CHOICE getMode() {
+        return POLYGLOT;
+      }
+
+      @Override
       public int getRoundTimeMinutes(boolean isDry) {
         FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getRoundTimeMinutes no user lists yet ");
           return 10;
-        }
-        else {
+        } else {
+          if (chosenList == -1) {
+            setChosenList(exerciseList);
+            reallyStartOver();
+          }
+
           IUserList iUserList = idToList.get(chosenList);
-          logger.info("getRoundTimeMinutes iUserList "+iUserList);
+          logger.info("getRoundTimeMinutes iUserList " + iUserList + " for " + chosenList);
+          logger.info("getRoundTimeMinutes iUserList " + idToList.keySet());
           return iUserList == null ? 10 : iUserList.getRoundTimeMinutes();
+        }
+      }
+
+      private void setChosenList(FacetExerciseList exerciseList) {
+        Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
+        String s = candidate.get(LISTS);
+        logger.info("getRoundTimeMinutes iUserList " + s );
+        if (s != null && !s.isEmpty()) {
+          try {
+            chosenList=Integer.parseInt(s);
+          } catch (NumberFormatException e) {
+            logger.warning("couldn't parse list id " + s);
+          }
         }
       }
 
@@ -198,12 +204,12 @@ public class QuizHelper extends PracticeHelper {
   @Override
   public void showContent(Panel listContent, String instanceName) {
     super.showContent(listContent, instanceName);
-    hideList();
+  //  hideList();
 //    logger.info("Set visible  on " + rememberedTopRow.getElement().getId());
 //    logger.info("Set visible with children " + rememberedTopRow.getElement().getChildCount());
-    rememberedTopRow.setVisible(false);
-   }
-
+    rememberedTopRow.getParent().setVisible(false);
+   //rememberedTopRow.setVisible(false);
+  }
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
@@ -213,84 +219,5 @@ public class QuizHelper extends PracticeHelper {
     protected UserList.LIST_TYPE getListType() {
       return UserList.LIST_TYPE.QUIZ;
     }
-
- /*   public void showEmpty() {
-      showEmptyExercise(getEmptySearchMessage());
-    }*/
-
-    /**
-     * @return
-     * @see #showEmptySelection
-     */
-  /*  protected String getEmptySearchMessage() {
-      logger.info("getEmptySearchMessage -- ");
-      return hasValues ? PLEASE_CHOOSE_A_QUIZ : NO_QUIZZES_YET;
-    }*/
-
-     /*     protected void addListsAsLinks(Collection<IUserList> result, long then,
-                                         Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
-            hasValues=
-          super.addListsAsLinks(result,then,finalTypeToValues,liForDimensionForType);
-          }*/
-/*
-          @Override
-          protected void getTypeOrder() {
-            typeOrder = getTypeOrderSimple();
-            //    logger.info("getTypeOrder type order " + typeOrder);
-            this.rootNodesInOrder = Collections.singletonList(QUIZ);
-          }
-
-          @Override
-          protected List<String> getTypeOrderSimple() {
-            return QUIZ_TYPE_ORDER;
-          }
-
-          @Override
-          protected String getChildForParent(String childType) {
-            Map<String, String> parentToChild = new HashMap<>();
-            parentToChild.put(QUIZ, Unit);
-
-            //Map<String, String> parentToChild = parentToChild;
-            String s = parentToChild.get(childType);
-//    logger.info("getChildForParent parent->child " + parentToChild);
-//    logger.info("getChildForParent childType     " + childType + " = " + s);
-            return s;
-          }
-
-          @Override
-          protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-            return null;
-          }*/
-
-/*          @Override
-          protected ExerciseListRequest getRequest(String prefix) {
-            ExerciseListRequest request = super.getRequest(prefix);
-            request.setQuiz(true);
-            return request;
-          }
-
-          protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-            super.gotFilterResponse(response, then, typeToSelection);
-
-            Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
-            Set<MatchInfo> matchInfos = typeToValues.get(QUIZ);
-
-            hasValues = matchInfos != null && !matchInfos.isEmpty();
-
-            *//*
-            logger.info("gotFilterResponse took " + (System.currentTimeMillis() - then) + " to get" +
-                "\n\ttype to select : " + typeToSelection +
-                "\n\ttype to values : " + response.getTypeToValues() +
-                "\n\thas values     : " + hasValues
-            );
-*//*
-
-            Set<String> knownTypes = typeToSelection.keySet();
-            if (knownTypes.contains(QUIZ) && !knownTypes.contains(Unit)) {
-              showQuizDialog(getHistoryToken(), this);
-            } else if (knownTypes.isEmpty()) {
-              logger.info("no known types");
-            }
-          }*/
   }
 }

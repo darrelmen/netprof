@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-  //private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
@@ -135,7 +135,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   protected void recordingStarted() {
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
-      // logger.info("startTimedRun is " + mode);
+      logger.info("startTimedRun is " + polyglotFlashcardContainer.getMode());
       polyglotFlashcardContainer.startTimedRun();
     }
     super.recordingStarted();
