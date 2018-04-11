@@ -91,7 +91,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private static final String SCORE_SUFFIX = " pronunciation scores (Drag to zoom, click to hear)";
   private static final int TIME_SLACK = 60;
-  private static final int WIDTH = 740;
+ // private static final int WIDTH = 740;
 
   private static final int MIN_SESSION_COUNT = 50;
 
@@ -1102,7 +1102,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+ //   logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
     String seriesName = toolTipData.getSeriesName();
 
     if (granToLabel.values().contains(seriesName)) {

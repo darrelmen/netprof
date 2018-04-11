@@ -221,7 +221,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @NotNull
   private PolyglotChart getChart(long duration) {
-    PolyglotChart pChart = new PolyglotChart(controller);
+    PolyglotChart pChart = new PolyglotChart(controller,exerciseList);
     pChart.addStyleName("topFiveMargin");
     pChart.addStyleName("bottomFiveMargin");
     pChart.addChart(sticky.getAnswers(), duration);

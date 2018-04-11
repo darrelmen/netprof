@@ -33,8 +33,6 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
@@ -102,14 +100,14 @@ public class QuizHelper extends PracticeHelper {
           return super.getExercisePanel(e);
         } else {
           return new QuizIntro(exerciseList.getIdToList(), listid -> {
-            // logger.info("got yes " + listid);
             Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
             candidate.put(LISTS, "" + listid);
             exerciseList.setHistory(candidate);
 
             chosenList = listid;
             showQuizForReal();
-          });
+          },
+              controller.getUserManager().getUserID());
         }
       }
 
@@ -141,10 +139,10 @@ public class QuizHelper extends PracticeHelper {
       private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
         String s = candidate.get(LISTS);
-        logger.info("getRoundTimeMinutes iUserList " + s );
+        logger.info("getRoundTimeMinutes iUserList " + s);
         if (s != null && !s.isEmpty()) {
           try {
-            chosenList=Integer.parseInt(s);
+            chosenList = Integer.parseInt(s);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse list id " + s);
           }
@@ -204,11 +202,11 @@ public class QuizHelper extends PracticeHelper {
   @Override
   public void showContent(Panel listContent, String instanceName) {
     super.showContent(listContent, instanceName);
-  //  hideList();
+    //  hideList();
 //    logger.info("Set visible  on " + rememberedTopRow.getElement().getId());
 //    logger.info("Set visible with children " + rememberedTopRow.getElement().getChildCount());
     rememberedTopRow.getParent().setVisible(false);
-   //rememberedTopRow.setVisible(false);
+    //rememberedTopRow.setVisible(false);
   }
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {

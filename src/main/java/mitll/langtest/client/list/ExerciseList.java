@@ -644,7 +644,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  void loadByID(int id) {
+public   void loadByID(int id) {
     if (hasExercise(id)) {
       // if (DEBUG) logger.info("loading exercise " + id);
       loadExercise(id);

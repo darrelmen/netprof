@@ -1,6 +1,7 @@
 package mitll.langtest.client.analysis;
 
 import mitll.langtest.client.exercise.ExceptionSupport;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
@@ -13,17 +14,19 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
-
   private static final int HEIGHT = 100;
 
   protected Chart chart = null;
+  private ListInterface listInterface;
 
   /**
    * @param exceptionSupport
    * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#getChart
    */
-  public PolyglotChart(ExceptionSupport exceptionSupport) {
+  public PolyglotChart(ExceptionSupport exceptionSupport,
+                       ListInterface listInterface) {
     super(exceptionSupport);
+    this.listInterface = listInterface;
   }
 
   /**
@@ -111,9 +114,27 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     return true;
   }
 
+  boolean showDate() {
+    return false;
+  }
+
+  protected void gotClickOnExercise(int exid, long nearestXAsLong) {
+    listInterface.loadByID(exid);
+  }
+
+/*  protected boolean gotClickAt(long nearestXAsLong) {
+    Integer exid = timeToId.get(nearestXAsLong);
+    if (exid != null) {
+      gotClickOnExercise(exid, nearestXAsLong);
+    } else {
+     // logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
+    }
+    return true;
+  }*/
 
   /**
    * TODO : for now, no hint
+   *
    * @return
    */
   @Override

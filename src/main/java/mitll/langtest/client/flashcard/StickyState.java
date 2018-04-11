@@ -59,6 +59,9 @@ public class StickyState {
   private final Map<Integer, Boolean> exToCorrect = new HashMap<>();
   private final Map<Integer, Double> exToScore = new HashMap<>();
   private final Map<Integer, AudioAnswer> exToAnswer = new LinkedHashMap<>();
+  private final List<AudioAnswer> answers = new ArrayList<>();
+  private final Map<AudioAnswer, Integer> answerToEx = new HashMap<>();
+  private final Map<Long, Integer> timeToID = new HashMap<>();
 
   /**
    * @param storage
@@ -73,7 +76,7 @@ public class StickyState {
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    * @see StatsPracticePanel#onSetComplete
    */
-  public void storeCurrent(Shell e) {
+  void storeCurrent(Shell e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }
@@ -100,8 +103,7 @@ public class StickyState {
     return storage.getValue(SCORE);
   }
 
-
-  public void populateCorrectMap() {
+  void populateCorrectMap() {
     String value = getCorrect();
     if (value != null && !value.trim().isEmpty()) {
       // logger.info("using correct map " + value);
@@ -142,7 +144,6 @@ public class StickyState {
     return value.split(",");
   }
 
-
   void resetStorage() {
     storage.removeValue(CORRECT1);
     storage.removeValue(INCORRECT);
@@ -154,6 +155,9 @@ public class StickyState {
     exToCorrect.clear();
     exToScore.clear();
     exToAnswer.clear(); // why wouldn't we do that too?
+    answers.clear(); // why wouldn't we do that too?
+    answerToEx.clear();
+
     clearCurrent();
   }
 
@@ -161,6 +165,20 @@ public class StickyState {
     // int id = exercise.getID();
     exToScore.put(id, result.getScore());
     exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
+    exToAnswer.put(id, result);
+    answerToEx.put(result, id);
+    timeToID.put(result.getTimestamp(),id);
+
+    if (!answers.isEmpty()) {
+      int index = answers.size() - 1;
+      AudioAnswer lastAnswer = answers.get(index);
+      if (answerToEx.get(lastAnswer)==id) {
+        answers.remove(index);
+      }
+    }
+
+    answers.add(result);
+
 
     StringBuilder builder = new StringBuilder();
     StringBuilder builder2 = new StringBuilder();
@@ -180,7 +198,6 @@ public class StickyState {
     }
     storeScore(builder3);
 
-    exToAnswer.put(id, result);
   }
 
   private void storeScore(StringBuilder builder3) {
@@ -207,24 +224,28 @@ public class StickyState {
     return exToScore.values();
   }
 
-  public boolean isComplete(int num) {
+  boolean isComplete(int num) {
     return num == exToScore.size();
   }
 
   Collection<AudioAnswer> getAnswers() {
-    return exToAnswer.values();
+    return answers;
   }
 
-  public Map<Long, Integer> getTimeToID() {
-    Map<Long, Integer> timeToID = new HashMap<>();
-    exToAnswer.forEach((k, v) -> {
-      timeToID.put(v.getTimestamp(), k);
-    });
+  Map<Long, Integer> getTimeToID() {
     return timeToID;
+//    Map<Long, Integer> timeToID = new HashMap<>();
+//    answerToEx.forEach((k,v) -> {
+//      timeToID.put(k.getTimestamp(), v);
+//    });
+//    return timeToID;
   }
+
 
   void clearAnswers() {
     exToAnswer.clear();
+    answers.clear();
+    timeToID.clear();
   }
 
   int getCorrectCount() {
@@ -243,7 +264,7 @@ public class StickyState {
     return count;
   }
 
-  public AudioAnswer getAnswer(int id) {
+  public AudioAnswer getLastAnswer(int id) {
     return exToAnswer.get(id);
   }
 }
