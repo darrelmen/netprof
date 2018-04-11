@@ -9,6 +9,7 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
 
   long getRoundTimeLeftMillis();
 
+  int getRoundTimeMinutes(boolean isDry);
 
   boolean getIsDry();
 
@@ -18,7 +19,6 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
 
   void showDrill();
   void showQuiz();
-  //void gotStartOver();
 
   boolean isComplete();
 }

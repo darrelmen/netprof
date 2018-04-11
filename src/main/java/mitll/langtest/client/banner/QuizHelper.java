@@ -33,27 +33,32 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
-import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.flashcard.PolyglotPracticePanel;
+import mitll.langtest.client.flashcard.QuizIntro;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
-import org.jetbrains.annotations.NotNull;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -64,22 +69,23 @@ import java.util.logging.Logger;
 public class QuizHelper extends PracticeHelper {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
-  private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz on the left.";
+//  private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz on the left.";
+/*
   private static final String NO_QUIZZES_YET = "No quizzes yet - please come back later.";
 
   private static final String QUIZ = "QUIZ";
   private static final String Unit = "Unit";
+*/
 
-  private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
+//  private static final List<String> QUIZ_TYPE_ORDER = Arrays.asList(QUIZ, Unit);
 
-  private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  // private PolyglotDialog.MODE_CHOICE candidateMode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-
-  private PolyglotDialog.PROMPT_CHOICE candidatePrompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
+  //
+//  private PolyglotDialog.PROMPT_CHOICE candidatePrompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
-
   private final INavigation navigation;
-  private String historyToken;
+  //private String historyToken;
 
   /**
    * @param controller
@@ -93,41 +99,72 @@ public class QuizHelper extends PracticeHelper {
     this.navigation = navigation;
   }
 
+  public interface QuizChoiceListener {
+    void gotChoice(int listid);
+  }
+
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
 
     polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, "Quiz") {
+
+      int chosenList = -1;
+
+      @Override
+      public Panel getExercisePanel(CommonExercise e) {
+        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
+        boolean hasSelectionForType = exerciseList.hasSelectionForType(LISTS);
+        if (hasSelectionForType) {
+          return super.getExercisePanel(e);
+        } else {
+          return new QuizIntro(exerciseList.getIdToList(), listid -> {
+            // logger.info("got yes " + listid);
+
+            Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
+            candidate.put(LISTS, "" + listid);
+            exerciseList.setHistory(candidate);
+
+            chosenList = listid;
+            showQuizForReal();
+          });
+        }
+      }
+
+      @Override
+      public int getRoundTimeMinutes(boolean isDry) {
+        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
+        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
+        if (idToList == null) {
+          logger.info("getRoundTimeMinutes no user lists yet ");
+          return 10;
+        }
+        else {
+          IUserList iUserList = idToList.get(chosenList);
+          logger.info("getRoundTimeMinutes iUserList "+iUserList);
+          return iUserList == null ? 10 : iUserList.getRoundTimeMinutes();
+        }
+      }
+
+      /**
+       * @see PolyglotPracticePanel#reallyStartOver
+       */
       @Override
       public void showQuiz() {
         super.showQuiz();
-        HistoryExerciseList historyExerciseList = (HistoryExerciseList) this.exerciseList;
 
-        if (historyToken == null) {
-          SelectionState selectionState = historyExerciseList.getSelectionState();
-          selectionState.getTypeToSection().remove(Unit);
-
-          ((PracticeFacetExerciseList) exerciseList).restoreUI(selectionState);
-
-          //     logger.warning("showQuiz using selection " + selectionState);
-        } else {
-//          logger.info("showQuiz current history " + History.getToken());
-//          logger.info("showQuiz now     history " + historyToken);
-
-          //if (historyToken.equals(History.getToken())) {
-          showQuizDialog(historyToken, historyExerciseList);
-          //} else {
-          historyExerciseList.setHistoryItem(historyToken);
-          // }
-
-        }
+        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
+        Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
+        candidate.remove(LISTS);
+        exerciseList.setHistory(candidate);
       }
     };
+
     statsFlashcardFactory = polyglotFlashcardFactory;
-
-
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }
+
+  private Panel rememberedTopRow;
 
   /**
    * @param outer
@@ -140,28 +177,55 @@ public class QuizHelper extends PracticeHelper {
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader) {
+        rememberedTopRow = topRow;
+        return new MyPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
+      }
 
-          private boolean hasValues = true;
-/*
-          @NotNull
-          @Override
-          protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
-            return new FilterRequest(incrReqID(), pairs, userListID).setQuiz(true);
-          }*/
+      @Override
+      protected void styleBottomRow(Panel bottomRow) {
+        bottomRow.addStyleName("centerPractice");
+        outerBottomRow = bottomRow;
+      }
+    };
+  }
 
-          protected UserList.LIST_TYPE getListType() {
-            return UserList.LIST_TYPE.QUIZ;
-          }
+  private void showQuizForReal() {
+    setMode(POLYGLOT, prompt);
+    setNavigation(navigation);
+    hideList();
+  }
 
-          /**
-           * @see #showEmptySelection
-           * @return
-           */
-          protected String getEmptySearchMessage() {
-            logger.info("getEmptySearchMessage -- ");
-            return hasValues ? PLEASE_CHOOSE_A_QUIZ : NO_QUIZZES_YET;
-          }
+  @Override
+  public void showContent(Panel listContent, String instanceName) {
+    super.showContent(listContent, instanceName);
+    hideList();
+//    logger.info("Set visible  on " + rememberedTopRow.getElement().getId());
+//    logger.info("Set visible with children " + rememberedTopRow.getElement().getChildCount());
+    rememberedTopRow.setVisible(false);
+   }
+
+
+  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {
+    MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
+      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+    }
+
+    protected UserList.LIST_TYPE getListType() {
+      return UserList.LIST_TYPE.QUIZ;
+    }
+
+ /*   public void showEmpty() {
+      showEmptyExercise(getEmptySearchMessage());
+    }*/
+
+    /**
+     * @return
+     * @see #showEmptySelection
+     */
+  /*  protected String getEmptySearchMessage() {
+      logger.info("getEmptySearchMessage -- ");
+      return hasValues ? PLEASE_CHOOSE_A_QUIZ : NO_QUIZZES_YET;
+    }*/
 
      /*     protected void addListsAsLinks(Collection<IUserList> result, long then,
                                          Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
@@ -228,90 +292,5 @@ public class QuizHelper extends PracticeHelper {
               logger.info("no known types");
             }
           }*/
-        };
-      }
-
-      @Override
-      protected void styleBottomRow(Panel bottomRow) {
-        bottomRow.addStyleName("centerPractice");
-        outerBottomRow = bottomRow;
-      }
-    };
-  }
-
-  private void showQuizDialog(String historyToken, HistoryExerciseList historyExerciseList) {
-    rememberHistoryToken(historyToken);
-
-    //  logger.info("current selection state " + historyToken);
-
-    String first = historyToken
-        + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Dry Run";
-    String second = historyToken
-        + SelectionState.SECTION_SEPARATOR + Unit + "=" + "Quiz";
-
-    showPolyDialog(first, second, historyExerciseList);
-  }
-
-  /**
-   * @seex #showDrill
-   */
-  private void showPolyDialog(String first, String second, HistoryExerciseList historyExerciseList) {
-    mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-
-    new PolyglotDialog(
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            mode = candidateMode;
-            if (mode == PolyglotDialog.MODE_CHOICE.DRY_RUN) {
-              historyExerciseList.setHistoryItem(first);
-            } else if (mode == PolyglotDialog.MODE_CHOICE.POLYGLOT) {
-              historyExerciseList.setHistoryItem(second);
-            } else {
-              return false;
-            }
-
-            prompt = candidatePrompt;
-
-            return true;
-          }
-
-          @Override
-          public void gotNo() {  // or cancel
-            navigation.setBannerVisible(true);
-            QuizHelper.this.setVisible(true);
-          }
-
-          @Override
-          public void gotHidden() {
-            if (mode != PolyglotDialog.MODE_CHOICE.NOT_YET) {
-              navigation.setBannerVisible(false);
-              QuizHelper.this.setVisible(false);
-            }
-            showQuizForReal();
-          }
-        },
-        new PolyglotDialog.ModeChoiceListener() {
-          @Override
-          public void gotMode(PolyglotDialog.MODE_CHOICE choice) {
-            candidateMode = choice;
-          }
-
-          @Override
-          public void gotPrompt(PolyglotDialog.PROMPT_CHOICE choice) {
-            candidatePrompt = choice;
-          }
-        }
-    );
-  }
-
-  private void showQuizForReal() {
-    setMode(mode, prompt);
-    setNavigation(navigation);
-    hideList();
-  }
-
-  private void rememberHistoryToken(String historyToken) {
-    this.historyToken = historyToken;
   }
 }

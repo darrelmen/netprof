@@ -46,7 +46,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 7/8/14.
  */
-class StickyState {
+public class StickyState {
   // private final Logger logger = Logger.getLogger("StickyState");
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
@@ -73,7 +73,7 @@ class StickyState {
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    * @see StatsPracticePanel#onSetComplete
    */
-  void storeCurrent(Shell e) {
+  public void storeCurrent(Shell e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }

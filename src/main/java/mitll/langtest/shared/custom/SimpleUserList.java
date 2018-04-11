@@ -10,12 +10,12 @@ public class SimpleUserList extends UserListLight implements IUserList {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsForUser
    * @param id
    * @param name
    * @param projid
    * @param userid
    * @param userChosenID
+   * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsForUser
    */
   public SimpleUserList(int id, String name, int projid, int userid, String userChosenID, int numItems) {
     super(id, name);
@@ -43,5 +43,14 @@ public class SimpleUserList extends UserListLight implements IUserList {
   @Override
   public int getProjid() {
     return projid;
+  }
+
+  /**
+   * TODO: allow teacher to choose.
+   *
+   * @return
+   */
+  public int getRoundTimeMinutes() {
+    return numItems / 10;
   }
 }

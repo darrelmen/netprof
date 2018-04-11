@@ -132,7 +132,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
   final String instance;
-  final ListInterface exerciseList;
+ protected final ListInterface exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 

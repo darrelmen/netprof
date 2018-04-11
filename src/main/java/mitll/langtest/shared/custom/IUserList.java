@@ -7,4 +7,6 @@ public interface IUserList extends IUserListLight {
   String getUserChosenID();
 
   int getNumItems();
+
+  int getRoundTimeMinutes();
 }

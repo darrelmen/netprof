@@ -288,9 +288,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }*/
 
   private void enableButtons() {
-    UserInfo currentSelection = getCurrentSelection();
-
-    boolean onMyList = myStudents.contains(currentSelection.getID());
+    boolean onMyList = myStudents.contains(getCurrentSelection().getID());
     if (add != null) {
       add.setEnabled(!onMyList);
       remove.setEnabled(onMyList);

@@ -91,7 +91,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   public Map<Integer, T> getIdToExercise() {
     Map<Integer, T> idToExercise = pagingContainer.getIdToExercise();
-    logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
+   // logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
     return idToExercise;
   }
 

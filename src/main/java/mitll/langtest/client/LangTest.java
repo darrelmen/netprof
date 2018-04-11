@@ -374,7 +374,7 @@ public class LangTest implements
   private void rememberStartup(StartupInfo startupInfo, boolean reloadWindow) {
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
-    logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
+  //  logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
     if (reloadWindow) {
       initialUI.chooseProjectAgain();
       //initialUI.setImplVersion(startupInfo.getImplementationVersion());

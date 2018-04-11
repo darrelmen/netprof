@@ -1,7 +1,6 @@
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -73,7 +72,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   /**
-   *
+   * @see PolyglotPracticePanel#recordingStarted
    */
   @Override
   public void startTimedRun() {
@@ -121,7 +120,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
       };
 
       {
-        int delayMillis = isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
+        int delayMillis = getRoundTimeMinutes(isDry)*60*1000;
         roundTimer.schedule(delayMillis);
         roundTimeLeftMillis = delayMillis;
         sessionStartMillis = System.currentTimeMillis();
@@ -144,6 +143,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         logger.warning("no current flashcard?");
       }
     }
+  }
+
+  @Override
+  public int getRoundTimeMinutes(boolean isDry) {
+    return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
   }
 
   private boolean isRoundTimerNotRunning() {

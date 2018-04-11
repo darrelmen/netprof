@@ -68,13 +68,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private static final boolean ADD_KEY_BINDING = true;
 
-  final ControlState controlState;
+  protected  final ControlState controlState;
   private List<L> allExercises;
 
 
   private String selectionID = "";
-  private final String instance;
-  final StickyState sticky;
+  //private final String instance;
+  protected final StickyState sticky;
   private Map<String, Collection<String>> selection = new HashMap<>();
 
   private Widget contentPanel;
@@ -83,7 +83,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private INavigation navigation;
   final KeyStorage storage;
 
-  final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
+  protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   //  private static final boolean DEBUG = false;
 
@@ -98,7 +98,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
                                String instance) {
     super(controller, exerciseList);
     controlState = new ControlState();
-    this.instance = instance;
+   // this.instance = instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<L>() {

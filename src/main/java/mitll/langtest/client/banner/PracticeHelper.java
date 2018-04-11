@@ -58,11 +58,10 @@ import mitll.langtest.shared.project.ProjectType;
  */
 class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
-
   private static final String PRACTICE = "practice";
 
-   StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
-   PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
+  StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
+  PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
@@ -103,8 +102,6 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
-      //final FlexListLayout outer = this;
-
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
@@ -136,11 +133,11 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     this.navigation = navigation;
   }
 
-  public StatsFlashcardFactory<CommonShell, CommonExercise> getStatsFlashcardFactory() {
+  StatsFlashcardFactory<CommonShell, CommonExercise> getStatsFlashcardFactory() {
     return statsFlashcardFactory;
   }
 
-  public PolyglotFlashcardFactory<CommonShell, CommonExercise> getPolyglotFlashcardFactory() {
+  PolyglotFlashcardFactory<CommonShell, CommonExercise> getPolyglotFlashcardFactory() {
     return polyglotFlashcardFactory;
   }
 
@@ -148,7 +145,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     return mode;
   }
 
-  public PolyglotDialog.PROMPT_CHOICE getPromptChoice() {
+  PolyglotDialog.PROMPT_CHOICE getPromptChoice() {
     return promptChoice;
   }
 

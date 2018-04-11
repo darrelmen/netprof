@@ -136,18 +136,7 @@ public class DialogHelper {
     dialogBox.setTitle("<b>" + title + "</b>");
     if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
 
-    FluidContainer container = new FluidContainer();
-
-    for (String msg : msgs) {
-      FluidRow row = new FluidRow();
-      Column column = new Column(12);
-      row.add(column);
-      Heading para = new Heading(4);
-      para.setText(msg);
-
-      column.add(para);
-      container.add(row);
-    }
+    FluidContainer container = getPrompt(msgs);
 
     if (other != null) container.add(other);
 
@@ -186,12 +175,29 @@ public class DialogHelper {
     return closeButton;
   }
 
+  @NotNull
+  private FluidContainer getPrompt(Collection<String> msgs) {
+    FluidContainer container = new FluidContainer();
+
+    for (String msg : msgs) {
+      FluidRow row = new FluidRow();
+      Column column = new Column(12);
+      row.add(column);
+      Heading para = new Heading(4);
+      para.setText(msg);
+
+      column.add(para);
+      container.add(row);
+    }
+    return container;
+  }
+
   public void hide() {
     dialogBox.hide();
   }
 
   @NotNull
-  private Button getCloseButton(String buttonName) {
+  public Button getCloseButton(String buttonName) {
     Button closeButton;
     closeButton = new Button(buttonName);
     closeButton.setType(ButtonType.PRIMARY);

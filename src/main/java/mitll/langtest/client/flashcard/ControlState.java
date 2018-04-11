@@ -41,7 +41,7 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/11/14.
  */
-class ControlState {
+public class ControlState {
   private static final String SHOW_STATE = "showState";
   private static final String AUDIO_ON = "audioOn";
   private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";

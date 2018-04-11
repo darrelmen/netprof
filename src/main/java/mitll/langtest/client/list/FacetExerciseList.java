@@ -150,13 +150,14 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   /**
    * for now only single selection
    */
-  private Map<String, String> typeToSelection = new HashMap<>();
+  protected Map<String, String> typeToSelection = new HashMap<>();
   /**
    * @see #addChoicesForType
    */
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
   protected List<String> rootNodesInOrder = new ArrayList<>();
   private final Map<Integer, String> idToListName = new HashMap<>();
+  private final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
   private int freqid = 0;
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
@@ -504,6 +505,11 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     this.typeToSelection = typeToSelection;
   }
 
+  public boolean hasSelectionForType(String type) {
+    String s = typeToSelection.get(type);
+    return s != null && !s.isEmpty();
+  }
+
   /**
    * structure
    * nav
@@ -531,10 +537,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #getTypeToValues
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-    logger.info("addFacetsForReal" +
-        "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
-        "\n\ttype->distinct " + typeToValues.keySet() +
-        "\n\ttype->sel      " + typeToSelection);
+   if (DEBUG) {
+     logger.info("addFacetsForReal" +
+         "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
+         "\n\ttype->distinct " + typeToValues.keySet() +
+         "\n\ttype->sel      " + typeToSelection);
+   }
 
     // nav -
     //   ul
@@ -576,9 +584,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   /**
-   * @see #addFacetsForReal
    * @param typeToValues
    * @return
+   * @see #addFacetsForReal
    */
   protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(LISTS);
@@ -639,7 +647,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #addListFacet
    */
   private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
-   // ListServiceAsync listService = controller.getListService();
+    // ListServiceAsync listService = controller.getListService();
     //logger.info("populateListChoices --- ");
 
     if (typeToValues == null) {
@@ -670,13 +678,16 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return UserList.LIST_TYPE.NORMAL;
   }
 
-  protected void addListsAsLinks(Collection<IUserList> result, long then, Map<String, Set<MatchInfo>> finalTypeToValues, ListItem liForDimensionForType) {
+  //Collection<IUserList> knownLists;
+
+  protected void addListsAsLinks(Collection<IUserList> result, long then,
+                                 Map<String, Set<MatchInfo>> finalTypeToValues,
+                                 ListItem liForDimensionForType) {
     long l = System.currentTimeMillis();
     if (l - then > 150) {
       logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
 
     }
-
     finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
     Widget favorites = liForDimensionForType.getWidget(0);
@@ -701,6 +712,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       String tooltip = isVisit ? " from " + list.getUserChosenID() : "";
       value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));
       idToListName.put(list.getID(), list.getName());
+      idToList.put(list.getID(), list);
     }
     return value;
   }
@@ -764,7 +776,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
-        if (type.equalsIgnoreCase(LISTS)) {
+        if (isListType(type)) {
           //   logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
@@ -1075,12 +1087,16 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
     return event -> {
       Map<String, String> candidate = new HashMap<>(typeToSelection);
-      String value = type.equalsIgnoreCase(LISTS) ? "" + newUserListID : key;
+      String value = isListType(type) ? "" + newUserListID : key;
       candidate.put(type, value);
 
       //  logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
+  }
+
+  private boolean isListType(String type) {
+    return type.equalsIgnoreCase(LISTS);
   }
 
   /**
@@ -1090,7 +1106,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #getChoiceHandler
    * @see #addRemoveClickHandler
    */
-  private void setHistory(Map<String, String> candidate) {
+  public void setHistory(Map<String, String> candidate) {
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1167,10 +1183,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
-        "\n\ttype to selection " + typeToSelection+
-        "\n\ttype to values    " + response.getTypeToValues()
-    );
+    if (DEBUG) {
+      logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
+          "\n\ttype to selection " + typeToSelection +
+          "\n\ttype to values    " + response.getTypeToValues().size()
+      );
+    }
 
     changeSelection(response.getTypesToInclude(), typeToSelection);
     setTypeToSelection(typeToSelection);
@@ -2162,5 +2180,13 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   @Override
   protected void noSectionsGetExercises(int exerciseID) {
     simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
+  }
+
+  public Map<Integer, IUserList> getIdToList() {
+    return idToList;
+  }
+
+  public Map<String, String>  getTypeToSelection() {
+    return typeToSelection;
   }
 }

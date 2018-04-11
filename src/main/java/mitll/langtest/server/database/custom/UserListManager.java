@@ -92,7 +92,7 @@ public class UserListManager implements IUserListManager {
   private static final int DRY_RUN_ITEMS = 10;
   private static final int MIN_PHONE = 4;
   private static final int MAX_PHONE = 7;
-  public static final String DRY_RUN = "Dry Run";
+  public static final String DRY_RUN = "Dry Run (Just Practice!)";
   private static final String DESCRIP = "Dry run to prep for quizzes.";
 
   private final IUserDAO userDAO;

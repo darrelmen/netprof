@@ -314,7 +314,7 @@ public class InitialUI implements UILifecycle {
     DivWidget verticalContainer = new FluidContainer();
     verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
-    logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
+   // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);

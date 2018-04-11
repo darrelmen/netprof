@@ -70,14 +70,13 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private LIST_TYPE listType;
 
   private boolean isPrivate;
+
   private boolean isReview;
 
-  //private boolean isDeleted;
   private long modified;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
-  //private int count;
   private String richText;
 
   public UserList() {
@@ -120,7 +119,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.richText = richText;
     this.projid = projid;
     this.listType = listType;
-    //this.isDeleted = isDeleted;
   }
 
   @Override
@@ -245,10 +243,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return modified;
   }
 
-/*  public void setModified(long modified) {
-    this.modified = modified;
-  }*/
-
   @Override
   public String getUserChosenID() {
     return userChosenID;
@@ -271,22 +265,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return projid;
   }
 
-/*
-  public boolean isDeleted() {
-    return isDeleted;
-  }
-*/
-
-/*
-  public int getCount() {
-    return count;
-  }
-*/
-/*
-  public void setCount(int count) {
-    this.count = count;
-  }*/
-
   public void setDescription(String description) {
     this.description = description;
   }
@@ -305,6 +283,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   public void setListType(LIST_TYPE listType) {
     this.listType = listType;
+  }
+
+  @Override
+  public int getRoundTimeMinutes() {
+    return getNumItems()/10;
   }
 
   @Override

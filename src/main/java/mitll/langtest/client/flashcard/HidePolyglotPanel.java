@@ -9,7 +9,7 @@ import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
-class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L,T> {
+public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L,T> {
 
   /**
    * @see HidePolyglotFactory#getCurrentFlashcard
@@ -22,7 +22,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    * @param stickyState
    * @param exerciseListToUse
    */
-  HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
+  public HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
                     ControlState controlState,
                     ExerciseController controller,
                     MySoundFeedback soundFeedback,
@@ -46,7 +46,6 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    */
   @Override
   void moveEnglishForComment(Widget englishPhrase) {
-
   }
 
   /**
