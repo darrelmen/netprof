@@ -9,9 +9,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
+import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.custom.UserList;
@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static mitll.langtest.shared.custom.UserList.LIST_TYPE.QUIZ;
 
@@ -49,7 +48,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    * @param slim
    * @param storageID
    * @param shortPageSize
-   * @see ListView#showContent(Panel, String)
+   * @see ContentView#showContent(Panel, String, boolean)
    */
   ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",

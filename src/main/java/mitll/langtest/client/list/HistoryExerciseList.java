@@ -458,7 +458,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     setTypeAheadText(selectionState.getSearch());
   }
 
-  protected void simpleLoadExercises(String selectionState, String prefix, int exerciseID) {
+  void simpleLoadExercises(String selectionState, String prefix, int exerciseID) {
     loadExercises(selectionState, prefix, false, false, false, false, exerciseID);
   }
 

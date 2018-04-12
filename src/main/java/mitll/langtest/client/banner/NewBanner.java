@@ -322,7 +322,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.info("showSection can't parse " + instance1);
 
     }
-    navigation.showView(choices, false);
+    navigation.showView(choices, false, true);
   }
 
   /**

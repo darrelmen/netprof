@@ -80,8 +80,8 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   }
 
   @Override
-  public void showContent(Panel listContent, String instanceName) {
-    super.showContent(listContent, instanceName);
+  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
+    super.showContent(listContent, instanceName, fromClick);
     hideList();
   }
 

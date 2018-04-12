@@ -19,6 +19,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
 import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
+import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
@@ -47,7 +48,8 @@ public class NewContentChooser implements INavigation {
   private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
-  private final PracticeHelper practiceHelper, quizHelper;
+  private final PracticeHelper practiceHelper;
+  private final QuizHelper quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
   private final ListView listView;
@@ -76,7 +78,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showInitialState() {
     clearCurrent();
-    showView(getCurrentView(), true);
+    showView(getCurrentView(), true, false);
   }
 
   /**
@@ -120,13 +122,17 @@ public class NewContentChooser implements INavigation {
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
 
+  /**
+   * @see StatsFlashcardFactory#showDrill
+   * @param view
+   */
   @Override
   public void showView(VIEWS view) {
-    showView(view, false);
+    showView(view, false, false);
   }
 
   @Override
-  public void showView(VIEWS view, boolean isFirstTime) {
+  public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
     //   logger.info("showView : show " + view + " current " + currentStoredView);
 
@@ -137,29 +143,25 @@ public class NewContentChooser implements INavigation {
       storeValue(view);
       switch (view) {
         case LEARN:
-          clear();
-
-          fixDivToNotScrollUnderHeader();
+          clearAndFixScroll();
 
           if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
 
-          learnHelper.showContent(divWidget, LEARN.toString());
+          learnHelper.showContent(divWidget, LEARN.toString(), fromClick);
           break;
         case DRILL:
           showDrill();
           break;
         case QUIZ:
-          showQuiz();
+          showQuiz(fromClick);
           break;
         case PROGRESS:
-          clear();
-          fixDivToNotScrollUnderHeader();
+          clearAndFixScroll();
           showProgress();
           break;
         case LISTS:
-          clear();
-          fixDivToNotScrollUnderHeader();
-          listView.showContent(divWidget, "listView");
+          clearAndFixScroll();
+          listView.showContent(divWidget, "listView", fromClick);
           break;
         case RECORD:
           clear();
@@ -186,6 +188,11 @@ public class NewContentChooser implements INavigation {
     }
   }
 
+  private void clearAndFixScroll() {
+    clear();
+    fixDivToNotScrollUnderHeader();
+  }
+
   private void fixDivToNotScrollUnderHeader() {
     divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
     divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
@@ -193,8 +200,7 @@ public class NewContentChooser implements INavigation {
 
   //  @Override
   private void showDrill() {
-    clear();
-    fixDivToNotScrollUnderHeader();
+    clearAndFixScroll();
 
     if (isPolyglotProject()) {
       showPolyDialog();
@@ -203,10 +209,9 @@ public class NewContentChooser implements INavigation {
     }
   }
 
-  private void showQuiz() {
-    clear();
-    fixDivToNotScrollUnderHeader();
-    showQuizForReal();
+  private void showQuiz(boolean fromClick) {
+    clearAndFixScroll();
+    showQuizForReal(fromClick);
   }
 
   /**
@@ -268,15 +273,16 @@ public class NewContentChooser implements INavigation {
   private void showPractice() {
     practiceHelper.setMode(mode, prompt);
     practiceHelper.setNavigation(this);
-    practiceHelper.showContent(divWidget, DRILL.toString());
+    practiceHelper.showContent(divWidget, DRILL.toString(), true);
     practiceHelper.hideList();
   }
 
-  private void showQuizForReal() {
+  private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
     quizHelper.setNavigation(this);
-    quizHelper.showContent(divWidget, QUIZ.toString());
+    quizHelper.showContent(divWidget, QUIZ.toString(), fromClick);
     quizHelper.hideList();
+    if (fromClick) quizHelper.showQuizIntro();
   }
 
   private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
@@ -443,7 +449,7 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showPreviousState() {
-    showView(getCurrentView(), false);
+    showView(getCurrentView(), false, false);
   }
 
   @Override

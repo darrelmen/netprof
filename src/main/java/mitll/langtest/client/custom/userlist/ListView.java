@@ -55,7 +55,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String YOUR_LISTS1 = "Your Lists";
 
   /**
-   * @see #showContent
+   * @see ContentView#showContent
    */
   private static final String YOUR_LISTS = "Your Lists and Quizes";
 
@@ -63,7 +63,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
   /**
-   * @see #showContent
+   * @see ContentView#showContent
    */
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
@@ -96,7 +96,7 @@ public class ListView implements ContentView, CreateListComplete {
     this.controller = controller;
   }
 
-  public void showContent(Panel listContent, String instanceName) {
+  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
     names.clear();
 
     listContent.clear();

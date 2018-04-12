@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -54,7 +55,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @return
    * @throws DominoSessionException
-   * @see mitll.langtest.client.custom.userlist.ListView#showContent
+   * @see ContentView#showContent
    */
   @Override
   public Collection<UserList<CommonShell>> getLists() throws DominoSessionException {
@@ -131,7 +132,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param onlyCreated
    * @param visited
    * @return
-   * @see mitll.langtest.client.custom.userlist.ListView#showContent
+   * @see ContentView#showContent
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");

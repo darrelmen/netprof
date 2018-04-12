@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.analysis.UserContainer;
+import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
@@ -49,7 +50,7 @@ public interface ListService extends RemoteService {
   /**
    * @return
    * @throws DominoSessionException
-   * @see mitll.langtest.client.custom.userlist.ListView#showContent
+   * @see ContentView#showContent
    */
   Collection<UserList<CommonShell>> getLists() throws DominoSessionException;
 

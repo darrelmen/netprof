@@ -468,11 +468,7 @@ abstract class AmasExercisePanel extends VerticalPanel implements
       if (!completedTabs.contains(pair.getValue())) {
         final Integer key = pair.getKey();
         //   logger.info("\tselectFirstIncomplete selecting tab #" +key);
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            selectTab(key - 1);
-          }
-        });
+        Scheduler.get().scheduleDeferred(() -> selectTab(key - 1));
         break;
       }
     }

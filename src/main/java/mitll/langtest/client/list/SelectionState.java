@@ -259,6 +259,14 @@ public class SelectionState {
     return onlyUninspected;
   }
 
+  private void setProject(int project) {
+    this.project = project;
+  }
+
+  public int getProject() {
+    return project;
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (Collection<String> section : getTypeToSection().values()) {
@@ -266,14 +274,6 @@ public class SelectionState {
     }
     String s = builder.toString();
     return s.substring(0, Math.max(0, s.length() - 2));
-  }
-
-  private void setProject(int project) {
-    this.project = project;
-  }
-
-  public int getProject() {
-    return project;
   }
 
   public String getInfo() {

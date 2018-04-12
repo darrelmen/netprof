@@ -86,7 +86,7 @@ public class AMASInitialUI extends InitialUI {
     lifecycleSupport.recordingModeSelect();
     LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
     learnHelper = new AutoCRTChapterNPFHelper(controller);
-    learnHelper.showContent(contentRow, "");
+    learnHelper.showContent(contentRow, "", true);
   }
 
   @Override

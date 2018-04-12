@@ -1135,6 +1135,7 @@ public class UserListManager implements IUserListManager {
   /**
    * @param userListID
    * @param user
+   * @return null if can't find the user list OR it's a quiz - can't visit a quiz
    * @seex mitll.langtest.client.custom.Navigation#addVisitor
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
@@ -1142,9 +1143,14 @@ public class UserListManager implements IUserListManager {
   public UserList addVisitor(int userListID, int user) {
     logger.debug("addVisitor - user " + user + " visits " + userListID);
     UserList where = getUserListNoExercises(userListID);
+
     if (where != null) {
-      userListDAO.addVisitor(where.getID(), user);
-      return where;
+      if (where.getListType() == UserList.LIST_TYPE.QUIZ) {
+        return null;
+      } else {
+        userListDAO.addVisitor(where.getID(), user);
+        return where;
+      }
     } else if (userListID > 0) {
       logger.warn("addVisitor - can't find list with id " + userListID);
       return null;

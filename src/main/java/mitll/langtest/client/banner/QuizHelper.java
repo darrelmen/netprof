@@ -33,6 +33,7 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
@@ -94,7 +95,7 @@ public class QuizHelper extends PracticeHelper {
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
         boolean hasSelectionForType = exerciseList.hasSelectionForType(LISTS);
         if (hasSelectionForType) {
           return super.getExercisePanel(e);
@@ -118,7 +119,7 @@ public class QuizHelper extends PracticeHelper {
 
       @Override
       public int getRoundTimeMinutes(boolean isDry) {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getRoundTimeMinutes no user lists yet ");
@@ -130,8 +131,8 @@ public class QuizHelper extends PracticeHelper {
           }
 
           IUserList iUserList = idToList.get(chosenList);
-          logger.info("getRoundTimeMinutes iUserList " + iUserList + " for " + chosenList);
-          logger.info("getRoundTimeMinutes iUserList " + idToList.keySet());
+          //   logger.info("getRoundTimeMinutes iUserList " + iUserList + " for " + chosenList);
+          //   logger.info("getRoundTimeMinutes iUserList " + idToList.keySet());
           return iUserList == null ? 10 : iUserList.getRoundTimeMinutes();
         }
       }
@@ -139,7 +140,7 @@ public class QuizHelper extends PracticeHelper {
       private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
         String s = candidate.get(LISTS);
-        logger.info("getRoundTimeMinutes iUserList " + s);
+        //   logger.info("getRoundTimeMinutes iUserList " + s);
         if (s != null && !s.isEmpty()) {
           try {
             chosenList = Integer.parseInt(s);
@@ -155,11 +156,7 @@ public class QuizHelper extends PracticeHelper {
       @Override
       public void showQuiz() {
         super.showQuiz();
-
-        FacetExerciseList exerciseList = (FacetExerciseList) this.exerciseList;
-        Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
-        candidate.remove(LISTS);
-        exerciseList.setHistory(candidate);
+        clearListSelection();
       }
     };
 
@@ -167,6 +164,7 @@ public class QuizHelper extends PracticeHelper {
     statsFlashcardFactory.setContentPanel(outerBottomRow);
     return statsFlashcardFactory;
   }
+
 
   private Panel rememberedTopRow;
 
@@ -200,13 +198,22 @@ public class QuizHelper extends PracticeHelper {
   }
 
   @Override
-  public void showContent(Panel listContent, String instanceName) {
-    super.showContent(listContent, instanceName);
+  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
+    super.showContent(listContent, instanceName, fromClick);
     //  hideList();
 //    logger.info("Set visible  on " + rememberedTopRow.getElement().getId());
 //    logger.info("Set visible with children " + rememberedTopRow.getElement().getChildCount());
     rememberedTopRow.getParent().setVisible(false);
     //rememberedTopRow.setVisible(false);
+  }
+
+  void showQuizIntro() {
+    Scheduler.get().scheduleDeferred(this::clearListSelection);
+  }
+
+  private void clearListSelection() {
+    FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
+    exerciseList.clearListSelection();
   }
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {

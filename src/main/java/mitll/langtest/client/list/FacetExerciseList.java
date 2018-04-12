@@ -223,6 +223,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
       downloadHelper.showDialog(controller.getHost());
     });
+
+    //clearListSelection();
   }
 
   /**
@@ -447,7 +449,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return false;
   }
 
-
   /**
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    * @see #getExercises
@@ -462,6 +463,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     if (getStartupInfo() != null) {
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
+
+    selectionState.getTypeToSection().remove(LISTS);
 
     restoreUIState(selectionState);
   }
@@ -537,12 +540,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #getTypeToValues
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-   if (DEBUG) {
-     logger.info("addFacetsForReal" +
-         "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
-         "\n\ttype->distinct " + typeToValues.keySet() +
-         "\n\ttype->sel      " + typeToSelection);
-   }
+    if (DEBUG) {
+      logger.info("addFacetsForReal" +
+          "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
+          "\n\ttype->distinct " + typeToValues.keySet() +
+          "\n\ttype->sel      " + typeToSelection);
+    }
 
     // nav -
     //   ul
@@ -678,8 +681,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return UserList.LIST_TYPE.NORMAL;
   }
 
-  //Collection<IUserList> knownLists;
-
   protected void addListsAsLinks(Collection<IUserList> result, long then,
                                  Map<String, Set<MatchInfo>> finalTypeToValues,
                                  ListItem liForDimensionForType) {
@@ -752,12 +753,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    if (DEBUG) logger.info("addChoices " + type + "=" + selectionForType);
+    if (DEBUG || true) logger.info("addChoices " + type + "=" + selectionForType);
 
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
-        if (DEBUG) logger.info("addChoices for " + type + "=" + keys.size());
+        if (DEBUG || true) logger.info("addChoices for " + type + "=" + keys.size());
         addChoicesForType(typeToValues, type, choices, keys);
       }
     } else {
@@ -777,10 +778,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (isListType(type)) {
-          //   logger.info("addChoices addListChoice " + type + "=" + selectionForType);
+          logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
-          //  logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
+          logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
           choices.add(getSelectedAnchor(type, selectionForType));
         }
       }
@@ -815,10 +816,14 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
       @Override
       public void onSuccess(UserList result) {
-        if (result.getProjid() != getCurrentProject()) {
-          logger.warning("addVisitor list " + result.getName() + " is NOT in the project #" + result.getProjid());
+        if (result == null) {
+          logger.info("addVisitor list " + userListID + " is a quiz or it doesn't exist any more.");
         } else {
-          choices.add(getSelectedAnchor(type, result.getName()));
+          if (result.getProjid() != getCurrentProject()) {
+            logger.warning("addVisitor list " + result.getName() + " is NOT in the project #" + result.getProjid());
+          } else {
+            choices.add(getSelectedAnchor(type, result.getName()));
+          }
         }
       }
     });
@@ -927,6 +932,11 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return headerContainer;
   }
 
+  /**
+   * @see #getTypeContainer
+   * @param refined
+   * @return
+   */
   @NotNull
   private ListItem getLIDimension(boolean refined) {
     ListItem liForDimension = new ListItem();
@@ -1284,7 +1294,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
         if (DEBUG) logger.info("restoreListBoxState t->sel    " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
-        if (typeToSelection.equals(newTypeToSelection) && typeOrderContainer.iterator().hasNext()) {
+        if (typeToSelection.equals(newTypeToSelection) &&
+            typeOrderContainer.iterator().hasNext()) {
 //          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
         } else {
           int userListID = getUserListID(newTypeToSelection);
@@ -2186,7 +2197,13 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return idToList;
   }
 
-  public Map<String, String>  getTypeToSelection() {
+  public Map<String, String> getTypeToSelection() {
     return typeToSelection;
+  }
+
+  public void clearListSelection() {
+    Map<String, String> candidate = new HashMap<>(getTypeToSelection());
+    candidate.remove(LISTS);
+    setHistory(candidate);
   }
 }

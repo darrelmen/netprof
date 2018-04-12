@@ -120,4 +120,8 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
     }
     return choices;
   }
+
+  public ListInterface<T, U> getExerciseList() {
+    return exerciseList;
+  }
 }

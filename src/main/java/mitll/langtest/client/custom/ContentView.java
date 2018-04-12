@@ -10,6 +10,7 @@ public interface ContentView {
    * @see INavigation#showView
    * @param listContent
    * @param instanceName
+   * @param fromClick
    */
-  void showContent(Panel listContent, String instanceName);
+  void showContent(Panel listContent, String instanceName, boolean fromClick);
 }

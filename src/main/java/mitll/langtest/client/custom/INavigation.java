@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.user.User;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +47,7 @@ public interface INavigation extends IViewContaner {
 
   void showView(VIEWS view);
 
-  void showView(VIEWS view, boolean isFirstTime);
+  void showView(VIEWS view, boolean isFirstTime, boolean fromClick);
 
   void showInitialState();
 
@@ -56,8 +55,6 @@ public interface INavigation extends IViewContaner {
   void showQuiz(String listName);
 
   void showDrillList(int listid);
-
- // void showDrill();
 
   Widget getNavigation();
 
