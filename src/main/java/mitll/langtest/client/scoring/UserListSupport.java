@@ -239,17 +239,16 @@ public class UserListSupport {
   @NotNull
   public String getMailTo(int listid, String name, boolean isQuiz) {
 
-   // boolean isQuiz=false;
+    // boolean isQuiz=false;
     String selector = //isQuiz ? "QUIZ=" + name.replaceAll("\\s+","+") :
         "Lists=" + listid;
-    //String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
+    String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
     String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + selector +
         getProjectParam()
-        //+
-       // suffix
-        ;
+        +
+        suffix;
 
     String encode = URL.encode(s);
     String type = isQuiz ? "quiz" : "list";

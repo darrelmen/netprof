@@ -557,7 +557,6 @@ public class ListView implements ContentView, CreateListComplete {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            //closeButton.setEnabled(false);
             boolean okToCreate = createListDialog.isOKToCreate(names);
             if (okToCreate) {
               createListDialog.doCreate();
@@ -656,8 +655,7 @@ public class ListView implements ContentView, CreateListComplete {
   public void madeIt(UserList userList) {
     dialogHelper.hide();
 
-    logger.info("made it " + userList.getName());
-
+  //  logger.info("made it " + userList.getName());
     //logger.info("\n\n\ngot made list");
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
