@@ -879,7 +879,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       projectManagement.addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
     } else {
-      logger.info("*not* making import project");
+//      logger.info("*not* making import project");
     }
   }
 

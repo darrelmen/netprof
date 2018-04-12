@@ -3,14 +3,11 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadContainer;
-import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
@@ -28,7 +25,6 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
-
   private static final String OVERALL_SCORE = "Overall Score";
 
   /**
@@ -107,6 +103,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
       Heading w = new Heading(4, SCORE_LOW_TRY_AGAIN);
       w.addStyleName("leftFiveMargin");
       wordTableContainer.add(w);
+      enablePlayAudio();
     }
 
     Panel container = downloadContainer.getDownloadContainer();
@@ -128,13 +125,17 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     // so it will play on drill tab...
-    playAudioPanel.setEnabled(true);
+    enablePlayAudio();
 
     wordTableContainer.add(scoreFeedbackDiv);
 
     if (hydecScore > NATIVE_THRSHOLD) {
       wordTableContainer.add(getPraise());
     }
+  }
+
+  private void enablePlayAudio() {
+    playAudioPanel.setEnabled(true);
   }
 
   private DivWidget getPraise() {

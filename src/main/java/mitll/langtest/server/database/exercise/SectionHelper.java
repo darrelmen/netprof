@@ -841,7 +841,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    // logger.info("getFirst matching " + typeToSection);
     Collection<T> exercisesForSelectionState = getExercisesForSelectionState(typeToSection);
     if (exercisesForSelectionState.size() < minFirstSize) {
-      logger.info("getFirst Fall back to " + firstOnly);
+      //logger.info("getFirst Fall back to " + firstOnly);
       exercisesForSelectionState = getExercisesForSelectionState(firstOnly);
     }
     return exercisesForSelectionState;
@@ -852,7 +852,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     for (MatchInfo matchInfo : matchInfos1) {
       if (matchInfo.getCount() > i) {
         second = matchInfo.getValue();
-        logger.info("getFirst choose " +matchInfo);
+       // logger.info("getFirst choose " +matchInfo);
         break;
       }
     }

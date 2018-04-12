@@ -237,9 +237,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           "\n\tsort by latest      " + sortByLatestExample +
           "\n\tphoneReportByResult " + phoneReportByResult.size());
 
-      List<SlickPhoneReport> sample = new ArrayList<>(phoneReportByResult);
+/*      List<SlickPhoneReport> sample = new ArrayList<>(phoneReportByResult);
       int n = Math.min(sample.size(), 10);
+
       for (int i = 0; i < n; i++) logger.info("\te.g. " + sample.get(i));
+*/
     }
 
     float totalScore = 0;
