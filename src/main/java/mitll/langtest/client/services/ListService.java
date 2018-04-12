@@ -38,10 +38,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -65,7 +62,8 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
-  UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType) throws DominoSessionException;
+  UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
+                       TimeRange timeRange) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 

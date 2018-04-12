@@ -32,12 +32,14 @@
 
 package mitll.langtest.client.flashcard;
 
+import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -47,7 +49,8 @@ import java.util.*;
  * @since 7/8/14.
  */
 public class StickyState {
-  // private final Logger logger = Logger.getLogger("StickyState");
+  private final Logger logger = Logger.getLogger("StickyState");
+
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
@@ -60,8 +63,8 @@ public class StickyState {
   private final Map<Integer, Double> exToScore = new HashMap<>();
   private final Map<Integer, AudioAnswer> exToAnswer = new LinkedHashMap<>();
   private final List<AudioAnswer> answers = new ArrayList<>();
-  private final Map<AudioAnswer, Integer> answerToEx = new HashMap<>();
-  private final Map<Long, Integer> timeToID = new HashMap<>();
+  //private final Map<AudioAnswer, Integer> answerToEx = new HashMap<>();
+  private final Map<Long, AudioAnswer> timeToAnswer = new HashMap<>();
 
   /**
    * @param storage
@@ -156,24 +159,27 @@ public class StickyState {
     exToScore.clear();
     exToAnswer.clear(); // why wouldn't we do that too?
     answers.clear(); // why wouldn't we do that too?
-    answerToEx.clear();
+    //answerToEx.clear();
 
     clearCurrent();
   }
 
-  void storeAnswer(final AudioAnswer result, int id) {
-    // int id = exercise.getID();
+  void storeAnswer(final AudioAnswer result) {
+     int id = result.getExid();
+     logger.info("store answer ex  "+id);
     exToScore.put(id, result.getScore());
     exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
     exToAnswer.put(id, result);
-    answerToEx.put(result, id);
-    timeToID.put(result.getTimestamp(),id);
+    //answerToEx.put(result, id);
+    timeToAnswer.put(result.getTimestamp(), result);
 
     if (!answers.isEmpty()) {
       int index = answers.size() - 1;
       AudioAnswer lastAnswer = answers.get(index);
-      if (answerToEx.get(lastAnswer)==id) {
-        answers.remove(index);
+      //  if (answerToEx.get(lastAnswer)==id) {
+      if (lastAnswer.getExid() == id) {
+        AudioAnswer remove = answers.remove(index);
+        logger.info("storeAnswer forget earlier answer " + remove);
       }
     }
 
@@ -228,24 +234,26 @@ public class StickyState {
     return num == exToScore.size();
   }
 
+  /**
+   * @see PolyglotPracticePanel#getChart(long)
+   * @return
+   */
   Collection<AudioAnswer> getAnswers() {
     return answers;
   }
 
-  Map<Long, Integer> getTimeToID() {
-    return timeToID;
-//    Map<Long, Integer> timeToID = new HashMap<>();
-//    answerToEx.forEach((k,v) -> {
-//      timeToID.put(k.getTimestamp(), v);
-//    });
-//    return timeToID;
+  /**
+   * @see PolyglotPracticePanel#getChart(long)
+   * @return
+   */
+  Map<Long, AudioAnswer> getTimeToAnswer() {
+    return timeToAnswer;
   }
-
 
   void clearAnswers() {
     exToAnswer.clear();
     answers.clear();
-    timeToID.clear();
+    timeToAnswer.clear();
   }
 
   int getCorrectCount() {
@@ -264,7 +272,7 @@ public class StickyState {
     return count;
   }
 
-  public AudioAnswer getLastAnswer(int id) {
+  AudioAnswer getLastAnswer(int id) {
     return exToAnswer.get(id);
   }
 }

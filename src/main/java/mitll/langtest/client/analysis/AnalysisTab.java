@@ -190,7 +190,7 @@ public class AnalysisTab extends DivWidget {
     boolean isTeacherView = overallBottom != null;
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
-        controller.getMessageHelper(), isTeacherView,
+        controller.getMessageHelper(),
         isPolyglot);
 
     {

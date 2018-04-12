@@ -3,6 +3,7 @@ package mitll.langtest.client.analysis;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 
@@ -52,6 +53,7 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
       if (first == -1) first = timestamp;
 
       double score = ts.getScore();
+      if (score < 0) score = 0;
 
       data2[i][0] = timestamp;
       data2[i][1] = score * 100;
@@ -105,8 +107,10 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     chart.setHeight(HEIGHT + "px");
   }
 
-  public void setTimeToID(Map<Long, Integer> timeToID) {
-    this.timeToId = timeToID;
+  private Map<Long, AudioAnswer> timeToAnswer;
+
+  public void setTimeToAnswer(Map<Long, AudioAnswer> timeToAnswer) {
+    this.timeToAnswer = timeToAnswer;
   }
 
   @Override
@@ -118,19 +122,29 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     return false;
   }
 
+  protected boolean gotClickAt(long nearestXAsLong) {
+    AudioAnswer audioAnswer = timeToAnswer.get(nearestXAsLong);
+    if (audioAnswer != null) {
+      gotClickOnExercise(audioAnswer.getExid(), nearestXAsLong);
+    } else {
+      // logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
+    }
+    return true;
+  }
+
+
+  @Override
+  protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
+    if (exerciseID == null) {
+      AudioAnswer audioAnswer = timeToAnswer.get(xAsLong);
+      if (audioAnswer != null) exerciseID = audioAnswer.getExid();
+    }
+    return exerciseID == null ? null : getIdToEx().get(exerciseID);
+  }
+
   protected void gotClickOnExercise(int exid, long nearestXAsLong) {
     listInterface.loadByID(exid);
   }
-
-/*  protected boolean gotClickAt(long nearestXAsLong) {
-    Integer exid = timeToId.get(nearestXAsLong);
-    if (exid != null) {
-      gotClickOnExercise(exid, nearestXAsLong);
-    } else {
-     // logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
-    }
-    return true;
-  }*/
 
   /**
    * TODO : for now, no hint
@@ -139,6 +153,6 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
    */
   @Override
   String getTooltipHint() {
-    return "<br/>";
+    return "<br/><b>Click to re-record.</b>";
   }
 }

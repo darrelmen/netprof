@@ -13,7 +13,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
@@ -399,7 +398,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showQuiz(ListContainer container) {
-    controller.showQuiz(getCurrentSelection(container).getName());//getListID(container));
+    controller.showQuiz(getCurrentSelection(container).getName());
   }
 
   @NotNull
@@ -407,11 +406,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> {
-      //   if (!container.isEmpty()) {
-      controller.showDrillList(getListID(container));
-      // }
-    });
+    drill.addClickHandler(event -> controller.showDrillList(getListID(container)));
     addTooltip(drill, "Drill the list.");
     drill.setEnabled(!container.isEmpty());
     container.addButton(drill);

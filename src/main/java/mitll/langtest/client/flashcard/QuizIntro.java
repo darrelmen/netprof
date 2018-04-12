@@ -34,14 +34,11 @@ public class QuizIntro extends DivWidget {
   private QuizIntro(Map<Integer, IUserList> idToList,
                     int minScore,
                     QuizHelper.QuizChoiceListener closeListener, String userID) {
-    Widget row;// = new FluidRow();
-    add(row = getContentRow(minScore, idToList, userID));
+    add(getContentRow(minScore, idToList, userID));
 
-    FluidRow row2 = new FluidRow();
-    row2.addStyleName("topFiveMargin");
-    row2.getElement().setId("buttonRow");
+    addStyleName("cardBorderShadow");
+
     this.closeButton = new DialogHelper(false).getCloseButton(START);
-    row2.add(new Column(2, 10, closeButton));
 
     closeButton.addClickHandler(event -> {
       closeButton.setEnabled(false);
@@ -49,7 +46,13 @@ public class QuizIntro extends DivWidget {
       closeButton.setEnabled(true);
     });
 
-    add(row2);
+    {
+      FluidRow row2 = new FluidRow();
+      row2.addStyleName("topFiveMargin");
+      row2.getElement().setId("buttonRow");
+      row2.add(new Column(2, 10, closeButton));
+      add(row2);
+    }
 
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(false);

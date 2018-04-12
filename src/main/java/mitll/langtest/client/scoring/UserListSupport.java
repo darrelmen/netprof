@@ -232,19 +232,24 @@ public class UserListSupport {
     return encode;
   }*/
 
-  public String getMailToList(IUserList ul) {
+  private String getMailToList(IUserList ul) {
     return getMailTo(ul.getID(), ul.getName(), false);
   }
 
   @NotNull
   public String getMailTo(int listid, String name, boolean isQuiz) {
-    String selector = isQuiz ? "QUIZ=" + name.replaceAll("\\s+","+") : "Lists=" + listid;
-    String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
+
+   // boolean isQuiz=false;
+    String selector = //isQuiz ? "QUIZ=" + name.replaceAll("\\s+","+") :
+        "Lists=" + listid;
+    //String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
     String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + selector +
-        getProjectParam() +
-        suffix;
+        getProjectParam()
+        //+
+       // suffix
+        ;
 
     String encode = URL.encode(s);
     String type = isQuiz ? "quiz" : "list";
@@ -257,7 +262,8 @@ public class UserListSupport {
         " " + name +
         "&body=" +
         getPrefix() + name + " " +
-        type + " : " + encode + getSuffix();
+        type + " : " + encode
+        + getSuffix();
   }
 
   @NotNull

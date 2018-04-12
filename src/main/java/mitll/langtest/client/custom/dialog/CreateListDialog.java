@@ -51,6 +51,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
+import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -235,6 +236,7 @@ public class CreateListDialog extends BasicDialog {
       }
     };
   }
+
   /**
    * @see ListView#doAdd
    */
@@ -242,13 +244,21 @@ public class CreateListDialog extends BasicDialog {
     gotCreate(enterKeyButtonHelper, theDescription, classBox, publicChoice);
   }
 
+  /**
+   * TODO: add time range widgets
+   *
+   * @param enterKeyButtonHelper
+   * @param area
+   * @param classBox
+   * @param publicRadio
+   */
   private void gotCreate(KeyPressHelper enterKeyButtonHelper,
-
                          TextArea area,
                          FormField classBox,
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
-    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType());
+    TimeRange timeRange = new TimeRange();
+    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType(), timeRange);
   }
 
   @NotNull
@@ -302,14 +312,19 @@ public class CreateListDialog extends BasicDialog {
    * @param listType
    * @see #gotCreate
    */
-  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic, UserList.LIST_TYPE listType) {
+  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
+                           UserList.LIST_TYPE listType, TimeRange timeRange) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
     // UserList.LIST_TYPE normal = UserList.LIST_TYPE.NORMAL;
     controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
-        classBox.getSafeText(), isPublic, listType, new AsyncCallback<UserList>() {
+        classBox.getSafeText(),
+        isPublic,
+        listType,
+        timeRange,
+        new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("making a new list", caught);

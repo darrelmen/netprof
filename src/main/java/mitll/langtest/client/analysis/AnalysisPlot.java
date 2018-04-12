@@ -91,7 +91,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private static final String SCORE_SUFFIX = " pronunciation scores (Drag to zoom, click to hear)";
   private static final int TIME_SLACK = 60;
- // private static final int WIDTH = 740;
+  // private static final int WIDTH = 740;
 
   private static final int MIN_SESSION_COUNT = 50;
 
@@ -135,13 +135,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private TimeWidgets timeWidgets;
   private MessageHelper messageHelper;
   protected Chart chart = null;
- private boolean isPolyglot;
+  private boolean isPolyglot;
   private SortedSet<TimeAndScore> rawBestScores;
 
   /**
    * @param service
-   * @param userid        either for yourself if you're a student or a selected student if you're a teacher
-   * @param isTeacherView
+   * @param userid  either for yourself if you're a student or a selected student if you're a teacher
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -151,13 +150,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                       UIObject playFeedback,
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
-                      boolean isTeacherView,
                       boolean isPolyglot) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
-  //  int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
+    //  int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
 
 /*    if (!isPolyglot) {
       setWidth(width + "px");
@@ -1102,7 +1100,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
- //   logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
+    //   logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
     String seriesName = toolTipData.getSeriesName();
 
     if (granToLabel.values().contains(seriesName)) {

@@ -33,7 +33,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private static final int X_OFFSET_LEGEND = 65;
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
-  Map<Long, Integer> timeToId = new TreeMap<>();
+  private Map<Long, Integer> timeToId = new TreeMap<>();
   private Map<Integer, CommonShell> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
@@ -115,8 +115,10 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return new ToolTip()
         .setFormatter(toolTipData -> {
           try {
-            Integer exerciseID = timeToId.get(toolTipData.getXAsLong());
-            CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+            long xAsLong = toolTipData.getXAsLong();
+            Integer exerciseID = timeToId.get(xAsLong);
+           // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
+            CommonShell commonShell = getCommonShellAtTime(exerciseID, xAsLong);
             return getTooltip(toolTipData, exerciseID, commonShell);
           } catch (Exception e) {
             logger.warning("getToolTip " + e.getMessage());
@@ -124,6 +126,13 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
             return "";
           }
         });
+  }
+
+  protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
+    CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+    if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
+
+    return commonShell;
   }
 
   void configureYAxis(Chart chart, String title) {
@@ -172,7 +181,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private String getExerciseTooltip(ToolTipData toolTipData, CommonShell commonShell, String seriesName) {
     boolean showEx = shouldShowExercise(seriesName);
 
-   // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
+    // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
     if (english.equalsIgnoreCase(foreignLanguage) &&
@@ -220,7 +229,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @return
    * @seex #getShell
    */
-  private Map<Integer, CommonShell> getIdToEx() {
+  Map<Integer, CommonShell> getIdToEx() {
     return idToEx;
   }
 

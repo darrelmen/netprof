@@ -33,10 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -71,7 +68,7 @@ public interface ListServiceAsync {
    * @param async
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType, AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType, TimeRange timeRange,AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

@@ -10,6 +10,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
+import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/13/17.
+ *
  * @see UserListSupport#addListOptions
  */
 public class NewListButton {
@@ -29,11 +31,11 @@ public class NewListButton {
   private final Widget dropdown;
 
   /**
-   * @see UserListSupport#addListOptions
    * @param exid
    * @param controller
    * @param userListSupport
    * @param dropdown
+   * @see UserListSupport#addListOptions
    */
   public NewListButton(int exid, ExerciseController controller, UserListSupport userListSupport,
                        Widget dropdown) {
@@ -96,7 +98,8 @@ public class NewListButton {
         title,
         "",
         "",
-        isPublic, UserList.LIST_TYPE.NORMAL, new AsyncCallback<UserList>() {
+        isPublic,
+        UserList.LIST_TYPE.NORMAL, new TimeRange(), new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

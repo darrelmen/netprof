@@ -86,7 +86,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
                                                 ExerciseController controller, Panel toAddTo) {
     super.addRecordingAndFeedbackWidgets(exerciseID, controller, toAddTo);
 
-    AudioAnswer answer = sticky.getAnswer(exerciseID);
+    AudioAnswer answer = sticky.getLastAnswer(exerciseID);
     if (answer != null) {
       showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
       playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), false);
@@ -230,7 +230,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     pChart.addStyleName("floatLeftAndClear");
     //logger.info("got " +exerciseList.getIdToExercise().size());
     pChart.setIdToEx(exerciseList.getIdToExercise());
-    pChart.setTimeToID(sticky.getTimeToID());
+    pChart.setTimeToAnswer(sticky.getTimeToAnswer());
     return pChart;
   }
 
