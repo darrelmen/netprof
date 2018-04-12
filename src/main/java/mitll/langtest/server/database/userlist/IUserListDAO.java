@@ -108,9 +108,9 @@ public interface IUserListDAO extends IDAO {
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
-  Collection<UserList<CommonShell>> getAllQuiz(int projid);
+  //Collection<UserList<CommonShell>> getAllQuiz(int projid);
   Collection<IUserListLight> getAllQuizLight(int projid);
-  Collection<SlickUserExerciseList> getSlickAllQuiz(int projid);
+  Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID);
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)
@@ -133,7 +133,7 @@ public interface IUserListDAO extends IDAO {
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 
-  int getNumMineAndPublic(int userid, int projid);
+ // int getNumMineAndPublic(int userid, int projid);
 
   void setPublicOnList(long userListID, boolean isPublic);
 

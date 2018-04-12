@@ -123,10 +123,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 */
 
     listContent.add(child);
-
-    if (fromClick) {
+ /*   if (fromClick) {
       logger.info(getClass() + " : END showContent instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-    }
+    }*/
   }
 
   /**

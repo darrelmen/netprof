@@ -432,17 +432,17 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getQuizSectionHelper
    */
-  @Override
+/*  @Override
   public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
+    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid, userID);
     List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
     return ret;
-  }
+  }*/
 
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
+    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid, -1);
     List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
     return names;
@@ -458,10 +458,15 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return names;
   }*/
 
-  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid) {
-    return dao.allQuiz(projid);
+  /**
+   * All public or mine.
+   * @param projid
+   * @param userID
+   * @return
+   */
+  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
+    return dao.allQuiz(projid,userID);
   }
-
 
   @NotNull
   private Collection<UserList<CommonShell>> getNonEmpty(List<UserList<CommonShell>> ret) {
@@ -512,15 +517,17 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   /**
-   * @param userid
-   * @param projid
+   * @paramx userid
+   * @paramx projid
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getNumLists
+   * @sexe mitll.langtest.server.database.custom.UserListManager#getNumLists
    */
+/*
   @Override
   public int getNumMineAndPublic(int userid, int projid) {
     return dao.numMineAndPublic(userid, projid);
   }
+*/
 
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {

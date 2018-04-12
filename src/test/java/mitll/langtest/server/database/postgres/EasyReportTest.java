@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -43,6 +44,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,10 +62,52 @@ public class EasyReportTest extends BaseTest {
   }*/
 
   @Test
+  public void test() {
+    DatabaseImpl andPopulate = getAndPopulate();
+  //  andPopulate.sendReport(-1);
+    andPopulate.close();
+  }
+  @Test
   public void testSendReport() {
     DatabaseImpl andPopulate = getAndPopulate();
     andPopulate.sendReport(-1);
     andPopulate.close();
+  }
+
+  @Test
+  public void testQuiz() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    int projectid = 2;
+    showQuizInfo(andPopulate, projectid);
+    showQuizInfo(andPopulate, 5);
+    //  andPopulate.sendReport(-1);
+    andPopulate.close();
+  }
+
+  private void showQuizInfo(DatabaseImpl andPopulate, int projectid) {
+    Project project = andPopulate.getProject(projectid);
+
+    ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+    //String next = sectionHelper.getTypeOrder().iterator().next();
+    sectionHelper.report();
+
+    Collection<CommonExercise> first = sectionHelper.getFirst();
+    logger.info("first " + first.size() + " e.g. " + first.iterator().next());
+
+    /*ISection<CommonExercise> quizSectionHelper = andPopulate.getQuizSectionHelper(projectid);//, project.getSectionHelper().getFirst());
+    HashMap<String, Collection<String>> typeToSection = new HashMap<>();
+    typeToSection.put("QUIZ", Arrays.asList("quiz"));
+    typeToSection.put("Unit", Arrays.asList("Dry Run"));
+*/
+   /* Collection<CommonExercise> exercisesForSelectionState = quizSectionHelper.getExercisesForSelectionState(typeToSection);
+    logger.info("1 for  " + typeToSection + " got " +exercisesForSelectionState.size());
+
+
+    typeToSection.put("Unit", Arrays.asList("Quiz"));
+    Collection<CommonExercise> exercisesForSelectionState2 = quizSectionHelper.getExercisesForSelectionState(typeToSection);
+
+    logger.info("2 for  " + typeToSection + " got " +exercisesForSelectionState2.size());*/
   }
 
   @Test

@@ -187,7 +187,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     Collection<IUserList> listsForUser = list_type == UserList.LIST_TYPE.NORMAL ? userListManager
         .getSimpleListsForUser(userIDFromSessionOrDB, projectIDFromUser, onlyCreated, visited) :
-        userListManager.getAllQuizUserList(projectIDFromUser);
+        userListManager.getAllQuizUserList(projectIDFromUser, userIDFromSessionOrDB);
 
     long now = System.currentTimeMillis();
 

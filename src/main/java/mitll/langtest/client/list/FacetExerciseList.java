@@ -48,6 +48,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
@@ -223,8 +224,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
       downloadHelper.showDialog(controller.getHost());
     });
-
-    //clearListSelection();
   }
 
   /**
@@ -464,7 +463,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-    selectionState.getTypeToSection().remove(LISTS);
+    if (!selectionState.getInstance().equalsIgnoreCase(getInstance())) {
+      logger.info("selection " + selectionState.getInstance() + " != " + getInstance());
+      selectionState.getTypeToSection().remove(LISTS);
+    }
 
     restoreUIState(selectionState);
   }
@@ -778,10 +780,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (isListType(type)) {
-         // logger.info("addChoices addListChoice " + type + "=" + selectionForType);
+          // logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
-         // logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
+          // logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
           choices.add(getSelectedAnchor(type, selectionForType));
         }
       }
@@ -933,9 +935,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   /**
-   * @see #getTypeContainer
    * @param refined
    * @return
+   * @see #getTypeContainer
    */
   @NotNull
   private ListItem getLIDimension(boolean refined) {
@@ -2201,7 +2203,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return typeToSelection;
   }
 
+  /**
+   * @see QuizHelper#clearListSelection
+   */
   public void clearListSelection() {
+    logger.info("in list ---> clearListSelection ");
+
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(LISTS);
     setHistory(candidate);

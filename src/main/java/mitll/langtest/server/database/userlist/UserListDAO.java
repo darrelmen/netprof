@@ -359,10 +359,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return null;
   }
 
+/*
   @Override
   public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
     return null;
   }
+*/
 
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
@@ -370,7 +372,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid) {
+  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
     return null;
   }
 
@@ -470,10 +472,10 @@ public class UserListDAO extends DAO implements IUserListDAO {
     this.userExerciseDAO = userExerciseDAO;
   }
 
-  @Override
+/*  @Override
   public int getNumMineAndPublic(int userid, int projid) {
     return 0;
-  }
+  }*/
 
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {

@@ -271,7 +271,7 @@ public class UserListManager implements IUserListManager {
           now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd());
       int userListID = rememberList(projid, quiz);
 
-      logger.info("createQuiz made new quiz " + quiz);
+      logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
       Project project = databaseServices.getProject(projid);
 
       List<CommonExercise> items = new ArrayList<>();
@@ -283,35 +283,7 @@ public class UserListManager implements IUserListManager {
           if (items.size() == reqSize) break;
         }
       } else {
-        int misses = 0;
-        List<CommonExercise> rawExercises = project.getRawExercises();
-        Random random = new Random();
-
-        int size = rawExercises.size();
-        Set<Integer> exids = new TreeSet<>();
-
-        reqSize = Math.min(reqSize, items.size());
-
-        while (items.size() < reqSize) {
-          int i = random.nextInt(size);
-          CommonExercise commonExercise = rawExercises.get(i);
-          boolean add = exids.add(commonExercise.getID());
-          if (add) {
-            int numPhones = commonExercise.getNumPhones();
-            if (numPhones > 0 || misses > 100) {
-              if (numPhones > 3) {
-                if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
-                  items.add(commonExercise);
-                  // logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
-                }
-              }
-            } else {
-              logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
-              misses++;
-            }
-            //  quiz.addExercise(getShells(commonExercise));
-          }
-        }
+        addRandomItems(reqSize, project, items);
       }
 
       List<CommonShell> shells = getShells(items);
@@ -324,6 +296,38 @@ public class UserListManager implements IUserListManager {
 
       logger.info("createQuiz quiz has " + quiz.getExercises().size());
       return quiz;
+    }
+  }
+
+  private void addRandomItems(int reqSize, Project project, List<CommonExercise> items) {
+    int misses = 0;
+    List<CommonExercise> rawExercises = project.getRawExercises();
+    Random random = new Random();
+
+    int size = rawExercises.size();
+    Set<Integer> exids = new TreeSet<>();
+
+    reqSize = Math.min(reqSize, rawExercises.size());
+
+    while (items.size() < reqSize) {
+      int i = random.nextInt(size);
+      CommonExercise commonExercise = rawExercises.get(i);
+      boolean add = exids.add(commonExercise.getID());
+      if (add) {
+        int numPhones = commonExercise.getNumPhones();
+        if (numPhones > 0 || misses > 100) {
+          if (numPhones > 3) {
+            if (numPhones > MIN_PHONE && numPhones < MAX_PHONE || items.size() > DRY_RUN_ITEMS) {
+              items.add(commonExercise);
+              // logger.info("createQuiz add " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+            }
+          }
+        } else {
+          logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
+          misses++;
+        }
+        //  quiz.addExercise(getShells(commonExercise));
+      }
     }
   }
 
@@ -347,18 +351,19 @@ public class UserListManager implements IUserListManager {
     return userListDAO.add(e, projid);
   }
 
+  /**
+   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
+   * @param userid
+   * @param projid
+   * @param listsICreated
+   * @param visitedLists
+   * @return
+   */
   @Override
   public Collection<IUserListLight> getNamesForUser(int userid,
                                                     int projid,
                                                     boolean listsICreated,
                                                     boolean visitedLists) {
-  /*  List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
-
-    Collection<UserList<CommonShell>> allQuiz = getUserListDAO().getAllQuiz(projid);
-    List<IUserListLight> names = new ArrayList<>(lists.size());
-    lists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
-    return names;*/
-
     return getUserListDAO().getAllQuizLight(projid);
   }
 
@@ -403,8 +408,8 @@ public class UserListManager implements IUserListManager {
   }
 
   @Override
-  public Collection<IUserList> getAllQuizUserList(int projid) {
-    return getSimpleLists(userListDAO.getSlickAllQuiz(projid));
+  public Collection<IUserList> getAllQuizUserList(int projid, int userID) {
+    return getSimpleLists(userListDAO.getSlickAllQuiz(projid, userID));
   }
 
 

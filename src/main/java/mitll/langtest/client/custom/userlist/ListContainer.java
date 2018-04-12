@@ -16,9 +16,11 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -103,8 +105,15 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       addOwner();
     } else {
       addIsPublic();
-      addIsQuiz();
+      if (canMakeQuiz()) {
+        addIsQuiz();
+      }
     }
+  }
+
+  private boolean canMakeQuiz() {
+    Collection<User.Permission> permissions = controller.getPermissions();
+    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
   @Override

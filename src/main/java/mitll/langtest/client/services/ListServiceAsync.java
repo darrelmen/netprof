@@ -45,30 +45,29 @@ public interface ListServiceAsync {
   void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
    * @param onlyCreated
    * @param visited
    * @param async
+   * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
    */
-  void getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type,AsyncCallback<Collection<IUserList>> async);
+  void getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type, AsyncCallback<Collection<IUserList>> async);
 
   void getListsWithIDsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListWithIDs>> async);
-
 
 
   void addItemToUserList(int userListID, int exID, AsyncCallback<Void> async);
 
   /**
-   * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    * @param name
    * @param description
    * @param dliClass
    * @param isPublic
    * @param listType
    * @param async
+   * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType,int size, AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType, int size, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

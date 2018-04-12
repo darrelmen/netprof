@@ -89,10 +89,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
-
-    if (request.isQuiz()) {
-      return getQuizTypeToValues(request);
-    } else {
+//    if (request.isQuiz()) {
+//      return getQuizTypeToValues(request);
+//    } else {
       //List<Pair> typeToSelection = request.getTypeToSelection();
 //    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
       ISection<CommonExercise> sectionHelper = getSectionHelper();
@@ -114,10 +113,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
         return typeToValues;
       }
-    }
+    //}
   }
 
-  public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
+ /* public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
     List<Pair> typeToSelection = request.getTypeToSelection();
 
     logger.info("getQuizTypeToValues " +
@@ -136,7 +135,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return sectionHelper.getTypeToValues(request);
     }
   }
-
+*/
   /**
    * Complicated.
    * <p>
@@ -466,9 +465,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-    if (request.isQuiz()) {
-      sectionHelper = db.getQuizSectionHelper(projid);
-    }
+//    if (request.isQuiz()) {
+//      sectionHelper = db.getQuizSectionHelper(projid);
+//    }
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
 
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???

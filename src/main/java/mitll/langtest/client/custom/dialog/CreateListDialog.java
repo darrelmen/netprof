@@ -400,7 +400,7 @@ public class CreateListDialog extends BasicDialog {
         classBox.getSafeText(),
         isPublic,
         listType,
-        100,
+        quizSize,
         new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {

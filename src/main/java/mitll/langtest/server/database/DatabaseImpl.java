@@ -511,13 +511,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * make sure dry run is easy
    *
-   * @param projectid
-   * @param first
+   * @paramx projectid
+   * @paramx first
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
    */
-  public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
+ /* public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
     if (projectid == -1) {
       return null;
     } else {
@@ -559,7 +559,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       sectionHelper.report();
       return sectionHelper;
     }
-  }
+  }*/
 
  /* @NotNull
   private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {

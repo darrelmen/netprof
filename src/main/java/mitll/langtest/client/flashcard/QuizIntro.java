@@ -109,18 +109,24 @@ public class QuizIntro extends DivWidget {
     idToList.forEach((k, v) -> {
       boolean isDry = v.getName().startsWith("Dry Run");
       if (isDry) {
-        addChoice(modeDep, choiceDiv, k, v);
+        maybeAddChoice(modeDep, choiceDiv, k, v);
       }
     });
 
     idToList.forEach((k, v) -> {
       boolean isDry = v.getName().startsWith("Dry Run");
       if (!isDry) {
-        addChoice(modeDep, choiceDiv, k, v);
+        maybeAddChoice(modeDep, choiceDiv, k, v);
       }
     });
 
     return choiceDiv;
+  }
+
+  private void maybeAddChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
+    if (v.getNumItems() > 0) {
+      addChoice(modeDep, choiceDiv, k, v);
+    }
   }
 
   private void addChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {

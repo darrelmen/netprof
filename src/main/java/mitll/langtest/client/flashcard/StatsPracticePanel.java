@@ -395,7 +395,10 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     startOver.setType(ButtonType.SUCCESS);
     startOver.setIcon(IconType.REPEAT);
     startOver.addStyleName("floatRight");
-    startOver.addClickHandler(event -> doStartOver());
+    startOver.addClickHandler(event -> {
+      startOver.setEnabled(false);
+      doStartOver();
+    });
     new TooltipHelper().addTooltip(startOver, START_OVER_FROM_THE_BEGINNING);
 
     controller.register(startOver, N_A);

@@ -49,7 +49,7 @@ public class FilterRequest implements IsSerializable {
   private String prefix = "";
   private int limit = -1;
   private int userListID = -1;
-  private boolean isQuiz =false;
+  //private boolean isQuiz =false;
 
   public FilterRequest() {
   }
@@ -118,14 +118,14 @@ public class FilterRequest implements IsSerializable {
     return userListID;
   }
 
-  public boolean isQuiz() {
+/*  public boolean isQuiz() {
     return isQuiz;
   }
 
   public FilterRequest setQuiz(boolean quiz) {
     isQuiz = quiz;
     return this;
-  }
+  }*/
 
   /**
    * @return

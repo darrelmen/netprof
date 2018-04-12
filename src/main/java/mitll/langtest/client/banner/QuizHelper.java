@@ -156,6 +156,7 @@ public class QuizHelper extends PracticeHelper {
       @Override
       public void showQuiz() {
         super.showQuiz();
+        logger.info("showQuiz clearListSelection ");
         clearListSelection();
       }
     };
@@ -208,10 +209,12 @@ public class QuizHelper extends PracticeHelper {
   }
 
   void showQuizIntro() {
+    logger.info("showQuizIntro clearListSelection ");
     Scheduler.get().scheduleDeferred(this::clearListSelection);
   }
 
   private void clearListSelection() {
+    logger.info("---> clearListSelection ");
     FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }

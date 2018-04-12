@@ -73,7 +73,7 @@ public interface IUserListManager   {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
 
-  Collection<IUserList> getAllQuizUserList(int projid);
+  Collection<IUserList> getAllQuizUserList(int projid, int userID);
   /**
    * @param userid
    * @param projid
