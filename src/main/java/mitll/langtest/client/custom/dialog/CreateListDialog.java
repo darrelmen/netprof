@@ -38,8 +38,11 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -65,6 +68,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  public static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
+  public static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
@@ -82,9 +87,9 @@ public class CreateListDialog extends BasicDialog {
 
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
-  private static final String CLASS = "Course Info (optional)";
+  private static final String CLASS = "Course Info";
   private static final String TITLE = "Title";
-  private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
+  private static final String DESCRIPTION_OPTIONAL = "Description";
   private final CreateListComplete listView;
   private FormField titleBox;
   private final ExerciseController controller;
@@ -96,12 +101,24 @@ public class CreateListDialog extends BasicDialog {
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
 
+  /**
+   * @param listView
+   * @param controller
+   * @param current
+   * @param isEdit
+   * @see ListView#doEdit
+   */
   public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current, boolean isEdit) {
     this(listView, controller);
     this.current = current;
     this.isEdit = isEdit;
   }
 
+  /**
+   * @param listView
+   * @param controller
+   * @see ListView#doAdd
+   */
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
     this.listView = listView;
     this.controller = controller;
@@ -135,6 +152,7 @@ public class CreateListDialog extends BasicDialog {
       child.add(row);
 
       theDescription = new TextArea();
+      theDescription.setPlaceholder("(optional)");
       if (current != null) theDescription.setText(current.getDescription());
       final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
       description.box.getElement().setId("CreateListDialog_Description");
@@ -146,6 +164,7 @@ public class CreateListDialog extends BasicDialog {
       child.add(row);
 
       classBox = addControlFormField(row, CLASS);
+      classBox.setHint("(optional)");
       if (current != null) classBox.setText(current.getClassMarker());
       classBox.box.getElement().setId("CreateListDialog_CourseInfo");
       classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
@@ -153,13 +172,67 @@ public class CreateListDialog extends BasicDialog {
 
     if (canMakeQuiz()) {
       child.add(getQuizChoices());
+
+      quizOptions = new DivWidget();
+      checkQuizOptionsVisible();
+      child.add(quizOptions);
+
+      FluidRow row2 = new FluidRow();
+      //   row2.add(new Heading(3, "Quiz Size"));
+      HTML quiz_size = new HTML("Quiz Size");
+      row2.add(quiz_size);
+      quiz_size.addStyleName("leftTenMargin");
+      quizOptions.add(row2);
+
+      row2 = new FluidRow();
+      quizOptions.add(row2);
+
+      ListBox w = new ListBox();
+      w.setWidth("120px");
+      w.addStyleName("topFiveMargin");
+      w.addStyleName("leftTenMargin");
+      row2.add(w);
+      for (int i = 10; i < 110; i += 10) {
+        w.addItem("" + i);
+      }
+      w.setSelectedValue("100");
+      w.addChangeHandler(event -> gotListSelection(w.getValue()));
     }
 
     child.add(getPrivacyChoices());
-    //  makeCreateButton(enterKeyButtonHelper, theDescription, classBox, publicChoice);
+
+    addWarningField(child);
+
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
+  private void checkQuizOptionsVisible() {
+    quizOptions.setVisible(isQuiz && current == null);
+  }
+
+  private int quizSize = 100;
+
+  private void gotListSelection(String value) {
+    quizSize = Integer.parseInt(value);
+ //   logger.info("got " + quizSize);
+  }
+
+  private DivWidget quizOptions;
+
+  private void addWarningField(Panel child) {
+    FluidRow row;
+    row = new FluidRow();
+    child.add(row);
+    modeDep = new Heading(4, "Public quizzes can be seen by all students.");
+    modeDep.setHeight(14 + "px");
+    modeDep.getElement().getStyle().setColor("blue");
+    modeDep.addStyleName("leftFiveMargin");
+    modeDep.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
+    modeDep.setVisible(false);
+    row.add(modeDep);
+  }
+
+  private Heading modeDep;
   private boolean isQuiz = false;
 
   @NotNull
@@ -169,8 +242,7 @@ public class CreateListDialog extends BasicDialog {
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
-/*      publicChoice.setValue(isQuiz);
-      privateChoice.setValue(!isQuiz);*/
+      checkQuizOptionsVisible();
     });
 
     Panel hp = new HorizontalPanel();
@@ -195,6 +267,7 @@ public class CreateListDialog extends BasicDialog {
     publicChoice.addClickHandler(event -> gotClickOnPublic());
     RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
     privateChoice = radioButton2;
+    privateChoice.addClickHandler(event -> gotClickOnPrivate());
     // students by default have private lists - ?
     {
       boolean isPrivate = getDefaultPrivacy();
@@ -213,12 +286,15 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void gotClickOnPublic() {
+    modeDep.setVisible(isQuiz);
+  }
 
+  private void gotClickOnPrivate() {
+    modeDep.setVisible(false);
   }
 
   private boolean getDefaultPrivacy() {
     boolean isPrivate = controller.getUserState().getCurrent().isStudent();
-
     if (current != null) isPrivate = current.isPrivate();
     return isPrivate;
   }
@@ -266,8 +342,12 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private boolean canMakeQuiz() {
-    Collection<User.Permission> permissions = controller.getPermissions();
-    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+    if (current != null && current.isFavorite()) {
+      return false;
+    } else {
+      Collection<User.Permission> permissions = controller.getPermissions();
+      return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+    }
   }
 
   /**
@@ -281,13 +361,13 @@ public class CreateListDialog extends BasicDialog {
     if (!isValidName()) {
       ret = false;
     } else if (names.contains(titleBox.getSafeText())) {
-      markError(titleBox, "Name already used. Please choose another.");
+      markError(titleBox, NAME_ALREADY_USED);
       ret = false;
     } else if ((!publicChoice.getValue() && !privateChoice.getValue())) {
       markErrorBlur(publicPrivateGroup,
           publicChoice,
           "",
-          "Please mark either public or private.",
+          PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE,
           Placement.TOP, true);
       ret = false;
     }
@@ -314,14 +394,13 @@ public class CreateListDialog extends BasicDialog {
                            UserList.LIST_TYPE listType, TimeRange timeRange) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
-    // UserList.LIST_TYPE normal = UserList.LIST_TYPE.NORMAL;
     controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
         classBox.getSafeText(),
         isPublic,
         listType,
-        timeRange,
+        100,
         new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {

@@ -33,6 +33,7 @@ public class FormField {
     return group.isVisible();
   }
 
+  public void setHint(String hint) { box.setPlaceholder(hint);}
   /**
    * Somehow it's cleaning the text by translating apostrophe to url encoded form
    *

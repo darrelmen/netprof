@@ -753,12 +753,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    if (DEBUG || true) logger.info("addChoices " + type + "=" + selectionForType);
+    if (DEBUG) logger.info("addChoices " + type + "=" + selectionForType);
 
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
-        if (DEBUG || true) logger.info("addChoices for " + type + "=" + keys.size());
+        if (DEBUG) logger.info("addChoices for " + type + "=" + keys.size());
         addChoicesForType(typeToValues, type, choices, keys);
       }
     } else {
@@ -778,10 +778,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (isListType(type)) {
-          logger.info("addChoices addListChoice " + type + "=" + selectionForType);
+         // logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
-          logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
+         // logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
           choices.add(getSelectedAnchor(type, selectionForType));
         }
       }

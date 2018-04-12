@@ -99,7 +99,7 @@ public class NewListButton {
         "",
         "",
         isPublic,
-        UserList.LIST_TYPE.NORMAL, new TimeRange(), new AsyncCallback<UserList>() {
+        UserList.LIST_TYPE.NORMAL, 100, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

@@ -923,10 +923,9 @@ public class ProjectChoices {
 
       }
     };
-    Heading contents = new Heading(2, "Are you sure?");
     new DialogHelper(true).show(
         "Delete " + projectForLang.getName() + " forever?",
-        contents,
+        new Heading(2, "Are you sure?"),
         listener,
         DIALOG_HEIGHT);
   }

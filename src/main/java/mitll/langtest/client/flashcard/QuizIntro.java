@@ -106,12 +106,10 @@ public class QuizIntro extends DivWidget {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 
-
     idToList.forEach((k, v) -> {
       boolean isDry = v.getName().startsWith("Dry Run");
       if (isDry) {
         addChoice(modeDep, choiceDiv, k, v);
-
       }
     });
 

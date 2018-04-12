@@ -190,13 +190,14 @@ public class UserListManager implements IUserListManager {
    * @param dliClass
    * @param isPublic
    * @param projid
-   * @param timeRange
+   * @param size
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
-  public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, TimeRange timeRange) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100, false, timeRange);
+  public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
+                          int size) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false, new TimeRange());
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -288,6 +289,9 @@ public class UserListManager implements IUserListManager {
 
         int size = rawExercises.size();
         Set<Integer> exids = new TreeSet<>();
+
+        reqSize = Math.min(reqSize, items.size());
+
         while (items.size() < reqSize) {
           int i = random.nextInt(size);
           CommonExercise commonExercise = rawExercises.get(i);

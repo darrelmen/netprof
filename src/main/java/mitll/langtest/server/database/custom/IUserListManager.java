@@ -54,7 +54,7 @@ public interface IUserListManager   {
 
   void ensureDryRun(int projid);
 
-  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, TimeRange timeRange);
+  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, int size);
 
   Collection<IUserListLight> getNamesForUser(int userid,
                                              int projid,

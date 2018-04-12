@@ -55,7 +55,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String YOUR_LISTS1 = "Your Lists";
 
   /**
-   * @see ContentView#showContent
+   * @see #showContent
    */
   private static final String YOUR_LISTS = "Your Lists and Quizes";
 
@@ -63,7 +63,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String DRILL = "Drill";
   private static final String STORAGE_ID = "others";
   /**
-   * @see ContentView#showContent
+   * @see #showContent
    */
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
@@ -471,30 +471,62 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
     if (currentSelection != null) {
-      final int uniqueID = currentSelection.getID();
-      controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
-
-      if (currentSelection.isFavorite()) {
-        Window.alert("Can't delete your favorites list.");
+      if (currentSelection.getListType() == UserList.LIST_TYPE.QUIZ) {
+        warnFirst(delete, currentSelection);
       } else {
-        controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            //   logger.warning("delete list call failed?");
-            controller.handleNonFatalError("deleting a list", caught);
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            if (result) {
-              removeFromLists(delete, myLists, currentSelection);
-            } else {
-              logger.warning("deleteList ---> did not do deleteList " + uniqueID);
-            }
-          }
-        });
+        doDelete(delete, currentSelection);
       }
     }
+  }
+
+  private void doDelete(Button delete, UserList<CommonShell> currentSelection) {
+    final int uniqueID = currentSelection.getID();
+    controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
+
+    if (currentSelection.isFavorite()) {
+      Window.alert("Can't delete your favorites list.");
+    } else {
+      controller.getListService().deleteList(uniqueID, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //   logger.warning("delete list call failed?");
+          controller.handleNonFatalError("deleting a list", caught);
+        }
+
+        @Override
+        public void onSuccess(Boolean result) {
+          if (result) {
+            removeFromLists(delete, myLists, currentSelection);
+          } else {
+            logger.warning("deleteList ---> did not do deleteList " + uniqueID);
+          }
+        }
+      });
+    }
+  }
+
+  private void warnFirst(Button delete, UserList<CommonShell> currentSelection) {
+    new DialogHelper(true).show(
+        "Delete " + currentSelection.getName() + " forever?",
+        new Heading(2, "Are you sure?"),
+        new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            doDelete(delete, currentSelection);
+            return true;
+          }
+
+          @Override
+          public void gotNo() {
+
+          }
+
+          @Override
+          public void gotHidden() {
+
+          }
+        },
+        500);
   }
 
   private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {
@@ -548,8 +580,9 @@ public class ListView implements ContentView, CreateListComplete {
 
 
     DialogHelper dialogHelper = new DialogHelper(true);
+    String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
-        CREATE_NEW_LIST,
+        createNewList,
         Collections.emptyList(),
         contents,
         ADD,
@@ -582,6 +615,11 @@ public class ListView implements ContentView, CreateListComplete {
     return dialogHelper;
   }
 
+  //  private boolean canMakeQuiz() {
+//    Collection<User.Permission> permissions = controller.getPermissions();
+//    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+//  }
+//
   private CreateListDialog editDialog;
 
   private void doEdit() {
@@ -654,8 +692,7 @@ public class ListView implements ContentView, CreateListComplete {
   @Override
   public void madeIt(UserList userList) {
     dialogHelper.hide();
-
-  //  logger.info("made it " + userList.getName());
+    //  logger.info("made it " + userList.getName());
     //logger.info("\n\n\ngot made list");
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());

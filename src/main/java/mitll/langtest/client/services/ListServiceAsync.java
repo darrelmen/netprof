@@ -68,7 +68,7 @@ public interface ListServiceAsync {
    * @param async
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType, TimeRange timeRange,AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType,int size, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
