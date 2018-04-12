@@ -38,6 +38,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
 public class AudioAnswer implements IsSerializable {
+  private int exid = -1;
   private int reqid = -1;
   private String path = null;
   private Validity validity = Validity.INVALID;
@@ -69,9 +70,11 @@ public class AudioAnswer implements IsSerializable {
    * @param validity
    * @param reqid
    * @param duration
+   * @param exid
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public AudioAnswer(String path, Validity validity, int reqid, long duration) {
+  public AudioAnswer(String path, Validity validity, int reqid, long duration, int exid) {
+    this.exid = exid;
     this.path = path;
     this.validity = validity;
     this.reqid = reqid;
@@ -197,7 +200,9 @@ public class AudioAnswer implements IsSerializable {
     this.score = pretestScore.getHydecScore();
   }
 
-  public String getTranscript() {    return transcript;  }
+  public String getTranscript() {
+    return transcript;
+  }
 
   public void setTranscript(String transcript) {
     this.transcript = transcript;
@@ -223,5 +228,9 @@ public class AudioAnswer implements IsSerializable {
         "\n\tsaid answer " + saidAnswer +
         "\n\tpretest " + pretestScore +
         "\n\ttranscript " + transcript;
+  }
+
+  public int getExid() {
+    return exid;
   }
 }

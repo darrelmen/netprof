@@ -170,8 +170,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 //    logger.info("writeAudioFile recording info " + recordingInfo);
     AudioAnswer audioAnswer =
-        amas ?
-        audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
+        //amas ?
+        //audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(
             base64EncodedString,
             commonExercise,

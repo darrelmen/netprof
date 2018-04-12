@@ -35,7 +35,6 @@ package mitll.langtest.shared.custom;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
-import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -53,6 +52,14 @@ import java.util.List;
  */
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
+
+  public long getStart() {
+    return start;
+  }
+
+  public long getEnd() {
+    return end;
+  }
 
   public enum LIST_TYPE {
     NORMAL,
@@ -74,6 +81,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private boolean isReview;
 
   private long modified;
+  private long start;
+  private long end;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
@@ -92,6 +101,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param richText
    * @param projid
    * @param listType
+   * @param start
+   * @param end
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
@@ -106,7 +117,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   String contextURL,
                   String richText,
                   int projid,
-                  LIST_TYPE listType) {
+                  LIST_TYPE listType, long start, long end) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -119,6 +130,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.richText = richText;
     this.projid = projid;
     this.listType = listType;
+    this.start = start;
+    this.end = end;
   }
 
   @Override
@@ -287,7 +300,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   @Override
   public int getRoundTimeMinutes() {
-    return getNumItems()/10;
+    return getNumItems() / 10;
   }
 
   @Override

@@ -44,7 +44,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -373,6 +372,7 @@ public class AudioFileHelper implements AlignDecode {
     //logger.info("writeAudioFile wav path " + wavPath +" compressed actual " + actualPath);
   }
 
+/*
   @Deprecated
   public AudioAnswer writeAMASAudioFile(String base64EncodedString,
                                         AmasExerciseImpl exercise1,
@@ -385,12 +385,14 @@ public class AudioFileHelper implements AlignDecode {
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
 
     // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
+*/
 /*    long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
       logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + validity.durationInMillis +
           " millis long");
-    }*/
+    }*//*
+
 
     return getAMASAudioAnswerDecoding(exercise1,
         audioContext,
@@ -400,6 +402,7 @@ public class AudioFileHelper implements AlignDecode {
 
         validity);
   }
+*/
 
 
   /**
@@ -446,7 +449,7 @@ public class AudioFileHelper implements AlignDecode {
         ;
   }
 
-  private AudioAnswer getAMASAudioAnswerDecoding(AmasExerciseImpl exercise1,
+/*  private AudioAnswer getAMASAudioAnswerDecoding(AmasExerciseImpl exercise1,
 
                                                  AudioContext context,
                                                  AnswerInfo.RecordingInfo recordingInfo,
@@ -462,7 +465,7 @@ public class AudioFileHelper implements AlignDecode {
 
     recordInResults(context, recordingInfo, validity, answer);
     return answer;
-  }
+  }*/
 
   /**
    * @param exercise
@@ -845,16 +848,17 @@ public class AudioFileHelper implements AlignDecode {
 
 
   /**
-   * @param exercise1
-   * @param reqid
-   * @param wavPath
-   * @param file
-   * @param validity
+   * @paramx exercise1
+   * @paramx reqid
+   * @paramx wavPath
+   * @paramx file
+   * @paramx validity
    * @return
    * @paramxx isValid
    * @see #getAudioAnswerDecoding
    * @deprecated - no concept of a project here - a project has a model
    */
+/*
   private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise1,
 
                                          int questionID,
@@ -869,8 +873,9 @@ public class AudioFileHelper implements AlignDecode {
             exercise1,
             questionID,
             reqid, file, validity, url) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
+        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise1.getID());
   }
+*/
 
   private boolean hasModel() {
     return !isNoModel;
@@ -887,13 +892,13 @@ public class AudioFileHelper implements AlignDecode {
    * @return AudioAnswer with decode info attached, if doFlashcard is true
    * @see #writeAudioFile
    */
-  private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
+/*  private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
                                          int qid, int reqid,
                                          File file, AudioCheck.ValidityAndDur validity, String url) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exid);
     autoCRT.getAutoCRTDecodeOutput(exercise, qid, file, audioAnswer, true);
     return audioAnswer;
-  }
+  }*/
 
 
   /**
@@ -921,25 +926,27 @@ public class AudioFileHelper implements AlignDecode {
         getAudioAnswer(
             commonShell,
             reqid, file, validity, url, decoderOptions, userID) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
+        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, commonShell.getID());
   }
 
   /**
-   * @param base64EncodedString
-   * @param textToAlign
-   * @param identifier
-   * @param reqid
+   *
+   * @paramx exid
+   * @paramx base64EncodedString
+   * @paramx textToAlign
+   * @paramx identifier
+   * @paramx reqid
    * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignment
+   * @seex mitll.langtest.server.services.ScoringServiceImpl#getAlignment
    */
-  public AudioAnswer getAlignment(String base64EncodedString,
+/*  public AudioAnswer getAlignment(int exid, String base64EncodedString,
                                   String textToAlign,
                                   String transliteration,
                                   String identifier,
                                   int reqid,
                                   boolean usePhoneToDisplay) {
     File file = getPostedFileLoc();
-    AudioAnswer audioAnswer = getAudioAnswer(base64EncodedString, reqid, file);
+    AudioAnswer audioAnswer = getAudioAnswer(exid, base64EncodedString, reqid, file);
 
     if (audioAnswer.isValid()) {
       PretestScore asrScoreForAudio = getASRScoreForAudio(
@@ -963,7 +970,7 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return audioAnswer;
-  }
+  }*/
 
   private File getPostedFileLoc() {
     return getPathUnder(POSTED_AUDIO);
@@ -974,12 +981,12 @@ public class AudioFileHelper implements AlignDecode {
     return new File(absoluteWavPathUnder);
   }
 
-  private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
+  private AudioAnswer getAudioAnswer(int exid, String base64EncodedString, int reqid, File file) {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
     //  logger.debug("getAMASAudioAnswer writing to " + file.getAbsolutePath() + " validity " + validity);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getAbsoluteWavPathUnder(POSTED_AUDIO)),
-        validity.getValidity(), reqid, validity.durationInMillis);
+        validity.getValidity(), reqid, validity.durationInMillis, exid);
   }
 
   private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
@@ -1244,7 +1251,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @see #getAlignment(String, String, String, String, int, boolean)
+   * @see #getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,
@@ -1363,7 +1370,7 @@ public class AudioFileHelper implements AlignDecode {
                                      String url,
                                      DecoderOptions decoderOptions,
                                      int userID) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise.getID());
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(

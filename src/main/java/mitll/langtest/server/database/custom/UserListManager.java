@@ -94,6 +94,11 @@ public class UserListManager implements IUserListManager {
   private static final int MAX_PHONE = 7;
   public static final String DRY_RUN = "Dry Run (Just Practice!)";
   private static final String DESCRIP = "Dry run to prep for quizzes.";
+  public static final int MINUTE = 60 * 1000;
+  public static final int HOUR = 60 * MINUTE;
+  public static final int DAY = 24 * HOUR;
+  public static final int YEAR = 365 * DAY;
+  public static final int FIFTY_YEAR = 50 * YEAR;
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -141,12 +146,18 @@ public class UserListManager implements IUserListManager {
    * @param isPublic
    * @param projid
    * @return
+   * @paramx start
+   * @paramx end
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
-    UserList userList = createUserList(userid, name, description, dliClass, !isPublic, projid);
+  public UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid//,
+                              //long start, long end
+  ) {
+    long start = System.currentTimeMillis();
+    long end = start + FIFTY_YEAR;
+    UserList userList = createUserList(userid, name, description, dliClass, !isPublic, projid, start, end);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -160,7 +171,9 @@ public class UserListManager implements IUserListManager {
     List<IUserListLight> collect = getDryRunList(projid);
     if (collect.isEmpty()) {
       int defaultUser = userDAO.getDefaultUser();
-      createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true);
+      long now = System.currentTimeMillis();
+      createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true,
+          new TimeRange());
       boolean addedit = getDryRunList(projid).size() == 1;
       if (!addedit) logger.error("ensureDryRun couldn't add dry run ?");
     }
@@ -177,12 +190,13 @@ public class UserListManager implements IUserListManager {
    * @param dliClass
    * @param isPublic
    * @param projid
+   * @param timeRange
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
-  public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100, false);
+  public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, TimeRange timeRange) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, 100, false, timeRange);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -198,6 +212,8 @@ public class UserListManager implements IUserListManager {
    * @param dliClass
    * @param isPrivate
    * @param projid
+   * @param start
+   * @param end
    * @return null if user already has a list with this name
    * @see #addUserList
    * @see #createFavorites
@@ -207,14 +223,16 @@ public class UserListManager implements IUserListManager {
                                   String description,
                                   String dliClass,
                                   boolean isPrivate,
-                                  int projid) {
+                                  int projid,
+                                  long start,
+                                  long end) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
       UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL);
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end);
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -229,6 +247,7 @@ public class UserListManager implements IUserListManager {
    * @param isPrivate
    * @param projid
    * @param reqSize
+   * @param timeRange
    * @return
    */
   private UserList<CommonShell> createQuiz(int userid,
@@ -238,7 +257,8 @@ public class UserListManager implements IUserListManager {
                                            boolean isPrivate,
                                            int projid,
                                            int reqSize,
-                                           boolean isDryRun) {
+                                           boolean isDryRun,
+                                           TimeRange timeRange) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -247,7 +267,7 @@ public class UserListManager implements IUserListManager {
       long now = System.currentTimeMillis();
 
       UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          now, "", "", projid, UserList.LIST_TYPE.QUIZ);
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd());
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz);
@@ -378,7 +398,8 @@ public class UserListManager implements IUserListManager {
     return names;
   }
 
-  @Override public Collection<IUserList> getAllQuizUserList(int projid) {
+  @Override
+  public Collection<IUserList> getAllQuizUserList(int projid) {
     return getSimpleLists(userListDAO.getSlickAllQuiz(projid));
   }
 
@@ -625,7 +646,9 @@ public class UserListManager implements IUserListManager {
   @Override
   public void createFavorites(int userid, int projid) {
     if (userListDAO.getByName(userid, UserList.MY_LIST, projid).isEmpty()) {
-      createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
+      long start = System.currentTimeMillis();
+      createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid,
+          start, start);
     }
   }
 
@@ -696,8 +719,9 @@ public class UserListManager implements IUserListManager {
   @NotNull
   private UserList<CommonShell> getQCList(String name, String description, int userListID) {
     User qcUser = getQCUser();
+    long modified = System.currentTimeMillis();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1, UserList.LIST_TYPE.NORMAL);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified);
   }
 
   @NotNull
@@ -711,8 +735,9 @@ public class UserListManager implements IUserListManager {
                                                    String name, String description,
                                                    int userListID) {
     User qcUser = getQCUser();
+    long modified = System.currentTimeMillis();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, System.currentTimeMillis(), "", "", -1, UserList.LIST_TYPE.NORMAL);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified);
     return getCommonUserList(userList, allKnown);
   }
 

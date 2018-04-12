@@ -116,16 +116,17 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.isFavorite(),
         shared.getID(),
         projid,
-        false, // not homework list
+        //false, // not homework list
         "",
         "",
-        shared.getListType().toString()
+        shared.getListType().toString(),
+        new Timestamp(shared.getStart()),
+        new Timestamp(shared.getEnd())
+
     );
   }
 
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
-    UserList.LIST_TYPE list_type = getListType(slick);
-
     return new UserList<>(
         slick.id(),
         slick.userid(),
@@ -138,19 +139,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.contexturl(),
         slick.richtext(),
         slick.projid(),
-        list_type);
-  }
-
-  @NotNull
-  private UserList.LIST_TYPE getListType(SlickUserExerciseList slick) {
-    String listtype = slick.listtype();
-
-    try {
-      return listtype.isEmpty() ? UserList.LIST_TYPE.NORMAL : UserList.LIST_TYPE.valueOf(listtype);
-    } catch (IllegalArgumentException e) {
-      logger.warn("can't parse " + listtype);
-      return UserList.LIST_TYPE.NORMAL;
-    }
+        getListType(slick),
+        slick.start().getTime(),
+        slick.endtime().getTime());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -165,7 +156,21 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.modified().getTime(),
         slick.contexturl(), slick.richtext(),
         slick.projid(),
-        getListType(slick));
+        getListType(slick),
+        slick.start().getTime(),
+        slick.endtime().getTime());
+  }
+
+  @NotNull
+  private UserList.LIST_TYPE getListType(SlickUserExerciseList slick) {
+    String listtype = slick.listtype();
+
+    try {
+      return listtype.isEmpty() ? UserList.LIST_TYPE.NORMAL : UserList.LIST_TYPE.valueOf(listtype);
+    } catch (IllegalArgumentException e) {
+      logger.warn("can't parse " + listtype);
+      return UserList.LIST_TYPE.NORMAL;
+    }
   }
 
   public void insert(SlickUserExerciseList UserExercise) {
@@ -256,7 +261,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param where
    * @see IUserListDAO#getAllByUser(int, int)
    * @see #getWithExercises(int)
-   * @see #populateLists(Collection, long)
+   * @see #populateLists
    */
   private void populateList(UserList<CommonShell> where) {
     //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
@@ -423,18 +428,20 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getQuizSectionHelper
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getQuizSectionHelper
    */
-  @Override public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
+  @Override
+  public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
     Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
     List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
     return ret;
   }
 
-  @Override public Collection<IUserListLight> getAllQuizLight(int projid) {
+  @Override
+  public Collection<IUserListLight> getAllQuizLight(int projid) {
     Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
     List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
@@ -522,7 +529,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void update(UserList userList) {  dao.update(toSlick(userList));  }
+  public void update(UserList userList) {
+    dao.update(toSlick(userList));
+  }
 
   /**
    * @return

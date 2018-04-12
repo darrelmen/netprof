@@ -37,10 +37,7 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
@@ -53,11 +50,11 @@ public interface IUserListManager   {
   @Deprecated
   int COMMENT_MAGIC_ID = -200;
 
-  UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
+  UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid );
 
   void ensureDryRun(int projid);
 
-  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
+  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, TimeRange timeRange);
 
   Collection<IUserListLight> getNamesForUser(int userid,
                                              int projid,

@@ -32,17 +32,13 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
@@ -76,14 +72,16 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType) throws DominoSessionException {
+  public UserList addUserList(String name, String description, String dliClass, boolean isPublic,
+                              UserList.LIST_TYPE listType,
+                              TimeRange timeRange) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, timeRange);
   }
 
   @Override
@@ -192,7 +190,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     long now = System.currentTimeMillis();
 
-    if (now-then>10) {
+    if (now - then > 10) {
       logger.info("getSimpleListsForUser took " + (now - then) + " to get " + listsForUser.size() +
           " lists for user " + userIDFromSessionOrDB + " type " + list_type);
     }
