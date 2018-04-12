@@ -4,16 +4,20 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.shared.custom.IUserList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
-  private static final String GENDER_GROUP = "GenderGroup";
+  //  private static final String GENDER_GROUP = "GenderGroup";
   private static final String START = "Start!";
   private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
 
@@ -82,6 +86,7 @@ public class QuizIntro extends DivWidget {
 
     row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. "));// (if you want to repeat an item)."));
+    row.add(new Heading(HSIZE, "Click on an item in the chart to jump to that item."));// (if you want to repeat an item)."));
     row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
     container.add(new Heading(HSIZE, "Please choose a quiz : "));
@@ -101,44 +106,66 @@ public class QuizIntro extends DivWidget {
   }
 
   private int listID = -1;
+  private List<IUserList> choicesAdded = new ArrayList<>();
 
   private Widget addModeChoices(Heading modeDep, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 
+    choicesAdded.clear();
+    ListBox choices = new ListBox();
+
+    choices.addItem("-- no choice yet --");
+    choiceDiv.add(choices);
+    choices.addChangeHandler(event -> {
+      if (choices.getSelectedIndex() == 0) {
+        modeDep.setText("");
+        listID = -1;
+        closeButton.setEnabled(false);
+      } else {
+        IUserList iUserList = choicesAdded.get(choices.getSelectedIndex() - 1);
+        onQuizChoice(modeDep, iUserList.getID(), iUserList);
+      }
+    });
     idToList.forEach((k, v) -> {
       boolean isDry = v.getName().startsWith("Dry Run");
       if (isDry) {
-        maybeAddChoice(modeDep, choiceDiv, k, v);
+        maybeAddChoice(choices, modeDep, choiceDiv, k, v);
       }
     });
 
     idToList.forEach((k, v) -> {
       boolean isDry = v.getName().startsWith("Dry Run");
       if (!isDry) {
-        maybeAddChoice(modeDep, choiceDiv, k, v);
+        maybeAddChoice(choices, modeDep, choiceDiv, k, v);
       }
     });
 
     return choiceDiv;
   }
 
-  private void maybeAddChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
+  private void maybeAddChoice(ListBox choices, Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
     if (v.getNumItems() > 0) {
-      addChoice(modeDep, choiceDiv, k, v);
+      choices.addItem(v.getName());
+      choicesAdded.add(v);
+      //addChoice(modeDep, choiceDiv, k, v);
     }
   }
 
-  private void addChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
+/*  private void addChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
     RadioButton choice = new RadioButton(GENDER_GROUP, v.getName());
     choice.addClickHandler(event -> {
-      int numItems = v.getNumItems();
-      int i = Math.max(1, numItems / 10);
-      modeDep.setText(getModeText(i, numItems));
-      listID = k;
-      closeButton.setEnabled(true);
+      onQuizChoice(modeDep, k, v);
     });
     choiceDiv.add(choice);
+  }*/
+
+  private void onQuizChoice(Heading modeDep, Integer k, IUserList v) {
+    int numItems = v.getNumItems();
+    int i = Math.max(1, numItems / 10);
+    modeDep.setText(getModeText(i, numItems));
+    listID = k;
+    closeButton.setEnabled(true);
   }
 
   private String getModeText(int minutes, int num) {

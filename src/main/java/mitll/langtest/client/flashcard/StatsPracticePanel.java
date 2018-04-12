@@ -73,7 +73,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
                             ControlState controlState,
                             ExerciseController controller,
                             MySoundFeedback soundFeedback,
-                            PolyglotDialog.PROMPT_CHOICE prompt,
                             CommonAnnotatable e,
                             StickyState stickyState,
                             ListInterface<L, T> exerciseListToUse) {
@@ -219,8 +218,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
     Panel widgets = new DivWidget();
 
-    Widget container = widgets;
-
     {
       AnalysisTab scoreHistory = getScoreHistory();
       scoreHistory.add(getButtonsBelowScoreHistory());
@@ -242,7 +239,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
       widgets.add(scoreHistory);
     }
     belowContentDiv.clear();
-    belowContentDiv.add(container);
+    belowContentDiv.add(widgets);
   }
 
   AnalysisTab getScoreHistory() {

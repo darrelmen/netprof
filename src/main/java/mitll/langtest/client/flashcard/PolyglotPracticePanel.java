@@ -18,7 +18,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -60,7 +59,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
                         MySoundFeedback soundFeedback,
                         PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState,
                         ListInterface<L, T> exerciseListToUse) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
     realAddWidgets(e, controller, controlState);
   }
@@ -89,7 +88,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     AudioAnswer answer = sticky.getLastAnswer(exerciseID);
     if (answer != null) {
       showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
-      playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), false);
+      playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), true);
     }
   }
 
