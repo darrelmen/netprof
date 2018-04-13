@@ -42,6 +42,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -173,7 +174,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see HistoryExerciseList#noSectionsGetExercises(int)
    */
   public boolean getExercises() {
-    if (DEBUG) logger.info("ExerciseList.getExercises instance " + getInstance());
+    if (DEBUG) logger.info("\n\n\nExerciseList.getExercises instance " + getInstance());
     ExerciseListRequest request = getRequest("");
 //    logger.info("request is " +request);
     service.getExerciseIds(request, new SetExercisesCallback("", "", -1, request));
@@ -289,7 +290,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
-      //logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+//
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
+//      logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {

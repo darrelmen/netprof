@@ -378,10 +378,11 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
+    EditItem editItem = new EditItem(controller);
     Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS,
         Collections.emptyList(),
-        new EditItem(controller).editItem(getCurrentSelectionFromMyLists()),
+        editItem.editItem(getCurrentSelectionFromMyLists()),
         "OK",
         null,
         new DialogHelper.CloseListener() {
@@ -403,6 +404,9 @@ public class ListView implements ContentView, CreateListComplete {
         }, 660, true);
 
     closeButton.setType(ButtonType.SUCCESS);
+
+    Scheduler.get().scheduleDeferred(()->editItem.reload());
+
   }
 
   @NotNull

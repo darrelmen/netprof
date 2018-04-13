@@ -33,6 +33,7 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -52,6 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Coordinates editing an item -
@@ -104,11 +107,10 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
+   // logger.info("list is " + originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
-
-    rememberAndLoadFirst(originalList, exerciseList);
     return hp;
   }
 
@@ -133,7 +135,7 @@ public class EditItem {
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
     exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
-    setFactory(exerciseList, originalList);
+    setFactory(exerciseList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(() -> exerciseList.onResize());
@@ -178,10 +180,7 @@ public class EditItem {
     return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
-  private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                          final UserList<CommonShell> originalList) {
-    final PagingExerciseList<CommonShell, CommonExercise> outer = exerciseList;
-
+  private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
         controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
@@ -199,18 +198,6 @@ public class EditItem {
     });
   }
 
-
-  /**
-   * @param ul
-   * @param npfExerciseList
-   * @see #editItem
-   */
-  private void rememberAndLoadFirst(final UserList<CommonShell> ul,
-                                    PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
-    npfExerciseList.setUserListID(ul.getID());
-    List<CommonShell> exercises = ul.getExercises();
-    exercises.sort(Comparator.comparing(CommonShell::getEnglish));
-    exercises.forEach(commonShell -> logger.info("rememberAndLoadFirst got " + commonShell.getID() + " " + commonShell.getEnglish()));
-    npfExerciseList.rememberAndLoadFirst(exercises);
+  public void reload() {    exerciseList.reload(new HashMap<>());
   }
 }

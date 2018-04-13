@@ -122,10 +122,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
     downloadContainer = new DownloadContainer();
 
-    logger.info("Bootstrap instance " + instance);
-
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " +instance));
-    logger.info("logException stack " + exceptionAsString);
+    //logger.info("Bootstrap instance " + instance);
   }
 
   /**

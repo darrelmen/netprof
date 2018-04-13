@@ -62,6 +62,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
             .setShowTypeAhead(false)
             .setSort(false), 12);
     this.editItem = editItem;
+    setUserListID(list.getID());
     this.list = list;
 
     if (list.isEmpty()) delete.setEnabled(false);

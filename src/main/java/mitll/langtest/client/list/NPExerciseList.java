@@ -100,7 +100,7 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
     return pagingContainer;
   }
 
-  public int getPageSize() {
+  int getPageSize() {
     return pageSize;
   }
 

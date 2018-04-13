@@ -511,9 +511,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * make sure dry run is easy
    *
+   * @return
    * @paramx projectid
    * @paramx first
-   * @return
    * @seex mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
    * @seex mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
    */
@@ -575,7 +575,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     return first;
   }*/
-
   @NotNull
   private List<Integer> addDryRunSet(int projectid,
                                      SectionHelper<CommonExercise> sectionHelper,
@@ -622,7 +621,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     //toAdd.sort(Comparator.comparingInt(CommonShell::getNumPhones));
 
     toAdd.forEach(exercise -> {
-    //  CommonExercise exercise = getExercise(projectid, exid);
+      //  CommonExercise exercise = getExercise(projectid, exid);
       List<Pair> pairs = useFirst ? first : second;
       allAttributes.add(pairs);
       sectionHelper.addPairs(exercise, pairs);
@@ -1624,6 +1623,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * Sort by english if normal list
    * @param listid
    * @param projectid
    * @return
@@ -1640,6 +1640,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         CommonExercise exercise = getExercise(projectid, exid);
         if (exercise != null) exercises.add(exercise);
       });
+      exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
       list.setExercises(exercises);
       return list;
     } else {
