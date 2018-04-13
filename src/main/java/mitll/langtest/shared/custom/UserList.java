@@ -182,10 +182,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return exercises.size();
   }
 
-/*  public T getLast() {
-    return exercises.get(exercises.size() - 1);
-  }*/
-
   /**
    * @param exercises
    * @seex UserListDAO#populateList(UserList)
@@ -195,10 +191,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   public void setExercises(List<T> exercises) {
     this.exercises = exercises;
   }
-
-/*  public boolean remove(T newUserExercise) {
-    return exercises.remove(newUserExercise);
-  }*/
 
   public boolean removeAndCheck(int id) {
     return remove(id) != null;

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import com.google.gwt.user.client.Random;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
@@ -364,6 +365,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           new Thread(() -> updateVisited(sid)).start();
         }
 
+//        simulateNetworkIssue();
         return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
       }
     } catch (DominoSessionException e) {
@@ -373,8 +375,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   private void updateVisited(String sid) {
-   // String sid = getSessionID();
-
     if (sid == null) {
       logger.error("updateVisited : no session?");
     } else {
@@ -404,6 +404,8 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         if (codeHasUpdated) {
           logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
         }
+
+        //      simulateNetworkIssue();
         return new HeartbeatStatus(true, codeHasUpdated);
       }
     } catch (DominoSessionException e) {
@@ -411,4 +413,17 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       return new HeartbeatStatus(false, false);
     }
   }
+
+/*  private void simulateNetworkIssue() {
+    try {
+      logger.info("checkHeartbeat sleep...");
+      java.util.Random random = new java.util.Random();
+
+      int millis = random.nextInt(5000);
+      Thread.sleep(millis);
+      logger.info("checkHeartbeat finished sleep... for " + millis);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }*/
 }
