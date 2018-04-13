@@ -173,7 +173,7 @@ public class UserListManager implements IUserListManager {
       int defaultUser = userDAO.getDefaultUser();
       long now = System.currentTimeMillis();
       createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true,
-          new TimeRange());
+          new TimeRange(), 1);
       boolean addedit = getDryRunList(projid).size() == 1;
       if (!addedit) logger.error("ensureDryRun couldn't add dry run ?");
     }
@@ -191,13 +191,15 @@ public class UserListManager implements IUserListManager {
    * @param isPublic
    * @param projid
    * @param size
+   * @param duration
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                          int size) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false, new TimeRange());
+                          int size, int duration) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false,
+        new TimeRange(), duration);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -233,7 +235,7 @@ public class UserListManager implements IUserListManager {
       return null;
     } else {
       UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end);
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10);
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -249,6 +251,7 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @param reqSize
    * @param timeRange
+   * @param duration
    * @return
    */
   private UserList<CommonShell> createQuiz(int userid,
@@ -259,7 +262,7 @@ public class UserListManager implements IUserListManager {
                                            int projid,
                                            int reqSize,
                                            boolean isDryRun,
-                                           TimeRange timeRange) {
+                                           TimeRange timeRange, int duration) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -268,7 +271,7 @@ public class UserListManager implements IUserListManager {
       long now = System.currentTimeMillis();
 
       UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd());
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration);
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
@@ -401,8 +404,8 @@ public class UserListManager implements IUserListManager {
               l.projid(),
               userid1,
               name,
-              numItems
-          ));
+              numItems,
+              l.duration()));
     });
     return names;
   }
@@ -457,7 +460,8 @@ public class UserListManager implements IUserListManager {
               l.projid(),
               l.userid(),
               name,
-              new ArrayList<>(exids)));
+              new ArrayList<>(exids),
+              l.duration()));
     });
     return names;
   }
@@ -730,7 +734,7 @@ public class UserListManager implements IUserListManager {
     User qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10);
   }
 
   @NotNull
@@ -746,7 +750,7 @@ public class UserListManager implements IUserListManager {
     User qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10);
     return getCommonUserList(userList, allKnown);
   }
 

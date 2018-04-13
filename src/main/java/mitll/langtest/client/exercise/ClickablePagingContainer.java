@@ -234,7 +234,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     int before = list.size();
 //    String id = exercise.getOldID();
     idToExercise.put(exercise.getID(), exercise);
-    int i = afterThisOne == null ? -1 : list.indexOf(afterThisOne);
+    int toUse = Math.max(0, before-1);
+
+    int i = afterThisOne == null ? toUse : list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
     // logger.info("data now has "+ after + " after adding " + exercise.getOldID());

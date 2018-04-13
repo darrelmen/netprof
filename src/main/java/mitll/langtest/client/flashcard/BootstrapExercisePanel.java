@@ -356,7 +356,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 //              grabFocus(this);
 //            }
             boolean b = super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
-            if (b) logger.info("ignore key press?");
+         //   if (b) logger.info("ignore key press?");
             return b;
           }
         };
@@ -373,7 +373,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private void grabFocus(FlashcardRecordButton widgets) {
     Scheduler.get().scheduleDeferred((Command) () -> {
       if (widgets != null) {
-        logger.warning("getAnswerWidget set focus on " + widgets.getElement().getId());
+        //logger.warning("getAnswerWidget set focus on " + widgets.getElement().getId());
         widgets.setFocus(true);
       }
       else {

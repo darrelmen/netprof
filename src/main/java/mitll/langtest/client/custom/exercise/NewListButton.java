@@ -10,7 +10,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +98,7 @@ public class NewListButton {
         "",
         "",
         isPublic,
-        UserList.LIST_TYPE.NORMAL, 100, new AsyncCallback<UserList>() {
+        UserList.LIST_TYPE.NORMAL, 100, 10, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

@@ -133,8 +133,6 @@ public interface IUserListDAO extends IDAO {
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 
- // int getNumMineAndPublic(int userid, int projid);
-
   void setPublicOnList(long userListID, boolean isPublic);
 
   void update(UserList<?> userList);

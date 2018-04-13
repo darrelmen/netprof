@@ -20,10 +20,12 @@ public class QuizIntro extends DivWidget {
   //  private static final String GENDER_GROUP = "GenderGroup";
   private static final String START = "Start!";
   private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
+  public static final String DRY_RUN = "Dry Run";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
   private static final int MIN_POLYGLOT_SCORE = 35;
+  private static final int NATIVE_THRESHOLD = 70;
   private final Button closeButton;
 
   public QuizIntro(Map<Integer, IUserList> idToList,
@@ -66,10 +68,26 @@ public class QuizIntro extends DivWidget {
     FluidContainer container = new FluidContainer();
 
     FluidRow row = new FluidRow();
+
+
+    Heading welcome = new Heading(3, "Welcome User ");
+    Heading welcome2 = new Heading(3, userID);
+    welcome2.getElement().getStyle().setColor("blue");
+
+    DivWidget h = new DivWidget();
+    h.setWidth("100%");
+    h.addStyleName("floatLeftAndClear");
+    h.add(welcome);
+    welcome.addStyleName("floatLeft");
+    h.add(welcome2);
+    welcome2.addStyleName("leftFiveMargin");
+    welcome2.addStyleName("floatLeft");
+
+    //h.addStyleName("bottomFiveMargin");
+
+    container.add(h);
     container.add(row);
 
-    Heading welcome = new Heading(3, "Welcome User " + userID);
-    row.add(welcome);
     addBottom(welcome);
     row.add(new Heading(HSIZE, "Netprof automatically scores your pronunciation relative to a native speaker."));
     Heading w = new Heading(HSIZE, "In the flashcards that follow, record yourself saying the prompted phrases.");
@@ -80,14 +98,16 @@ public class QuizIntro extends DivWidget {
     Heading w1 = new Heading(HSIZE, " * CLICK and HOLD the mouse button.");
     row.add(w1);
     addBottom(w1);
-    Heading w2 = new Heading(HSIZE, "Native speakers score in the range of 75 and above.");
+    Heading w2 = new Heading(HSIZE, "Native speakers score in the range of " +
+        NATIVE_THRESHOLD +
+        " and above.");
     row.add(w2);
     addBottom(w2);
 
     row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. "));// (if you want to repeat an item)."));
-    row.add(new Heading(HSIZE, "Click on an item in the chart to jump to that item."));// (if you want to repeat an item)."));
-    row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
+    //  row.add(new Heading(HSIZE, "Click on an item in the chart to jump to that item."));// (if you want to repeat an item)."));
+    //  row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
     container.add(new Heading(HSIZE, "Please choose a quiz : "));
 
@@ -128,42 +148,32 @@ public class QuizIntro extends DivWidget {
       }
     });
     idToList.forEach((k, v) -> {
-      boolean isDry = v.getName().startsWith("Dry Run");
+      boolean isDry = v.getName().startsWith(DRY_RUN);
       if (isDry) {
-        maybeAddChoice(choices, modeDep, choiceDiv, k, v);
+        maybeAddChoice(choices, v);
       }
     });
 
     idToList.forEach((k, v) -> {
-      boolean isDry = v.getName().startsWith("Dry Run");
+      boolean isDry = v.getName().startsWith(DRY_RUN);
       if (!isDry) {
-        maybeAddChoice(choices, modeDep, choiceDiv, k, v);
+        maybeAddChoice(choices, v);
       }
     });
 
     return choiceDiv;
   }
 
-  private void maybeAddChoice(ListBox choices, Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
+  private void maybeAddChoice(ListBox choices, IUserList v) {
     if (v.getNumItems() > 0) {
       choices.addItem(v.getName());
       choicesAdded.add(v);
-      //addChoice(modeDep, choiceDiv, k, v);
     }
   }
 
-/*  private void addChoice(Heading modeDep, DivWidget choiceDiv, Integer k, IUserList v) {
-    RadioButton choice = new RadioButton(GENDER_GROUP, v.getName());
-    choice.addClickHandler(event -> {
-      onQuizChoice(modeDep, k, v);
-    });
-    choiceDiv.add(choice);
-  }*/
-
   private void onQuizChoice(Heading modeDep, Integer k, IUserList v) {
     int numItems = v.getNumItems();
-    int i = Math.max(1, numItems / 10);
-    modeDep.setText(getModeText(i, numItems));
+    modeDep.setText(getModeText(v.getRoundTimeMinutes(), numItems));
     listID = k;
     closeButton.setEnabled(true);
   }
@@ -173,6 +183,6 @@ public class QuizIntro extends DivWidget {
         minutes +
         " minute" +
         (minutes > 1 ? "s" : "") +
-        " to <i>try</i> to complete all " + num + " items.";
+        " to try to complete all " + num + " items.";
   }
 }

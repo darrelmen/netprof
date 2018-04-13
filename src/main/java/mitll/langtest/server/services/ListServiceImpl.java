@@ -69,20 +69,21 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param dliClass
    * @param isPublic
    * @param listType
+   * @param duration
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
   public UserList addUserList(String name, String description, String dliClass, boolean isPublic,
                               UserList.LIST_TYPE listType,
-                              int size) throws DominoSessionException {
+                              int size, int duration) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration);
   }
 
   @Override

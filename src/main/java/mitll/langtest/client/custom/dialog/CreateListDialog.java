@@ -38,8 +38,6 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -52,7 +50,6 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -70,6 +67,7 @@ import java.util.logging.Logger;
 public class CreateListDialog extends BasicDialog {
   public static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
   public static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
+  public static final int MAX_DURATION = 21;
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
@@ -142,7 +140,7 @@ public class CreateListDialog extends BasicDialog {
     {
       titleBox = addControlFormField(row, TITLE);
       final TextBoxBase box = titleBox.box;
-      if (current != null) box.setText(current.getName());
+      if (isEditing()) box.setText(current.getName());
       box.getElement().setId("CreateListDialog_Title");
       box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "Title = " + box.getValue()));
     }
@@ -153,7 +151,7 @@ public class CreateListDialog extends BasicDialog {
 
       theDescription = new TextArea();
       theDescription.setPlaceholder("(optional)");
-      if (current != null) theDescription.setText(current.getDescription());
+      if (isEditing()) theDescription.setText(current.getDescription());
       final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
       description.box.getElement().setId("CreateListDialog_Description");
       description.box.addBlurHandler(event -> controller.logEvent(description.box, TEXT_BOX, CREATE_NEW_LIST, "Description = " + description.box.getValue()));
@@ -165,7 +163,7 @@ public class CreateListDialog extends BasicDialog {
 
       classBox = addControlFormField(row, CLASS);
       classBox.setHint("(optional)");
-      if (current != null) classBox.setText(current.getClassMarker());
+      if (isEditing()) classBox.setText(current.getClassMarker());
       classBox.box.getElement().setId("CreateListDialog_CourseInfo");
       classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
     }
@@ -177,26 +175,38 @@ public class CreateListDialog extends BasicDialog {
       checkQuizOptionsVisible();
       child.add(quizOptions);
 
-      FluidRow row2 = new FluidRow();
-      //   row2.add(new Heading(3, "Quiz Size"));
-      HTML quiz_size = new HTML("Quiz Size");
-      row2.add(quiz_size);
-      quiz_size.addStyleName("leftTenMargin");
-      quizOptions.add(row2);
+      {
+        DivWidget row2 = new DivWidget();
+        row2.setWidth("100%");
+        row2.addStyleName("floatLeftAndClear");
+        row2.add(getQuizSizeLabel());
+        row2.add(getDurationLabel());
 
-      row2 = new FluidRow();
-      quizOptions.add(row2);
-
-      ListBox w = new ListBox();
-      w.setWidth("120px");
-      w.addStyleName("topFiveMargin");
-      w.addStyleName("leftTenMargin");
-      row2.add(w);
-      for (int i = 10; i < 110; i += 10) {
-        w.addItem("" + i);
+        quizOptions.add(row2);
       }
-      w.setSelectedValue("100");
-      w.addChangeHandler(event -> gotListSelection(w.getValue()));
+
+
+      FluidRow row2 = new FluidRow();
+      quizOptions.add(row2);
+
+      row2.add(getSizeChoices());
+      row2.add(getDurationChoices());
+    }
+
+    {
+      quizOptions2 = new DivWidget();
+      DivWidget row2 = new DivWidget();
+      row2.setWidth("100%");
+      row2.addStyleName("floatLeftAndClear");
+      row2.add(getDurationLabel());
+      quizOptions2.add(row2);
+
+      row2 = new DivWidget();
+      child.add(row2);
+      quizOptions2.add(getDurationChoices());
+
+      child.add(quizOptions2);
+      quizOptions2.setVisible(isQuiz);
     }
 
     child.add(getPrivacyChoices());
@@ -206,18 +216,82 @@ public class CreateListDialog extends BasicDialog {
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
+  private boolean isEditing() {
+    return current != null;
+  }
+
+  @NotNull
+  private HTML getDurationLabel() {
+    HTML w = new HTML("Duration (Minutes)");
+    w.addStyleName("floatLeft");
+    return w;
+  }
+
+  @NotNull
+  private HTML getQuizSizeLabel() {
+    HTML quiz_size = new HTML("Quiz Size");
+    quiz_size.setWidth("130px");
+    quiz_size.addStyleName("floatLeft");
+    quiz_size.setVisible(current == null);
+    quiz_size.addStyleName("leftTenMargin");
+    return quiz_size;
+  }
+
+  private ListBox getSizeChoices() {
+    ListBox w = new ListBox();
+    w.setWidth("120px");
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftTenMargin");
+
+    for (int i = 10; i < 110; i += 10) {
+      w.addItem("" + i);
+    }
+    w.setSelectedValue("100");
+    w.addChangeHandler(event -> gotListSelection(w.getValue()));
+    w.setVisible(current == null);
+
+    return w;
+  }
+
+  private ListBox getDurationChoices() {
+    ListBox w = new ListBox();
+    w.setWidth("120px");
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftTenMargin");
+
+    for (int i = 1; i < MAX_DURATION; i++) {
+      w.addItem("" + i);
+    }
+    if (isEditing()) {
+      w.setSelectedValue("" + current.getDuration());
+    } else {
+      w.setSelectedValue("10");
+    }
+    w.addChangeHandler(event -> gotListSelection2(w.getValue()));
+    return w;
+  }
+
   private void checkQuizOptionsVisible() {
     quizOptions.setVisible(isQuiz && current == null);
+    if (quizOptions2 != null) {
+      quizOptions2.setVisible(isQuiz && isEditing());
+    }
   }
 
   private int quizSize = 100;
+  private int duration = 10;
 
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
- //   logger.info("got " + quizSize);
+    //   logger.info("got " + quizSize);
   }
 
-  private DivWidget quizOptions;
+  private void gotListSelection2(String value) {
+    duration = Integer.parseInt(value);
+    //   logger.info("got " + quizSize);
+  }
+
+  private DivWidget quizOptions, quizOptions2;
 
   private void addWarningField(Panel child) {
     FluidRow row;
@@ -249,7 +323,7 @@ public class CreateListDialog extends BasicDialog {
     checkBox.addStyleName("leftFiveMargin");
     hp.add(checkBox);
 
-    if (current != null) {
+    if (isEditing()) {
       boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
       checkBox.setValue(isQuiz);
       this.isQuiz = isQuiz;
@@ -295,7 +369,7 @@ public class CreateListDialog extends BasicDialog {
 
   private boolean getDefaultPrivacy() {
     boolean isPrivate = controller.getUserState().getCurrent().isStudent();
-    if (current != null) isPrivate = current.isPrivate();
+    if (isEditing()) isPrivate = current.isPrivate();
     return isPrivate;
   }
 
@@ -331,8 +405,7 @@ public class CreateListDialog extends BasicDialog {
                          FormField classBox,
                          RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
-    TimeRange timeRange = new TimeRange();
-    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType(), timeRange);
+    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType());
   }
 
   @NotNull
@@ -342,7 +415,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private boolean canMakeQuiz() {
-    if (current != null && current.isFavorite()) {
+    if (isEditing() && current.isFavorite()) {
       return false;
     } else {
       Collection<User.Permission> permissions = controller.getPermissions();
@@ -388,10 +461,11 @@ public class CreateListDialog extends BasicDialog {
    * @param classBox
    * @param isPublic
    * @param listType
+   * @param duration
    * @see #gotCreate
    */
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
-                           UserList.LIST_TYPE listType, TimeRange timeRange) {
+                           UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
     controller.getListService().addUserList(
@@ -401,6 +475,7 @@ public class CreateListDialog extends BasicDialog {
         isPublic,
         listType,
         quizSize,
+        duration,
         new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -458,11 +533,12 @@ public class CreateListDialog extends BasicDialog {
     currentSelection.setPrivate(aPrivate);
     UserList.LIST_TYPE listType = getListType();
     currentSelection.setListType(listType);
+    currentSelection.setDuration(duration);
 
-    logger.info("doEdit is " +
+/*    logger.info("doEdit is " +
         "\n\tprivate " + aPrivate +
         "\n\ttype    " + listType
-    );
+    );*/
 
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

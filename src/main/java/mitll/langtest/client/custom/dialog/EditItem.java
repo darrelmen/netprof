@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
@@ -96,7 +98,20 @@ public class EditItem {
    * @see ListView#editList
    */
   public Panel editItem(UserList<CommonShell> originalList) {
+    DivWidget div = new DivWidget();
+    boolean hasDescrip = !originalList.getDescription().isEmpty();
+    Heading w = new Heading(4,
+        (originalList.getListType() == UserList.LIST_TYPE.QUIZ ? "Quiz " : "List ") +
+            originalList.getName() +
+
+            (hasDescrip ? "(" + originalList.getDescription() + ")" : "")
+    );
+    w.addStyleName("bottomFiveMargin");
+    div.add(w);
+
+
     Panel hp = new HorizontalPanel();
+
     hp.getElement().setId("EditItem_for_" + originalList.getName());
 
     Panel pagerOnLeft = new SimplePanel();
@@ -107,11 +122,12 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
-   // logger.info("list is " + originalList);
+    // logger.info("list is " + originalList);
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
-    return hp;
+    div.add(hp);
+    return div;
   }
 
   public void onResize() {
@@ -187,17 +203,18 @@ public class EditItem {
 
       @Override
       public Panel getExercisePanel(CommonExercise exercise) {
-          TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
-              controller,
-              exerciseList,
-              alignments);
-          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
-          return widgets;
+        TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+            controller,
+            exerciseList,
+            alignments);
+        widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
+        return widgets;
 
       }
     });
   }
 
-  public void reload() {    exerciseList.reload(new HashMap<>());
+  public void reload() {
+    exerciseList.reload(new HashMap<>());
   }
 }

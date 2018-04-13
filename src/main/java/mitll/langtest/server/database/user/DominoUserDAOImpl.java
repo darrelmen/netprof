@@ -1326,7 +1326,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return idToFirstLast;
   }*/
 
-  private static class ReportUserImpl implements ReportUser {
+/*  private static class ReportUserImpl implements ReportUser {
 
     int id;
     String userID, device;
@@ -1371,7 +1371,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     public String getDevice() {
       return device;
     }
-  }
+  }*/
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 

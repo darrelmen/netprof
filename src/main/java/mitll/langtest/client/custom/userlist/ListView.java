@@ -750,6 +750,7 @@ public class ListView implements ContentView, CreateListComplete {
     dialogHelper.hide();
     //  logger.info("made it " + userList.getName());
     //logger.info("\n\n\ngot made list");
+
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
     myLists.enableAll();

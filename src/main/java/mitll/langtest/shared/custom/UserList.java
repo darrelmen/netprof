@@ -61,6 +61,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return end;
   }
 
+
   public enum LIST_TYPE {
     NORMAL,
     QUIZ
@@ -83,6 +84,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private long modified;
   private long start;
   private long end;
+  private int duration;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
@@ -103,6 +105,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param listType
    * @param start
    * @param end
+   * @param duration
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
@@ -117,7 +120,10 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   String contextURL,
                   String richText,
                   int projid,
-                  LIST_TYPE listType, long start, long end) {
+                  LIST_TYPE listType,
+                  long start,
+                  long end,
+                  int duration) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -132,6 +138,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.listType = listType;
     this.start = start;
     this.end = end;
+    this.duration = duration;
   }
 
   @Override
@@ -292,7 +299,15 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   @Override
   public int getRoundTimeMinutes() {
-    return getNumItems() / 10;
+    return duration;
+  }
+
+  public int getDuration() {
+    return getRoundTimeMinutes();
+  }
+
+  public void setDuration(int duration) {
+    this.duration = duration;
   }
 
   @Override

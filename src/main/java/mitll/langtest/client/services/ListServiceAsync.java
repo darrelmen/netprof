@@ -63,11 +63,12 @@ public interface ListServiceAsync {
    * @param dliClass
    * @param isPublic
    * @param listType
+   * @param duration
    * @param async
    * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType, int size, AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType, int size, int duration, AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

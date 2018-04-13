@@ -8,15 +8,21 @@ public class SimpleUserListWithIDs extends SimpleUserList implements IUserListWi
   public SimpleUserListWithIDs() {
   }
 
+  /**
+   *
+   * @param id
+   * @param name
+   * @param projid
+   * @param userid
+   * @param userChosenID
+   * @param ids
+   * @param duration
+   */
   public SimpleUserListWithIDs(int id, String name, int projid, int userid, String userChosenID,
-                               Collection<Integer> ids) {
-    super(id, name, projid, userid, userChosenID, ids.size());
+                               Collection<Integer> ids, int duration) {
+    super(id, name, projid, userid, userChosenID, ids.size(), duration);
     this.ids = ids;
   }
-
-/*  public Collection<Integer> getIds() {
-    return ids;
-  }*/
 
   public boolean containsByID(int id) {
     return ids.contains(id);

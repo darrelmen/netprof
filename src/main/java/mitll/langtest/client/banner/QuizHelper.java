@@ -144,8 +144,7 @@ public class QuizHelper extends PracticeHelper {
         if (s != null && !s.isEmpty()) {
           try {
             chosenList = Integer.parseInt(s);
-              logger.info("setChosenList chosenList " + chosenList);
-
+             // logger.info("setChosenList chosenList " + chosenList);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse list id " + s);
           }
