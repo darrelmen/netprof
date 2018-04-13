@@ -38,6 +38,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String EDIT_THE_LIST = "Edit the list title or make it public.";
+  public static final String SHARE = "Share";
+  public static final String SHARE_THE_LIST = "Share the list with someone.";
+  public static final String VISITED = "Visited";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
@@ -171,7 +175,8 @@ public class ListView implements ContentView, CreateListComplete {
               }
             };
         Panel tableWithPager = listContainer.getTableWithPager(result);
-        addPagerAndHeader(tableWithPager, "Visited", top);
+        addPagerAndHeader(tableWithPager, VISITED, top);
+        tableWithPager.addStyleName("rightFiveMargin");
 
         new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
         tableWithPager.setHeight(VISITED_HEIGHT + "px");
@@ -264,16 +269,16 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
-    addTooltip(successButton, "Edit the list title or make it public.");
+    addTooltip(successButton, EDIT_THE_LIST);
     successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
   private Button getShare() {
-    Button successButton = getSuccessButton("Share");
+    Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
     successButton.addClickHandler(event -> doShare());
-    addTooltip(successButton, "Share the list with someone.");
+    addTooltip(successButton, SHARE_THE_LIST);
     successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
@@ -398,7 +403,8 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showQuiz(ListContainer container) {
-    controller.showQuiz(getCurrentSelection(container).getName());
+    UserList<CommonShell> currentSelection = getCurrentSelection(container);
+    controller.showQuiz(currentSelection.getName(), currentSelection.getID());
   }
 
   @NotNull

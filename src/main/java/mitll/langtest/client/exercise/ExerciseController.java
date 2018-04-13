@@ -114,12 +114,10 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   boolean usingFlashRecorder();
 
-  //boolean isMicAvailable();
-
   KeyStorage getStorage();
 
   void showLearnList(int id);
-  void showQuiz(String listName);
+  void showQuiz(String listName, int listID);
   void showDrillList(int id);
   void setBannerVisible(boolean visible);
 

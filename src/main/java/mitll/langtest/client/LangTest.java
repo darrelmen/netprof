@@ -34,8 +34,6 @@ package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -54,7 +52,6 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -242,6 +239,11 @@ public class LangTest implements
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
+  /**
+   * @see
+   */
+  public static final String RECORDING_DISABLED = "RECORDING DISABLED";
+
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 600;
   private static final int MAX_CACHE_SIZE = 100;
@@ -755,7 +757,7 @@ public class LangTest implements
               hiddenEvent -> {
                 hideFlash();
                 checkLogin();
-                initialUI.setSplash();
+                initialUI.setSplash(RECORDING_DISABLED);
                 isMicConnected = false;
               }, false, true, 600, 400);
         }
@@ -769,7 +771,7 @@ public class LangTest implements
         hideFlash();
         new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
 
-        initialUI.setSplash();
+        initialUI.setSplash(RECORDING_DISABLED);
         isMicConnected = false;
       }
 
@@ -1228,8 +1230,8 @@ public class LangTest implements
   }
 
   @Override
-  public void showQuiz(String listName) {
-    initialUI.getNavigation().showQuiz(listName);
+  public void showQuiz(String listName, int listID) {
+    initialUI.getNavigation().showQuiz(listName, listID);
   }
 
   /**

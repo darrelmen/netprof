@@ -15,7 +15,11 @@ public interface IBanner {
 
   void setNavigation(INavigation navigation);
 
-  void setSubtitle();
+  /**
+   * @see mitll.langtest.client.initial.InitialUI#setSplash
+   * @param subtitle
+   */
+  void setSubtitle(String subtitle);
 
   void setVisible(boolean visible);
 

@@ -177,7 +177,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
     //quickAddText.addStyleName("bigflfont");
-
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);

@@ -47,7 +47,9 @@ import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -73,9 +75,7 @@ public class EditItem {
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
-
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  private final String instanceName;
 
   /**
    * @param controller
@@ -83,7 +83,6 @@ public class EditItem {
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
-    this.instanceName = "EditItem";
   }
 
   /**
@@ -104,6 +103,7 @@ public class EditItem {
     final Panel contentOnRight = new SimplePanel();
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
+
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
@@ -188,54 +188,18 @@ public class EditItem {
 
       @Override
       public Panel getExercisePanel(CommonExercise exercise) {
-    //    Panel panel = new ResizableSimple();
-    //    panel.getElement().setId("EditItemPanel");
-
- /*       logger.info("Creator " + exercise.getCreator() + " vs " + controller.getUser());
-        boolean iCreatedThisItem = didICreateThisItem(exercise) ||
-            (controller.getUserManager().isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
-        if (iCreatedThisItem) {  // it's mine!
-          EditableExerciseDialog editableExercise =
-              new EditableExerciseDialog(controller,
-                  exercise,
-                  originalList.getID(),
-                  outer,
-                  getInstance()
-              ) {
-                @Override
-                protected void addItemsAtTop(Panel container) {
-
-                }
-              };
-          panel.add(editableExercise.addFields(outer, panel));
-          editableExercise.setFields(exercise);
-        } else {*/
           TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,
               alignments);
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
-   //     }
 
-     //   return panel;
       }
     });
   }
 
- /* private class ResizableSimple extends SimplePanel implements RequiresResize {
 
-    @Override
-    public void onResize() {
-      Widget widget = getWidget();
-      if (widget instanceof RequiresResize) {
-        ((RequiresResize) widget).onResize();
-      } else {
-        logger.info("skipping " + widget.getElement().getId());
-      }
-    }
-  }
-*/
   /**
    * @param ul
    * @param npfExerciseList
@@ -244,22 +208,9 @@ public class EditItem {
   private void rememberAndLoadFirst(final UserList<CommonShell> ul,
                                     PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getID());
-    npfExerciseList.rememberAndLoadFirst(ul.getExercises());
+    List<CommonShell> exercises = ul.getExercises();
+    exercises.sort(Comparator.comparing(CommonShell::getEnglish));
+    exercises.forEach(commonShell -> logger.info("rememberAndLoadFirst got " + commonShell.getID() + " " + commonShell.getEnglish()));
+    npfExerciseList.rememberAndLoadFirst(exercises);
   }
-
-/*
-  private String getInstance() {
-    return instanceName;
-  }
-*/
-
-  /**
-   * @param exercise
-   * @return
-   * @paramx originalList
-   * @seex EditItem#getAddOrEditPanel(CommonExercise, UserList, boolean)
-   */
-/*  private boolean didICreateThisItem(CommonExercise exercise) {
-    return exercise.getCreator() == controller.getUser();
-  }*/
 }

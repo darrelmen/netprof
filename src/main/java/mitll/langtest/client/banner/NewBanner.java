@@ -59,7 +59,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * @see #setSubtitle
    */
-  private static final String RECORDING_DISABLED = "RECORDING DISABLED";
+ // private static final String RECORDING_DISABLED = "RECORDING DISABLED";
 
   private final UILifecycle lifecycle;
   private ComplexWidget recnav, defectnav;
@@ -238,15 +238,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * Tell them we can't record.
    *
-   * @see InitialUI#setSplash
+   * @see UILifecycle#setSplash
+   * @param subtitle
    */
   @Override
-  public void setSubtitle() {
-    this.subtitle.setText(RECORDING_DISABLED);
-    subtitle.removeStyleName("subtitleForeground");
-    subtitle.addStyleName("subtitleNoRecordingForeground");
+  public void setSubtitle(String subtitle) {
+    this.subtitle.setText(subtitle);
+    this.subtitle.removeStyleName("subtitleForeground");
+    this.subtitle.addStyleName("subtitleNoRecordingForeground");
   }
-
 
   private void getInfoMenu(UserMenu userMenu, Nav rnav) {
     Dropdown info = new Dropdown();
@@ -256,7 +256,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     info.add(getManual());
     info.add(getContactUs());
   }
-
 
   /**
    * @param nav

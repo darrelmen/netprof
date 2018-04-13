@@ -423,8 +423,8 @@ public class NewContentChooser implements INavigation {
   }
 
   @Override
-  public void showQuiz(String listName) {
-    History.newItem("QUIZ" + "=" + listName);
+  public void showQuiz(String listName, int listID) {
+    History.newItem(LISTS + "=" + listID);
     banner.showQuiz();
   }
 

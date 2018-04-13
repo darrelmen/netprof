@@ -70,6 +70,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.LangTest.RECORDING_DISABLED;
+
 
 /**
  * <br/>
@@ -81,6 +83,13 @@ import java.util.logging.Logger;
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  /**
+   * Make sure we can talk to the server...
+   *
+   * @see #confirmCurrentProject
+   */
+  private static final String CHECK_NETWORK_WIFI = "CHECK NETWORK/WIFI";
+  private static final int WIFI_MAX_WAIT = 5000;
   private static final String DIVIDER = ">";
   private static final String ALL = "Home";
 
@@ -132,7 +141,7 @@ public class InitialUI implements UILifecycle {
   private INavigation navigation;
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
- // private String implVersion;
+  // private String implVersion;
 
   private static final boolean DEBUG = false;
 
@@ -314,7 +323,7 @@ public class InitialUI implements UILifecycle {
     DivWidget verticalContainer = new FluidContainer();
     verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
-   // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
+    // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
     com.google.gwt.user.client.Element element = verticalContainer.getElement();
     element.setId(ROOT_VERTICAL_CONTAINER);
     element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
@@ -329,6 +338,8 @@ public class InitialUI implements UILifecycle {
    * <p>
    * Also, if we log out of one tab and go to another, we'll notice here.
    *
+   * Does heartbeat wifi connectivity checking...
+   *
    * @see #getRootContainer
    */
   private void confirmCurrentProject() {
@@ -337,15 +348,18 @@ public class InitialUI implements UILifecycle {
       String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
       if (projectStartupInfo == null) {
         long then = System.currentTimeMillis();
+        Timer timer = getWifiTimer();
         controller.getOpenUserService().checkHeartbeat(implementationVersion, new AsyncCallback<HeartbeatStatus>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            cancelHeartbeatTimer(timer);
           }
 
           @Override
           public void onSuccess(HeartbeatStatus result) {
+            cancelHeartbeatTimer(timer);
             long now = System.currentTimeMillis();
+            logger.info("1 waited " + (now - then));
             if (result.isCodeHasUpdated()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
               Window.Location.reload();
@@ -354,15 +368,20 @@ public class InitialUI implements UILifecycle {
         });
       } else {
         long then = System.currentTimeMillis();
+
+        Timer timer = getWifiTimer();
+
         controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            cancelHeartbeatTimer(timer);
           }
 
           @Override
           public void onSuccess(HeartbeatStatus result) {
+            cancelHeartbeatTimer(timer);
             long now = System.currentTimeMillis();
+            logger.info("2 waited " + (now - then));
             if (result.isCodeHasUpdated()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
               Window.Location.reload();
@@ -374,6 +393,24 @@ public class InitialUI implements UILifecycle {
         });
       }
     }
+  }
+
+  private void cancelHeartbeatTimer(Timer timer) {
+    timer.cancel();
+    setSplash(controller.isRecordingEnabled() ? "" : RECORDING_DISABLED);
+  }
+
+  @NotNull
+  private Timer getWifiTimer() {
+    Timer timer = new Timer() {
+      @Override
+      public void run() {
+        //logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
+        setSplash(CHECK_NETWORK_WIFI);
+      }
+    };
+    timer.schedule(WIFI_MAX_WAIT);
+    return timer;
   }
 
   private HandlerRegistration addMouseOverHandler(DivWidget container, MouseOverHandler handler) {
@@ -515,11 +552,11 @@ public class InitialUI implements UILifecycle {
         }*/
         break;
       } else if (project.getID() == currentProject) {
-      //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       } else {
-       // logger.info("addBreadcrumbLevels skipping project " + project);
+        // logger.info("addBreadcrumbLevels skipping project " + project);
       }
     }
   }
@@ -892,18 +929,15 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   * @param message
    * @see LangTest#makeFlashContainer
    */
   @Override
-  public void setSplash() {
-    banner.setSubtitle();
+  public void setSplash(String message) {
+    banner.setSubtitle(message);
   }
 
   public void setVisible(boolean visible) {
     banner.setVisible(visible);
   }
-
-/*  public void setImplVersion(String implVersion) {
-    this.implVersion = implVersion;
-  }*/
 }

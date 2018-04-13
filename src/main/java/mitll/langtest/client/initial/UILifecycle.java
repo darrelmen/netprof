@@ -77,8 +77,9 @@ public interface UILifecycle {
 
   /**
    * @see LangTest#makeFlashContainer()
+   * @param message
    */
-  void setSplash();
+  void setSplash(String message);
 
   void logout();
 

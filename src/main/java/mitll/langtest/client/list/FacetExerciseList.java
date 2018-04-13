@@ -464,7 +464,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     }
 
     if (!selectionState.getInstance().equalsIgnoreCase(getInstance())) {
-      logger.info("selection " + selectionState.getInstance() + " != " + getInstance());
+      logger.info("addWidgets selection " + selectionState.getInstance() + " != " + getInstance());
       selectionState.getTypeToSection().remove(LISTS);
     }
 

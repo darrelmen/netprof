@@ -52,7 +52,7 @@ public interface INavigation extends IViewContaner {
   void showInitialState();
 
   void showLearnList(int listid);
-  void showQuiz(String listName);
+  void showQuiz(String listName, int listID);
 
   void showDrillList(int listid);
 
