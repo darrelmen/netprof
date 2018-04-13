@@ -65,13 +65,14 @@ public class FlashcardRecordButton extends RecordButton {
   /**
    * @see #initRecordButton
    */
-  //private static final String SPACE_BAR = "Press and hold";
-  //private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to start recording, release to stop.";
   private static final String PROMPT = "Press and hold to record";
   private static final int WIDTH_FOR_BUTTON = 360;
 
   private final ExerciseController controller;
   private static final boolean DEBUG = false;
+  private static int count = 0;
+
+  int id = 0;
 
   /**
    * @param delay
@@ -87,7 +88,7 @@ public class FlashcardRecordButton extends RecordButton {
                                ExerciseController controller,
                                final String instance) {
     super(delay, recordingListener, true, controller.getProps());
-
+    id = count++;
     if (addKeyBinding) {
       addKeyListener(controller, instance);
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
@@ -96,15 +97,16 @@ public class FlashcardRecordButton extends RecordButton {
 
     setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
-    getElement().getStyle().setProperty("fontSize", "x-large");
-    getElement().getStyle().setProperty("fontFamily", "Arial Unicode MS, Arial, sans-serif");
+    Style style = getElement().getStyle();
+    style.setProperty("fontSize", "x-large");
+    style.setProperty("fontFamily", "Arial Unicode MS, Arial, sans-serif");
 
-    getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-    getElement().getStyle().setLineHeight(37, Style.Unit.PX);
+    style.setVerticalAlign(Style.VerticalAlign.MIDDLE);
+    style.setLineHeight(37, Style.Unit.PX);
 
     initRecordButton();
 
-    getElement().setId("FlashcardRecordButton_" + instance);
+    getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
@@ -214,7 +216,13 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   protected boolean shouldIgnoreKeyPress() {
-    boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
+    boolean notAttached = !isAttached();
+    if (notAttached) logger.warning("not attached? " + getElement().getId() + " = " + id);
+    boolean hidden = checkHidden(getElement().getId());
+    if (hidden) logger.warning("hidden");
+    boolean noUser = controller.getUser() == -1;
+    if (noUser) logger.warning("noUser");
+    boolean b = notAttached || hidden || noUser;
     return b;
   }
 

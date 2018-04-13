@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
@@ -44,6 +45,7 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.list.ListInterface;
@@ -83,20 +85,11 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
-  private Logger logger;
+  private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
   public static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
-/*
-
-  private static final int FIRST_STEP = 35;
-  private static final int SECOND_STEP = 75;
-
-  private static final double FIRST_STEP_PCT = ((double) FIRST_STEP) / 100d;
-  private static final double SECOND_STEP_PCT = ((double) SECOND_STEP) / 100d;
-*/
-
   private Panel recoOutput;
 
   private static final int DELAY_MILLIS_LONG = 3000;
@@ -128,6 +121,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          ListInterface exerciseList) {
     super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
     downloadContainer = new DownloadContainer();
+
+    logger.info("Bootstrap instance " + instance);
+
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " +instance));
+    logger.info("logException stack " + exceptionAsString);
   }
 
   /**
@@ -188,9 +186,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
                                                 ExerciseController controller,
                                                 Panel toAddTo) {
-    if (logger == null) {
-      logger = Logger.getLogger("BootstrapExercisePanel");
-    }
+//    if (logger == null) {
+//      logger = Logger.getLogger("BootstrapExercisePanel");
+//    }
     // logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, controller));
@@ -259,10 +257,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     recordButtonRow.add(bDiv);
     recordButtonRow.getElement().setId("recordButtonRow");
 
-
     recordButtonRow.addStyleName("alignCenter");
     recordButton.addStyleName("alignCenter");
-
 
     // recordButtonRow.addStyleName("leftTenMargin");
     //  recordButtonRow.addStyleName("rightTenMargin");
@@ -271,17 +267,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     return recordButtonRow;
   }
 
-/*
-  private Panel getCenteredWrapper(Widget recordButton) {
-    Panel recordButtonRow = new FluidRow();
-    Paragraph recordButtonContainer = new Paragraph();
-    recordButtonContainer.addStyleName("alignCenter");
-    recordButtonContainer.add(recordButton);
-    recordButton.addStyleName("alignCenter");
-    recordButtonRow.add(new Column(12, recordButtonContainer));
-    return recordButtonRow;
-  }
-*/
+  FlashcardRecordButton toGrab;
 
   /**
    * @param exerciseID
@@ -359,6 +345,9 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             }
           }
 
+          /**
+           * @see FlashcardRecordButton#checkKeyDown
+           */
           @Override
           protected void gotEnter() {
             playRef();
@@ -366,15 +355,34 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected boolean shouldIgnoreKeyPress() {
-            return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
+//            if (!isAttached()) {
+//              grabFocus(this);
+//            }
+            boolean b = super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
+            if (b) logger.info("ignore key press?");
+            return b;
           }
         };
 
         // without this, the arrow keys may go to the chapter selector
-        Scheduler.get().scheduleDeferred((Command) () -> widgets.setFocus(true));
+        grabFocus(widgets);
+        toGrab = widgets;
         return widgets;
       }
     };
+  }
+
+
+  private void grabFocus(FlashcardRecordButton widgets) {
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      if (widgets != null) {
+        logger.warning("getAnswerWidget set focus on " + widgets.getElement().getId());
+        widgets.setFocus(true);
+      }
+      else {
+        logger.warning("getAnswerWidget no widgets ");
+      }
+    });
   }
 
   /**
@@ -703,7 +711,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   @Override
   boolean otherReasonToIgnoreKeyPress() {
-    return super.otherReasonToIgnoreKeyPress() || !realRecordButton.isEnabled();
+    boolean b = !realRecordButton.isEnabled();
+    if (b) logger.warning("Bootstrap record button disabled?");
+    boolean b1 = super.otherReasonToIgnoreKeyPress();
+    if (b1) logger.warning("Bootstrap otherReasonToIgnoreKeyPress?");
+    return b1 || b;
   }
 
   /**

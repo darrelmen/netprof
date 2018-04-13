@@ -44,6 +44,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
@@ -108,7 +110,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   /**
    * @see #getShowGroup(ControlState)
    */
-  private static final String SHOW = "SHOW";//"START WITH";
+  private static final String SHOW = "SHOW";
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
   private static final String BOTH = "Both";
@@ -476,8 +478,17 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     contentMiddle.getElement().setId("Focusable_content");
 
     contentMiddle.addClickHandler(event -> gotCardClick(contentMiddle));
+  //  addMouseOverHandler(contentMiddle, event -> gotMouseOver());
     return contentMiddle;
   }
+
+/*  protected void gotMouseOver() {
+
+  }
+
+  private HandlerRegistration addMouseOverHandler(Widget container, MouseOverHandler handler) {
+    return container.addDomHandler(handler, MouseOverEvent.getType());
+  }*/
 
   private void gotCardClick(ClickableSimplePanel contentMiddle) {
     boolean englishHidden = isHidden(english);
@@ -1143,11 +1154,14 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    //logger.info("addAudioBindings : click on audio playback panel...");
+    logger.info("addAudioBindings : click on audio playback panel...");
     focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));
-    focusPanel.addFocusHandler(event -> focusPanel.setFocus(false));
+    focusPanel.addFocusHandler(event -> {
+      logger.warning("addAudioBindings set focus false on " +focusPanel.getElement().getId());
+      focusPanel.setFocus(false);
+    });
   }
 
   /**

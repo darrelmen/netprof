@@ -82,7 +82,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void addImages() {
-    waiting     = new IconAnchor();
+    waiting = new IconAnchor();
     waiting.setBaseIcon(MyCustomIconType.waiting);
     hideWaiting();
   }

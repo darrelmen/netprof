@@ -127,7 +127,7 @@ public class QuizHelper extends PracticeHelper {
         } else {
           if (chosenList == -1) {
             setChosenList(exerciseList);
-            reallyStartOver();
+            //reallyStartOver();
           }
 
           IUserList iUserList = idToList.get(chosenList);
@@ -144,6 +144,8 @@ public class QuizHelper extends PracticeHelper {
         if (s != null && !s.isEmpty()) {
           try {
             chosenList = Integer.parseInt(s);
+              logger.info("setChosenList chosenList " + chosenList);
+
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse list id " + s);
           }
@@ -156,7 +158,7 @@ public class QuizHelper extends PracticeHelper {
       @Override
       public void showQuiz() {
         super.showQuiz();
-        logger.info("showQuiz clearListSelection ");
+      //  logger.info("showQuiz clearListSelection ");
         clearListSelection();
       }
     };
@@ -209,12 +211,12 @@ public class QuizHelper extends PracticeHelper {
   }
 
   void showQuizIntro() {
-    logger.info("showQuizIntro clearListSelection ");
+    //logger.info("showQuizIntro clearListSelection ");
     Scheduler.get().scheduleDeferred(this::clearListSelection);
   }
 
   private void clearListSelection() {
-    logger.info("---> clearListSelection ");
+   // logger.info("---> clearListSelection ");
     FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }
