@@ -397,7 +397,7 @@ public class InitialUI implements UILifecycle {
 
   private void cancelHeartbeatTimer(Timer timer) {
     timer.cancel();
-    setSplash(controller.isRecordingEnabled() ? "" : RECORDING_DISABLED);
+    setSplash(controller.isMicAvailable() ? "" : RECORDING_DISABLED);
   }
 
   @NotNull

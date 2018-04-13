@@ -56,10 +56,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
   private static final String DOCUMENTATION = "User Manual";
-  /**
-   * @see #setSubtitle
-   */
- // private static final String RECORDING_DISABLED = "RECORDING DISABLED";
 
   private final UILifecycle lifecycle;
   private ComplexWidget recnav, defectnav;

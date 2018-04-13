@@ -99,7 +99,7 @@ public class EditItem {
    */
   public Panel editItem(UserList<CommonShell> originalList) {
     DivWidget div = new DivWidget();
-    boolean hasDescrip = !originalList.getDescription().isEmpty();
+/*    boolean hasDescrip = !originalList.getDescription().isEmpty();
     Heading w = new Heading(4,
         (originalList.getListType() == UserList.LIST_TYPE.QUIZ ? "Quiz " : "List ") +
             originalList.getName() +
@@ -108,7 +108,7 @@ public class EditItem {
     );
     w.addStyleName("bottomFiveMargin");
     div.add(w);
-
+*/
 
     Panel hp = new HorizontalPanel();
 

@@ -214,7 +214,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         //   logger.info("Desc " + description + " length " + description.length());
         String truncate = truncate(description);
         //   logger.info("truncate " + truncate + " length " + truncate.length());
-        return getSafeHtml(truncate);
+        return getNoWrapContent(truncate);
       }
     };
   }

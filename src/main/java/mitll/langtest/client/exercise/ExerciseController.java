@@ -112,6 +112,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   boolean isRecordingEnabled();
 
+boolean  isMicAvailable();
+
   boolean usingFlashRecorder();
 
   KeyStorage getStorage();

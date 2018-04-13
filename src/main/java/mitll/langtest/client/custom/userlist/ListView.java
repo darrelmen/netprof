@@ -379,8 +379,15 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void editList() {
     EditItem editItem = new EditItem(controller);
+
+    UserList<CommonShell> originalList = getCurrentSelectionFromMyLists();
+    boolean hasDescrip = !originalList.getDescription().isEmpty();
+    String suffix = //(originalList.getListType() == UserList.LIST_TYPE.QUIZ ? "Quiz " : "List ") +
+        originalList.getName() +
+
+        (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
     Button closeButton = new DialogHelper(true).show(
-        ADD_EDIT_ITEMS,
+        ADD_EDIT_ITEMS + " : " + suffix,
         Collections.emptyList(),
         editItem.editItem(getCurrentSelectionFromMyLists()),
         "OK",
@@ -405,7 +412,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     closeButton.setType(ButtonType.SUCCESS);
 
-    Scheduler.get().scheduleDeferred(()->editItem.reload());
+    Scheduler.get().scheduleDeferred(() -> editItem.reload());
 
   }
 
@@ -761,7 +768,9 @@ public class ListView implements ContentView, CreateListComplete {
    * @seex CreateListDialog#makeCreateButton
    */
   @Override
-  public void gotEdit() {  editDialog.doEdit(myLists.getCurrentSelection(), myLists);  }
+  public void gotEdit() {
+    editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+  }
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
