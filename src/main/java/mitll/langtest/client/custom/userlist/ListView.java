@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,11 +39,13 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String EDIT_THE_LIST = "Edit the list title or make it public.";
-  public static final String SHARE = "Share";
-  public static final String SHARE_THE_LIST = "Share the list with someone.";
-  public static final String VISITED = "Visited";
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final String EDIT_THE_LIST = "Edit the list title or make it public.";
+  public static final String SHARE = "Share";
+  private static final String SHARE_THE_LIST = "Share the list with someone.";
+  private static final String VISITED = "Visited";
+  private static final String SAVE = "Save";
 
   private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
   private static final String SHARE_QUIZ = "Share Quiz";
@@ -113,46 +116,27 @@ public class ListView implements ContentView, CreateListComplete {
     left.addStyleName("rightFiveMargin");
     left.addStyleName("cardBorderShadow");
     DivWidget right = new DivWidget();
+    right.getElement().setId("right");
+
     leftRight.add(right);
 
     right.setWidth("100%");
     DivWidget top = new DivWidget();
+    top.getElement().setId("top");
     right.add(top);
-    top.addStyleName("leftTenMargin");
+
+    styleTopAndBottom(top);
+
     top.addStyleName("bottomFiveMargin");
-    top.addStyleName("cardBorderShadow");
 
     DivWidget bottom = new DivWidget();
     right.add(bottom);
+    bottom.getElement().setId("bottom");
 
-    bottom.addStyleName("cardBorderShadow");
-    bottom.addStyleName("leftTenMargin");
+    styleTopAndBottom(bottom);
 
     ListServiceAsync listService = controller.getListService();
-    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting lists created by user", caught);
-      }
-
-      @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer myLists = new MyListContainer();
-        Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
-        result.forEach(list -> {
-          if (list.getUserID() == controller.getUser()) {
-            names.add(list.getName());
-          }
-        });
-
-        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
-
-        addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
-        tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
-
-        left.add(getButtons(ListView.this.myLists));
-      }
-    });
+    addYourLists(left, listService);
 
     listService.getListsForUser(false, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
@@ -230,6 +214,54 @@ public class ListView implements ContentView, CreateListComplete {
     });
   }
 
+  private void styleTopAndBottom(DivWidget bottom) {
+    bottom.addStyleName("leftTenMargin");
+    bottom.addStyleName("rightFiveMargin");
+    bottom.addStyleName("cardBorderShadow");
+  }
+
+  private void addYourLists(DivWidget left, ListServiceAsync listService) {
+    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting lists created by user", caught);
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList<CommonShell>> result) {
+        showYourLists(result, left);
+      }
+    });
+  }
+
+  private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
+    ListContainer myLists = new MyListContainer();
+    Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
+    populateUniqueListNames(result);
+
+    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
+
+    addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
+    tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
+
+    left.add(getButtons(ListView.this.myLists));
+
+    Scheduler.get().scheduleDeferred(() ->
+        {
+          setShareHREF(getCurrentSelectionFromMyLists());
+        }
+    );
+  }
+
+
+  private void populateUniqueListNames(Collection<UserList<CommonShell>> result) {
+    result.forEach(list -> {
+      if (list.getUserID() == controller.getUser()) {
+        names.add(list.getName());
+      }
+    });
+  }
+
 
   private boolean canMakeQuiz() {
     Collection<User.Permission> permissions = controller.getPermissions();
@@ -247,6 +279,7 @@ public class ListView implements ContentView, CreateListComplete {
     tableWithPager.setWidth("100%");
   }
 
+  Button share;
 
   @NotNull
   private DivWidget getButtons(ListContainer container) {
@@ -255,7 +288,7 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.addStyleName("topFiveMargin");
     buttons.add(getAddButton());
     buttons.add(getRemoveButton());
-    buttons.add(getShare());
+    buttons.add(share = getShare());
 
     buttons.add(getEdit());
     // buttons.add(getImport());
@@ -277,7 +310,9 @@ public class ListView implements ContentView, CreateListComplete {
   private Button getShare() {
     Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
-    successButton.addClickHandler(event -> doShare());
+    // successButton.addClickHandler(event -> doShare());
+
+    // successButton.setHref(    getMailTo());
     addTooltip(successButton, SHARE_THE_LIST);
     successButton.setEnabled(!myLists.isEmpty());
     return successButton;
@@ -346,7 +381,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS,
         Collections.emptyList(),
-        new EditItem(controller).editItem(getCurrentSelection(myLists)),
+        new EditItem(controller).editItem(getCurrentSelectionFromMyLists()),
         "OK",
         null,
         new DialogHelper.CloseListener() {
@@ -447,12 +482,16 @@ public class ListView implements ContentView, CreateListComplete {
   private Button getRemoveButton() {
     final Button add = new Button("", IconType.MINUS);
     add.addStyleName("leftFiveMargin");
-    add.addClickHandler(event -> gotDelete(add, getCurrentSelection(myLists)));
+    add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
     addTooltip(add, "Delete list.");
     add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
+  }
+
+  private UserList<CommonShell> getCurrentSelectionFromMyLists() {
+    return getCurrentSelection(myLists);
   }
 
   @NotNull
@@ -638,7 +677,7 @@ public class ListView implements ContentView, CreateListComplete {
         EDIT,
         Collections.emptyList(),
         contents,
-        EDIT1,
+        SAVE,
         CANCEL,
         new DialogHelper.CloseListener() {
           @Override
@@ -666,7 +705,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void doShare() {
     UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
     boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
-    String mailToList = new UserListSupport(controller).getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
+    String mailToList = getMailTo();
 
     DivWidget contents = new DivWidget();
     String name = currentSelection.getName();
@@ -690,6 +729,13 @@ public class ListView implements ContentView, CreateListComplete {
     closeButton.setType(ButtonType.SUCCESS);
   }
 
+  @NotNull
+  private String getMailTo() {
+    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
+    boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
+    return new UserListSupport(controller).getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
+  }
+
   /**
    * @param userList
    * @see CreateListDialog#addUserList
@@ -710,14 +756,16 @@ public class ListView implements ContentView, CreateListComplete {
    * @seex CreateListDialog#makeCreateButton
    */
   @Override
-  public void gotEdit() {
-    //  logger.info("\n\n\ngot edit");
-    editDialog.doEdit(myLists.getCurrentSelection(), myLists);
-  }
+  public void gotEdit() {  editDialog.doEdit(myLists.getCurrentSelection(), myLists);  }
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
       super(ListView.this.controller, 20, true, "myLists", 15);
+    }
+
+    @Override
+    public void gotClickOnItem(final UserList<CommonShell> user) {
+      setShareHREF(user);
     }
 
     @Override
@@ -733,5 +781,16 @@ public class ListView implements ContentView, CreateListComplete {
         showLearnList(this);
       }
     }
+  }
+
+  private void setShareHREF(UserList<CommonShell> user) {
+    if (user != null) {
+      setShareButtonHREF();
+      share.setEnabled(!user.isFavorite());
+    }
+  }
+
+  private void setShareButtonHREF() {
+    share.setHref(getMailTo());
   }
 }

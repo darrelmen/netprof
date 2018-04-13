@@ -73,8 +73,7 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise>
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private final Logger logger = Logger.getLogger("RecorderNPFHelper");
-
+ // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   /**
    *
@@ -99,11 +98,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private final Logger logger = Logger.getLogger("RecorderNPFHelper_ExercisePanelFactory");
-
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        //     logger.info("make rec panel for " +e.getID() + " " + e.getClass() + " " + e.isContext());
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
@@ -209,7 +205,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     });
   }
 
-
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
     getProgressInfo();
@@ -240,7 +235,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
-
     /**
      * @param e
      * @param controller1

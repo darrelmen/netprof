@@ -359,7 +359,7 @@ public class InitialUI implements UILifecycle {
           public void onSuccess(HeartbeatStatus result) {
             cancelHeartbeatTimer(timer);
             long now = System.currentTimeMillis();
-            logger.info("1 waited " + (now - then));
+            //logger.info("1 waited " + (now - then));
             if (result.isCodeHasUpdated()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
               Window.Location.reload();
@@ -381,7 +381,7 @@ public class InitialUI implements UILifecycle {
           public void onSuccess(HeartbeatStatus result) {
             cancelHeartbeatTimer(timer);
             long now = System.currentTimeMillis();
-            logger.info("2 waited " + (now - then));
+            //logger.info("2 waited " + (now - then));
             if (result.isCodeHasUpdated()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
               Window.Location.reload();

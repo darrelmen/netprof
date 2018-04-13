@@ -284,7 +284,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     learn.addClickHandler(event -> {
       //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       controller.logEvent("ViewLink", instanceName, "N/A", "click on view");
-      gotClickOnChoice(instanceName, learn);
+      gotClickOnChoice(instanceName, learn, true);
       // setHistoryItem(historyToken);
     });
     return learn;
@@ -293,27 +293,35 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * @see NewContentChooser#showLearnList
    */
+  @Override
   public void showLearn() {
-    gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN));
+    gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN), false);
   }
 
+  @Override
   public void showQuiz() {
-    gotClickOnChoice(VIEWS.QUIZ.toString(), viewToLink.get(INavigation.VIEWS.QUIZ));
+    gotClickOnChoice(VIEWS.QUIZ.toString(), viewToLink.get(INavigation.VIEWS.QUIZ), false);
   }
 
   /**
    * @see NewContentChooser#showDrillList
    */
   public void showDrill() {
-    gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL));
+    gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL), false);
   }
 
-  private void gotClickOnChoice(String instanceName, NavLink learn) {
-    showSection(instanceName);
+  /**
+   *
+   * @param instanceName
+   * @param learn
+   * @param fromClick
+   */
+  private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
+    showSection(instanceName, fromClick);
     showActive(learn);
   }
 
-  private void showSection(String instance1) {
+  private void showSection(String instance1, boolean fromClick) {
     VIEWS choices = INavigation.VIEWS.NONE;
     try {
       choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
@@ -321,7 +329,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.info("showSection can't parse " + instance1);
 
     }
-    navigation.showView(choices, false, true);
+    navigation.showView(choices, false, fromClick);
   }
 
   /**

@@ -277,6 +277,10 @@ public class NewContentChooser implements INavigation {
     practiceHelper.hideList();
   }
 
+  /**
+   * @see #showQuiz(boolean)
+   * @param fromClick
+   */
   private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
     quizHelper.setNavigation(this);
@@ -425,6 +429,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showQuiz(String listName, int listID) {
     History.newItem(LISTS + "=" + listID);
+    logger.info("showQuiz " + listName + " " + listID);
     banner.showQuiz();
   }
 

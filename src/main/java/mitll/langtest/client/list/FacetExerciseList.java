@@ -449,6 +449,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   /**
+   * remove list selection if not for this instance.
+   *
    * @seex mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    * @see #getExercises
    */
@@ -463,9 +465,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-    if (!selectionState.getInstance().equalsIgnoreCase(getInstance())) {
-      logger.info("addWidgets selection " + selectionState.getInstance() + " != " + getInstance());
-      selectionState.getTypeToSection().remove(LISTS);
+    String instance = selectionState.getInstance();
+    if (!instance.isEmpty() && !instance.equalsIgnoreCase(getInstance())) {
+      Collection<String> remove = selectionState.getTypeToSection().remove(LISTS);
+      logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing "+remove);
     }
 
     restoreUIState(selectionState);
