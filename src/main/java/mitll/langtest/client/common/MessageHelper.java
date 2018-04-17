@@ -40,6 +40,7 @@ import com.github.gwtbootstrap.client.ui.event.ClosedHandler;
 import com.github.gwtbootstrap.client.ui.event.HideEvent;
 import com.github.gwtbootstrap.client.ui.event.HideHandler;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -47,6 +48,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.UmbrellaException;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
@@ -144,14 +146,14 @@ public class MessageHelper {
 
   private Modal handleError(String msg, Throwable throwable, DDialogType dType) {
     if (throwable instanceof DominoSessionException) {
-      log.warning("Logout for session (" + msg+ ") : t=" + throwable);
+      log.warning("Logout for session (" + msg + ") : t=" + throwable);
       parentHelper.logout();
     } else if (throwable instanceof RpcTokenException) {
       log.warning("Restoring session: t=" + throwable);
       logOnServer("Refreshing token ! Original message\n" + msg, throwable, false);
       makeInternalDialog("", DDialogType.RefreshToken, true);
     } else if (throwable instanceof RestrictedOperationException) {
-      makeInternalDialog("Operation not Permitted! (" +msg+ ")", DDialogType.NonFatalError, true);
+      makeInternalDialog("Operation not Permitted! (" + msg + ")", DDialogType.NonFatalError, true);
     } else if (throwable instanceof IncompatibleRemoteServiceException) {
       makeInternalDialog("Your version of netprof is out of date. Please click refresh on your browser to get the latest version.<br/><br/>",
           DDialogType.NonFatalError, false);
@@ -218,10 +220,7 @@ public class MessageHelper {
 
     if (dType != DDialogType.FatalError && dType != DDialogType.Loading) {
       a.setClose(true);
-			a.addClosedHandler(event -> {
-        m.hide();
-        parentHelper.getUserPermissions(); // since the user permissions may have changed
-      });
+      a.addClosedHandler(event -> doHide(m));
     } else {
       a.setClose(false);
     }
@@ -236,13 +235,7 @@ public class MessageHelper {
       } else {
         closeBtn.setType(ButtonType.INFO);
       }
-      closeBtn.addClickHandler(arg0 -> {
-        m.hide();
-       // if (dType == DDialogType.RefreshToken) {
-         // log.warning("Refreshing");
-          parentHelper.getUserPermissions(); // since the user permissions may have changed
-       // }
-      });
+      closeBtn.addClickHandler(arg0 -> doHide(m));
       a.add(closeBtn);
     }
 
@@ -252,6 +245,11 @@ public class MessageHelper {
     //	m.addStyleName("alert-modal");
     m.show();
     return m;
+  }
+
+  private void doHide(Modal m) {
+    m.hide();
+    Scheduler.get().scheduleDeferred(parentHelper::getUserPermissions);
   }
 
   private String getDefaultSuffix(DDialogType dType) {
@@ -375,7 +373,7 @@ public class MessageHelper {
 		return cMsg;	
 	}*/
 
-  private Throwable unwrap(Throwable e) {
+ /* private Throwable unwrap(Throwable e) {
     if (e instanceof UmbrellaException) {
       UmbrellaException ue = (UmbrellaException) e;
       if (ue.getCauses().size() == 1) {
@@ -383,5 +381,5 @@ public class MessageHelper {
       }
     }
     return e;
-  }
+  }*/
 }

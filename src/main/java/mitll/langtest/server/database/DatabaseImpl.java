@@ -741,7 +741,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void rememberUsersCurrentProject(int userid, int projectid) {
-    //  logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
+    logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
     getUserProjectDAO().upsert(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -761,7 +761,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
-//    logger.info("setStartupInfo on " + userWhere.getUserID());
+    logger.info("setStartupInfo on " + userWhere.getUserID());
     setStartupInfo(userWhere, projectForUser(userWhere.getID()));
   }
 
@@ -1635,13 +1635,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (isNormalList) {
       Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listid);
       UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
-      List<CommonExercise> exercises = new ArrayList<>();
-      exids.forEach(exid -> {
-        CommonExercise exercise = getExercise(projectid, exid);
-        if (exercise != null) exercises.add(exercise);
-      });
-      exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
-      list.setExercises(exercises);
+      if (list != null) {  // could be null if we make it private ?
+        List<CommonExercise> exercises = new ArrayList<>();
+        exids.forEach(exid -> {
+          CommonExercise exercise = getExercise(projectid, exid);
+          if (exercise != null) exercises.add(exercise);
+        });
+        exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
+        list.setExercises(exercises);
+      }
       return list;
     } else {
       return getUserListManager().getCommentedListEx(projectid);

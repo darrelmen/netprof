@@ -323,7 +323,10 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
       }
     }
 
-    return ensureWAV(audioFile);
+
+    String s = ensureWAV(audioFile);
+    logger.info("getWavAudioFile " + audioFile + " = " + s);
+    return s;
   }
 
   private String removeSuffix(String audioFile) {

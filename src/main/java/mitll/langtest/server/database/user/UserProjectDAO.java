@@ -79,6 +79,10 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.upsert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
+   * @param bulk
+   */
   public void addBulk(Collection<SlickUserProject> bulk) {
     dao.addBulk(bulk);
   }
@@ -130,10 +134,10 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int getCurrentProjectForUser(int user) {
-//    long then = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     List<Integer> slickUserProjects = dao.mostRecentByUser(user);
-//    long now = System.currentTimeMillis();
-//    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
+    long now = System.currentTimeMillis();
+    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
   }
 

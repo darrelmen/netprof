@@ -376,14 +376,14 @@ public class LangTest implements
   private void rememberStartup(StartupInfo startupInfo, boolean reloadWindow) {
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
-  //  logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
+    //  logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
     if (reloadWindow) {
       initialUI.chooseProjectAgain();
       //initialUI.setImplVersion(startupInfo.getImplementationVersion());
     }
 
     List<SlimProject> projects = getAllProjects();
-    projectToAudioService   = createHostSpecificServices(projects);
+    projectToAudioService = createHostSpecificServices(projects);
     projectToScoringService = createHostSpecificServicesScoring(projects);
 
 /*    if (initialUI != null) {
@@ -820,7 +820,7 @@ public class LangTest implements
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
     if (projectStartupInfo == null) {
-      logger.warning("setProjectStartupInfo project startup " + projectStartupInfo + " for " + user);
+      logger.info("setProjectStartupInfo project startup null for " + user);
     }
     initialUI.showCogMenu();
   }
@@ -1136,7 +1136,9 @@ public class LangTest implements
    * @see RecordButtonPanel#startRecording()
    * @see PostAudioRecordButton#startRecording()
    */
-  public void startRecording() {    flashRecordPanel.recordOnClick();  }
+  public void startRecording() {
+    flashRecordPanel.recordOnClick();
+  }
 
   /**
    * Recording interface
@@ -1178,6 +1180,11 @@ public class LangTest implements
   }
 
   @Override
+  public boolean removeKeyListener(KeyPressHelper.KeyListener listener) {
+    return  keyPressHelper.removeKeyHandler(listener);
+  }
+
+  @Override
   public boolean shouldRecord() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     boolean hasModel = (projectStartupInfo != null) && projectStartupInfo.isHasModel();
@@ -1195,8 +1202,8 @@ public class LangTest implements
   }
 
   /**
-   * @see
    * @return
+   * @see
    */
   public boolean isMicAvailable() {
     return isMicConnected;
@@ -1211,6 +1218,7 @@ public class LangTest implements
    */
   public void logout() {
     initialUI.logout();
+    keyPressHelper.clearListeners();
   }
 
   public KeyStorage getStorage() {
@@ -1221,8 +1229,8 @@ public class LangTest implements
   }
 
   /**
-   * @see ListView#showLearnList
    * @param id
+   * @see ListView#showLearnList
    */
   @Override
   public void showLearnList(int id) {
@@ -1235,8 +1243,8 @@ public class LangTest implements
   }
 
   /**
-   * @see ListView#getDrillButton
    * @param id
+   * @see ListView#getDrillButton
    */
   @Override
   public void showDrillList(int id) {

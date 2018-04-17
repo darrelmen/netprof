@@ -753,7 +753,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    //logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);

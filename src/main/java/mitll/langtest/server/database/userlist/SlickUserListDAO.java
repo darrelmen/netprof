@@ -56,6 +56,7 @@ import java.util.*;
 
 public class SlickUserListDAO extends DAO implements IUserListDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserListDAO.class);
+  public static final boolean DEBUG = false;
 
   private final UserExerciseListDAOWrapper dao;
   private final UserExerciseListVisitorDAOWrapper visitorDAOWrapper;
@@ -244,13 +245,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     List<UserList<CommonShell>> userExerciseLists = fromSlick(getByUser(userid, projectID));
     long now = System.currentTimeMillis();
 
-    logger.info("getAllByUser took " + (now - then) + " to get " + userExerciseLists.size());
+    if (DEBUG) logger.info("getAllByUser took " + (now - then) + " to get " + userExerciseLists.size());
 
     then = now;
     userExerciseLists.forEach(this::populateList);
     now = System.currentTimeMillis();
 
-    logger.info("getAllByUser took " + (now - then) + " to populate " + userExerciseLists.size());
+    if (DEBUG) logger.info("getAllByUser took " + (now - then) + " to populate " + userExerciseLists.size());
 
     return userExerciseLists;
   }
@@ -368,15 +369,22 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }
   }
 
+  /**
+   * list might be deleted...
+   *
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListByIDExercises
+   * @param unique
+   * @return null if the list has been deleted
+   */
   @Override
   public UserList<CommonExercise> getList(int unique) {
-    Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID((int) unique);
+    Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID(unique);
     UserList<CommonExercise> exlist;
 
     if (slickUserExerciseListOption.isDefined()) {
       exlist = fromSlickEx(slickUserExerciseListOption.get());
     } else {
-      logger.error("getList : huh? no user list with id " + unique);
+      logger.warn("getList : huh? no user list with id " + unique);
       return null;
     }
     return exlist;
@@ -388,7 +396,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     if (slickUserExerciseListOption.isDefined()) {
       return fromSlick(slickUserExerciseListOption.get());
     } else {
-      if (warnIfMissing) logger.error("getByExID : huh? no user list with id " + unique);
+      if (warnIfMissing) logger.warn("getByExID : huh? no user list with id " + unique);
       return null;
     }
   }

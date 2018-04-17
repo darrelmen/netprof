@@ -35,6 +35,7 @@ package mitll.langtest.server.audio.imagewriter;
 import mitll.langtest.server.audio.image.AudioImage;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.tools.AudioFile;
+import mitll.langtest.server.services.AudioServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -92,12 +93,16 @@ public class SimpleImageWriter extends mitll.langtest.server.audio.imagewriter.B
                                                  String suffix) {
     long start = System.currentTimeMillis();
 
+    if (!audioFileName.endsWith(".wav")) {
+      logger.error("huh? asking for images for " +audioFileName);
+
+    }
     // open the audio file
     AudioFile audioFile;
     try {
       audioFile = new AudioFile(audioFileName);
-    } catch (IOException e) {
-      logger.error("reading from " + audioFileName + " got " + e, e);
+    } catch (Exception e) {
+      logger.error("writeImageTypes reading from " + audioFileName + " got " + e, e);
       return Collections.emptyMap();
     }
 

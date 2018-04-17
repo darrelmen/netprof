@@ -355,12 +355,12 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
    * @param userid
    * @param projid
    * @param listsICreated
    * @param visitedLists
    * @return
+   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
    */
   @Override
   public Collection<IUserListLight> getNamesForUser(int userid,
@@ -376,8 +376,13 @@ public class UserListManager implements IUserListManager {
                                                      boolean listsICreated,
                                                      boolean visitedLists) {
     List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
-    logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
+    //logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
     return getSimpleLists(lists);
+  }
+
+  @Override
+  public Collection<IUserList> getAllQuizUserList(int projid, int userID) {
+    return getSimpleLists(userListDAO.getSlickAllQuiz(projid, userID));
   }
 
   @NotNull
@@ -409,12 +414,6 @@ public class UserListManager implements IUserListManager {
     });
     return names;
   }
-
-  @Override
-  public Collection<IUserList> getAllQuizUserList(int projid, int userID) {
-    return getSimpleLists(userListDAO.getSlickAllQuiz(projid, userID));
-  }
-
 
   @Nullable
   private String getUserName(int userid, Map<Integer, String> idToName) {
@@ -601,7 +600,10 @@ public class UserListManager implements IUserListManager {
       listsForUser = userListDAO.getAllByUser(userid, projid);
       long now = System.currentTimeMillis();
 
-      logger.info("getListsForUser took " + (now - then) + " found " + listsForUser.size() + " created by " + userid);
+      if (DEBUG || now - then > 50) {
+        logger.info("getListsForUser took " + (now - then) + " to find " + listsForUser.size() + " created by " + userid);
+      }
+
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -616,7 +618,10 @@ public class UserListManager implements IUserListManager {
       long then = System.currentTimeMillis();
       Collection<UserList<CommonShell>> listsForUser1 = userListDAO.getVisitedLists(userid, projid);
       long now = System.currentTimeMillis();
-      logger.info("getListsForUser took " + (now - then) + "found " + listsForUser1.size() + " visited by " + userid);
+
+      if (DEBUG || now - then > 50) {
+        logger.info("getListsForUser took " + (now - then) + " to find " + listsForUser1.size() + " visited by " + userid);
+      }
 
       for (UserList<CommonShell> userList : listsForUser1) {
         if (!ids.contains(userList.getID())) {

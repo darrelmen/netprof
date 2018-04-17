@@ -40,6 +40,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -71,8 +72,8 @@ public class FlashcardRecordButton extends RecordButton {
   private final ExerciseController controller;
   private static final boolean DEBUG = false;
   private static int count = 0;
-
-  int id = 0;
+  private final String name;
+  private int id = 0;
 
   /**
    * @param delay
@@ -89,6 +90,8 @@ public class FlashcardRecordButton extends RecordButton {
                                final String instance) {
     super(delay, recordingListener, true, controller.getProps());
     id = count++;
+    name = "FlashcardRecordButton_";
+
     if (addKeyBinding) {
       addKeyListener(controller, instance);
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
@@ -109,12 +112,35 @@ public class FlashcardRecordButton extends RecordButton {
     getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
   }
 
+/*  @Override
+  protected void onDetach() {
+    super.onDetach();
+    removeListener();
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    removeListener();
+  }
+*/
+  private void removeListener() {
+    if (listener != null) {
+      controller.removeKeyListener(listener);
+      listener = null;
+    } else {
+      logger.info("removeListener no listener ");
+    }
+  }
+
+  private KeyPressHelper.KeyListener listener = null;
+
   private void addKeyListener(ExerciseController controller, final String instance) {
     if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
-    KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
+    listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
-        return "FlashcardRecordButton_" + instance;
+        return name;
       }
 
       @Override
@@ -132,6 +158,7 @@ public class FlashcardRecordButton extends RecordButton {
     };
     controller.addKeyListener(listener);
   }
+
 
   private void checkKeyDown(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
@@ -217,11 +244,14 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected boolean shouldIgnoreKeyPress() {
     boolean notAttached = !isAttached();
-    if (notAttached) logger.warning("not attached? " + getElement().getId() + " = " + id);
+    if (notAttached) {
+      logger.info("shouldIgnoreKeyPress not attached? " + getElement().getId() + " = " + id);
+      removeListener();
+    }
     boolean hidden = checkHidden(getElement().getId());
-    if (hidden) logger.warning("hidden");
+    if (hidden) logger.info("hidden");
     boolean noUser = controller.getUser() == -1;
-    if (noUser) logger.warning("noUser");
+    if (noUser) logger.info("noUser");
     boolean b = notAttached || hidden || noUser;
     return b;
   }

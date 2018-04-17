@@ -134,7 +134,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
   final String instance;
- protected final ListInterface exerciseList;
+  protected final ListInterface exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
@@ -478,7 +478,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     contentMiddle.getElement().setId("Focusable_content");
 
     contentMiddle.addClickHandler(event -> gotCardClick(contentMiddle));
-  //  addMouseOverHandler(contentMiddle, event -> gotMouseOver());
+    //  addMouseOverHandler(contentMiddle, event -> gotMouseOver());
     return contentMiddle;
   }
 
@@ -850,7 +850,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
    */
-  private ControlGroup getAudioGroup(final ControlState controlState) {
+  protected ControlGroup getAudioGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup(PLAY);
     Icon widget = new Icon(IconType.VOLUME_UP);
     widget.addStyleName("leftFiveMargin");
@@ -1154,12 +1154,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    logger.info("addAudioBindings : click on audio playback panel...");
+    //  logger.info("addAudioBindings : click on audio playback panel...");
     focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));
     focusPanel.addFocusHandler(event -> {
-      logger.warning("addAudioBindings set focus false on " +focusPanel.getElement().getId());
+      //  logger.warning("addAudioBindings set focus false on " +focusPanel.getElement().getId());
       focusPanel.setFocus(false);
     });
   }
@@ -1169,7 +1169,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    *
    * @param event
    */
-  void onClickOnCard(ClickEvent event) {
+  private void onClickOnCard(ClickEvent event) {
     setAutoPlay(false);
     playRefLater();
     event.getNativeEvent().stopPropagation();

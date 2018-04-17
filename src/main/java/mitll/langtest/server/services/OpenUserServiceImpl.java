@@ -288,7 +288,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         int id = sessionUser.getID();
 
         if (db.getProjectDAO().exists(projectid)) {
-          logger.info("setProject set project (" + projectid + ") for " + sessionUser);
+          logger.info("setProject set project (" + projectid + ") for '" + sessionUser + "' = " + id);
           db.getProjectManagement().configureProjectByID(projectid);
           db.rememberUsersCurrentProject(id, projectid);
           db.setStartupInfo(sessionUser, projectid);

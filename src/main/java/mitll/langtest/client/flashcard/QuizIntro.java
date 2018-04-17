@@ -17,9 +17,8 @@ import java.util.Map;
 
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
-  //  private static final String GENDER_GROUP = "GenderGroup";
   private static final String START = "Start!";
-  private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
+ // private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
   public static final String DRY_RUN = "Dry Run";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
@@ -148,20 +147,22 @@ public class QuizIntro extends DivWidget {
       }
     });
     idToList.forEach((k, v) -> {
-      boolean isDry = v.getName().startsWith(DRY_RUN);
-      if (isDry) {
+      if (isDry(v)) {
         maybeAddChoice(choices, v);
       }
     });
 
     idToList.forEach((k, v) -> {
-      boolean isDry = v.getName().startsWith(DRY_RUN);
-      if (!isDry) {
+      if (!isDry(v)) {
         maybeAddChoice(choices, v);
       }
     });
 
     return choiceDiv;
+  }
+
+  private boolean isDry(IUserList v) {
+    return v.getName().startsWith(DRY_RUN);
   }
 
   private void maybeAddChoice(ListBox choices, IUserList v) {

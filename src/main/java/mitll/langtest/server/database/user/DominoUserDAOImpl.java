@@ -146,6 +146,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IUserProjectDAO userProjectDAO;
 
   private IProjectManagement projectManagement;
+  private Group primaryGroup = null;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       //  .concurrencyLevel(4)
@@ -452,7 +453,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
-  private Group primaryGroup = null;
 
   /**
    * Need a group - just use the first one.
@@ -942,7 +942,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     if (user.isPoly()) {
-      logger.info("toUser user " + user.getUserID() + " is a polyglot user.");
+      logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
       handlePolyglotUser(dominoUser, permissionSet, user);
     } else {
 //      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
@@ -961,10 +961,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (mostRecentByUser == -1) {  // none yet...
       if (projectAssignment != -1) {
+        logger.info("handlePolyglotUser 1 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
         userProjectDAO.upsert(id, projectAssignment);
       }
     } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
-      logger.info("handlePolyglotUser before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
+      logger.info("handlePolyglotUser 2 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
       userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
     }
   }

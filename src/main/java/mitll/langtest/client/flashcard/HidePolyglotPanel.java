@@ -36,6 +36,10 @@ public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> 
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
+
+    if (controller.getUserState().isAdmin()) {
+      rightColumn.add(getAudioGroup(controlState));
+    }
     rightColumn.add(getKeyBinding());
     return rightColumn;
   }

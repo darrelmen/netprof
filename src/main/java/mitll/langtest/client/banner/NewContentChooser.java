@@ -56,7 +56,6 @@ public class NewContentChooser implements INavigation {
 
   private VIEWS currentSection = VIEWS.NONE;
 
-
   /**
    * @param controller
    * @see InitialUI#makeNavigation
@@ -94,11 +93,11 @@ public class NewContentChooser implements INavigation {
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
     //   logger.info("getCurrentView currentView " + currentView);
-    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView() : VIEWS.valueOf(currentView);
+    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
-//    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+    //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
     List<User.Permission> requiredPerms = currentStoredView.getPerms();
     userPerms.retainAll(requiredPerms);
 
@@ -112,9 +111,18 @@ public class NewContentChooser implements INavigation {
     return currentStoredView;
   }
 
+  private boolean isNPQUser() {
+    boolean isNPQ = false;
+    String affiliation = controller.getUserState().getCurrent().getAffiliation();
+    if (affiliation != null && affiliation.equalsIgnoreCase("NPQ")) {
+      isNPQ = true;
+    }
+    return isNPQ;
+  }
+
   @NotNull
-  private VIEWS getInitialView() {
-    return isPolyglotProject() ? DRILL : LEARN;
+  private VIEWS getInitialView(boolean npqUser) {
+    return npqUser ? QUIZ : isPolyglotProject() ? DRILL : LEARN;
   }
 
   private boolean isPolyglotProject() {
@@ -123,8 +131,8 @@ public class NewContentChooser implements INavigation {
   }
 
   /**
-   * @see StatsFlashcardFactory#showDrill
    * @param view
+   * @see StatsFlashcardFactory#showDrill
    */
   @Override
   public void showView(VIEWS view) {
@@ -278,8 +286,8 @@ public class NewContentChooser implements INavigation {
   }
 
   /**
-   * @see #showQuiz(boolean)
    * @param fromClick
+   * @see #showQuiz(boolean)
    */
   private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
@@ -429,7 +437,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showQuiz(String listName, int listID) {
     History.newItem(LISTS + "=" + listID);
-    logger.info("showQuiz " + listName + " " + listID);
+    // logger.info("showQuiz " + listName + " " + listID);
     banner.showQuiz();
   }
 

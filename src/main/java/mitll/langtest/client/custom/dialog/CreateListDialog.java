@@ -65,10 +65,17 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  public static final int MIN_DURATION = 1;
+  public static final int DEFAULT_DURATION = 10;
+  public static final String PUBLIC_QUIZZES = "Public quizzes can be seen by all students.";
+  private final Logger logger = Logger.getLogger("CreateListDialog");
+
+
   public static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
   public static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
   public static final int MAX_DURATION = 21;
-  private final Logger logger = Logger.getLogger("CreateListDialog");
+  public static final int MAX_QUIZ_SIZE = 110;
+  public static final int MIN_QUIZ_SIZE = 0;
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
   private static final String CREATE_A_NEW_QUIZ = "Create a new quiz.";
@@ -98,6 +105,7 @@ public class CreateListDialog extends BasicDialog {
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
+  private ListBox durationList;
 
   /**
    * @param listView
@@ -203,7 +211,7 @@ public class CreateListDialog extends BasicDialog {
 
       row2 = new DivWidget();
       child.add(row2);
-      quizOptions2.add(getDurationChoices());
+      quizOptions2.add(durationList = getDurationChoices());
 
       child.add(quizOptions2);
       quizOptions2.setVisible(isQuiz);
@@ -243,7 +251,7 @@ public class CreateListDialog extends BasicDialog {
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftTenMargin");
 
-    for (int i = 10; i < 110; i += 10) {
+    for (int i = MIN_QUIZ_SIZE; i < MAX_QUIZ_SIZE; i += 10) {
       w.addItem("" + i);
     }
     w.setSelectedValue("100");
@@ -259,13 +267,13 @@ public class CreateListDialog extends BasicDialog {
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftTenMargin");
 
-    for (int i = 1; i < MAX_DURATION; i++) {
+    for (int i = MIN_DURATION; i < MAX_DURATION; i++) {
       w.addItem("" + i);
     }
     if (isEditing()) {
       w.setSelectedValue("" + current.getDuration());
     } else {
-      w.setSelectedValue("10");
+      w.setSelectedValue("" + DEFAULT_DURATION);
     }
     w.addChangeHandler(event -> gotListSelection2(w.getValue()));
     return w;
@@ -279,15 +287,42 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private int quizSize = 100;
+  private boolean madeSelection = false;
   private int duration = 10;
 
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
+    if (!madeSelection && false) {
+      duration = Math.max(1, quizSize / 10);
+
+      Scheduler.get().scheduleDeferred(() ->
+          {
+            durationList.setSelectedValue("" + duration);
+            durationList.setVisible(false);
+
+
+          //  logger.info("2 duration sel " + durationList.getSelectedIndex());
+
+         //   durationList.setVisible(true);
+          }
+      );
+      Scheduler.get().scheduleDeferred(() ->
+          {
+
+           // logger.info("3 duration sel " + durationList.getSelectedIndex());
+
+            durationList.setVisible(true);
+          }
+
+      );
+//      logger.info("1 duration sel " + durationList.getSelectedIndex());
+    }
     //   logger.info("got " + quizSize);
   }
 
   private void gotListSelection2(String value) {
     duration = Integer.parseInt(value);
+    madeSelection = true;
     //   logger.info("got " + quizSize);
   }
 
@@ -297,7 +332,7 @@ public class CreateListDialog extends BasicDialog {
     FluidRow row;
     row = new FluidRow();
     child.add(row);
-    modeDep = new Heading(4, "Public quizzes can be seen by all students.");
+    modeDep = new Heading(4, PUBLIC_QUIZZES);
     modeDep.setHeight(14 + "px");
     modeDep.getElement().getStyle().setColor("blue");
     modeDep.addStyleName("leftFiveMargin");

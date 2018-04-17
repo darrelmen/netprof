@@ -2210,8 +2210,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @see QuizHelper#clearListSelection
    */
   public void clearListSelection() {
-    logger.info("in list ---> clearListSelection ");
-
+    //logger.info("in list ---> clearListSelection ");
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(LISTS);
     setHistory(candidate);

@@ -53,6 +53,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class KeyPressHelper {
+  public static final String OBJECT_KEYBOARD_EVENT = "[object KeyboardEvent]";
   private final Logger logger = Logger.getLogger("KeyPressHelper");
 
   private final boolean removeOnEnter;
@@ -75,9 +76,9 @@ public class KeyPressHelper {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest
    * @param removeOnPress
    * @param hearAllEvents
+   * @see mitll.langtest.client.LangTest
    */
   public KeyPressHelper(boolean removeOnPress, boolean hearAllEvents) {
     this(removeOnPress);
@@ -85,22 +86,17 @@ public class KeyPressHelper {
   }
 
   public void addKeyHandler(final Button button) {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
-
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       int keyCode = ne.getKeyCode();
-                                                       boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-                                                       if (isEnter && event.getTypeInt() == 512 &&
-                                                           "[object KeyboardEvent]".equals(ne.getString())) {
-                                                         ne.preventDefault();
-                                                         ne.stopPropagation();
-                                                         userHitEnterKey(button);
-                                                       }
-                                                     }
-                                                   });
+    keyHandler = Event.addNativePreviewHandler(event -> {
+      NativeEvent ne = event.getNativeEvent();
+      int keyCode = ne.getKeyCode();
+      boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+      if (isEnter && event.getTypeInt() == 512 &&
+          OBJECT_KEYBOARD_EVENT.equals(ne.getString())) {
+        ne.preventDefault();
+        ne.stopPropagation();
+        userHitEnterKey(button);
+      }
+    });
 
     //logger.info("addKeyHandler made key handler " + keyHandler);
   }
@@ -110,40 +106,50 @@ public class KeyPressHelper {
   }
 
   public void addKeyHandler(KeyListener handler) {
-    listeners.put(handler.getName(), handler);
+    String name = handler.getName();
+    KeyListener put = listeners.put(name, handler);
+    boolean already = put != null;
+    logger.info("addKeyHandler " + name + " now " + listeners.size() + " already " + already);
     if (listeners.size() > 3) {
-      logger.info("addKeyHandler added  " + handler.getName() + " now " + this);
+      logger.info("addKeyHandler added  " + name + " now " + this);
     }
   }
 
+  public boolean removeKeyHandler(KeyListener listener) {
+    int before = listeners.size();
+    boolean b = listeners.remove(listener.getName()) != null;
+    logger.info("removeKeyHandler now " + listeners.size() + " listeners vs " + before);
+    return b;
+  }
+
+  public void clearListeners() {
+    listeners.clear();
+  }
+
   private void makeKeyHandler() {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                   Event.NativePreviewHandler() {
+    keyHandler = Event.addNativePreviewHandler(event -> {
+      NativeEvent ne = event.getNativeEvent();
+      int typeInt = event.getTypeInt();
 
-                                                     @Override
-                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                       NativeEvent ne = event.getNativeEvent();
-                                                       int typeInt = event.getTypeInt();
-
-                                                       if ((typeInt == 0x00080 || // keydown
-                                                           typeInt == 0x00200) // keyup
-                                                           &&
-                                                           "[object KeyboardEvent]".equals(ne.getString())) {
-                                                         gotEvent(ne, typeInt == 0x00080);
-                                                       }
-                                                     }
-                                                   });
+      if ((typeInt == 0x00080 || // keydown
+          typeInt == 0x00200) // keyup
+          &&
+          OBJECT_KEYBOARD_EVENT.equals(ne.getString())) {
+        gotEvent(ne, typeInt == 0x00080);
+      }
+    });
   }
 
   private void gotEvent(NativeEvent ne, boolean isKeyDown) {
     for (KeyListener keyPressHandler : listeners.values()) {
-   //   logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
+      //   logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
       keyPressHandler.gotPress(ne, isKeyDown);
     }
   }
 
   public interface KeyListener {
     String getName();
+
     void gotPress(NativeEvent ne, boolean isKeyDown);
   }
 
@@ -167,7 +173,7 @@ public class KeyPressHelper {
   }
 
   public static class ButtonClickEvent extends ClickEvent {
-        /*To call click() function for Programmatic equivalent of the user clicking the button.*/
+    /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
   public String toString() {

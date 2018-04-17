@@ -1009,17 +1009,19 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     List<String> typesInOrder = getTypesFromRequest(typeToSelection);
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
-    logger.info("getTypeToValues typesToInclude1 " + typesToInclude1);
-    logger.info("getTypeToValues request is      " + typeToSelection);
+    if (DEBUG) {
+      logger.info("getTypeToValues typesToInclude1 " + typesToInclude1);
+      logger.info("getTypeToValues request is      " + typeToSelection);
+    }
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-    logger.info("getTypeToValues typeToMatches is " + typeToMatches);
+    if (DEBUG)  logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
     int userListID = request.getUserListID();
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
-      logger.info("getTypeToValues back off including  " + typesToInclude1);
+      if (DEBUG) logger.info("getTypeToValues back off including  " + typesToInclude1);
       for (Pair pair : typeToSelection) {
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
@@ -1027,12 +1029,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           typeToSelection2.add(new Pair(pair.getProperty(), "all"));
         }
       }
-      logger.info("getTypeToValues try search again with " + typeToSelection2);
+
+      if (DEBUG)  logger.info("getTypeToValues try search again with " + typeToSelection2);
 
       Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2);
       return new FilterResponse(request.getReqID(), typeToMatches1, typesToInclude1, userListID);
     } else {
-      logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
+      if (DEBUG) logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
 
       return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
     }
