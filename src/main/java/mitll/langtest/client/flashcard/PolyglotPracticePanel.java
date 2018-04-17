@@ -40,15 +40,16 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final int NEXT_EXERCISE_DELAY = 750;
   private static final int INCORRECT_BEFORE_ADVANCE = 3;
 
-  private static final int DRY_RUN_MINUTES = 1;
-  private static final int ROUND_MINUTES = 10;
+//  private static final int DRY_RUN_MINUTES = 1;
+//  private static final int ROUND_MINUTES = 10;
   private static final int MINUTE = 60 * 1000;
-  private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * MINUTE;
-  private static final int ROUND_TIME = ROUND_MINUTES * MINUTE;
+ // private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * MINUTE;
+ // private static final int ROUND_TIME = ROUND_MINUTES * MINUTE;
   private static final int CHART_HEIGHT = 120;
   private static final String TIME_LEFT = "Time left";
 
   private static final long ONE_MIN = (60L * 1000L);
+  private SpeedChoices speedChoices;
   private Label timeLeft;
 
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
@@ -68,7 +69,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
   }
 
-  protected void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
+  private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
     hideClickToFlip();
   }
@@ -84,7 +85,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
                                                 ExerciseController controller, Panel toAddTo) {
     super.addRecordingAndFeedbackWidgets(exerciseID, controller, toAddTo);
-
     AudioAnswer answer = sticky.getLastAnswer(exerciseID);
     if (answer != null) {
       showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
@@ -94,8 +94,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void addRowBelowPrevNext(DivWidget toAddTo) {
-    // String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-    //  logger.info("logException stack " + exceptionAsString);
     toAddTo.add(getChart(getRoundTime()));
     super.addRowBelowPrevNext(toAddTo);
   }
@@ -170,8 +168,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     return b;
   }
 
-  protected void playIncorrect() {
-  }
+  protected void playIncorrect() {}
 
   /**
    * @return null if we're not allowed to play audio.
@@ -180,6 +177,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   String getRefAudioToPlay() {
     if (speedChoices == null) {
+ //     logger.info("getRefAudioToPlay no speed choices ");
       return null;
     } else {
       boolean regular = speedChoices.isRegular();

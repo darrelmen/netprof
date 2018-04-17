@@ -644,11 +644,11 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public List<Project> getPolyglotMatchingProjects(Language languageMatchingGroup) {
+  public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
     List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
     return projectByLangauge.stream()
         .filter(project ->
-            isPolyglot(project) &&
+            (!isPoly || isPolyglot(project)) &&
                 isProduction(project))
         .collect(Collectors.toList());
   }

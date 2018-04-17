@@ -65,7 +65,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private static final String N_A = "N/A";
 
   private final FlashcardContainer statsFlashcardFactory;
-  SpeedChoices speedChoices;
   final StickyState sticky;
   private Label remain, incorrectBox, correctBox, pronScore;
 

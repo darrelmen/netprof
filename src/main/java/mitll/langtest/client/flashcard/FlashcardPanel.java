@@ -850,7 +850,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
    */
-  protected ControlGroup getAudioGroup(final ControlState controlState) {
+  ControlGroup getAudioGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup(PLAY);
     Icon widget = new Icon(IconType.VOLUME_UP);
     widget.addStyleName("leftFiveMargin");
@@ -1045,7 +1045,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
     {
-      //  FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
       Widget englishPhrase = makeEnglishPhrase(englishTranslations);
       english = englishPhrase;
       moveEnglishForComment(englishPhrase);
@@ -1154,7 +1153,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    //  logger.info("addAudioBindings : click on audio playback panel...");
+    logger.info("addAudioBindings : click on audio playback panel...");
     focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));

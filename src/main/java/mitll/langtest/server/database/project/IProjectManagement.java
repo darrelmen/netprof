@@ -85,7 +85,7 @@ public interface IProjectManagement {
   Project getProject(int projectid);
   Project getProjectByName(String name);
   List<Project> getProjectByLangauge(Language name);
-  List<Project> getPolyglotMatchingProjects(Language languageMatchingGroup);
+  List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly);
 
   Collection<Project> getProjects();
 

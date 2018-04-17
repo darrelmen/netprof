@@ -943,8 +943,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (user.isPoly()) {
       logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
-      handlePolyglotUser(dominoUser, permissionSet, user);
-    } else {
+      handleAffiliationUser(dominoUser, permissionSet, user,true);
+    } else if (user.isNPQ()) {
+      handleAffiliationUser(dominoUser, permissionSet, user,false);
+    }
+    else {
 //      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
     }
     user.setPermissions(permissionSet);
@@ -952,12 +955,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return user;
   }
 
-  private void handlePolyglotUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user) {
-    permissionSet.add(User.Permission.POLYGLOT);
+  private void handleAffiliationUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user, boolean isPoly) {
+    if (isPoly) permissionSet.add(User.Permission.POLYGLOT);
 
     int id = user.getID();
     int mostRecentByUser = userProjectDAO.getCurrentProjectForUser(id);
-    int projectAssignment = getProjectAssignment(dominoUser, id);
+    int projectAssignment = getProjectAssignment(dominoUser, id, isPoly);
 
     if (mostRecentByUser == -1) {  // none yet...
       if (projectAssignment != -1) {
@@ -975,21 +978,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    *
    * @param dominoUser
    * @param id
+   * @param isPoly
    * @return
-   * @see #handlePolyglotUser
+   * @see #handleAffiliationUser
    */
-  private int getProjectAssignment(DBUser dominoUser, int id) {
+  private int getProjectAssignment(DBUser dominoUser, int id, boolean isPoly) {
     Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
     int projID = -1;
     if (!secondaryGroups.isEmpty()) {
       Group next = secondaryGroups.iterator().next();
       Language languageMatchingGroup = getLanguageMatchingGroup(next);
       if (languageMatchingGroup != Language.UNKNOWN) {
-        List<Project> collect = projectManagement.getPolyglotMatchingProjects(languageMatchingGroup);
+        List<Project> collect = projectManagement.getMatchingProjects(languageMatchingGroup, isPoly);
 
         if (!collect.isEmpty()) {
           if (collect.size() > 1) {
-            logger.info("getProjectAssignment found multiple polyglot projects ");
+            logger.info("getProjectAssignment found multiple projects ");
           }
 
           projID = collect.iterator().next().getID();

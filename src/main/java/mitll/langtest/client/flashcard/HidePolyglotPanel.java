@@ -9,10 +9,8 @@ import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
-public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L,T> {
-
+public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
   /**
-   * @see HidePolyglotFactory#getCurrentFlashcard
    * @param statsFlashcardFactory
    * @param controlState
    * @param controller
@@ -21,15 +19,16 @@ public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> 
    * @param e
    * @param stickyState
    * @param exerciseListToUse
+   * @see HidePolyglotFactory#getCurrentFlashcard
    */
   public HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
-                    ControlState controlState,
-                    ExerciseController controller,
-                    MySoundFeedback soundFeedback,
-                    PolyglotDialog.PROMPT_CHOICE prompt,
-                    CommonAnnotatable e,
-                    StickyState stickyState,
-                    ListInterface<L,T> exerciseListToUse) {
+                           ControlState controlState,
+                           ExerciseController controller,
+                           MySoundFeedback soundFeedback,
+                           PolyglotDialog.PROMPT_CHOICE prompt,
+                           CommonAnnotatable e,
+                           StickyState stickyState,
+                           ListInterface<L, T> exerciseListToUse) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
   }
 
@@ -39,6 +38,7 @@ public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> 
 
     if (controller.getUserState().isAdmin()) {
       rightColumn.add(getAudioGroup(controlState));
+      addControlsBelowAudio(controlState, rightColumn);
     }
     rightColumn.add(getKeyBinding());
     return rightColumn;
@@ -46,6 +46,7 @@ public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> 
 
   /**
    * No comment - no move to the left...
+   *
    * @param englishPhrase
    */
   @Override
@@ -69,6 +70,10 @@ public class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> 
    * @return
    */
   Widget getHasAudioIndicator(boolean hasRefAudio) {
-    return null;
+    if (controller.getUserState().isAdmin()) {
+      return super.getHasAudioIndicator(hasRefAudio);
+    } else {
+      return null;
+    }
   }
 }
