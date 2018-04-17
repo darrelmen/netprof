@@ -66,6 +66,7 @@ public class AudioConversion extends AudioBase {
 //  private final long trimMillisAfter;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_DETAIL = true;
   private boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
 
@@ -570,7 +571,7 @@ public class AudioConversion extends AudioBase {
    * @see #writeMP3
    */
   private boolean convertToMP3FileAndCheck(String lamePath, String pathToAudioFile, String mp3File, TrackInfo trackInfo) {
-    if (DEBUG) logger.debug("convertToMP3FileAndCheck convert " + pathToAudioFile + " to " + mp3File);
+    if (DEBUG_DETAIL) logger.info("convertToMP3FileAndCheck convert " + pathToAudioFile + " to " + mp3File);
 
     String title = trackInfo.getTitle();
     if (title != null && title.length() > 30) {
@@ -583,7 +584,7 @@ public class AudioConversion extends AudioBase {
         "--tc", trackInfo.getComment(),
         "--tl", trackInfo.getAlbum());
     try {
-//      logger.debug("running lame" + lameProc.command());
+      if (DEBUG_DETAIL) logger.info("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
     } catch (IOException e) {
       //  logger.error("Couldn't run " + lameProc);

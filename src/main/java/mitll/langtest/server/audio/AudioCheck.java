@@ -84,7 +84,6 @@ public class AudioCheck {
   boolean trimAudio;
 
   /**
-   *
    * @param trimAudio
    * @param minDynamicRange
    */
@@ -133,7 +132,7 @@ public class AudioCheck {
   private double getDurationInSeconds(AudioInputStream audioInputStream) {
     long frames = audioInputStream.getFrameLength();
     AudioFormat format = audioInputStream.getFormat();
-    return (frames + 0.0d) / format.getFrameRate();
+    return Long.valueOf(frames).floatValue() / format.getFrameRate();
   }
 
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
@@ -199,10 +198,10 @@ public class AudioCheck {
 */
 
   /**
-   * @see #addDynamicRange
-   * @see #getDNR
    * @param file
    * @return
+   * @see #addDynamicRange
+   * @see #getDNR
    */
   private DynamicRange.RMSInfo getDynamicRange(File file) {
     String highPassFilterFile = new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE)
@@ -228,22 +227,22 @@ public class AudioCheck {
   /**
    * Verify audio messages
    *
-   * @param file audio byte array with header
+   * @param wavFile audio byte array with header
    * @return true if well formed
    * @see AudioConversion#isValid(File, boolean, boolean)
    * @see #checkWavFile(File, boolean)
    * @see #checkWavFileRejectAnyTooLoud(File, boolean)
    */
-  private ValidityAndDur checkWavFileWithClipThreshold(File file, boolean usePercent, boolean quietAudioOK) {
+  private ValidityAndDur checkWavFileWithClipThreshold(File wavFile, boolean usePercent, boolean quietAudioOK) {
     AudioInputStream ais = null;
     try {
-      ais = AudioSystem.getAudioInputStream(file);
+      ais = AudioSystem.getAudioInputStream(wavFile);
       AudioFormat format = ais.getFormat();
-      //logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
+      //logger.info("wavFile " + wavFile.getName() + " sample rate " + format.getSampleRate());
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
-        logger.warn("huh? file " + file.getAbsoluteFile() + " is in big endian format?");
+        logger.warn("checkWavFileWithClipThreshold huh? wavFile " + wavFile.getAbsoluteFile() + " is in big endian format?");
       }
       int fsize = format.getFrameSize();
       assert (fsize == 2);
@@ -252,7 +251,14 @@ public class AudioCheck {
 
       long frameLength = ais.getFrameLength();
       if (frameLength < MinRecordLength) {
-        logger.debug("INFO: audio recording too short (Length: " + frameLength + ") < min (" + MinRecordLength + ") ");
+
+        logger.warn("checkWavFileWithClipThreshold: audio recording too short" +
+            "\n\t(Length:   " + frameLength + ") < min (" + MinRecordLength + ") " +
+            "\n\tFrame size " + fsize +
+            "\n\tformat     " + format+
+            "\n\tFrame rate " + format.getFrameRate()+
+            "\n\tduration   " + dur
+        );
         return new ValidityAndDur(Validity.TOO_SHORT, dur, false);
       }
 
@@ -261,7 +267,7 @@ public class AudioCheck {
       int bufSize = WinSize * fsize;
       byte[] buf = new byte[bufSize];
       int countClipped = 0;
-     // int cc = 0;
+      // int cc = 0;
 
       short max = 0;
       short nmax = 0;
@@ -276,9 +282,9 @@ public class AudioCheck {
             float r = ((float) tmp) / MAX_VALUE;
             if (tmp > clippedThreshold || tmp < clippedThresholdMinus) {//.abs(r) > 0.98f) {
               countClipped++;
-       /*       logger.debug("at " + frameIndex + " s " + s + " i " + i + " value was " + tmp + " and r " + r);*/
+              /*       logger.debug("at " + frameIndex + " s " + s + " i " + i + " value was " + tmp + " and r " + r);*/
             }
-       //     if (tmp > ct) cc++;
+            //     if (tmp > ct) cc++;
             if (tmp > max) max = tmp;
             if (tmp < nmax) nmax = tmp;
 
@@ -346,8 +352,8 @@ public class AudioCheck {
   }
 
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#decodeOneExercise
    * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#decodeOneExercise
    */
   public float getMinDNR() {
     return FORGIVING_MIN_DNR;

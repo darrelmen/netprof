@@ -117,7 +117,7 @@ public class DynamicRange {
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
-        logger.warn("huh? file " + file.getAbsoluteFile() + " is in big endian format?");
+        logger.warn("getDynamicRange huh? file " + file.getAbsoluteFile() + " is in big endian format?");
       }
       int fsize = format.getFrameSize();
       assert (fsize == 2);

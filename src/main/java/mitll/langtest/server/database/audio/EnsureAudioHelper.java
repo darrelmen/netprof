@@ -60,12 +60,10 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private static final String MP3 = ".mp3";
   private static final int MP3_LENGTH = MP3.length();
 
-
   private static final int WARN_THRESH = 10;
 
-
   private static final boolean DEBUG = false;
-  private static final boolean WARN_MISSING_FILE = false;
+//  private static final boolean WARN_MISSING_FILE = false;
 
   private static final int CHECKED_INTERVAL = 1;
   public static final String UNKNOWN = "unknown";
@@ -242,11 +240,10 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
     return filePath;
   }
-
-  private String getUserID(int user) {
+/*  private String getUserID(int user) {
     User userBy = getUserBy(user);
     return getUserIDForgiving(user, userBy);
-  }
+  }*/
 
   private String getUserIDForgiving(int user, User userBy) {
     return userBy == null ? "" + user : userBy.getUserID();
@@ -270,7 +267,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
-      if (DEBUG) logger.debug("ensureMP3 : trying " + wavFile);
+      if (DEBUG || true) logger.debug("ensureMP3 : trying " + wavFile);
       // File test = new File(parent + File.separator + language, wavFile);
       parent = audioConversion.getParentForFilePathUnderBaseAudio(wavFile, language, parent, serverProps.getAudioBaseDir());
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
@@ -304,6 +301,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    */
   @Override
   public String getWavAudioFile(String audioFile, String language) {
+    String reqFile = audioFile;
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
 //      logger.info("getWavAudioFile " + audioFile);
@@ -323,9 +321,14 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
       }
     }
 
-
     String s = ensureWAV(audioFile);
-    logger.info("getWavAudioFile " + audioFile + " = " + s);
+
+    logger.info("getWavAudioFile" +
+        "\n\treqFile      " + reqFile +
+        "\n\taudio before " + audioFile +
+        "\n\tafter        " + s
+    );
+
     return s;
   }
 
