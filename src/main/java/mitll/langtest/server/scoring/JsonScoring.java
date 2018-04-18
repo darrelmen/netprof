@@ -224,8 +224,6 @@ public class JsonScoring {
    * @param deviceType
    * @param device
    * @return
-   * @paramx doFlashcard
-   * @paramx allowAlternates
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(int reqid,
@@ -278,12 +276,16 @@ public class JsonScoring {
   /**
    * @param wavFile
    * @param trackInfo
-   * @see  #ensureMP3Later
+   * @see #ensureMP3Later
    */
   private void writeCompressedVersions(String wavFile, TrackInfo trackInfo) {
     File absolutePathToWav = new File(wavFile);
-    if (!absolutePathToWav.exists()) logger.error("no file at " + absolutePathToWav);
-    String s = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).writeCompressedVersions(absolutePathToWav, false, trackInfo);
+    if (!absolutePathToWav.exists()) {
+      logger.error("no file at " + absolutePathToWav);
+    }
+
+    new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange())
+        .writeCompressedVersions(absolutePathToWav, false, trackInfo);
   }
 
   private String getUserID(int userid) {

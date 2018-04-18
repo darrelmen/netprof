@@ -99,7 +99,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       }
       return userInfo;
     } else {
-      throw getRestricted("performance report");
+      throw getRestricted("getUsersWithRecordings : performance report");
     }
   }
 
@@ -109,7 +109,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @param listid
    * @param req
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, ShowTab, boolean, int)
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
    */
   @Override
   public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)

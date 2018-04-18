@@ -42,6 +42,7 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -169,7 +170,7 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
-   * @see IProjectManagement#configureProject
+   * @see ProjectManagement#configureProject
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
     if (asrScoring.isDictEmpty()) {
@@ -429,7 +430,7 @@ public class AudioFileHelper implements AlignDecode {
 
       float score,
       DecoderOptions options) {
-    AudioCheck.ValidityAndDur validity = audioConversion.isValid(file, false, isQuietAudioOK());
+    AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "");
 

@@ -66,7 +66,7 @@ public class AudioConversion extends AudioBase {
 //  private final long trimMillisAfter;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_DETAIL = true;
+  private static final boolean DEBUG_DETAIL = false;
   private boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
 
@@ -196,6 +196,11 @@ public class AudioConversion extends AudioBase {
     return removeSuffix(wavFile.getName());
   }
 
+  /**
+   * @param wavFile
+   * @return
+   * @see AudioCheck#getDynamicRange
+   */
   public String getHighPassFilterFile(String wavFile) {
     try {
       return doHighPassFilter(wavFile);
@@ -255,13 +260,14 @@ public class AudioConversion extends AudioBase {
   }
 
   private File copyFileAndDeleteOriginal(final File wavFile, final String sourceFile, final String suffix) throws IOException {
-//    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
+    if (DEBUG)
+      logger.info("copyFileAndDeleteOriginal orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
     String name1 = wavFile.getName();
     String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + WAV;
 
     File replacement = new File(dest);
     File srcFile = new File(sourceFile);
-//    logger.info("srcFile " + srcFile + " exists " + srcFile.exists());
+    if (DEBUG) logger.info("copyFileAndDeleteOriginal srcFile " + srcFile + " exists " + srcFile.exists());
     copyAndDeleteOriginal(srcFile, replacement);
 
     return replacement;
@@ -437,8 +443,10 @@ public class AudioConversion extends AudioBase {
     try {
       String absolutePath = absolutePathToWav.getAbsolutePath();
       String mp3File = getMP3ForWav(absolutePath);
+      //logger.info("writeCompressedVersions started  writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
       if (!writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)) return FILE_MISSING;
       if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
+      // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
       return mp3File;
     } catch (Exception e) {
       logger.error("writeCompressedVersions got " + e, e);
@@ -453,11 +461,7 @@ public class AudioConversion extends AudioBase {
   private boolean writeMP3(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, String mp3File) {
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
-      if (DEBUG)
-        logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav);
-
       if (DEBUG) logger.debug("writeMP3 run lame on " + absolutePathToWav + " making " + mp3File);
-
       if (!convertToMP3FileAndCheck(getLame(), absolutePathToWav.getAbsolutePath(), mp3File, trackInfo)) {
         if (spew2++ < 10)
           logger.error("writeMP3 File missing for " + absolutePathToWav + " for " + trackInfo.getArtist());
@@ -526,9 +530,6 @@ public class AudioConversion extends AudioBase {
   private File getAbsoluteFile(String realContextPath, String filePath) {
     return getAbsolute(realContextPath, filePath);
   }
-//  public boolean exists(String realContextPath, String filePath) {
-//    return getAbsoluteFile(realContextPath, filePath).exists();
-//  }
 
   private File getAbsolute(String realContextPath, String filePath) {
     return new File(realContextPath, filePath);
@@ -623,7 +624,7 @@ public class AudioConversion extends AudioBase {
     return file.getAbsolutePath();
   }
 
-  int spew4 = 0;
+  private int spew4 = 0;
 
   public String getParentForFilePathUnderBaseAudio(String wavFile, String language, String parent, String audioBaseDir) {
     File test = new File(wavFile);
@@ -655,5 +656,9 @@ public class AudioConversion extends AudioBase {
       }
     }
     return parent;
+  }
+
+  AudioCheck getAudioCheck() {
+    return audioCheck;
   }
 }

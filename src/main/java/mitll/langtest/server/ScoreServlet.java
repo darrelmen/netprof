@@ -1074,6 +1074,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * After writing the file, it shouldn't be modified any more.
    * @param inputStream
    * @param project
    * @param realExID
@@ -1092,6 +1093,12 @@ public class ScoreServlet extends DatabaseServlet {
     makeFileSaveDir(saveFile);
 
     writeToFile(inputStream, saveFile);
+
+   // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
+    if (!saveFile.setReadOnly()) {
+      logger.warn("huh? can't mark file read only?");
+    }
+
     return saveFile;
   }
 

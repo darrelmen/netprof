@@ -73,7 +73,7 @@ public class UserPerformance implements Serializable {
   /**
    * @param userID
    * @param resultsForQuery
-   * @see Analysis#getUserPerformance(long, Map)
+   * @see Analysis#getUserPerformance
    */
   public UserPerformance(long userID, List<BestScore> resultsForQuery, String first, String last) {
     this(userID);

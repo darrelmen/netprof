@@ -34,14 +34,11 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.Affiliation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +56,7 @@ public class StartupInfo implements IsSerializable {
   private List<SlimProject> projects;
   private String message = "";
   private String implementationVersion;
+  public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
   /**
    * Name.IMPLEMENTATION_VERSION
    */
@@ -112,7 +110,7 @@ public class StartupInfo implements IsSerializable {
       return "";
     } else {
       String host = withThisID.iterator().next().getHost();
-      return host.equals(Project.WEBSERVICE_HOST_DEFAULT) ? "" : host;
+      return host.equals(WEBSERVICE_HOST_DEFAULT) ? "" : host;
     }
   }
 

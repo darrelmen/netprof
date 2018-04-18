@@ -33,17 +33,13 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Checks for two things -- is the audio long enough ({@link #MinRecordLength} and is
@@ -74,33 +70,28 @@ public class AudioCheck {
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
-  static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
-  //public static final int CLIPPED_FRAME_COUNT = 1;
+  private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
+  public static final boolean DEBUG = false;
   private final int MIN_DYNAMIC_RANGE;
-//  private final ServerProperties props;
 
   // TODO :make a server prop
   private final float FORGIVING_MIN_DNR = 18F;
-  boolean trimAudio;
+  private final boolean trimAudio;
 
   /**
    * @param trimAudio
    * @param minDynamicRange
    */
   public AudioCheck(boolean trimAudio, int minDynamicRange) {
-    //  this.props = props;
     this.trimAudio = trimAudio;
-    this.MIN_DYNAMIC_RANGE = minDynamicRange;//props == null ? 26 : props.getMinDynamicRange();
+    this.MIN_DYNAMIC_RANGE = minDynamicRange;
   }
 
-  private double dB(double power) {
-    return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
-  }
 
   /**
    * @param file
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
+   * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
   public double getDurationInSeconds(String file) {
     return getDurationInSeconds(new File(file));
@@ -109,12 +100,12 @@ public class AudioCheck {
   /**
    * @param file
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public double getDurationInSeconds(File file) {
     AudioInputStream audioInputStream = null;
     try {
-      audioInputStream = AudioSystem.getAudioInputStream(file);
+      audioInputStream = getAudioInputStream(file);
       double dur = getDurationInSeconds(audioInputStream);
       audioInputStream.close();
       return dur;
@@ -135,6 +126,12 @@ public class AudioCheck {
     return Long.valueOf(frames).floatValue() / format.getFrameRate();
   }
 
+  /**
+   * @param file
+   * @param useSensitiveTooLoudCheck
+   * @param quietAudioOK
+   * @return
+   */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     try {
       if (file.length() < 44) {
@@ -142,7 +139,8 @@ public class AudioCheck {
         return new AudioCheck.ValidityAndDur(Validity.TOO_SHORT, 0, false);
       } else {
         AudioCheck.ValidityAndDur validityAndDur =
-            useSensitiveTooLoudCheck ? checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
+            useSensitiveTooLoudCheck ?
+                checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
                 checkWavFile(file, quietAudioOK);
         return validityAndDur;
       }
@@ -158,7 +156,7 @@ public class AudioCheck {
    * @return
    * @see AudioConversion#isValid(File, boolean, boolean)
    */
-  ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
+  private ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false, quietAudioOK);
     if (validityAndDur.isValid()) {
       addDynamicRange(file, validityAndDur);
@@ -173,7 +171,7 @@ public class AudioCheck {
    * @return
    * @see AudioConversion#isValid
    */
-  ValidityAndDur checkWavFile(File file, boolean quietAudioOK) {
+  private ValidityAndDur checkWavFile(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, true, quietAudioOK);
     if (validityAndDur.isValid()) {
       addDynamicRange(file, validityAndDur);
@@ -227,6 +225,10 @@ public class AudioCheck {
   /**
    * Verify audio messages
    *
+   * lots of debugging to track down weird thing where would choose mpeg format for wav files.
+   * b/c of domino jar :
+   * com.googlecode.soundlibs:mp3spi:1.9.5.4
+   *
    * @param wavFile audio byte array with header
    * @return true if well formed
    * @see AudioConversion#isValid(File, boolean, boolean)
@@ -236,14 +238,26 @@ public class AudioCheck {
   private ValidityAndDur checkWavFileWithClipThreshold(File wavFile, boolean usePercent, boolean quietAudioOK) {
     AudioInputStream ais = null;
     try {
-      ais = AudioSystem.getAudioInputStream(wavFile);
+      ais = getAudioInputStream(wavFile);
       AudioFormat format = ais.getFormat();
-      //logger.info("wavFile " + wavFile.getName() + " sample rate " + format.getSampleRate());
+
+      if (DEBUG) {
+        AudioFileFormat format2 = AudioSystem.getAudioFileFormat(wavFile);
+        logger.info("checkWavFileWithClipThreshold " +
+            "\n\twavFile     " + wavFile.getName() +
+            "\n\tsample rate " + format.getSampleRate() +
+            "\n\tformat      " + format +
+            "\n\tformat class     " + format.getClass() +
+            "\n\tformat 2     " + format2 +
+            "\n\tformat 2 class     " + format2.getClass()
+        );
+      }
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
         logger.warn("checkWavFileWithClipThreshold huh? wavFile " + wavFile.getAbsoluteFile() + " is in big endian format?");
       }
+
       int fsize = format.getFrameSize();
       assert (fsize == 2);
       assert (format.getChannels() == 1);
@@ -251,15 +265,23 @@ public class AudioCheck {
 
       long frameLength = ais.getFrameLength();
       if (frameLength < MinRecordLength) {
-
         logger.warn("checkWavFileWithClipThreshold: audio recording too short" +
             "\n\t(Length:   " + frameLength + ") < min (" + MinRecordLength + ") " +
             "\n\tFrame size " + fsize +
-            "\n\tformat     " + format+
-            "\n\tFrame rate " + format.getFrameRate()+
+            "\n\tformat     " + format +
+            "\n\tformat class " + format.getClass() +
+            "\n\tFrame rate " + format.getFrameRate() +
             "\n\tduration   " + dur
         );
         return new ValidityAndDur(Validity.TOO_SHORT, dur, false);
+      } else if (DEBUG) {
+        logger.info("checkWavFileWithClipThreshold: audio recording too short" +
+            "\n\t(Length:   " + frameLength + ") < min (" + MinRecordLength + ") " +
+            "\n\tFrame size " + fsize +
+            "\n\tformat     " + format +
+            "\n\tFrame rate " + format.getFrameRate() +
+            "\n\tduration   " + dur
+        );
       }
 
       // Verify audio power
@@ -351,6 +373,17 @@ public class AudioCheck {
     return INVALID_AUDIO;
   }
 
+  private double dB(double power) {
+    return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
+  }
+
+  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    //logger.info("getAudioInputStream : getting audio input stream for " + wavFile.getAbsolutePath());
+    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wavFile);
+    //logger.info("getAudioInputStream : got stream " + audioInputStream + " for " + wavFile.getAbsolutePath());
+    return audioInputStream;
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.decoder.RefResultDecoder#decodeOneExercise
@@ -415,22 +448,12 @@ public class AudioCheck {
       this.durationInMillis = (int) (1000d * duration);
     }
 
-    public String dump() {
+    String dump() {
       return getValidity() + "," + durationInMillis + "," + maxMinRange;
     }
 
     public String toString() {
       return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange;
     }
-  }
-
-
-  public static void main(String[] arg) {
-    if (arg.length < 1) {
-      System.out.println("Usage : file.wav");
-      return;
-    }
-    ValidityAndDur valid = new AudioCheck(false, 24).isValid(new File(arg[0]), false, false);
-    System.out.println(arg[0] + "," + valid.dump());
   }
 }
