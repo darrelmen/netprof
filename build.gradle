@@ -67,7 +67,7 @@ description = 'NetProF pronunciation feedback'
 dependencies {
     // our modules
 //    def dominoVers = '2.7-SNAPSHOT'
-    def dominoVers = '2.7-topic-MFLTS'
+   def dominoVers = '2.7-topic-MFLTS'
 
    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
@@ -199,6 +199,9 @@ war {
     rootSpec.exclude("**/*-tests.jar")
     rootSpec.exclude("**/*tests.jar")
     rootSpec.exclude("**/log4j2-test.xml")
+
+    // so this is coming from somewhere in domino - it includes a faulty mpeg format that chooses to insert itself when we go to read .wav files!
+    rootSpec.exclude("**/mp3spi*.jar")
 
     // try to make ours mask out others...
     from('src') {

@@ -66,6 +66,7 @@ public class AnalysisTab extends DivWidget {
   private static final String WORD_EXAMPLES = "WordExamples";
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
+  public static final int TIME_WINDOW_WIDTH = 92;
   private static final int MIN_HEIGHT = 325;
 
   /**
@@ -386,7 +387,7 @@ public class AnalysisTab extends DivWidget {
 
   private HTML getCurrentTimeWindow() {
     HTML currentDate = new HTML();
-    currentDate.setWidth(130 + "px");
+    currentDate.setWidth(TIME_WINDOW_WIDTH + "px");
     currentDate.addStyleName("boxShadow");
     currentDate.addStyleName("leftFiveMargin");
     currentDate.addStyleName("topFiveMargin");

@@ -91,7 +91,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private static final String SCORE_SUFFIX = " pronunciation scores (Drag to zoom, click to hear)";
   private static final int TIME_SLACK = 60;
-  // private static final int WIDTH = 740;
 
   private static final int MIN_SESSION_COUNT = 50;
 
@@ -155,12 +154,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.isPolyglot = isPolyglot;
-    //  int width = isTeacherView ? WIDTH : STUDENT_WIDTH;
 
-/*    if (!isPolyglot) {
-      setWidth(width + "px");
-    }
-    {*/
     getElement().setId("AnalysisPlot");
     Style style = getElement().getStyle();
     style.setMarginLeft(10, Style.Unit.PX);
@@ -169,8 +163,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     addStyleName("cardBorderShadow");
 
     getElement().getStyle().setProperty("maxWidth", STUDENT_WIDTH + "px");
-
-    //  }
 
     /**
      * setRawBestScores
@@ -207,7 +199,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
-      //if (isPolyglot)
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
         sessions.addAll(getEasyPeriods(phoneSessions));
@@ -347,9 +338,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     showSeriesByVisible();
 
     if (isPolyglot) {
-      //setTimeHorizon(possible < 50 ? AnalysisTab.TIME_HORIZON.ONEMIN : TENMIN);
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     }
+
+    timeWidgets.setDisplay(getShortDate(firstTime, false));
+
   }
 
   @NotNull
@@ -887,7 +880,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void setTimeWindowControlsToAll() {
     timeWidgets.getPrevButton().setEnabled(false);
     disableNext();
-    timeWidgets.setDisplay("");
+
+    timeWidgets.setDisplay(getShortDate(firstTime, false));
     setTitleScore(-1, -1, index);
     timeWidgets.reset();
     timeChanged(firstTime, lastTime);
@@ -973,7 +967,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    */
   private void showTimePeriod(long offset, List<Long> periods) {
     Long periodStart = periods.get(index);
-    timeWidgets.setDisplay(getShortDate(periodStart, shouldShowHour(offset)));
+    String shortDate = getShortDate(periodStart, shouldShowHour(offset));
+   // logger.info("showTimePeriod short date " + shortDate);
+    timeWidgets.setDisplay(shortDate);
     long end = periodStart + offset;
 
 /*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));

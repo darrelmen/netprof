@@ -89,7 +89,7 @@ class TimeWidgets {
    * @param text
    */
   void setDisplay(String text) {
-    this.display.setText(text);
+    this.display.setHTML(text);
   }
 
   void setScore(String text) {
@@ -104,10 +104,7 @@ class TimeWidgets {
     if (day != null) day.setActive(false);
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
-
-    if (minute != null) {
-      minute.setActive(false);
-    }
+    if (minute != null) {  minute.setActive(false); }
   }
 
   Button getPrevButton() {

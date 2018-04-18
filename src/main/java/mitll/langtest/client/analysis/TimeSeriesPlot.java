@@ -56,7 +56,8 @@ class TimeSeriesPlot extends DivWidget {
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
   protected final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
-  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+ // private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("MMM d h:mm a");
   private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final String nowFormat = shortFormat.format(new Date());
@@ -148,7 +149,8 @@ class TimeSeriesPlot extends DivWidget {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
     DateTimeFormat toUse = showHour ? noYearFormat : sameYear(shortForDate) ? superShortFormat : shortFormat;
-    return toUse.format(date);
+
+    return "<span style='white-space:nowrap;'>" + toUse.format(date) + "</span>";
   }
 
   private boolean sameYear(String shortForDate) {
