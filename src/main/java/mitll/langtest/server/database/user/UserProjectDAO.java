@@ -137,7 +137,7 @@ public class UserProjectDAO implements IUserProjectDAO {
     long then = System.currentTimeMillis();
     List<Integer> slickUserProjects = dao.mostRecentByUser(user);
     long now = System.currentTimeMillis();
-    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
+//    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
   }
 

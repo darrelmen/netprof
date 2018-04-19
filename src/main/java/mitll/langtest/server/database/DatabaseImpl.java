@@ -1484,7 +1484,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this, this)
           .getExercisesForSearch(
               options.getSearch(),
-              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid);
+              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);
       exercisesForSelectionState = exercisesForSearch.getByExercise();
     }
 

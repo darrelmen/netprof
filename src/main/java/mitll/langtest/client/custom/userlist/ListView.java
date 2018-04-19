@@ -39,6 +39,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_LIST = "Edit the list title or make it public.";
@@ -51,6 +52,9 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String SHARE_QUIZ = "Share Quiz";
   private static final String SHARE_LIST = "Share List";
 
+  /**
+   * @see #getAddItems
+   */
   private static final String ITEMS = "Items";
   private static final String ADD = "Add";
   private static final String CANCEL = "Cancel";
@@ -372,7 +376,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton(ITEMS);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
-    addTooltip(successButton, "Edit the items on list.");
+    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
     successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
@@ -382,9 +386,8 @@ public class ListView implements ContentView, CreateListComplete {
 
     UserList<CommonShell> originalList = getCurrentSelectionFromMyLists();
     boolean hasDescrip = !originalList.getDescription().isEmpty();
-    String suffix = //(originalList.getListType() == UserList.LIST_TYPE.QUIZ ? "Quiz " : "List ") +
+    String suffix =
         originalList.getName() +
-
         (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
     Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + suffix,
@@ -412,8 +415,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     closeButton.setType(ButtonType.SUCCESS);
 
-    Scheduler.get().scheduleDeferred(() -> editItem.reload());
-
+    Scheduler.get().scheduleDeferred(editItem::reload);
   }
 
   @NotNull

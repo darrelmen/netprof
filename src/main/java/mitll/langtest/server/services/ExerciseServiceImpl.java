@@ -92,27 +92,27 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 //    if (request.isQuiz()) {
 //      return getQuizTypeToValues(request);
 //    } else {
-      //List<Pair> typeToSelection = request.getTypeToSelection();
+    //List<Pair> typeToSelection = request.getTypeToSelection();
 //    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
-      ISection<CommonExercise> sectionHelper = getSectionHelper();
-      if (sectionHelper == null) {
-        logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
-        return new FilterResponse();
-      } else {
-        FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
+    ISection<CommonExercise> sectionHelper = getSectionHelper();
+    if (sectionHelper == null) {
+      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+      return new FilterResponse();
+    } else {
+      FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
 
-        int userListID = request.getUserListID();
-        UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
+      int userListID = request.getUserListID();
+      UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
 
-        if (next != null) {  // echo it back
-          //logger.info("\tgetTypeToValues " + request + " include list " + next);
-          typeToValues.getTypesToInclude().add(LISTS);
-          Set<MatchInfo> value = new HashSet<>();
-          value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-          typeToValues.getTypeToValues().put(LISTS, value);
-        }
-        return typeToValues;
+      if (next != null) {  // echo it back
+        //logger.info("\tgetTypeToValues " + request + " include list " + next);
+        typeToValues.getTypesToInclude().add(LISTS);
+        Set<MatchInfo> value = new HashSet<>();
+        value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
+        typeToValues.getTypeToValues().put(LISTS, value);
       }
+      return typeToValues;
+    }
     //}
   }
 
@@ -136,6 +136,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 */
+
   /**
    * Complicated.
    * <p>
@@ -211,11 +212,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises;
     boolean predefExercises = userListByID == null;
-    if (request.isQuiz()) {
-      exercises = Collections.emptyList();
-    } else {
+//    if (request.isQuiz()) {
+//      exercises = Collections.emptyList();
+//    } else {
       exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
-    }
+//    }
     // now if there's a prefix, filter by prefix match
 
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
@@ -223,7 +224,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (!prefix.isEmpty()) {
       logger.info("getExerciseWhenNoUnitChapter found prefix '" + prefix + "' for user list " + userListByID);
       // now do a trie over matches
-      exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID());
+      exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
+          !request.isPlainVocab());
       if (request.getLimit() > 0) {
         exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
       }
@@ -245,10 +247,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     logger.info("getExerciseWhenNoUnitChapter took " + (now - then) + " to get " + commonExercises.size());
 
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
-
-//    if (request.isNoFilter()) {
-//      rememberCachedWrapper(projectID, exerciseListWrapper);
-//    }
     return exerciseListWrapper;
   }
 
@@ -465,18 +463,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-//    if (request.isQuiz()) {
-//      sectionHelper = db.getQuizSectionHelper(projid);
-//    }
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
-
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-
-    if (request.isQuiz()) {
+/*    if (request.isQuiz()) {
       Collator collator = getAudioFileHelper(projid).getCollator();
       copy.sort((o1, o2) -> compareExercisesByLength(o1, o2, collator));
 //      copy.forEach(commonExercise -> logger.info("1 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
-    }
+    }*/
 
     exercisesForState = filterExercises(request, copy, projid);
 //    exercisesForState.forEach(commonExercise -> logger.info("2 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
@@ -485,11 +478,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * TODO : unfortunately num phones is not correct right now.
+   *
    * @param o1
    * @param o2
    * @param collator
    * @return
    */
+/*
   private int compareExercisesByLength(CommonExercise o1, CommonExercise o2, Collator collator) {
     int i = 0;//Integer.compare(o1.getNumPhones(), o2.getNumPhones());
     if (i == 0) {
@@ -503,6 +498,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (i == 0) i = Integer.compare(o1.getID(), o2.getID());
     return i;
   }
+*/
 
 
   /**
@@ -548,10 +544,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguage(projID));
     } else {
       copy = new ArrayList<>(exercisesForState);
-
-      if (!request.isQuiz()){
+//      if (!request.isQuiz()) {
         sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
-      }
+  //    }
     }
 
     return makeExerciseListWrapper(request, copy, projID);
@@ -874,10 +869,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   /**
    * TODO : revisit the parameterized types here.
    *
+   * @param <T>
    * @param prefix
    * @param exercises
    * @param predefExercises
-   * @param <T>
+   * @param matchOnContext
    * @return
    * @see #getExerciseIds
    */
@@ -885,9 +881,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               Collection<T> exercises,
                                                                               boolean predefExercises,
                                                                               int projectID,
-                                                                              int userID) {
+                                                                              int userID, boolean matchOnContext) {
     Search<T> search = new Search<T>(db, db);
-    TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID);
+    TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
     exercisesForSearch.setByID(Collections.emptyList());
 
     {

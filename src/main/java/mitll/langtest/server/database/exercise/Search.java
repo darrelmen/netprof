@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,16 +32,17 @@ public class Search<T extends CommonExercise> {
    * @param prefix
    * @param exercises
    * @param predefExercises
+   * @param matchOnContext
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
   public <T extends CommonExercise> TripleExercises<T> getExercisesForSearch(String prefix,
                                                                              Collection<T> exercises,
                                                                              boolean predefExercises,
-                                                                             int projectID
-  ) {
+                                                                             int projectID,
+                                                                             boolean matchOnContext) {
     Project project = projectServices.getProject(projectID);
-    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, (ExerciseTrie<T>) project.getFullTrie(), projectID);
+    return getExercisesForSearchWithTrie(prefix, exercises, predefExercises, (ExerciseTrie<T>) project.getFullTrie(), projectID, matchOnContext);
   }
 
   /**
@@ -54,6 +54,7 @@ public class Search<T extends CommonExercise> {
    * @param predefExercises if true, use the fullTrie
    * @param fullTrie
    * @param projectID
+   * @param matchOnContext
    * @return
    * @see #getExercisesForSearch
    */
@@ -61,12 +62,13 @@ public class Search<T extends CommonExercise> {
                                                                                       Collection<T> exercises,
                                                                                       boolean predefExercises,
                                                                                       ExerciseTrie<T> fullTrie,
-                                                                                      int projectID) {
+                                                                                      int projectID,
+                                                                                      boolean matchOnContext) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie :
         new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true);
     List<T> basicExercises = trie.getExercises(prefix);
     Project project = getProject(projectID);
-    ExerciseTrie<T> fullContextTrie = project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
+    ExerciseTrie<T> fullContextTrie = !matchOnContext || project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
 
     logger.info("getExercisesForSearchWithTrie : " +
         "\n\tprojectID " + projectID +

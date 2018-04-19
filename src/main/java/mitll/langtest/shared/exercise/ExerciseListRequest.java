@@ -70,7 +70,8 @@ public class ExerciseListRequest implements IsSerializable {
   private int limit = -1;
   private boolean QC = false;
   private boolean addContext = false;
-  private boolean quiz = false;
+  private boolean plainVocab = false;
+  //private boolean quiz = false;
 
   public ExerciseListRequest() {
   }
@@ -326,6 +327,11 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  public ExerciseListRequest setOnlyPlainVocab(boolean plainVocab) {
+    this.plainVocab = plainVocab;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -351,11 +357,17 @@ public class ExerciseListRequest implements IsSerializable {
         ;
   }
 
-  public boolean isQuiz() {
-    return quiz;
+  public boolean isPlainVocab() {
+    return plainVocab;
   }
 
+ /* public boolean isQuiz() {
+    return quiz;
+  }
+*/
+/*
   public void setQuiz(boolean quiz) {
     this.quiz = quiz;
   }
+*/
 }

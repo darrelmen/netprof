@@ -3,7 +3,9 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -62,7 +64,8 @@ public class SearchTypeahead {
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
-            .setAddFirst(false);
+            .setAddFirst(false)
+            .setOnlyPlainVocab(true);
 
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
@@ -95,6 +98,10 @@ public class SearchTypeahead {
 
     textBox.getElement().setId("TextBox_exercise");
     typeahead.setWidget(textBox);
+
+    Scheduler.get().scheduleDeferred((Command) () -> textBox.setFocus(true));
+    textBox.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
     return typeahead;
   }
 
@@ -133,7 +140,8 @@ public class SearchTypeahead {
   }
 
   @NotNull
-  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<? extends CommonShell> exercises, int size, int limit) {
+  private SuggestOracle.Response getResponse(SuggestOracle.Request request, List<? extends CommonShell> exercises,
+                                             int size, int limit) {
     int numberTruncated = Math.max(0, size - limit);
     //  logger.info("trunc " + numberTruncated);
     SuggestOracle.Response response = new SuggestOracle.Response(getSuggestions(request.getQuery(), exercises));
@@ -161,8 +169,9 @@ public class SearchTypeahead {
    * @return
    */
   private ExerciseSuggestion getSuggestion(String query, String[] searchWords, CommonShell resp) {
-    String foreignLanguage = resp.getForeignLanguage();
     String lcQ = query.toLowerCase();
+
+    String foreignLanguage = resp.getForeignLanguage();
     boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
 
     String formattedSuggestion = found ?

@@ -39,7 +39,7 @@ import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -56,9 +56,10 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
-  public static final int MIN_EMAIL_LENGTH = 7;
-  public static final String BAD_PASS = "Your password is incorrect. Please try again.";
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  private static final int MIN_EMAIL_LENGTH = 7;
+  private static final String BAD_PASS = "Your password is incorrect. Please try again.";
 
   private static final int SHORT_USER_ID = 4;
   private static final String USER_ID_REGEX = "^[a-zA-Z0-9_\\-.]{4,50}$";
@@ -81,7 +82,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
 //  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
 
-  //public static final int BOGUS_AGE = 99;
   /**
    * @see #getSignUpForm
    */
@@ -144,7 +144,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
     affiliations = startupInfo.getAffiliations();
-    //logger.info("got " + affiliations);
   }
 
   protected void setMarkFieldsWithLabels(boolean val) {
@@ -192,7 +191,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 
     boolean askForDemographic = askForDemographic(candidate);
-    // demoHeader.setVisible(askForDemographic);
     registrationInfo.setVisible(askForDemographic);
 
     FormField firstFocus =
@@ -200,7 +198,6 @@ public class SignUpForm extends UserDialog implements SignUp {
             firstName :
             lastName.isEmpty() ? lastName :
                 email.isEmpty() ? signUpEmail :
-
                     null;
 
     if (askForDemographic) {
@@ -665,8 +662,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         lastName.getSafeText(),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
-    logger.info("OK sending " + newUser + " " + newUser.getAffiliation());
-
+   // logger.info("OK sending " + newUser + " " + newUser.getAffiliation());
     openUserService.addUser(
         newUser,
         Window.Location.getHref(),
@@ -683,8 +679,8 @@ public class SignUpForm extends UserDialog implements SignUp {
            *
            * - user already exists with userid
            * - user slots are incomplete and need to be updated
-           *  - user could be locked
-           *  - user should provide password, otherwise anyone could take over an account
+           * - user could be locked
+           * - user should provide password, otherwise anyone could take over an account
            * - user is new and needs to be added
            *
            *  @param result

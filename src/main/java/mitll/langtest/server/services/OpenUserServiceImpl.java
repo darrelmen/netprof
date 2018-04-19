@@ -160,8 +160,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     if (userByID != null) {
       LoginResult.ResultType resultType = LoginResult.ResultType.Exists;
       if (!userByID.isValid()) {
-        //logger.info("addUser user " + userByID + " resultType.");
-        //  } else {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());

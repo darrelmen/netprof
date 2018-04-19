@@ -58,16 +58,13 @@ public class UserManagement {
    * @param userDAO
    * @see DatabaseImpl#makeDAO
    */
-  public UserManagement(IUserDAO userDAO) {
-    this.userDAO = userDAO;
-  //  this.resultDAO = resultDAO;
-  }
+  public UserManagement(IUserDAO userDAO) {  this.userDAO = userDAO;  }
 
   /**
    * @param request
    * @param user
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#addUser
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
    */
   public User addUser(HttpServletRequest request, SignUpUser user) {
     return addUser(user.setIp(getIPInfo(request)));

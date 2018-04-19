@@ -32,11 +32,11 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -50,13 +50,9 @@ import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Coordinates editing an item -
@@ -99,17 +95,6 @@ public class EditItem {
    */
   public Panel editItem(UserList<CommonShell> originalList) {
     DivWidget div = new DivWidget();
-/*    boolean hasDescrip = !originalList.getDescription().isEmpty();
-    Heading w = new Heading(4,
-        (originalList.getListType() == UserList.LIST_TYPE.QUIZ ? "Quiz " : "List ") +
-            originalList.getName() +
-
-            (hasDescrip ? "(" + originalList.getDescription() + ")" : "")
-    );
-    w.addStyleName("bottomFiveMargin");
-    div.add(w);
-*/
-
     Panel hp = new HorizontalPanel();
 
     hp.getElement().setId("EditItem_for_" + originalList.getName());
@@ -122,8 +107,6 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
-    // logger.info("list is " + originalList);
-
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
     div.add(hp);
@@ -132,7 +115,6 @@ public class EditItem {
 
   public void onResize() {
     if (exerciseList != null) {
-      //  logger.info("EditItem onResize");
       exerciseList.onResize();
     }
   }

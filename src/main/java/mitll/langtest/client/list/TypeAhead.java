@@ -54,7 +54,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class TypeAhead implements ITypeAhead {
   //private final Logger logger = Logger.getLogger("TypeAhead");
-
   /**
    * @see #makeTypeAhead
    */
@@ -156,7 +155,7 @@ public abstract class TypeAhead implements ITypeAhead {
 
   /**
    * @return
-   * @see PagingExerciseList#addTypeAhead(Panel)
+   * @see PagingExerciseList#addTypeAhead
    */
   TextBox getTypeAheadBox() {
     return typeAhead;

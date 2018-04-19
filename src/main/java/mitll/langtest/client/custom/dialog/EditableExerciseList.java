@@ -76,16 +76,13 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   protected DivWidget getOptionalWidget() {
     DivWidget widgets = new DivWidget();
     widgets.getElement().setId("northSouth");
-//    widgets.addStyleName("inlineFlex");
     widgets.addStyleName("bottomFiveMargin");
-//
     widgets.add(getAddButtonContainer());
     widgets.add(message = getFeedback());
 
     addListChangedListener((items, selectionID) -> enableRemove(!isEmpty()));
 
     return widgets;
-    // return getAddButtonContainer();
   }
 
   @Override
@@ -101,19 +98,21 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
     addW.getElement().setId("buttonContainer");
-    //addW.addStyleName("floatLeft");
     addW.addStyleName("topMargin");
     addW.addStyleName("inlineFlex");
+    addW.addStyleName("inlineFlex");
 
-    Button add = getAddButton();
-
-    addW.add(getTypeahead(add));
     {
+      Button add = getAddButton();
 
-      DivWidget ac = new DivWidget();
-      ac.addStyleName("leftFiveMargin");
-      ac.add(add);
-      addW.add(ac);
+      addW.add(getTypeahead(add));
+      {
+
+        DivWidget ac = new DivWidget();
+        ac.addStyleName("leftFiveMargin");
+        ac.add(add);
+        addW.add(ac);
+      }
     }
     message = getFeedback();
 //    addW.add(message = getFeedback());
@@ -159,6 +158,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button makeDeleteButtonItself() {
     Button delete = new Button("");//REMOVE_FROM_LIST);
     delete.setIcon(IconType.MINUS);
+    delete.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
     delete.getElement().setId("Remove_from_list");
     // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
     delete.setType(ButtonType.WARNING);
@@ -208,6 +208,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button getAddButton() {
     Button add = new Button("", IconType.PLUS);
     add.setType(ButtonType.SUCCESS);
+    add.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
 
     add.setEnabled(false);
     add.addClickHandler(event -> onClickAdd(add));
