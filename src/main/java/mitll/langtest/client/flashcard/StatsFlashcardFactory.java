@@ -65,14 +65,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     implements FlashcardContainer {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-  private static final boolean ADD_KEY_BINDING = true;
-
   protected  final ControlState controlState;
   private List<L> allExercises;
 
-
   private String selectionID = "";
-  //private final String instance;
   protected final StickyState sticky;
   private Map<String, Collection<String>> selection = new HashMap<>();
 

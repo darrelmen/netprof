@@ -369,23 +369,25 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       addBullet(left, firstBullet, "NewProF2_48x48.png");
     } else {
       addBullet(left, SECOND_BULLET, "NewProF1_48x48.png");
-      addBullet(left, firstBullet, "NewProF2_48x48.png");
-      addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
+      addBullet(left, firstBullet, "NewProF2_48x48.png").setWidth("33px");
+      addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png").setWidth("38px");
     }
 
     left.add(flagsDisplay.getFlagsDisplay());
   }
 
-  private void addBullet(DivWidget left, String bulletText, String image) {
+  private Image addBullet(DivWidget left, String bulletText, String image) {
     Widget w1 = new HTML(bulletText);
     Panel h = new HorizontalPanel();
-    h.add(new Image(LangTest.LANGTEST_IMAGES + image));
+    Image child = new Image(LangTest.LANGTEST_IMAGES + image);
+    h.add(child);
     h.add(w1);
     configure(h);
 
     left.add(h);
     w1.getElement().getStyle().setMarginTop(4, Style.Unit.PX);
     configure(w1);
+    return child;
   }
 
   private void configure(Panel h) {

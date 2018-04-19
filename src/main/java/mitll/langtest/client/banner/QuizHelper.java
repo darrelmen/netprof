@@ -66,6 +66,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * @since 2/4/16.
  */
 public class QuizHelper extends PracticeHelper {
+  public static final String QUIZ = "Quiz";
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
@@ -89,8 +90,7 @@ public class QuizHelper extends PracticeHelper {
 
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-
-    polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, "Quiz") {
+    polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, QUIZ) {
       private int chosenList = -1;
 
       @Override

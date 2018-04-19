@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
@@ -26,7 +27,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
-
   private static final String ALL_DONE = "All done!";
 
   private static final String COMPLETE = "You've recorded all the items. " +
@@ -40,11 +40,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final int NEXT_EXERCISE_DELAY = 750;
   private static final int INCORRECT_BEFORE_ADVANCE = 3;
 
-//  private static final int DRY_RUN_MINUTES = 1;
-//  private static final int ROUND_MINUTES = 10;
   private static final int MINUTE = 60 * 1000;
- // private static final int DRY_RUN_ROUND_TIME = DRY_RUN_MINUTES * MINUTE;
- // private static final int ROUND_TIME = ROUND_MINUTES * MINUTE;
   private static final int CHART_HEIGHT = 120;
   private static final String TIME_LEFT = "Time left";
 
@@ -191,7 +187,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   AnalysisTab getScoreHistory() {
-    return new AnalysisTab(controller, true, -1, () -> 0);
+    AnalysisTab widgets = new AnalysisTab(controller, true, -1, () -> 0);
+    widgets.getElement().getStyle().setMarginTop(-25, Style.Unit.PX);
+    return widgets;
   }
 
   void gotTryAgain() {

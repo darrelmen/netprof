@@ -30,7 +30,6 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
-
   // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
 
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
@@ -43,8 +42,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
-
-  //public static final String SHOW = "showStorage";
   /**
    * @see #getImage
    */
@@ -126,7 +123,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     navCollapse.add(getRightSideChoices(userManager, userMenu));
 
     setCogVisible(userManager.hasUser());
-    // addHistoryListener();
   }
 
   @NotNull
@@ -185,6 +181,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
+    rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX );
 
     addUserMenu(userManager, userMenu, rnav);
 

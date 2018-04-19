@@ -416,7 +416,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #FlashcardPanel
    */
-  private Panel getThreePartContent(ControlState controlState,
+  protected Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,
                                     DivWidget belowDiv,
                                     DivWidget lowestRow) {
