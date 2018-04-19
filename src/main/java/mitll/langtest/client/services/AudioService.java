@@ -88,4 +88,6 @@ public interface AudioService extends RemoteService {
    */
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
   void recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
+
+  void logMessage(String subject,String message, boolean sendEmail);
 }

@@ -103,11 +103,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
    * @param deviceType
    * @param device
+   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    * @paramx doFlashcard         true if called from practice (flashcard) and we want to do decode and not align
    * @paramx recordInResults     if true, record in results table -- only when recording in a learn or practice tab
    * @paramx addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @paramx allowAlternates
-   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
    */
@@ -201,7 +201,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       } else {
         String path = audioAnswer.getPath();
         String actualPath = ensureAudioHelper.ensureCompressedAudio(user, commonExercise, path, audioContext.getAudioType(), language, new HashMap<>());
-        logger.info("writeAudioFile initial path " + path +" compressed actual " + actualPath);
+        logger.info("writeAudioFile initial path " + path + " compressed actual " + actualPath);
         if (actualPath.startsWith(serverProps.getAudioBaseDir())) {
           actualPath = actualPath.substring(serverProps.getAudioBaseDir().length());
           // logger.info("Now " + actualPath);
@@ -426,9 +426,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     logger.info("getImageForAudioFile" +
         "\n\timageOutDir " + imageOutDir +
         "\n\tabs         " + absoluteImageDir +
-        "\n\ttype        " + imageType1+
-        "\n\twavAudioFile " + wavAudioFile+
-        "\n\ttestFile " + testFile+
+        "\n\ttype        " + imageType1 +
+        "\n\twavAudioFile " + wavAudioFile +
+        "\n\ttestFile " + testFile +
         "\n\ttestFile len " + testFile.length()
     );
     String absolutePathToImage = imageWriter.writeImage(
@@ -474,8 +474,30 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return new ImageResponse(reqid, imageURL, duration);
   }
 
-
   public void recalcRefAudio(int projid) {
     db.getProject(projid).recalcRefAudio();
+  }
+
+  /**
+   * Here so it's easy to test all the servers...
+   *
+   * @param subject
+   * @param message
+   * @param sendEmail
+   */
+  public void logMessage(String subject, String message, boolean sendEmail) {
+    if (message.length() > 10000) message = message.substring(0, 10000);
+    String prefixedMessage = "on " + getHostName() + " from client : " + message;
+
+    prefixedMessage = getInfo(prefixedMessage);
+    if (sendEmail) {
+      logger.error(prefixedMessage);
+    } else {
+      logger.info(prefixedMessage);
+    }
+
+    if (sendEmail) {
+      sendEmail("TEST : " + subject, getInfo(prefixedMessage));
+    }
   }
 }

@@ -70,7 +70,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String LAST_NAME = "Last Name";
   private static final String EMAIL = "Email";
   private static final String ADD_INFO1 = "Add Info";
-
   private static final String ADD_INFO = "Add info";
   private static final String COMPLETE_YOUR_PROFILE = "Complete Your Profile";
 

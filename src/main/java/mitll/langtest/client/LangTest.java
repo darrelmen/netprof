@@ -226,6 +226,7 @@ import java.util.logging.Logger;
  */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
+  public static final String LOCALHOST = "127.0.0.1";
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final String CAN_T_RECORD_AUDIO = "Can't record audio";
@@ -290,9 +291,8 @@ public class LangTest implements
   private Map<Integer, AudioServiceAsync> projectToAudioService;
   private Map<Integer, ScoringServiceAsync> projectToScoringService;
   private final long then = 0;
-  private MessageHelper messageHelper = new MessageHelper(initialUI, this);
-
-  private AnnotationHelper annotationHelper = new AnnotationHelper(this, messageHelper);
+  private MessageHelper messageHelper;
+  private AnnotationHelper annotationHelper;
 
   /**
    * This gets called first.
@@ -376,19 +376,13 @@ public class LangTest implements
   private void rememberStartup(StartupInfo startupInfo, boolean reloadWindow) {
     this.startupInfo = startupInfo;
     props = new PropertyHandler(startupInfo.getProperties());
-    //  logger.info("rememberStartup : implVersion " + startupInfo.getImplementationVersion());
     if (reloadWindow) {
       initialUI.chooseProjectAgain();
-      //initialUI.setImplVersion(startupInfo.getImplementationVersion());
     }
 
     List<SlimProject> projects = getAllProjects();
     projectToAudioService = createHostSpecificServices(projects);
     projectToScoringService = createHostSpecificServicesScoring(projects);
-
-/*    if (initialUI != null) {
-      initialUI.setImplVersion(startupInfo.getImplementationVersion());
-    }*/
   }
 
   @Override
@@ -429,12 +423,6 @@ public class LangTest implements
     return projectToAudioService;
   }
 
-  @Override
-  public AudioServiceAsync getAudioServiceAsyncForHost(String host) {
-    AudioServiceAsync audioService = GWT.create(AudioService.class);
-    adjustEntryPoint(host, (ServiceDefTarget) audioService);
-    return audioService;
-  }
 
   /**
    * Create host specific scoring services -- i.e. scoring for russian, korean, msa, levantine are on h2.
@@ -451,13 +439,13 @@ public class LangTest implements
     projects.forEach(slimProject ->
         hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost));
 
-    //  logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
+//    logger.info("createHostSpecificServices num hosts = " + hostToService.size() + " : " + hostToService.keySet());
     // then map project to service
     projects.forEach(slimProject -> {
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
-      // logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
+  //    logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
       if (scoringServiceAsync == null) {
         logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {
@@ -466,6 +454,13 @@ public class LangTest implements
     });
 
     return projectToAudioService;
+  }
+
+  @Override
+  public AudioServiceAsync getAudioServiceAsyncForHost(String host) {
+    AudioServiceAsync audioService = GWT.create(AudioService.class);
+    adjustEntryPoint(host, (ServiceDefTarget) audioService);
+    return audioService;
   }
 
   @Override
@@ -485,10 +480,9 @@ public class LangTest implements
 
   private boolean isDefault(String host) {
     boolean isDefault = false;
-    if (host.equals("127.0.0.1")) isDefault = true;
+    if (host.equals(LOCALHOST)) isDefault = true;
     return isDefault;
   }
-
 
   /**
    * Log browser exception on server, include user and exercise ids.  Consider including chapter selection.
@@ -654,6 +648,8 @@ public class LangTest implements
     */
     this.initialUI = new InitialUI(this, userManager);
     messageHelper = new MessageHelper(initialUI, this);
+    annotationHelper = new AnnotationHelper(this, messageHelper);
+
     populateRootPanel();
 
     setPageTitle();
@@ -1054,10 +1050,15 @@ public class LangTest implements
         logger.warning("\n after getting user ... getAudioService has no project yet... using default audio service...?");
       }
     }
-    AudioServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultAudioService : projectToAudioService.get(projectStartupInfo.getProjectid());
+    AudioServiceAsync audioServiceAsync = projectStartupInfo == null ?
+        defaultAudioService :
+        projectToAudioService.get(projectStartupInfo.getProjectid());
+
     if (audioServiceAsync == null) logger.warning("getAudioService no audio service for " + projectStartupInfo);
     return audioServiceAsync == null ? defaultAudioService : audioServiceAsync;
   }
+
+  public Collection<AudioServiceAsync> getAllAudioServices() { return new HashSet<>(projectToAudioService.values()); }
 
   /**
    * Find host-specific scoring service - e.g. msa is on hydra2
@@ -1069,7 +1070,9 @@ public class LangTest implements
     if (projectStartupInfo == null) {
       logger.info("getScoringService has no project yet...");
     }
-    ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ? defaultScoringServiceAsync : projectToScoringService.get(projectStartupInfo.getProjectid());
+    ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ?
+        defaultScoringServiceAsync :
+        projectToScoringService.get(projectStartupInfo.getProjectid());
     if (audioServiceAsync == null) logger.warning("getScoringService no audio service for " + projectStartupInfo);
     return audioServiceAsync == null ? defaultScoringServiceAsync : audioServiceAsync;
   }

@@ -4,6 +4,7 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.*;
 import mitll.langtest.shared.project.SlimProject;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -20,6 +21,8 @@ public interface Services extends EventRegistration {
   ScoringServiceAsync getScoringServiceAsyncForHost(String host);
 
   AudioServiceAsync getAudioService();
+
+  Collection<AudioServiceAsync> getAllAudioServices();
 
   /**
    *

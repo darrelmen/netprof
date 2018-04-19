@@ -72,9 +72,9 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       String userAgent = request.getHeader("User-Agent");
 
       // ensure a newSession is created.
-      HttpSession newSession = createSession();
+//      HttpSession newSession = createSession();
       //logger.info("Login newSession " + newSession.getId() + " isNew=" + newSession.isNew());
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, newSession, true);
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);
@@ -188,7 +188,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
+    return new MailSupport(serverProps);
   }
 
   /**

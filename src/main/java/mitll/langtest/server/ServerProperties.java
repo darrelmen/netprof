@@ -130,6 +130,7 @@ public class ServerProperties {
   private static final String IOS_VERSION = "1.0.1";
   private static final String I_OS_VERSION = "iOSVersion";
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
+  public static final String DEFAULT_MAIL_FROM = "gordon.vidaver@ll.mit.edu";
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
@@ -146,7 +147,6 @@ public class ServerProperties {
    */
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
-  //  private static final String ANALYSIS_INITIAL_SCORES = "analysisInitialScores";
   private static final String RELEASE_DATE = "releaseDate";
   private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
 
@@ -190,7 +190,6 @@ public class ServerProperties {
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
-  // private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
   private static final String DO_AUDIO_CHECKS_IN_PRODUCTION = "doAudioChecksInProduction";
@@ -198,9 +197,7 @@ public class ServerProperties {
   private static final String MIN_ANALYSIS_SCORE = "minAnalysisScore";
   private static final String HYDRA_HOST = "hydraHost";
 
-  private static final int MIN_SCORE_TO_SHOW = 0;//20;// 0.20f;
-  private static final int USER_INITIAL_SCORES = 20;
-  // private static final int USER_FINAL_SCORES = 30;
+  private static final int MIN_SCORE_TO_SHOW = 0;
 
   /**
    * Note netprof is all lower case.
@@ -247,6 +244,7 @@ public class ServerProperties {
   private String configFileFullPath;
 
   public ServerProperties() {
+
     Map<String, String> value = new HashMap<>();
 
     // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
@@ -358,6 +356,7 @@ public class ServerProperties {
 
   private void useProperties(File configDir, String dateFromManifest) throws FileNotFoundException {
     emailList = new EmailList(props);
+
     readProperties(dateFromManifest);
     affliations = new JsonConfigReader().getAffiliations(configDir);
     setApplicationConf();
@@ -370,6 +369,9 @@ public class ServerProperties {
     } catch (IOException e) {
       logger.error("got " + e + " reading from " + configFileFullPath, e);
     }
+
+    getEmailAddress();
+
   }
 
   /**
@@ -621,10 +623,6 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
-/*  private String getProperty(String prop) {
-    return props.getProperty(prop);
-  }*/
-
   private String getProperty(ProjectProperty prop) {
     return props.getProperty(prop.getName());
   }
@@ -764,10 +762,6 @@ public class ServerProperties {
     return emailList.getReportEmails();
   }
 
-/*  public int getUserInitialScores() {
-    return getIntPropertyDef(ANALYSIS_INITIAL_SCORES, USER_INITIAL_SCORES);
-  }*/
-
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
   }
@@ -779,14 +773,6 @@ public class ServerProperties {
     return (float) getIntPropertyDef(MIN_ANALYSIS_SCORE, MIN_SCORE_TO_SHOW) / 100f;
   }
 
-  /**
-   * true if you want to compare hydec scores with hydra scores for reference audio
-   *
-   * @return
-   */
-/*  public boolean shouldDoDecodeWithHydec() {
-    return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
-  }*/
   public String getMiraClassifierURL() {
     return miraClassifierURL;
   }
@@ -897,7 +883,18 @@ public class ServerProperties {
   }
 
   public String getMailServer() {
-    return props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU);
+    String property = System.getProperty("log.mailhost");
+    return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
+  }
+
+  public String getMailFrom() {
+    String property = System.getProperty("log.mailfrom");
+    return property == null ? props.getProperty("mail.from", DEFAULT_MAIL_FROM) : property;
+  }
+
+  public String getMailReplyTo() {
+    String property = System.getProperty("mail.replyto");
+    return property == null ? props.getProperty("mail.replyto", "admin@" +getNPServer()) : property;
   }
 
   /**

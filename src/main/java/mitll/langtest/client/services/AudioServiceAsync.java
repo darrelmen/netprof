@@ -41,7 +41,6 @@ import mitll.langtest.shared.scoring.ImageOptions;
 
 public interface AudioServiceAsync {
   /**
-   *
    * @param base64EncodedString
    * @param audioContext
    * @param recordedWithFlash
@@ -61,7 +60,6 @@ public interface AudioServiceAsync {
                       AsyncCallback<AudioAnswer> async);
 
   /**
-   * @see mitll.langtest.client.LangTest#getImage(int, String, String, String, int, int, String, String, AsyncCallback)
    * @param reqid
    * @param audioFile
    * @param imageType
@@ -69,6 +67,7 @@ public interface AudioServiceAsync {
    * @param exerciseID
    * @param language
    * @param async
+   * @see mitll.langtest.client.LangTest#getImage(int, String, String, String, int, int, String, String, AsyncCallback)
    */
   void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
@@ -76,16 +75,18 @@ public interface AudioServiceAsync {
                             AsyncCallback<ImageResponse> async);
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#checkAudio
    * @param projectid
    * @param async
+   * @see mitll.langtest.client.project.ProjectEditForm#checkAudio
    */
   void checkAudio(int projectid, AsyncCallback<Void> async);
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    * @param id
    * @param asyncCallback
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
+
+  void logMessage(String subject, String message, boolean sendEmail, AsyncCallback<Void> async);
 }

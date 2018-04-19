@@ -325,7 +325,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
   }
 
-  private String getHostName() {
+  protected String getHostName() {
     try {
       return java.net.InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
@@ -338,7 +338,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
+    return new MailSupport(serverProps);
   }
 
   protected String getInfo(String message) {

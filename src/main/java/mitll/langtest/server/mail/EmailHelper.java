@@ -65,10 +65,11 @@ public class EmailHelper {
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String YOUR_USER_NAME = "Your user name";
- // private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
+  // private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
   //private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
 
   private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
+  public static final String LOCALHOST = "127.0.0.1";
 
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
@@ -78,12 +79,12 @@ public class EmailHelper {
   private final String NP_SERVER;
 
   /**
-   * @see RestUserManagement#getEmailHelper
-   * @see OpenUserServiceImpl#getEmailHelper
    * @param serverProperties
    * @param userDAO
    * @param mailSupport
    * @param pathHelper
+   * @see RestUserManagement#getEmailHelper
+   * @see OpenUserServiceImpl#getEmailHelper
    */
   public EmailHelper(ServerProperties serverProperties,
                      IUserDAO userDAO,
@@ -95,7 +96,7 @@ public class EmailHelper {
     this.mailSupport = mailSupport;
     this.pathHelper = pathHelper;
     NP_SERVER = serverProperties.getNPServer();
-    REPLY_TO = "admin@" + NP_SERVER;
+    REPLY_TO = serverProperties.getMailReplyTo();
   }
 
   private String getHash(String toHash) {
@@ -120,8 +121,7 @@ public class EmailHelper {
           getUserNameMessage(userID),
           "Click here to return to the site." // link text
       );
-    }
-    else {
+    } else {
       logger.warn("no user with email " + email);
     }
   }
@@ -135,9 +135,9 @@ public class EmailHelper {
   }
 
   /**
-   * @see RestUserManagement#forgotUsername
    * @param email
    * @param userID
+   * @see RestUserManagement#forgotUsername
    */
   public void getUserNameEmailDevice(String email, String userID) {
     //logger.debug("Sending user email...");
@@ -152,6 +152,7 @@ public class EmailHelper {
 
   /**
    * TODO : - update this for domino
+   *
    * @param user
    * @param email
    * @param url
@@ -219,7 +220,7 @@ public class EmailHelper {
    */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
     List<String> ccEmails = Collections.emptyList();
-    mailSupport.sendEmail(NP_SERVER,
+    mailSupport.sendEmail(
         link,
         to,
         REPLY_TO,
@@ -230,7 +231,7 @@ public class EmailHelper {
   }
 
   private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) { // just for testing
+    if (url.contains(LOCALHOST)) { // just for testing
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
     } else {
       return url.split("\\?")[0].split("\\#")[0];

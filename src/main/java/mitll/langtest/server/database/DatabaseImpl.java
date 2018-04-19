@@ -393,12 +393,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     String propValue = projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName());
 
     if (propValue == null) {
-      List<String> reportEmails = serverProps.getReportEmails();
-
-//      logger.info("default properties : " + reportEmails);
-
       projectDAO.addOrUpdateProperty(defaultProject, ProjectProperty.REPORT_LIST,
-          reportEmails.toString()
+          serverProps.getReportEmails()
+              .toString()
               .replaceAll("\\[", "").replaceAll("]", ""));
       //    logger.info("default properties : " + projectDAO.getPropValue(defaultProject, ProjectProperty.REPORT_LIST.getName()));
     } else {
@@ -508,125 +505,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  /**
-   * make sure dry run is easy
-   *
-   * @return
-   * @paramx projectid
-   * @paramx first
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#getQuizTypeToValues
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#getExercisesForSelectionState
-   */
- /* public ISection<CommonExercise> getQuizSectionHelper(int projectid) {
-    if (projectid == -1) {
-      return null;
-    } else {
-      SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
-      sectionHelper.setPredefinedTypeOrder(QUIZ_TYPES);
-      getExercises(projectid);
 
-      Collection<UserList<CommonShell>> allQuiz = getUserListManager().getUserListDAO().getAllQuiz(projectid);
-
-      logger.info("getQuizSectionHelper count " + allQuiz.size());
-
-      List<Integer> listIDs = new ArrayList<>();
-      allQuiz.forEach(quiz -> listIDs.add(quiz.getID()));
-      Map<Integer, Collection<Integer>> exidsForList =
-          getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listIDs);
-
-      List<List<Pair>> allAttributes = new ArrayList<>();
-      allQuiz.forEach(quiz -> {
-        int id = quiz.getID();
-        Collection<Integer> exids = exidsForList.get(id);
-        if (exids == null) {
-          logger.error("getQuizSectionHelper : no exercises in list " + id);
-        } else {
-          List<CommonExercise> firstCandidates = new ArrayList<>();
-
-          exids.forEach(exid->firstCandidates.add(getExercise(projectid,exid)));
-          //List<CommonExercise> first = getFirstEasyLength(firstCandidates);
-
-          // dry run set
-          List<Integer> toAdd = addDryRunSet(projectid, sectionHelper, allAttributes, quiz, firstCandidates.subList(0,10));
-
-          // quiz set
-          addQuizSet(projectid, sectionHelper, allAttributes, quiz, exids, toAdd);
-        }
-      });
-
-      sectionHelper.rememberTypesInOrder(QUIZ_TYPES, allAttributes);
-
-      sectionHelper.report();
-      return sectionHelper;
-    }
-  }*/
-
- /* @NotNull
-  private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
-    List<CommonExercise> first = new ArrayList<>();
-    int misses = 0;
-//          while (first.size() < 10 && misses < 100) {
-    for (CommonExercise candidate : firstCandidates) {
-      //CommonExercise exercise = getExercise(projectid, exid);
-      if (candidate.getNumPhones() < MAX_PHONES || misses++ > 100) {
-        first.add(candidate);
-        if (first.size() == 10) break;
-      }
-    }
-    return first;
-  }*/
-  @NotNull
-  private List<Integer> addDryRunSet(int projectid,
-                                     SectionHelper<CommonExercise> sectionHelper,
-                                     List<List<Pair>> allAttributes,
-                                     UserList<CommonShell> quiz,
-                                     Collection<CommonExercise> first) {
-    List<Integer> toAdd = new ArrayList<>();
-    first.forEach(commonExercise -> toAdd.add(commonExercise.getID()));
-    addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, toAdd, true);
-    return toAdd;
-  }
-
-  private void addQuizSet(int projectid, SectionHelper<CommonExercise> sectionHelper,
-                          List<List<Pair>> allAttributes,
-                          UserList<CommonShell> quiz,
-                          Collection<Integer> exids,
-                          Collection<Integer> toAdd) {
-    List<Integer> copy = new ArrayList<>(exids);
-    copy.removeAll(toAdd);
-    addExercisesForQuiz(projectid, sectionHelper, allAttributes, quiz, copy, false);
-  }
-
-  private void addExercisesForQuiz(int projectid,
-                                   SectionHelper<CommonExercise> sectionHelper,
-                                   List<List<Pair>> allAttributes,
-                                   UserList<CommonShell> quiz,
-                                   Collection<Integer> exids, boolean useFirst) {
-    int id = quiz.getID();
-    String name = quiz.getName();
-
-    logger.info("\tquiz " + id + " '" + name + "'  = " + exids.size());
-
-    List<Pair> first = new ArrayList<>(2);
-
-    first.add(new Pair(QUIZ, name));
-    first.add(new Pair(UNIT, DRY_RUN));
-
-    List<Pair> second = new ArrayList<>(2);
-    second.add(new Pair(QUIZ, name));
-    second.add(new Pair(UNIT, QUIZ1));
-
-    List<CommonExercise> toAdd = new ArrayList<>();
-    exids.forEach(exid -> toAdd.add(getExercise(projectid, exid)));
-    //toAdd.sort(Comparator.comparingInt(CommonShell::getNumPhones));
-
-    toAdd.forEach(exercise -> {
-      //  CommonExercise exercise = getExercise(projectid, exid);
-      List<Pair> pairs = useFirst ? first : second;
-      allAttributes.add(pairs);
-      sectionHelper.addPairs(exercise, pairs);
-    });
-  }
 
   private boolean isAmas() {
     return serverProps.isAMAS();
@@ -1091,31 +970,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
   }
 
-  /**
-   * does all average calc on server
-   *
-   * @return
-   * @paramx listid
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
-   * @seex mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
-   */
-/*
-  @Override
-  public AVPScoreReport getUserHistoryForList(int userid,
-                                              Collection<Integer> ids,
-                                              int latestResultID,
-                                              Collection<Integer> allIDs,
-                                              Map<Integer, CollationKey> idToKey,
-                                              String language) {
-    return new UserSessionHistory().getUserHistoryForList(userid,
-        ids,
-        latestResultID,
-        allIDs,
-        idToKey,
-        resultDAO,
-        language);
-  }
-*/
   @Override
   public Connection getConnection(String who) {
     return null;
@@ -1624,6 +1478,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * Sort by english if normal list
+   *
    * @param listid
    * @param projectid
    * @return
@@ -1813,9 +1668,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return stats;
   }
 
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail(), serverProps.getMailServer());
-  }
+  private MailSupport getMailSupport() {  return new MailSupport(serverProps);  }
 
   /**
    * @param year

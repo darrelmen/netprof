@@ -261,31 +261,37 @@ public class Project implements IPronunciationLookup {
   private <T extends CommonShell> void buildExerciseTrie() {
     final List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
+
+    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder)).start();
+    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder)).start();
+  }
+
+  private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
     fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
     logger.info("buildExerciseTrie : for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
+  }
 
-    new Thread(() -> {
-      long then1 = System.currentTimeMillis();
+  private void makeContextTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
+    long then1 = System.currentTimeMillis();
 
-      if (fullContextTrie != null) {
-        logger.warn("buildExerciseTrie : rebuilding full context trie for " + rawExercises.size() + " exercises.");
-      }
+    if (fullContextTrie != null) {
+      logger.warn("buildExerciseTrie : rebuilding full context trie for " + rawExercises.size() + " exercises.");
+    }
 
-      logger.info("buildExerciseTrie : START context for " + project.id() + " for " + rawExercises.size() + " exercises.");
+    logger.info("buildExerciseTrie : START context for " + project.id() + " for " + rawExercises.size() + " exercises.");
 //      List<CommonExercise> copy = new ArrayList<>(rawExercises);
 /*
       if (copy.size() > 1000) {
         copy = copy.subList(0, 1000);
       }
 */
-      long before = logMemory();
-      fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
-      long after = logMemory();
-      logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() +
-          " exercises, used " + (after - before) + " MB");
-    }).start();
+    long before = logMemory();
+    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
+    long after = logMemory();
+    logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() +
+        " exercises, used " + (after - before) + " MB");
   }
 
   /**

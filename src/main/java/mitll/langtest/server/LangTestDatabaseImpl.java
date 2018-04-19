@@ -167,15 +167,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
-   * @return
-   * @throws DominoSessionException
-   * @see LangTestDatabaseImpl#getUserHistoryForList
-   */
-/*  private Collection<CommonExercise> getExercisesForUser() throws DominoSessionException {
-    return db.getExercises(getProjectIDFromUser());
-  }*/
-
-  /**
    * This report is for on demand sending the report to the current user.
    *
    * @see UserMenu#getProjectSpecificChoices
@@ -286,69 +277,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getMaleFemaleProgress(getProjectIDFromUser(getUserIDFromSessionOrDB()));
   }
 
-  /**
-   * @return
-   * @paramx ids            items the user has actually practiced/recorded audio for
-   * @paramx latestResultID
-   * @paramx typeToSection  indicates the unit and chapter(s) we're asking about
-   * @paramx userListID     if we're asking about a list and not predef items
-   * @seex mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
-   */
-/*
-  @Override
-  public AVPScoreReport getUserHistoryForList(Collection<Integer> ids,
-                                              long latestResultID,
-                                              Map<String, Collection<String>> typeToSection,
-                                              int userListID) throws DominoSessionException {
-*/
-/*    logger.debug("getUserHistoryForList" +
-        "\n\tuser " + userid + " and" +
-        "\n\tids " + ids.size() +
-        "\n\tlist " + userListID+
-        " type to section " + typeToSection);
-    *//*
+  public static final String TEST_EXCEPTION = "Test Exception";
 
-    int userIDFromSession = getUserIDFromSessionOrDB();
-
-    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
-
-    if (userListByID == null && userListID != -1) logger.error("no user list for " + userListID);
-
-    List<Integer> allIDs = new ArrayList<>();
-    Map<Integer, CollationKey> idToKey = new HashMap<>();
-
-    int projectID = getProjectIDFromUser(userIDFromSession);
-    Collator collator = getCollator(projectID);
-
-    if (collator != null) {  // some kind of race...
-      if (userListByID != null) {
-        userListByID.getExercises().forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
-      } else {
-        Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercisesForUser() :
-            (getSectionHelper() == null ? Collections.emptyList() : getSectionHelper().getExercisesForSelectionState(typeToSection));
-
-        exercisesForState.forEach(exercise -> populateCollatorMap(allIDs, idToKey, collator, exercise));
-      }
-    }
-
-    //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userIDFromSession, ids, (int) latestResultID, allIDs, idToKey, db.getLanguage(projectID));
-  }
-*/
-
-/*  private Collator getCollator(int projid) {
-    AudioFileHelper audioFileHelper = getAudioFileHelper(db.getProject(projid));
-    return audioFileHelper == null ? null : audioFileHelper.getCollator();
-  }*/
-
-/*  private void populateCollatorMap(List<Integer> allIDs,
-                                   Map<Integer, CollationKey> idToKey,
-                                   Collator collator,
-                                   CommonShell exercise) {
-    int id = exercise.getID();
-    allIDs.add(id);
-    idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
-  }*/
   public void logMessage(String message, boolean sendEmail) {
     if (message.length() > 10000) message = message.substring(0, 10000);
     String prefixedMessage = "on " + getHostName() + " from client : " + message;
@@ -359,19 +289,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.info(prefixedMessage);
     }
 
-    if (message.startsWith(GOT_BROWSER_EXCEPTION) || sendEmail) {
+    if (message.startsWith(TEST_EXCEPTION) && sendEmail) {
+      sendEmail(TEST_EXCEPTION, getInfo(prefixedMessage));
+
+    } else if (message.startsWith(GOT_BROWSER_EXCEPTION) || sendEmail) {
       sendEmail("Javascript Exception", getInfo(prefixedMessage));
     }
   }
-
-  private String getHostName() {
-    try {
-      return InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
-      return "unknown host exception?";
-    }
-  }
-
 
   @Override
   public void destroy() {

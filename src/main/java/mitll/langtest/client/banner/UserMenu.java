@@ -20,6 +20,7 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.result.ActiveUsersManager;
 import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
@@ -33,6 +34,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
+  public static final String ACTIVE_USERS = "Active Users";
+  public static final String TEST_EXCEPTION = "Test Exception";
+  public static final String TEST_EXCEPTION_MSG = "Test Exception - this tests to see that email error reporting is configured properly. Thanks!";
+  public static final String STATUS_REPORT_BEING_GENERATED = "Status report being generated.";
+  public static final String MESSAGE__504 = "504";
+
   private final Logger logger = Logger.getLogger("UserMenu");
   //private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
 
@@ -84,11 +91,36 @@ public class UserMenu {
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
-    choices.add(new LinkAndTitle("Active Users", new ActiveUsersHandler()));
-   // choices.add(new LinkAndTitle("Active Today", new ActiveUsersHandlerDay()));
+    choices.add(new LinkAndTitle(ACTIVE_USERS, new ActiveUsersHandler()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
     choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
+
+
+    choices.add(new LinkAndTitle("Send Test Exception", event -> {
+      ArrayList<String> strings = new ArrayList<>();
+      Collection<AudioServiceAsync> allAudioServices = controller.getAllAudioServices();
+      allAudioServices.forEach(audioServiceAsync ->
+          audioServiceAsync.logMessage(TEST_EXCEPTION,
+              TEST_EXCEPTION_MSG, true, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  new ModalInfoDialog("Error", "Somehow couldn't send test emails.");
+
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                  strings.add("got");
+                  if (strings.size() == allAudioServices.size()) {
+                    new ModalInfoDialog("Check your email.", "Email should arrive sent from all servers.");
+                  }
+                }
+              })
+      );
+
+      controller.logMessageOnServer(TEST_EXCEPTION, TEST_EXCEPTION_MSG, true);
+    }));
 
     return choices;
   }
@@ -99,14 +131,14 @@ public class UserMenu {
     choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle(EVENTS, new EventsClickHandler()));
-/*    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Female", new DownloadContentsClickHandler(menu,false)));
-    choices.add(new LinkAndTitle(DOWNLOAD_CONTEXT + " Male", new DownloadContentsClickHandler(menu,true)));*/
     return choices;
   }
 
   private void addSendReport(List<LinkAndTitle> choices) {
     choices.add(new LinkAndTitle(SEND_REPORT, event -> {
-      new ModalInfoDialog("Status report being generated.", "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
+      new ModalInfoDialog(
+          STATUS_REPORT_BEING_GENERATED,
+          "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
       sendReport();
     }));
   }
@@ -115,7 +147,7 @@ public class UserMenu {
     lazyGetService().sendReport(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        if (caught.getMessage().contains("504")) {
+        if (caught.getMessage().contains(MESSAGE__504)) {
           logger.info("OK send usage timed out...");
         } else {
           controller.handleNonFatalError("sending usage report", caught);
@@ -228,20 +260,20 @@ public class UserMenu {
   }
 
   private class ReportListHandler implements ClickHandler {
-    //final EventRegistration outer = lifecycleSupport;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new ReportListManager(controller).showReportList();
         }
       });
     }
   }
+
   private class ActiveUsersHandler implements ClickHandler {
-    //final EventRegistration outer = lifecycleSupport;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -253,22 +285,6 @@ public class UserMenu {
       });
     }
   }
- /* private class ActiveUsersHandlerDay implements ClickHandler {
-    final EventRegistration outer = lifecycleSupport;
-
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new ActiveUsersManager(controller).show(24);
-        }
-      });
-    }
-  }*/
-
   private void downloadFailedAlert() {
     Window.alert("Code download failed");
   }

@@ -82,7 +82,6 @@ public class EmailList {
    * Set this property for non-DLI deployments.
    */
   private static final String REPORT_EMAILS = "reportEmails";
-//  private static final String REPORT_EMAIL_NAMES = "reportNames";
 
   /**
    * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500
@@ -93,8 +92,8 @@ public class EmailList {
   private final Properties props;
 
   /**
-   * @see mitll.langtest.server.ServerProperties#useProperties
    * @param props
+   * @see mitll.langtest.server.ServerProperties#useProperties
    */
   public EmailList(Properties props) {
     this.props = props;
@@ -104,10 +103,10 @@ public class EmailList {
 
     property = props.getProperty(REPORT_EMAILS);
     if (property != null) {
-     // logger.info("reportEmails = " + property);
+      // logger.info("reportEmails = " + property);
       if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
       else reportEmails = Arrays.asList(property.split(","));
-     // logger.info("reportEmails = " + reportEmails);
+      // logger.info("reportEmails = " + reportEmails);
     }
   }
 
@@ -116,11 +115,7 @@ public class EmailList {
       admins = new HashSet<>(Arrays.asList(property.split(",")));
       logger.info("admins now " + admins);
     }
-    else {
-     // logger.debug("default admins " + admins);
-    }
   }
-
 
   /**
    * @return
@@ -135,7 +130,8 @@ public class EmailList {
   }
 
   public String getEmailAddress() {
-    return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
+    String property = System.getProperty("log.mailto");
+    return property == null ? props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL) : property;
   }
 
   public boolean isDebugEMail() {

@@ -34,8 +34,8 @@ package mitll.langtest.server.mail;
 
 import com.sun.mail.util.MailConnectException;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.IReport;
-import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,12 +60,12 @@ public class MailSupport {
   private static final Logger logger = LogManager.getLogger(MailSupport.class);
 
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
-  private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
+  private static final String DATA_COLLECT_WEBMASTER = "Netprof Admin";
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
+
   /**
    * @see #email
    */
-  // private static final String MAILSERVER = "llmail.ll.mit.edu";//"localhost";
   private static final int MAIL_PORT = 25;
   private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
@@ -75,6 +75,16 @@ public class MailSupport {
   private final boolean debugEmail;
   private final boolean testEmail;
   private final String mailServer;
+  private final String mailFrom;
+ // private final String replyTo;
+
+  public MailSupport(ServerProperties serverProps) {
+    this(serverProps.isDebugEMail(),
+        serverProps.isTestEmail(),
+        serverProps.getMailServer(),
+        serverProps.getMailFrom(),
+        serverProps.getMailReplyTo());
+  }
 
   /**
    * @param debugEmail
@@ -82,11 +92,13 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    * @see RestUserManagement#getMailSupport()
    */
-  public MailSupport(boolean debugEmail, boolean testEmail, String mailServer) {
+  private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom, String replyTo) {
     this.debugEmail = debugEmail;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
-    if (testEmail) logger.warn("--->using test email");
+    this.mailFrom = mailFrom;
+  //  this.replyTo = replyTo;
+    if (testEmail) logger.warn("MailSupport --->using test email");
   }
 
   /**
@@ -95,14 +107,13 @@ public class MailSupport {
    * @param replyTo
    * @param subject
    * @param message
-   * @see Report#sendEmails
+   * @seex Report#sendEmails
    */
-  public boolean sendEmail(String serverName, String to, String replyTo, String subject, String message) {
+/*  public boolean sendEmail(String serverName, String to, String replyTo, String subject, String message) {
     return sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
-  }
+  }*/
 
   /**
-   * @param serverName
    * @param baseURL
    * @param to
    * @param replyTo
@@ -112,7 +123,7 @@ public class MailSupport {
    * @param ccEmails
    * @see EmailHelper#sendEmail
    */
-  boolean sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
+  boolean sendEmail(String baseURL, String to, String replyTo, String subject, String message,
                     String linkText, Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<>();
     if (toAddresses.isEmpty()) {
@@ -121,8 +132,8 @@ public class MailSupport {
 
     String body = getHTMLEmail(linkText, message, baseURL);
 
-    String fromEmail = "admin@" + serverName;
-    return normalFullEmail(fromEmail, fromEmail, replyTo, ccEmails, toAddresses, subject, body);
+    // String fromEmail = "admin@" + serverName;
+    return normalFullEmail(replyTo, replyTo, replyTo, ccEmails, toAddresses, subject, body);
   }
 
   private String getHTMLEmail(String linkText, String message, String link2) {
@@ -191,7 +202,7 @@ public class MailSupport {
   }
 
   /**
-   * @param receiver
+   * @param receiver could be comma separated...
    * @param subject
    * @param message
    * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
@@ -199,7 +210,15 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, mailServer, testEmail);
+    if (receiver.contains(",")) {
+      String[] split = receiver.split(",");
+      Arrays.asList(split).forEach(
+          rec ->
+              normalEmail(RECIPIENT_NAME, rec, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer)
+      );
+    } else {
+      normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer);
+    }
   }
 
   /**
@@ -266,10 +285,17 @@ public class MailSupport {
    * @param message
    * @param email_server
    * @param useTestPort
+   * @param from
+   * @param smtpHost
    * @see #email(String, String, String)
    */
-  private void normalEmail(String recipientName, String recipientEmail, List<String> ccEmails,
-                           String subject, String message, String email_server, boolean useTestPort) {
+  private void normalEmail(String recipientName,
+                           String recipientEmail,
+                           List<String> ccEmails,
+                           String subject,
+                           String message,
+                           String email_server,
+                           boolean useTestPort, String from, String smtpHost) {
     try {
       Transport.send(
           makeMessage(
@@ -278,10 +304,11 @@ public class MailSupport {
               recipientEmail,
               ccEmails,
               subject,
-              message));
+              message,
+              from, smtpHost));
     } catch (MailConnectException e) {
       if (!useTestPort) {
-        normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true);
+        normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true, from, smtpHost);
       } else {
         logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
@@ -319,7 +346,7 @@ public class MailSupport {
    * @param recipientEmails
    * @param subject
    * @param message
-   * @see #sendEmail(String, String, String, String, String, String, String, Collection)
+   * @see #sendEmail(String, String, String, String, String, String, Collection)
    */
   private boolean normalFullEmail(String senderName,
                                   String senderEmail,
@@ -332,7 +359,9 @@ public class MailSupport {
                                   String message) {
     try {
       Transport.send(makeHTMLMessage(getMailSession(mailServer, testEmail),
-          senderName, senderEmail, replyToEmail, recipientEmails,
+          senderName,
+          senderEmail,
+          replyToEmail, recipientEmails,
           ccEmails, subject, message));
       return true;
     } catch (Exception e) {
@@ -369,28 +398,47 @@ public class MailSupport {
    * @param ccEmails
    * @param subject
    * @param message
+   * @param from
+   * @param smtpHost
    * @return
    * @throws Exception
-   * @see #normalEmail(String, String, List, String, String, String, boolean)
+   * @see #normalEmail(String, String, List, String, String, String, boolean, String, String)
    */
   private Message makeMessage(Session session,
                               String recipientName,
                               String recipientEmail,
                               Collection<String> ccEmails,
                               String subject,
-                              String message) throws Exception {
+                              String message,
+                              String from, String smtpHost) throws Exception {
     Message msg = new MimeMessage(session);
-    configure(recipientName, recipientEmail, ccEmails, subject, message, msg);
-
+    configure(recipientName, recipientEmail, ccEmails, subject, message, msg, from, smtpHost);
     return msg;
   }
 
-  private void configure(String recipientName, String recipientEmail, Collection<String> ccEmails, String subject, String message, Message msg) throws MessagingException, UnsupportedEncodingException {
-    msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
+  private void configure(String recipientName,
+                         String recipientEmail,
+
+                         Collection<String> ccEmails,
+                         String subject,
+                         String message,
+                         Message msg,
+                         String from,
+                         String smtp) throws MessagingException, UnsupportedEncodingException {
     InternetAddress address = new InternetAddress(recipientEmail, recipientName);
-    logger.debug("makeMessage sending to " + address + " at port " + MAIL_PORT);
+
+    logger.info("email: " +
+        "\n\tsending to " + address +
+        (ccEmails.isEmpty() ? "" : "\n\tcc         " + ccEmails) +
+        "\n\tsmtp       " + smtp +
+        "\n\tat port    " + MAIL_PORT +
+        "\n\tsubject    " + subject +
+        "\n\tmessage    " + message);
+
     msg.addRecipient(Message.RecipientType.TO, address);
     addCC(ccEmails, msg);
+    msg.setFrom(new InternetAddress(from, DATA_COLLECT_WEBMASTER));
+
     msg.setSubject(subject);
     msg.setText(message);
     msg.setSentDate(new Date());
