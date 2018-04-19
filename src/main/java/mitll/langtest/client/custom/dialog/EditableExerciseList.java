@@ -115,7 +115,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       }
     }
     message = getFeedback();
-//    addW.add(message = getFeedback());
     addW.add(getRemoveButtonContainer());
     return addW;
   }
@@ -127,9 +126,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   @NotNull
   private DivWidget getRemoveButtonContainer() {
     DivWidget delW = new DivWidget();
-    //delW.addStyleName("floatLeft");
     delW.addStyleName("leftFiveMargin");
-    //delW.getElement().getStyle().setClear(Style.Clear.LEFT);
     delW.add(makeDeleteButton());
     return delW;
   }
@@ -177,7 +174,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    */
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
-    //quickAddText.addStyleName("bigflfont");
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
@@ -218,9 +214,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
   private void onClickAdd(Button add) {
     add.setEnabled(false);
+
     if (searchTypeahead.getCurrentExercise() != null) {
       if (isOnList()) {
-        // TODO : warn user already added.
         message.setText("This is already in the list.");
         enableButton(add);
       } else {
@@ -325,7 +321,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 //    int before = getSize();
     addExercise(currentExercise);
     //   int after = getSize();
-
 //    logger.info("before " + before + " after " + after);
     enableRemove(true);
 
@@ -336,11 +331,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private String getSafeText(TextBox box) {
     return sanitize(box.getText()).replaceAll("&#39;", "'");
   }
-
   private String sanitize(String text) {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
-
 
   protected int getNumTableRowsGivenScreenHeight() {
     return 12;
@@ -381,10 +374,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
           logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + list.getID() +
               " now " + list.getExercises().size());
         }
-//        if (learnContainer != null && learnContainer.getReloadable() != null) {
-//          learnContainer.getReloadable().redraw();   // TODO : or reload???
-//        }
-        logger.info("deleteItem list size is " + exerciseList.getSize());
+//        logger.info("deleteItem list size is " + exerciseList.getSize());
         editableExerciseList.enableRemove(exerciseList.getSize() > 0);
       }
 

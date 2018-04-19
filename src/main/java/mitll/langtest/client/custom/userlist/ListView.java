@@ -40,6 +40,7 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   public static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
+  public static final String MY_LISTS = "myLists";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_LIST = "Edit the list title or make it public.";
@@ -250,11 +251,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     left.add(getButtons(ListView.this.myLists));
 
-    Scheduler.get().scheduleDeferred(() ->
-        {
-          setShareHREF(getCurrentSelectionFromMyLists());
-        }
-    );
+    Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
   }
 
 
@@ -388,7 +385,7 @@ public class ListView implements ContentView, CreateListComplete {
     boolean hasDescrip = !originalList.getDescription().isEmpty();
     String suffix =
         originalList.getName() +
-        (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
+            (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
     Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + suffix,
         Collections.emptyList(),
@@ -776,11 +773,12 @@ public class ListView implements ContentView, CreateListComplete {
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
-      super(ListView.this.controller, 20, true, "myLists", 15);
+      super(ListView.this.controller, 20, true, MY_LISTS, 15);
     }
 
     @Override
     public void gotClickOnItem(final UserList<CommonShell> user) {
+      super.gotClickOnItem(user);
       setShareHREF(user);
     }
 

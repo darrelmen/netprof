@@ -76,7 +76,6 @@ public class MailSupport {
   private final boolean testEmail;
   private final String mailServer;
   private final String mailFrom;
- // private final String replyTo;
 
   public MailSupport(ServerProperties serverProps) {
     this(serverProps.isDebugEMail(),
@@ -102,18 +101,6 @@ public class MailSupport {
   }
 
   /**
-   * @param serverName
-   * @param to
-   * @param replyTo
-   * @param subject
-   * @param message
-   * @seex Report#sendEmails
-   */
-/*  public boolean sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-    return sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
-  }*/
-
-  /**
    * @param baseURL
    * @param to
    * @param replyTo
@@ -130,10 +117,7 @@ public class MailSupport {
       toAddresses.add(to);
     }
 
-    String body = getHTMLEmail(linkText, message, baseURL);
-
-    // String fromEmail = "admin@" + serverName;
-    return normalFullEmail(replyTo, replyTo, replyTo, ccEmails, toAddresses, subject, body);
+    return normalFullEmail(replyTo, replyTo, replyTo, ccEmails, toAddresses, subject, getHTMLEmail(linkText, message, baseURL));
   }
 
   private String getHTMLEmail(String linkText, String message, String link2) {
@@ -236,11 +220,11 @@ public class MailSupport {
     try {
       message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
       InternetAddress address = new InternetAddress(receiver, receiverName);
+
       logger.info("makeMessage sending to " + address + " at port " + MAIL_PORT + " via " + mailServer);
+
       message.addRecipient(Message.RecipientType.TO, address);
-      // addCC(ccEmails, msg);
       message.setSubject(subject);
-      //  message.setText(messageBody);
       message.setSentDate(new Date());
 
       Multipart multipart = new MimeMultipart();
@@ -315,7 +299,7 @@ public class MailSupport {
       // OK try with test email
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon (" + mailServer + ") " + "? " + e);
+        logger.warn("couldn't send email - no mail daemon (" + mailServer + ") " + "? " + e);
       } else {
         logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }

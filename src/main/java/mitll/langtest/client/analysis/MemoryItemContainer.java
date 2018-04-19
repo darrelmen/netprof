@@ -91,7 +91,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private int shortPageSize;// = 8;
-  Column<T, SafeHtml> dateCol;
+  private Column<T, SafeHtml> dateCol;
 
   /**
    * @param controller
@@ -122,21 +122,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     leftSide.addStyleName("floatLeft");
 
     {
-/*
-      DivWidget headerRow = new DivWidget();
-      headerRow.setWidth("100%");
-      if (!title.isEmpty()) {
-        headerRow.add(getStudentsHeader(title, subtitle));
-      }
-      leftSide.add(headerRow);
-*/
-
-/*
-      IsWidget rightOfHeader = getRightOfHeader();
-      if (rightOfHeader != null) {
-        headerRow.add(rightOfHeader);
-      }
-      */
       IsWidget belowHeader = getBelowHeader();
       if (belowHeader != null) {
         leftSide.add(belowHeader);
@@ -162,12 +147,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     students.setWidth("100%");
     return students;
   }
-
-/*
-  private IsWidget getRightOfHeader() {
-    return null;
-  }
-*/
 
   protected IsWidget getBelowHeader() {
     return null;
@@ -228,8 +207,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
-    table.setColumnWidth(dateCol, STARTED_WIDTH + "px");
+    table.setColumnWidth(dateCol, getDateWidth() + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, list));
+  }
+
+  protected int getDateWidth() {
+    return STARTED_WIDTH;
   }
 
   protected int getIdWidth() {
@@ -266,13 +249,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     Long selectedUser = getSelectedUser(selectedUserKey);
 
+   // logger.info("populateTable for " +selectedUserKey+ " selected item is " + selectedUser);
     for (T user : users) {
       addItem(user);
 
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        //logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
+     //   logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
       }
       i++;
     }
@@ -396,7 +380,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
-    //logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
@@ -457,7 +441,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   protected SafeHtml getFormattedDate(Long itemDate) {
     String signedUp = getFormattedDateString(itemDate);
-
     return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
   }
 

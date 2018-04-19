@@ -65,7 +65,6 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
-
   void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }

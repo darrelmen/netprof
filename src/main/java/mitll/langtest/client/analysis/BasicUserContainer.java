@@ -90,9 +90,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     addDateCol(list);
 
     table.setWidth("100%", true);
-
-   // addTooltip();
-  }
+    }
 
   /**
    * @param o1

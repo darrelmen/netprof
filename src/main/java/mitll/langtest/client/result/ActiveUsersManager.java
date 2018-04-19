@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -24,13 +25,16 @@ import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
 import java.util.List;
 
 public class ActiveUsersManager {
-  private static final int HOUR = 60 * 60 * 1000;
   //private final Logger logger = Logger.getLogger("ActiveUsersManager");
+
+  private static final int HOUR = 60 * 60 * 1000;
   private static final String LOGGED_IN = "Logged In";
   private static final String LAST_ACTIVITY = "Last Active";
+  private static final int INTCOL_WIDTH = 110;
 
   private final ExerciseController controller;
   private static final int TOP = 56;
@@ -105,6 +109,24 @@ public class ActiveUsersManager {
       addProj(getList());
     }
 
+    protected int getDateWidth() {
+      return INTCOL_WIDTH;
+    }
+
+    private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d h:mm a");
+
+    @Override protected String getFormattedDateString(Long itemDate) {
+      Date date = new Date(itemDate);
+      String signedUp = format.format(date);
+
+//      // drop year if this year
+//      if (signedUp.equals(todaysDate)) {
+//        signedUp = todayTimeFormat.format(date);
+//      } else if (todayYear.equals(signedUp.substring(signedUp.length() - 2))) {
+//        signedUp = signedUp.substring(0, signedUp.length() - 4);
+//      }
+      return signedUp;
+    }
     private void addLang(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> userCol = new Column<ActiveUser, SafeHtml>(new PagingContainer.ClickableCell()) {
         @Override
@@ -135,7 +157,7 @@ public class ActiveUsersManager {
       Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(LAST_ACTIVITY));
-      table.setColumnWidth(dateCol, STARTED_WIDTH + "px");
+      table.setColumnWidth(dateCol, INTCOL_WIDTH + "px");
       table.addColumnSortHandler(getVisitedSorter(dateCol, list));
     }
 

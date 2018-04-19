@@ -155,7 +155,7 @@ public class SearchTypeahead {
     feedbackExerciseList.clearMessage();
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
-    exercises.forEach(resp -> suggestions.add(getSuggestion(query, searchWords, resp)));
+    exercises.forEach(resp -> suggestions.add(getSuggestion(searchWords, resp)));
 
     return suggestions;
   }
@@ -163,20 +163,20 @@ public class SearchTypeahead {
   /**
    * What to show for each trie search result - if match in vocab item, show it, if in context sentence, show that.
    *
-   * @param query
    * @param searchWords
    * @param resp
    * @return
    */
-  private ExerciseSuggestion getSuggestion(String query, String[] searchWords, CommonShell resp) {
-    String lcQ = query.toLowerCase();
+  private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
+    //String lcQ = query.toLowerCase();
 
     String foreignLanguage = resp.getForeignLanguage();
-    boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
+    //boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
 
-    String formattedSuggestion = found ?
-        (foreignLanguage + " - " + resp.getEnglish()) :
-        (resp.getCforeignLanguage() + (resp.getCenglish().isEmpty() ? "" : (" - " + resp.getCenglish())) + " (Context)");
+    String formattedSuggestion =// found ?
+        (foreignLanguage + " - " + resp.getEnglish());
+    //:
+    //    (resp.getCforeignLanguage() + (resp.getCenglish().isEmpty() ? "" : (" - " + resp.getCenglish())) + " (Context)");
 
     String lowerCaseSuggestion = normalizeSuggestion(formattedSuggestion);
     String displayString = highlighter.getHighlightedString(searchWords, formattedSuggestion, lowerCaseSuggestion);
@@ -233,6 +233,7 @@ public class SearchTypeahead {
   /**
    * @return
    * @see EditableExerciseList#isOnList
+   * @see EditableExerciseList#onClickAdd
    */
   CommonShell getCurrentExercise() {
     return currentExercise;
