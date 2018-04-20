@@ -44,6 +44,8 @@ public class JsonScoring {
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   public static final boolean TRY_TO_DO_ALIGNMENT = false;
   public static final String EXERCISE_TEXT = "exerciseText";
+  public static final float MIN_HYDRA_ALIGN = 0.3F;
+  public static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -87,7 +89,7 @@ public class JsonScoring {
 
     JSONObject jsonForScore = new JSONObject();
     if (exercise == null) {
-      jsonForScore.put(VALID, "bad_exercise_id");
+      jsonForScore.put(VALID, BAD_EXERCISE_ID);
       return jsonForScore;
     }
     boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
@@ -98,9 +100,12 @@ public class JsonScoring {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
-    logger.debug("getJsonForAudioForUser flashcard " + doFlashcard +
-        " exercise id " + exerciseID + " took " + (now - then) +
-        " millis for " + saveFile.getName() + " = " + hydecScore);
+    logger.debug("getJsonForAudioForUser" +
+        "\n\tflashcard   " + doFlashcard +
+        "\n\texercise id " + exerciseID +
+        "\n\ttook        " + (now - then) + " millis " +
+        "\n\tfor         " + saveFile.getName() +
+        "\n\tscore       " + hydecScore);
 
     if (answer != null && answer.isValid() && pretestScore != null) {
       boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
@@ -116,8 +121,10 @@ public class JsonScoring {
       if (doFlashcard) {
         jsonForScore.put(IS_CORRECT, answer.isCorrect());
         jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
-        int decodeResultID = answer.getResultID();
-        jsonForScore.put(RESULT_ID, decodeResultID);
+        jsonForScore.put(RESULT_ID, answer.getResultID());
+      }
+      else {
+        jsonForScore.put(IS_CORRECT, hydecScore> MIN_HYDRA_ALIGN);
       }
     }
     addValidity(exerciseID, jsonForScore, answer);

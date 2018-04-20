@@ -40,9 +40,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
-  public static final String MY_LISTS = "myLists";
   private final Logger logger = Logger.getLogger("ListView");
+  
+  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
+  private static final String MY_LISTS = "myLists";
 
   private static final String EDIT_THE_LIST = "Edit the list title or make it public.";
   public static final String SHARE = "Share";
@@ -165,7 +166,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private ListContainer addVisitedTable(DivWidget top) {
     ListContainer listContainer =
-        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE) {
+        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE, false) {
           @Override
           protected boolean hasDoubleClick() {
             return true;
@@ -210,7 +211,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private ListContainer addPublicTable(DivWidget bottom) {
     ListContainer listContainer =
-        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE) {
+        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE, false) {
 
           @Override
           protected boolean hasDoubleClick() {
@@ -318,7 +319,7 @@ public class ListView implements ContentView, CreateListComplete {
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, EDIT_THE_LIST);
-    successButton.setEnabled(!myLists.isEmpty());
+    // successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
@@ -326,7 +327,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
     addTooltip(successButton, SHARE_THE_LIST);
-    successButton.setEnabled(!myLists.isEmpty());
+    //  successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
@@ -385,7 +386,7 @@ public class ListView implements ContentView, CreateListComplete {
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
     addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-    successButton.setEnabled(!myLists.isEmpty());
+    //  successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
@@ -445,7 +446,7 @@ public class ListView implements ContentView, CreateListComplete {
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, LEARN_THE_LIST);
-    learn.setEnabled(!container.isEmpty());
+    //learn.setEnabled(!container.isEmpty());
     container.addButton(learn);
     return learn;
   }
@@ -465,7 +466,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.DRILL));
     addTooltip(drill, "Drill the list.");
-    drill.setEnabled(!container.isEmpty());
+    // drill.setEnabled(!container.isEmpty());
     container.addButton(drill);
 
     return drill;
@@ -505,7 +506,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
     addTooltip(add, "Delete list.");
-    add.setEnabled(!myLists.isEmpty());
+    // add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
   }
@@ -520,7 +521,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
     add.setType(ButtonType.DANGER);
-    add.setEnabled(!visited.isEmpty());
+    // add.setEnabled(!visited.isEmpty());
     addTooltip(add, "Forget visited list.");
     visited.addButton(add);
     return add;
@@ -784,7 +785,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
-      super(ListView.this.controller, 20, true, MY_LISTS, 15);
+      super(ListView.this.controller, 20, true, MY_LISTS, 15, true);
     }
 
     @Override

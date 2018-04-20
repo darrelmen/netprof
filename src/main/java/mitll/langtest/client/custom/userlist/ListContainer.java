@@ -41,6 +41,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
   private boolean slim;
+  private boolean addOwnerToDescrip;
 
   private List<Button> buttons = new ArrayList<>();
 
@@ -52,10 +53,11 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    * @param shortPageSize
    * @see ContentView#showContent(Panel, String, boolean)
    */
-  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize) {
+  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize, boolean addOwnerToDescrip) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",
         pageSize, shortPageSize);
     this.slim = slim;
+    this.addOwnerToDescrip=addOwnerToDescrip;
   }
 
   void addButton(Button button) {
@@ -65,6 +67,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
+
   void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }
@@ -209,7 +212,8 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        String description = shell.getDescription();
+        String owner = addOwnerToDescrip && (shell.getUserID() != controller.getUser()) ? "(" + shell.getUserChosenID() + ") " : "";
+        String description = owner + shell.getDescription();
         //   logger.info("Desc " + description + " length " + description.length());
         String truncate = truncate(description);
         //   logger.info("truncate " + truncate + " length " + truncate.length());
@@ -261,7 +265,9 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         return getSafeHtml(shell.isPrivate() ? "No" : "Yes");
       }
     };
-  }  private Column<UserList<CommonShell>, SafeHtml> getQuiz() {
+  }
+
+  private Column<UserList<CommonShell>, SafeHtml> getQuiz() {
     return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
@@ -271,7 +277,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getListType()==QUIZ ? "Yes" : "No");
+        return getSafeHtml(shell.getListType() == QUIZ ? "Yes" : "No");
       }
     };
   }
