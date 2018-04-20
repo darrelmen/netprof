@@ -71,7 +71,7 @@ public interface IUserListManager   {
                                                       boolean listsICreated,
                                                       boolean visitedLists);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists, boolean includeQuiz);
 
   Collection<IUserList> getAllQuizUserList(int projid, int userID);
   /**

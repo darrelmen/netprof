@@ -101,10 +101,11 @@ public interface ListService extends RemoteService {
   /**
    * @param onlyCreated
    * @param visited
+   * @param includeQuiz
    * @return
    * @see UserContainer#getListBox
    */
-  Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
+  Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz) throws DominoSessionException;
 
   Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type) throws DominoSessionException;
 

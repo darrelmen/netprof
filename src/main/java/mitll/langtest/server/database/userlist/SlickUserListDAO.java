@@ -237,7 +237,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @param projectID
    * @return
-   * @see IUserListManager#getListsForUser(int, int, boolean, boolean)
+   * @see IUserListManager#getListsForUser(int, int, boolean, boolean, boolean)
    */
   @Override
   public List<UserList<CommonShell>> getAllByUser(int userid, int projectID) {
@@ -443,13 +443,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getQuizSectionHelper
    */
-/*  @Override
+ @Override
   public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid, userID);
+    Collection<SlickUserExerciseList> slickUserExerciseLists = dao.allQuiz(projid);
     List<UserList<CommonShell>> ret = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists.forEach(ue -> ret.add(fromSlick(ue)));
     return ret;
-  }*/
+  }
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
     Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid, -1);
@@ -494,7 +494,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, int, boolean, boolean)
+   * @see IUserListManager#getListsForUser(int, int, boolean, boolean, boolean)
    */
   @Override
   public Collection<UserList<CommonShell>> getVisitedLists(int userid, int projid) {

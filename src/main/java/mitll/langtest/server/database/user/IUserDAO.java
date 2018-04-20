@@ -226,10 +226,12 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   void close() throws Exception;
 
   boolean isStudent(int userIDFromSessionOrDB);
+  boolean isAdmin(int userid);
 
   DBUser getDominoAdminUser();
 
   void setProjectManagement(IProjectManagement projectManagement);
+
 
   class ReportUsers {
     private List<ReportUser> allUsers;

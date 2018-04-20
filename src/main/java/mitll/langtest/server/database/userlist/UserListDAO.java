@@ -215,7 +215,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @param projectID
    * @return
-   * @see UserListManager#getListsForUser
+   * @see IUserListManager#getListsForUser
    */
   @Override
   public List<UserList<CommonShell>> getAllByUser(int userid, int projectID) {
@@ -368,6 +368,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
+    return null;
+  }
+
+  @Override
+  public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
     return null;
   }
 

@@ -42,7 +42,7 @@ import java.util.Collection;
 public interface ListServiceAsync {
   void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
 
-  void getListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   /**
    * @param onlyCreated

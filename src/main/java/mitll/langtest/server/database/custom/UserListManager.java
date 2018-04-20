@@ -575,6 +575,7 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @param listsICreated
    * @param visitedLists
+   * @param includeQuiz
    * @return
    * @seex #getMyLists
    * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
@@ -583,7 +584,8 @@ public class UserListManager implements IUserListManager {
   public Collection<UserList<CommonShell>> getListsForUser(int userid,
                                                            int projid,
                                                            boolean listsICreated,
-                                                           boolean visitedLists) {
+                                                           boolean visitedLists,
+                                                           boolean includeQuiz) {
     if (userid == -1) {
       return Collections.emptyList();
     }
@@ -623,11 +625,13 @@ public class UserListManager implements IUserListManager {
         logger.info("getListsForUser took " + (now - then) + " to find " + listsForUser1.size() + " visited by " + userid);
       }
 
-      for (UserList<CommonShell> userList : listsForUser1) {
-        if (!ids.contains(userList.getID())) {
-          listsForUser.add(userList);
-        }
-      }
+      addIfNotThere(listsForUser, ids, listsForUser1);
+    }
+
+    boolean isAdmin = userDAO.isAdmin(userid);
+    if (isAdmin && includeQuiz) {
+      Collection<UserList<CommonShell>> allQuiz = userListDAO.getAllQuiz(projid);
+      addIfNotThere(listsForUser, ids, allQuiz);
     }
 
     // put favorite at front
@@ -653,6 +657,14 @@ public class UserListManager implements IUserListManager {
     }*/
 
     return listsForUser;
+  }
+
+  private void addIfNotThere(List<UserList<CommonShell>> listsForUser, Set<Integer> ids, Collection<UserList<CommonShell>> listsForUser1) {
+    for (UserList<CommonShell> userList : listsForUser1) {
+      if (!ids.contains(userList.getID())) {
+        listsForUser.add(userList);
+      }
+    }
   }
 
   /**
@@ -790,54 +802,6 @@ public class UserListManager implements IUserListManager {
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
   }
 
-  /**
-   * Wrap predef exercises with user exercises -- why?
-   *
-   * @param idToUserExercise
-   * @param ids
-   * @return
-   * @see #getReviewedExercises
-   */
-/*  private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
-    List<CommonExercise> onList = new ArrayList<>();
-
-    logger.info("getReviewed checking " + ids.size() + " against " + idToUserExercise.size());
-    for (Integer id : ids) {
-      CommonExercise commonExercise = idToUserExercise.get(id);
-      if (commonExercise != null && !commonExercise.isPredefined()) {
-        onList.add(commonExercise);
-        //}
-        //if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
-        //  if (idToUserExercise.containsKey(id)) {
-        //    onList.add(idToUserExercise.get(id));
-        // }
-        //else {
-        //  logger.debug("skipping id " + id + " since no in ");
-        //}
-      } else {                                    // add predef exercises
-        CommonExercise byID = userExerciseDAO.getPredefExercise(id);
-        if (byID != null) {
-          //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
-          Exercise e = new Exercise(byID);
-          onList.add(e); // all predefined references
-          //e.setTooltip(byID.getCombinedTooltip());
-          //logger.debug("getReviewedUserExercises : found " + e.getOldID() + " tooltip " + e.getTooltip());
-        } else {
-          logger.warn("\n\ngetReviewedUserExercises : huh? can't find predef exercise " + id);
-        }
-      }
-    }
-*//*
-    Collections.sort(onList, new Comparator<HasID>() {
-      @Override
-      public int compare(HasID o1, HasID o2) {
-        return o1.getID().compareTo(o2.getOldID());
-      }
-    });
-*//*
-    Collections.sort(onList);
-    return onList;
-  }*/
 
   /**
    * TODO : do a search over the list fields to find matches

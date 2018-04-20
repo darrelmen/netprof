@@ -239,7 +239,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param users
    * @see #getTableWithPager
    */
-  void populateTable(Collection<T> users) {
+  public void populateTable(Collection<T> users) {
     int i = 0;
     int index = 0;
     T userToSelect = null;

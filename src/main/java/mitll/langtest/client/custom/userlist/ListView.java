@@ -142,10 +142,15 @@ public class ListView implements ContentView, CreateListComplete {
 
     styleTopAndBottom(bottom);
 
-    ListServiceAsync listService = controller.getListService();
-    addYourLists(left, listService);
+    addYourLists(left);
+    addVisited(top);
+    addPublic(bottom);
+  }
 
-    listService.getListsForUser(false, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+  private void addVisited(DivWidget top) {
+    ListContainer listContainer = addVisitedTable(top);
+
+    controller.getListService().getListsForUser(false, true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting lists visited by user", caught);
@@ -153,37 +158,44 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer =
-            new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE) {
-              @Override
-              protected boolean hasDoubleClick() {
-                return true;
-              }
-
-              @Override
-              protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-                showLearnList(this);
-              }
-            };
-        Panel tableWithPager = listContainer.getTableWithPager(result);
-        addPagerAndHeader(tableWithPager, VISITED, top);
-        tableWithPager.addStyleName("rightFiveMargin");
-
-        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
-        tableWithPager.setHeight(VISITED_HEIGHT + "px");
-
-        DivWidget ldButtons = new DivWidget();
-        {
-          ldButtons.addStyleName("topFiveMargin");
-          ldButtons.add(getRemoveVisitorButton(listContainer));
-          addDrillAndLearn(ldButtons, listContainer);
-        }
-        top.add(ldButtons);
+        listContainer.populateTable(result);
       }
     });
+  }
 
+  private ListContainer addVisitedTable(DivWidget top) {
+    ListContainer listContainer =
+        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE) {
+          @Override
+          protected boolean hasDoubleClick() {
+            return true;
+          }
 
-    listService.getLists(new AsyncCallback<Collection<UserList<CommonShell>>>() {
+          @Override
+          protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+            showLearnList(this);
+          }
+        };
+    Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
+    addPagerAndHeader(tableWithPager, VISITED, top);
+    tableWithPager.addStyleName("rightFiveMargin");
+
+    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+    tableWithPager.setHeight(VISITED_HEIGHT + "px");
+
+    DivWidget ldButtons = new DivWidget();
+    {
+      ldButtons.addStyleName("topFiveMargin");
+      ldButtons.add(getRemoveVisitorButton(listContainer));
+      addDrillAndLearn(ldButtons, listContainer);
+    }
+    top.add(ldButtons);
+    return listContainer;
+  }
+
+  private void addPublic(DivWidget bottom) {
+    ListContainer listContainer = addPublicTable(bottom);
+    controller.getListService().getLists(new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting all lists", caught);
@@ -191,34 +203,40 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        ListContainer listContainer =
-            new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE) {
-
-              @Override
-              protected boolean hasDoubleClick() {
-                return true;
-              }
-
-              @Override
-              protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-                if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
-                  showQuiz(this);
-                } else {
-                  showLearnList(this);
-                }
-              }
-            };
-        Panel tableWithPager = listContainer.getTableWithPager(result);
-        addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
-        tableWithPager.setHeight(BROWSE_HEIGHT + "px");
-        tableWithPager.getElement().getStyle().setProperty("minWidth", "700px");
-
-        new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
-
-
-        bottom.add(getLDButtons(listContainer));
+        listContainer.populateTable(result);
       }
     });
+  }
+
+  private ListContainer addPublicTable(DivWidget bottom) {
+    ListContainer listContainer =
+        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE) {
+
+          @Override
+          protected boolean hasDoubleClick() {
+            return true;
+          }
+
+          @Override
+          protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+            if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
+              showQuiz(this);
+            } else {
+              showLearnList(this);
+            }
+          }
+        };
+    Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
+    addPagerAndHeader(tableWithPager, OTHERS_PUBLIC_LISTS, bottom);
+    tableWithPager.setHeight(BROWSE_HEIGHT + "px");
+    tableWithPager.getElement().getStyle().setProperty("minWidth", "700px");
+
+    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+
+
+    bottom.add(getLDButtons(listContainer));
+
+    return listContainer;
   }
 
   private void styleTopAndBottom(DivWidget bottom) {
@@ -227,8 +245,9 @@ public class ListView implements ContentView, CreateListComplete {
     bottom.addStyleName("cardBorderShadow");
   }
 
-  private void addYourLists(DivWidget left, ListServiceAsync listService) {
-    listService.getListsForUser(true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+  private void addYourLists(DivWidget left) {
+    showYourLists(Collections.emptyList(), left);
+    controller.getListService().getListsForUser(true, false, canMakeQuiz(), new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting lists created by user", caught);
@@ -236,7 +255,9 @@ public class ListView implements ContentView, CreateListComplete {
 
       @Override
       public void onSuccess(Collection<UserList<CommonShell>> result) {
-        showYourLists(result, left);
+        myLists.populateTable(result);
+        populateUniqueListNames(result);
+        Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
       }
     });
   }
@@ -244,18 +265,11 @@ public class ListView implements ContentView, CreateListComplete {
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
-    populateUniqueListNames(result);
-
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
-
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
-
     left.add(getButtons(ListView.this.myLists));
-
-    Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
   }
-
 
   private void populateUniqueListNames(Collection<UserList<CommonShell>> result) {
     result.forEach(list -> {
@@ -265,12 +279,10 @@ public class ListView implements ContentView, CreateListComplete {
     });
   }
 
-
   private boolean canMakeQuiz() {
     Collection<User.Permission> permissions = controller.getPermissions();
     return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
-
 
   private void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
     Heading w = new Heading(HEADING_SIZE, visited);
@@ -282,7 +294,7 @@ public class ListView implements ContentView, CreateListComplete {
     tableWithPager.setWidth("100%");
   }
 
-  Button share;
+  private Button share;
 
   @NotNull
   private DivWidget getButtons(ListContainer container) {
@@ -313,9 +325,6 @@ public class ListView implements ContentView, CreateListComplete {
   private Button getShare() {
     Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
-    // successButton.addClickHandler(event -> doShare());
-
-    // successButton.setHref(    getMailTo());
     addTooltip(successButton, SHARE_THE_LIST);
     successButton.setEnabled(!myLists.isEmpty());
     return successButton;
@@ -442,11 +451,11 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showLearnList(ListContainer container) {
-    controller.showListIn(getListID(container),INavigation.VIEWS.LEARN);
+    controller.showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
   private void showQuiz(ListContainer container) {
-    controller.showListIn(getListID(container),INavigation.VIEWS.QUIZ);
+    controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
   }
 
   @NotNull
@@ -454,7 +463,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> controller.showListIn(getListID(container),INavigation.VIEWS.DRILL));
+    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.DRILL));
     addTooltip(drill, "Drill the list.");
     drill.setEnabled(!container.isEmpty());
     container.addButton(drill);

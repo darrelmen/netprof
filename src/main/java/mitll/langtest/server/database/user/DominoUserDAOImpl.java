@@ -194,6 +194,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  /**
+   * Fall back if somehow we can't get domino services from servlet context?
+   *
+   * @param database
+   * @param props
+   * @throws MongoTimeoutException
+   */
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
@@ -265,6 +272,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.debug("isStudent : not a student #" + userIDFromSessionOrDB);
     }
     return b;
+  }
+
+  @Override
+  public boolean isAdmin(int userid) {
+    User user = getByID(userid);
+    if (user == null) {
+      logger.error("huh? no user " +userid);
+      return false;
+    }
+    else {
+      return user.isAdmin();
+    }
   }
 
   private Ignite getIgnite() {

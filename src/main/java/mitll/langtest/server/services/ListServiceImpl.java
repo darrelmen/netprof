@@ -132,16 +132,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * @param onlyCreated
    * @param visited
+   * @param includeQuiz
    * @return
    * @see ContentView#showContent
    */
-  public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+  public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<UserList<CommonShell>> listsForUser = getUserListManager()
-        .getListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+        .getListsForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited, includeQuiz);
 
     long now = System.currentTimeMillis();
 

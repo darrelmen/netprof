@@ -697,6 +697,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public boolean isAdmin(int userid) {
+    return false;
+  }
+
+  @Override
   public DBUser getDominoAdminUser() {
     return null;
   }
