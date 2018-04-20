@@ -238,10 +238,7 @@ public class UserListSupport {
 
   @NotNull
   public String getMailTo(int listid, String name, boolean isQuiz) {
-
-    // boolean isQuiz=false;
-    String selector = //isQuiz ? "QUIZ=" + name.replaceAll("\\s+","+") :
-        "Lists=" + listid;
+    String selector = "Lists=" + listid;
     String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
     String s = trimURL(Window.Location.getHref()) +
         "#" +
@@ -255,12 +252,22 @@ public class UserListSupport {
 
     return "mailto:" +
         "?" +
-        "Subject=Share netprof " + controller.getLanguage() +
+        "Subject=" +
+        getSubject(name, type) +
+        "&body=" +
+        getBody(name, encode, type);
+  }
+
+  @NotNull
+  private String getSubject(String name, String type) {
+    return "Share netprof " + controller.getLanguage() +
         " " +
         type +
-        " " + name +
-        "&body=" +
-        getPrefix() + name + " " +
+        " " + name;
+  }
+
+  private String getBody(String name, String encode, String type) {
+    return getPrefix() + name + " " +
         type + " : " + encode
         + getSuffix();
   }

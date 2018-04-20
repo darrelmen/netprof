@@ -91,10 +91,11 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String EDIT = EDIT1;
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
-  private static final int MY_LIST_HEIGHT = 560;
+  private static final int MY_LIST_HEIGHT = 560;//530;//560;
   private static final int browseBigger = 30;
-  private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - 35 - browseBigger;
-  private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - 30 + browseBigger;
+  private static final int MARGIN_FOR_BUTTON = 40;
+  private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON - browseBigger;
+  private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON + browseBigger;
 
   private final ExerciseController controller;
   private ListContainer myLists;

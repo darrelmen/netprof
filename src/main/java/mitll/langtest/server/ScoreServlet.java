@@ -118,6 +118,10 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String FULL = "full";
   private static final String WIDGET_TYPE = "widgetType";
   private static final boolean REPORT_ON_HEADERS = false;
+  /**
+   * for now we force decode requests into forced alignment... better to do false positive than false negative
+   */
+  private static final boolean CONVERT_DECODE_TO_ALIGN = true;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -957,8 +961,8 @@ public class ScoreServlet extends DatabaseServlet {
     logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
         "\n\tfor user " + user +
-        "\n\tprojid  " + projid +
-        "\n\texercise id   " + realExID +
+        "\n\tprojid   " + projid +
+        "\n\texid     " + realExID +
         //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
         "\n\tfull     " + fullJSONFormat +
@@ -969,6 +973,11 @@ public class ScoreServlet extends DatabaseServlet {
     logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
+
+    if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
+      logger.info("\tfor now we force decode requests into alignment...");
+      requestType = PostRequest.ALIGN;
+    }
 
     return jsonScoring.getJsonForAudioForUser(
         reqid,
@@ -1075,6 +1084,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * After writing the file, it shouldn't be modified any more.
+   *
    * @param inputStream
    * @param project
    * @param realExID
@@ -1094,7 +1104,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     writeToFile(inputStream, saveFile);
 
-   // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
+    // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
     if (!saveFile.setReadOnly()) {
       logger.warn("huh? can't mark file read only?");
     }

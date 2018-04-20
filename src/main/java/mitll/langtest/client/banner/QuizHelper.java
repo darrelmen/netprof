@@ -66,7 +66,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * @since 2/4/16.
  */
 public class QuizHelper extends PracticeHelper {
-  public static final String QUIZ = "Quiz";
+  private static final String QUIZ = "Quiz";
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
@@ -202,11 +202,7 @@ public class QuizHelper extends PracticeHelper {
   @Override
   public void showContent(Panel listContent, String instanceName, boolean fromClick) {
     super.showContent(listContent, instanceName, fromClick);
-    //  hideList();
-//    logger.info("Set visible  on " + rememberedTopRow.getElement().getId());
-//    logger.info("Set visible with children " + rememberedTopRow.getElement().getChildCount());
     rememberedTopRow.getParent().setVisible(false);
-    //rememberedTopRow.setVisible(false);
   }
 
   void showQuizIntro() {

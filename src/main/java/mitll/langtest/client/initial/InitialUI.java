@@ -286,11 +286,15 @@ public class InitialUI implements UILifecycle {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
-    History.newItem(""); // clear history!
+    pushClearHistory(); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
     lifecycleSupport.recordingModeSelect();
     clearContent();
+  }
+
+  private void pushClearHistory() {
+    History.newItem("");
   }
 
   /**
@@ -587,7 +591,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void resetLanguageSelection(int levelToRemove) {
-    History.newItem("");
+    pushClearHistory();
     clearStartupInfo();
     clearContent();
     removeUntilCrumb(levelToRemove);
@@ -621,7 +625,7 @@ public class InitialUI implements UILifecycle {
       } else {
         forgetProjectForUser();
 
-        History.newItem("");
+        pushClearHistory();
         clearStartupInfo();
 
         clearBreadcrumbs();
@@ -889,7 +893,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void clickOnParentCrumb(SlimProject parent) {
-    History.newItem(""); // clear history!
+    pushClearHistory(); // clear history!
     removeLastCrumb();
     addProjectChoices(1, parent);
   }

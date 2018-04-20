@@ -43,6 +43,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
+  private static final String QUIZ = "Quiz";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
@@ -63,7 +64,7 @@ public class NewContentChooser implements INavigation {
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new NewLearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
-    quizHelper = new QuizHelper(controller, this, QUIZ, this);
+    quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -122,7 +123,7 @@ public class NewContentChooser implements INavigation {
 
   @NotNull
   private VIEWS getInitialView(boolean npqUser) {
-    return npqUser ? QUIZ : isPolyglotProject() ? DRILL : LEARN;
+    return npqUser ? VIEWS.QUIZ : isPolyglotProject() ? DRILL : LEARN;
   }
 
   private boolean isPolyglotProject() {
@@ -292,7 +293,7 @@ public class NewContentChooser implements INavigation {
   private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
     quizHelper.setNavigation(this);
-    quizHelper.showContent(divWidget, QUIZ.toString(), fromClick);
+    quizHelper.showContent(divWidget, VIEWS.QUIZ.toString(), fromClick);
     quizHelper.hideList();
     if (fromClick) quizHelper.showQuizIntro();
   }
@@ -350,7 +351,6 @@ public class NewContentChooser implements INavigation {
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting defect list", caught);
       }
-
       @Override
       public void onSuccess(UserList<CommonShell> result) {
         showReviewItems(result);
@@ -360,8 +360,8 @@ public class NewContentChooser implements INavigation {
 
   private String getCurrentStoredView() {
     SelectionState selectionState = new SelectionState(History.getToken(), false);
-    boolean isQuiz = selectionState.getInstance().equalsIgnoreCase("Quiz");
-    return isQuiz ? QUIZ.toString().toUpperCase() : controller.getStorage().getValue(CURRENT_VIEW).toUpperCase();
+    boolean isQuiz = selectionState.getInstance().equalsIgnoreCase(QUIZ);
+    return isQuiz ? VIEWS.QUIZ.toString().toUpperCase() : controller.getStorage().getValue(CURRENT_VIEW).toUpperCase();
   }
 
   private void storeValue(VIEWS view) {

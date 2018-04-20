@@ -63,13 +63,13 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
-  protected  final ControlState controlState;
+  final ControlState controlState;
   private List<L> allExercises;
 
   private String selectionID = "";
-  protected final StickyState sticky;
+  final StickyState sticky;
   private Map<String, Collection<String>> selection = new HashMap<>();
 
   private Widget contentPanel;
@@ -93,7 +93,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
                                String instance) {
     super(controller, exerciseList);
     controlState = new ControlState();
-   // this.instance = instance;
+    // this.instance = instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<L>() {
@@ -207,7 +207,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  protected void reallyStartOver() {
+  private void reallyStartOver() {
     sticky.reset();
     sticky.resetStorage();
     loadFirstExercise();
