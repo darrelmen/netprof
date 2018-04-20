@@ -156,7 +156,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #addChoicesForType
    */
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
-  protected List<String> rootNodesInOrder = new ArrayList<>();
+  private List<String> rootNodesInOrder = new ArrayList<>();
   private final Map<Integer, String> idToListName = new HashMap<>();
   private final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
   private int freqid = 0;
@@ -231,7 +231,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @return
    */
   @NotNull
-  private DivWidget getPagerAndSort(ExerciseController controller) {
+  protected DivWidget getPagerAndSort(ExerciseController controller) {
     DivWidget pagerAndSort = new DivWidget();
     pagerAndSort.getElement().setId("pagerAndSort");
     pagerAndSort.addStyleName("inlineFlex");

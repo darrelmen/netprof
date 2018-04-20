@@ -90,7 +90,5 @@ public interface UILifecycle {
   INavigation getNavigation();
 
   void showCogMenu();
-/*
-  void setImplVersion(String implementationVersion);
-*/
+
 }

@@ -32,14 +32,12 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -77,13 +75,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final String selectedUserKey;
   private final String header;
 
-  public static final int STARTED_WIDTH = 90;
+  private static final int STARTED_WIDTH = 90;
   private static final String SIGNED_UP1 = "Start";
 
   static final String SELECTED_USER = "selectedUser";
 
   private static final int ID_WIDTH = 90;
-  private int idWidth = ID_WIDTH;
   private int pageSize;
   private final String todayYear;
   private final String todaysDate;
@@ -91,7 +88,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private int shortPageSize;// = 8;
-  private Column<T, SafeHtml> dateCol;
 
   /**
    * @param controller
@@ -136,6 +132,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     leftSide.add(getTableWithPager(users));
   }
 
+/*
   @NotNull
   private Heading getStudentsHeader(String title, String subtitle) {
     Heading students = subtitle.isEmpty() ?
@@ -147,6 +144,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     students.setWidth("100%");
     return students;
   }
+*/
 
   protected IsWidget getBelowHeader() {
     return null;
@@ -181,7 +179,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
-
   /**
    */
   @Override
@@ -204,7 +201,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   protected void addDateCol(List<T> list) {
-    dateCol = getDateColumn();
+    Column<T, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
     table.setColumnWidth(dateCol, getDateWidth() + "px");
@@ -216,10 +213,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   protected int getIdWidth() {
-    return idWidth;
+    return ID_WIDTH;
   }
 
-  protected String getDateColHeader() {   return SIGNED_UP1;
+  protected String getDateColHeader() {
+    return SIGNED_UP1;
   }
 
   /**
@@ -249,21 +247,21 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     Long selectedUser = getSelectedUser(selectedUserKey);
 
-   // logger.info("populateTable for " +selectedUserKey+ " selected item is " + selectedUser);
+    // logger.info("populateTable for " +selectedUserKey+ " selected item is " + selectedUser);
     for (T user : users) {
       addItem(user);
 
       if (selectedUser != null && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-     //   logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
+        //   logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
       }
       i++;
     }
 
     flush();
 
-    scrollIntoView(index, false);
+    scrollIntoView(index);
 
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);
@@ -287,10 +285,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * @param i
-   * @param doRedraw
+   * @paramx doRedraw
    * @see #getTableWithPager
    */
-  private void scrollIntoView(int i, boolean doRedraw) {
+  private void scrollIntoView(int i) {
     int pageSize = table.getPageSize();
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
@@ -307,9 +305,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 //        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
 //            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, pageSize);
-        if (doRedraw) {
-          table.redraw();
-        }
+//        if (doRedraw) {
+//          table.redraw();
+//        }
       }
     }
     //  i++;
@@ -380,7 +378,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
-    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+   // logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);

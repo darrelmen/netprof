@@ -221,6 +221,12 @@ public class QuizHelper extends PracticeHelper {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
     }
 
+
+    @Override protected DivWidget getPagerAndSort(ExerciseController controller) {
+      DivWidget pagerAndSort = super.getPagerAndSort(controller);
+      pagerAndSort.setVisible(false);
+      return pagerAndSort;
+    }
     protected UserList.LIST_TYPE getListType() {
       return UserList.LIST_TYPE.QUIZ;
     }

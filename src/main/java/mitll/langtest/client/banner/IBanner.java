@@ -38,7 +38,9 @@ public interface IBanner {
 
   void checkProjectSelected();
 
-  void showLearn();
-  void showQuiz();
-  void showDrill();
+  void show(INavigation.VIEWS views);
+
+//  void showLearn();
+//  void showQuiz();
+//  void showDrill();
 }

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
@@ -441,16 +442,11 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showLearnList(ListContainer container) {
-    controller.showLearnList(getListID(container));
-  }
-
-  private int getListID(ListContainer container) {
-    return getCurrentSelection(container).getID();
+    controller.showListIn(getListID(container),INavigation.VIEWS.LEARN);
   }
 
   private void showQuiz(ListContainer container) {
-    UserList<CommonShell> currentSelection = getCurrentSelection(container);
-    controller.showQuiz(currentSelection.getName(), currentSelection.getID());
+    controller.showListIn(getListID(container),INavigation.VIEWS.QUIZ);
   }
 
   @NotNull
@@ -458,12 +454,16 @@ public class ListView implements ContentView, CreateListComplete {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> controller.showDrillList(getListID(container)));
+    drill.addClickHandler(event -> controller.showListIn(getListID(container),INavigation.VIEWS.DRILL));
     addTooltip(drill, "Drill the list.");
     drill.setEnabled(!container.isEmpty());
     container.addButton(drill);
 
     return drill;
+  }
+
+  private int getListID(ListContainer container) {
+    return getCurrentSelection(container).getID();
   }
 
   @NotNull
@@ -744,7 +744,8 @@ public class ListView implements ContentView, CreateListComplete {
   private String getMailTo() {
     UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
     boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
-    return new UserListSupport(controller).getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
+    return new UserListSupport(controller)
+        .getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
   }
 
   /**

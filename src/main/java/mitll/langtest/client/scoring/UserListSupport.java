@@ -12,6 +12,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.exercise.NewListButton;
 import mitll.langtest.client.custom.exercise.PopupContainerFactory;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -239,7 +240,12 @@ public class UserListSupport {
   @NotNull
   public String getMailTo(int listid, String name, boolean isQuiz) {
     String selector = "Lists=" + listid;
-    String suffix = isQuiz ? SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=Quiz" : "";
+    String suffix = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" +
+        (isQuiz ?
+            INavigation.VIEWS.QUIZ.toString() :
+            INavigation.VIEWS.LEARN.toString()
+        );
+
     String s = trimURL(Window.Location.getHref()) +
         "#" +
         SelectionState.SECTION_SEPARATOR + selector +

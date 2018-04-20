@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
@@ -120,11 +121,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   KeyStorage getStorage();
 
-  void showLearnList(int id);
-
-  void showQuiz(String listName, int listID);
-
-  void showDrillList(int id);
+  void showListIn(int listID, INavigation.VIEWS views);
 
   void setBannerVisible(boolean visible);
 

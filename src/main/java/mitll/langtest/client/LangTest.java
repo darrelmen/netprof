@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -445,7 +446,7 @@ public class LangTest implements
       String host = slimProject.getHost();
       ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
 
-  //    logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
+      //    logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
       if (scoringServiceAsync == null) {
         logger.warning("no scoring service for " + host + " project " + slimProject);
       } else {
@@ -1058,7 +1059,9 @@ public class LangTest implements
     return audioServiceAsync == null ? defaultAudioService : audioServiceAsync;
   }
 
-  public Collection<AudioServiceAsync> getAllAudioServices() { return new HashSet<>(projectToAudioService.values()); }
+  public Collection<AudioServiceAsync> getAllAudioServices() {
+    return new HashSet<>(projectToAudioService.values());
+  }
 
   /**
    * Find host-specific scoring service - e.g. msa is on hydra2
@@ -1184,7 +1187,7 @@ public class LangTest implements
 
   @Override
   public boolean removeKeyListener(KeyPressHelper.KeyListener listener) {
-    return  keyPressHelper.removeKeyHandler(listener);
+    return keyPressHelper.removeKeyHandler(listener);
   }
 
   @Override
@@ -1232,27 +1235,32 @@ public class LangTest implements
   }
 
   /**
-   * @param id
+   * @paramx id
    * @see ListView#showLearnList
    */
-  @Override
+/*  @Override
   public void showLearnList(int id) {
-    initialUI.getNavigation().showLearnList(id);
+    initialUI.getNavigation().showListIn(id, INavigation.VIEWS.LEARN);
   }
 
   @Override
   public void showQuiz(String listName, int listID) {
-    initialUI.getNavigation().showQuiz(listName, listID);
+    initialUI.getNavigation().showListIn(listID, INavigation.VIEWS.QUIZ);
+  }*/
+
+  @Override
+  public void showListIn(int listID, INavigation.VIEWS views) {
+    initialUI.getNavigation().showListIn(listID, views);
   }
 
   /**
-   * @param id
+   * @paramx id
    * @see ListView#getDrillButton
    */
-  @Override
+ /* @Override
   public void showDrillList(int id) {
     initialUI.getNavigation().showDrillList(id);
-  }
+  }*/
 
   @Override
   public void setBannerVisible(boolean visible) {

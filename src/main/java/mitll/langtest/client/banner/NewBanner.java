@@ -283,10 +283,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return learn;
   }
 
+  public void show(INavigation.VIEWS views) {
+    gotClickOnChoice(views.toString(), viewToLink.get(views), false);
+  }
+
   /**
    * @see NewContentChooser#showLearnList
    */
-  @Override
+/*  @Override
   public void showLearn() {
     gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN), false);
   }
@@ -294,14 +298,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void showQuiz() {
     gotClickOnChoice(VIEWS.QUIZ.toString(), viewToLink.get(INavigation.VIEWS.QUIZ), false);
-  }
+  }*/
 
   /**
    * @see NewContentChooser#showDrillList
    */
+/*
   public void showDrill() {
     gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL), false);
   }
+*/
 
   /**
    *

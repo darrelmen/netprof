@@ -43,7 +43,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
-  private static final String QUIZ = "Quiz";
+  //private static final String QUIZ = "Quiz";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
@@ -102,8 +102,6 @@ public class NewContentChooser implements INavigation {
     List<User.Permission> requiredPerms = currentStoredView.getPerms();
     userPerms.retainAll(requiredPerms);
 
-//    logger.info("user userPerms " + userPerms + " overlap =  " + userPerms);
-
     if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
       logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
       currentStoredView = LEARN;
@@ -143,7 +141,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    //   logger.info("showView : show " + view + " current " + currentStoredView);
+    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -156,9 +154,11 @@ public class NewContentChooser implements INavigation {
 
           if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
 
+          setInstanceHistory(LEARN);
           learnHelper.showContent(divWidget, LEARN.toString(), fromClick);
           break;
         case DRILL:
+          setInstanceHistory(DRILL);
           showDrill();
           break;
         case QUIZ:
@@ -166,26 +166,32 @@ public class NewContentChooser implements INavigation {
           break;
         case PROGRESS:
           clearAndFixScroll();
+          setInstanceHistory(PROGRESS);
           showProgress();
           break;
         case LISTS:
           clearAndFixScroll();
+          setInstanceHistory(LISTS);
           listView.showContent(divWidget, "listView", fromClick);
           break;
         case RECORD:
           clear();
+          setInstanceHistory(RECORD);
           new RecorderNPFHelper(controller, true, this, RECORD).showNPF(divWidget, RECORD.toString());
           break;
         case CONTEXT:
           clear();
+          setInstanceHistory(CONTEXT);
           new RecorderNPFHelper(controller, false, this, CONTEXT).showNPF(divWidget, CONTEXT.toString());
           break;
         case DEFECTS:
           clear();
+          setInstanceHistory(DEFECTS);
           new MarkDefectsChapterNPFHelper(controller, this, DEFECTS).showNPF(divWidget, DEFECTS.toString());
           break;
         case FIX:
           clear();
+          setInstanceHistory(FIX);
           getReviewList();
           break;
         case NONE:
@@ -194,6 +200,15 @@ public class NewContentChooser implements INavigation {
         default:
           logger.warning("huh? unknown view " + view);
       }
+    }
+  }
+
+  private void setInstanceHistory(VIEWS views) {
+    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+      logger.info("setInstanceHistory clearing history for instance " + views);
+      History.newItem(SelectionState.INSTANCE + "=" + views.toString());
+    } else {
+      logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
@@ -314,15 +329,21 @@ public class NewContentChooser implements INavigation {
         //  logger.info("First " + s);
         Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
         if (!matchInfos.isEmpty()) {
-          MatchInfo next = matchInfos.iterator().next();
-          String value = next.getValue();
-          //  logger.info("First " + s + " = "+ value);
-          History.newItem(s + "=" + value);
+          pushUnitOrChapter(s, matchInfos.iterator().next());
         }
       }
     }
   }
 
+  private void pushUnitOrChapter(String s, MatchInfo next) {
+    String value = next.getValue();
+    //  logger.info("First " + s + " = "+ value);
+    History.newItem(s + "=" + value);
+  }
+
+  /**
+   * Only for polyglot...
+   */
   private void pushSecondUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
@@ -334,12 +355,9 @@ public class NewContentChooser implements INavigation {
         Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
         if (!matchInfos.isEmpty()) {
           Iterator<MatchInfo> iterator = matchInfos.iterator();
-
           MatchInfo next = iterator.next();
           if (iterator.hasNext()) next = iterator.next();
-          String value = next.getValue();
-          //  logger.info("First " + s + " = "+ value);
-          History.newItem(s + "=" + value);
+          pushUnitOrChapter(s, next);
         }
       }
     }
@@ -351,6 +369,7 @@ public class NewContentChooser implements INavigation {
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting defect list", caught);
       }
+
       @Override
       public void onSuccess(UserList<CommonShell> result) {
         showReviewItems(result);
@@ -358,10 +377,30 @@ public class NewContentChooser implements INavigation {
     });
   }
 
+  /**
+   * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
+   *
+   * @return
+   */
   private String getCurrentStoredView() {
+    String instance = getCurrentInstance();
+    logger.info("getCurrentStoredView instance = " + instance);
+//    boolean isQuiz = instance.equalsIgnoreCase(VIEWS.QUIZ.toString());
+
+    VIEWS views = null;
+    try {
+      views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.info("bad instance " + instance);
+    }
+    logger.info("getCurrentStoredView instance = " + instance + "/" + views);
+
+    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
+  }
+
+  private String getCurrentInstance() {
     SelectionState selectionState = new SelectionState(History.getToken(), false);
-    boolean isQuiz = selectionState.getInstance().equalsIgnoreCase(QUIZ);
-    return isQuiz ? VIEWS.QUIZ.toString().toUpperCase() : controller.getStorage().getValue(CURRENT_VIEW).toUpperCase();
+    return selectionState.getInstance();
   }
 
   private void storeValue(VIEWS view) {
@@ -429,31 +468,39 @@ public class NewContentChooser implements INavigation {
   }*/
 
   @Override
+  public void showListIn(int listid, VIEWS view) {
+    setHistoryWithList(listid, view);
+    banner.show(view);
+  }
+
+  private void setHistoryWithList(int listid, VIEWS views) {
+    History.newItem(
+        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
+            SelectionState.INSTANCE + "=" + views.toString());
+  }
+
+/*
+  @Override
   public void showLearnList(int listid) {
-    setHistoryWithList(listid);
-    banner.showLearn();
+    setHistoryWithList(listid, LEARN);
+    banner.show(LEARN);
   }
 
   @Override
-  public void showQuiz(String listName, int listID) {
-    History.newItem(LISTS + "=" + listID);
-    // logger.info("showQuiz " + listName + " " + listID);
+  public void showQuiz(int listID) {
+    setHistoryWithList(listID, QUIZ);
     banner.showQuiz();
   }
 
   @Override
   public void showDrillList(int listid) {
-    setHistoryWithList(listid);
+    setHistoryWithList(listid, DRILL);
     banner.showDrill();
-  }
+  }*/
 
   @Override
   public void setBannerVisible(boolean visible) {
     banner.setVisible(visible);
-  }
-
-  private void setHistoryWithList(int listid) {
-    History.newItem(FacetExerciseList.LISTS + "=" + listid);
   }
 
   @Override

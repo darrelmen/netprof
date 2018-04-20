@@ -51,10 +51,11 @@ public interface INavigation extends IViewContaner {
 
   void showInitialState();
 
-  void showLearnList(int listid);
-  void showQuiz(String listName, int listID);
+  void showListIn(int listid, VIEWS view);
+/*  void showLearnList(int listid);
+  void showQuiz(int listID);
 
-  void showDrillList(int listid);
+  void showDrillList(int listid);*/
 
   Widget getNavigation();
 

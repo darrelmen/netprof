@@ -67,6 +67,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ProjectEditForm extends UserDialog {
   public static final String PROJECT_TYPE = "Project Type";
+  public static final boolean SHOW_PROJECT_TYPE = false;
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   public static final String LANGUAGE = "Language";
@@ -398,10 +399,8 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) widgets.setVisible(false);
     }
 
-    {
-      /*DivWidget widgets =*/
+    if (SHOW_PROJECT_TYPE){
       addProjectType(info, fieldset);
-      // if (isNew) widgets.setVisible(false);
     }
 
     {
