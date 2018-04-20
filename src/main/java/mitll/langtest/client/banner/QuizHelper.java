@@ -67,6 +67,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  */
 public class QuizHelper extends PracticeHelper {
   private static final String QUIZ = "Quiz";
+  private static final int INTDEF_MIN_SCORE = 35;
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
@@ -78,7 +79,9 @@ public class QuizHelper extends PracticeHelper {
    * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  QuizHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView,
+  QuizHelper(ExerciseController controller,
+             IViewContaner viewContaner,
+             INavigation.VIEWS myView,
              INavigation navigation) {
     super(controller, viewContaner, myView);
     this.navigation = navigation;
@@ -106,6 +109,7 @@ public class QuizHelper extends PracticeHelper {
             exerciseList.setHistory(candidate);
 
             chosenList = listid;
+
             showQuizForReal();
           },
               controller.getUserManager().getUserID());
@@ -137,6 +141,23 @@ public class QuizHelper extends PracticeHelper {
         }
       }
 
+      @Override
+      public int getMinScore() {
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
+        if (idToList == null) {
+          logger.info("getMinScore no user lists yet ");
+          return INTDEF_MIN_SCORE;
+        } else {
+          if (chosenList == -1) {
+            setChosenList(exerciseList);
+          }
+          IUserList iUserList = idToList.get(chosenList);
+          return iUserList == null ? INTDEF_MIN_SCORE : iUserList.getMinScore();
+        }
+      }
+
+
       private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
         String s = candidate.get(LISTS);
@@ -144,7 +165,7 @@ public class QuizHelper extends PracticeHelper {
         if (s != null && !s.isEmpty()) {
           try {
             chosenList = Integer.parseInt(s);
-             // logger.info("setChosenList chosenList " + chosenList);
+            // logger.info("setChosenList chosenList " + chosenList);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse list id " + s);
           }
@@ -157,7 +178,6 @@ public class QuizHelper extends PracticeHelper {
       @Override
       public void showQuiz() {
         super.showQuiz();
-      //  logger.info("showQuiz clearListSelection ");
         clearListSelection();
       }
     };
@@ -211,7 +231,7 @@ public class QuizHelper extends PracticeHelper {
   }
 
   private void clearListSelection() {
-   // logger.info("---> clearListSelection ");
+    // logger.info("---> clearListSelection ");
     FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }
@@ -221,12 +241,13 @@ public class QuizHelper extends PracticeHelper {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
     }
 
-
-    @Override protected DivWidget getPagerAndSort(ExerciseController controller) {
+    @Override
+    protected DivWidget getPagerAndSort(ExerciseController controller) {
       DivWidget pagerAndSort = super.getPagerAndSort(controller);
       pagerAndSort.setVisible(false);
       return pagerAndSort;
     }
+
     protected UserList.LIST_TYPE getListType() {
       return UserList.LIST_TYPE.QUIZ;
     }

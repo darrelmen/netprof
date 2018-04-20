@@ -61,7 +61,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return end;
   }
 
-
   public enum LIST_TYPE {
     NORMAL,
     QUIZ
@@ -85,6 +84,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private long start;
   private long end;
   private int duration;
+  private int minScore;
+  private boolean showAudio;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
@@ -106,6 +107,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param start
    * @param end
    * @param duration
+   * @param minScore
+   * @param showAudio
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
@@ -123,7 +126,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   LIST_TYPE listType,
                   long start,
                   long end,
-                  int duration) {
+                  int duration, int minScore, boolean showAudio) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -139,21 +142,14 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.start = start;
     this.end = end;
     this.duration = duration;
+    this.minScore=minScore;
+    this.showAudio=showAudio;
   }
 
   @Override
   public int getUserID() {
     return userid;
   }
-
-/*  public void addExerciseAfter(T after, T toAdd) {
-    int index = exercises.indexOf(after);
-    if (index == -1) {
-      addExercise(toAdd);
-    } else {
-      exercises.add(index + 1, toAdd);
-    }
-  }*/
 
   /**
    * @param toAdd
@@ -300,6 +296,24 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   @Override
   public int getRoundTimeMinutes() {
     return duration;
+  }
+
+  @Override
+  public int getMinScore() {
+    return minScore;
+  }
+
+  @Override
+  public boolean shouldShowAudio() {
+    return showAudio;
+  }
+
+  public void setMinScore(int minScore) {
+    this.minScore = minScore;
+  }
+
+  public void setShowAudio(boolean showAudio) {
+    this.showAudio = showAudio;
   }
 
   public int getDuration() {

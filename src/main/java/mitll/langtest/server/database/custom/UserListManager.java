@@ -88,12 +88,11 @@ public class UserListManager implements IUserListManager {
 
 
   private static final boolean DEBUG = false;
-  // private static final int NUM_TO_CREATE_FOR_QUIZ = 10 + 100;
   private static final int DRY_RUN_ITEMS = 10;
   private static final int MIN_PHONE = 4;
   private static final int MAX_PHONE = 7;
   public static final String DRY_RUN = "Dry Run (Just Practice!)";
-  private static final String DESCRIP = "Dry run to prep for quizzes.";
+  //private static final String DESCRIP = "Dry run to prep for quizzes.";
   public static final int MINUTE = 60 * 1000;
   public static final int HOUR = 60 * MINUTE;
   public static final int DAY = 24 * HOUR;
@@ -152,9 +151,7 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid//,
-                              //long start, long end
-  ) {
+  public UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
     long start = System.currentTimeMillis();
     long end = start + FIFTY_YEAR;
     UserList userList = createUserList(userid, name, description, dliClass, !isPublic, projid, start, end);
@@ -166,18 +163,18 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  @Override
+/*  @Override
   public void ensureDryRun(int projid) {
     List<IUserListLight> collect = getDryRunList(projid);
     if (collect.isEmpty()) {
       int defaultUser = userDAO.getDefaultUser();
       long now = System.currentTimeMillis();
       createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true,
-          new TimeRange(), 1);
+          new TimeRange(), 1, minScore, showAudio);
       boolean addedit = getDryRunList(projid).size() == 1;
       if (!addedit) logger.error("ensureDryRun couldn't add dry run ?");
     }
-  }
+  }*/
 
   private List<IUserListLight> getDryRunList(int projid) {
     return userListDAO.getAllQuizLight(projid).stream().filter(iUserListLight -> iUserListLight.getName().equalsIgnoreCase(DRY_RUN)).collect(Collectors.toList());
@@ -192,14 +189,16 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @param size
    * @param duration
+   * @param minScore
+   * @param showAudio
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                          int size, int duration) {
+                          int size, int duration, int minScore, boolean showAudio) {
     UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false,
-        new TimeRange(), duration);
+        new TimeRange(), duration, minScore, showAudio);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -235,7 +234,7 @@ public class UserListManager implements IUserListManager {
       return null;
     } else {
       UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10);
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false);
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -252,6 +251,8 @@ public class UserListManager implements IUserListManager {
    * @param reqSize
    * @param timeRange
    * @param duration
+   * @param minScore
+   * @param showAudio
    * @return
    */
   private UserList<CommonShell> createQuiz(int userid,
@@ -262,7 +263,8 @@ public class UserListManager implements IUserListManager {
                                            int projid,
                                            int reqSize,
                                            boolean isDryRun,
-                                           TimeRange timeRange, int duration) {
+                                           TimeRange timeRange,
+                                           int duration, int minScore, boolean showAudio) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -271,7 +273,7 @@ public class UserListManager implements IUserListManager {
       long now = System.currentTimeMillis();
 
       UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration);
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration, minScore, showAudio);
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
@@ -410,7 +412,9 @@ public class UserListManager implements IUserListManager {
               userid1,
               name,
               numItems,
-              l.duration()));
+              l.duration(),
+              l.minscore(),
+              l.showaudio()));
     });
     return names;
   }
@@ -751,7 +755,7 @@ public class UserListManager implements IUserListManager {
     User qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
   }
 
   @NotNull
@@ -767,7 +771,7 @@ public class UserListManager implements IUserListManager {
     User qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10);
+        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
     return getCommonUserList(userList, allKnown);
   }
 
@@ -801,21 +805,6 @@ public class UserListManager implements IUserListManager {
     permissions.add(User.Permission.QUALITY_CONTROL);
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
   }
-
-
-  /**
-   * TODO : do a search over the list fields to find matches
-   *
-   * @param search NOT YET IMPLEMENTED
-   * @param userid
-   * @param projid
-   * @return
-   * @seex mitll.langtest.server.services.ListServiceImpl#getUserListsForText
-   */
-/*  @Override
-  public List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid) {
-    return userListDAO.getAllPublic(userid, projid);
-  }*/
 
   /**
    * Really create a new exercise and associated context exercise in database.
@@ -882,19 +871,6 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void addItemToList(int userListID, @Deprecated String exerciseID, int exid) {
-/*
-    //UserList where = getUserListNoExercises(userListID);
-
-   // if (where != null) {
-      addItemToGivenList(userListID, exerciseID, exid);
-//    } else {
-//      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
-//    }
-  }
-
-  private void addItemToGivenList(int userListID, @Deprecated String exerciseID, int exid) {
-*/
-
     userListExerciseJoinDAO.add(userListID, exerciseID, exid);
     userListDAO.updateModified(userListID);
   }
@@ -1352,12 +1328,4 @@ public class UserListManager implements IUserListManager {
   public void update(UserList userList) {
     userListDAO.update(userList);
   }
-
-/*  public Collection<Integer> getDefectExercises() {
-    return reviewedDAO.getDefectExercises();
-  }
-
-  public Collection<Integer> getInspectedExercises() {
-    return reviewedDAO.getInspectedExercises();
-  }*/
 }

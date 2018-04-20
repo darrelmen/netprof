@@ -18,7 +18,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
 
-  static final int MIN_POLYGLOT_SCORE = 35;
+  //static final int MIN_POLYGLOT_SCORE = 35;
   private static final int HEARTBEAT_INTERVAL = 1000;
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
@@ -51,7 +51,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         prompt,
         e.getCommonAnnotatable(),
         sticky,
-        exerciseList);
+        exerciseList,
+        getMinScore());
   }
 
   @Override
@@ -66,7 +67,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return new StickyState(storage) {
       @Override
       protected boolean isCorrect(boolean correct, double score) {
-        return (score * 100D) >= PolyglotFlashcardFactory.MIN_POLYGLOT_SCORE;
+        return (score * 100D) >= Integer.valueOf(getMinScore()).doubleValue();
       }
     };
   }
@@ -149,6 +150,12 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public int getRoundTimeMinutes(boolean isDry) {
     return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
   }
+
+  public int getMinScore() {
+    return 35;
+  }
+
+
 
   private boolean isRoundTimerNotRunning() {
     return (roundTimer == null) || !roundTimer.isRunning();

@@ -27,6 +27,7 @@ public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise
         prompt,
         e.getCommonAnnotatable(),
         sticky,
-        exerciseList);
+        exerciseList,
+        getMinScore());
   }
 }

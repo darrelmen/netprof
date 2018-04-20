@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.shared.custom.IUserList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,28 +19,20 @@ import java.util.Map;
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
   private static final String START = "Start!";
- // private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
+  // private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
   public static final String DRY_RUN = "Dry Run";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
-  private static final int MIN_POLYGLOT_SCORE = 35;
+  // private static final int MIN_POLYGLOT_SCORE = 35;
+  private  int MIN_POLYGLOT_SCORE;
   private static final int NATIVE_THRESHOLD = 70;
   private final Button closeButton;
 
   public QuizIntro(Map<Integer, IUserList> idToList,
-                   QuizHelper.QuizChoiceListener closeListener, String userID) {
-    this(idToList, MIN_POLYGLOT_SCORE, closeListener, userID);
-  }
-
-  /**
-   * @param closeListener
-   * @see mitll.langtest.client.banner.NewContentChooser#showPolyDialog
-   */
-  private QuizIntro(Map<Integer, IUserList> idToList,
-                    int minScore,
-                    QuizHelper.QuizChoiceListener closeListener, String userID) {
-    add(getContentRow(minScore, idToList, userID));
+                   QuizHelper.QuizChoiceListener closeListener,
+                   String userID) {
+    add(getContentRow(idToList, userID));
 
     addStyleName("cardBorderShadow");
 
@@ -63,7 +56,7 @@ public class QuizIntro extends DivWidget {
     closeButton.setEnabled(false);
   }
 
-  private Widget getContentRow(int minScore, Map<Integer, IUserList> idToList, String userID) {
+  private Widget getContentRow(Map<Integer, IUserList> idToList, String userID) {
     FluidContainer container = new FluidContainer();
 
     FluidRow row = new FluidRow();
@@ -103,7 +96,7 @@ public class QuizIntro extends DivWidget {
     row.add(w2);
     addBottom(w2);
 
-    row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
+    // row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. "));// (if you want to repeat an item)."));
     //  row.add(new Heading(HSIZE, "Click on an item in the chart to jump to that item."));// (if you want to repeat an item)."));
     //  row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
@@ -111,13 +104,21 @@ public class QuizIntro extends DivWidget {
     container.add(new Heading(HSIZE, "Please choose a quiz : "));
 
     {
-      Heading modeDep = new Heading(HSIZE, "");
-      modeDep.setHeight(14 + "px");
-      modeDep.getElement().getStyle().setColor("blue");
-      container.add(addModeChoices(modeDep, idToList));
+      Heading modeDep = getUserNotice();
+      Heading modeDep2 = getUserNotice();
+      container.add(addModeChoices(modeDep, modeDep2, idToList));
       container.add(modeDep);
+      container.add(modeDep2);
     }
     return container;
+  }
+
+  @NotNull
+  private Heading getUserNotice() {
+    Heading modeDep = new Heading(HSIZE, "");
+    modeDep.setHeight(14 + "px");
+    modeDep.getElement().getStyle().setColor("blue");
+    return modeDep;
   }
 
   private void addBottom(Heading w) {
@@ -127,7 +128,7 @@ public class QuizIntro extends DivWidget {
   private int listID = -1;
   private List<IUserList> choicesAdded = new ArrayList<>();
 
-  private Widget addModeChoices(Heading modeDep, Map<Integer, IUserList> idToList) {
+  private Widget addModeChoices(Heading modeDep, Heading modeDep2, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 
@@ -143,7 +144,7 @@ public class QuizIntro extends DivWidget {
         closeButton.setEnabled(false);
       } else {
         IUserList iUserList = choicesAdded.get(choices.getSelectedIndex() - 1);
-        onQuizChoice(modeDep, iUserList.getID(), iUserList);
+        onQuizChoice(modeDep, modeDep2, iUserList.getID(), iUserList);
       }
     });
     idToList.forEach((k, v) -> {
@@ -172,9 +173,10 @@ public class QuizIntro extends DivWidget {
     }
   }
 
-  private void onQuizChoice(Heading modeDep, Integer k, IUserList v) {
+  private void onQuizChoice(Heading modeDep, Heading modeDep2, Integer k, IUserList v) {
     int numItems = v.getNumItems();
     modeDep.setText(getModeText(v.getRoundTimeMinutes(), numItems));
+    modeDep2.setText("Scores above " + v.getMinScore() + " advance automatically.");
     listID = k;
     closeButton.setEnabled(true);
   }

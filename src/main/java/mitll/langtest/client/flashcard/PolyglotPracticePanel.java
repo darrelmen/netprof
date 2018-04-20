@@ -32,9 +32,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final String COMPLETE = "You've recorded all the items. " +
       "Use the arrow keys to review or re-record as desired, or click See Your Scores.";
 
-  private static final int MIN_POLYGLOT_SCORE = 35;
+  // private static final int MIN_POLYGLOT_SCORE = 35;
 
-  private static final float MIN_SCORE_F = ((float) MIN_POLYGLOT_SCORE) / 100f;
+  private float minScore;// = ((float) MIN_POLYGLOT_SCORE) / 100f;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 750;
@@ -50,14 +50,19 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
+  private int minPolyScore;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
                         MySoundFeedback soundFeedback,
-                        PolyglotDialog.PROMPT_CHOICE prompt, CommonAnnotatable e, StickyState stickyState,
-                        ListInterface<L, T> exerciseListToUse) {
+                        PolyglotDialog.PROMPT_CHOICE prompt,
+                        CommonAnnotatable e, StickyState stickyState,
+                        ListInterface<L, T> exerciseListToUse,
+                        int minPolyScore) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
+    this.minScore = ((float) minPolyScore) / 100f;
+    this.minPolyScore = minPolyScore;
     realAddWidgets(e, controller, controlState);
   }
 
@@ -155,16 +160,17 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   private boolean isCorrect(double score) {
-    return score >= MIN_SCORE_F;
+    return score >= minScore;
   }
 
   protected boolean isCorrect(boolean correct, double score) {
-    boolean b = (score * 100D) >= PolyglotFlashcardFactory.MIN_POLYGLOT_SCORE;
+    boolean b = (score * 100D) >= minPolyScore;
     // logger.info("isCorrect " + correct + "  " + score + " " + b);
     return b;
   }
 
-  protected void playIncorrect() {}
+  protected void playIncorrect() {
+  }
 
   /**
    * @return null if we're not allowed to play audio.
@@ -173,7 +179,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   String getRefAudioToPlay() {
     if (speedChoices == null) {
- //     logger.info("getRefAudioToPlay no speed choices ");
+      //     logger.info("getRefAudioToPlay no speed choices ");
       return null;
     } else {
       boolean regular = speedChoices.isRegular();
@@ -216,7 +222,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @NotNull
   private PolyglotChart getChart(long duration) {
-    PolyglotChart pChart = new PolyglotChart(controller,exerciseList);
+    PolyglotChart pChart = new PolyglotChart(controller, exerciseList);
     pChart.addStyleName("topFiveMargin");
     pChart.addStyleName("bottomFiveMargin");
     pChart.addChart(sticky.getAnswers(), duration);

@@ -68,6 +68,9 @@ public class CreateListDialog extends BasicDialog {
   public static final int MIN_DURATION = 1;
   public static final int DEFAULT_DURATION = 10;
   public static final String PUBLIC_QUIZZES = "Public quizzes can be seen by all students.";
+  public static final int DEFAULT_MIN_SCORE = 30;
+  public static final int MAX_SCORE = 71;
+  public static final int MIN_SCORE = 0;
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
 
@@ -105,7 +108,7 @@ public class CreateListDialog extends BasicDialog {
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
-  private ListBox durationList;
+  private ListBox durationList, minScoreList;
 
   /**
    * @param listView
@@ -189,6 +192,9 @@ public class CreateListDialog extends BasicDialog {
         row2.addStyleName("floatLeftAndClear");
         row2.add(getQuizSizeLabel());
         row2.add(getDurationLabel());
+        HTML label = getLabel("Min. Score");
+        label.addStyleName("leftTenMargin");
+        row2.add(label);
 
         quizOptions.add(row2);
       }
@@ -199,6 +205,7 @@ public class CreateListDialog extends BasicDialog {
 
       row2.add(getSizeChoices());
       row2.add(getDurationChoices());
+      row2.add(getMinScoreChoices());
     }
 
     {
@@ -207,11 +214,15 @@ public class CreateListDialog extends BasicDialog {
       row2.setWidth("100%");
       row2.addStyleName("floatLeftAndClear");
       row2.add(getDurationLabel());
+      HTML label = getLabel("Min. Score");
+      label.addStyleName("leftTwentyMargin");
+      row2.add(label);
       quizOptions2.add(row2);
 
       row2 = new DivWidget();
       child.add(row2);
       quizOptions2.add(durationList = getDurationChoices());
+      quizOptions2.add(minScoreList = getMinScoreChoices());
 
       child.add(quizOptions2);
       quizOptions2.setVisible(isQuiz);
@@ -230,7 +241,13 @@ public class CreateListDialog extends BasicDialog {
 
   @NotNull
   private HTML getDurationLabel() {
-    HTML w = new HTML("Duration (Minutes)");
+    String html = "Duration (Minutes)";
+    return getLabel(html);
+  }
+
+  @NotNull
+  private HTML getLabel(String html) {
+    HTML w = new HTML(html);
     w.addStyleName("floatLeft");
     return w;
   }
@@ -246,10 +263,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private ListBox getSizeChoices() {
-    ListBox w = new ListBox();
-    w.setWidth("120px");
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftTenMargin");
+    ListBox w = getListBox();
 
     for (int i = MIN_QUIZ_SIZE; i < MAX_QUIZ_SIZE; i += 10) {
       w.addItem("" + i);
@@ -262,10 +276,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private ListBox getDurationChoices() {
-    ListBox w = new ListBox();
-    w.setWidth("120px");
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftTenMargin");
+    ListBox w = getListBox();
 
     for (int i = MIN_DURATION; i < MAX_DURATION; i++) {
       w.addItem("" + i);
@@ -279,6 +290,32 @@ public class CreateListDialog extends BasicDialog {
     return w;
   }
 
+  private ListBox getMinScoreChoices() {
+    ListBox w = getListBox();
+
+    for (int i = MIN_SCORE; i < MAX_SCORE; i+=10) {
+      w.addItem("" + i);
+    }
+
+    if (isEditing()) {
+      w.setSelectedValue("" + current.getMinScore());
+    } else {
+      w.setSelectedValue("" + DEFAULT_MIN_SCORE);
+    }
+
+    w.addChangeHandler(event -> gotListSelection3(w.getValue()));
+    return w;
+  }
+
+  @NotNull
+  private ListBox getListBox() {
+    ListBox w = new ListBox();
+    w.setWidth("120px");
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftTenMargin");
+    return w;
+  }
+
   private void checkQuizOptionsVisible() {
     quizOptions.setVisible(isQuiz && current == null);
     if (quizOptions2 != null) {
@@ -287,11 +324,14 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private int quizSize = 100;
+  private int minScore = DEFAULT_MIN_SCORE;
   private boolean madeSelection = false;
+  private boolean showAudio = false;
   private int duration = 10;
 
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
+
     if (!madeSelection && false) {
       duration = Math.max(1, quizSize / 10);
 
@@ -299,21 +339,15 @@ public class CreateListDialog extends BasicDialog {
           {
             durationList.setSelectedValue("" + duration);
             durationList.setVisible(false);
-
-
           //  logger.info("2 duration sel " + durationList.getSelectedIndex());
-
          //   durationList.setVisible(true);
           }
       );
       Scheduler.get().scheduleDeferred(() ->
           {
-
            // logger.info("3 duration sel " + durationList.getSelectedIndex());
-
             durationList.setVisible(true);
           }
-
       );
 //      logger.info("1 duration sel " + durationList.getSelectedIndex());
     }
@@ -323,7 +357,11 @@ public class CreateListDialog extends BasicDialog {
   private void gotListSelection2(String value) {
     duration = Integer.parseInt(value);
     madeSelection = true;
-    //   logger.info("got " + quizSize);
+  }
+
+  private void gotListSelection3(String value) {
+    minScore = Integer.parseInt(value);
+  //  madeSelection = true;
   }
 
   private DivWidget quizOptions, quizOptions2;
@@ -496,7 +534,7 @@ public class CreateListDialog extends BasicDialog {
    * @param classBox
    * @param isPublic
    * @param listType
-   * @param duration
+   * @paramx duration
    * @see #gotCreate
    */
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
@@ -511,7 +549,8 @@ public class CreateListDialog extends BasicDialog {
         listType,
         quizSize,
         duration,
-        new AsyncCallback<UserList>() {
+        minScore,
+        showAudio, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("making a new list", caught);
@@ -569,11 +608,8 @@ public class CreateListDialog extends BasicDialog {
     UserList.LIST_TYPE listType = getListType();
     currentSelection.setListType(listType);
     currentSelection.setDuration(duration);
-
-/*    logger.info("doEdit is " +
-        "\n\tprivate " + aPrivate +
-        "\n\ttype    " + listType
-    );*/
+    currentSelection.setMinScore(minScore);
+    currentSelection.setShowAudio(showAudio);
 
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

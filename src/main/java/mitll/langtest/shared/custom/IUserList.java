@@ -9,4 +9,6 @@ public interface IUserList extends IUserListLight {
   int getNumItems();
 
   int getRoundTimeMinutes();
+  int getMinScore();
+  boolean shouldShowAudio();
 }

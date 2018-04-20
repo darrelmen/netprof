@@ -61,11 +61,13 @@ public interface ListService extends RemoteService {
    * @param isPublic
    * @param listType
    * @param duration
+   * @param minScore
+   * @param showAudio
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
-                       int size, int duration) throws DominoSessionException;
+                       int size, int duration, int minScore, boolean showAudio) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 

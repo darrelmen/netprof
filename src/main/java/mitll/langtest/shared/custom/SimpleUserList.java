@@ -4,8 +4,9 @@ public class SimpleUserList extends UserListLight implements IUserList {
   private int projid;
   private int userid;
   private int numItems;
-  private int duration;
+  private int duration, minScore;
   private String userChosenID;
+  private boolean showAudio;
 
   public SimpleUserList() {
   }
@@ -19,13 +20,15 @@ public class SimpleUserList extends UserListLight implements IUserList {
    * @param duration
    * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsForUser
    */
-  public SimpleUserList(int id, String name, int projid, int userid, String userChosenID, int numItems, int duration) {
+  public SimpleUserList(int id, String name, int projid, int userid, String userChosenID, int numItems, int duration, int minScore, boolean showAudio) {
     super(id, name);
     this.projid = projid;
     this.userid = userid;
     this.userChosenID = userChosenID;
     this.numItems = numItems;
     this.duration = duration;
+    this.minScore = minScore;
+    this.showAudio = showAudio;
   }
 
   @Override
@@ -46,6 +49,16 @@ public class SimpleUserList extends UserListLight implements IUserList {
   @Override
   public int getProjid() {
     return projid;
+  }
+
+  @Override
+  public int getMinScore() {
+    return minScore;
+  }
+
+  @Override
+  public boolean shouldShowAudio() {
+    return showAudio;
   }
 
   /**

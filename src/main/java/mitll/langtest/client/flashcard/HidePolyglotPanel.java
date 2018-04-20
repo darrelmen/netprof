@@ -1,7 +1,6 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -10,7 +9,7 @@ import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
- class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
+class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
   /**
    * @param statsFlashcardFactory
    * @param controlState
@@ -22,15 +21,16 @@ import mitll.langtest.shared.exercise.CommonShell;
    * @param exerciseListToUse
    * @see HidePolyglotFactory#getCurrentFlashcard
    */
-   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
-                           ControlState controlState,
-                           ExerciseController controller,
-                           MySoundFeedback soundFeedback,
-                           PolyglotDialog.PROMPT_CHOICE prompt,
-                           CommonAnnotatable e,
-                           StickyState stickyState,
-                           ListInterface<L, T> exerciseListToUse) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse);
+  HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
+                    ControlState controlState,
+                    ExerciseController controller,
+                    MySoundFeedback soundFeedback,
+                    PolyglotDialog.PROMPT_CHOICE prompt,
+                    CommonAnnotatable e,
+                    StickyState stickyState,
+                    ListInterface<L, T> exerciseListToUse,
+                    int minPoly) {
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse, minPoly);
   }
 
   Panel getRightColumn(final ControlState controlState) {
@@ -45,14 +45,7 @@ import mitll.langtest.shared.exercise.CommonShell;
     return rightColumn;
   }
 
- /*  @Override
-   protected Panel getThreePartContent(ControlState controlState, Panel contentMiddle, DivWidget belowDiv, DivWidget lowestRow) {
-     Panel threePartContent = super.getThreePartContent(controlState, contentMiddle, belowDiv, lowestRow);
-     threePartContent.getElement().getStyle().setMarginTop(-16, Style.Unit.PX);
-     return threePartContent;
-   }*/
-
-   /**
+  /**
    * No comment - no move to the left...
    *
    * @param englishPhrase

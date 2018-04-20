@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
-  
+
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 

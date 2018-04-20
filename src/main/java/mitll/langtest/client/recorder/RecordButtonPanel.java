@@ -80,7 +80,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private Panel panel;
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
-  private boolean doFlashcardAudio,doAlignment;
+  private boolean doFlashcardAudio, doAlignment;
   private boolean allowAlternates = false;
   private final AudioType audioType;
 
@@ -94,7 +94,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
                               final int index,
                               boolean doFlashcardAudio,
                               AudioType audioType,
-                              String recordButtonTitle, boolean doAlignment) {
+                              String recordButtonTitle,
+                              boolean doAlignment) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     this.index = index;
@@ -252,11 +253,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   /**
-   * @see #postAudioFile
    * @param result
    * @param then
    * @param outer
    * @param len
+   * @see #postAudioFile
    */
   private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
     //System.out.println("postAudioFile : onSuccess " + result);
@@ -284,7 +285,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
       @Override
       public void onSuccess(Void result) {
-       // logger.info("couldn't post round trip.");
+        // logger.info("couldn't post round trip.");
       }
     });
   }
@@ -303,7 +304,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   /**
-   *
    * @param caught
    * @param then
    * @param len
@@ -314,8 +314,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     recordButton.setEnabled(true);
     String stackTrace = getExceptionAsString(caught);
     logMessage("postAudioFile : failed to post " + getLog(then, len) + "\n" + stackTrace, true);
- //   Window.alert(NETWORK_ISSUE);
-  //  new ExceptionHandlerDialog(caught);
+    //   Window.alert(NETWORK_ISSUE);
+    //  new ExceptionHandlerDialog(caught);
     receivedAudioAnswer(new AudioAnswer(), getPanel());
   }
 

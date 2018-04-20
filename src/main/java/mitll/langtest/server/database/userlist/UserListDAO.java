@@ -60,7 +60,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   private static final String NAME = "name";
 
-  public static final String USER_EXERCISE_LIST = "userexerciselist";
+   static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
   private final IUserDAO userDAO;
   private IUserExerciseDAO userExerciseDAO;
@@ -359,13 +359,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return null;
   }
 
-/*
-  @Override
-  public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-    return null;
-  }
-*/
-
   @Override
   public Collection<IUserListLight> getAllQuizLight(int projid) {
     return null;
@@ -452,7 +445,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
           rs.getTimestamp("modified").getTime(), "", "", -1,
-          UserList.LIST_TYPE.NORMAL, System.currentTimeMillis(),  System.currentTimeMillis(), 10)
+          UserList.LIST_TYPE.NORMAL, System.currentTimeMillis(),  System.currentTimeMillis(), 10, 30, false)
       );
     }
     //logger.debug("getWhere : got " + lists);
