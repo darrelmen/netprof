@@ -21,11 +21,10 @@ public class QuizIntro extends DivWidget {
   private static final String START = "Start!";
   // private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
   public static final String DRY_RUN = "Dry Run";
+  public static final String FLASHCARDS = "quiz";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
-  // private static final int MIN_POLYGLOT_SCORE = 35;
-  private  int MIN_POLYGLOT_SCORE;
   private static final int NATIVE_THRESHOLD = 70;
   private final Button closeButton;
 
@@ -82,7 +81,7 @@ public class QuizIntro extends DivWidget {
 
     addBottom(welcome);
     row.add(new Heading(HSIZE, "Netprof automatically scores your pronunciation relative to a native speaker."));
-    Heading w = new Heading(HSIZE, "In the flashcards that follow, record yourself saying the prompted phrases.");
+    Heading w = new Heading(HSIZE, "In the " + FLASHCARDS + " that follows, record yourself saying the prompted phrases.");
     row.add(w);
     addBottom(w);
     row.add(new Heading(HSIZE, "To record : "));
@@ -98,7 +97,7 @@ public class QuizIntro extends DivWidget {
 
     // row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. "));// (if you want to repeat an item)."));
-    //  row.add(new Heading(HSIZE, "Click on an item in the chart to jump to that item."));// (if you want to repeat an item)."));
+      row.add(new Heading(HSIZE, "Click on a dot in the graph below to repeat to an item."));
     //  row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
     container.add(new Heading(HSIZE, "Please choose a quiz : "));
