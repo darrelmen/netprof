@@ -12,7 +12,8 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import java.util.logging.Logger;
 
 public class ScoreProgressBar {
-  private Logger logger = Logger.getLogger("ScoreProgressBar");
+  //private Logger logger = Logger.getLogger("ScoreProgressBar");
+
   private static final String AUDIO_CUT_OFF = "Audio cut off.";
   protected ProgressBar progressBar;
 
@@ -45,14 +46,6 @@ public class ScoreProgressBar {
     String text = isFullMatch ? "" + round : AUDIO_CUT_OFF;
 
     progressBar.setText(text);
-
-//    progressBar.setColor(
-//        score > SECOND_STEP ?
-//            ProgressBarBase.Color.SUCCESS :
-//            score > FIRST_STEP ?
-//                ProgressBarBase.Color.WARNING :
-//                ProgressBarBase.Color.DANGER);
-
     setColor(progressBar, percent, round, showNow);
     return progressBar;
   }
@@ -64,7 +57,6 @@ public class ScoreProgressBar {
 //      Style styleWidget = getStyleWidget();
 //      styleWidget.setBackgroundColor(color);
 //      setPercent(percent, round, styleWidget);
-
       setPercentLater(progressBar, percent, round, color);
     } else {
    //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
@@ -84,14 +76,11 @@ public class ScoreProgressBar {
   }
 
   private Style getStyleWidget(ProgressBar progressBar) {
-     Widget theBar = progressBar.getWidget(0);
-    return theBar.getElement().getStyle();
+    return progressBar.getWidget(0).getElement().getStyle();
   }
-
 
   private void setPercent(ProgressBar progressBar, double percent, double round, Style style) {
     if (percent > 0.4) style.setColor("black");
-
     progressBar.setPercent(round);
   }
 }

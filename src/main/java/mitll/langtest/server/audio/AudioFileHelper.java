@@ -78,7 +78,7 @@ import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
 
-  private static final String POSTED_AUDIO = "postedAudio";
+ // private static final String POSTED_AUDIO = "postedAudio";
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
@@ -89,6 +89,7 @@ public class AudioFileHelper implements AlignDecode {
 
   public static final boolean DEBUG = false;
   public static final String FRENCH = "french";
+  private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -1434,6 +1435,8 @@ public class AudioFileHelper implements AlignDecode {
           precalcScores);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
+      audioAnswer.setCorrect( audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN);
+
 /*      if (!asrScoreForAudio.isFullMatch()) {
         audioAnswer.setValidity(CUT_OFF);
 

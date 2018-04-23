@@ -133,20 +133,23 @@ public class SLFFile {
     return slfFile;
   }
 */
+/*
   private String getSLFPath(String tmpDir) {
     return tmpDir + File.separator + Scoring.SMALL_LM_SLF;
   }
+*/
 
   /**
    * creates string LM for hydra
    *
    * @param lmSentences
-   * @param addSil
-   * @param includeUnk
-   * @param includeSelfSILLink
+   * @param addSil true usually
+   * @param includeUnk if decode
+   * @param includeSelfSILLink only true if trimming
    * @param removeAllAccents
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getSmallLM
    */
   public String[] createSimpleSLFFile(Collection<String> lmSentences,
                                       boolean addSil,

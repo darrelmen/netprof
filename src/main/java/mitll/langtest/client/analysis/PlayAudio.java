@@ -80,8 +80,7 @@ class PlayAudio {
    * @see AnalysisPlot#getSeriesClickEventHandler
    */
   void playLast(int userID, int id, long nearestXAsLong) {
-    logger.info("playLast playing exercise " + id);
-
+    //   logger.info("playLast playing exercise " + id);
     exerciseService.getLatestScoreAudioPath(userID, id, nearestXAsLong, new AsyncCallback<Pair>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -93,59 +92,11 @@ class PlayAudio {
         playBothCuts(result.getProperty(), result.getValue());
       }
     });
-
-/*    exerciseService.getExercise(id, false, new AsyncCallback<Shell>() {
-      @Override
-      public void onFailure(Throwable caught) {
-
-      }
-
-      @Override
-      public void onSuccess(Shell commonExercise) {
-        if (commonExercise == null) {
-          logger.info("playLast no exercise " + id + " for " + userid);
-          // if the exercise has been deleted...?
-          // show popup?
-        } else {
-          CommonExercise commonExercise1 = (CommonExercise) commonExercise;
-          List<CorrectAndScore> scores = commonExercise1.getScores();
-          if (scores.isEmpty()) {
-            String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
-            logger.warning(msg);
-
-          } else {
-            CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-
-            long diff = Long.MAX_VALUE;
-            for (CorrectAndScore score : scores) {
-              long l = Math.abs(score.getTimestamp() - nearestXAsLong);
-              if (l < diff) {
-                diff = l;
-                logger.info("diff " + l + " found " + correctAndScore);
-                correctAndScore = score;
-              }
-            }
-
-            playBothCuts(commonExercise1, correctAndScore.getPath());
-          }
-        }
-      }
-    });*/
-    //else {
-    // playBothCuts(wordScore.getAnswerAudio(), wordScore.getRefAudio());
-    //  }
   }
 
-/*  private void playBothCuts(String refAudio, String path) {
-   // String path = correctAndScore.getPath();
-//    String refAudio = commonExercise.getRefAudio();
-    playBothCuts(path, refAudio);//commonExercise.getRefAudio());
-  }*/
-
   private void playBothCuts(String refAudio, String studentAudioPath) {
-    logger.info("playBothCuts play audio    " + studentAudioPath);
-    logger.info("playBothCuts play refAudio " + refAudio);
-
+    //   logger.info("playBothCuts play audio    " + studentAudioPath);
+    //   logger.info("playBothCuts play refAudio " + refAudio);
     if (t != null) {
       // logger.info("cancel timer");
       t.cancel();
@@ -210,6 +161,7 @@ class PlayAudio {
   private void showPlayback() {
     playFeedback.setVisible(true);
   }
+
   private void hidePlayback() {
     playFeedback.setVisible(false);
   }

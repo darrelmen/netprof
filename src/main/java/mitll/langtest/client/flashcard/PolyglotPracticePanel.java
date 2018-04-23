@@ -22,20 +22,27 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+ // private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
+
   private static final String ALL_DONE = "All done!";
 
-  private static final String COMPLETE = "You've recorded all the items. " +
-      "Use the arrow keys to review or re-record as desired, or click See Your Scores.";
+//  private static final String COMPLETE = "You've recorded all the items. " +
+//      "Use the arrow keys to review or re-record as desired, or click See Your Scores.";
 
-  // private static final int MIN_POLYGLOT_SCORE = 35;
-
-  private float minScore;// = ((float) MIN_POLYGLOT_SCORE) / 100f;
+  private static final List<String> messages = Arrays.asList(
+      "You've recorded all the items. ",
+      "Click on a dot in the chart to jump back and re-record.",
+      //"Or use the arrow keys to review.",
+      "Or to see your overall score click See Your Scores."
+  );
+  private float minScore;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 750;
@@ -285,15 +292,15 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       value = "";
     }
     timeLeft.setText(value);
-   // logger.info("showTimeRemaining : time left " + l);
+    // logger.info("showTimeRemaining : time left " + l);
   }
 
   public void onSetComplete() {
     long roundTimeLeftMillis = polyglotFlashcardContainer.getRoundTimeLeftMillis();
     //logger.info("onSetComplete  " + roundTimeLeftMillis);
-    stopTimerShowBanner();
+    controller.setBannerVisible(true);
     if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
-      new ModalInfoDialog(ALL_DONE, COMPLETE);
+      new ModalInfoDialog(ALL_DONE, messages);
     } else {
       super.onSetComplete();
     }

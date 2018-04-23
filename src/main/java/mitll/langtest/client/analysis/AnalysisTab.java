@@ -34,6 +34,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -139,6 +140,7 @@ public class AnalysisTab extends DivWidget {
 
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
+  private ListBox timeScale ;
 
   /**
    * @param controller
@@ -358,14 +360,11 @@ public class AnalysisTab extends DivWidget {
     Button nextButton = getNextButton();
     stepper.add(nextButton);
 
-    //if (isPolyglot) {
     Heading scoreHeader = new Heading(3);
     scoreHeader.addStyleName("leftFiveMargin");
     scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
     scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     stepper.add(this.scoreHeader = scoreHeader);
-    //    logger.info("add score header");
-    // }
 
     timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice,
         dayChoice,

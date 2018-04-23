@@ -67,6 +67,10 @@ public class ModalInfoDialog {
   public ModalInfoDialog(String title, String message) {
     this(title, message, null);
   }
+  public ModalInfoDialog(String title, Collection<String> messages) {
+    this(title, messages, Collections.emptyList(),
+        null, null, false, true, 600, 200);
+  }
 
   public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding, int width, int height) {
     this(title, MESSAGES, Collections.emptyList(), widget, null, false, addEnterKeyBinding, width, height);
@@ -86,10 +90,6 @@ public class ModalInfoDialog {
 
     modal.show();
   }
-//
-//  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
-//    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger, true);
-//  }
 
   public Modal getModal(String title,
                         Collection<String> messages,

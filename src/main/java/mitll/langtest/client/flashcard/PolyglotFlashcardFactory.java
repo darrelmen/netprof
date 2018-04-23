@@ -83,6 +83,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void stopTimedRun() {
+    logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
@@ -193,11 +194,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   @Override
   void reset() {
     super.reset();
+    logger.info("reset");
+
     cancelRoundTimer();
   }
 
   @Override
   public void cancelRoundTimer() {
+    logger.info("cancelRoundTimer");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     roundTimeLeftMillis = 0;

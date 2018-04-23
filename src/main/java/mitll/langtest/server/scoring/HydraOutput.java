@@ -21,7 +21,7 @@ public class HydraOutput {
    * @param wordAndProns
    */
   HydraOutput(Scores scores,
-              String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {//Trie<String> trie) {
+              String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
@@ -32,43 +32,63 @@ public class HydraOutput {
     return scores;
   }
 
-   String getWordLab() {
-    return wordLab;
-  }
-
-   String getPhoneLab() {
-    return phoneLab;
-  }
-
   public void setScores(Scores scores) {
     this.scores = scores;
   }
 
-   boolean isMatch(List<WordAndProns> reco) {
+  String getWordLab() {
+    return wordLab;
+  }
+
+  String getPhoneLab() {
+    return phoneLab;
+  }
+
+  /**
+   * Does the reco word and phone sequence match any of the possible complete sequences
+   * Only make sure the number of words is correct for now...
+   * @param reco
+   * @return
+   */
+  boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
-      logger.warn("isMatch expecting  " + wordAndProns.size() + " words, saw " + reco.size());
+      logger.warn("isMatch " +
+          "\n\texpecting " + wordAndProns.size() + " words," +
+          "\n\tsaw       " + reco.size());
       return false;
     } else {
-      boolean res = true;
-      for (int i = 0; i < reco.size(); i++) {
-        WordAndProns recoWordAndProns = reco.get(i);
-        WordAndProns expected = wordAndProns.get(i);
-        String expectedWord = expected.getWord();
-        String recoWord = recoWordAndProns.getWord();
-        if (!recoWord.equalsIgnoreCase(expectedWord)) {
-          logger.warn("isMatch word : expecting  " + expectedWord + " saw " + recoWord);
-        }
-        Set<String> prons = expected.getProns();
-        String next = recoWordAndProns.getProns().iterator().next();
-        boolean contains = prons.contains(next);
-        res &= contains;
-        if (!contains) {
-          logger.warn("isMatch phone : expecting one of " + prons + " saw " + next);
-          break;
-        }
-      }
-      return res;
+      boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
+
+
+      return true; // don't use the result of the phone comparison!
     }
+  }
+
+  private boolean doPhoneComparison(List<WordAndProns> reco, List<WordAndProns> expectedSeq) {
+    boolean res = true;
+    for (int i = 0; i < reco.size(); i++) {
+      WordAndProns recoWordAndProns = reco.get(i);
+      WordAndProns expected = expectedSeq.get(i);
+
+      String expectedWord = expected.getWord();
+      String recoWord = recoWordAndProns.getWord();
+
+      if (!recoWord.equalsIgnoreCase(expectedWord)) {
+        logger.warn("doPhoneComparison word :" +
+            "\n\texpecting '" + expectedWord + "'" +
+            "\n\tsaw       '" + recoWord + "'");
+      }
+
+      Set<String> prons = expected.getProns();
+      String next = recoWordAndProns.getProns().iterator().next();
+      boolean contains = prons.contains(next);
+      res &= contains;
+      if (!contains) {
+        logger.warn("doPhoneComparison phone : expecting one of " + prons + " saw " + next);
+        break;
+      }
+    }
+    return res;
   }
 
   List<WordAndProns> getWordAndProns() {
