@@ -499,12 +499,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 //        else {
 //          logger.info("receivedAudioAnswer: NOPE : show popup for " + result.getValidity() + " on " + button.getElement().getId());
 //        }
-      showPopup(result.getValidity().getPrompt(), button);
-    }
-    initRecordButton();
-    clearFeedback();
-    recoOutput.clear();
-  }
+        showPopup(result.getValidity().getPrompt(), button);
+      }
+      initRecordButton();
+      clearFeedback();
+      recoOutput.clear();
+   }
 
   boolean isCorrect(boolean correct, double score) {
     return correct;

@@ -82,20 +82,21 @@ public abstract class Scoring {
   private static final String END_SIL = "</s>";
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
-  private final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
+  final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 
   private final String deployPath;
   final ServerProperties props;
   final LogAndNotify logAndNotify;
 
   /**
-   * @see SLFFile#createSimpleSLFFile(Collection, String, float)
+   * @see SLFFile#createSimpleSLFFile(Collection, String, float, boolean)
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final CheckLTS checkLTSHelper;
 
   final boolean isAsianLanguage;
+  final boolean removeAllAccents;
 
   private LTSFactory ltsFactory;
   final String language;
@@ -114,6 +115,7 @@ public abstract class Scoring {
     this.logAndNotify = langTestDatabase;
     String language = project.getLanguage();
     this.language = language;
+    removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
 //    if (isAsianLanguage) {
 //      logger.warn("using mandarin segmentation.");
@@ -410,7 +412,7 @@ public abstract class Scoring {
       if (key == NetPronImageType.WORD_TRANSCRIPT) {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
         for (Float timeStamp : timeToEvent.keySet()) {
-          String event = timeToEvent.get(timeStamp).event;
+          String event = timeToEvent.get(timeStamp).getEvent();
           String trim = event.trim();
           if (!trim.isEmpty() && !toSkip.contains(event)) {
 //            logger.debug("getRecoSentence including " + event + " trim '" + trim + "'");
@@ -426,16 +428,4 @@ public abstract class Scoring {
     return b.toString().trim();
   }
 
-  List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
-    List<String> phones = new ArrayList<>();
-
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.PHONE_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.event));
-      }
-    }
-    return phones;
-  }
 }

@@ -318,7 +318,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
         //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + hydecScore);
         hydecScore = wordScore;
       }
-      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), true, false);
+
+      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), result.isFullMatch(), false);
       listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       scoreFeedbackDiv.hideScore();

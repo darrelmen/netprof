@@ -54,7 +54,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends AudioPanel<T> {
-//  private Logger logger = Logger.getLogger("ScoringAudioPanel");
+  //  private Logger logger = Logger.getLogger("ScoringAudioPanel");
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
@@ -103,7 +103,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
         exercise, exerciseID, instance);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
-    this.clickableTranscript = new ClickableTranscript(words,phones,controller.getButtonFactory(),exerciseID,playAudio);
+    this.clickableTranscript = new ClickableTranscript(words, phones, controller.getButtonFactory(), exerciseID, playAudio);
   }
 
 
@@ -180,20 +180,20 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
                            String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
     {
-    String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
-    if (words != null) {
-      showImageAndCheck(words, wordTranscript);
-    } else {
-      wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
-    }
+      String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
+      if (words != null) {
+        showImageAndCheck(words, wordTranscript);
+      } else {
+        wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+      }
     }
     {
-    String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-    if (phones != null) {
-      showImageAndCheck(phones, phoneTranscript);
-    } else {
-      phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
-    }
+      String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      if (phones != null) {
+        showImageAndCheck(phones, phoneTranscript);
+      } else {
+        phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+      }
     }
     if (!scoredBefore && miniScoreListener != null) {
       miniScoreListener.gotScore(result, path);
@@ -219,5 +219,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void showChart() {   miniScoreListener.showChart(controller.getHost());  }
+  public void showChart() {
+    miniScoreListener.showChart(controller.getHost());
+  }
 }

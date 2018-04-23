@@ -30,7 +30,6 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
-  // private static final String CHOOSE_A_DIFFERENT_LANGUAGE = "Choose a different language or project.";
 
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
       Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, VIEWS.QUIZ, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
@@ -271,7 +270,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   @NotNull
   private NavLink getChoice(ComplexWidget nav, VIEWS views) {
-    String instanceName = views.toString();
+    String instanceName = views.toString();//(views.toString().equalsIgnoreCase("Drill")) ? PRACTICE :views.toString();
+ //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
 //    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
@@ -323,6 +323,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void showSection(String instance1, boolean fromClick) {
     VIEWS choices = INavigation.VIEWS.NONE;
     try {
+//      if (instance1.equalsIgnoreCase(PRACTICE)) instance1= VIEWS.DRILL.toString();
       choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("showSection can't parse " + instance1);

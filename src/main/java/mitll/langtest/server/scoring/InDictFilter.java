@@ -112,7 +112,7 @@ public class InDictFilter {
    * @return
    */
   private boolean allValid(String sentence) {
-    Collection<String> tokens = audioFileHelper.getSmallVocabDecoder().getTokens(sentence);
+    Collection<String> tokens = audioFileHelper.getSmallVocabDecoder().getTokens(sentence, false);
     if (tokens.isEmpty() && !sentence.isEmpty()) logger.error("huh? no tokens from " + sentence);
 
     return allTokensValid(tokens);

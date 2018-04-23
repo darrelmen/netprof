@@ -83,7 +83,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
    * @param recoSentence
    * @param processDur
    * @param isFullMatch
-    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,

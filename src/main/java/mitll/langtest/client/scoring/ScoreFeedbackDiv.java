@@ -113,7 +113,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     return wordTableContainer;
   }
 
-  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer, float hydecScore) {
+  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
+                                 float hydecScore) {
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 

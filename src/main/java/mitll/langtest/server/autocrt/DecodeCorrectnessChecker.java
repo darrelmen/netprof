@@ -67,6 +67,7 @@ public class DecodeCorrectnessChecker {
 
   public static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
   public static final String MANDARIN = "mandarin";
+  public static final String FRENCH = "french";
 
   private final AlignDecode alignDecode;
   private final double minPronScore;
@@ -106,7 +107,10 @@ public class DecodeCorrectnessChecker {
     boolean b = isAsianLanguage(language);
 //    logger.info("is asian lang (" + language + ")" + b);
 
-    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b);
+    boolean b1 = language.equalsIgnoreCase(FRENCH);
+    boolean removeAllPunct = !b1;
+    logger.info("getDecodeScore : " +language + " : is french " + b1 + " remove all punct " + removeAllPunct);
+    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b, removeAllPunct);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
@@ -155,6 +159,7 @@ public class DecodeCorrectnessChecker {
    *                          possible sentences
    * @param precalcScores
    * @param isMandarinEtAl
+   * @param removeAllPunct
    * @return PretestScore word/phone alignment with scores
    * @see #getDecodeScore
    */
@@ -164,8 +169,9 @@ public class DecodeCorrectnessChecker {
                                       DecoderOptions decoderOptions,
 
                                       PrecalcScores precalcScores,
-                                      boolean isMandarinEtAl) {
-    List<String> lmSentences = removePunct(possibleSentences);
+                                      boolean isMandarinEtAl,
+                                      boolean removeAllPunct) {
+    List<String> lmSentences = removePunct(possibleSentences, removeAllPunct);
 //    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
     //making the transliteration empty as I don't think it is useful here
     PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(answer.getReqid(), audioFile, lmSentences,
@@ -177,7 +183,7 @@ public class DecodeCorrectnessChecker {
 
     //    logger.debug("recoSentence is " + recoSentence + " (" + recoSentence.length() + ")");
 
-    boolean isCorrect = isCorrect(possibleSentences, recoSentence, isMandarinEtAl);
+    boolean isCorrect = isCorrect(possibleSentences, recoSentence, isMandarinEtAl, removeAllPunct);
 
     if (!isCorrect) {
       logger.debug("recoSentence (not correct) is '" + recoSentence + "' length = (" + recoSentence.length() + ")");
@@ -191,15 +197,20 @@ public class DecodeCorrectnessChecker {
     return asrScoreForAudio;
   }
 
+  private List<String> removePunct(Collection<String> possibleSentences, boolean removeAllPunct) {
+    return removeAllPunct ? removePunct(possibleSentences) : removePunctFrench(possibleSentences);
+  }
+
   /**
    * Convert dashes into spaces and remove periods, and other punct
    *
    * @param expectedAnswers
    * @param recoSentence
    * @param isMandarinEtAl
+   * @param removeAllAccents
    * @return
    */
-  private boolean isCorrect(Collection<String> expectedAnswers, String recoSentence, boolean isMandarinEtAl) {
+  private boolean isCorrect(Collection<String> expectedAnswers, String recoSentence, boolean isMandarinEtAl, boolean removeAllAccents) {
     if (DEBUG) {
       logger.debug("isCorrect - expected  '" + expectedAnswers + "' vs heard '" + recoSentence + "', is asian lang = " + isMandarinEtAl);
     }
@@ -211,19 +222,21 @@ public class DecodeCorrectnessChecker {
         logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
       }
 
-      List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted);
-      List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence);
+      List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted, removeAllAccents);
+      List<String> recoTokens   = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
       if (answerTokens.size() == recoTokens.size()) {
         boolean same = true;
         for (int i = 0; i < answerTokens.size() && same; i++) {
-          String s = answerTokens.get(i);
-          String anotherString = recoTokens.get(i);
+          String expected = answerTokens.get(i);
+          String reco     = recoTokens.get(i);
           if (DEBUG)
-            logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
-          same = s.equalsIgnoreCase(anotherString);
+            logger.debug("isCorrect comparing '" + expected + "' " + expected.length() + " to '" + reco + "' " + reco.length());
+          same = expected.equalsIgnoreCase(reco);
           if (!same) {
-            if (DEBUG)
-              logger.debug("isCorrect comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            if (DEBUG || true)
+              logger.debug("isCorrect NO MATCH " +
+                  "\n\tcomparing '" + expected + "' " + expected.length() +
+                  "\n\tto        '" + reco + "' " + reco.length());
           }
         }
         if (same) return true;
@@ -269,43 +282,53 @@ public class DecodeCorrectnessChecker {
 
   /**
    * Special rule for mandarin - break it up into characters
-   *
+   * <p>
    * Added hack for spanish to replace Ud. with usted
+   *
    * @param rawRefSentence
    * @param language
    * @return
    */
   public String getPhraseToDecode(String rawRefSentence, String language) {
     if (language.equalsIgnoreCase("spanish")) {
- //     logger.info("raw before " + rawRefSentence);
+      //     logger.info("raw before " + rawRefSentence);
       rawRefSentence = rawRefSentence
           .replaceAll("Ud.", "usted")
           .replaceAll("Uds.", "ustedes");
-     // logger.info("raw after   " + rawRefSentence);
+      // logger.info("raw after   " + rawRefSentence);
     }
 
-   // logger.info("raw (" +language+  ") after   " + rawRefSentence);
+    // logger.info("raw (" +language+  ") after   " + rawRefSentence);
 
     return isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
-        svd.getSegmented(rawRefSentence.trim().toUpperCase()) :
+        svd.getSegmented(rawRefSentence.trim().toUpperCase(), !isFrench(language)) :
         rawRefSentence.trim().toUpperCase();
+  }
+
+  private boolean isFrench(String language) {
+    return language.equalsIgnoreCase(FRENCH);
   }
 
   /**
    * @param possibleSentences
    * @return
-   * @see #getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @see #getDecodeScore
    */
   private List<String> removePunct(Collection<String> possibleSentences) {
-    List<String> foreground = new ArrayList<String>();
-    for (String ref : possibleSentences) {
-      foreground.add(removePunct(ref));
-    }
+    List<String> foreground = new ArrayList<String>(possibleSentences.size());
+    possibleSentences.forEach(ref -> foreground.add(removePunct(ref)));
+    return foreground;
+  }
+
+  private List<String> removePunctFrench(Collection<String> possibleSentences) {
+    List<String> foreground = new ArrayList<String>(possibleSentences.size());
+    possibleSentences.forEach(ref -> foreground.add(removePunctFrench(ref)));
     return foreground;
   }
 
   /**
+   * TODO : Do we want to do this for French???
+   * <p>
    * Replace elipsis with space. Then remove all punct.
    * Replace commas with spaces.
    * <p>
@@ -320,5 +343,13 @@ public class DecodeCorrectnessChecker {
         .replaceAll("/", " ")
         .replaceAll(",", " ")
         .replaceAll("\\p{P}", "");
+  }
+
+  private String removePunctFrench(String t) {
+    return t
+        .replaceAll("\\.\\.\\.", " ")
+        .replaceAll("/", " ")
+        .replaceAll(",", " ")
+        .replaceAll("[.?]", " ");
   }
 }

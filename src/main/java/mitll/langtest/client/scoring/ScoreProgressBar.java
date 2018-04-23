@@ -58,12 +58,13 @@ public class ScoreProgressBar {
   }
 
   public void setColor(ProgressBar progressBar, double percent, double round, boolean showNow) {
-    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+     String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
 
     if (showNow) {
 //      Style styleWidget = getStyleWidget();
 //      styleWidget.setBackgroundColor(color);
 //      setPercent(percent, round, styleWidget);
+
       setPercentLater(progressBar, percent, round, color);
     } else {
    //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
@@ -73,7 +74,7 @@ public class ScoreProgressBar {
 
   private void setPercentLater(ProgressBar progressBar, double percent, double round, String color) {
     Style style = getStyleWidget(progressBar);
-    style.setBackgroundImage("linear-gradient(to bottom," +
+     style.setBackgroundImage("linear-gradient(to bottom," +
         color +
         "," +
         color +
@@ -83,9 +84,10 @@ public class ScoreProgressBar {
   }
 
   private Style getStyleWidget(ProgressBar progressBar) {
-    Widget theBar = progressBar.getWidget(0);
+     Widget theBar = progressBar.getWidget(0);
     return theBar.getElement().getStyle();
   }
+
 
   private void setPercent(ProgressBar progressBar, double percent, double round, Style style) {
     if (percent > 0.4) style.setColor("black");

@@ -33,12 +33,12 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.CharacterIterator;
+import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.*;
 
@@ -57,14 +57,19 @@ public class SmallVocabDecoder {
 
   /**
    * @see #getTrimmed(String)
-   * @see mitll.langtest.server.audio.SLFFile#cleanToken(String)
+   * @see #cleanToken
    * <p>
    * remove latin capital letter i with dot above - 0130
    */
-  public static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
+  private static final String OE = "oe";
+
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char ZERO = '0';
   private static final String P_Z = "\\p{Z}+";
+  private static final String FRENCH_PUNCT = "[,.?]";
+
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {
@@ -96,7 +101,7 @@ public class SmallVocabDecoder {
   /**
    * @param s
    * @return
-   * @see #getTokens(String)
+   * @see #getTokens(String, boolean)
    */
   String toFull(String s) {
     StringBuilder builder = new StringBuilder();
@@ -123,7 +128,7 @@ public class SmallVocabDecoder {
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<>();
-    sentences.forEach(sent -> getTokens(sent).forEach(token -> {
+    sentences.forEach(sent -> getTokens(sent, false).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
     }));
@@ -157,8 +162,8 @@ public class SmallVocabDecoder {
     return vocab;
   }
 
-  public String getSegmented(String longPhrase) {
-    Collection<String> tokens = getTokens(longPhrase);
+  public String getSegmented(String longPhrase, boolean removeAllAccents) {
+    Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
 //    for (String token : tokens) {
@@ -168,21 +173,28 @@ public class SmallVocabDecoder {
     return builder.toString();
   }
 
-  public List<String> getTokensAllLanguages(boolean isMandarin, String fl) {
-    return isMandarin ? getMandarinTokens(fl) : getTokens(fl);
+  public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
   }
+
 
   /**
    * @param sentence
+   * @param removeAllAccents
    * @return
-   * @see PronunciationLookup#getPronunciationsFromDictOrLTS
+   * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
-  public List<String> getTokens(String sentence) {
+  public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
-    // logger.debug("initial " + sentence);
-    String trimmedSent = getTrimmed(sentence);
-    // logger.debug("after  trim " + trimmedSent);
+    if (sentence.isEmpty()) {
+      logger.warn("huh? empty ", new Exception());
+    }
+    //  logger.info("getTokens initial    '" + sentence + "'");
+    String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
+    //if (removeAllAccents) {
+    // logger.info("getTokens after trim '" + trimmedSent + "'");
+    // }
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
@@ -198,6 +210,12 @@ public class SmallVocabDecoder {
     return all;
   }
 
+  private String getTrimmedSent(String sentence, boolean removeAllAccents) {
+    return removeAllAccents ?
+        getTrimmed(sentence) :
+        getTrimmedLeaveAccents(sentence);
+  }
+
   /**
    * @param foreignLanguage
    * @return
@@ -205,7 +223,7 @@ public class SmallVocabDecoder {
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
 //    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
-    return getTokens(segmentation);
+    return getTokens(segmentation, false);
   }
 
   /**
@@ -218,13 +236,61 @@ public class SmallVocabDecoder {
    * @param sentence
    * @return
    * @see #getTokens
-   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises
+   * @see mitll.langtest.server.trie.ExerciseTrie#addSuffixes
    */
   public String getTrimmed(String sentence) {
-    return getTrimmedLeaveLastSpace(sentence)
+    String trim = getTrimmedLeaveLastSpace(sentence)
         //.replaceAll("\\s+", " ")
         .trim();
+    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
+    return trim;
   }
+
+  /**
+   * @param sentence
+   * @return
+   * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
+   */
+/*  public String getTrimmedRemoveAccents(String sentence) {
+    String trim = getTrimmedLeaveLastSpace(removeAccents(sentence))
+        //.replaceAll("\\s+", " ")
+        .trim();
+    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
+    return trim;
+  }*/
+  public String getTrimmedLeaveAccents(String sentence) {
+    String trim = sentence
+        .replaceAll(FRENCH_PUNCT, "")
+        .replaceAll(REPLACE_ME_OE, OE)
+        //.replaceAll("\\s+", " ")
+        .trim();
+    //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
+    return trim;
+  }
+
+  public String removeAccents(String text) {
+    return text == null ? null :
+        Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+  }
+
+  public String cleanToken(String token, boolean removeAllPunct) {
+    return removeAllPunct ?
+        getTrimmedLeaveLastSpace(token).toLowerCase() :
+        getTrimmedLeaveAccents(token).toLowerCase();
+  }
+/*
+  private String cleanToken(String token) {
+*//*    String s = token
+        .replaceAll(REMOVE_ME, " ")
+        .replaceAll("\\p{Z}+", " ")
+        .replaceAll("\\p{P}", "");
+
+    // return StringUtils.stripAccents(s).toLowerCase();*//*
+
+    String s = getTrimmedLeaveLastSpace(token);
+    return s.toLowerCase();
+  }*/
 
   /**
    * We want to keep accents - french accents especially...
@@ -246,7 +312,8 @@ public class SmallVocabDecoder {
         // .replaceAll("\\u2193", " ")
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
-        .replaceAll("\\p{P}", " ");
+        .replaceAll("\\p{P}", " ")
+        .replaceAll(REPLACE_ME_OE, OE);
     return s;//StringUtils.stripAccents(s);
   }
 

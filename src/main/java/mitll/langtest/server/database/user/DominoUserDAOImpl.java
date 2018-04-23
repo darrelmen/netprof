@@ -157,7 +157,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) throws Exception {
-              // logger.info("Load " + key);
+             // logger.info("Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
@@ -181,7 +181,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (servletContext != null) {
         Enumeration<String> attributeNames = servletContext.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
-          logger.warn("DominoUserDAOImpl : domino user dao: no user service (" + USER_SVC + ")" + attributeNames.nextElement());
+          logger.info("domino user dao: no user service (" + USER_SVC + ")" + attributeNames.nextElement());
         }
       }
       usedDominoResources = false;

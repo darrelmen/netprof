@@ -449,8 +449,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event, phoneToDisplay) : value.event;
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.getEvent(), phoneToDisplay) : value.getEvent();
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
       }
     }
 

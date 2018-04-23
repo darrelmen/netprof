@@ -206,6 +206,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
+  /**
+   *
+   * @param request
+   * @param projectID
+   * @param userListByID
+   * @return
+   */
   private ExerciseListWrapper<T> getExerciseWhenNoUnitChapter(ExerciseListRequest request,
                                                               int projectID,
                                                               UserList<CommonExercise> userListByID) {
@@ -390,7 +397,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Called from the client:
    *
    * @return
+
    * @see #getExerciseWhenNoUnitChapter
+
+    * @see #getExerciseWhenNoUnitChapter(ExerciseListRequest, int, UserList)
+
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
@@ -1653,9 +1664,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.event, phoneToDisplay) : value.event;
-
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score, displayName));
+        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.getEvent(), phoneToDisplay) : value.getEvent();
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
       }
     }
 

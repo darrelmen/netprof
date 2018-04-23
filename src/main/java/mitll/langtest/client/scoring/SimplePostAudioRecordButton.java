@@ -168,9 +168,9 @@ public abstract class SimplePostAudioRecordButton {//extends RecordButton implem
       }
 
       *//**
-   * Feedback for when audio isn't valid for some reason.
-   * @param toShow
-   *//*
+       * Feedback for when audio isn't valid for some reason.
+       * @param toShow
+       *//*
       private void showPopup(String toShow) {
         new PopupHelper().showPopup(toShow, getOuter(), 3000);
       }
