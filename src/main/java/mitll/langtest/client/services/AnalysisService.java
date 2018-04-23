@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.analysis.*;
@@ -45,6 +46,11 @@ import java.util.List;
 
 @RemoteServiceRelativePath("analysis-manager")
 public interface AnalysisService extends RemoteService {
+  /**
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
+   * @return
+   * @throws DominoSessionException
+   */
   Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
 
   /**

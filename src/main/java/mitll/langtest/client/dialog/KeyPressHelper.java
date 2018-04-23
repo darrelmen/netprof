@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class KeyPressHelper {
-  public static final String OBJECT_KEYBOARD_EVENT = "[object KeyboardEvent]";
+  private static final String OBJECT_KEYBOARD_EVENT = "[object KeyboardEvent]";
   private final Logger logger = Logger.getLogger("KeyPressHelper");
 
   private final boolean removeOnEnter;
@@ -97,7 +97,6 @@ public class KeyPressHelper {
         userHitEnterKey(button);
       }
     });
-
     //logger.info("addKeyHandler made key handler " + keyHandler);
   }
 
@@ -109,7 +108,7 @@ public class KeyPressHelper {
     String name = handler.getName();
     KeyListener put = listeners.put(name, handler);
     boolean already = put != null;
-    logger.info("addKeyHandler " + name + " now " + listeners.size() + " already " + already);
+//    logger.info("addKeyHandler " + name + " now " + listeners.size() + " already " + already);
     if (listeners.size() > 3) {
       logger.info("addKeyHandler added  " + name + " now " + this);
     }
@@ -118,7 +117,7 @@ public class KeyPressHelper {
   public boolean removeKeyHandler(KeyListener listener) {
     int before = listeners.size();
     boolean b = listeners.remove(listener.getName()) != null;
-    logger.info("removeKeyHandler now " + listeners.size() + " listeners vs " + before);
+  //  logger.info("removeKeyHandler now " + listeners.size() + " listeners vs " + before);
     return b;
   }
 

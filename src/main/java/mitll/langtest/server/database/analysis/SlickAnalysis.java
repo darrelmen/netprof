@@ -414,6 +414,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @return
    * @see AnalysisServiceImpl#getUsersWithRecordings
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
   public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {

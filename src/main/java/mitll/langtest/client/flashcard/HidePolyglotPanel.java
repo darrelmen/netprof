@@ -15,29 +15,28 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    * @param controlState
    * @param controller
    * @param soundFeedback
-   * @param prompt
    * @param e
    * @param stickyState
    * @param exerciseListToUse
+   * @param showAudio
    * @see HidePolyglotFactory#getCurrentFlashcard
    */
   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
                     ControlState controlState,
                     ExerciseController controller,
                     MySoundFeedback soundFeedback,
-                    PolyglotDialog.PROMPT_CHOICE prompt,
                     CommonAnnotatable e,
                     StickyState stickyState,
                     ListInterface<L, T> exerciseListToUse,
-                    int minPoly) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, prompt, e, stickyState, exerciseListToUse, minPoly);
+                    int minPoly, boolean showAudio) {
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, minPoly, showAudio);
   }
 
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    if (controller.getUserState().isAdmin()) {
+    if (showAudio) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
     }
@@ -71,7 +70,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    * @return
    */
   Widget getHasAudioIndicator(boolean hasRefAudio) {
-    if (controller.getUserState().isAdmin()) {
+    if (showAudio) {
       return super.getHasAudioIndicator(hasRefAudio);
     } else {
       return null;

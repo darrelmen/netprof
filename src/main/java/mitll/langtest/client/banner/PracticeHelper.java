@@ -121,7 +121,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     this.mode = mode;
     this.promptChoice = promptChoice;
     if (polyglotFlashcardFactory != null) {
-      polyglotFlashcardFactory.setMode(mode, promptChoice);
+      polyglotFlashcardFactory.setMode(mode);
     }
   }
 

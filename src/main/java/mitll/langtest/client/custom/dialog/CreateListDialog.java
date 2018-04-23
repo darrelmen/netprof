@@ -33,6 +33,10 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -40,10 +44,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -65,20 +66,27 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
-  public static final int MIN_DURATION = 1;
-  public static final int DEFAULT_DURATION = 10;
-  public static final String PUBLIC_QUIZZES = "Public quizzes can be seen by all students.";
-  public static final int DEFAULT_MIN_SCORE = 30;
-  public static final int MAX_SCORE = 71;
-  public static final int MIN_SCORE = 0;
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
 
-  public static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
-  public static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
-  public static final int MAX_DURATION = 21;
-  public static final int MAX_QUIZ_SIZE = 110;
-  public static final int MIN_QUIZ_SIZE = 0;
+  private static final String QUIZ_SIZE = "# Items";
+  private static final String DURATION_MINUTES = "Duration (Min.)";
+  private static final int DEFAULT_QUIZ_SIZE = 0;
+
+  private static final int MIN_DURATION = 1;
+  private static final int DEFAULT_DURATION = 1;
+  private static final String PUBLIC_QUIZZES = "Public quizzes can be seen by all students.";
+  private static final int DEFAULT_MIN_SCORE = 30;
+  private static final int MAX_SCORE = 71;
+  private static final int MIN_SCORE = 0;
+  private static final String MIN_SCORE1 = "Min. Score to Adv.";
+
+
+  private static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
+  private static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
+  private static final int MAX_DURATION = 21;
+  private static final int MAX_QUIZ_SIZE = 110;
+  private static final int MIN_QUIZ_SIZE = 0;
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
   private static final String CREATE_A_NEW_QUIZ = "Create a new quiz.";
@@ -109,6 +117,12 @@ public class CreateListDialog extends BasicDialog {
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
   private ListBox durationList, minScoreList;
+  private boolean playAudio;
+
+  private int quizSize = DEFAULT_QUIZ_SIZE;
+  private int minScore = DEFAULT_MIN_SCORE;
+  private boolean madeSelection = false;
+  private int duration = DEFAULT_DURATION;
 
   /**
    * @param listView
@@ -180,53 +194,10 @@ public class CreateListDialog extends BasicDialog {
     }
 
     if (canMakeQuiz()) {
-      child.add(getQuizChoices());
-
-      quizOptions = new DivWidget();
-      checkQuizOptionsVisible();
-      child.add(quizOptions);
-
-      {
-        DivWidget row2 = new DivWidget();
-        row2.setWidth("100%");
-        row2.addStyleName("floatLeftAndClear");
-        row2.add(getQuizSizeLabel());
-        row2.add(getDurationLabel());
-        HTML label = getLabel("Min. Score");
-        label.addStyleName("leftTenMargin");
-        row2.add(label);
-
-        quizOptions.add(row2);
-      }
-
-
-      FluidRow row2 = new FluidRow();
-      quizOptions.add(row2);
-
-      row2.add(getSizeChoices());
-      row2.add(getDurationChoices());
-      row2.add(getMinScoreChoices());
+      addQuizOptions(child);
     }
 
-    {
-      quizOptions2 = new DivWidget();
-      DivWidget row2 = new DivWidget();
-      row2.setWidth("100%");
-      row2.addStyleName("floatLeftAndClear");
-      row2.add(getDurationLabel());
-      HTML label = getLabel("Min. Score");
-      label.addStyleName("leftTwentyMargin");
-      row2.add(label);
-      quizOptions2.add(row2);
-
-      row2 = new DivWidget();
-      child.add(row2);
-      quizOptions2.add(durationList = getDurationChoices());
-      quizOptions2.add(minScoreList = getMinScoreChoices());
-
-      child.add(quizOptions2);
-      quizOptions2.setVisible(isQuiz);
-    }
+    addEditOptions(child);
 
     child.add(getPrivacyChoices());
 
@@ -235,40 +206,102 @@ public class CreateListDialog extends BasicDialog {
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
+  private void addQuizOptions(Panel child) {
+    child.add(getQuizChoices());
+
+    quizOptions = new DivWidget();
+    styleQuizOptions(quizOptions);
+    checkQuizOptionsVisible();
+    child.add(quizOptions);
+
+    quizOptions.add(getChoices(true));
+  }
+
+  private void styleQuizOptions(DivWidget quizOptions) {
+    quizOptions.addStyleName("leftFiveMargin");
+    quizOptions.addStyleName("rightFiveMargin");
+    quizOptions.addStyleName("url-box");
+  }
+
+  @NotNull
+  private Grid getChoices(boolean isCreate) {
+    Grid grid = new Grid(2, 4);
+    int col = 0;
+    if(isCreate) {
+      grid.setWidget(0, col++, getQuizSizeLabel());
+    }
+    grid.setWidget(0, col++, getDurationLabel());
+    grid.setWidget(0, col++, getLabel(MIN_SCORE1));
+    grid.setWidget(0, col++, getHearLabel());
+
+    col = 0;
+    if(isCreate) {
+      grid.setWidget(1, col++, getSizeChoices());
+    }
+    grid.setWidget(1, col++, getDurationChoices());
+    grid.setWidget(1, col++, getMinScoreChoices());
+    grid.setWidget(1, col++, getPlayAudioCheck());
+    return grid;
+  }
+
+  @NotNull
+  private HTML getHearLabel() {
+    HTML label;
+    label = getLabel("Hear Items");
+    label.addStyleName("leftTenMargin");
+    return label;
+  }
+
+  @NotNull
+  private CheckBox getPlayAudioCheck() {
+    CheckBox w = new CheckBox("Play Audio?");
+    w.addStyleName("leftFiveMargin");
+    w.addValueChangeHandler(event -> playAudio = w.getValue());
+    if (current != null) {
+      w.setValue(current.shouldShowAudio());
+    }
+    return w;
+  }
+
+  private void addEditOptions(Panel child) {
+    quizOptions2 = new DivWidget();
+    styleQuizOptions(quizOptions2);
+    quizOptions2.add(getChoices(false));
+    child.add(quizOptions2);
+
+    quizOptions2.setVisible(isQuiz);
+  }
+
   private boolean isEditing() {
     return current != null;
   }
 
   @NotNull
   private HTML getDurationLabel() {
-    String html = "Duration (Minutes)";
-    return getLabel(html);
+    return getLabel(DURATION_MINUTES);
   }
 
   @NotNull
   private HTML getLabel(String html) {
     HTML w = new HTML(html);
-    w.addStyleName("floatLeft");
+    w.addStyleName("leftFiveMargin");
+    w.setWidth("100px");
     return w;
   }
 
   @NotNull
   private HTML getQuizSizeLabel() {
-    HTML quiz_size = new HTML("Quiz Size");
-    quiz_size.setWidth("130px");
-    quiz_size.addStyleName("floatLeft");
+    HTML quiz_size = getLabel(QUIZ_SIZE);
     quiz_size.setVisible(current == null);
-    quiz_size.addStyleName("leftTenMargin");
     return quiz_size;
   }
 
   private ListBox getSizeChoices() {
     ListBox w = getListBox();
-
     for (int i = MIN_QUIZ_SIZE; i < MAX_QUIZ_SIZE; i += 10) {
       w.addItem("" + i);
     }
-    w.setSelectedValue("100");
+    w.setSelectedValue("" + DEFAULT_QUIZ_SIZE);
     w.addChangeHandler(event -> gotListSelection(w.getValue()));
     w.setVisible(current == null);
 
@@ -292,8 +325,7 @@ public class CreateListDialog extends BasicDialog {
 
   private ListBox getMinScoreChoices() {
     ListBox w = getListBox();
-
-    for (int i = MIN_SCORE; i < MAX_SCORE; i+=10) {
+    for (int i = MIN_SCORE; i < MAX_SCORE; i += 10) {
       w.addItem("" + i);
     }
 
@@ -310,9 +342,8 @@ public class CreateListDialog extends BasicDialog {
   @NotNull
   private ListBox getListBox() {
     ListBox w = new ListBox();
-    w.setWidth("120px");
+    w.setWidth(50 + "px");
     w.addStyleName("topFiveMargin");
-    w.addStyleName("leftTenMargin");
     return w;
   }
 
@@ -323,11 +354,6 @@ public class CreateListDialog extends BasicDialog {
     }
   }
 
-  private int quizSize = 100;
-  private int minScore = DEFAULT_MIN_SCORE;
-  private boolean madeSelection = false;
-  private boolean showAudio = false;
-  private int duration = 10;
 
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
@@ -339,13 +365,13 @@ public class CreateListDialog extends BasicDialog {
           {
             durationList.setSelectedValue("" + duration);
             durationList.setVisible(false);
-          //  logger.info("2 duration sel " + durationList.getSelectedIndex());
-         //   durationList.setVisible(true);
+            //  logger.info("2 duration sel " + durationList.getSelectedIndex());
+            //   durationList.setVisible(true);
           }
       );
       Scheduler.get().scheduleDeferred(() ->
           {
-           // logger.info("3 duration sel " + durationList.getSelectedIndex());
+            // logger.info("3 duration sel " + durationList.getSelectedIndex());
             durationList.setVisible(true);
           }
       );
@@ -361,7 +387,7 @@ public class CreateListDialog extends BasicDialog {
 
   private void gotListSelection3(String value) {
     minScore = Integer.parseInt(value);
-  //  madeSelection = true;
+    //  madeSelection = true;
   }
 
   private DivWidget quizOptions, quizOptions2;
@@ -550,7 +576,7 @@ public class CreateListDialog extends BasicDialog {
         quizSize,
         duration,
         minScore,
-        showAudio, new AsyncCallback<UserList>() {
+        playAudio, new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("making a new list", caught);
@@ -560,11 +586,7 @@ public class CreateListDialog extends BasicDialog {
           public void onSuccess(UserList result) {
             if (result == null) {
               markError(titleBox, "You already have a list named " + safeText);
-//              Window.alert("You already have a list with that name.");
-              //logger.info("NOIT SUCCESS " + result);
-              //listView.madeIt(result);
             } else {
-              //logger.info("Success " + result);
               listView.madeIt(result);
             }
           }
@@ -609,7 +631,7 @@ public class CreateListDialog extends BasicDialog {
     currentSelection.setListType(listType);
     currentSelection.setDuration(duration);
     currentSelection.setMinScore(minScore);
-    currentSelection.setShowAudio(showAudio);
+    currentSelection.setShowAudio(playAudio);
 
     controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

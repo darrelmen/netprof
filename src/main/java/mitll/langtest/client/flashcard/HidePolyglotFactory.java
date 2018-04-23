@@ -2,7 +2,6 @@ package mitll.langtest.client.flashcard;
 
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +23,9 @@ public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise
         controlState,
         controller,
         soundFeedback,
-        prompt,
         e.getCommonAnnotatable(),
         sticky,
         exerciseList,
-        getMinScore());
+        getMinScore(), shouldShowAudio());
   }
 }

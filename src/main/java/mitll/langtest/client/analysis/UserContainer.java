@@ -72,9 +72,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see #addName
    */
   private static final String NAME = "Name";
-
-  private static final String MINE = "Mine";
-
   private static final int SESSION_WIDTH = 105;
   /**
    *
@@ -95,8 +92,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private static final boolean SHOW_MY_STUDENTS = false;
   private static final String Y = "Y";
 
+/*
+  private static final String MINE = "Mine";
   private static final String MINE_ONLY = "Mine Only";
-
+*/
 
   private static final String TRYING_TO_GET_STUDENTS = "trying to get students";
 
@@ -346,14 +345,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     filterContainer.add(userTypeahead.getSearch());
 
-    // if (!isPolyglot()) {
     DivWidget c = new DivWidget();
     c.addStyleName("leftFiveMargin");
     c.addStyleName("floatRight");
-    //     c.add(getFilterLabel());
     c.add(getListBox());
     filterContainer.add(c);
-    // }
     return filterContainer;
   }
 
@@ -395,23 +391,30 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return mineOnly;
   }*/
 
+/*
   private void showAllUsers() {
     setStorageMineOnly(false);
     populateTable(remembered);
   }
+*/
 
+/*
   private void setStorageMineOnly(boolean val) {
     controller.getStorage().setBoolean("mineOnly", val);
   }
+*/
 
   /**
    * @seex #getMyStudents
    */
+/*
   private void rememberAndFilter() {
     remembered = new ArrayList<>(getList());
     filterUsers();
   }
+*/
 
+/*
   private void filterUsers() {
     List<UserInfo> filtered = new ArrayList<>();
 
@@ -421,7 +424,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     populateTable(filtered);
   }
-
+*/
   @NotNull
   private ListBox getListBox() {
     ListBox listBox = new ListBox();
@@ -476,33 +479,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   protected void addColumnsToTable(boolean sortEnglish) {
     List<UserInfo> list = getList();
     addItemID(list, 20);
-    // boolean polyglot = isPolyglot();
-    // if (polyglot) {
     addName(list);
-    // } else {
-    //   addFirstName(list);
-    //  addLastName(list);
-    // }
     addDateCol(list);
 
     addNumber(list);
     addCurrent(list);
 
 /*
-    if (!polyglot) {
       if (SHOW_MY_STUDENTS) addMine(list);
-    }
 */
 
-//    if (polyglot) {
     addPolyNumber(list);
     addLastSession(list);
     table.getColumnSortList().push(addLastOverallScore(list));
-    //  }
-
-/*    if (!polyglot) {
-      table.getColumnSortList().push(dateCol);
-    }*/
 
     table.setWidth("100%", true);
 
@@ -542,13 +531,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
-//    boolean polyglot = isPolyglot();
-//    String current1 = polyglot ? LIFETIME_AVG : CURRENT;
     addColumn(current, new TextHeader(LIFETIME_AVG));
-    // int currentWidth = polyglot ? LIFETIME_AVG_WIDTH : CURRENT_WIDTH;
-    int currentWidth = LIFETIME_AVG_WIDTH;
-    table.setColumnWidth(current, currentWidth + "px");
-
+    table.setColumnWidth(current, LIFETIME_AVG_WIDTH + "px");
     table.addColumnSortHandler(getCurrentSorter(current, list));
   }
 
@@ -572,27 +556,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return current;
   }
 
-  private void addMine(List<UserInfo> list) {
+/*  private void addMine(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getMineCol();
     current.setSortable(true);
     addColumn(current, new TextHeader(MINE));
     table.setColumnWidth(current, 65 + "px");
 
     table.addColumnSortHandler(getMineSorter(current, list));
-  }
+  }*/
 
   private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
 
-    //boolean polyglot = isPolyglot();
-    //String text = polyglot ? LIFETIME : "#";
-
     addColumn(num, new TextHeader(LIFETIME));
     table.addColumnSortHandler(getNumSorter(num, list));
-    ///  int numWidth = polyglot ? LIFETIME_WIDTH : NUM_WIDTH;
-    int numWidth = LIFETIME_WIDTH;
-    table.setColumnWidth(num, numWidth + "px");
+    table.setColumnWidth(num, LIFETIME_WIDTH + "px");
   }
 
   private void addPolyNumber(List<UserInfo> list) {
@@ -740,6 +719,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return columnSortHandler;
   }
 
+/*
   private ColumnSortEvent.ListHandler<UserInfo> getMineSorter(Column<UserInfo, SafeHtml> englishCol,
                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -760,7 +740,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           return -1;
         });
     return columnSortHandler;
-  }
+  }*/
 
 
   private Column<UserInfo, SafeHtml> getCurrent() {
@@ -953,7 +933,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     } else {
       populateTable(matches);
     }
-    //  table.redraw();
   }
 
   @NotNull
@@ -966,7 +945,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     for (UserInfo user : orig) {
       //String formattedDateString = getFormattedDateString(getItemDate(user)).toLowerCase();
       //logger.info("user "+ user.getID() + " " + user.getUserID() + " " + formattedDateString);
-
       if (user.getUserID().toLowerCase().startsWith(prefix)
           || user.getFirst().toLowerCase().startsWith(prefix)
           || user.getLast().toLowerCase().startsWith(prefix)

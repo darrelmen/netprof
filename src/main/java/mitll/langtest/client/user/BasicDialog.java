@@ -164,10 +164,8 @@ public class BasicDialog {
       userGroup.add(widget);
     } else {
       Panel vert = new VerticalPanel();
-
-      HTML hint1 = getHint(hint);
       vert.add(widget);
-      vert.add(hint1);
+      vert.add(getHint(hint));
 
       userGroup.add(vert);
     }

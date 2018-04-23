@@ -157,6 +157,21 @@ public class QuizHelper extends PracticeHelper {
         }
       }
 
+      @Override
+      public boolean shouldShowAudio() {
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
+        if (idToList == null) {
+          logger.info("shouldShowAudio no user lists yet ");
+          return false;
+        } else {
+          if (chosenList == -1) {
+            setChosenList(exerciseList);
+          }
+          IUserList iUserList = idToList.get(chosenList);
+          return iUserList != null && iUserList.shouldShowAudio();
+        }
+      }
 
       private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());

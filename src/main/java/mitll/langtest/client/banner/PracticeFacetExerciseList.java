@@ -33,7 +33,7 @@ class PracticeFacetExerciseList extends FacetExerciseList {
   protected void goToFirst(String searchIfAny, int exerciseID) {
     super.goToFirst(searchIfAny, exerciseID);
     if (practiceHelper.getPolyglotFlashcardFactory() != null) {
-      practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode(), practiceHelper.getPromptChoice());
+      practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode());
     }
     getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
   }

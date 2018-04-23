@@ -51,18 +51,19 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
   private int minPolyScore;
+  protected boolean showAudio;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
                         MySoundFeedback soundFeedback,
-                        PolyglotDialog.PROMPT_CHOICE prompt,
                         CommonAnnotatable e, StickyState stickyState,
                         ListInterface<L, T> exerciseListToUse,
-                        int minPolyScore) {
+                        int minPolyScore, boolean showAudio) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
     this.minScore = ((float) minPolyScore) / 100f;
     this.minPolyScore = minPolyScore;
+    this.showAudio = showAudio;
     realAddWidgets(e, controller, controlState);
   }
 

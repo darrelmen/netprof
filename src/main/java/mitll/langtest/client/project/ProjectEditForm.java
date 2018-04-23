@@ -315,6 +315,7 @@ public class ProjectEditForm extends UserDialog {
 
   /**
    * TODO : how to handle didn't create the project?
+   *
    * @see ProjectChoices#showNewProjectDialog
    */
   void newProject() {
@@ -399,9 +400,7 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) widgets.setVisible(false);
     }
 
-    if (SHOW_PROJECT_TYPE){
-      addProjectType(info, fieldset);
-    }
+    addProjectType(info, fieldset).setVisible(SHOW_PROJECT_TYPE);
 
     {
       DivWidget hDivLabel = getHDivLabel(fieldset, HYDRA_HOST_PORT, false);

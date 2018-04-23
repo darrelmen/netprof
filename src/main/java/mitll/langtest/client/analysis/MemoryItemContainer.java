@@ -132,20 +132,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     leftSide.add(getTableWithPager(users));
   }
 
-/*
-  @NotNull
-  private Heading getStudentsHeader(String title, String subtitle) {
-    Heading students = subtitle.isEmpty() ?
-        new Heading(3, title) :
-        new Heading(3, title, subtitle);
-
-    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
-    students.addStyleName("floatLeft");
-    students.setWidth("100%");
-    return students;
-  }
-*/
-
   protected IsWidget getBelowHeader() {
     return null;
   }

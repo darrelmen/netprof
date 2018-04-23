@@ -326,7 +326,6 @@ public class NewContentChooser implements INavigation {
       List<String> typeOrder = projectStartupInfo.getTypeOrder();
       if (!typeOrder.isEmpty()) {
         String s = typeOrder.get(0);
-        //  logger.info("First " + s);
         Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
         if (!matchInfos.isEmpty()) {
           pushUnitOrChapter(s, matchInfos.iterator().next());
@@ -336,9 +335,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-    String value = next.getValue();
-    //  logger.info("First " + s + " = "+ value);
-    History.newItem(s + "=" + value);
+    History.newItem(s + "=" + next.getValue());
   }
 
   /**
@@ -384,8 +381,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-    logger.info("getCurrentStoredView instance = " + instance);
-//    boolean isQuiz = instance.equalsIgnoreCase(VIEWS.QUIZ.toString());
+  //  logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -393,7 +389,7 @@ public class NewContentChooser implements INavigation {
     } catch (IllegalArgumentException e) {
       logger.info("bad instance " + instance);
     }
-    logger.info("getCurrentStoredView instance = " + instance + "/" + views);
+    //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
 
     return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
   }
@@ -478,25 +474,6 @@ public class NewContentChooser implements INavigation {
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             SelectionState.INSTANCE + "=" + views.toString());
   }
-
-/*
-  @Override
-  public void showLearnList(int listid) {
-    setHistoryWithList(listid, LEARN);
-    banner.show(LEARN);
-  }
-
-  @Override
-  public void showQuiz(int listID) {
-    setHistoryWithList(listID, QUIZ);
-    banner.showQuiz();
-  }
-
-  @Override
-  public void showDrillList(int listid) {
-    setHistoryWithList(listid, DRILL);
-    banner.showDrill();
-  }*/
 
   @Override
   public void setBannerVisible(boolean visible) {

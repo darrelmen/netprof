@@ -932,7 +932,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
-    return getJsonSupportForProject(projid).getJsonScoreHistory(userid, typeToSection, sorter);
+    if (projid == -1) {
+      return new JSONObject();
+    }
+    else {
+      JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
+      // TODO :  maybe if the project is retired...?  how to handle this on iOS???
+      return jsonSupportForProject == null ? new JSONObject():jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
+    }
   }
 
   private int projectForUser(int userid) {

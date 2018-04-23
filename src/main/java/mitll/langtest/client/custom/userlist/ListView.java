@@ -812,7 +812,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void setShareHREF(UserList<CommonShell> user) {
     if (user != null) {
       setShareButtonHREF();
-      share.setEnabled(!user.isFavorite());
+     // share.setEnabled(!user.isFavorite());
     }
   }
 

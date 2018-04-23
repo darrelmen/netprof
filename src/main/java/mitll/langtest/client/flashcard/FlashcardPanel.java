@@ -1153,7 +1153,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-    logger.info("addAudioBindings : click on audio playback panel...");
+  //  logger.info("addAudioBindings : click on audio playback panel...");
     focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));
