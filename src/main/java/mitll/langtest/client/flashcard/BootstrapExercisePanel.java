@@ -701,7 +701,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void disableRecord() {
     realRecordButton.setEnabled(false);
   }
-
   void enableRecord() {
     realRecordButton.setEnabled(true);
   }
@@ -747,8 +746,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         adjusted.add(correct);
       }
       String history = SetCompleteDisplay.getScoreHistory(adjusted);
-      String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
-          "</span>";
+      String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) + "</span>";
 
       historyDiv.add(new HTML(s));
     }

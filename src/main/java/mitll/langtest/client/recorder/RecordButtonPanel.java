@@ -234,7 +234,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
           public void onFailure(Throwable caught) {
             onPostFailure(caught, then, len);
           }
-
           public void onSuccess(AudioAnswer result) {
             onPostSuccess(result, then, outer, len);
           }

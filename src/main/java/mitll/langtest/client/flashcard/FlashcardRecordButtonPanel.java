@@ -73,7 +73,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
                                     int exerciseID,
                                     int index) {
     super(controller, exerciseID, index, true, AudioType.PRACTICE,
-        "Record", controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT);
+        "Record", true);
     this.exercisePanel = exercisePanel;
   }
 

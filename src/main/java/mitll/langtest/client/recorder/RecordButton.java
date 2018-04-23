@@ -126,7 +126,6 @@ public class RecordButton extends Button {
     /**
      * <button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-heart"></i>
      </button>
-
      */
 
     getElement().setId("record_button");
