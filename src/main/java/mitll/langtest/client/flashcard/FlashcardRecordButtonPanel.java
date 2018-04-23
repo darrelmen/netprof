@@ -58,7 +58,6 @@ import mitll.langtest.shared.project.ProjectType;
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
 //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
-
   private IconAnchor waiting;
 
   /**
@@ -98,7 +97,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   public Widget getRecordButton() {
     Widget recordButton1 = super.getRecordButton();
-   // Panel hp = new FlowPanel();
     Panel hp = new DivWidget();
     hp.getElement().getStyle().setMarginLeft(70, Style.Unit.PX);
     hp.getElement().setId("flashcardButtonContainer");
@@ -140,6 +138,11 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   public void flip(boolean first) {
   }
 
+  /**
+   * @see RecordButton#stopRecording
+   * @param duration
+   * @return
+   */
   @Override
   public boolean stopRecording(long duration) {
     boolean b = super.stopRecording(duration);

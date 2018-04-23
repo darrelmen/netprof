@@ -66,11 +66,11 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * @since 2/4/16.
  */
 public class QuizHelper extends PracticeHelper {
-  private static final String QUIZ = "Quiz";
-  private static final int INTDEF_MIN_SCORE = 35;
   private final Logger logger = Logger.getLogger("QuizHelper");
 
-  private PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
+  private static final String QUIZ = "Quiz";
+  private static final int INTDEF_MIN_SCORE = 35;
+
   private final INavigation navigation;
 
   /**
@@ -229,7 +229,7 @@ public class QuizHelper extends PracticeHelper {
   }
 
   private void showQuizForReal() {
-    setMode(POLYGLOT, prompt);
+    setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
     setNavigation(navigation);
     hideList();
   }
@@ -241,12 +241,10 @@ public class QuizHelper extends PracticeHelper {
   }
 
   void showQuizIntro() {
-    //logger.info("showQuizIntro clearListSelection ");
     Scheduler.get().scheduleDeferred(this::clearListSelection);
   }
 
   private void clearListSelection() {
-    // logger.info("---> clearListSelection ");
     FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }

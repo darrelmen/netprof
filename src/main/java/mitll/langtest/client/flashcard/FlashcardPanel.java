@@ -88,7 +88,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private static final int KEY_PRESS_WIDTH = 125;
   private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
 
-  private static final int CARD_HEIGHT = 362;//320;
+  private static final int CARD_HEIGHT = 362;
 
   /**
    * @see #addPlayingHighlight
@@ -102,7 +102,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getKeyBindings()
    */
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
-  //private static final String ARROW_KEY_TIP2 = "<b>Arrow keys</b> to advance or flip. <b>Enter</b> key to play audio.</i>";
 
   static final String ON = "On";
   static final String OFF = "Off";
@@ -416,7 +415,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @return
    * @see #FlashcardPanel
    */
-  protected Panel getThreePartContent(ControlState controlState,
+  Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,
                                     DivWidget belowDiv,
                                     DivWidget lowestRow) {
@@ -581,7 +580,6 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
       timer.scheduleIn(delayMillis);
     }
   }
-
 
   /**
    *
@@ -1326,6 +1324,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   }
 
   public void onSetComplete() {
+  }
+
+  public void stopRecording() {
+
   }
 
   private class ClickableSimplePanel extends SimplePanel {

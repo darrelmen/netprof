@@ -165,8 +165,8 @@ public class StickyState {
   }
 
   void storeAnswer(final AudioAnswer result) {
-     int id = result.getExid();
-     logger.info("store answer ex  "+id);
+    int id = result.getExid();
+    //   logger.info("store answer ex  "+id);
     exToScore.put(id, result.getScore());
     exToCorrect.put(id, isCorrect(result.isCorrect(), result.getScore()));
     exToAnswer.put(id, result);
@@ -235,16 +235,16 @@ public class StickyState {
   }
 
   /**
-   * @see PolyglotPracticePanel#getChart(long)
    * @return
+   * @see PolyglotPracticePanel#getChart(long)
    */
   Collection<AudioAnswer> getAnswers() {
     return answers;
   }
 
   /**
-   * @see PolyglotPracticePanel#getChart(long)
    * @return
+   * @see PolyglotPracticePanel#getChart(long)
    */
   Map<Long, AudioAnswer> getTimeToAnswer() {
     return timeToAnswer;

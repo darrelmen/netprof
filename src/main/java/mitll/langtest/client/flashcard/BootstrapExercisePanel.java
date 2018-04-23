@@ -85,6 +85,7 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
+  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
   public static final String IN = "in";
@@ -121,7 +122,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          ListInterface exerciseList) {
     super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
     downloadContainer = new DownloadContainer();
-
     //logger.info("Bootstrap instance " + instance);
   }
 
@@ -245,7 +245,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
-    // Panel recordButtonRow = getCenteredWrapper(recordButton);
     Panel recordButtonRow = new DivWidget();
     recordButtonRow.setWidth("100%");
 
@@ -256,10 +255,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     recordButtonRow.addStyleName("alignCenter");
     recordButton.addStyleName("alignCenter");
-
-    // recordButtonRow.addStyleName("leftTenMargin");
-    //  recordButtonRow.addStyleName("rightTenMargin");
-    // recordButtonRow.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
 
     return recordButtonRow;
   }
@@ -311,6 +306,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
           public void stop(long duration) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
+            //logger.info("BootstrapExercisePlugin : stop recording " + duration);
             super.stop(duration);
           }
 
@@ -352,11 +348,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
           @Override
           protected boolean shouldIgnoreKeyPress() {
-//            if (!isAttached()) {
-//              grabFocus(this);
-//            }
             boolean b = super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
-         //   if (b) logger.info("ignore key press?");
+            //   if (b) logger.info("ignore key press?");
             return b;
           }
         };
@@ -375,8 +368,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       if (widgets != null) {
         //logger.warning("getAnswerWidget set focus on " + widgets.getElement().getId());
         widgets.setFocus(true);
-      }
-      else {
+      } else {
         logger.warning("getAnswerWidget no widgets ");
       }
     });
@@ -453,35 +445,10 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   @NotNull
   private DivWidget getProgressBar(double score, boolean isFullMatch) {
-//    if (score < 0) score = 0;
-//    double percent = 100 * score;
     DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
     widgets.setHeight("25px");
     return widgets;
   }
-
-/*  @NotNull
-  private ProgressBar getProgressBar(double score, int percent) {
-    ProgressBar scoreFeedback = new ProgressBar();
-    int percent1 = percent;
-    scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
-
-    scoreFeedback.setHeight("25px");
-    scoreFeedback.setText("Score " + percent1 + "%");
-    //   scoreFeedback.setVisible(true);
-//    scoreFeedback.setColor(
-//        score > 0.8 ? ProgressBarBase.Color.SUCCESS :
-//            score > 0.6 ? ProgressBarBase.Color.DEFAULT :
-//                score > 0.4 ? ProgressBarBase.Color.WARNING :
-//                    ProgressBarBase.Color.DANGER);
-
-    scoreFeedback.setColor(
-        score > FIRST_STEP_PCT ?
-            ProgressBarBase.Color.SUCCESS : score > SECOND_STEP_PCT ?
-            ProgressBarBase.Color.WARNING :
-            ProgressBarBase.Color.DANGER);
-    return scoreFeedback;
-  }*/
 
   /**
    * @param result
@@ -527,7 +494,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
       if (button instanceof ComplexPanel) {
         button = ((ComplexPanel) button).getWidget(0);
-        logger.info("receivedAudioAnswer: show popup for " + result.getValidity() + " on " + button.getElement().getId());
+        //    logger.info("receivedAudioAnswer: show popup for " + result.getValidity() + " on " + button.getElement().getId());
       }
 //        else {
 //          logger.info("receivedAudioAnswer: NOPE : show popup for " + result.getValidity() + " on " + button.getElement().getId());
@@ -621,11 +588,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
     showOtherText();
 
-    logger.info("showIncorrectFeedback : " +
-        "said answer " + result.isSaidAnswer() +
-        "result " + result +
-        " score " + score +
-        " has ref " + hasRefAudio);
+    if (DEBUG) {
+      logger.info("showIncorrectFeedback : " +
+          "said answer " + result.isSaidAnswer() +
+          "result " + result +
+          " score " + score +
+          " has ref " + hasRefAudio);
+    }
 
     if (hasRefAudio) {
       if (controlState.isAudioFeedbackOn()) {
@@ -701,6 +670,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   void disableRecord() {
     realRecordButton.setEnabled(false);
   }
+
   void enableRecord() {
     realRecordButton.setEnabled(true);
   }
@@ -720,6 +690,13 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   void removePlayingHighlight() {
     removePlayingHighlight(foreign);
+  }
+
+  @Override
+  public void stopRecording() {
+    if (realRecordButton != null) {
+      realRecordButton.stopRecordingSafe();
+    }
   }
 
   private void initRecordButton() {

@@ -29,7 +29,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   private long roundTimeLeftMillis = -1;
   private long sessionStartMillis = 0;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
-//  private  PolyglotDialog.PROMPT_CHOICE prompt = PolyglotDialog.PROMPT_CHOICE.NOT_YET;
 
   public PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
@@ -84,6 +83,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void stopTimedRun() {
+    currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
     cancelRoundTimer();
@@ -163,10 +163,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
-   // this.prompt = prompt;
-    //  logger.info("setMode : prompt is " + prompt);
-//    if (prompt == PolyglotDialog.PROMPT_CHOICE.PLAY) controlState.setAudioOn(true);
-//    else if (prompt == PolyglotDialog.PROMPT_CHOICE.DONT_PLAY) controlState.setAudioOn(false);
   }
 
   @Override

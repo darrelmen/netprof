@@ -247,9 +247,22 @@ public class RecordButton extends Button {
     started = System.currentTimeMillis();
 
     cancelAfterStopTimer();
-//      logger.info("startOrStopRecording started = " + started);
+  //  logger.info("startOrStopRecording started = " + started);
     start();
     addRecordingMaxLengthTimeout();
+  }
+
+  public void stopRecordingSafe() {
+    if (isRecording()) {
+      stopRecording();
+    } else {
+/*      boolean running = afterStopTimer != null && afterStopTimer.isRunning();
+      boolean running1 = recordTimer != null && recordTimer.isRunning();
+      logger.info("stopRecordingSafe : not currently recording " +
+          "\n\tafter stop running = " + running +
+          "\n\trecord timer       = " + running1
+      );*/
+    }
   }
 
   private void stopRecording() {
@@ -288,12 +301,12 @@ public class RecordButton extends Button {
 
   /**
    * @param duration
-   * @see #startOrStopRecording()
+   * @see #startOrStopRecording
    */
   protected void stop(long duration) {
-    // long now = System.currentTimeMillis();
-    //  long duration2 = now - started;
-    //logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+  //  long now = System.currentTimeMillis();
+  //  long duration2 = now - started;
+   // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
   }

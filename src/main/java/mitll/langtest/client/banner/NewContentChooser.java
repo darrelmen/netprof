@@ -141,7 +141,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+   // logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);

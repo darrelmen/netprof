@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -51,7 +52,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
   private int minPolyScore;
-  protected boolean showAudio;
+  boolean showAudio;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
@@ -134,7 +135,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   @Override
   protected void recordingStarted() {
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
+/*
       logger.info("startTimedRun is " + polyglotFlashcardContainer.getMode());
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+      logger.warning("logException stack " + exceptionAsString);
+*/
       polyglotFlashcardContainer.startTimedRun();
     }
     super.recordingStarted();
@@ -237,9 +243,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   protected void gotSeeScoresClick() {
+    stopTimerShowBanner();
+    super.gotSeeScoresClick();
+  }
+
+  private void stopTimerShowBanner() {
     controller.setBannerVisible(true);
     polyglotFlashcardContainer.cancelRoundTimer();
-    super.gotSeeScoresClick();
   }
 
   void reallyStartOver() {
@@ -275,12 +285,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       value = "";
     }
     timeLeft.setText(value);
-    //   logger.info("showTimeRemaining : time left " + l);
+   // logger.info("showTimeRemaining : time left " + l);
   }
 
   public void onSetComplete() {
     long roundTimeLeftMillis = polyglotFlashcardContainer.getRoundTimeLeftMillis();
     //logger.info("onSetComplete  " + roundTimeLeftMillis);
+    stopTimerShowBanner();
     if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
       new ModalInfoDialog(ALL_DONE, COMPLETE);
     } else {

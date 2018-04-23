@@ -64,7 +64,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
-  public static final int MIN_DURATION = 150;
+  public static final int MIN_DURATION = 250;
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;

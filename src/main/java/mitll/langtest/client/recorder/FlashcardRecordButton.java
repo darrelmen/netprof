@@ -40,9 +40,10 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -112,24 +113,32 @@ public class FlashcardRecordButton extends RecordButton {
     getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
   }
 
-/*  @Override
+  @Override
   protected void onDetach() {
     super.onDetach();
     removeListener();
+
+    if (isRecording()) {
+      logger.info("stop recording since detach!");
+      stop(MIN_DURATION + 1);
+    }
   }
 
   @Override
-  protected void onLoad() {
-    super.onLoad();
+  protected void onUnload() {
+    super.onUnload();
+
+  //  logger.info("onUnload ---> ");
     removeListener();
+    stopRecordingSafe();
   }
-*/
+
   private void removeListener() {
     if (listener != null) {
       controller.removeKeyListener(listener);
       listener = null;
     } else {
-      logger.info("removeListener no listener ");
+      //logger.info("removeListener no listener ");
     }
   }
 
@@ -164,21 +173,15 @@ public class FlashcardRecordButton extends RecordButton {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       if (isSpace) {
-        if (DEBUG) logger.info("checkKeyDown got space");
+        if (DEBUG) logger.info("checkKeyDown got space " + event);
         if (!mouseDown) {
           mouseDown = true;
           doClick();
         }
-      } else {//if (warnUserWhenNotSpace) {
+      } else {
         int keyCode = event.getKeyCode();
         if (DEBUG) logger.info("checkKeyDown key code is " + keyCode);
-     /*   if (keyCode == KeyCodes.KEY_ALT ||
-            keyCode == KeyCodes.KEY_CTRL ||
-            keyCode == KeyCodes.KEY_ESCAPE ||
-            keyCode == KeyCodes.KEY_WIN_KEY) {
-          //logger.info("key code is " + keyCode);
-        } else {*/
-        //logger.info("warn - key code is " + keyCode);
+
         switch (keyCode) {
           case KeyCodes.KEY_LEFT:
             stopProp(event);
@@ -230,11 +233,15 @@ public class FlashcardRecordButton extends RecordButton {
   private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       if (checkIsSpace(event)) {
-        mouseDown = false;
-        doClick();
+        if (!mouseDown) {
+          logger.warning("huh? mouse down = false");
+        } else {
+          mouseDown = false;
+          doClick();
+        }
       }
     } else {
-      //logger.info("ignore key up.");
+      logger.info("checkKeyUp ignore key up.");
     }
   }
 
@@ -249,7 +256,11 @@ public class FlashcardRecordButton extends RecordButton {
       removeListener();
     }
     boolean hidden = checkHidden(getElement().getId());
-    if (hidden) logger.info("hidden");
+    if (hidden) {
+      logger.info("shouldIgnoreKeyPress : hidden");
+      removeListener();
+      stopRecordingSafe();
+    }
     boolean noUser = controller.getUser() == -1;
     if (noUser) logger.info("noUser");
     boolean b = notAttached || hidden || noUser;
@@ -283,7 +294,6 @@ public class FlashcardRecordButton extends RecordButton {
 
   public void initRecordButton() {
     super.initRecordButton();
-    //  setText(addKeyBinding ? SPACE_BAR : getPrompt());
     setText("");
     setType(ButtonType.DANGER);
   }

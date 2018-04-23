@@ -136,7 +136,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   protected void loadNext() {
     if (exerciseList.onLast()) {
       timer.cancelTimer();
-      //   cancelRoundTimer();
       onSetComplete();
     } else {
       exerciseList.loadNext();
