@@ -2134,21 +2134,17 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     scoreProgress.setVisible(visible);
   }
 
-//  private void showProgressScore(int num, int denom, ProgressBar practicedProgress) {
-//    showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED);
-//  }
-
   private void showProgress(int num,
                             int denom,
                             ProgressBar practicedProgress,
                             String zeroPercent,
                             String oneHundredPercent,
-                            String suffix, boolean useColorGradient) {
+                            String suffix,
+                            boolean useColorGradient) {
     double score = (float) num / (float) denom;
     double percent = 100 * score;
     practicedProgress.setPercent(num == 0 ? 100 : percent);
     boolean allDone = num == denom;
-
 
     String text =
         num == 0 ? zeroPercent :
@@ -2160,10 +2156,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     if (percent == 0d) round = 100d;
 
     if (useColorGradient && num > 0) {
-//      if (score == 0f) {
-//        //logger.warning("score now 50 ");
-//        score = 50f;
-//      }
       new ScoreProgressBar(false).setColor(practicedProgress, score, round, false);
     } else {
       practicedProgress.setColor(
@@ -2173,6 +2165,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                   percent > FIRST_STEP ?
                       ProgressBarBase.Color.INFO :
                       ProgressBarBase.Color.WARNING);
+      // bug #
+      practicedProgress.getWidget(0).getElement().getStyle().setColor("black");
     }
     practicedProgress.setVisible(true);
   }

@@ -172,6 +172,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(scoreAudioNow)
+        .setDoAlignment(scoreAudioNow)
         .setRecordInResults(recordInResults)
         .setRefRecording(shouldAddToAudioTable())
         .setAllowAlternates(false);

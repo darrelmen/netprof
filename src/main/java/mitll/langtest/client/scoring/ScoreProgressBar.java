@@ -54,9 +54,6 @@ public class ScoreProgressBar {
      String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
 
     if (showNow) {
-//      Style styleWidget = getStyleWidget();
-//      styleWidget.setBackgroundColor(color);
-//      setPercent(percent, round, styleWidget);
       setPercentLater(progressBar, percent, round, color);
     } else {
    //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);

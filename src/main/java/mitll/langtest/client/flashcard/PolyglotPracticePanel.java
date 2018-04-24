@@ -31,10 +31,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
-
-//  private static final String COMPLETE = "You've recorded all the items. " +
-//      "Use the arrow keys to review or re-record as desired, or click See Your Scores.";
-
   private static final List<String> messages = Arrays.asList(
       "You've recorded all the items. ",
       "Click on a dot in the chart to jump back and re-record.",

@@ -298,6 +298,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
+   * TODO : this is a bad idea to alter the score unless the praise is based on the same score...
+   *
    * @param result
    * @param scoredBefore
    * @param path

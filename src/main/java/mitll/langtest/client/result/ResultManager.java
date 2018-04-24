@@ -85,14 +85,11 @@ public class ResultManager extends PagerTable {
   private static final String NO = "No";
 
   private static final int PAGE_SIZE = 7;
-  //private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
   private static final String DURATION_SEC = "Dur (s)";
   private static final String AUDIO_TYPE = "Audio Type";
   private static final String USER_ID = "User";
-//  private static final String DESC = "DESC";
-//  private static final String ASC = "ASC";
 
   private static final String ANSWER = "answer";
   private static final String USERID = MonitorResult.USERID;
@@ -112,7 +109,6 @@ public class ResultManager extends PagerTable {
 
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
-  //  private final Map<Column<?, ?>, String> colToField = new HashMap<>();
   private final Collection<String> typeOrder;
   private int req = 0;
   private final ExerciseController controller;

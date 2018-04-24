@@ -10,9 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 /**
- * @see mitll.langtest.client.banner.PracticeHelper
  * @param <L>
  * @param <T>
+ * @see mitll.langtest.client.banner.PracticeHelper
  */
 public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
@@ -83,7 +83,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void stopTimedRun() {
-  //  logger.info("stopTimedRun");
+    //  logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
@@ -121,9 +121,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
       };
 
       {
-        int delayMillis = getRoundTimeMinutes(isDry)*60*1000;
+        int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
         roundTimer.schedule(delayMillis);
-        roundTimeLeftMillis = delayMillis;
+        long timeRemainingMillis = sticky.getTimeRemainingMillis();
+        roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
         sessionStartMillis = System.currentTimeMillis();
       }
 
@@ -156,7 +157,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return 35;
   }
 
-  public boolean shouldShowAudio() {return false;}
+  public boolean shouldShowAudio() {
+    return false;
+  }
 
   private boolean isRoundTimerNotRunning() {
     return (roundTimer == null) || !roundTimer.isRunning();
@@ -191,6 +194,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return roundTimeLeftMillis;
   }
 
+  /**
+   *
+   */
   @Override
   void reset() {
     super.reset();

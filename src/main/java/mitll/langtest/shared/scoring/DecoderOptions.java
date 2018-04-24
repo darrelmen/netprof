@@ -19,14 +19,14 @@ public class DecoderOptions implements IsSerializable {
   }
 
   /**
-   * @param isRefRecording
-   * @param recordInResults
-   * @param doDecode
-   * @param canUseCache
-   * @param allowAlternates
-   * @param usePhoneToDisplay
+   * @paramx isRefRecording
+   * @paramx recordInResults
+   * @paramx doDecode
+   * @paramx canUseCache
+   * @paramx allowAlternates
+   * @paramx usePhoneToDisplay
    */
-  public DecoderOptions(boolean isRefRecording,
+/*  public DecoderOptions(boolean isRefRecording,
                         boolean recordInResults,
                         boolean doDecode,
                         boolean canUseCache,
@@ -38,7 +38,7 @@ public class DecoderOptions implements IsSerializable {
     this.canUseCache = canUseCache;
     this.allowAlternates = allowAlternates;
     this.usePhoneToDisplay = usePhoneToDisplay;
-  }
+  }*/
 
   public boolean isRefRecording() {
     return isRefRecording;
