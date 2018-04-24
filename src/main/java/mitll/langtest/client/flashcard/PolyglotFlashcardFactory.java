@@ -30,7 +30,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   private long sessionStartMillis = 0;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
 
-  public PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
+  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
   }
 
@@ -83,7 +83,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void stopTimedRun() {
-    logger.info("stopTimedRun");
+  //  logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
@@ -131,6 +131,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         @Override
         public void run() {
           long l = roundTimeLeftMillis -= HEARTBEAT_INTERVAL;
+          sticky.storeTimeRemaining(roundTimeLeftMillis);
           if (currentFlashcard != null) {
             ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(l);
           }
@@ -156,7 +157,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   public boolean shouldShowAudio() {return false;}
-
 
   private boolean isRoundTimerNotRunning() {
     return (roundTimer == null) || !roundTimer.isRunning();
@@ -204,6 +204,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     logger.info("cancelRoundTimer");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
+    sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
   }
 

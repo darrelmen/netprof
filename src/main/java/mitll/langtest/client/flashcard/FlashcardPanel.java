@@ -1330,6 +1330,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
 
   }
 
+  protected void rememberCurrentExercise() {
+
+  }
+
   private class ClickableSimplePanel extends SimplePanel {
     HandlerRegistration addClickHandler(ClickHandler handler) {
       return addDomHandler(handler, ClickEvent.getType());

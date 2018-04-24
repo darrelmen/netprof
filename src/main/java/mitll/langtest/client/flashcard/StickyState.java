@@ -32,14 +32,17 @@
 
 package mitll.langtest.client.flashcard;
 
-import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -49,13 +52,14 @@ import java.util.logging.Logger;
  * @since 7/8/14.
  */
 public class StickyState {
-  private final Logger logger = Logger.getLogger("StickyState");
+ // private final Logger logger = Logger.getLogger("StickyState");
 
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
   private static final String CURRENT_EXERCISE = "currentExercise";
-  private static final String CORRECT1 = "correct";
+  private static final String CORRECT = "correct";
+  private static final String TIME_REMAINING = "timeRemaining";
   private final KeyStorage storage;
 
 
@@ -63,7 +67,6 @@ public class StickyState {
   private final Map<Integer, Double> exToScore = new HashMap<>();
   private final Map<Integer, AudioAnswer> exToAnswer = new LinkedHashMap<>();
   private final List<AudioAnswer> answers = new ArrayList<>();
-  //private final Map<AudioAnswer, Integer> answerToEx = new HashMap<>();
   private final Map<Long, AudioAnswer> timeToAnswer = new HashMap<>();
 
   /**
@@ -99,11 +102,23 @@ public class StickyState {
   }
 
   private String getCorrect() {
-    return storage.getValue(CORRECT1);
+    return storage.getValue(CORRECT);
   }
 
   private String getScore() {
     return storage.getValue(SCORE);
+  }
+
+  public long getTimeRemainingMillis() {
+    String value = storage.getValue(TIME_REMAINING);
+    if (value == null) return 0L;
+    long i = 0L;
+    try {
+      i = Long.parseLong(value);
+    } catch (NumberFormatException e) {
+
+    }
+    return i;
   }
 
   void populateCorrectMap() {
@@ -148,10 +163,15 @@ public class StickyState {
   }
 
   void resetStorage() {
-    storage.removeValue(CORRECT1);
+    storage.removeValue(CORRECT);
     storage.removeValue(INCORRECT);
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
+    clearTimeRemaining();
+  }
+
+  public void clearTimeRemaining() {
+    storage.removeValue(TIME_REMAINING);
   }
 
   void reset() {
@@ -214,9 +234,8 @@ public class StickyState {
     storage.storeValue(INCORRECT, builder2.toString());
   }
 
-  private void storeCorrect(StringBuilder builder) {
-    storage.storeValue(CORRECT1, builder.toString());
-  }
+  private void storeCorrect(StringBuilder builder) {    storage.storeValue(CORRECT, builder.toString());  }
+  public void storeTimeRemaining(long millis) {    storage.storeValue(TIME_REMAINING, ""+millis);  }
 
   boolean isCorrect(boolean correct, double score) {
     return correct;

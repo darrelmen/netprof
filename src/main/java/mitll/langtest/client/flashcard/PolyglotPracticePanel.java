@@ -301,4 +301,9 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   String getKeyBindings() {
     return ARROW_KEY_TIP;
   }
+
+
+  @Override protected void rememberCurrentExercise() {
+
+  }
 }

@@ -197,10 +197,15 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     if (exercise == null) {
       logger.warning("StatsPracticePanel.onSetComplete. : err : no exercise?");
     } else {
-      sticky.storeCurrent(exercise);
+      rememberCurrentExercise();
     }
 
     showFeedbackCharts();
+  }
+
+  @Override
+  protected void rememberCurrentExercise() {
+    sticky.storeCurrent(exercise);
   }
 
   /**

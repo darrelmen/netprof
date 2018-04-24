@@ -79,7 +79,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   final KeyStorage storage;
 
   protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
-
   //  private static final boolean DEBUG = false;
 
   /**
@@ -140,8 +139,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    */
   @Override
   public Panel getExercisePanel(T e) {
-    sticky.storeCurrent(e);
     currentFlashcard = getFlashcard(e);
+    currentFlashcard.rememberCurrentExercise();
     return currentFlashcard;
   }
 
