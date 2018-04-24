@@ -301,25 +301,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     sticky.resetStorage();
   }
 
-  /**
-   * @return
-   * @see StatsPracticePanel#showFeedbackCharts
-   */
-/*    private Button getRepeatButton() {
-    final Button w1 = new Button(GO_BACK);
-    w1.setIcon(IconType.UNDO);
-    w1.getElement().setId("AVP_DoWholeSetFromStart");
-    w1.setType(ButtonType.PRIMARY);
-    w1.addClickHandler(event -> doGoBack(w1));
-    controller.register(w1, N_A);
-    return w1;
-  }*/
-/*   private void doGoBack(Button w1) {
-    w1.setVisible(false);
-    sticky.clearCurrent();
-    showFlashcardDisplay();
-    startOver();
-  }*/
   private void showFlashcardDisplay() {
     abortPlayback();
     belowContentDiv.clear();
@@ -373,14 +354,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   @Override
   protected void gotClickOnNext() {
     abortPlayback();
-
     loadNext();
-/*    if (exerciseList.onLast()) {
-      onSetComplete();
-    } else {
-      //logger.info("load next " + exerciseList.getCurrentExerciseID());
-      exerciseList.loadNext();
-    }*/
   }
 
   private Button getStartOver() {

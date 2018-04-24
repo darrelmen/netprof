@@ -188,7 +188,7 @@ public class EditItem {
         TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
             controller,
             exerciseList,
-            alignments);
+            alignments, true);
         widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
         return widgets;
 

@@ -179,7 +179,7 @@ public class StickyState {
       //  if (answerToEx.get(lastAnswer)==id) {
       if (lastAnswer.getExid() == id) {
         AudioAnswer remove = answers.remove(index);
-        logger.info("storeAnswer forget earlier answer " + remove);
+      //  logger.info("storeAnswer forget earlier answer " + remove);
       }
     }
 

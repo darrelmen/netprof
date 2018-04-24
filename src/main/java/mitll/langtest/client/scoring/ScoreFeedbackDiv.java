@@ -17,12 +17,13 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv extends ScoreProgressBar {
-  //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
   private static final String OVERALL_SCORE = "Overall Score";
@@ -32,7 +33,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
-  public static final int FIRST_STEP = 35;
+  public static final int FIRST_STEP  = 35;
   public static final int SECOND_STEP = 75;
 
   private final PlayAudioPanel playAudioPanel;
@@ -130,7 +131,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     wordTableContainer.add(scoreFeedbackDiv);
 
-    if (hydecScore > NATIVE_THRSHOLD) {
+    logger.info("showScoreFeedback hydec score " + hydecScore);
+    if (hydecScore > NATIVE_THRSHOLD && pretestScore.isFullMatch()) {
       wordTableContainer.add(getPraise());
     }
   }

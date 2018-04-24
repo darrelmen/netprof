@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.common.MessageHelper;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 

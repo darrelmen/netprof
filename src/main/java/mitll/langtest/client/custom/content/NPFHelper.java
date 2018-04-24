@@ -223,7 +223,7 @@ public class NPFHelper implements RequiresResize {
           TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(e,
               controller,
               exerciseList,
-              alignments);
+              alignments, true);
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
 
           return widgets;

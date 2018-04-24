@@ -285,7 +285,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         if (allValid) {
           String pronStringForWord = getPronStringForWord(word, pron, justPhones);
           if (korean || french) {
-            logger.info("getPronunciationsFromDictOrLTS word '" + word + "' = " + pronStringForWord);
+            if (DEBUG) logger.info("getPronunciationsFromDictOrLTS word '" + word + "' = " + pronStringForWord);
           }
           dict.append(pronStringForWord);
           prons.add(getPhoneSeq(pron));

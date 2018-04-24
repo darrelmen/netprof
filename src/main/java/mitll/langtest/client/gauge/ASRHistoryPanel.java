@@ -50,9 +50,7 @@ import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -76,12 +74,10 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private static final int YEAR_LENGTH = 2;
   private static final int YEAR_SUFFIX = (YEAR_LENGTH + 2);
-  private static final int NUM_TO_SHOW = 2;
 
   /**
    *
    */
-  //private final List<CorrectAndScore> scores2 = new ArrayList<>();
   private CorrectAndScore currentMax = null;
 
   private final ExerciseController controller;
@@ -90,11 +86,12 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private final String todaysDate, todayYear;
+  private boolean addPlayer;
 
   /**
    * @see SimpleRecordAudioPanel#getScoreHistory
    */
-  public ASRHistoryPanel(ExerciseController controller, int exerciseID) {
+  public ASRHistoryPanel(ExerciseController controller, int exerciseID, boolean addPlayer) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     getElement().setId("ASRHistoryPanel");
@@ -102,6 +99,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - YEAR_LENGTH);
+    this.addPlayer=addPlayer;
   }
 
   private String getVariableInfoDateStamp(Date date) {
@@ -144,7 +142,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
       currentMax = hydecScore;
     //  logger.info("current max now " + hydecScore);
     }
-//    scores2.add(hydecScore);
   }
 
   /**
@@ -160,7 +157,9 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   //call this after adding the widget to the page
   @Override
   public void onLoad() {
-    Scheduler.get().scheduleDeferred(this::addPlayer);
+    if (addPlayer) {
+      Scheduler.get().scheduleDeferred(this::addPlayer);
+    }
   }
 
   private native void addPlayer() /*-{
@@ -175,22 +174,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    */
   @NotNull
   private void addHistory(Panel vp, String host) {
-   /* List<CorrectAndScore> scoreAndPaths = scores2;
-
-    int numScores = scores2.size();
-    if (numScores >= NUM_TO_SHOW) {
-      scoreAndPaths = scores2.subList(numScores - NUM_TO_SHOW, numScores);
-    }
-
-    Collections.reverse(scoreAndPaths);   //???? right thing to do ? TODO?
-    */
-
-    //TooltipHelper tooltipHelper = new TooltipHelper();
-   // int j = 0;
-    //for (CorrectAndScore scoreAndPath : scoreAndPaths) {
-    //  int i = scoreAndPaths.size() - (j++);
-
-
     if (currentMax != null) {
       Panel hp = getAudioAndScore(new TooltipHelper(), currentMax, BEST_SCORE, 1, host);
       hp.addStyleName("floatLeft");
@@ -198,8 +181,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
       hp.addStyleName("buttonGroupInset6");
       vp.add(hp);
     }
-    // }
-    // return currentMax;
   }
 
   /**

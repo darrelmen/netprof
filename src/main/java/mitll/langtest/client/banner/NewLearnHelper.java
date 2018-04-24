@@ -63,7 +63,7 @@ class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
 
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments);
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false);
       }
     };
   }

@@ -2,7 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -27,7 +25,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -36,7 +34,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   /**
    * TODO : limit connection here...
    */
-  private final BusyPanel goodwaveExercisePanel;
+  //private final BusyPanel goodwaveExercisePanel;
 
   private PostAudioRecordButton postAudioRecordButton;
   private RecorderPlayAudioPanel playAudioPanel;
@@ -56,23 +54,24 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   private final ListInterface<CommonShell, T> listContainer;
   private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
+  private boolean addPlayer;
 
   /**
    * @param controller
    * @param exercise
    * @param listContainer
+   * @param addPlayer
    * @see TwoColumnExercisePanel#getRecordPanel
    */
-  SimpleRecordAudioPanel(BusyPanel goodwaveExercisePanel,
-                         ExerciseController controller,
+  SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
 
-                         ListInterface<CommonShell, T> listContainer) {
+                         ListInterface<CommonShell, T> listContainer, boolean addPlayer) {
     this.controller = controller;
-    this.goodwaveExercisePanel = goodwaveExercisePanel;
+    // this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;
     this.listContainer = listContainer;
-
+    this.addPlayer = addPlayer;
     getElement().setId("SimpleRecordAudioPanel");
     this.isRTL = controller.isRightAlignContent();
     setWidth("100%");
@@ -184,7 +183,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private ASRHistoryPanel getScoreHistory() {
-    ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID());
+    ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID(), addPlayer);
     addMiniScoreListener(historyPanel);
     historyPanel.showChart(controller.getHost());
     historyPanel.setWidth("50%");
@@ -228,7 +227,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.setEnabled(false);
     scoreFeedbackDiv.hideScore();
 
-    if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(true);
+    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(true);
     playAudioPanel.showFirstRecord();
 
     waitCursorHelper.showFinished();
@@ -250,7 +249,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     //  logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
 
-    if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(false);
+    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
     scoreHistory.setVisible(true);

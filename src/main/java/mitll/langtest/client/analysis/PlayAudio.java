@@ -161,7 +161,6 @@ class PlayAudio {
   private void showPlayback() {
     playFeedback.setVisible(true);
   }
-
   private void hidePlayback() {
     playFeedback.setVisible(false);
   }

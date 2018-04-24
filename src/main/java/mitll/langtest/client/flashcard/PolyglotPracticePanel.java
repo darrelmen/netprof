@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
  // private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
-
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
@@ -135,19 +134,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   @Override
-  protected boolean showScoreFeedback(AudioAnswer result) {
-    return true;
-  }
-
-  @Override
   protected void recordingStarted() {
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
-/*
-      logger.info("startTimedRun is " + polyglotFlashcardContainer.getMode());
-
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      logger.warning("logException stack " + exceptionAsString);
-*/
       polyglotFlashcardContainer.startTimedRun();
     }
     super.recordingStarted();

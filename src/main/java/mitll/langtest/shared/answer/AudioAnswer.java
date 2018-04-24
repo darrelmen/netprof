@@ -33,9 +33,14 @@
 package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.io.File;
 
 public class AudioAnswer implements IsSerializable {
   private int exid = -1;
@@ -112,6 +117,7 @@ public class AudioAnswer implements IsSerializable {
   /**
    * @param correct
    * @see DecodeCorrectnessChecker#getDecodeScore
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(CommonShell, int, File, AudioCheck.ValidityAndDur, String, DecoderOptions, int)
    */
   public void setCorrect(boolean correct) {
     this.correct = correct;
@@ -129,6 +135,10 @@ public class AudioAnswer implements IsSerializable {
     this.resultID = resultID;
   }
 
+  /**
+   * Not really used very much anymore ...
+   * @return
+   */
   public boolean isSaidAnswer() {
     return saidAnswer;
   }

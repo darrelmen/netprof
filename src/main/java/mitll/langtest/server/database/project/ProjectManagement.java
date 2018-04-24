@@ -367,7 +367,7 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : getProjects()) {
       Integer userID = project.getUserForFile(requestURI);
       if (userID != null) {
-        logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+//        logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
         return userID;
       }
     }

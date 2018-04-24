@@ -468,7 +468,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     String instance = selectionState.getInstance();
     if (!instance.isEmpty() && !instance.equalsIgnoreCase(getInstance())) {
       Collection<String> remove = selectionState.getTypeToSection().remove(LISTS);
-      logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing "+remove);
+      logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing " + remove);
     }
 
     restoreUIState(selectionState);
@@ -1704,7 +1704,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     for (int id : visibleIDs) {
       CommonExercise e = idToEx.get(id);
       if (e == null) {
-        logger.warning("\n\ngetFullExercisesSuccess : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+        logger.warning("\n\ngetVisibleExercises : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
       } else {
         //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
         toShow.add(e);
@@ -1712,11 +1712,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     }
     return toShow;
   }
-
-  private void setExerciseContainer(DivWidget w) {
-    innerContainer.setWidget(w);  // immediate feedback that something is happening...
-  }
-
 
   /**
    * TODO : why? ?>
@@ -1909,7 +1904,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       getRefAudio(getters.iterator());
     }
 
-    setExerciseContainer(exerciseContainer);
+    innerContainer.setWidget(exerciseContainer);  // immediate feedback that something is happening...
     showPrevNext();
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
 //    logger.info("logException stack:\n" + exceptionAsString);
@@ -1972,6 +1967,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       }
     }
 
+    addPlayer();
 /*
   long now = System.currentTimeMillis();
 logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs current " +
@@ -1981,6 +1977,9 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return getters;
   }
 
+  private native void addPlayer() /*-{
+      $wnd.basicMP3Player.init();
+  }-*/;
 
   private CommonExercise getCachedExercise(Integer id) {
     return fetched.get(id);

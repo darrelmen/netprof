@@ -78,7 +78,7 @@ import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
 
- // private static final String POSTED_AUDIO = "postedAudio";
+  // private static final String POSTED_AUDIO = "postedAudio";
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
@@ -371,6 +371,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * So we can check later if they have permission to hear it.
+   *
    * @param audioContext
    * @param relPath
    * @param absolutePath
@@ -873,12 +874,12 @@ public class AudioFileHelper implements AlignDecode {
 
 
   /**
+   * @return
    * @paramx exercise1
    * @paramx reqid
    * @paramx wavPath
    * @paramx file
    * @paramx validity
-   * @return
    * @paramxx isValid
    * @see #getAudioAnswerDecoding
    * @deprecated - no concept of a project here - a project has a model
@@ -901,7 +902,6 @@ public class AudioFileHelper implements AlignDecode {
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise1.getID());
   }
 */
-
   private boolean hasModel() {
     return !isNoModel;
   }
@@ -956,13 +956,12 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   *
+   * @return
    * @paramx exid
    * @paramx base64EncodedString
    * @paramx textToAlign
    * @paramx identifier
    * @paramx reqid
-   * @return
    * @seex mitll.langtest.server.services.ScoringServiceImpl#getAlignment
    */
 /*  public AudioAnswer getAlignment(int exid, String base64EncodedString,
@@ -1018,7 +1017,6 @@ public class AudioFileHelper implements AlignDecode {
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getAbsoluteWavPathUnder(POSTED_AUDIO)),
         validity.getValidity(), reqid, validity.durationInMillis, exid);
   }*/
-
   private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
@@ -1435,7 +1433,8 @@ public class AudioFileHelper implements AlignDecode {
           precalcScores);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
-      audioAnswer.setCorrect( audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN);
+      audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
+          audioAnswer.getPretestScore().isFullMatch());
 
 /*      if (!asrScoreForAudio.isFullMatch()) {
         audioAnswer.setValidity(CUT_OFF);

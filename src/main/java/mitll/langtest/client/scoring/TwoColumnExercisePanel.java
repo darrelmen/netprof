@@ -102,6 +102,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private AlignmentFetcher alignmentFetcher;
   private ItemMenu itemMenu;
+  private boolean addPlayer;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -111,17 +112,21 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @param controller
    * @param listContainer
    * @param alignments
+   * @param addPlayer
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
+   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
+   * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
                                 final ListInterface<CommonShell, T> listContainer,
-                                Map<Integer, AlignmentOutput> alignments) {
+                                Map<Integer, AlignmentOutput> alignments,
+                                boolean addPlayer) {
     this.exercise = commonExercise;
     this.controller = controller;
     this.listContainer = listContainer;
-
+    this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
 
     annotationHelper = controller.getCommentAnnotator();
@@ -1091,7 +1096,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
-    return new SimpleRecordAudioPanel<>(null, controller, e, listContainer);
+    return new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
   }
 
   @NotNull

@@ -85,7 +85,6 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
-  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
   public static final String IN = "in";
@@ -96,6 +95,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private static final int DELAY_MILLIS_LONG = 3000;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
+  private static final boolean DEBUG = true;
 
   /**
    * @see #getFeedbackGroup(ControlState)
@@ -416,6 +416,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     {
       IconAnchor correctIcon = new IconAnchor();
+
+      logger.info("showScoreFeedback correct" + correct + " is full " + isFullMatch);
       correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
       DivWidget iconContainer = new DivWidget();
@@ -468,7 +470,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       String prefix = "";
       final double score = result.getScore();
 
-      if (isCorrect(result.isCorrect() && result.getPretestScore().isFullMatch(), score)) {
+      if (isCorrect(result.isCorrect(), score)) {
         showCorrectFeedback(score, result.getPretestScore());
       } else {   // incorrect!!
         showIncorrectFeedback(result, score, hasRefAudio());
@@ -499,12 +501,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 //        else {
 //          logger.info("receivedAudioAnswer: NOPE : show popup for " + result.getValidity() + " on " + button.getElement().getId());
 //        }
-        showPopup(result.getValidity().getPrompt(), button);
-      }
-      initRecordButton();
-      clearFeedback();
-      recoOutput.clear();
-   }
+      showPopup(result.getValidity().getPrompt(), button);
+    }
+    initRecordButton();
+    clearFeedback();
+    recoOutput.clear();
+  }
 
   boolean isCorrect(boolean correct, double score) {
     return correct;
@@ -583,17 +585,18 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @see #receivedAudioAnswer
    */
   private void showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio) {
-    if (showScoreFeedback(result)) { // if they said the right answer, but poorly, show pron score
+    if (true) {//showScoreFeedback(result)) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(false, score, result.getPretestScore().isFullMatch());
     }
     showOtherText();
 
     if (DEBUG) {
       logger.info("showIncorrectFeedback : " +
-          "said answer " + result.isSaidAnswer() +
-          "result " + result +
-          " score " + score +
-          " has ref " + hasRefAudio);
+          // "said answer " + result.isSaidAnswer() +
+          "\n\tcorrect " + result.isCorrect() +
+          "\n\tresult " + result +
+          "\n\tscore " + score +
+          "\n\thas ref " + hasRefAudio);
     }
 
     if (hasRefAudio) {
@@ -624,9 +627,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
   }
 
+/*
   boolean showScoreFeedback(AudioAnswer result) {
     return result.isSaidAnswer();
   }
+*/
 
   /**
    * @see #showIncorrectFeedback
