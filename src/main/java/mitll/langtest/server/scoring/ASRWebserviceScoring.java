@@ -623,7 +623,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK, removeAllPunct);
+      String[] slfOut = getDecodeSLF(lmSentences, removeAllPunct);
       smallLM = "[" + slfOut[0] + "]";
       cleaned = getSmallVocabDecoder().cleanToken(slfOut[1], removeAllPunct);
     } else {
@@ -685,6 +685,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+
+
   private String getHydraTranscript(String cleaned) {
     return pronunciationLookup.getCleanedTranscript(cleaned);
   }
@@ -708,6 +710,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK, removeAllPunct)[0]
         +
         "]";
+  }
+
+  /**
+   * So the main differences between align and decode are:
+   * 1) We include the unk model
+   * 2) We allow multiple possible sentences
+   *
+   * ADD SIL right now is TRUE
+   * INCLUDE_SELF_LINK is false here, true only for trimming
+   *
+   * @param lmSentences
+   * @param removeAllPunct
+   * @return
+   */
+  private String[] getDecodeSLF(Collection<String> lmSentences, boolean removeAllPunct) {
+    return slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK, removeAllPunct);
   }
 
   /**
