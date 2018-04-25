@@ -208,22 +208,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
-  // why did I want a min height for the table? It messes with the view on the laptop.
-
-  /**
-   * Min height is so that when the table is only a few rows, the buttons below the table don't roll up.
-   *
-   * @return
-   * @paramx users
-   */
-/*
-  @Override
-  public Panel getTableWithPager(Collection<UserInfo> users) {
-    Panel tableWithPager = super.getTableWithPager(users);
-    tableWithPager.getElement().getStyle().setProperty("minHeight", 250 + "px");
-    return tableWithPager;
-  }
-*/
   private boolean showOnlyMine() {
     return SHOW_MY_STUDENTS && controller.getStorage().isTrue("mineOnly");
   }
@@ -908,7 +892,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         selectedUser.getID(),
         selectedUser.getUserID(),
         listid,
-        true,//isPolyglot(),
+        listid !=-1,
         req++,
         this));
   }
@@ -916,7 +900,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   public Button getAdd() {
     return add;
   }
-
   public Button getRemove() {
     return remove;
   }

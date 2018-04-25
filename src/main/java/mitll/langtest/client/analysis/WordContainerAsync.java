@@ -39,6 +39,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -315,9 +316,19 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       @Override
       public SafeHtml getValue(WordScore shell) {
         if (shell == null) return getSafeHtml("");
-        return getSafeHtml(getVariableInfoDateStamp(shell));
+        return getNoWrapContent(getVariableInfoDateStamp(shell));
       }
     };
+  }
+
+  private SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 
   private String getVariableInfoDateStamp(WordScore shell) {

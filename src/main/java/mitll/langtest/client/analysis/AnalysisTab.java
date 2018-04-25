@@ -41,6 +41,8 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -49,6 +51,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
 import org.jetbrains.annotations.NotNull;
@@ -90,16 +93,11 @@ public class AnalysisTab extends DivWidget {
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private final int userid;
 
-  /**
-   *
-   */
-  private Heading scoreHeader;
-
   private static final long MINUTE = 60 * 1000;
   static final long HOUR = 60 * MINUTE;
   static final long QUARTER = 6 * HOUR;
 
-  private static final long TENMIN_DUR = 10 * MINUTE;
+  static final long TENMIN_DUR = 10 * MINUTE;
   static final long DAY_DUR = 24 * HOUR;
   private static final long WEEK_DUR = 7 * DAY_DUR;
   private static final long MONTH_DUR = 4 * WEEK_DUR;
@@ -109,7 +107,6 @@ public class AnalysisTab extends DivWidget {
 
   enum TIME_HORIZON {
     SESSION("Session", -1),
-    TENMIN("Minute", TENMIN_DUR),
     DAY("Day", DAY_DUR),
     WEEK("Week", WEEK_DUR),
     MONTH("Month", MONTH_DUR),
@@ -140,7 +137,7 @@ public class AnalysisTab extends DivWidget {
 
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
-  private ListBox timeScale ;
+  private ListBox timeScale;
 
   /**
    * @param controller
@@ -160,6 +157,8 @@ public class AnalysisTab extends DivWidget {
         -1,
         isPolyglot,
         req, reqCounter);
+
+    logger.info("isPoly " + isPolyglot);
   }
 
   /**
@@ -187,6 +186,7 @@ public class AnalysisTab extends DivWidget {
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
+    logger.info("isPoly  2 " + isPolyglot);
 
     Widget playFeedback = getPlayFeedback();
 
@@ -197,7 +197,7 @@ public class AnalysisTab extends DivWidget {
         isPolyglot);
 
     {
-      Panel timeControls = getTimeControls(playFeedback);
+      Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);
       add(timeControls);
     }
@@ -335,10 +335,14 @@ public class AnalysisTab extends DivWidget {
     return bottom;
   }
 
+  /**
+   * @param playFeedback
+   * @return
+   */
   @NotNull
-  private Panel getTimeControls(Widget playFeedback) {
+  private Panel getTimeControls(Widget playFeedback, boolean isTeacherView) {
     Panel timeControls = new HorizontalPanel();
-    timeControls.add(getTimeGroup());
+    timeControls.add(isTeacherView ? makeTimeScaleBox() : getTimeGroup());
     timeControls.add(getTimeWindowStepper());
     timeControls.add(playFeedback);
     return timeControls;
@@ -364,13 +368,16 @@ public class AnalysisTab extends DivWidget {
     scoreHeader.addStyleName("leftFiveMargin");
     scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
     scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    stepper.add(this.scoreHeader = scoreHeader);
+    stepper.add(scoreHeader);
 
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice,
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate,
+
+        allChoice,
         dayChoice,
         weekChoice,
         monthChoice,
         sessionChoice,
+
         scoreHeader);
     return stepper;
   }
@@ -432,15 +439,43 @@ public class AnalysisTab extends DivWidget {
       sessionChoice.setActive(true);
     }
 
-    // if (!isPolyglot) {
     buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY));
     buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
     buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
-    // }
-
     buttonGroup.add(allChoice = getAllChoice());
 
+
     return buttonGroup;
+  }
+
+  private ListBox makeTimeScaleBox() {
+    timeScale = new ListBox();
+    timeScale.setWidth(160 + "px");
+    timeScale.addStyleName("leftTenMargin");
+    timeScale.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    timeScale.addChangeHandler(event -> {
+      int selectedIndex = timeScale.getSelectedIndex();
+      TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
+      analysisPlot.setTimeHorizon(horizon);
+    });
+
+    for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
+      timeScale.addItem("Time Scale : " + horizon.getDisplay());
+    }
+
+    Scheduler.get().scheduleDeferred(() -> {
+      if (isPolyglot) {
+      //  logger.info("is poly...");
+        timeScale.setSelectedValue(TIME_HORIZON.values()[0].getDisplay());
+      } else {
+        timeScale.setSelectedIndex(TIME_HORIZON.values().length - 1);
+//        timeScale.setSelectedValue(TIME_HORIZON.values()[TIME_HORIZON.values().length - 1].getDisplay());
+      }
+     // int selectedIndex = timeScale.getSelectedIndex();
+     // logger.info("selectedIndex ..." + selectedIndex);
+    });
+
+    return timeScale;
   }
 
   private Button getButtonChoice(TIME_HORIZON week) {
