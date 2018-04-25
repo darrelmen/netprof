@@ -1,14 +1,17 @@
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -80,14 +83,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public void startTimedRun() {
     if (!inLightningRound) {
       inLightningRound = true;
-      logger.info("startTimedRun ->");
+      //logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
     }
   }
 
   private void stopTimedRun() {
-    logger.info("stopTimedRun");
+    //logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
@@ -115,6 +118,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 //          logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
           if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
             currentFlashcard.cancelAdvanceTimer();
+
             stopTimedRun();
             if (currentFlashcard.isTabVisible()) {
               currentFlashcard.onSetComplete();
@@ -231,6 +235,24 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     if (recurringTimer != null) recurringTimer.cancel();
     sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
+    removeItemFromHistory();
+  }
+
+  private void removeItemFromHistory() {
+    SelectionState selectionState = new SelectionState(History.getToken(), false);
+
+    Collection<String> lists = selectionState.getTypeToSection().get("Lists");
+
+    String listChoice = lists == null || lists.isEmpty() ? "" : "Lists" + "=" + lists.iterator().next();
+    //logger.info("lists " + lists);
+    String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
+        SelectionState.SECTION_SEPARATOR +
+        SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
+        SelectionState.SECTION_SEPARATOR +
+        listChoice;
+
+    //logger.info("gotSeeScoresClick push new token with no item " + historyToken);
+    History.newItem(historyToken);
   }
 
   private void clearAnswerMemory() {

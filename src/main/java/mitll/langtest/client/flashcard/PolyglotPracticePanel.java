@@ -67,7 +67,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
                         boolean showAudio) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
-    this.minScore = ((float) minPolyScore) / 100f;
+    double d = Math.floor((double) minPolyScore) / 100D;
+    this.minScore = Double.valueOf(d).floatValue();
     this.minPolyScore = minPolyScore;
     this.showAudio = showAudio;
     realAddWidgets(e, controller, controlState);
@@ -238,21 +239,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected void gotSeeScoresClick() {
     stopTimerShowBanner();
 
-    SelectionState selectionState = new SelectionState(History.getToken(), false);
-
-    Collection<String> lists = selectionState.getTypeToSection().get("Lists");
-
-    String listChoice = lists == null || lists.isEmpty() ? "" : "Lists" + "=" + lists.iterator().next();
-    //logger.info("lists " + lists);
-    String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
-        SelectionState.SECTION_SEPARATOR +
-        SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
-        SelectionState.SECTION_SEPARATOR +
-        listChoice;
-
-
-    //logger.info("gotSeeScoresClick push new token with no item " + historyToken);
-    History.newItem(historyToken);
     super.gotSeeScoresClick();
   }
 

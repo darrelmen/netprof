@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
+  public static final int HIDE_DELAY = 5000;
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
   public static final String SCORE = "Score";
@@ -113,6 +114,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    */
   private ToolTip getToolTip() {
     return new ToolTip()
+        .setHideDelay(getHideDelay())
         .setFormatter(toolTipData -> {
           try {
             long xAsLong = toolTipData.getXAsLong();
@@ -128,10 +130,12 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
         });
   }
 
+  protected int getHideDelay() {
+    return HIDE_DELAY;
+  }
   protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
     if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
-
     return commonShell;
   }
 
@@ -194,7 +198,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
     return
         (showEx ?
-            "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
+            getFLTooltip(foreignLanguage) +
                 englishTool
             : "")
             +
@@ -213,8 +217,12 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   }
 
   @NotNull
-  String getTooltipHint() {
-    return "<br/>" + "<b>Click to hear vs. reference</b>";
+  protected String getFLTooltip(String foreignLanguage) {
+    return "<span style='font-size:200%'>" + foreignLanguage + "</span>";
+  }
+
+  @NotNull
+  String getTooltipHint() {    return "<br/><b>Click to hear vs. reference</b>";
   }
 
   boolean shouldShowExercise(String seriesName) {

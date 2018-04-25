@@ -146,6 +146,14 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     listInterface.loadByID(exid);
   }
 
+  protected int getHideDelay() {
+    return 2000;
+  }
+
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+    return getFLTooltip(commonShell.getForeignLanguage()) + getTooltipHint();
+  }
+
   /**
    * TODO : for now, no hint
    *

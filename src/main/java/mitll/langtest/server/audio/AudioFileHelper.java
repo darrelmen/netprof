@@ -90,6 +90,8 @@ public class AudioFileHelper implements AlignDecode {
   public static final boolean DEBUG = false;
   public static final String FRENCH = "french";
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
+  private static final String TEST_USER = "demo_";
+  private static final String TEST_PASSWORD = "domino22";//"demo";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -1167,7 +1169,7 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
 
     if (session != null) {
-//      logger.info("adding " + session);
+      logger.info("getProxyScore adding session " + session);
       httpClient.addRequestProperty("Cookie", session);
     }
 
@@ -1211,8 +1213,8 @@ public class AudioFileHelper implements AlignDecode {
       HTTPClient httpClient = getHttpClient(hydraHost);
       httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.GetRequest.HASUSER.toString());
       httpClient.addRequestProperty(ScoreServlet.PROJID, "" + projID);
-      httpClient.addRequestProperty(ScoreServlet.USERID, "demo_");
-      httpClient.addRequestProperty(ScoreServlet.PASS, "demo");
+      httpClient.addRequestProperty(ScoreServlet.USERID, TEST_USER);
+      httpClient.addRequestProperty(ScoreServlet.PASS, TEST_PASSWORD);
       String json = httpClient.sendAndReceiveCookie("");
       logger.info("getSession response " + json);
       return json;

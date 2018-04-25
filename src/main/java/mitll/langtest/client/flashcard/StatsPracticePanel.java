@@ -437,17 +437,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     }
 
     {
-      ControlGroup incorrect = new ControlGroup(INCORRECT);
-      incorrect.addStyleName("topFiveMargin");
-
-      incorrectBox = new Label();
-      incorrectBox.setType(LabelType.WARNING);
-
-      g.setWidget(row, 0, incorrect);
-      g.setWidget(row++, 1, incorrectBox);
-    }
-
-    {
       ControlGroup correct = new ControlGroup(CORRECT);
       correct.addStyleName("topFiveMargin");
 
@@ -456,6 +445,17 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
       g.setWidget(row, 0, correct);
       g.setWidget(row++, 1, correctBox);
+    }
+
+    {
+      ControlGroup incorrect = new ControlGroup(INCORRECT);
+      incorrect.addStyleName("topFiveMargin");
+
+      incorrectBox = new Label();
+      incorrectBox.setType(LabelType.WARNING);
+
+      g.setWidget(row, 0, incorrect);
+      g.setWidget(row++, 1, incorrectBox);
     }
 
     {
