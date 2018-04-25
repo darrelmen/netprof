@@ -5,16 +5,17 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.PolyglotChart;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
@@ -23,11 +24,12 @@ import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
- // private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+//  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
@@ -61,7 +63,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
                         MySoundFeedback soundFeedback,
                         CommonAnnotatable e, StickyState stickyState,
                         ListInterface<L, T> exerciseListToUse,
-                        int minPolyScore, boolean showAudio) {
+                        int minPolyScore,
+                        boolean showAudio) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
     this.minScore = ((float) minPolyScore) / 100f;
@@ -227,7 +230,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     pChart.setWidth("100%");
     pChart.setHeight(CHART_HEIGHT + "px");
     pChart.addStyleName("floatLeftAndClear");
-    //logger.info("got " +exerciseList.getIdToExercise().size());
     pChart.setIdToEx(exerciseList.getIdToExercise());
     pChart.setTimeToAnswer(sticky.getTimeToAnswer());
     return pChart;
@@ -235,6 +237,22 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   protected void gotSeeScoresClick() {
     stopTimerShowBanner();
+
+    SelectionState selectionState = new SelectionState(History.getToken(), false);
+
+    Collection<String> lists = selectionState.getTypeToSection().get("Lists");
+
+    String listChoice = lists == null || lists.isEmpty() ? "" : "Lists" + "=" + lists.iterator().next();
+    //logger.info("lists " + lists);
+    String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
+        SelectionState.SECTION_SEPARATOR +
+        SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
+        SelectionState.SECTION_SEPARATOR +
+        listChoice;
+
+
+    //logger.info("gotSeeScoresClick push new token with no item " + historyToken);
+    History.newItem(historyToken);
     super.gotSeeScoresClick();
   }
 
@@ -290,16 +308,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  void playRefOnError() {
-  }
+  void playRefOnError() {}
 
   @Override
   String getKeyBindings() {
     return ARROW_KEY_TIP;
   }
 
-
-  @Override protected void rememberCurrentExercise() {
-
-  }
+  @Override
+  protected void rememberCurrentExercise() {}
 }

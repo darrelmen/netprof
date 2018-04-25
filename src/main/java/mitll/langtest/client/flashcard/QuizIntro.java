@@ -18,10 +18,12 @@ import java.util.Map;
 
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
+  /**
+   *
+   */
   private static final String START = "Start!";
-  // private static final String YOU_ARE_NOT_REQUIRED = "You are not required to record all the items.";
   public static final String DRY_RUN = "Dry Run";
-  public static final String FLASHCARDS = "quiz";
+  private static final String FLASHCARDS = "quiz";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 

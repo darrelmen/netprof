@@ -106,6 +106,7 @@ public class QuizHelper extends PracticeHelper {
           return new QuizIntro(exerciseList.getIdToList(), listid -> {
             Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
             candidate.put(LISTS, "" + listid);
+            //logger.info("setHistory " + candidate);
             exerciseList.setHistory(candidate);
 
             chosenList = listid;

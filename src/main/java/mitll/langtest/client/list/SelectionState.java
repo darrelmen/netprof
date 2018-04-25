@@ -62,7 +62,7 @@ public class SelectionState {
   private static final String ITEM_SEPARATOR = "&#44";
   private static final String SHOWING_ALL_ENTRIES = "All entries";
 
-  public  static final String INSTANCE = "instance";
+  public static final String INSTANCE = "instance";
   private int item = -1;
   private final Map<String, Collection<String>> typeToSection = new HashMap<>();
   private String instance = "";
@@ -80,11 +80,7 @@ public class SelectionState {
    */
   public SelectionState(String token, boolean removePlus) {
     String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    //logger.info("From '" + token + "' to '" + token1 +   "'");
     parseToken(token1);
-//
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("token " + token));
-//    logger.info("logException stack " + exceptionAsString);
   }
 
   private String unencodeToken(String token) {

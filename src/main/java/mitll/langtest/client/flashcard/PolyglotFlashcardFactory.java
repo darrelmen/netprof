@@ -1,12 +1,15 @@
 package mitll.langtest.client.flashcard;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -77,13 +80,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public void startTimedRun() {
     if (!inLightningRound) {
       inLightningRound = true;
+      logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
     }
   }
 
   private void stopTimedRun() {
-    //  logger.info("stopTimedRun");
+    logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     inLightningRound = false;
@@ -143,7 +147,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
       if (currentFlashcard != null) {
         ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(roundTimeLeftMillis);
       } else {
-        logger.warning("no current flashcard?");
+        logger.warning("startRoundTimer : no current flashcard?");
       }
     }
   }
@@ -194,20 +198,35 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return roundTimeLeftMillis;
   }
 
+  protected void listChanged(List<L> items, String selectionID) {
+    baseListChanged(items, selectionID);
+   // logger.info("PolyglotFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+
+    Scheduler.get().scheduleDeferred(() -> {
+      if (sticky.getTimeRemainingMillis() > 0) {
+        inLightningRound = true;
+    //    logger.info("startTimedRun on reload");
+        startRoundTimer(getIsDry());
+      }
+      else {
+        reset();
+      }
+    });
+  }
+
   /**
    *
    */
   @Override
   void reset() {
     super.reset();
-    logger.info("reset");
-
+    //logger.info("reset");
     cancelRoundTimer();
   }
 
   @Override
   public void cancelRoundTimer() {
-    logger.info("cancelRoundTimer");
+    //logger.info("cancelRoundTimer");
     if (roundTimer != null) roundTimer.cancel();
     if (recurringTimer != null) recurringTimer.cancel();
     sticky.clearTimeRemaining();

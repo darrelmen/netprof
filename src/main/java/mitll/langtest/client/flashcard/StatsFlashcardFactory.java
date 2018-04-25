@@ -63,7 +63,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;
@@ -103,10 +103,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
          */
         @Override
         public void listChanged(List<L> items, String selectionID) {
-          StatsFlashcardFactory.this.selectionID = selectionID;
-          allExercises = items;
-          //     logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
-          reset();
+          StatsFlashcardFactory.this.listChanged(items, selectionID);
         }
       });
     }
@@ -124,6 +121,17 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
+  }
+
+  protected void listChanged(List<L> items, String selectionID) {
+    baseListChanged(items, selectionID);
+    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+    reset();
+  }
+
+  protected void baseListChanged(List<L> items, String selectionID) {
+    StatsFlashcardFactory.this.selectionID = selectionID;
+    allExercises = items;
   }
 
   @NotNull
@@ -230,7 +238,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public void showDrill() {
     navigation.showView(INavigation.VIEWS.DRILL);
   }
-
   public void showQuiz() {
     navigation.showView(INavigation.VIEWS.QUIZ);
   }

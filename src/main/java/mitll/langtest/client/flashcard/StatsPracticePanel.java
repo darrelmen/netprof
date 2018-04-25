@@ -11,11 +11,9 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
-import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
@@ -211,9 +209,9 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   /**
    * TODO: get last session...
    *
-   * @see #onSetComplete
    * @seex #getButtonsBelowScoreHistory
    * @seex #showFlashcardDisplay
+   * @see #onSetComplete
    */
   private void showFeedbackCharts() {
     setMainContentVisible(false);
