@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
@@ -449,20 +450,19 @@ public class NewContentChooser implements INavigation {
     return divWidget;
   }
 
-  /*
   @NotNull
-  private ShowTab getShowTab() {
+  public ShowTab getShowTab() {
     return exid -> {
       boolean wasMade = learnHelper.getReloadable() != null;
       if (!wasMade) {
-        banner.showLearn();
+        banner.show(LEARN);
       }
       learnHelper.loadExercise(exid);
       if (wasMade) {
-        banner.showLearn();
+        banner.show(LEARN);
       }
     };
-  }*/
+  }
 
   @Override
   public void showListIn(int listid, VIEWS view) {

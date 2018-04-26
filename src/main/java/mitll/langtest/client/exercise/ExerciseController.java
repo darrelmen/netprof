@@ -33,6 +33,7 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
@@ -122,6 +123,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
   KeyStorage getStorage();
 
   void showListIn(int listID, INavigation.VIEWS views);
+
+  ShowTab getShowTab();
 
   void setBannerVisible(boolean visible);
 

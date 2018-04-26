@@ -60,7 +60,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
@@ -161,25 +160,47 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   protected void addTable(Panel column) {
     DivWidget tableC = new DivWidget();
     tableC.add(table);
-    column.add(tableC);
-
     tableC.setHeight(TABLE_HEIGHT + "px");
-    DivWidget child = getButtonRow();
 
-    column.add(child);
+    column.add(tableC);
+    column.add(getButtonRow());
   }
+
 
   @NotNull
   private DivWidget getButtonRow() {
     DivWidget child = new DivWidget();
-    review = new Button("Review");
+    review = new Button("Review") {
+      @Override
+      protected void onDetach() {
+        super.onDetach();
+       // logger.info("got detach ");
+        stopAudio();
+      }
+    };
+
+    review.setWidth("61px");
     review.addStyleName("topFiveMargin");
+    review.addStyleName("leftFiveMargin");
     review.setIcon(IconType.PLAY);
     review.setType(ButtonType.SUCCESS);
     review.addClickHandler(event -> gotClickOnReview());
+
+
+    Button learn = new Button("Learn");
+    learn.addStyleName("topFiveMargin");
+
+    learn.setType(ButtonType.SUCCESS);
+
+    learn.addClickHandler(event -> {
+      int exid = getSelected().getExid();
+      controller.getShowTab().showLearnAndItem(exid);
+    });
+
     DivWidget wrapper = new DivWidget();
-    wrapper.add(review);
     wrapper.addStyleName("floatRight");
+    wrapper.add(learn);
+    wrapper.add(review);
     child.add(wrapper);
     return child;
   }
@@ -209,7 +230,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   protected void studentAudioEnded() {
-  //  logger.info("studentAudioEnded ");
+    //  logger.info("studentAudioEnded ");
     if (isReview) {
       WordScore selected = getSelected();
       if (selected == null) {
@@ -220,12 +241,12 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-  //        logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          //        logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
             int rowCount = table.getRowCount();
-    //        logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
+            //        logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
 
             boolean b = i1 > rowCount;
             if (b) {
@@ -234,7 +255,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
               scrollToVisible(i1);
             }
           } else {
-      //      logger.info("studentAudioEnded next " + (i + 1));
+            //      logger.info("studentAudioEnded next " + (i + 1));
             WordScore wordScore = visibleItems.get(i + 1);
             setSelected(wordScore);
             playAudio(getSelected());

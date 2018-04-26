@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
@@ -52,10 +53,8 @@ public interface INavigation extends IViewContaner {
   void showInitialState();
 
   void showListIn(int listid, VIEWS view);
-/*  void showLearnList(int listid);
-  void showQuiz(int listID);
 
-  void showDrillList(int listid);*/
+  ShowTab getShowTab();
 
   Widget getNavigation();
 

@@ -50,6 +50,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
@@ -1234,33 +1235,15 @@ public class LangTest implements
     return storage;
   }
 
-  /**
-   * @paramx id
-   * @see ListView#showLearnList
-   */
-/*  @Override
-  public void showLearnList(int id) {
-    initialUI.getNavigation().showListIn(id, INavigation.VIEWS.LEARN);
-  }
-
-  @Override
-  public void showQuiz(String listName, int listID) {
-    initialUI.getNavigation().showListIn(listID, INavigation.VIEWS.QUIZ);
-  }*/
-
   @Override
   public void showListIn(int listID, INavigation.VIEWS views) {
     initialUI.getNavigation().showListIn(listID, views);
   }
 
-  /**
-   * @paramx id
-   * @see ListView#getDrillButton
-   */
- /* @Override
-  public void showDrillList(int id) {
-    initialUI.getNavigation().showDrillList(id);
-  }*/
+  @Override
+  public ShowTab getShowTab() {
+    return initialUI.getNavigation().getShowTab();
+  }
 
   @Override
   public void setBannerVisible(boolean visible) {
