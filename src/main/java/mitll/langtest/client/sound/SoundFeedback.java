@@ -32,7 +32,7 @@
 
 package mitll.langtest.client.sound;
 
-import mitll.langtest.client.services.LangTestDatabaseAsync;
+import java.util.logging.Logger;
 
 /**
  * Does sound feedback - correct/incorrect to user.
@@ -44,6 +44,8 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundFeedback {
+  private final Logger logger = Logger.getLogger("SoundFeedback");
+
   public static final String CORRECT   = "langtest/sounds/correct4.mp3";
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
@@ -53,7 +55,7 @@ public class SoundFeedback {
 
   /**
    * @param soundManager
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel
    */
   public SoundFeedback(SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
@@ -76,25 +78,27 @@ public class SoundFeedback {
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#playRefAndGoToNext
    */
   private Sound createSound(final String song, final EndListener endListener, final boolean soft) {
-    //System.out.println("playing " + song);
+    //logger.info("playing " + song);
     currentSound = new Sound(new AudioControl() {
       @Override
       public void reinitialize() {
+        //logger.info("got reinitialize");
       }
 
       @Override
       public void songFirstLoaded(double durationEstimate) {
-        // System.out.println("songFirstLoaded " +song);
+       // logger.info("got songFirstLoaded");
       }
 
       @Override
       public void repeatSegment(float startInSeconds, float endInSeconds) {
+       // logger.info("got repeatSegment");
 
       }
 
       @Override
       public void songLoaded(double duration) {
-        //  System.out.println("songLoaded " +song);
+   //     logger.info("songLoaded " +song + " dur " + duration);
         if (soft) {
           soundManager.setVolume(song, SOFT_VOL);
         }
@@ -107,7 +111,7 @@ public class SoundFeedback {
 
       @Override
       public void songFinished() {
-        //  System.out.println("songFinished " +song);
+ //       logger.info("songFinished " +song);
         destroySound();
         if (endListener != null) {
           endListener.songEnded();

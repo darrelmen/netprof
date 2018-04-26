@@ -84,7 +84,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     );
     this.sticky = stickyState;
     this.statsFlashcardFactory = statsFlashcardFactory;
-    soundFeedback.setEndListener(new SoundFeedback.EndListener() {
+/*    soundFeedback.setEndListener(new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         disableRecord();
@@ -95,7 +95,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         enableRecord();
         removePlayingHighlight();
       }
-    });
+    });*/
 
     addWidgets(e, controller, controlState);
   }

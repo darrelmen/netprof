@@ -45,7 +45,7 @@ class SoundManager {
   protected static final Logger logger = Logger.getLogger("SoundManager");
 
   private static boolean onreadyWasCalled = false;
-  private final static boolean   debug = false;
+  //private final static boolean   debug = false;
   public static native void initialize() /*-{
     $wnd.soundManager.onload = $wnd.loaded();
     $wnd.soundManager.ontimeout = $wnd.ontimeout();
@@ -142,15 +142,12 @@ class SoundManager {
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void loaded(){
-
-  //  if (debug) System.out.println(new Date() + " : Got loaded call!");
   }
 
   /**
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void ontimeout(){
-   // if (debug) System.out.println(new Date() + " : Got ontimeout call!");
     //Window.alert("Do you have a flashblocker on?  Please add this site to your whitelist.");
   }
 
@@ -158,7 +155,6 @@ class SoundManager {
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
   public static void myready(){
-   // if (debug) System.out.println(new Date() + " : Got myready call!");
     onreadyWasCalled = true;
   }
 
@@ -167,24 +163,37 @@ class SoundManager {
   }
 
 	public static void songFinished(Sound sound){
-   // if (debug) System.out.println("sound finished " +sound);
-		sound.getParent().songFinished();
+		getParent(sound).songFinished();
 	}
 
-	public static void songFirstLoaded(Sound sound, double durationEstimate){
-  //  if (debug) System.out.println("songFirstLoaded sound " +sound);
-
-    sound.getParent().songFirstLoaded(durationEstimate);
+  public static void songFirstLoaded(Sound sound, double durationEstimate){
+    getParent(sound).songFirstLoaded(durationEstimate);
 	}
 
+  /**
+   * Deal with missing audio by jumping to songEnded
+   * @param sound
+   * @param duration
+   */
 	public static void songLoaded(Sound sound, double duration){
-  //  logger.info("songLoaded sound " +sound + " with dur " +duration);
-    sound.getParent().songLoaded(duration);
+    boolean isNull = (""+duration).equalsIgnoreCase("null");
+
+    if (isNull) {
+      songFinished(sound);
+      logger.info("songLoaded sound " +sound + " but can't find audio on server");
+    }
+    else {
+      getParent(sound).songLoaded(duration);
+    }
 	}
 
 	public static void update(Sound sound, double position){
-		sound.getParent().update(position);
+		getParent(sound).update(position);
 	}
+
+  private static AudioControl getParent(Sound sound) {
+    return sound.getParent();
+  }
 
   /**
    * @see mitll.langtest.client.sound.SoundManagerStatic#exportStaticMethods()

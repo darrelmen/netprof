@@ -203,19 +203,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     for (WordScore ws : wordScores) {
       instance.setTimeInMillis(ws.getTimestamp());
       int i = instance.get(Calendar.DAY_OF_YEAR);
-
-      logger.info("day of year " + i + " for " + new Date(ws.getTimestamp()) + " ws " + ws);
+//      logger.info("day of year " + i + " for " + new Date(ws.getTimestamp()) + " ws " + ws);
       if (dayOfYear == -1) {
         dayOfYear = i;
       } else if (i != dayOfYear) {
-        logger.info("day of year " + i + " vs " + dayOfYear +
-            "  for " + new Date(ws.getTimestamp()) + " ws " + ws);
+//        logger.info("day of year " + i + " vs " + dayOfYear + "  for " + new Date(ws.getTimestamp()) + " ws " + ws);
         allSameDay = false;
         break;
       }
     }
-    logger.info("allSameDay " + allSameDay);
-
+  //  logger.info("allSameDay " + allSameDay);
     return allSameDay;
   }
 

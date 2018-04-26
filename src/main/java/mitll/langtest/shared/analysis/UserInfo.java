@@ -83,7 +83,7 @@ public class UserInfo extends SimpleUser {
     for (BestScore bs : bestScores1) {
       total += bs.getScore();
     }
-    return toRound(total, bestScores1.size());
+    return toPercent(total, bestScores1.size());
   }
 
   private void setLastSessionScore(List<BestScore> bestScores) {

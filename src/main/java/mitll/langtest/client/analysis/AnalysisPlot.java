@@ -467,7 +467,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private boolean isShortPeriod(List<TimeAndScore> rawBestScores) {
     if (rawBestScores.size() < 2) {
-      logger.info("only " + rawBestScores.size() + " scores");
+     // logger.info("only " + rawBestScores.size() + " scores");
       return true;
     }
     TimeAndScore first = rawBestScores.get(0);

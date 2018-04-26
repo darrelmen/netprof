@@ -22,11 +22,13 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 1/20/17.
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
-  // private final Logger logger = Logger.getLogger("AudioExampleContainer");
+  private final Logger logger = Logger.getLogger("AudioExampleContainer");
   private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -158,7 +160,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-
+//        logger.info("started " + CompressedAudio.getPath(wordScore.getAnswerAudio()));
       }
 
       @Override
@@ -170,6 +172,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   protected void studentAudioEnded() {
 
+  }
+
+  protected void stopAudio() {
+    soundFeedback.destroySound();
   }
 
   SafeHtml getSafeHtml(String columnText) {

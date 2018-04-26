@@ -59,14 +59,14 @@ public class MySoundFeedback extends SoundFeedback {
     createSound(song, endListener);
   }
 
-  public synchronized void queueSong(String song) {
+  synchronized void queueSong(String song) {
     //logger.info("\t queueSong (no callback) song " +song+ " -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
     createSound(song, null);
   }
 
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#abortPlayback
+   * @see FlashcardPanel#stopPlayback
    */
   public synchronized void clear() {
    // logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
@@ -74,7 +74,7 @@ public class MySoundFeedback extends SoundFeedback {
   }
 
   // TODO : remove this empty listener
-  private EndListener endListener = new EndListener() {
+/*  private EndListener endListener = new EndListener() {
     @Override
     public void songStarted() {
       //logger.info("empty listener - song started --------- "+ System.currentTimeMillis());
@@ -86,15 +86,7 @@ public class MySoundFeedback extends SoundFeedback {
     }
   };
 
-  /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
-   * @return
-   */
-  EndListener getEndListener() {
-    return endListener;
-  }
-
   void setEndListener(EndListener endListener) {
     this.endListener = endListener;
-  }
+  }*/
 }

@@ -83,6 +83,7 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
+  private static final int TABLE_HEIGHT = 215;
   private final Logger logger = Logger.getLogger("WordContainerAsync");
 
   private static final int NARROW_THRESHOLD = 1450;
@@ -113,7 +114,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat longerYearFormat = DateTimeFormat.getFormat("MMM d yy h:mm a");
 
   private final WordTable wordTable = new WordTable();
-  private List<WordScore> lastResults;
 
   private final int numWords;
 
@@ -155,89 +155,94 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private boolean isReview = false;
-  Button review;
+  private Button review;
 
   @Override
   protected void addTable(Panel column) {
-    super.addTable(column);
-    DivWidget child = new DivWidget();
+    DivWidget tableC = new DivWidget();
+    tableC.add(table);
+    column.add(tableC);
+
+    tableC.setHeight(TABLE_HEIGHT + "px");
+    DivWidget child = getButtonRow();
+
     column.add(child);
+  }
+
+  @NotNull
+  private DivWidget getButtonRow() {
+    DivWidget child = new DivWidget();
     review = new Button("Review");
     review.addStyleName("topFiveMargin");
     review.setIcon(IconType.PLAY);
     review.setType(ButtonType.SUCCESS);
-    review.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String text = review.getText().trim();
-        logger.info("Text '" + text + "'");
-        if (text.equalsIgnoreCase("Review")) {
-          review.setText("Pause");
-          review.setIcon(IconType.PAUSE);
-
-          isReview = true;
-
-          WordScore selected = getSelected();
-          if (selected == null) {
-            logger.warning("no selection?");
-          } else {
-
-            if (onLast()) {
-              scrollToVisible(0);
-            }
-            else {
-              logger.info("playAudio " + selected);
-
-              playAudio(selected);
-            }
-          }
-        } else {
-          resetReview();
-        }
-      }
-    });
+    review.addClickHandler(event -> gotClickOnReview());
     DivWidget wrapper = new DivWidget();
     wrapper.add(review);
     wrapper.addStyleName("floatRight");
     child.add(wrapper);
+    return child;
+  }
+
+  private void gotClickOnReview() {
+    isReview = !isReview;
+    if (isReview) {
+      review.setText("Pause");
+      review.setIcon(IconType.PAUSE);
+
+      WordScore selected = getSelected();
+      if (selected == null) {
+        logger.warning("gotClickOnReview no selection?");
+      } else {
+        if (onLast() && table.getRowCount() > 1) {
+          //logger.info("scrollToVisible first row - selected = " + selected + " table.getRowCount() " + table.getRowCount());
+          scrollToVisible(0);
+        } else {
+//          logger.info("gotClickOnReview playAudio " + selected);
+          playAudio(selected);
+        }
+      }
+    } else {
+      stopAudio();
+      resetReview();
+    }
   }
 
   protected void studentAudioEnded() {
+  //  logger.info("studentAudioEnded ");
     if (isReview) {
       WordScore selected = getSelected();
       if (selected == null) {
-        logger.warning("no selection?");
+        logger.warning("studentAudioEnded no selection?");
       } else {
-        List<WordScore> list = table.getVisibleItems();
-
-
-        //   logger.info("selected " + selected);
-
-        List<WordScore> toUse = list;//this.lastResults;
-        int i = toUse == null ? -1 : toUse.indexOf(selected);
+        //        logger.info("studentAudioEnded selected " + selected);
+        List<WordScore> visibleItems = table.getVisibleItems();
+        int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          logger.info("index " + i + " in " + toUse.size());
-          if (i == toUse.size() - 1) {
+  //        logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
             int rowCount = table.getRowCount();
-            logger.info("next page " + i1 + " row " + rowCount);
+    //        logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
 
-            boolean b = rowCount == i1;
+            boolean b = i1 > rowCount;
             if (b) {
               resetReview();
             } else {
               scrollToVisible(i1);
             }
-
           } else {
-            WordScore wordScore = toUse.get(i + 1);
+      //      logger.info("studentAudioEnded next " + (i + 1));
+            WordScore wordScore = visibleItems.get(i + 1);
             setSelected(wordScore);
             playAudio(getSelected());
           }
         }
       }
+    } else {
+      resetReview();
     }
   }
 
@@ -246,8 +251,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     Range visibleRange = table.getVisibleRange();
     int i1 = visibleRange.getStart() + visibleRange.getLength();
     int rowCount = table.getRowCount();
-    logger.info("next page " + i1 + " row " + rowCount);
-
+//    logger.info("next page " + i1 + " row " + rowCount);
     return rowCount == i1;
   }
 
@@ -320,34 +324,15 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
-                  updateRowData(start, lastResults = result.getResults());
+                  updateRowData(start, result.getResults());
                   isAllSameDay = result.isAllSameDay();
-
-      /*            logger.info("\t getResults req " +val+
-                      " got back " + numTotal );*/
 
                   if (isAllSameDay) {
                     table.setColumnWidth(theDateCol, WIDE_DATE_WIDTH + "px");
                   }
-/*                  if (numTotal > 0) {
-                    WordScore object = result.getResults().get(0);
-*//*
-                    logger.info("--->getResults req " + result.req +
-                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
-                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
-*//*
-                    cellTable.getSelectionModel().setSelected(object, true);
-                  }*/
-
                   if (!result.getResults().isEmpty()) {
-                    WordScore toSelect = result.getResults().get(0);
-                    setSelected(toSelect);
-                    if (isReview) {
-                      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
-                    }
+                    selectFirst(result);
                   }
-
-
                 }
               }
             });
@@ -357,6 +342,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
+  }
+
+  private void selectFirst(WordsAndTotal result) {
+    WordScore toSelect = result.getResults().get(0);
+    setSelected(toSelect);
+    if (isReview) {
+      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
+    }
   }
 
   /**

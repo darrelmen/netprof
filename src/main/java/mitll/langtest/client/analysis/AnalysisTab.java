@@ -79,8 +79,6 @@ public class AnalysisTab extends DivWidget {
    *
    * @see #showWordScores
    */
-  // private static final int WORD_WIDTH = 489;//459;
-
   private static final String WORDS = "Vocabulary";
   /**
    * @see #exampleHeader
@@ -545,6 +543,7 @@ public class AnalysisTab extends DivWidget {
   private Heading getHeading(String words) {
     Heading wordsTitle = new Heading(3, words);
     wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    wordsTitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     return wordsTitle;
   }
 

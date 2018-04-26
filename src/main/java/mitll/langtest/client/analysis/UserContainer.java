@@ -76,7 +76,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    *
    */
-  private static final String POLY_NUMBER =  "Session Compl. #";//"Session Completed";
+  private static final String POLY_NUMBER = "Session Compl.";//"Session Completed";
   private static final int LIFETIME_WIDTH = 60;
   private static final String LIFETIME = "Life. #";
   private static final int LIFETIME_AVG_WIDTH = 65;
@@ -693,9 +693,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              int s1 = getAdjustedScore(o1);
-              int s2 = getAdjustedScore(o2);
-              return Integer.compare(s1, s2);
+              float s1 = getAdjustedScore(o1);
+              float s2 = getAdjustedScore(o2);
+              return Float.compare(s1, s2);
             }
           }
           return -1;
@@ -757,7 +757,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + Integer.valueOf( shell.getLastSessionScore()).floatValue()/10F);
+        int lastSessionScore = shell.getLastSessionScore() / 10;
+        // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
+        return getSafeHtml("" + lastSessionScore);
       }
     };
   }
@@ -777,23 +779,30 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + getAdjustedScore(shell));
+        String columnText = "" + getAdjustedScore(shell);
+        if (!columnText.contains(".")) columnText += ".0";
+        return getSafeHtml(columnText);
       }
     };
   }
 
-  private int getAdjustedScore(UserInfo shell) {
+  private float getAdjustedScore(UserInfo shell) {
     int percent = getPercent(shell);
-    int lastSessionScore = shell.getLastSessionScore();
+    //int lastSessionScore = shell.getLastSessionScore();
+    //int lastSessionScore = shell.getLastSessionScore()/10;
+    float v = Integer.valueOf(shell.getLastSessionScore()).floatValue();
+    // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
+    // return getSafeHtml("" + lastSessionScore);
 
-    float lastf = (float) lastSessionScore;
+    float lastf = v;//(float) lastSessionScore;
     if (percent < 50) {
       lastf *= 0.8f;
     } else if (percent < 60) {
       lastf *= 0.9f;
     }
 
-    return Math.round(lastf);
+    // return Math.round(lastf) / 10F;
+    return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
   }
 
 /*
@@ -893,7 +902,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         selectedUser.getID(),
         selectedUser.getUserID(),
         listid,
-        listid !=-1,
+        listid != -1,
         req++,
         this));
   }
@@ -901,6 +910,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   public Button getAdd() {
     return add;
   }
+
   public Button getRemove() {
     return remove;
   }
