@@ -387,4 +387,8 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);
   }
+
+  public void getTypeAheadGrabFocus() {
+    searchTypeahead.grabFocus();
+  }
 }

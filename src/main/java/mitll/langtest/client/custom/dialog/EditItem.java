@@ -66,7 +66,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  private final Logger logger = Logger.getLogger("EditItem");
+  //private final Logger logger = Logger.getLogger("EditItem");
 
   /**
    * @see #getNewItem
@@ -132,12 +132,14 @@ public class EditItem {
                                                                            String instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
-    setFactory(exerciseList);
-    exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
+    EditableExerciseList exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
+    this.exerciseList = exerciseList;
+    setFactory(this.exerciseList);
+    this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
-    Scheduler.get().scheduleDeferred(() -> exerciseList.onResize());
-    return exerciseList;
+    Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
+  //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
+    return this.exerciseList;
   }
 
   /**

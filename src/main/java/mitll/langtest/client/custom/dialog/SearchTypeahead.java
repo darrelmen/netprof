@@ -239,6 +239,10 @@ public class SearchTypeahead {
     return currentExercise;
   }
 
+  public void grabFocus() {
+    //getTypeahead()
+  }
+
   private static class ExerciseSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
     private CommonShell shell;
 

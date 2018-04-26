@@ -174,7 +174,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       @Override
       protected void onDetach() {
         super.onDetach();
-       // logger.info("got detach ");
+        // logger.info("got detach ");
         stopAudio();
       }
     };
@@ -246,13 +246,19 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
             int rowCount = table.getRowCount();
-            //        logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
+         //   logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
 
             boolean b = i1 > rowCount;
             if (b) {
               resetReview();
             } else {
-              scrollToVisible(i1);
+              if (i1 == rowCount) {
+                resetReview();
+              } else {
+                WordScore wordScore = visibleItems.get(i + 1);
+                setSelected(wordScore);
+                scrollToVisible(i1);
+              }
             }
           } else {
             //      logger.info("studentAudioEnded next " + (i + 1));
@@ -345,7 +351,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
-                  updateRowData(start, result.getResults());
+                  updateRowData(start, lastResults=result.getResults());
                   isAllSameDay = result.isAllSameDay();
 
                   if (isAllSameDay) {

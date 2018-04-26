@@ -5,6 +5,6 @@ package mitll.langtest.client.list;
  */
  interface ITypeAhead {
   String getText();
-
+void grabFocus();
   void setText(String text);
 }
