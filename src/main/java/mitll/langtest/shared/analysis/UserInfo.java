@@ -78,6 +78,14 @@ public class UserInfo extends SimpleUser {
     setLastSessionScore(bestScores);
   }
 
+  private int getPercent(List<BestScore> bestScores1) {
+    float total = 0;
+    for (BestScore bs : bestScores1) {
+      total += bs.getScore();
+    }
+    return toRound(total, bestScores1.size());
+  }
+
   private void setLastSessionScore(List<BestScore> bestScores) {
     long maxSession = Long.MIN_VALUE;
     Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
@@ -93,17 +101,21 @@ public class UserInfo extends SimpleUser {
     }
     List<BestScore> bestScores1 = sessionToScores.get(maxSession);
 
-    lastSessionScore = getPercent(bestScores1);
+    lastSessionScore = getRounded(bestScores1);
     lastSessionNum = bestScores1.size();
     this.lastSessionSize = lastSessionSize;
   }
 
-  private int getPercent(List<BestScore> bestScores1) {
+  private int getRounded(List<BestScore> bestScores1) {
     float total = 0;
     for (BestScore bs : bestScores1) {
       total += bs.getScore();
     }
-    return toPercent(total, bestScores1.size());
+    return toRound(total, bestScores1.size());
+  }
+
+  private static int toRound(float total, float size) {
+    return Math.round(1000f * total / size);
   }
 
   private static int toPercent(float total, float size) {
@@ -169,7 +181,7 @@ public class UserInfo extends SimpleUser {
   }
 
   public int getLastSessionScore() {
-    return lastSessionScore;
+    return lastSessionScore;//Integer.valueOf(lastSessionScore).floatValue() / 10F;
   }
 
   /**

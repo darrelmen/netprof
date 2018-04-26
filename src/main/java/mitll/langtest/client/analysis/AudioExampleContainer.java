@@ -16,6 +16,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioWidget;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -32,6 +33,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private static final String PLAY = "Play";
 
   protected final AnalysisPlot plot;
+  private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   /**
    * @param controller
@@ -79,8 +81,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       }
     };
   }
-
-  private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
 
   /**
@@ -154,8 +154,22 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     playAudio(wordScore);
   }
 
-  private void playAudio(T wordScore) {
-    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()));
+  protected void playAudio(T wordScore) {
+    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()), new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+
+      }
+
+      @Override
+      public void songEnded() {
+        studentAudioEnded();
+      }
+    });
+  }
+
+  protected void studentAudioEnded() {
+
   }
 
   SafeHtml getSafeHtml(String columnText) {

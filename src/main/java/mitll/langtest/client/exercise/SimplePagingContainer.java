@@ -243,6 +243,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return selectionModel.getSelectedObject();
   }
 
+  public void setSelected(T toSelect) {
+    selectionModel.setSelected(toSelect,true);
+  }
+
   /**
    * @param id2
    * @param header
@@ -345,7 +349,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @param i
    * @see ClickablePagingContainer#markCurrent
    */
-  protected void scrollToVisible(int i) {
+  protected  void scrollToVisible(int i) {
     int pageSize = table.getPageSize();
 
     int pageNum = i / pageSize;
@@ -361,6 +365,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
       //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+
       table.setVisibleRange(newStart, pageSize);
     } else {
       int pageEnd = table.getPageStart() + pageSize;
@@ -372,6 +377,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 //              " vs current " + table.getVisibleRange());
 
         table.setVisibleRange(newStart, pageSize);
+      }
+      else {
+//        logger.info("nope -");
       }
     }
   }

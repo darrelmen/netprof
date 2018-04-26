@@ -72,11 +72,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see #addName
    */
   private static final String NAME = "Name";
-  private static final int SESSION_WIDTH = 105;
+  private static final int SESSION_WIDTH = 95;
   /**
    *
    */
-  private static final String POLY_NUMBER = "Session Completed";
+  private static final String POLY_NUMBER =  "Session Compl. #";//"Session Completed";
   private static final int LIFETIME_WIDTH = 60;
   private static final String LIFETIME = "Life. #";
   private static final int LIFETIME_AVG_WIDTH = 65;
@@ -757,7 +757,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getLastSessionScore());
+        return getSafeHtml("" + Integer.valueOf( shell.getLastSessionScore()).floatValue()/10F);
       }
     };
   }
@@ -777,8 +777,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        int adjustedScore = getAdjustedScore(shell);
-        return getSafeHtml("" + adjustedScore);
+        return getSafeHtml("" + getAdjustedScore(shell));
       }
     };
   }
@@ -797,6 +796,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return Math.round(lastf);
   }
 
+/*
   private Column<UserInfo, SafeHtml> getMineCol() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -811,6 +811,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       }
     };
   }
+*/
 
   private Column<UserInfo, SafeHtml> getNum() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {

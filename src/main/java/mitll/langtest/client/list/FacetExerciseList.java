@@ -368,7 +368,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   protected void addMinWidthStyle(Panel leftColumn) {
   }
 
-
   protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     tableWithPager = pagingContainer.getTableWithPager(listOptions);
   }

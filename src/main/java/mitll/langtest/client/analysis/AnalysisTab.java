@@ -157,9 +157,7 @@ public class AnalysisTab extends DivWidget {
         -1,
         isPolyglot,
         req, reqCounter);
-
-    logger.info("isPoly " + isPolyglot);
-  }
+    }
 
   /**
    * @param controller
@@ -186,7 +184,6 @@ public class AnalysisTab extends DivWidget {
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
-    logger.info("isPoly  2 " + isPolyglot);
 
     Widget playFeedback = getPlayFeedback();
 

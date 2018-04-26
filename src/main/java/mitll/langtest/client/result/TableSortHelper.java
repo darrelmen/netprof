@@ -9,25 +9,18 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class TableSortHelper {
-
   private final Logger logger = Logger.getLogger("TableSortHelper");
 
   public static final String TIMESTAMP = "timestamp";
-
   private static final String DESC = "DESC";
   private static final String ASC = "ASC";
 
-
   private final Map<Column<?, ?>, String> colToField = new HashMap<>();
-//
-//  public TableSortHelper(Map<Column<?, ?>, String> colToField) {
-//    this.colToField = colToField;
-//  }
 
   /**
    * @param table
    * @return
-   * @see #createProvider
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    */
   public StringBuilder getColumnSortedState(CellTable<?> table) {
     final ColumnSortList sortList = table.getColumnSortList();
@@ -39,7 +32,9 @@ public class TableSortHelper {
       if (s == null) {
         logger.warning("Can't find column " + column + "?");
       }
-      builder.append(s + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
+      String s1 = columnSortInfo.isAscending() ? ASC : DESC;
+   //   logger.info("col " + columnSortInfo + " s " + s + " = " + s1 );
+      builder.append(s + "_" + s1 + ",");
     }
     if (!builder.toString().contains(TIMESTAMP)) {
       builder.append(TIMESTAMP + "_" + DESC);

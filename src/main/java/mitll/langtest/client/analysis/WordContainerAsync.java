@@ -32,11 +32,18 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -45,9 +52,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -55,6 +60,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
@@ -81,7 +87,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final int NARROW_THRESHOLD = 1450;
 
-  private static final int ROWS_TO_SHOW = 8;
+  private static final int ROWS_TO_SHOW = 6;
 
   private static final int ITEM_COL_WIDTH = 210;//250;
   private static final int ITEM_COL_WIDTH_NARROW = 190;
@@ -107,6 +113,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final DateTimeFormat longerYearFormat = DateTimeFormat.getFormat("MMM d yy h:mm a");
 
   private final WordTable wordTable = new WordTable();
+  private List<WordScore> lastResults;
 
   private final int numWords;
 
@@ -141,6 +148,115 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     this.analysisServiceAsync = analysisServiceAsync;
   }
 
+  @Override
+  protected void addSelectionModel() {
+    selectionModel = new SingleSelectionModel<>();
+    table.setSelectionModel(selectionModel);
+  }
+
+  private boolean isReview = false;
+  Button review;
+
+  @Override
+  protected void addTable(Panel column) {
+    super.addTable(column);
+    DivWidget child = new DivWidget();
+    column.add(child);
+    review = new Button("Review");
+    review.addStyleName("topFiveMargin");
+    review.setIcon(IconType.PLAY);
+    review.setType(ButtonType.SUCCESS);
+    review.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String text = review.getText().trim();
+        logger.info("Text '" + text + "'");
+        if (text.equalsIgnoreCase("Review")) {
+          review.setText("Pause");
+          review.setIcon(IconType.PAUSE);
+
+          isReview = true;
+
+          WordScore selected = getSelected();
+          if (selected == null) {
+            logger.warning("no selection?");
+          } else {
+
+            if (onLast()) {
+              scrollToVisible(0);
+            }
+            else {
+              logger.info("playAudio " + selected);
+
+              playAudio(selected);
+            }
+          }
+        } else {
+          resetReview();
+        }
+      }
+    });
+    DivWidget wrapper = new DivWidget();
+    wrapper.add(review);
+    wrapper.addStyleName("floatRight");
+    child.add(wrapper);
+  }
+
+  protected void studentAudioEnded() {
+    if (isReview) {
+      WordScore selected = getSelected();
+      if (selected == null) {
+        logger.warning("no selection?");
+      } else {
+        List<WordScore> list = table.getVisibleItems();
+
+
+        //   logger.info("selected " + selected);
+
+        List<WordScore> toUse = list;//this.lastResults;
+        int i = toUse == null ? -1 : toUse.indexOf(selected);
+
+        if (i > -1) {
+          logger.info("index " + i + " in " + toUse.size());
+          if (i == toUse.size() - 1) {
+            Range visibleRange = table.getVisibleRange();
+            int i1 = visibleRange.getStart() + visibleRange.getLength();
+            int rowCount = table.getRowCount();
+            logger.info("next page " + i1 + " row " + rowCount);
+
+            boolean b = rowCount == i1;
+            if (b) {
+              resetReview();
+            } else {
+              scrollToVisible(i1);
+            }
+
+          } else {
+            WordScore wordScore = toUse.get(i + 1);
+            setSelected(wordScore);
+            playAudio(getSelected());
+          }
+        }
+      }
+    }
+  }
+
+
+  private boolean onLast() {
+    Range visibleRange = table.getVisibleRange();
+    int i1 = visibleRange.getStart() + visibleRange.getLength();
+    int rowCount = table.getRowCount();
+    logger.info("next page " + i1 + " row " + rowCount);
+
+    return rowCount == i1;
+  }
+
+  private void resetReview() {
+    review.setText("Review");
+    review.setIcon(IconType.PLAY);
+    isReview = false;
+  }
+
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
@@ -172,7 +288,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         StringBuilder columnSortedState = tableSortHelper.getColumnSortedState(table);
 
         int val = req++;
-       // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         //  logger.info("createProvider sort " + columnSortedState.toString());
 
         analysisServiceAsync.getWordScoresForUser(
@@ -186,6 +302,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
             columnSortedState.toString(),
             val,
             new AsyncCallback<WordsAndTotal>() {
+
               @Override
               public void onFailure(Throwable caught) {
                 // Window.alert("Can't contact server.");
@@ -203,7 +320,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
-                  updateRowData(start, result.getResults());
+                  updateRowData(start, lastResults = result.getResults());
                   isAllSameDay = result.isAllSameDay();
 
       /*            logger.info("\t getResults req " +val+
@@ -221,6 +338,16 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 *//*
                     cellTable.getSelectionModel().setSelected(object, true);
                   }*/
+
+                  if (!result.getResults().isEmpty()) {
+                    WordScore toSelect = result.getResults().get(0);
+                    setSelected(toSelect);
+                    if (isReview) {
+                      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
+                    }
+                  }
+
+
                 }
               }
             });
@@ -239,7 +366,15 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    */
   public Panel getTableWithPager() {
     // logger.info("getTableWithPager " +listOptions);
+
     CellTable<WordScore> wordScoreCellTable = makeCellTable(new ListOptions().isSort());
+
+    if (isPolyglot()) {
+      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
+    } else {
+      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
+    }
+
     createProvider(numWords, wordScoreCellTable);
 
     // Create a SimplePager.
@@ -249,12 +384,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     tableWithPager.addStyleName("floatLeftAndClear");
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
-
-    if (!isPolyglot()) {
-      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-    } else {
-      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
-    }
 
     addPlayer();
 
@@ -436,7 +565,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     };
   }
 
-
   /**
    * @param from
    * @param to
@@ -455,7 +583,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     }
 
     redraw();
-    //table.redraw();
   }
 
   private void redraw() {
