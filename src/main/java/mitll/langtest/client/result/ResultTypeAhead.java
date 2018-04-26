@@ -21,11 +21,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 2/16/17.
  */
 public class ResultTypeAhead {
+  private final Logger logger = Logger.getLogger("ResultTypeAhead");
+
   private static final String USER_ID = "User";
 
   private final Map<String, Typeahead> typeToSuggest = new HashMap<>();
@@ -88,8 +91,8 @@ public class ResultTypeAhead {
     Typeahead typeahead = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
-        resultServiceAsync.getResultAlternatives(getUnitToValue(), getText(), whichField, new AsyncCallback<Collection<String>>() {
+        logger.info(" requestSuggestions got request for " + whichField + " : " + w.getText());
+        resultServiceAsync.getResultAlternatives(getUnitToValue(), w.getText(), whichField, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
             messageHelper.handleNonFatalError("searching for recordings", caught);

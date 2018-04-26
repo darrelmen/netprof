@@ -271,15 +271,6 @@ public class ResultManager extends PagerTable {
     }
   }
 
-//  private Column<?, ?> getColumn(String name) {
-//    for (Map.Entry<Column<?, ?>, String> pair : colToField.entrySet()) {
-//      if (pair.getValue().equals(name)) {
-//        return pair.getKey();
-//      }
-//    }
-//    return null;
-//  }
-
   /**
    * Deals with out of order requests, or where the requests outpace the responses
    *

@@ -221,6 +221,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     });
   }
 
+  @Override
+  protected void onDetach() {
+    super.onDetach();
+    stopPlayback();
+  }
+
   private void wasHidden() {
     cancelAdvanceTimer();
     stopPlayback();

@@ -32,6 +32,10 @@
 
 package mitll.langtest.server.services;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.services.ResultService;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
@@ -44,6 +48,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("serial")
 public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultService {
@@ -120,6 +126,34 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
+  private LoadingCache<Integer, Collection<MonitorResult>> projectToResults = CacheBuilder.newBuilder()
+      //  .concurrencyLevel(4)
+      //  .weakKeys()
+      .maximumSize(10000)
+      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, Collection<MonitorResult>>() {
+            @Override
+            public Collection<MonitorResult> load(Integer key) throws Exception {
+              // logger.info("Load " + key);
+              return db.getResultDAO().getMonitorResultsKnownExercises(key);
+            }
+          });
+
+  private LoadingCache<Integer, Collection<MonitorResult>> projectToResults2 = CacheBuilder.newBuilder()
+      //  .concurrencyLevel(4)
+      //  .weakKeys()
+      .maximumSize(10000)
+      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, Collection<MonitorResult>>() {
+            @Override
+            public Collection<MonitorResult> load(Integer key) throws Exception {
+              // logger.info("Load " + key);
+              return db.getMonitorResults(key);
+            }
+          });
+
   /**
    * TODO : don't fetch everything from the database if you don't have to.
    * Use offset and limit to restrict?
@@ -142,8 +176,14 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       return monitorResultsByID;
     }
 
-    Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
+ //   Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
 
+    Collection<MonitorResult> results = null;
+    try {
+      results = projectToResults.get(projectID);
+    } catch (ExecutionException e) {
+      results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
+    }
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
       for (String type : db.getTypeOrder(projectID)) {
@@ -239,7 +279,14 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   }
 
   private Collection<MonitorResult> getMonitorResults(int userid) {
-    return db.getMonitorResults(getProjectIDFromUser(userid));
+    int projectID = getProjectIDFromUser(userid);
+    Collection<MonitorResult> results = null;
+    try {
+      results = projectToResults2.get(projectID);
+    } catch (ExecutionException e) {
+      results = db.getMonitorResults(projectID);
+    }
+    return results;
   }
 
   /**
@@ -258,6 +305,13 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     int userid = getUserIDFromSessionOrDB();
 
     if (hasAdminPerm(userid)) {
+      if (which.equalsIgnoreCase("userid")) {
+        try {
+          userid=Integer.parseInt(flText);
+        } catch (NumberFormatException e) {
+          logger.info("couldn't parse " + flText);
+        }
+      }
       Collection<MonitorResult> results = getMonitorResults(userid);
 
       logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
@@ -309,7 +363,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
       if (userid > -1) { // asking for userid
         // make trie from results
-        logger.debug("making trie for userid " + userid);
+        logger.debug("getResultAlternatives making trie for userid " + userid);
 
         // TODO : dude this doesn't scale - what if have to walk through 100K items?
 
