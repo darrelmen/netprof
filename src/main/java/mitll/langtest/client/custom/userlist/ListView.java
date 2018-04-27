@@ -71,7 +71,7 @@ public class ListView implements ContentView, CreateListComplete {
   /**
    * @see #showContent
    */
-  private static final String YOUR_LISTS = "Your Lists and Quizes";
+  private static final String YOUR_LISTS = "Your Lists and Quizzes";
 
   private static final String LEARN = "Learn";
   private static final String DRILL = "Drill";

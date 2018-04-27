@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
@@ -467,7 +469,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private boolean isShortPeriod(List<TimeAndScore> rawBestScores) {
     if (rawBestScores.size() < 2) {
-     // logger.info("only " + rawBestScores.size() + " scores");
+      // logger.info("only " + rawBestScores.size() + " scores");
       return true;
     }
     TimeAndScore first = rawBestScores.get(0);
@@ -754,7 +756,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       setTimeRange(rawBestScores);
 
       if (!toGet.isEmpty()) {
-      //  logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
+        //  logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -969,7 +971,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void showTimePeriod(long offset, List<Long> periods) {
     Long periodStart = periods.get(index);
     String shortDate = periodStart > 1 ? getShortDate(periodStart, shouldShowHour(offset)) : "";
-  //  logger.info("showTimePeriod short date " + shortDate + " for " + periodStart);
+    //  logger.info("showTimePeriod short date " + shortDate + " for " + periodStart);
     timeWidgets.setDisplay(shortDate);
     long end = periodStart + offset;
 
@@ -1025,8 +1027,19 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 /*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
       logger.warning("from " + exceptionAsString);*/
     }
-    timeWidgets.setScore(getScoreText(timeAndScoresInRange, index));
+    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) +
+        "</span>");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 
   /**
