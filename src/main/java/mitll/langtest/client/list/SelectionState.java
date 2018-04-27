@@ -49,7 +49,7 @@ public class SelectionState {
 
   private static final String POUND = "#";
 
-  static final String ITEM = "item";
+  public static final String ITEM = "item";
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
 

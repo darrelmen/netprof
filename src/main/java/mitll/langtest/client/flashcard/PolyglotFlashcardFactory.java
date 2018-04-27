@@ -119,7 +119,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
       roundTimer = new Timer() {
         @Override
         public void run() {
-          logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
+        //  logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
+
           if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
             currentFlashcard.cancelAdvanceTimer();
 

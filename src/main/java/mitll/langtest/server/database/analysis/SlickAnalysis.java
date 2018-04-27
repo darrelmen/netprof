@@ -75,7 +75,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
   private final boolean sortByPolyScore;
-  Collator collator;
+  private Collator collator;
 
   /**
    * @param database
@@ -358,7 +358,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     List<WordAndScore> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
 
     if (wordAndScores == null) {
-      logger.error("huh? no scores for " + phone);
+      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
       return new ArrayList<>();
     } else {
 

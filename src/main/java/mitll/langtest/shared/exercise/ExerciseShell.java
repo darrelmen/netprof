@@ -186,15 +186,17 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return score > 0;
   }
 
-  @Override
+/*  @Override
   public String getCforeignLanguage() {
     return cforeignLanguage;
-  }
+  }*/
+/*
 
   @Override
   public String getCenglish() {
     return cenglish;
   }
+*/
 
   public String toString() {
     return "ExerciseShell " +

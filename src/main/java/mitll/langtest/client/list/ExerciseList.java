@@ -249,10 +249,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected abstract void showFinishedGettingExercises();
 
   /**
-   * @see #rememberAndLoadFirst(List, String, String, int)
-   * @see ExerciseList.SetExercisesCallbackWithID#useExercises
    * @param result
    * @return
+   * @see #rememberAndLoadFirst(List, String, String, int)
+   * @see ExerciseList.SetExercisesCallbackWithID#useExercises
    */
   protected abstract List<T> rememberExercises(List<T> result);
 
@@ -640,7 +640,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     if (hasExercise(id)) {
-    //    logger.info("checkAndAskServer for " + id);
+      //    logger.info("checkAndAskServer for " + id);
 
       askServerForExercise(id);
     } else {
@@ -648,7 +648,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-public   void loadByID(int id) {
+  public void loadByID(int id) {
     if (hasExercise(id)) {
       // if (DEBUG) logger.info("loading exercise " + id);
       loadExercise(id);
@@ -730,7 +730,7 @@ public   void loadByID(int id) {
    */
   protected void addExerciseWidget(U commonExercise) {
     createdPanel = factory.getExercisePanel(commonExercise);
-   //  logger.info("addExerciseWidget for "  + commonExercise.getID());
+    //  logger.info("addExerciseWidget for "  + commonExercise.getID());
     innerContainer.setWidget(createdPanel);
   }
 
@@ -800,6 +800,7 @@ public   void loadByID(int id) {
 
   /**
    * Compare with google response for this state.
+   *
    * @param message
    */
   protected void showEmptyExercise(String message) {
@@ -859,9 +860,9 @@ public   void loadByID(int id) {
   }
 
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#loadAfterCurrent
    * @param id
    * @return
+   * @see StatsFlashcardFactory.StatsPracticePanel#loadAfterCurrent
    */
   public boolean loadNextExercise(int id) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id);// + " instance ");// + getInstance());
@@ -896,7 +897,7 @@ public   void loadByID(int id) {
     boolean onFirst = i == 0;
     if (!onFirst) {
       T at = getAt(prev);
-     // logger.info("\tloadPreviousExercise load prev " + at.getID());
+      // logger.info("\tloadPreviousExercise load prev " + at.getID());
       loadExercise(at.getID());
     }
     return onFirst;

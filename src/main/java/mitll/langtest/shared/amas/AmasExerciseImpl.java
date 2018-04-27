@@ -316,6 +316,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public boolean hasScore() {
     return false;
   }
+/*
 
   @Override
   public String getCforeignLanguage() {
@@ -326,6 +327,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public String getCenglish() {
     return null;
   }
+*/
 
   public String getOrient() {
     return orient;

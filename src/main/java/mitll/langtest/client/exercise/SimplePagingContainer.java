@@ -178,7 +178,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
         DoubleClickEvent.getType());
   }
 
-  protected boolean hasDoubleClick() { return false; }
+  protected boolean hasDoubleClick() {
+    return false;
+  }
+
   protected void gotDoubleClickOn(T selected) {
 //    logger.info("got double click on " + selected);
   }
@@ -244,7 +247,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   public void setSelected(T toSelect) {
-    selectionModel.setSelected(toSelect,true);
+    selectionModel.setSelected(toSelect, true);
   }
 
   /**
@@ -345,11 +348,13 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     getList().add(0, item);
   }
 
+  //boolean DEBUG=true;
+
   /**
    * @param i
    * @see ClickablePagingContainer#markCurrent
    */
-  protected  void scrollToVisible(int i) {
+  protected boolean scrollToVisible(int i) {
     int pageSize = table.getPageSize();
 
     int pageNum = i / pageSize;
@@ -364,22 +369,23 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-      //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      if (DEBUG) logger.info("scrollToVisible new start of prev page " + newStart + " vs current " + table.getVisibleRange());
 
       table.setVisibleRange(newStart, pageSize);
+      return true;
     } else {
       int pageEnd = table.getPageStart() + pageSize;
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
-//
-//        if (false)
-//          logger.info("scrollToVisible new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-//              " vs current " + table.getVisibleRange());
+        if (DEBUG)
+          logger.info("scrollToVisible new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+              " vs current " + table.getVisibleRange());
 
         table.setVisibleRange(newStart, pageSize);
-      }
-      else {
-//        logger.info("nope -");
+        return true;
+      } else {
+        if (DEBUG) logger.info("nope -");
+        return false;
       }
     }
   }

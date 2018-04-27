@@ -60,6 +60,8 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.sound.CompressedAudio;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
@@ -121,7 +123,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final AnalysisTab.ReqInfo reqInfo;
   private boolean isAllSameDay = false;
   private long from = 0, to = Long.MAX_VALUE;
-  private List<WordScore> lastResults;
+  private int lastPlayed = -1;
+//  private List<WordScore> lastResults;
 
   /**
    * What sort order do we want?
@@ -194,8 +197,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     learn.setType(ButtonType.SUCCESS);
 
     learn.addClickHandler(event -> {
-      int exid = getSelected().getExid();
-      controller.getShowTab().showLearnAndItem(exid);
+      gotClickOnLearn();
     });
 
     DivWidget wrapper = new DivWidget();
@@ -205,6 +207,13 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     child.add(wrapper);
     return child;
   }
+
+  private void gotClickOnLearn() {
+    int exid = getSelected().getExid();
+    controller.getShowTab().showLearnAndItem(exid);
+  }
+
+  private static final boolean DEBUG = false;
 
   private void gotClickOnReview() {
     isReview = !isReview;
@@ -217,10 +226,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         logger.warning("gotClickOnReview no selection?");
       } else {
         if (onLast() && table.getRowCount() > 1) {
-          //logger.info("scrollToVisible first row - selected = " + selected + " table.getRowCount() " + table.getRowCount());
-          scrollToVisible(0);
+          if (DEBUG) {
+            logger.info("scrollToVisible first row - selected = " + selected + " table.getRowCount() " + table.getRowCount());
+          }
+
+          boolean didScroll = scrollToVisible(0);
+          if (!didScroll) {
+            WordScore visibleItem = table.getVisibleItem(0);
+            setSelected(visibleItem);
+            playAudio(visibleItem);
+          }
         } else {
-//          logger.info("gotClickOnReview playAudio " + selected);
+          if (DEBUG) logger.info("gotClickOnReview playAudio " + selected);
           playAudio(selected);
         }
       }
@@ -237,18 +254,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       if (selected == null) {
         logger.warning("studentAudioEnded no selection?");
       } else {
-        if (false) logger.info("studentAudioEnded selected " + selected);
+        if (DEBUG) logger.info("studentAudioEnded selected " + selected);
         List<WordScore> visibleItems = table.getVisibleItems();
 
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          if (false) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (DEBUG) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
             int rowCount = table.getRowCount();
-            if (false) logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
+            if (DEBUG) logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
 
             boolean b = i1 > rowCount;
             if (b) {
@@ -257,11 +274,13 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
               if (i1 == rowCount) {
                 resetReview();
               } else {
+                if (DEBUG) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
+
                 scrollToVisible(i1);
               }
             }
           } else {
-            //      logger.info("studentAudioEnded next " + (i + 1));
+            if (DEBUG) logger.info("studentAudioEnded next " + (i + 1));
             WordScore wordScore = visibleItems.get(i + 1);
             setSelected(wordScore);
             playAudio(getSelected());
@@ -274,12 +293,26 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
 
+  @Override
+  protected void playAudio(WordScore wordScore) {
+    lastPlayed = wordScore.getExid();
+    super.playAudio(wordScore);
+  }
+
   private boolean onLast() {
-    Range visibleRange = table.getVisibleRange();
-    int i1 = visibleRange.getStart() + visibleRange.getLength();
-    int rowCount = table.getRowCount();
-//    logger.info("next page " + i1 + " row " + rowCount);
-    return rowCount == i1;
+//    Range visibleRange = table.getVisibleRange();
+//    int i1 = visibleRange.getStart() + visibleRange.getLength();
+//    int rowCount = table.getRowCount();
+////    logger.info("next page " + i1 + " row " + rowCount);
+//    return rowCount == i1;
+//
+
+    int visibleItemCount = table.getVisibleItemCount();
+    if (visibleItemCount == 0) return true;
+    else {
+      WordScore lastVisible = table.getVisibleItem(visibleItemCount - 1);
+      return (lastVisible.getExid() == lastPlayed);
+    }
   }
 
   private void resetReview() {
@@ -351,7 +384,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
-                  updateRowData(start, lastResults = result.getResults());
+                  updateRowData(start, result.getResults());
                   isAllSameDay = result.isAllSameDay();
 
                   if (isAllSameDay) {
@@ -372,10 +405,31 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private void selectFirst(WordsAndTotal result) {
-    WordScore toSelect = result.getResults().get(0);
-    setSelected(toSelect);
-    if (isReview) {
-      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
+
+    List<WordScore> results = result.getResults();
+
+    if (!results.isEmpty()) {
+
+      int next = -1;
+
+      for (int i = 0; i < results.size(); i++) {
+        WordScore wordScore = results.get(i);
+        if (wordScore.getExid() == lastPlayed) {
+          if (DEBUG) {
+            logger.info("selectFirst found last " + wordScore.getExid() + " word " + wordScore.getTranscript());
+          }
+
+          next = i;
+        }
+      }
+
+      next = Math.min(results.size() - 1, next + 1);
+      WordScore toSelect = results.get(next);
+      //logger.info("Select " + next + " " + toSelect.getExid());
+      setSelected(toSelect);
+      if (isReview) {
+        Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
+      }
     }
   }
 

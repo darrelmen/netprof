@@ -76,16 +76,4 @@ public interface CommonShell extends Shell {
   int getRawScore();
   float getScore();
   boolean hasScore();
-
-  /**
-   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getSuggestion(String, String[], CommonShell)
-   * @return
-   */
-  String getCforeignLanguage();
-
-  /**
-   * @see mitll.langtest.client.custom.dialog.SearchTypeahead#getSuggestion(String, String[], CommonShell)
-   * @return
-   */
-  String getCenglish();
 }
