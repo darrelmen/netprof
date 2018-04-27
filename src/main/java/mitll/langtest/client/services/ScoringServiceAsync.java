@@ -53,23 +53,6 @@ public interface ScoringServiceAsync {
                            boolean usePhonemeMap,
                            AsyncCallback<PretestScore> async);
 
-  /**
-   * JUST FOR DIALOG DEMO
-   *
-   * @paramx base64EncodedString
-   * @paramx textToAlign
-   * @paramx identifier
-   * @paramx reqid
-   * @paramx device
-   * @param async
-   * @seex mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile
-   */
-/*  void getAlignment(String base64EncodedString,
-                    String textToAlign,
-                    String transliteration,
-                    String identifier,
-                    int reqid, String device, AsyncCallback<AudioAnswer> async);*/
-
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);

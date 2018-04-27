@@ -21,4 +21,7 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
   void showQuiz();
 
   boolean isComplete();
+
+  void postAudio();
+  void addRoundTrip(long roundTripMillis);
 }

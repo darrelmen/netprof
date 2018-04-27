@@ -183,10 +183,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
                                                 ExerciseController controller,
                                                 Panel toAddTo) {
-//    if (logger == null) {
-//      logger = Logger.getLogger("BootstrapExercisePanel");
-//    }
-    // logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, controller));
 
@@ -450,6 +446,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
     widgets.setHeight("25px");
     return widgets;
+  }
+
+  @Override
+  public void postedAudio() {
+
   }
 
   /**

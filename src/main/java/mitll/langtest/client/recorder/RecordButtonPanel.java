@@ -224,6 +224,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
         .setAllowAlternates(allowAlternates);
 
     final long then = System.currentTimeMillis();
+
+    postedAudio();
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
         controller.usingFlashRecorder(),
@@ -240,6 +242,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
         });
   }
 
+
   @NotNull
   protected String getDeviceType() {
     return "browser";
@@ -247,7 +250,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
   protected String getDevice() {
     String browserInfo = controller.getBrowserInfo();
-    logger.info("GetDevice " + browserInfo);
+   // logger.info("GetDevice " + browserInfo);
     return browserInfo;
   }
 
@@ -259,13 +262,13 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * @see #postAudioFile
    */
   private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
-    //System.out.println("postAudioFile : onSuccess " + result);
     if (reqid != result.getReqid()) {
       return;
     }
     long diff = System.currentTimeMillis() - then;
 
     recordButton.setEnabled(true);
+    result.setRoundTripMillis(diff);
     receivedAudioAnswer(result, outer);
 
     Scheduler.get().scheduleDeferred(() -> addRoundTrip(result, (int) diff));
@@ -333,6 +336,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   public RecordButton getRealRecordButton() {
     return recordButton;
   }
+
+  protected void postedAudio() {}
 
   /**
    * @param result

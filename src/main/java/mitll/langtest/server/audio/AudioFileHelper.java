@@ -918,7 +918,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param url
    * @return AudioAnswer with decode info attached, if doFlashcard is true
    * @see #writeAudioFile
-   * @deprecated
+   * @deprecatedx
    */
 /*  private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
                                          int qid, int reqid,

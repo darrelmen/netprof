@@ -24,17 +24,20 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
 
+  private static final String LISTS = "Lists";
+
   private static final int HEARTBEAT_INTERVAL = 1000;
   private static final int DRY_RUN_MINUTES = 1;
   private static final int ROUND_MINUTES = 10;
+
   private static final int DRY_RUN_ROUND_TIME = PolyglotFlashcardFactory.DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = PolyglotFlashcardFactory.ROUND_MINUTES * 60 * 1000;
   private boolean inLightningRound = false;
-  private Timer roundTimer = null;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = -1;
   private long sessionStartMillis = 0;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  private boolean postedAudio;
 
   PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
@@ -93,6 +96,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
+  /**
+   * @see #startOver
+   * @see #sessionComplete
+   */
   private void stopTimedRun() {
     //logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
@@ -116,43 +123,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     if (isRoundTimerNotRunning()) {
       clearAnswerMemory();
 
-      roundTimer = new Timer() {
-        @Override
-        public void run() {
-        //  logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
+      doSessionStart(isDry);
 
-          if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
-            currentFlashcard.cancelAdvanceTimer();
-
-            stopTimedRun();
-            if (currentFlashcard.isTabVisible()) {
-              currentFlashcard.onSetComplete();
-            }
-            ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(0);
-          }
-        }
-      };
-
-      {
-        int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
-        int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
-        roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
-        sessionStartMillis = System.currentTimeMillis();
-
-        roundTimer.schedule((int) roundTimeLeftMillis);
-      }
-
-      recurringTimer = new Timer() {
-        @Override
-        public void run() {
-          long l = roundTimeLeftMillis -= HEARTBEAT_INTERVAL;
-          sticky.storeTimeRemaining(roundTimeLeftMillis);
-          if (currentFlashcard != null) {
-            ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(l);
-          }
-        }
-      };
-      recurringTimer.scheduleRepeating(HEARTBEAT_INTERVAL);
+      makeTimer();
 
       if (currentFlashcard != null) {
         ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(roundTimeLeftMillis);
@@ -160,6 +133,58 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         logger.warning("startRoundTimer : no current flashcard?");
       }
     }
+  }
+
+  private void sessionComplete() {
+    if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
+      currentFlashcard.cancelAdvanceTimer();
+
+      stopTimedRun();
+      if (currentFlashcard.isTabVisible()) {
+        currentFlashcard.onSetComplete();
+      }
+      ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(0);
+    }
+  }
+
+  private void doSessionStart(boolean isDry) {
+    int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
+    int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
+    roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
+    sessionStartMillis = System.currentTimeMillis();
+  }
+
+  /**
+   * Every second decrement time remaining...
+   */
+  private void makeTimer() {
+    recurringTimer = new Timer() {
+      @Override
+      public void run() {
+        timerFired();
+      }
+    };
+    recurringTimer.scheduleRepeating(HEARTBEAT_INTERVAL);
+  }
+
+  private void timerFired() {
+    long l = roundTimeLeftMillis -= HEARTBEAT_INTERVAL;
+    sticky.storeTimeRemaining(roundTimeLeftMillis);
+    if (currentFlashcard != null && !postedAudio) {
+      ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(l);
+    }
+/*    else {
+      logger.info("Skip updated of time left at " + (roundTimeLeftMillis/1000));
+    }*/
+    if (l < 0) sessionComplete();
+  }
+
+  private boolean isRoundTimerNotRunning() {
+    return (recurringTimer == null) || !recurringTimer.isRunning();
+  }
+
+  private void cancelTimer() {
+    if (recurringTimer != null) recurringTimer.cancel();
   }
 
   @Override
@@ -173,10 +198,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   public boolean shouldShowAudio() {
     return false;
-  }
-
-  private boolean isRoundTimerNotRunning() {
-    return (roundTimer == null) || !roundTimer.isRunning();
   }
 
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
@@ -211,7 +232,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
     // logger.info("PolyglotFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
-
     Scheduler.get().scheduleDeferred(() -> {
       if (sticky.getTimeRemainingMillis() > 0) {
         inLightningRound = true;
@@ -233,22 +253,39 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     cancelRoundTimer();
   }
 
+  /**
+   * @see #stopTimedRun
+   * @see #reset
+   */
   @Override
   public void cancelRoundTimer() {
     //logger.info("cancelRoundTimer");
-    if (roundTimer != null) roundTimer.cancel();
-    if (recurringTimer != null) recurringTimer.cancel();
+    // if (roundTimer != null) roundTimer.cancel();
+    cancelTimer();
     sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
     removeItemFromHistory();
   }
 
+  @Override
+  public void postAudio() {
+   // logger.info("postAudio ");
+    postedAudio = true;
+  }
+
+  @Override
+  public void addRoundTrip(long roundTripMillis) {
+  //  logger.info("addRoundTrip ");
+    postedAudio = false;
+    roundTimeLeftMillis += roundTripMillis;
+  }
+
   private void removeItemFromHistory() {
     SelectionState selectionState = new SelectionState(History.getToken(), false);
 
-    Collection<String> lists = selectionState.getTypeToSection().get("Lists");
+    Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
 
-    String listChoice = lists == null || lists.isEmpty() ? "" : "Lists" + "=" + lists.iterator().next();
+    String listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
     //logger.info("lists " + lists);
     String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
         SelectionState.SECTION_SEPARATOR +

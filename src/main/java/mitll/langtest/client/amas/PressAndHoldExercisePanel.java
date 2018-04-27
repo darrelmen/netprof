@@ -331,6 +331,9 @@ class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerList
 
   private boolean prevRecording = false;
 
+  @Override
+  public void postedAudio() {}
+
   /**
    * @param result
    * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer

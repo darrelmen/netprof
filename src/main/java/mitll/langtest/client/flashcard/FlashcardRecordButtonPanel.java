@@ -115,6 +115,11 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);
 
+  @Override
+  protected void postedAudio() {
+    exercisePanel.postedAudio();
+  }
+
   /**
    * Deal with three cases: <br></br>
    * * the audio was invalid in some way : too short, too quiet, too loud<br></br>

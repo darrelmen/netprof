@@ -162,7 +162,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
   /**
    * @param result
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);

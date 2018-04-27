@@ -309,4 +309,18 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected void rememberCurrentExercise() {
     sticky.clearCurrent();
   }
+
+  public void postedAudio() {
+     polyglotFlashcardContainer.postAudio();
+  }
+
+  /**
+   *
+   * @param result
+   */
+  @Override
+  public void receivedAudioAnswer(AudioAnswer result) {
+    super.receivedAudioAnswer(result);
+    polyglotFlashcardContainer.addRoundTrip(result.getRoundTripMillis());
+  }
 }

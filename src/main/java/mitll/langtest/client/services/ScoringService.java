@@ -79,23 +79,6 @@ public interface ScoringService extends RemoteService {
                                    ImageOptions imageOptions,
                                    int exerciseID,
                                    boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
-
-  /**
-   * @param base64EncodedString
-   * @param textToAlign
-   * @param identifier
-   * @param reqid
-   * @param device
-   * @return
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
-   */
-/*  AudioAnswer getAlignment(String base64EncodedString,
-                           String textToAlign,
-                           String transliteration,
-                           String identifier,
-                           int reqid,
-                           String device) throws DominoSessionException;*/
-
   /**
    * @param resultid
    * @param roundTrip

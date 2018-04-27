@@ -33,14 +33,9 @@
 package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
-
-import java.io.File;
 
 public class AudioAnswer implements IsSerializable {
   private int exid = -1;
@@ -53,6 +48,7 @@ public class AudioAnswer implements IsSerializable {
   private boolean correct = false;
   private boolean saidAnswer = false;
   private long durationInMillis;
+  private long roundTripMillis;
   private int resultID;
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
@@ -117,7 +113,7 @@ public class AudioAnswer implements IsSerializable {
   /**
    * @param correct
    * @see DecodeCorrectnessChecker#getDecodeScore
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(CommonShell, int, File, AudioCheck.ValidityAndDur, String, DecoderOptions, int)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public void setCorrect(boolean correct) {
     this.correct = correct;
@@ -227,6 +223,18 @@ public class AudioAnswer implements IsSerializable {
   }
 
 
+  public int getExid() {
+    return exid;
+  }
+
+  public long getRoundTripMillis() {
+    return roundTripMillis;
+  }
+
+  public void setRoundTripMillis(long roundTripMillis) {
+    this.roundTripMillis = roundTripMillis;
+  }
+
   public String toString() {
     return "Answer id " + getResultID() +
         " : audio attr " + audioAttribute +
@@ -239,9 +247,5 @@ public class AudioAnswer implements IsSerializable {
         "\n\tsaid answer " + saidAnswer +
         "\n\tpretest " + pretestScore +
         "\n\ttranscript " + transcript;
-  }
-
-  public int getExid() {
-    return exid;
   }
 }
