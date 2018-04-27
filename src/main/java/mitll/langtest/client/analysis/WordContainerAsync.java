@@ -121,6 +121,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private final AnalysisTab.ReqInfo reqInfo;
   private boolean isAllSameDay = false;
   private long from = 0, to = Long.MAX_VALUE;
+  private List<WordScore> lastResults;
 
   /**
    * What sort order do we want?
@@ -236,17 +237,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       if (selected == null) {
         logger.warning("studentAudioEnded no selection?");
       } else {
-        //        logger.info("studentAudioEnded selected " + selected);
+        if (false) logger.info("studentAudioEnded selected " + selected);
         List<WordScore> visibleItems = table.getVisibleItems();
+
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          //        logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (false) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
             int rowCount = table.getRowCount();
-         //   logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
+            if (false) logger.info("studentAudioEnded next page " + i1 + " row " + rowCount);
 
             boolean b = i1 > rowCount;
             if (b) {
@@ -255,8 +257,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
               if (i1 == rowCount) {
                 resetReview();
               } else {
-                WordScore wordScore = visibleItems.get(i + 1);
-                setSelected(wordScore);
                 scrollToVisible(i1);
               }
             }
@@ -351,7 +351,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
-                  updateRowData(start, lastResults=result.getResults());
+                  updateRowData(start, lastResults = result.getResults());
                   isAllSameDay = result.isAllSameDay();
 
                   if (isAllSameDay) {

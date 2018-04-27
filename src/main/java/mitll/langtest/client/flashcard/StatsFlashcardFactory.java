@@ -205,13 +205,17 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   @Override
   public void startOver() {
     int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
-    int currentExerciseID = sticky.getCurrentExerciseID();
+    int currentExerciseID = getCurrentExerciseID();
 //logger.info("startOver : current " + currentExerciseID + " = " + statsFlashcardFactory.mode);
     if (currentExerciseID != -1 && currentExerciseID != lastID) {
       exerciseList.loadExercise(currentExerciseID);
     } else {
       reallyStartOver();
     }
+  }
+
+  protected int getCurrentExerciseID() {
+    return sticky.getCurrentExerciseID();
   }
 
   private void reallyStartOver() {

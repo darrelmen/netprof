@@ -65,6 +65,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     stopTimedRun();
   }
 
+  protected int getCurrentExerciseID() {
+    return -1;
+  }
+
   @Override
   @NotNull
   StickyState getSticky() {
@@ -115,7 +119,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
       roundTimer = new Timer() {
         @Override
         public void run() {
-//          logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
+          logger.info("startRoundTimer ----> at " + System.currentTimeMillis());
           if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
             currentFlashcard.cancelAdvanceTimer();
 
@@ -130,10 +134,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
       {
         int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
-        roundTimer.schedule(delayMillis);
-        long timeRemainingMillis = sticky.getTimeRemainingMillis();
+        int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
         roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
         sessionStartMillis = System.currentTimeMillis();
+
+        roundTimer.schedule((int) roundTimeLeftMillis);
       }
 
       recurringTimer = new Timer() {
@@ -204,15 +209,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-   // logger.info("PolyglotFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+    // logger.info("PolyglotFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
 
     Scheduler.get().scheduleDeferred(() -> {
       if (sticky.getTimeRemainingMillis() > 0) {
         inLightningRound = true;
-    //    logger.info("startTimedRun on reload");
+        //    logger.info("startTimedRun on reload");
         startRoundTimer(getIsDry());
-      }
-      else {
+      } else {
         reset();
       }
     });

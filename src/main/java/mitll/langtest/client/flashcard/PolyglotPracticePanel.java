@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-//  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+  //  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
@@ -42,7 +42,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private float minScore;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
-  private static final int NEXT_EXERCISE_DELAY = 750;
+  private static final int NEXT_EXERCISE_DELAY = 850;
   private static final int INCORRECT_BEFORE_ADVANCE = 3;
 
   private static final int MINUTE = 60 * 1000;
@@ -294,13 +294,19 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     }
   }
 
-  void playRefOnError() {}
+  void playRefOnError() {
+  }
 
   @Override
   String getKeyBindings() {
     return ARROW_KEY_TIP;
   }
 
+  /**
+   * Actively forget...
+   */
   @Override
-  protected void rememberCurrentExercise() {}
+  protected void rememberCurrentExercise() {
+    sticky.clearCurrent();
+  }
 }

@@ -149,12 +149,12 @@ class ScoreFeedback {
     soundFeedback.queueSong(SoundFeedback.CORRECT);
    }
 
-  public class MySoundFeedback extends SoundFeedback {
-    public MySoundFeedback() {
+  class MySoundFeedback extends SoundFeedback {
+    MySoundFeedback() {
       super(controller.getSoundManager());
     }
 
-    public synchronized void queueSong(String song) {
+    synchronized void queueSong(String song) {
       destroySound(); // if there's something playing, stop it!
       createSound(song, null);
     }

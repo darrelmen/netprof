@@ -80,7 +80,8 @@ public class StickyState {
   /**
    * @param e
    * @see ExercisePanelFactory#getExercisePanel(Shell)
-   * @see StatsPracticePanel#onSetComplete
+   * @see StatsPracticePanel#rememberCurrentExercise
+   *
    */
   void storeCurrent(Shell e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
@@ -109,7 +110,7 @@ public class StickyState {
     return storage.getValue(SCORE);
   }
 
-  public long getTimeRemainingMillis() {
+  long getTimeRemainingMillis() {
     String value = storage.getValue(TIME_REMAINING);
     if (value == null) return 0L;
     long i = 0L;
