@@ -43,7 +43,7 @@ echo `pwd`
 echo "start curl..."
 date
 suffix="Answers"
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$orig$suffix.tar.gz"
+curl -ugvidaver -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$orig$suffix.tar.gz"
 
 echo "finished curl..."
 date

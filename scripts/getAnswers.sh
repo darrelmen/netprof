@@ -46,8 +46,8 @@ suffix="Answers"
 realName=$orig$suffix
 echo $realName
 
-echo curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
+echo curl -ugvidaver -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
+curl -ugvidaver -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$orig/answersAudio/$realName.tar.gz"
 
 echo "finished curl..."
 date

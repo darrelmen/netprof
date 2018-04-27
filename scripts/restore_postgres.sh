@@ -4,7 +4,7 @@ date
 #export PGPASSWORD=npadmin
 #echo $PGPASSWORD
 #PGPASSWORD=npadmin pg_dump -U netprof netprof --host 127.0.0.1 > ltea_data2.dump
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -o /tmp/netprof_pg.dump "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/netprof_pg.dump"
+curl -ugvidaver -o /tmp/netprof_pg.dump "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/netprof_pg.dump"
 date
 #tar xvfz ltea_data2_dump.tar.gz
 #date
@@ -18,7 +18,7 @@ date
 
 
 # have to be postgres first
-sudo su - postgres
+#sudo su - postgres
 
 # assumes postgres is owner of old netprof_old
 # assumes we've done this before

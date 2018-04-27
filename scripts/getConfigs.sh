@@ -11,7 +11,7 @@ for file in ${files[@]}
 do
 echo $file
 cd config
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$file/$file.tar.gz"
+curl -ugvidaver -O "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$file/$file.tar.gz"
 tar xvfz $file.tar.gz
 rm $file.tar.gz
 cd ..

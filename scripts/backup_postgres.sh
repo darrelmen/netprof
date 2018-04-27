@@ -11,6 +11,6 @@ echo "finished dumping postgres now..."
 
 date
 echo "start posting to artifactory now..."
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T netprof_pg.dump  "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/netprof_pg.dump"
+curl -ugvidaver -T netprof_pg.dump  "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/netprof_pg.dump"
 date
 echo "Done!"
