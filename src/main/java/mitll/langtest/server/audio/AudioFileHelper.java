@@ -92,6 +92,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
+  public static final long DAY = 24 * 60 * 60 * 1000L;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -263,17 +264,17 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(now, exercise) || exercise.getEnglish().equalsIgnoreCase("teacher")) {
+    if (isStale(now, exercise)// || exercise.getEnglish().equalsIgnoreCase("teacher")
+        ) {
       validForeignPhrase = isInDictOrLTS(exercise);
 //      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
-      Set<Integer> toAddTo = validForeignPhrase ? safe : unsafe;
-      toAddTo.add(exercise.getID());
+      (validForeignPhrase ? safe : unsafe).add(exercise.getID());
     }
     return validForeignPhrase;
   }
 
   private boolean isStale(long now, CommonExercise exercise) {
-    return now - exercise.getLastChecked() > 24 * 60 * 60 * 1000L;
+    return now - exercise.getLastChecked() > DAY;
   }
 
   /**

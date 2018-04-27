@@ -56,6 +56,8 @@ class CheckLTS {
   private final String language;
 
   private final HTKDictionary htkDictionary;
+  private final SmallVocabDecoder smallVocabDecoder;
+
   private final boolean isAsianLanguage, removeAllAccents;
 
   private static final boolean DEBUG = false;
@@ -74,6 +76,7 @@ class CheckLTS {
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
+    smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     this.language = languageProperty != null ? languageProperty : "";
     this.isAsianLanguage = isAsianLanguage;
     removeAllAccents = !language.equalsIgnoreCase("french");
@@ -135,7 +138,7 @@ class CheckLTS {
       return Collections.emptySet();
     }
 
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+    // SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
     Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
 
@@ -170,74 +173,63 @@ class CheckLTS {
             oov.add(trim);
           }
         } else {
-          String[][] process = /*(!isEmptyLTS) ? lts.process(token) :*/ null;
+          boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
+          if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
 
-          if (!isEmptyLTS) {
-            String[][] cached = tokenToLTSResult.get(token);
-            if (cached == null) {
-              tokenToLTSResult.put(token, cached = lts.process(token));
+          if (htkEntry) {
+            // we don't accept tokens when the dict is empty...
+            indict.add(trim);
+          } else {
+            String[][] process = null;
+
+            if (!isEmptyLTS) {
+              String[][] cached = tokenToLTSResult.get(token);
+              if (cached == null) {
+                tokenToLTSResult.put(token, cached = lts.process(token));
+              }
+              process = cached;
             }
-            process = cached;
-          }
 
-          if (DEBUG) {
-            if (process != null) {
-              if (process.length > 0) {
-                logger.info("in dict for " + process[0].length);
-                if (process[0].length > 0) {
-                  logger.info("in dict for " + process[0][0].length());
+            if (DEBUG) {
+              if (process != null) {
+                if (process.length > 0) {
+                  logger.info("in dict for " + process[0].length);
+                  if (process[0].length > 0) {
+                    logger.info("in dict for " + process[0][0].length());
+                  }
                 }
               }
             }
-          }
 
+            // so we've checked with LTS - why first ?
+            // but if it's not in LTS, check in dict
+            boolean legitLTS = isLegitLTS(process, token);
+            if (!legitLTS) { // deal with upper case better
+              process = (!isEmptyLTS) ? lts.process(token.toLowerCase()) : null;
+              legitLTS = isLegitLTS(process, token);
+            }
 
-          // so we've checked with LTS - why first ?
-          // but if it's not in LTS, check in dict
-          boolean legitLTS = isLegitLTS(process, token);
-          if (!legitLTS) { // deal with upper case better
-            process = (!isEmptyLTS) ? lts.process(token.toLowerCase()) : null;
-            legitLTS = isLegitLTS(process, token);
-          }
+            if (!translitOk && !legitLTS) {
 
-          if (!translitOk &&
-              !legitLTS
-          /*    (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))
-          */) {
-            boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
-            if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
-
-            if (htkEntry) {
-              // we don't accept tokens when the dict is empty...
-              indict.add(trim);
-            } else {
               if (!isEmptyLTS) {
-                logger.warn("checkLTS with " + lts + "/" + language + " token #" + i +
-                    " : '" + token + "' hash " + token.hashCode() +
-                    " is invalid in '" + foreignLanguagePhrase +
-                    "' and not in dictionary of size " + htkDictionary.size() + " translitOk " + translitOk + " legitLTS " + legitLTS
-                );
+                logger.warn(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS);
               } else if (DEBUG) {
-                logger.debug("checkLTS with " + lts + "/" + language + " token #" + i +
-                    " : '" + token + "' hash " + token.hashCode() +
-                    " is invalid in '" + foreignLanguagePhrase +
-                    "' and not in dictionary of size " + htkDictionary.size()
-                );
+                logger.debug(getDebugInfo(lts, foreignLanguagePhrase, i, token));
               }
               oov.add(trim);
-            }
-          } else if (!isEmptyLTS && legitLTS) {
-            if (DEBUG && process != null) {
-              logger.info("checkLTS for " + token + " got " + (process.length));
-              for (String[] first : process) {
-                for (String second : first) logger.info("\t" + second);
+
+            } else if (!isEmptyLTS && legitLTS) {
+              if (DEBUG && process != null) {
+                logger.info("checkLTS for " + token + " got " + (process.length));
+                for (String[] first : process) {
+                  for (String second : first) logger.info("\t" + second);
+                }
               }
+              inlts.add(trim);
+            } else {
+              if (DEBUG) logger.info("checkLTS oov for " + token + " = " + trim);
+              oov.add(trim);
             }
-            inlts.add(trim);
-          } else {
-            if (DEBUG) logger.info("checkLTS oov for " + token + " = " + trim);
-            oov.add(trim);
           }
         }
         i++;
@@ -257,6 +249,13 @@ class CheckLTS {
       logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
+  }
+
+  private String getDebugInfo(LTS lts, String foreignLanguagePhrase, int i, String token) {
+    return "checkLTS with " + lts + "/" + language + " token #" + i +
+        " : '" + token + "' hash " + token.hashCode() +
+        " is invalid in '" + foreignLanguagePhrase +
+        "' and not in dictionary of size " + htkDictionary.size();
   }
 
   /**

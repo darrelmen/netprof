@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
+# run this on ltea-data2
+
 date
-export PGPASSWORD=npadmin
-echo $PGPASSWORD
-pg_dump -U netprof netprof --host 127.0.0.1 > ltea_data2.dump
+
+echo "start dumping postgres now..."
+# this dumps out a special postgres compressed dump
+PGPASSWORD=npadmin pg_dump -U netprof --host 127.0.0.1 -f netprof_pg.dump netprof -Fc
+echo "finished dumping postgres now..."
+
 date
-ls -l ltea_data2.dump
-date
-tar cfz ltea_data2_dump.tar.gz ltea_data2.dump
-date
-curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T ./ltea_data2_dump.tar.gz "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/ltea_data2_dump.tar.gz"
+echo "start posting to artifactory now..."
+curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T netprof_pg.dump  "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/ltea-data2-pg/daily/netprof_pg.dump"
 date
 echo "Done!"
