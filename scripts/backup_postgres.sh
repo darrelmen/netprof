@@ -6,7 +6,7 @@ date
 
 echo "start dumping postgres now..."
 # this dumps out a special postgres compressed dump
-PGPASSWORD=npadmin pg_dump -U netprof --host 127.0.0.1 -f netprof_pg.dump netprof -Fc
+PGPASSWORD=SOMETHING pg_dump -U netprof --host 127.0.0.1 -f netprof_pg.dump netprof -Fc
 echo "finished dumping postgres now..."
 
 date
