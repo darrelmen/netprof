@@ -49,6 +49,7 @@ import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -129,6 +130,8 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    */
   protected Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
+    logger.info("getPermissions for" + "\nuser " + userIDFromSessionOrDB);
+
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {
       logger.error("getPermissions : no user in session?");
@@ -162,7 +165,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   /**
    * @return
-   * @see LangTestDatabaseImpl#getExercisesForUser
+   * @see ExerciseServiceImpl#getExerciseIds(ExerciseListRequest)
    */
   protected int getProjectIDFromUser() throws DominoSessionException {
     return getProjectIDFromUser(getUserIDFromSessionOrDB());

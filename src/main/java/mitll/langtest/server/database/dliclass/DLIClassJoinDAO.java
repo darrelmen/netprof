@@ -51,7 +51,6 @@ public class DLIClassJoinDAO implements IDLIClassJoinDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public DLIClassJoinDAO(DBConnection dbConnection) {
-    // super(database);
     dao = new DLIClassJoinWrapper(dbConnection);
   }
 

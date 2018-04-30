@@ -46,6 +46,13 @@ public interface SoundManagerAPI {
 
   boolean isReady();
 
+  /**
+   * @see PlayAudioPanel#createSound
+   * @param sound
+   * @param title
+   * @param file
+   * @param doAutoload
+   */
   void createSound(Sound sound, String title, String file, boolean doAutoload);
 
   void setVolume(String title, int vol);

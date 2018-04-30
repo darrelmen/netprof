@@ -160,7 +160,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * @param users
    * @param leftSide
-   * @see MemoryItemContainer#getTable(Collection)
+   * @see MemoryItemContainer#getTable
    */
   @Override
   protected void addTable(Collection<UserInfo> users, DivWidget leftSide) {

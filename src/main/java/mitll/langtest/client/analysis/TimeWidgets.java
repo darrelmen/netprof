@@ -90,8 +90,8 @@ class TimeWidgets {
   }
 
   /**
-   * @see AnalysisPlot#showTimePeriod
    * @param text
+   * @see AnalysisPlot#showTimePeriod
    */
   void setDisplay(String text) {
     this.display.setHTML(text);
@@ -104,17 +104,17 @@ class TimeWidgets {
   }
 
   public void reset() {
-    all.setActive(true);
-
+    if (all != null) all.setActive(true);
     if (day != null) day.setActive(false);
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
-    if (minute != null) {  minute.setActive(false); }
+    if (minute != null) minute.setActive(false);
   }
 
   Button getPrevButton() {
     return prevButton;
   }
+
   public Button getNextButton() {
     return nextButton;
   }

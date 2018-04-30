@@ -104,12 +104,13 @@ public class QuizHelper extends PracticeHelper {
           return super.getExercisePanel(e);
         } else {
           return new QuizIntro(exerciseList.getIdToList(), listid -> {
-            Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
+            chosenList = listid;
+            logger.info("got choice " + listid);
+
+           Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
             candidate.put(LISTS, "" + listid);
             //logger.info("setHistory " + candidate);
             exerciseList.setHistory(candidate);
-
-            chosenList = listid;
 
             showQuizForReal();
           },

@@ -38,27 +38,20 @@ public class ActiveUser extends SimpleUser {
     this.visited=visited;
   }
 
-
   public long getVisited() {
     return visited;
   }
-/*
-
-  public void setVisited(long visited) {
-    this.visited = visited;
-  }
-*/
 
   public String getProjectName() {
     return projectName;
   }
 
-  public String getLanguage() {
-    return language;
-  }
-
   public void setProjectName(String projectName) {
     this.projectName = projectName;
+  }
+
+  public String getLanguage() {
+    return language;
   }
 
   public void setLanguage(String language) {

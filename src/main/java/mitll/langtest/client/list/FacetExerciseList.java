@@ -1121,6 +1121,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #addRemoveClickHandler
    */
   public void setHistory(Map<String, String> candidate) {
+    logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 

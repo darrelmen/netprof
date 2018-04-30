@@ -92,6 +92,7 @@ public class UserMenu {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
     choices.add(new LinkAndTitle(ACTIVE_USERS, new ActiveUsersHandler()));
+    choices.add(new LinkAndTitle(ACTIVE_USERS + " Week", new ActiveUsersHandlerWeek()));
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
     choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
@@ -279,12 +280,32 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
-          new ActiveUsersManager(controller).show(24);
+          showActiveUsers(24);
         }
       });
     }
   }
+
+  private class ActiveUsersHandlerWeek implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          showActiveUsers(7 * 24);
+        }
+      });
+    }
+  }
+
+  private void showActiveUsers(int hours) {
+    new ActiveUsersManager(controller).show(hours);
+  }
+
   private void downloadFailedAlert() {
     Window.alert("Code download failed");
   }

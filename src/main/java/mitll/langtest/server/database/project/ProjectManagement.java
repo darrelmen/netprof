@@ -343,6 +343,16 @@ public class ProjectManagement implements IProjectManagement {
 
       // side effect is to cache the users.
       new Thread(() -> rememberUsers(projectID)).start();
+
+      /**
+       * Cache it for later....?
+       */
+ /*      new Thread(() -> {
+         db
+          .getAnalysis(projectID)
+          .getUserInfo(db.getUserDAO(), 1);
+       }).start();*/
+
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);

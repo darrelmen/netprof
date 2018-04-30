@@ -50,7 +50,7 @@ public class ActiveUsersManager {
   public void show(int hours) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Active Users (last day)");
+    dialogBox.setText("Active Users" + (hours <= 24 ? " (last day)" : "(last week)"));
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -115,7 +115,8 @@ public class ActiveUsersManager {
 
     private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d h:mm a");
 
-    @Override protected String getFormattedDateString(Long itemDate) {
+    @Override
+    protected String getFormattedDateString(Long itemDate) {
       Date date = new Date(itemDate);
       String signedUp = format.format(date);
 
@@ -127,6 +128,7 @@ public class ActiveUsersManager {
 //      }
       return signedUp;
     }
+
     private void addLang(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> userCol = new Column<ActiveUser, SafeHtml>(new PagingContainer.ClickableCell()) {
         @Override
@@ -162,7 +164,7 @@ public class ActiveUsersManager {
     }
 
     private ColumnSortEvent.ListHandler<ActiveUser> getVisitedSorter(Column<ActiveUser, SafeHtml> englishCol,
-                                                         List<ActiveUser> dataList) {
+                                                                     List<ActiveUser> dataList) {
       ColumnSortEvent.ListHandler<ActiveUser> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
       columnSortHandler.setComparator(englishCol, this::getVisitedCompare);
       return columnSortHandler;

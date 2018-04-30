@@ -123,6 +123,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final int EST_NUM_USERS = 8000;
   private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
   private static final long STALE_DUR = 5L * 60L * 1000L;
+  private static final boolean SWITCH_USER_PROJECT = false;
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -156,11 +157,27 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       .build(
           new CacheLoader<Integer, DBUser>() {
             @Override
-            public DBUser load(Integer key) throws Exception {
-             // logger.info("Load " + key);
+            public DBUser load(Integer key) {
+             // logger.info("idToDBUser Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
+
+
+  private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
+      //  .concurrencyLevel(4)
+      //  .weakKeys()
+      .maximumSize(10000)
+      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, User>() {
+            @Override
+            public User load(Integer key) {
+              // logger.info("idToUser Load " + key);
+              return getUser(lookupUser(key));
+            }
+          });
+
 
   /**
    * @param database
@@ -769,22 +786,27 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return delegate.getDBUser(userID);
   }
 
+  @Override
+  public User getUserWhere(int userid) {
+    return getByID(userid);
+  }
+
   /**
    * @param id
    * @return
    * @see NPUserSecurityManager#getUserForID
    */
   public User getByID(int id) {
-    return getUser(lookupUser(id));
+    try {
+      return idToUser.get(id);
+    } catch (ExecutionException e) {
+      logger.warn("getByID got " + e);
+      return getUser(lookupUser(id));
+    }
   }
 
   private User getUser(DBUser dominoUser) {
     return dominoUser == null ? null : toUser(dominoUser);
-  }
-
-  @Override
-  public User getUserWhere(int userid) {
-    return getByID(userid);
   }
 
   /**
@@ -974,21 +996,31 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return user;
   }
 
+  /**
+   * @see #toUser
+   * @param dominoUser
+   * @param permissionSet
+   * @param user
+   * @param isPoly
+   */
   private void handleAffiliationUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user, boolean isPoly) {
     if (isPoly) permissionSet.add(User.Permission.POLYGLOT);
 
     int id = user.getID();
     int mostRecentByUser = userProjectDAO.getCurrentProjectForUser(id);
-    int projectAssignment = getProjectAssignment(dominoUser, id, isPoly);
 
     if (mostRecentByUser == -1) {  // none yet...
+      int projectAssignment = getProjectAssignment(dominoUser, id, isPoly);
       if (projectAssignment != -1) {
         logger.info("handlePolyglotUser 1 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
         userProjectDAO.upsert(id, projectAssignment);
       }
-    } else if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
-      logger.info("handlePolyglotUser 2 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
-      userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
+    } else if (SWITCH_USER_PROJECT){
+      int projectAssignment = getProjectAssignment(dominoUser, id, isPoly);
+      if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
+        logger.info("handlePolyglotUser 2 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
+        userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
+      }
     }
   }
 

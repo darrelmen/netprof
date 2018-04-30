@@ -39,6 +39,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       //"Or use the arrow keys to review.",
       "Or to see your overall score click See Your Scores."
   );
+  public static final boolean DO_AUTOLOAD = true;
   private float minScore;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
@@ -85,10 +86,12 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   /**
    * Remember to preload the audio!
+   * Show a previous recording if we have it cached...
    *
    * @param exerciseID
    * @param controller used in subclasses for audio control
    * @param toAddTo
+   * @see FlashcardPanel#addWidgets
    */
   @Override
   protected void addRecordingAndFeedbackWidgets(int exerciseID,
@@ -97,7 +100,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     AudioAnswer answer = sticky.getLastAnswer(exerciseID);
     if (answer != null) {
       showRecoFeedback(answer.getScore(), answer.getPretestScore(), isCorrect(answer.isCorrect(), answer.getScore()));
-      playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), true);
+      playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), DO_AUTOLOAD);
     }
   }
 
@@ -250,10 +253,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   void reallyStartOver() {
     if (instance.equalsIgnoreCase(INavigation.VIEWS.DRILL.toString())) {
       polyglotFlashcardContainer.showDrill();
+      super.reallyStartOver();
     } else {
+      controller.setBannerVisible(true);
       polyglotFlashcardContainer.showQuiz();
     }
-    super.reallyStartOver();
   }
 
   @Override

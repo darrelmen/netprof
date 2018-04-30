@@ -336,6 +336,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
+    logger.info("pushUnitOrChapter ");
     History.newItem(s + "=" + next.getValue());
   }
 
@@ -471,7 +472,8 @@ public class NewContentChooser implements INavigation {
       if (wasMade) {
         banner.show(LEARN);
       }
-     // logger.info("getShowTab history after - " + History.getToken());
+
+      logger.info("getShowTab history after - " + History.getToken());
 
       History.newItem(
           //  FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
@@ -483,11 +485,13 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showListIn(int listid, VIEWS view) {
+    logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view);
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
+    logger.info("showListIn - " + listid + " " + views);
     History.newItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             SelectionState.INSTANCE + "=" + views.toString());

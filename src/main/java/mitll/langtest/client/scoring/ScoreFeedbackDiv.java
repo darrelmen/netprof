@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv extends ScoreProgressBar {
-  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+//  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
   private static final String OVERALL_SCORE = "Overall Score";
@@ -32,6 +32,13 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * @see #getWordTableContainer
    */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
+
+  private static final List<String> praise = Arrays.asList(
+      "Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
+      "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!",
+      "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!",
+      "Wonderful!", "Terrific!", "Groovy!", "Adroit!", "First-rate!");
+
 
   public static final int FIRST_STEP  = 35;
   public static final int SECOND_STEP = 75;
@@ -131,7 +138,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     wordTableContainer.add(scoreFeedbackDiv);
 
-    logger.info("showScoreFeedback hydec score " + hydecScore);
+//    logger.info("showScoreFeedback hydec score " + hydecScore);
     if (hydecScore > NATIVE_THRSHOLD && pretestScore.isFullMatch()) {
       wordTableContainer.add(getPraise());
     }
@@ -149,12 +156,6 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     praise.add(w);
     return praise;
   }
-
-  private static final List<String> praise = Arrays.asList(
-      "Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
-      "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!",
-      "Terrific!", "Superb!", "Nice!", "Bravo!", "Magnificent!",
-      "Wonderful!", "Terrific!", "Groovy!", "Adroit!", "First-rate!");
 
   private Random rand = new Random();
 

@@ -143,7 +143,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
-        logger.warning("hmm exercise is null for " + instance + " and " + exerciseID);
+       // logger.info("hmm exercise is null for " + instance + " and " + exerciseID);
       } else {
         controller.register(getPlayButton(), exercise.getID());
       }

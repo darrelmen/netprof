@@ -199,7 +199,15 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
+  /**
+   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
+   * @see #setSessionUser(HttpSession, User, boolean)
+   * @param session
+   * @param id1
+   */
   private void setSessionUserAndRemember(HttpSession session, int id1) {
+    log.info("setSessionUserAndRemember : set session user to " +id1);
+
     session.setAttribute(USER_SESSION_ATT, id1);
     String sessionID = session.getId();
 

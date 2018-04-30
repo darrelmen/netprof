@@ -74,7 +74,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PUSH = false;
+  private static final boolean DEBUG_PUSH = true;
 
   /**
    * @param currentExerciseVPanel
@@ -307,7 +307,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewItem
    */
   public void setHistoryItem(String historyToken) {
-    if (DEBUG_PUSH) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    if (DEBUG_PUSH || true) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 

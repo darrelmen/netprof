@@ -98,9 +98,10 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         "\n\tby      " + answerInfo.getUserid() +
         "\n\tto      " + answerInfo.getId() +
         "\n\tanswer  " + answerInfo.getAnswer() +
+        "\n\tanswer2 " + answerInserted +
         "\n\tsession " + answerInfo.getDevice() +
         "\n\tnum     " + answerInfo.getDeviceType() +
-        "\n\tslick   " + res +
+//        "\n\tslick   " + res +
         "\n\tid      " + id);
 
     return id;

@@ -87,6 +87,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
+  /**
+   * Auto fetch their response as a compressed version.
+   * TODO :  Bug - first time you click it, button returns to play state too early...
+   */
+  private static final boolean DO_AUTOLOAD = false;
+
   public static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
@@ -412,8 +418,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
     {
       IconAnchor correctIcon = new IconAnchor();
-
-      logger.info("showScoreFeedback correct" + correct + " is full " + isFullMatch);
+//      logger.info("showScoreFeedback correct" + correct + " is full " + isFullMatch);
       correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
       DivWidget iconContainer = new DivWidget();
@@ -477,12 +482,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         showIncorrectFeedback(result, score, hasRefAudio());
         prefix = IN;
       }
-
+/*
       controller.logEvent(button, "Button", exercise.getID(), prefix + "correct response - score " +
-          Math.round(score * 100f));
+          Math.round(score * 100f));*/
 
       // load audio?  why fetch it? unless we're going to play it?
-      playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()), true);
+      playAudioPanel.startSong(CompressedAudio.getPath(result.getPath()), DO_AUTOLOAD);
     }
   }
 

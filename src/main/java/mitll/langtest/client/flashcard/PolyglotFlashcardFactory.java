@@ -281,20 +281,25 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void removeItemFromHistory() {
+
+
     SelectionState selectionState = new SelectionState(History.getToken(), false);
 
-    Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
+    if (selectionState.getItem() > 0) {
+      Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
 
-    String listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
-    //logger.info("lists " + lists);
-    String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
-        SelectionState.SECTION_SEPARATOR +
-        SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
-        SelectionState.SECTION_SEPARATOR +
-        listChoice;
+      String listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
+      //logger.info("lists " + lists);
+      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
+          SelectionState.SECTION_SEPARATOR +
+          SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
+          SelectionState.SECTION_SEPARATOR +
+          listChoice;
 
-    //logger.info("gotSeeScoresClick push new token with no item " + historyToken);
-    History.newItem(historyToken);
+      logger.info("removeItemFromHistory push new token with no item " + historyToken);
+      History.newItem(historyToken);
+    }
+
   }
 
   private void clearAnswerMemory() {
