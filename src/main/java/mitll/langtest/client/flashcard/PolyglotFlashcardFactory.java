@@ -32,12 +32,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   private static final int DRY_RUN_ROUND_TIME = PolyglotFlashcardFactory.DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = PolyglotFlashcardFactory.ROUND_MINUTES * 60 * 1000;
-  private boolean inLightningRound = false;
+  // private boolean inLightningRound = false;
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = -1;
   private long sessionStartMillis = 0;
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
+
+  private static final boolean DEBUG = false;
 
   PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
@@ -60,6 +62,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         exerciseList,
         getMinScore(),
         shouldShowAudio());
+  }
+
+  @NotNull
+  protected String getKeyPrefix() {
+    return "";
   }
 
   @Override
@@ -88,50 +95,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    */
   @Override
   public void startTimedRun() {
-    if (!inLightningRound) {
-      inLightningRound = true;
-      //logger.info("startTimedRun ->");
+    if (!isRoundTimerRunning()) {
+      //inLightningRound = true;
+      logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
-    }
-  }
-
-  /**
-   * @see #startOver
-   * @see #sessionComplete
-   */
-  private void stopTimedRun() {
-    //logger.info("stopTimedRun");
-    currentFlashcard.stopRecording();
-    setBannerVisible(true);
-    inLightningRound = false;
-    cancelRoundTimer();
-  }
-
-  private void setBannerVisible(boolean b) {
-    controller.setBannerVisible(b);
-  }
-
-  @Override
-  public boolean getIsDry() {
-    return mode == PolyglotDialog.MODE_CHOICE.DRY_RUN;
-  }
-
-  private void startRoundTimer(boolean isDry) {
-    setBannerVisible(false);
-
-    if (isRoundTimerNotRunning()) {
-      clearAnswerMemory();
-
-      doSessionStart(isDry);
-
-      makeTimer();
-
-      if (currentFlashcard != null) {
-        ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(roundTimeLeftMillis);
-      } else {
-        logger.warning("startRoundTimer : no current flashcard?");
-      }
     }
   }
 
@@ -147,9 +115,55 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
+  /**
+   * @see #startOver
+   * @see #sessionComplete
+   */
+  private void stopTimedRun() {
+    logger.info("stopTimedRun");
+    currentFlashcard.stopRecording();
+    setBannerVisible(true);
+    //inLightningRound = false;
+    cancelRoundTimer();
+  }
+
+  private void setBannerVisible(boolean b) {
+    controller.setBannerVisible(b);
+  }
+
+  @Override
+  public boolean getIsDry() {
+    return mode == PolyglotDialog.MODE_CHOICE.DRY_RUN;
+  }
+
+  /**
+   * @param isDry
+   */
+  private void startRoundTimer(boolean isDry) {
+    setBannerVisible(false);
+
+    if (!isRoundTimerRunning()) {
+      logger.info("start round timer ");
+      clearAnswerMemory();
+
+      doSessionStart(isDry);
+
+      makeTimer();
+
+      if (currentFlashcard != null) {
+        ((PolyglotPracticePanel) currentFlashcard).showTimeRemaining(roundTimeLeftMillis);
+      } else {
+        logger.warning("startRoundTimer : no current flashcard?");
+      }
+    } else {
+      logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
+    }
+  }
+
   private void doSessionStart(boolean isDry) {
     int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
+    logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
     sessionStartMillis = System.currentTimeMillis();
   }
@@ -179,12 +193,18 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     if (l < 0) sessionComplete();
   }
 
-  private boolean isRoundTimerNotRunning() {
+/*  private boolean isRoundTimerNotRunning() {
     return (recurringTimer == null) || !recurringTimer.isRunning();
+  }*/
+
+  private boolean isRoundTimerRunning() {
+    return (recurringTimer != null) && recurringTimer.isRunning();
   }
 
   private void cancelTimer() {
-    if (recurringTimer != null) recurringTimer.cancel();
+    if (recurringTimer != null) {
+      recurringTimer.cancel();
+    }
   }
 
   @Override
@@ -214,9 +234,17 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return sessionStartMillis;
   }
 
+  /**
+   * @return
+   * @see PolyglotPracticePanel#maybeAdvance
+   */
   @Override
   public boolean isInLightningRound() {
-    return inLightningRound;
+    return isRoundTimerRunning();
+  }
+
+  public void startQuiz() {
+    sticky.startQuiz();
   }
 
   @Override
@@ -231,11 +259,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-    // logger.info("PolyglotFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+    logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
     Scheduler.get().scheduleDeferred(() -> {
-      if (sticky.getTimeRemainingMillis() > 0) {
-        inLightningRound = true;
-        //    logger.info("startTimedRun on reload");
+      if (sticky.inQuiz() && sticky.getTimeRemainingMillis() > 0 && hasListSelection()) {
+        // inLightningRound = true;
+        logger.info("startTimedRun on reload");
         startRoundTimer(getIsDry());
       } else {
         reset();
@@ -244,12 +272,13 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   /**
-   *
+   * @see #startTimedRun
+   * @see #listChanged
    */
   @Override
   void reset() {
     super.reset();
-    //logger.info("reset");
+    logger.info("reset");
     cancelRoundTimer();
   }
 
@@ -259,36 +288,45 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    */
   @Override
   public void cancelRoundTimer() {
-    //logger.info("cancelRoundTimer");
+    logger.info("cancelRoundTimer");
+    sticky.endQuiz();
     // if (roundTimer != null) roundTimer.cancel();
     cancelTimer();
+    clearTimeRemaining();
+    //removeItemFromHistory(-1);
+  }
+
+  public void clearTimeRemaining() {
+    logger.info("clearTimeRemaining");
     sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
-    removeItemFromHistory();
   }
 
   @Override
   public void postAudio() {
-   // logger.info("postAudio ");
+    // logger.info("postAudio ");
     postedAudio = true;
   }
 
   @Override
   public void addRoundTrip(long roundTripMillis) {
-  //  logger.info("addRoundTrip ");
+    //  logger.info("addRoundTrip ");
     postedAudio = false;
     roundTimeLeftMillis += roundTripMillis;
   }
 
-  private void removeItemFromHistory() {
+  public void removeItemFromHistory(int listOverride) {
+    String currrentToken = History.getToken();
+    SelectionState selectionState = new SelectionState(currrentToken, false);
 
-
-    SelectionState selectionState = new SelectionState(History.getToken(), false);
-
-    if (selectionState.getItem() > 0) {
-      Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
-
-      String listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
+    if (selectionState.getItem() > 0 || listOverride > 0) {
+      String listChoice = "";
+      if (listOverride > -1) {
+        listChoice = LISTS + "=" + listOverride;
+      } else {
+        Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
+        listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
+      }
       //logger.info("lists " + lists);
       String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
           SelectionState.SECTION_SEPARATOR +
@@ -296,13 +334,23 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
           SelectionState.SECTION_SEPARATOR +
           listChoice;
 
-      logger.info("removeItemFromHistory push new token with no item " + historyToken);
-      History.newItem(historyToken);
+      if (currrentToken.equalsIgnoreCase(historyToken)) {
+        logger.info("removeItemFromHistory no push since no change to " + historyToken);
+      } else {
+        logger.info("removeItemFromHistory push new token with no item " + historyToken);
+        History.newItem(historyToken);
+      }
     }
+  }
 
+  private boolean hasListSelection() {
+    SelectionState selectionState = new SelectionState(History.getToken(), false);
+    Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
+    return lists != null && !lists.isEmpty();
   }
 
   private void clearAnswerMemory() {
     sticky.clearAnswers();
+    // clearTimeRemaining();
   }
 }

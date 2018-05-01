@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
-  //  private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
+   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
@@ -39,7 +39,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       //"Or use the arrow keys to review.",
       "Or to see your overall score click See Your Scores."
   );
-  public static final boolean DO_AUTOLOAD = true;
+  private static final boolean DO_AUTOLOAD = true;
   private float minScore;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
@@ -125,6 +125,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     rightColumn.add(speedChoices.getSpeedChoices());
   }
 
+  /**
+   * Get session start...
+   * @return
+   */
   @Override
   protected String getDeviceValue() {
     String s = "" + polyglotFlashcardContainer.getSessionStartMillis();
@@ -138,6 +142,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void recordingStarted() {
+    logger.info("recordingStarted  ");
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       polyglotFlashcardContainer.startTimedRun();
     }

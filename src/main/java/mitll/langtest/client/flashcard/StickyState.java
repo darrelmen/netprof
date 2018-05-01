@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -52,7 +53,7 @@ import java.util.Map;
  * @since 7/8/14.
  */
 public class StickyState {
- // private final Logger logger = Logger.getLogger("StickyState");
+   private final Logger logger = Logger.getLogger("StickyState");
 
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
@@ -60,6 +61,7 @@ public class StickyState {
   private static final String CURRENT_EXERCISE = "currentExercise";
   private static final String CORRECT = "correct";
   private static final String TIME_REMAINING = "timeRemaining";
+  private static final String IN_QUIZ = "inQuiz";
   private final KeyStorage storage;
 
 
@@ -81,7 +83,6 @@ public class StickyState {
    * @param e
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    * @see StatsPracticePanel#rememberCurrentExercise
-   *
    */
   void storeCurrent(Shell e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
@@ -110,17 +111,7 @@ public class StickyState {
     return storage.getValue(SCORE);
   }
 
-  long getTimeRemainingMillis() {
-    String value = storage.getValue(TIME_REMAINING);
-    if (value == null) return 0L;
-    long i = 0L;
-    try {
-      i = Long.parseLong(value);
-    } catch (NumberFormatException e) {
 
-    }
-    return i;
-  }
 
   void populateCorrectMap() {
     String value = getCorrect();
@@ -173,6 +164,42 @@ public class StickyState {
 
   public void clearTimeRemaining() {
     storage.removeValue(TIME_REMAINING);
+
+    logger.info("clearTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
+  }
+
+
+  void storeTimeRemaining(long millis) {
+    logger.info("storeTimeRemaining Store time remaining " + millis);
+    storage.storeValue(TIME_REMAINING, "" + millis);
+
+    logger.info("storeTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
+
+  }
+  long getTimeRemainingMillis() {
+    String value = storage.getValue(TIME_REMAINING);
+    if (value == null) return 0L;
+    long i = 0L;
+    try {
+      i = Long.parseLong(value);
+    } catch (NumberFormatException e) {
+
+    }
+
+    logger.info("getTimeRemainingMillis " + i);
+
+    return i;
+  }
+
+  public void startQuiz() {
+    storage.storeValue(IN_QUIZ,""+true);
+  }
+
+  public boolean inQuiz() {
+    return storage.getValue(IN_QUIZ) != null;
+  }
+  public void endQuiz() {
+    storage.removeValue(IN_QUIZ);
   }
 
   void reset() {
@@ -200,7 +227,7 @@ public class StickyState {
       //  if (answerToEx.get(lastAnswer)==id) {
       if (lastAnswer.getExid() == id) {
         AudioAnswer remove = answers.remove(index);
-      //  logger.info("storeAnswer forget earlier answer " + remove);
+        //  logger.info("storeAnswer forget earlier answer " + remove);
       }
     }
 
@@ -235,8 +262,10 @@ public class StickyState {
     storage.storeValue(INCORRECT, builder2.toString());
   }
 
-  private void storeCorrect(StringBuilder builder) {    storage.storeValue(CORRECT, builder.toString());  }
-  public void storeTimeRemaining(long millis) {    storage.storeValue(TIME_REMAINING, ""+millis);  }
+  private void storeCorrect(StringBuilder builder) {
+    storage.storeValue(CORRECT, builder.toString());
+  }
+
 
   boolean isCorrect(boolean correct, double score) {
     return correct;

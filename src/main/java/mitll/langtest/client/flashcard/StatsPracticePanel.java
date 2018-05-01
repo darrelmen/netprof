@@ -84,19 +84,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     );
     this.sticky = stickyState;
     this.statsFlashcardFactory = statsFlashcardFactory;
-/*    soundFeedback.setEndListener(new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        disableRecord();
-      }
-
-      @Override
-      public void songEnded() {
-        enableRecord();
-        removePlayingHighlight();
-      }
-    });*/
-
     addWidgets(e, controller, controlState);
   }
 
@@ -104,7 +91,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   @Override
   protected String getDeviceValue() {
     String s = controller.getBrowserInfo();
-    //     logger.info("getDeviceValue  " + s);
     return s;
   }
 

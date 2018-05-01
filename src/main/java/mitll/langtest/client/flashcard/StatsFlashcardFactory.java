@@ -111,7 +111,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
-        return (selectionID.isEmpty() ? "" : selectionID + "_") + super.getKey(name); // in the context of this selection
+        return getKeyPrefix() + super.getKey(name); // in the context of this selection
       }
     };
 
@@ -123,13 +123,18 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
   }
 
+  @NotNull
+  protected String getKeyPrefix() {
+    return selectionID.isEmpty() ? "" : selectionID + "_";
+  }
+
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
     logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
     reset();
   }
 
-  protected void baseListChanged(List<L> items, String selectionID) {
+  void baseListChanged(List<L> items, String selectionID) {
     StatsFlashcardFactory.this.selectionID = selectionID;
     allExercises = items;
   }

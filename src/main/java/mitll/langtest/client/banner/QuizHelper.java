@@ -34,6 +34,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
@@ -47,11 +48,14 @@ import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.flashcard.QuizIntro;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -72,6 +76,7 @@ public class QuizHelper extends PracticeHelper {
   private static final int INTDEF_MIN_SCORE = 35;
 
   private final INavigation navigation;
+  private int chosenList = -1;
 
   /**
    * @param controller
@@ -94,9 +99,8 @@ public class QuizHelper extends PracticeHelper {
   @Override
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, QUIZ) {
-      private int chosenList = -1;
 
-      @Override
+/*      @Override
       public Panel getExercisePanel(CommonExercise e) {
         FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
         boolean hasSelectionForType = exerciseList.hasSelectionForType(LISTS);
@@ -106,17 +110,19 @@ public class QuizHelper extends PracticeHelper {
           return new QuizIntro(exerciseList.getIdToList(), listid -> {
             chosenList = listid;
             logger.info("got choice " + listid);
-
+*//*
            Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
             candidate.put(LISTS, "" + listid);
+            SelectionState.INSTANCE + "=" +
             //logger.info("setHistory " + candidate);
-            exerciseList.setHistory(candidate);
+            exerciseList.setHistory(candidate);*//*
 
+            removeItemFromHistory(chosenList);
             showQuizForReal();
           },
               controller.getUserManager().getUserID());
         }
-      }
+      }*/
 
       @Override
       public PolyglotDialog.MODE_CHOICE getMode() {
@@ -196,6 +202,8 @@ public class QuizHelper extends PracticeHelper {
       public void showQuiz() {
         super.showQuiz();
         clearListSelection();
+        MyPracticeFacetExerciseList exerciseList = (MyPracticeFacetExerciseList) this.getExerciseList();
+        exerciseList.showQuizIntro();
       }
     };
 
@@ -254,6 +262,49 @@ public class QuizHelper extends PracticeHelper {
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+    }
+
+
+    @Override
+    protected void loadFirstExercise(String searchIfAny) {
+      SelectionState selectionState = new SelectionState(History.getToken(), false);
+      Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
+      logger.info("loadFirstExercise chosen = " + chosenList);
+
+      if (//chosenList == -1 &&
+          (lists == null || lists.isEmpty())) {
+        logger.info("skip load first exercise - no list");
+        showQuizIntro();
+      } else {
+        if (chosenList == -1) {
+          String next = lists.iterator().next();
+          try {
+            chosenList=  Integer.parseInt(next);
+            logger.info("chosen list now " + chosenList);
+          } catch (NumberFormatException e) {
+            logger.warning("couldn't parse " + next);
+          }
+        }
+        super.loadFirstExercise(searchIfAny);
+      }
+    }
+
+    void showQuizIntro() {
+      createdPanel = getQuizIntro();
+      innerContainer.setWidget(createdPanel);
+    }
+
+    @NotNull
+    private QuizIntro getQuizIntro() {
+      return new QuizIntro(getIdToList(), listid -> {
+        polyglotFlashcardFactory.cancelRoundTimer();
+        chosenList = listid;
+        logger.info("got choice " + listid);
+        polyglotFlashcardFactory.removeItemFromHistory(chosenList);
+        showQuizForReal();
+        polyglotFlashcardFactory.startQuiz();
+      },
+          controller.getUserManager().getUserID());
     }
 
     @Override

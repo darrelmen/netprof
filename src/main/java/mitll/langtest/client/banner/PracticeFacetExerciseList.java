@@ -38,9 +38,6 @@ class PracticeFacetExerciseList extends FacetExerciseList {
     getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
   }
 
-  protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, int currrentReq) {
-  }
-
   @Override
   protected void onLastItem() {
     getStatsFlashcardFactory().resetStorage();

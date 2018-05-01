@@ -185,7 +185,8 @@ public class MessageHelper {
   /**
    * Make a dialog box with an embedded alert (either error, or waiting).
    */
-  private Modal makeInternalDialog(String msg, final DDialogType dType,
+  private Modal makeInternalDialog(String msg,
+                                   final DDialogType dType,
                                    boolean defaultSuffix) {
     if (waitDialog != null) {
       waitDialog.hide();
