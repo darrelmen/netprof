@@ -391,7 +391,10 @@ public class UserMenu {
     List<String> strings = new ArrayList<>();
     try {
       String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
-      props.put("Recording type", recordingInfo);
+      if (server == 1) {
+        props.put("Recording type", recordingInfo);
+      }
+
       props.remove("domino.url");
       Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
       if (max.isPresent()) {

@@ -341,7 +341,7 @@
         <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
         <init-param>
             <param-name>authorized-users</param-name>
-            <param-value>gvidaver:dliDLI1234</param-value>
+            <param-value>gvidaver:dliDLI1234, rbudd:dliDLI1234</param-value>
         </init-param>
     </filter>
 
