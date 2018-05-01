@@ -143,15 +143,15 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private final ProgressBar practicedProgress, scoreProgress;
   private final DivWidget pagerAndSortRow;
 
-  protected List<String> typeOrder;
+  private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
   private Panel tableWithPager;
-  private boolean isDrill;
+  private final boolean isDrill;
   /**
    * for now only single selection
    */
-  protected Map<String, String> typeToSelection = new HashMap<>();
+  private Map<String, String> typeToSelection = new HashMap<>();
   /**
    * @see #addChoicesForType
    */
@@ -217,13 +217,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> {
-      gotListChanged();
-    });
-
-    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> {
-      downloadHelper.showDialog(controller.getHost());
-    });
+    LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> gotListChanged());
+    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
   }
 
   /**
@@ -434,10 +429,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @param currentReq
    * @see #makePagingContainer
    */
+/*
   protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, final int currentReq) {
     if (DEBUG) logger.info("gotVisibleRangeChanged : visible range " + idsForRange);
     askServerForVisibleExercises(-1, idsForRange, currentReq);
   }
+*/
 
   /**
    * @see HistoryExerciseList#noSectionsGetExercises
@@ -493,7 +490,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return container;
   }
 
-  protected void getTypeOrder() {
+  private void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
@@ -595,7 +592,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @return
    * @see #addFacetsForReal
    */
-  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
+  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(LISTS);
     populateListChoices(liForDimensionForType, typeToValues);
     return liForDimensionForType;
@@ -685,13 +682,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return UserList.LIST_TYPE.NORMAL;
   }
 
-  protected void addListsAsLinks(Collection<IUserList> result, long then,
-                                 Map<String, Set<MatchInfo>> finalTypeToValues,
-                                 ListItem liForDimensionForType) {
+  private void addListsAsLinks(Collection<IUserList> result, long then,
+                               Map<String, Set<MatchInfo>> finalTypeToValues,
+                               ListItem liForDimensionForType) {
     long l = System.currentTimeMillis();
     if (l - then > 150) {
       logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
-
     }
     finalTypeToValues.put(LISTS, getMatchInfoForEachList(result));
 
@@ -1082,7 +1078,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return did;
   }
 
-  protected String getChildForParent(String childType) {
+  private String getChildForParent(String childType) {
     Map<String, String> parentToChild = getStartupInfo().getParentToChild();
     String s = parentToChild.get(childType);
 //    logger.info("getChildForParent parent->child " + parentToChild);
@@ -1120,7 +1116,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #getChoiceHandler
    * @see #addRemoveClickHandler
    */
-  public void setHistory(Map<String, String> candidate) {
+  private void setHistory(Map<String, String> candidate) {
     logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
@@ -1140,14 +1136,15 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #getChoiceHandler
    * @see #getSectionWidgetContainer()
    */
-  protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
+  private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    //List<Pair> pairs = getPairs(typeToSelection);
-    // logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    List<Pair> pairs = getPairs(typeToSelection);
+    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+
     final long then = System.currentTimeMillis();
 
-    service.getTypeToValues(getRequest(userListID, getPairs(typeToSelection)),
+    service.getTypeToValues(getRequest(userListID, pairs),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1189,15 +1186,15 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   @NotNull
-  protected FilterRequest getRequest(int userListID, List<Pair> pairs) {
+  private FilterRequest getRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID);
   }
 
-  protected int incrReqID() {
+  private int incrReqID() {
     return reqid++;
   }
 
-  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     if (DEBUG) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
