@@ -349,7 +349,7 @@ public class UserMenu {
                   values.addAll(allProps.get(i).values());
                 }
 
-                new ModalInfoDialog(ABOUT_NETPROF, keys, values, null, null, false, true, 600, 400) {
+                new ModalInfoDialog(ABOUT_NETPROF, keys, values, null, null, false, true, 600, 600) {
                   @Override
                   protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
                     FlexTable flexTable = super.addContent(messages, values, modal, bigger);
