@@ -411,7 +411,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
       long then = System.currentTimeMillis();
       Map<Integer, Float> integerFloatMap = dao.exidAndScoreWhere(userid, idsToFind);
       long now = System.currentTimeMillis();
-      logger.info("getScores took " + (now - then) + " millis to ask for scores for " + idsToFind.size() + " exercises for user " + userid + " enumerated...");
+
+      long diff = now - then;
+      if (diff > 40) {
+        logger.info("getScores took " + diff + " millis to ask for scores for " + idsToFind.size() + " exercises for user " + userid + " enumerated...");
+      }
 
       return new HashMap<>(integerFloatMap);
     } else {

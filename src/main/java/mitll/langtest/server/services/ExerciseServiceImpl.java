@@ -207,7 +207,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
-   *
    * @param request
    * @param projectID
    * @param userListByID
@@ -222,7 +221,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 //    if (request.isQuiz()) {
 //      exercises = Collections.emptyList();
 //    } else {
-      exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
+    exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
 //    }
     // now if there's a prefix, filter by prefix match
 
@@ -251,7 +250,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     long now = System.currentTimeMillis();
 
-    logger.info("getExerciseWhenNoUnitChapter took " + (now - then) + " to get " + commonExercises.size());
+    long diff = now - then;
+    if (diff > 20) {
+      logger.info("getExerciseWhenNoUnitChapter took " + diff + " to get " + commonExercises.size());
+    }
 
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
     return exerciseListWrapper;
@@ -397,11 +399,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Called from the client:
    *
    * @return
-
    * @see #getExerciseWhenNoUnitChapter
-
-    * @see #getExerciseWhenNoUnitChapter(ExerciseListRequest, int, UserList)
-
+   * @see #getExerciseWhenNoUnitChapter(ExerciseListRequest, int, UserList)
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
@@ -556,8 +555,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     } else {
       copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
-        sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
-  //    }
+      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
+      //    }
     }
 
     return makeExerciseListWrapper(request, copy, projID);
@@ -893,7 +892,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               boolean predefExercises,
                                                                               int projectID,
                                                                               int userID, boolean matchOnContext) {
-    Search<T> search = new Search<T>(db, db);
+    Search<T> search = new Search<T>(db);
     TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
     exercisesForSearch.setByID(Collections.emptyList());
 

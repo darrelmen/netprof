@@ -79,6 +79,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
+  public static final int SLOW_ROUND_TRIP = 3000;
 
   private IEnsureAudioHelper ensureAudioHelper;
 
@@ -624,12 +625,26 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   /**
    * Doesn't really need to be on the scoring service...
    *
+   * Send email if it's slow.
    * @param resultID
    * @param roundTrip
    */
   @Override
   public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
+
+    if (roundTrip > SLOW_ROUND_TRIP) {
+      try {
+        int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+        new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
+            getInfo("Slow round trip (" +
+            roundTrip +
+            ") recording #" +resultID+
+            " by user #" + userIDFromSessionOrDB))).start();
+      } catch (Exception e) {
+        logger.warn("addRoundTrip got " + e, e);
+      }
+    }
   }
 
   /**

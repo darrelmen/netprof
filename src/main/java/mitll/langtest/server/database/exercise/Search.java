@@ -1,7 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -17,12 +16,12 @@ import java.util.List;
 public class Search<T extends CommonExercise> {
   private static final Logger logger = LogManager.getLogger(Search.class);
 
-  private DatabaseServices database;
+  //private DatabaseServices database;
   private ProjectServices projectServices;
 
-  public Search(ProjectServices projectServices, DatabaseServices database) {
+  public Search(ProjectServices projectServices) {
     this.projectServices = projectServices;
-    this.database = database;
+    //this.database = database;
   }
 
   /**
@@ -70,21 +69,32 @@ public class Search<T extends CommonExercise> {
     Project project = getProject(projectID);
     ExerciseTrie<T> fullContextTrie = !matchOnContext || project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
 
-    logger.info("getExercisesForSearchWithTrie : " +
-        "\n\tprojectID " + projectID +
-        "\n\thas full  " + (fullContextTrie != null) +
-        "\n\tfound     " + (project != null) +
-        "\n\tpredef    " + predefExercises +
-        "\n\tprefix    " + prefix +
-        "\n\tmatches   " + basicExercises.size());
-
     List<T> ts = Collections.emptyList();
 
     if (predefExercises && fullContextTrie != null) {
       ts = fullContextTrie.getExercises(prefix);
-      logger.info("getExercisesForSearchWithTrie for full context for" +
+ /*     logger.info("getExercisesForSearchWithTrie for full context for" +
           "\n\tprefix '" + prefix + "'" +
           "\n\tgot " + ts.size());
+*/
+
+      logger.info("getExercisesForSearchWithTrie : " +
+              "\n\tprojectID " + projectID +
+//          "\n\thas full  " + (fullContextTrie != null) +
+              //         "\n\tfound     " + (project != null) +
+              //  "\n\tpredef    " + predefExercises +
+              "\n\tprefix    " + prefix +
+              "\n\tmatches   " + basicExercises.size() +
+              "\n\tcontext   " + ts.size()
+      );
+    } else {
+      logger.info("getExercisesForSearchWithTrie : " +
+          "\n\tprojectID " + projectID +
+          "\n\thas full  " + (fullContextTrie != null) +
+          "\n\tfound     " + (project != null) +
+          "\n\tpredef    " + predefExercises +
+          "\n\tprefix    " + prefix +
+          "\n\tmatches   " + basicExercises.size());
     }
  /*   int exid = getExid(prefix);
 

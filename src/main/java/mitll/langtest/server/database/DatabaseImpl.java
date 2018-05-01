@@ -1030,7 +1030,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           realExid = Integer.parseInt(exid);
         }
       } catch (NumberFormatException e) {
-        logger.warn("couldn't parse exid '" + exid + "'");
+        //logger.warn("couldn't parse exid '" + exid + "'");
         //e.printStackTrace();
       }
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
@@ -1342,7 +1342,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
     if (!options.getSearch().isEmpty()) {
-      TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this, this)
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this)
           .getExercisesForSearch(
               options.getSearch(),
               exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);
