@@ -35,6 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -89,4 +90,7 @@ public interface AudioServiceAsync {
   void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
 
   void logMessage(String subject, String message, boolean sendEmail, AsyncCallback<Void> async);
+
+  void getStartupInfo(AsyncCallback<StartupInfo> async);
+
 }

@@ -363,7 +363,6 @@ public class LangTest implements
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
-
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }

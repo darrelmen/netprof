@@ -919,7 +919,7 @@ public class ServerProperties {
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
-  List<Affiliation> getAffiliations() {
+  public List<Affiliation> getAffiliations() {
     return affliations;
   }
 
@@ -927,7 +927,7 @@ public class ServerProperties {
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
    */
-  Map<String, String> getUIProperties() {
+ public Map<String, String> getUIProperties() {
     return getPropertyMap(uiprops);
   }
 

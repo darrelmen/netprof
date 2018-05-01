@@ -44,11 +44,15 @@ import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.SlimProject;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -58,7 +62,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -500,5 +506,35 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (sendEmail) {
       sendEmail("TEST : " + subject, getInfo(prefixedMessage));
     }
+  }
+
+  @Override
+  public StartupInfo getStartupInfo() {
+    List<SlimProject> projectInfos = new ArrayList<>();
+    if (db == null) {
+      logger.info("getStartupInfo no db yet...");
+    } else {
+      IProjectManagement projectManagement = db.getProjectManagement();
+      ((NPUserSecurityManager) securityManager).setProjectManagement(projectManagement);
+      if (projectManagement == null) {
+        logger.error("getStartupInfo : config error - didn't make project management");
+      } else {
+        long then = System.currentTimeMillis();
+        projectInfos = projectManagement.getNestedProjectInfo();
+        long now = System.currentTimeMillis();
+        if (now - then > 50L)
+          logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
+      }
+    }
+
+    //long then = System.currentTimeMillis();
+    StartupInfo startupInfo =
+        new StartupInfo(serverProps.getUIProperties(), projectInfos, "server", serverProps.getAffiliations());
+//    long now = System.currentTimeMillis();
+//    if (now - then > 100L) {
+//      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
+//    }
+//    logger.debug("getStartupInfo sending " + startupInfo);
+    return startupInfo;
   }
 }

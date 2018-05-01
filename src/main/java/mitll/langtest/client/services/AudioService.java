@@ -41,6 +41,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -90,4 +91,7 @@ public interface AudioService extends RemoteService {
   void recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
   void logMessage(String subject,String message, boolean sendEmail);
+
+
+  StartupInfo getStartupInfo();
 }

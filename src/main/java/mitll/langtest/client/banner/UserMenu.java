@@ -25,6 +25,7 @@ import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.project.StartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -99,7 +100,7 @@ public class UserMenu {
 
 
     choices.add(new LinkAndTitle("Send Test Exception", event -> {
-      ArrayList<String> strings = new ArrayList<>();
+      List<String> strings = new ArrayList<>();
       Collection<AudioServiceAsync> allAudioServices = controller.getAllAudioServices();
       allAudioServices.forEach(audioServiceAsync ->
           audioServiceAsync.logMessage(TEST_EXCEPTION,
@@ -125,6 +126,7 @@ public class UserMenu {
 
     return choices;
   }
+
 
   List<LinkAndTitle> getProjectSpecificChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
@@ -315,21 +317,57 @@ public class UserMenu {
     about.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
+
         Map<String, String> props = UserMenu.this.props.getProps();
-        List<String> strings = new ArrayList<>();
-        try {
-          String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
-          props.put("Recording type", recordingInfo);
-          props.remove("domino.url");
-          Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
-          if (max.isPresent()) {
-            int maxl = max.get().length();
-            props.keySet().forEach(key -> strings.add(key + getLen(maxl - key.length()))
-            );
-          }
-        } catch (Exception e) {
-          //logger.warning("got " + e);
-        }
+
+        List<Map<String, String>> allProps = new ArrayList<>();
+        allProps.add(props);
+        Collection<AudioServiceAsync> allAudioServices = controller.getAllAudioServices();
+        allAudioServices.forEach(audioServiceAsync ->
+            audioServiceAsync.getStartupInfo(new AsyncCallback<StartupInfo>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(StartupInfo result) {
+                Map<String, String> properties = result.getProperties();
+                allProps.add(properties);
+                List<String> keys = new ArrayList<>();
+                List<String> values = new ArrayList<>();
+                if (allProps.size() == allAudioServices.size()+1) {
+                  showAllProps(keys, values);
+
+                }
+              }
+
+              private void showAllProps(List<String> keys, List<String> values) {
+                for (int i = 0; i < allProps.size(); i++) {
+                  List<String> strings = getPropKeys(allProps.get(i), i + 1);
+                  keys.addAll(strings);
+                  values.addAll(allProps.get(i).values());
+                }
+
+                new ModalInfoDialog(ABOUT_NETPROF, keys, values, null, null, false, true, 600, 400) {
+                  @Override
+                  protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
+                    FlexTable flexTable = super.addContent(messages, values, modal, bigger);
+
+                    int rowCount = flexTable.getRowCount();
+                    flexTable.setHTML(rowCount + 1, 0, "Need Help?");
+                    flexTable.setHTML(rowCount + 1, 1, " <a href='" + getMailTo() + "'>Help Email</a>");
+                    return flexTable;
+                  }
+                };
+              }
+            }));
+
+/*
+        Map<String, String> props = UserMenu.this.props.getProps();
+
+        controller.getAllAudioServices();
+        List<String> strings = getPropKeys(props);
 
         new ModalInfoDialog(ABOUT_NETPROF, strings, props.values(), null, null, false, true, 600, 400) {
           @Override
@@ -341,10 +379,30 @@ public class UserMenu {
             flexTable.setHTML(rowCount + 1, 1, " <a href='" + getMailTo() + "'>Help Email</a>");
             return flexTable;
           }
-        };
+        };*/
       }
     });
     return about;
+  }
+
+
+  @NotNull
+  private List<String> getPropKeys(Map<String, String> props, int server) {
+    List<String> strings = new ArrayList<>();
+    try {
+      String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
+      props.put("Recording type", recordingInfo);
+      props.remove("domino.url");
+      Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
+      if (max.isPresent()) {
+        int maxl = max.get().length();
+        props.keySet().forEach(key -> strings.add("Server #"+server + " : " + key + getLen(maxl - key.length()))
+        );
+      }
+    } catch (Exception e) {
+      //logger.warning("got " + e);
+    }
+    return strings;
   }
 
   private String getLen(int len) {
