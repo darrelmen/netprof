@@ -42,17 +42,23 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -60,8 +66,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.instrumentation.SlimSegment;
@@ -84,8 +88,10 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
-  private static final int TABLE_HEIGHT = 215;
   private final Logger logger = Logger.getLogger("WordContainerAsync");
+
+  private static final int TABLE_HEIGHT = 215;
+  private static final String PAUSE = "Pause";
 
   private static final int NARROW_THRESHOLD = 1450;
 
@@ -218,7 +224,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private void gotClickOnReview() {
     isReview = !isReview;
     if (isReview) {
-      review.setText("Pause");
+      review.setText(PAUSE);
       review.setIcon(IconType.PAUSE);
 
       WordScore selected = getSelected();
@@ -346,7 +352,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         end = end >= numResults ? numResults : end;
 
 /*        logger.info("createProvider asking for " + start +"->" + end + " num " + numResults);
-        logger.info("createProvider asking from " + from + "/"+
+        logger.info("createProvider asking from " + from + "/" +
             new Date(from) +"->" + to +"/"+new Date(to));*/
 
         StringBuilder columnSortedState = tableSortHelper.getColumnSortedState(table);
@@ -377,10 +383,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
               @Override
               public void onSuccess(final WordsAndTotal result) {
                 if (result.getReq() < req - 1) {
-/*
-              logger.info("->>getResults ignoring response " + result.req + " vs " + req +
-                  " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
-*/
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
@@ -393,6 +395,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                   if (!result.getResults().isEmpty()) {
                     selectFirst(result);
                   }
+                  Scheduler.get().scheduleDeferred(cellTable::redraw);
+
                 }
               }
             });
