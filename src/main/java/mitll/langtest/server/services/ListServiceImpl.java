@@ -79,14 +79,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public UserList addUserList(String name, String description, String dliClass, boolean isPublic,
                               UserList.LIST_TYPE listType,
                               int size,
-                              int duration, int minScore, boolean showAudio) throws DominoSessionException {
+                              int duration, int minScore, boolean showAudio,
+                              Map<String,String> unitChapter) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio,unitChapter);
   }
 
   @Override

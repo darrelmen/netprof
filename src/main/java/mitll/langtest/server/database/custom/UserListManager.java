@@ -196,9 +196,9 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                          int size, int duration, int minScore, boolean showAudio) {
+                          int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
     UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false,
-        new TimeRange(), duration, minScore, showAudio);
+        new TimeRange(), duration, minScore, showAudio, unitChapter);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -264,7 +264,7 @@ public class UserListManager implements IUserListManager {
                                            int reqSize,
                                            boolean isDryRun,
                                            TimeRange timeRange,
-                                           int duration, int minScore, boolean showAudio) {
+                                           int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
     String userChosenID = userDAO.getUserChosenID(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
@@ -288,7 +288,8 @@ public class UserListManager implements IUserListManager {
           if (items.size() == reqSize) break;
         }
       } else {
-        addRandomItems(reqSize, project, items);
+
+        addRandomItems(reqSize, project, items, unitChapter);
       }
 
       List<CommonShell> shells = getShells(items);
@@ -304,15 +305,41 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private void addRandomItems(int reqSize, Project project, List<CommonExercise> items) {
+  private void addRandomItems(int reqSize, Project project, List<CommonExercise> items, Map<String, String> unitChapter) {
+    //List<CommonExercise> rawExercises = project.getRawExercises();
+    Map<String, Collection<String>> typeToSelection = new HashMap<>();
+    unitChapter.forEach((k, v) -> {
+      if (!v.equalsIgnoreCase("All")) {
+        typeToSelection.put(k, Collections.singleton(v));
+      }
+    });
+
+    Collection<CommonExercise> exercisesForSelectionState;
+    if (typeToSelection.isEmpty()) {
+      exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSelection);
+    } else {
+      exercisesForSelectionState = project.getRawExercises();
+    }
+    logger.info("for " + unitChapter);
+    logger.info("exercisesForSelectionState " + exercisesForSelectionState.size());
+    ArrayList<CommonExercise> rawExercises = new ArrayList<>(exercisesForSelectionState);
+    logger.info("rawExercises " + rawExercises.size());
+    addRandomItems(reqSize, items, rawExercises);
+  }
+
+  private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> rawExercises) {
     int misses = 0;
-    List<CommonExercise> rawExercises = project.getRawExercises();
     Random random = new Random();
 
     int size = rawExercises.size();
+
+    logger.info("size " + size);
+    logger.info("req " + reqSize);
     Set<Integer> exids = new TreeSet<>();
 
     reqSize = Math.min(reqSize, rawExercises.size());
+    logger.info("reqSize " + reqSize);
+    logger.info("items.size() " + items.size());
 
     while (items.size() < reqSize) {
       int i = random.nextInt(size);

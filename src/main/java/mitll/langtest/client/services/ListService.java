@@ -44,6 +44,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.Map;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
@@ -67,7 +68,7 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
-                       int size, int duration, int minScore, boolean showAudio) throws DominoSessionException;
+                       int size, int duration, int minScore, boolean showAudio, Map<String,String> unitChapter) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 

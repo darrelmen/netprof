@@ -215,7 +215,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         String owner = addOwnerToDescrip && (shell.getUserID() != controller.getUser()) ? "(" + shell.getUserChosenID() + ") " : "";
         String description = owner + shell.getDescription();
         //   logger.info("Desc " + description + " length " + description.length());
-        String truncate = truncate(description);
+        String truncate = truncate(description,30);
         //   logger.info("truncate " + truncate + " length " + truncate.length());
         return getNoWrapContent(truncate);
       }

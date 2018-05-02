@@ -45,18 +45,20 @@ import mitll.npdata.dao.DBConnection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public interface IUserListManager   {
+public interface IUserListManager {
   @Deprecated
   int COMMENT_MAGIC_ID = -200;
 
-  UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid );
+  UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
 /*
   void ensureDryRun(int projid);
 */
 
-  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid, int size, int duration, int minScore, boolean showAudio);
+  UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
+                   int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
 
   Collection<IUserListLight> getNamesForUser(int userid,
                                              int projid,
@@ -76,6 +78,7 @@ public interface IUserListManager   {
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists, boolean includeQuiz);
 
   Collection<IUserList> getAllQuizUserList(int projid, int userID);
+
   /**
    * @param userid
    * @param projid
@@ -85,9 +88,9 @@ public interface IUserListManager   {
   void createFavorites(int userid, int projid);
 
   /**
-   * @see ListServiceImpl#getReviewList
    * @param projID
    * @return
+   * @see ListServiceImpl#getReviewList
    */
   UserList<CommonShell> getCommentedList(int projID);
 

@@ -673,7 +673,7 @@ public class ListView implements ContentView, CreateListComplete {
           public void gotHidden() {
 
           }
-        }, 550);
+        }, 580);
 
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setIcon(IconType.PLUS);
@@ -766,12 +766,14 @@ public class ListView implements ContentView, CreateListComplete {
   @Override
   public void madeIt(UserList userList) {
     dialogHelper.hide();
-    //  logger.info("made it " + userList.getName());
+    logger.info("made it " + userList.getName());
+    logger.info("made it ex " + userList.getExercises().size());
     //logger.info("\n\n\ngot made list");
 
     myLists.addExerciseAfter(null, userList);
     myLists.markCurrentExercise(userList.getID());
     myLists.enableAll();
+    myLists.redraw();
     names.add(userList.getName());
   }
 

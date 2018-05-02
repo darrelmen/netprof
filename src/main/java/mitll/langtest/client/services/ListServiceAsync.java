@@ -38,6 +38,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface ListServiceAsync {
   void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
@@ -70,7 +71,9 @@ public interface ListServiceAsync {
    * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType, int size, int duration, int minScore, boolean showAudio, AsyncCallback<UserList> async);
+                   boolean isPublic, UserList.LIST_TYPE listType, int size, int duration, int minScore, boolean showAudio,
+                   Map<String,String> unitChapter,
+                   AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

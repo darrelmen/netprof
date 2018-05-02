@@ -13,6 +13,7 @@ import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -98,7 +99,7 @@ public class NewListButton {
         "",
         "",
         isPublic,
-        UserList.LIST_TYPE.NORMAL, 100, 10, 30, false, new AsyncCallback<UserList>() {
+        UserList.LIST_TYPE.NORMAL, 100, 10, 30, false, new HashMap<>(), new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

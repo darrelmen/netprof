@@ -42,6 +42,8 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -51,13 +53,14 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -145,6 +148,57 @@ public class CreateListDialog extends BasicDialog {
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
     this.listView = listView;
     this.controller = controller;
+    getTypeToValues(new HashMap<>());
+  }
+
+  private void getTypeToValues(Map<String, String> typeToSelection) {
+    if (!isThereALoggedInUser()) return;
+
+
+    final long then = System.currentTimeMillis();
+
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    Collection<SectionNode> sectionNodes = projectStartupInfo.getSectionNodes();
+    logger.info("order   " + projectStartupInfo.getTypeOrder());
+    logger.info("section nodes " + sectionNodes);
+    logger.info("root nodes " + projectStartupInfo.getRootNodes());
+    logger.info("parent->child " + projectStartupInfo.getParentToChild());
+
+/*    controller.getExerciseService().getTypeToValues(new FilterRequest(0, new ArrayList<>(), -1),
+        new AsyncCallback<FilterResponse>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            if (caught instanceof DominoSessionException) {
+              logger.info("getTypeToValues : got " + caught);
+            }
+            controller.handleNonFatalError("no type to values", caught);
+          }
+
+          *//**
+           * fixes downstream selections that no longer make sense.
+           * @param response
+           *//*
+          @Override
+          public void onSuccess(FilterResponse response) {
+            gotFilterResponse(response, then, typeToSelection);
+          }
+        });*/
+  }
+
+
+/*  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+    if (true) {
+      logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
+          "\n\ttype to selection " + typeToSelection +
+          "\n\tresponse " + response +
+          "\n\ttype to values    " + response.getTypeToValues().size()
+      );
+    }
+  }*/
+
+
+  private boolean isThereALoggedInUser() {
+    return controller.getUser() > 0;
   }
 
   /**
@@ -223,25 +277,103 @@ public class CreateListDialog extends BasicDialog {
     quizOptions.addStyleName("url-box");
   }
 
+  List<ListBox> allUnitChapter;
+
   @NotNull
   private Grid getChoices(boolean isCreate) {
-    Grid grid = new Grid(2, 4);
-    int col = 0;
-    if(isCreate) {
-      grid.setWidget(0, col++, getQuizSizeLabel());
-    }
-    grid.setWidget(0, col++, getDurationLabel());
-    grid.setWidget(0, col++, getLabel(MIN_SCORE1));
-    grid.setWidget(0, col++, getHearLabel());
+    Grid grid = new Grid(isCreate ? 4 : 2, 4);
 
-    col = 0;
-    if(isCreate) {
-      grid.setWidget(1, col++, getSizeChoices());
+
+    int col = 0;
+    int row = 0;
+
+    if (isCreate) {
+      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+      for (String type : projectStartupInfo.getTypeOrder()) {
+        grid.setWidget(row, col++, getLabel(type));
+      }
+
+      row++;
+      col = 0;
+      List<ListBox> all = new ArrayList<>();
+      allUnitChapter = all;
+      boolean first = true;
+      for (String type : projectStartupInfo.getTypeOrder()) {
+        ListBox listBox = getListBox(100);
+        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all));
+        all.add(listBox);
+        grid.setWidget(row, col++, listBox);
+        listBox.addItem("All");
+
+        if (first) {
+          projectStartupInfo.getSectionNodes().forEach(sectionNode -> {
+            listBox.addItem(sectionNode.getName());
+          });
+          first = false;
+        }
+
+      }
+
+      row++;
+      col = 0;
     }
-    grid.setWidget(1, col++, getDurationChoices());
-    grid.setWidget(1, col++, getMinScoreChoices());
-    grid.setWidget(1, col++, getPlayAudioCheck());
+    if (isCreate) {
+      grid.setWidget(row, col++, getQuizSizeLabel());
+    }
+    grid.setWidget(row, col++, getDurationLabel());
+    grid.setWidget(row, col++, getLabel(MIN_SCORE1));
+    grid.setWidget(row, col++, getHearLabel());
+
+    row++;
+    col = 0;
+    if (isCreate) {
+      grid.setWidget(row, col++, getSizeChoices());
+    }
+    grid.setWidget(row, col++, getDurationChoices());
+    grid.setWidget(row, col++, getMinScoreChoices());
+    grid.setWidget(row, col++, getPlayAudioCheck());
     return grid;
+  }
+
+  private void gotChangeFor(String type, ListBox listBox, List<ListBox> all) {
+    int i = all.indexOf(listBox);
+    int nextIndex = i + 1;
+    if (nextIndex < all.size()) {
+      ListBox nextBox = all.get(nextIndex);
+
+      String current = listBox.getSelectedValue();
+      Pair pair = new Pair(type, current);
+
+      ArrayList<Pair> pairs = new ArrayList<>();
+      pairs.add(pair);
+      controller.getExerciseService().getTypeToValues(new FilterRequest(0, pairs, -1),
+          new AsyncCallback<FilterResponse>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              if (caught instanceof DominoSessionException) {
+                logger.info("getTypeToValues : got " + caught);
+              }
+              controller.handleNonFatalError("no type to values", caught);
+            }
+
+            /**
+             * fixes downstream selections that no longer make sense.
+             * @param response
+             */
+            @Override
+            public void onSuccess(FilterResponse response) {
+              Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
+              logger.info("got " + typeToValues);
+              Set<MatchInfo> matchInfos = typeToValues.get(controller.getProjectStartupInfo().getTypeOrder().get(nextIndex));
+              nextBox.clear();
+              nextBox.addItem("All");
+              matchInfos.forEach(matchInfo -> {
+                nextBox.addItem(matchInfo.getValue());
+              });
+            }
+          });
+
+    }
   }
 
   @NotNull
@@ -291,7 +423,13 @@ public class CreateListDialog extends BasicDialog {
 
   @NotNull
   private HTML getQuizSizeLabel() {
-    HTML quiz_size = getLabel(QUIZ_SIZE);
+    String quizSize = QUIZ_SIZE;
+    return getEditableLabel(quizSize);
+  }
+
+  @NotNull
+  private HTML getEditableLabel(String quizSize) {
+    HTML quiz_size = getLabel(quizSize);
     quiz_size.setVisible(current == null);
     return quiz_size;
   }
@@ -341,8 +479,14 @@ public class CreateListDialog extends BasicDialog {
 
   @NotNull
   private ListBox getListBox() {
+    int width = 50;
+    return getListBox(width);
+  }
+
+  @NotNull
+  private ListBox getListBox(int width) {
     ListBox w = new ListBox();
-    w.setWidth(50 + "px");
+    w.setWidth(width + "px");
     w.addStyleName("topFiveMargin");
     return w;
   }
@@ -387,7 +531,6 @@ public class CreateListDialog extends BasicDialog {
 
   private void gotListSelection3(String value) {
     minScore = Integer.parseInt(value);
-    //  madeSelection = true;
   }
 
   private DivWidget quizOptions, quizOptions2;
@@ -567,6 +710,13 @@ public class CreateListDialog extends BasicDialog {
                            UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
+    Map<String,String> unitToChapter = new LinkedHashMap<>();
+    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+
+
+    if (allUnitChapter != null) {
+      allUnitChapter.forEach(listBox -> unitToChapter.put(typeOrder.get(unitToChapter.size()), listBox.getSelectedValue()));
+    }
     controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
@@ -576,7 +726,9 @@ public class CreateListDialog extends BasicDialog {
         quizSize,
         duration,
         minScore,
-        playAudio, new AsyncCallback<UserList>() {
+        playAudio,
+        unitToChapter,
+        new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("making a new list", caught);
