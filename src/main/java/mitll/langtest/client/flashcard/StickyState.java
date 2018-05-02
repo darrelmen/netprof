@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * @since 7/8/14.
  */
 public class StickyState {
-   private final Logger logger = Logger.getLogger("StickyState");
+  private final Logger logger = Logger.getLogger("StickyState");
 
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
@@ -61,6 +61,7 @@ public class StickyState {
   private static final String CURRENT_EXERCISE = "currentExercise";
   private static final String CORRECT = "correct";
   private static final String TIME_REMAINING = "timeRemaining";
+  private static final String SESSION = "session";
   private static final String IN_QUIZ = "inQuiz";
   private final KeyStorage storage;
 
@@ -112,7 +113,6 @@ public class StickyState {
   }
 
 
-
   void populateCorrectMap() {
     String value = getCorrect();
     if (value != null && !value.trim().isEmpty()) {
@@ -160,23 +160,42 @@ public class StickyState {
     storage.removeValue(CURRENT_EXERCISE);
     storage.removeValue(SCORE);
     clearTimeRemaining();
+    //clearSession();
   }
 
   public void clearTimeRemaining() {
     storage.removeValue(TIME_REMAINING);
- //   logger.info("clearTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
+    clearSession();
   }
 
-
   void storeTimeRemaining(long millis) {
-   // logger.info("storeTimeRemaining Store time remaining " + millis);
     storage.storeValue(TIME_REMAINING, "" + millis);
-
-   // logger.info("storeTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
   }
 
   long getTimeRemainingMillis() {
-    String value = storage.getValue(TIME_REMAINING);
+    return getLongValue(TIME_REMAINING);
+  }
+
+  /**
+   * The idea is that we remember the current session id across page reloads...
+   */
+  public void clearSession() {
+    storage.removeValue(SESSION);
+  //  logger.info("clearSession " );
+  }
+
+  void storeSession(long millis) {
+    storage.storeValue(SESSION, "" + millis);
+   // logger.info("storeSession " + millis);
+  }
+
+  long getSession() {
+    String session = SESSION;
+    return getLongValue(session);
+  }
+
+  private long getLongValue(String session) {
+    String value = storage.getValue(session);
     if (value == null) return 0L;
     long i = 0L;
     try {
@@ -184,21 +203,22 @@ public class StickyState {
     } catch (NumberFormatException e) {
 
     }
-
-  //  logger.info("getTimeRemainingMillis " + i);
+    //   logger.info("getSession " + i);
 
     return i;
   }
 
-  public void startQuiz() {
-    storage.storeValue(IN_QUIZ,""+true);
+  void startQuiz() {
+    storage.storeValue(IN_QUIZ, "" + true);
   }
 
   public boolean inQuiz() {
     return storage.getValue(IN_QUIZ) != null;
   }
-  public void endQuiz() {
+
+  void endQuiz() {
     storage.removeValue(IN_QUIZ);
+    clearSession();
   }
 
   void reset() {

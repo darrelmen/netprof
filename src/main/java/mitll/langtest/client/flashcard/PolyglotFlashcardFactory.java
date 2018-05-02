@@ -32,14 +32,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   private static final int DRY_RUN_ROUND_TIME = PolyglotFlashcardFactory.DRY_RUN_MINUTES * 60 * 1000;
   private static final int ROUND_TIME = PolyglotFlashcardFactory.ROUND_MINUTES * 60 * 1000;
-  // private boolean inLightningRound = false;
+
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = -1;
-  private long sessionStartMillis = 0;
+
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
 
-  private static final boolean DEBUG = false;
+ // private static final boolean DEBUG = false;
 
   PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
     super(controller, exerciseList, instance);
@@ -97,9 +97,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   public void startTimedRun() {
     if (!isRoundTimerRunning()) {
       //inLightningRound = true;
-      logger.info("startTimedRun ->");
+     // logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
+      sticky.storeSession(System.currentTimeMillis());
     }
   }
 
@@ -143,7 +144,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     setBannerVisible(false);
 
     if (!isRoundTimerRunning()) {
-      logger.info("start round timer ");
+      //logger.info("start round timer ");
       clearAnswerMemory();
 
       doSessionStart(isDry);
@@ -165,7 +166,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
     logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
-    sessionStartMillis = System.currentTimeMillis();
+   // sessionStartMillis = System.currentTimeMillis();
   }
 
   /**
@@ -231,7 +232,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   @Override
   public long getSessionStartMillis() {
-    return sessionStartMillis;
+    return sticky.getSession();
   }
 
   /**
