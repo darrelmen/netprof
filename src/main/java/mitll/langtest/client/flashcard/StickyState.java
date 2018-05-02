@@ -164,18 +164,17 @@ public class StickyState {
 
   public void clearTimeRemaining() {
     storage.removeValue(TIME_REMAINING);
-
-    logger.info("clearTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
+ //   logger.info("clearTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
   }
 
 
   void storeTimeRemaining(long millis) {
-    logger.info("storeTimeRemaining Store time remaining " + millis);
+   // logger.info("storeTimeRemaining Store time remaining " + millis);
     storage.storeValue(TIME_REMAINING, "" + millis);
 
-    logger.info("storeTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
-
+   // logger.info("storeTimeRemaining getTimeRemainingMillis " + getTimeRemainingMillis());
   }
+
   long getTimeRemainingMillis() {
     String value = storage.getValue(TIME_REMAINING);
     if (value == null) return 0L;
@@ -186,7 +185,7 @@ public class StickyState {
 
     }
 
-    logger.info("getTimeRemainingMillis " + i);
+  //  logger.info("getTimeRemainingMillis " + i);
 
     return i;
   }

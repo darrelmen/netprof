@@ -131,4 +131,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   CommentAnnotator getCommentAnnotator();
 
   MessageHelper getMessageHelper();
+
+  boolean isHasNetworkProblem();
+  void setHasNetworkProblem(boolean hasNetworkProblem);
 }

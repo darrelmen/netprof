@@ -88,7 +88,7 @@ public class InitialUI implements UILifecycle {
    *
    * @see #confirmCurrentProject
    */
-  private static final String CHECK_NETWORK_WIFI = "CHECK NETWORK/WIFI";
+  public static final String CHECK_NETWORK_WIFI = "CHECK NETWORK/WIFI";
   private static final int WIFI_MAX_WAIT = 5000;
   private static final String DIVIDER = ">";
   private static final String ALL = "Home";
@@ -400,17 +400,20 @@ public class InitialUI implements UILifecycle {
   }
 
   private void cancelHeartbeatTimer(Timer timer) {
+    controller.setHasNetworkProblem(false);
     timer.cancel();
     setSplash(controller.isMicAvailable() ? "" : RECORDING_DISABLED);
   }
 
   @NotNull
   private Timer getWifiTimer() {
+    long then = System.currentTimeMillis();
     Timer timer = new Timer() {
       @Override
       public void run() {
-        //logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
+       // logger.warning("getWifiTimer waited " + (System.currentTimeMillis() - then) + " for a response");
         setSplash(CHECK_NETWORK_WIFI);
+        controller.setHasNetworkProblem(true);
       }
     };
     timer.schedule(WIFI_MAX_WAIT);
@@ -902,9 +905,9 @@ public class InitialUI implements UILifecycle {
    * @see #clickOnParentCrumb
    */
   private void removeLastCrumb() {
-    logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
+   // logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
-    logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
+   // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
   /**
@@ -941,7 +944,7 @@ public class InitialUI implements UILifecycle {
     banner.setSubtitle(message);
   }
 
-  public void setVisible(boolean visible) {
-    banner.setVisible(visible);
-  }
+//  public void setVisible(boolean visible) {
+//    banner.setVisible(visible);
+//  }
 }

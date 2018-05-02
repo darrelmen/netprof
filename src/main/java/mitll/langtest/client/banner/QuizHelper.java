@@ -299,7 +299,7 @@ public class QuizHelper extends PracticeHelper {
       return new QuizIntro(getIdToList(), listid -> {
         polyglotFlashcardFactory.cancelRoundTimer();
         chosenList = listid;
-        logger.info("got choice " + listid);
+       // logger.info("got choice " + listid);
         polyglotFlashcardFactory.removeItemFromHistory(chosenList);
         showQuizForReal();
         polyglotFlashcardFactory.startQuiz();

@@ -3,11 +3,13 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -16,6 +18,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -85,13 +88,20 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     this.sticky = stickyState;
     this.statsFlashcardFactory = statsFlashcardFactory;
     addWidgets(e, controller, controlState);
+    wifiTimer = getWifiTimer();
   }
 
+  private Timer wifiTimer;
 
   @Override
   protected String getDeviceValue() {
-    String s = controller.getBrowserInfo();
-    return s;
+    return controller.getBrowserInfo();
+  }
+
+  @Override
+  protected void onDetach() {
+    super.onDetach();
+    wifiTimer.cancel();
   }
 
   @NotNull
@@ -333,8 +343,38 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
     buttons.add(getSkipToEnd());
     buttons.add(startOver = getStartOver());
+    buttons.add(addSubtitle());
 
     belowContentDiv = toAddTo;
+  }
+
+  private Label wifiStatus;
+
+  private Label addSubtitle() {
+    wifiStatus = new Label(InitialUI.CHECK_NETWORK_WIFI);
+    wifiStatus.addStyleName("rightFiveMargin");
+    wifiStatus.addStyleName("floatRight");
+    wifiStatus.setType(LabelType.WARNING);
+    wifiStatus.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    wifiStatus.setVisible(true);
+    return wifiStatus;
+  }
+
+
+  @NotNull
+  private Timer getWifiTimer() {
+    Timer timer = new Timer() {
+      @Override
+      public void run() {
+        //logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
+        if (controller.isHasNetworkProblem()) {
+          logger.info("check - " + controller.isHasNetworkProblem());
+        }
+        wifiStatus.setVisible(controller.isHasNetworkProblem());
+      }
+    };
+    timer.scheduleRepeating(1000);
+    return timer;
   }
 
   /**

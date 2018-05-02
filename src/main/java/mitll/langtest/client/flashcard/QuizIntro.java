@@ -24,12 +24,19 @@ public class QuizIntro extends DivWidget {
   private static final String START = "Start!";
   public static final String DRY_RUN = "Dry Run";
   private static final String FLASHCARDS = "quiz";
+  private static final String WELCOME_USER_ = "Welcome ";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
   private static final int NATIVE_THRESHOLD = 70;
   private final Button closeButton;
 
+  /**
+   * @see QuizHelper.MyPracticeFacetExerciseList
+   * @param idToList
+   * @param closeListener
+   * @param userID
+   */
   public QuizIntro(Map<Integer, IUserList> idToList,
                    QuizHelper.QuizChoiceListener closeListener,
                    String userID) {
@@ -63,7 +70,7 @@ public class QuizIntro extends DivWidget {
     FluidRow row = new FluidRow();
 
 
-    Heading welcome = new Heading(3, "Welcome User ");
+    Heading welcome = new Heading(3, WELCOME_USER_);
     Heading welcome2 = new Heading(3, userID);
     welcome2.getElement().getStyle().setColor("blue");
 

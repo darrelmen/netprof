@@ -246,7 +246,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   protected void gotSeeScoresClick() {
     stopTimerShowBanner();
-
     super.gotSeeScoresClick();
   }
 

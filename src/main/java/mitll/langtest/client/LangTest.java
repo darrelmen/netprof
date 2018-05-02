@@ -295,7 +295,7 @@ public class LangTest implements
   private final long then = 0;
   private MessageHelper messageHelper;
   private AnnotationHelper annotationHelper;
-
+private boolean hasNetworkProblem;
   /**
    * This gets called first.
    * <p>
@@ -1266,5 +1266,13 @@ public class LangTest implements
 
   public OpenUserServiceAsync getOpenUserService() {
     return openUserService;
+  }
+
+  public boolean isHasNetworkProblem() {
+    return hasNetworkProblem;
+  }
+
+  public void setHasNetworkProblem(boolean hasNetworkProblem) {
+    this.hasNetworkProblem = hasNetworkProblem;
   }
 }
