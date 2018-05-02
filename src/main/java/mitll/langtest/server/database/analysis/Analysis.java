@@ -332,7 +332,7 @@ public abstract class Analysis extends DAO {
   PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
     //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
     if (DEBUG)
-      logger.debug(" getPhonesForUser " + userid + " got " + next);
+      logger.debug(" getPhoneReportForPhone " + userid + " got " + next + " from " + new Date(from) + " to " + new Date(to));
 
     if (next == null) {
       return new PhoneReport();
@@ -368,7 +368,7 @@ public abstract class Analysis extends DAO {
   private List<Integer> getResultIDsForUser(UserInfo next) {
     List<BestScore> resultsForQuery = next.getBestScores();
 
-    List<Integer> resultIDs = new ArrayList<>();
+    List<Integer> resultIDs = new ArrayList<>(next.getBestScores().size());
     resultsForQuery.forEach(bs -> resultIDs.add(bs.getResultID()));
 
     if (DEBUG)

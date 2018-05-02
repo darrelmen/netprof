@@ -54,6 +54,8 @@ import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 @SuppressWarnings("serial")
 public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenUserService {
   private static final Logger logger = LogManager.getLogger(OpenUserServiceImpl.class);
+  private static final int BOUND = 10000;
+  private static final boolean SIMULATE_NETWORK = false;
 
   /**
    * If successful, establishes a session.
@@ -324,7 +326,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * in the database if it's not consistent with the UI.
    * <p>
    * This should support Paul's language eval comparison. (1/22/18).
-   *
+   * <p>
    * So what can happen
    * - a user can choose a different project in a different tab, and this makes sure the current client one is the current one
    * - a user can have a browser open so long it's javascript is out of date and should reload.
@@ -363,7 +365,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           new Thread(() -> updateVisited(sid)).start();
         }
 
-//        simulateNetworkIssue();
+        if (SIMULATE_NETWORK) simulateNetworkIssue();
         return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
       }
     } catch (DominoSessionException e) {
@@ -403,7 +405,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
         }
 
-        //      simulateNetworkIssue();
+        simulateNetworkIssue();
         return new HeartbeatStatus(true, codeHasUpdated);
       }
     } catch (DominoSessionException e) {
@@ -412,16 +414,16 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     }
   }
 
-/*  private void simulateNetworkIssue() {
+  private void simulateNetworkIssue() {
     try {
       logger.info("checkHeartbeat sleep...");
       java.util.Random random = new java.util.Random();
 
-      int millis = random.nextInt(5000);
+      int millis = random.nextInt(BOUND);
       Thread.sleep(millis);
       logger.info("checkHeartbeat finished sleep... for " + millis);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-  }*/
+  }
 }

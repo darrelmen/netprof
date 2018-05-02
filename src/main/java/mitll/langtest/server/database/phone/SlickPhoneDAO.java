@@ -228,7 +228,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     boolean useSessionGran = project.getKind() == ProjectType.POLYGLOT;
     String language = project.getLanguage();
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getPhoneReport" +
           "\n\tuser    " + userid +
           "\n\tlang    " + language +
@@ -296,6 +296,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           report.pseq(),
           report.pscore(),
           language);
+
+     if (DEBUG) logger.info("getPhoneReport adding " +new Date(wordAndScore.getTimestamp()));
 
       if (addTranscript) {
         addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);

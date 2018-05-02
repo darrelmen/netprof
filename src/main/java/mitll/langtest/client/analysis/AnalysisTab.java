@@ -41,8 +41,6 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -51,7 +49,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
 import org.jetbrains.annotations.NotNull;
@@ -597,9 +594,8 @@ public class AnalysisTab extends DivWidget {
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
-
-    final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, analysisServiceAsync, listid, userid);
+    //final PhonePlot phonePlot = new PhonePlot();
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
 
     analysisPlot.addListener(phoneContainer);
 
@@ -632,7 +628,6 @@ public class AnalysisTab extends DivWidget {
     sounds.add(phones);
     return sounds;
   }
-
 
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);

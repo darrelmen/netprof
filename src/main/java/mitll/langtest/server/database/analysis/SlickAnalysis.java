@@ -72,10 +72,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private final int projid;
   private final Project project;
 
-  private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
   private final boolean sortByPolyScore;
   private Collator collator;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PHONE = false;
 
   /**
    * @param database
@@ -212,7 +214,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         break;
       }
     }
-  //  logger.info("allSameDay " + allSameDay);
+    //  logger.info("allSameDay " + allSameDay);
     return allSameDay;
   }
 
@@ -239,11 +241,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * Support word async table sort columns
-   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
+   *
    * @param project
    * @param criteria
    * @param inTime
    * @return
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    * @see #getWordScoresForPeriod
    */
   private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
@@ -342,7 +345,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 
-    if (DEBUG) {
+    if (DEBUG || DEBUG_PHONE) {
       logger.info("getPhoneReportFor for" +
           "\n\tuser   " + next +
           "\n\tuserid " + userid +
@@ -362,13 +365,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       return new ArrayList<>();
     } else {
 
-      if (DEBUG) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+      if (DEBUG || DEBUG_PHONE) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
 
       SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
       // examples.addAll(wordAndScores);
       List<WordAndScore> filteredWords = new ArrayList<>(examples);
 
-      filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
+      if (filteredWords.size() > MAX_TO_SEND) {
+        filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
+      }
 
       long now = System.currentTimeMillis();
       logger.info("getPhoneReportFor (took " + (now - then) + ") " +

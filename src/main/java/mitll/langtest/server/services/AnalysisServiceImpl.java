@@ -189,8 +189,11 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
    */
   @Override
-  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone,
-                                                                long from, long to)
+  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid,
+                                                                int listid,
+                                                                String phone,
+                                                                long from,
+                                                                long to)
       throws DominoSessionException, RestrictedOperationException {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     int projectID = getProjectIDFromUser();
