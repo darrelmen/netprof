@@ -32,8 +32,10 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextArea;
@@ -42,11 +44,13 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -55,12 +59,21 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.MatchInfo;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -69,12 +82,15 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  private static final String ALL = "All";
+  private static final String HEAR_ITEMS = "Hear Items";
+  private static final String PLAY_AUDIO = "Play Audio?";
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
 
   private static final String QUIZ_SIZE = "# Items";
   private static final String DURATION_MINUTES = "Duration (Min.)";
-  private static final int DEFAULT_QUIZ_SIZE = 0;
+  private static final int DEFAULT_QUIZ_SIZE = 10;
 
   private static final int MIN_DURATION = 1;
   private static final int DEFAULT_DURATION = 1;
@@ -148,58 +164,11 @@ public class CreateListDialog extends BasicDialog {
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
     this.listView = listView;
     this.controller = controller;
-    getTypeToValues(new HashMap<>());
   }
 
-  private void getTypeToValues(Map<String, String> typeToSelection) {
-    if (!isThereALoggedInUser()) return;
-
-
-    final long then = System.currentTimeMillis();
-
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    Collection<SectionNode> sectionNodes = projectStartupInfo.getSectionNodes();
-    logger.info("order   " + projectStartupInfo.getTypeOrder());
-    logger.info("section nodes " + sectionNodes);
-    logger.info("root nodes " + projectStartupInfo.getRootNodes());
-    logger.info("parent->child " + projectStartupInfo.getParentToChild());
-
-/*    controller.getExerciseService().getTypeToValues(new FilterRequest(0, new ArrayList<>(), -1),
-        new AsyncCallback<FilterResponse>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            if (caught instanceof DominoSessionException) {
-              logger.info("getTypeToValues : got " + caught);
-            }
-            controller.handleNonFatalError("no type to values", caught);
-          }
-
-          *//**
-           * fixes downstream selections that no longer make sense.
-           * @param response
-           *//*
-          @Override
-          public void onSuccess(FilterResponse response) {
-            gotFilterResponse(response, then, typeToSelection);
-          }
-        });*/
-  }
-
-
-/*  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (true) {
-      logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
-          "\n\ttype to selection " + typeToSelection +
-          "\n\tresponse " + response +
-          "\n\ttype to values    " + response.getTypeToValues().size()
-      );
-    }
-  }*/
-
-
-  private boolean isThereALoggedInUser() {
-    return controller.getUser() > 0;
-  }
+//  private boolean isThereALoggedInUser() {
+//    return controller.getUser() > 0;
+//  }
 
   /**
    * @param thirdRow
@@ -277,7 +246,7 @@ public class CreateListDialog extends BasicDialog {
     quizOptions.addStyleName("url-box");
   }
 
-  List<ListBox> allUnitChapter;
+  private List<ListBox> allUnitChapter;
 
   @NotNull
   private Grid getChoices(boolean isCreate) {
@@ -303,12 +272,10 @@ public class CreateListDialog extends BasicDialog {
         listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all));
         all.add(listBox);
         grid.setWidget(row, col++, listBox);
-        listBox.addItem("All");
+        listBox.addItem(ALL);
 
         if (first) {
-          projectStartupInfo.getSectionNodes().forEach(sectionNode -> {
-            listBox.addItem(sectionNode.getName());
-          });
+          projectStartupInfo.getSectionNodes().forEach(sectionNode -> listBox.addItem(sectionNode.getName()));
           first = false;
         }
 
@@ -363,13 +330,11 @@ public class CreateListDialog extends BasicDialog {
             @Override
             public void onSuccess(FilterResponse response) {
               Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
-              logger.info("got " + typeToValues);
+             // logger.info("got " + typeToValues);
               Set<MatchInfo> matchInfos = typeToValues.get(controller.getProjectStartupInfo().getTypeOrder().get(nextIndex));
               nextBox.clear();
-              nextBox.addItem("All");
-              matchInfos.forEach(matchInfo -> {
-                nextBox.addItem(matchInfo.getValue());
-              });
+              nextBox.addItem(ALL);
+              matchInfos.forEach(matchInfo -> nextBox.addItem(matchInfo.getValue()));
             }
           });
 
@@ -379,14 +344,14 @@ public class CreateListDialog extends BasicDialog {
   @NotNull
   private HTML getHearLabel() {
     HTML label;
-    label = getLabel("Hear Items");
+    label = getLabel(HEAR_ITEMS);
     label.addStyleName("leftTenMargin");
     return label;
   }
 
   @NotNull
   private CheckBox getPlayAudioCheck() {
-    CheckBox w = new CheckBox("Play Audio?");
+    CheckBox w = new CheckBox(PLAY_AUDIO);
     w.addStyleName("leftFiveMargin");
     w.addValueChangeHandler(event -> playAudio = w.getValue());
     if (current != null) {
@@ -502,7 +467,7 @@ public class CreateListDialog extends BasicDialog {
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
 
-    if (!madeSelection && false) {
+/*    if (!madeSelection && false) {
       duration = Math.max(1, quizSize / 10);
 
       Scheduler.get().scheduleDeferred(() ->
@@ -520,7 +485,7 @@ public class CreateListDialog extends BasicDialog {
           }
       );
 //      logger.info("1 duration sel " + durationList.getSelectedIndex());
-    }
+    }*/
     //   logger.info("got " + quizSize);
   }
 
