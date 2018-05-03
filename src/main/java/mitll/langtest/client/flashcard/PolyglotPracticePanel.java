@@ -57,7 +57,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
   private int minPolyScore;
-  boolean showAudio;
+ protected boolean showAudio;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,

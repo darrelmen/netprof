@@ -289,7 +289,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    */
   @Override
   public void cancelRoundTimer() {
-    logger.info("cancelRoundTimer");
+   // logger.info("cancelRoundTimer");
     sticky.endQuiz();
     // if (roundTimer != null) roundTimer.cancel();
     cancelTimer();
@@ -298,7 +298,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   public void clearTimeRemaining() {
-    logger.info("clearTimeRemaining");
+   // logger.info("clearTimeRemaining");
     sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
   }

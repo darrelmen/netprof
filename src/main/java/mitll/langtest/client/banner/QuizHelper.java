@@ -177,6 +177,13 @@ public class QuizHelper extends PracticeHelper {
             setChosenList(exerciseList);
           }
           IUserList iUserList = idToList.get(chosenList);
+          if (iUserList == null) {
+            logger.warning("no user list for "+chosenList);
+          }
+          else {
+            logger.info("shouldShowAudio for list " + chosenList + " user list " + iUserList);
+            logger.info("for list " + chosenList + " show audio " + iUserList.shouldShowAudio());
+          }
           return iUserList != null && iUserList.shouldShowAudio();
         }
       }
