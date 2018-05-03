@@ -411,7 +411,7 @@ public class InitialUI implements UILifecycle {
     Timer timer = new Timer() {
       @Override
       public void run() {
-       // logger.warning("getWifiTimer waited " + (System.currentTimeMillis() - then) + " for a response");
+        logger.warning("getWifiTimer waited " + (System.currentTimeMillis() - then) + " for a response");
         setSplash(CHECK_NETWORK_WIFI);
         controller.setHasNetworkProblem(true);
       }

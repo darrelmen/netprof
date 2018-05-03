@@ -72,6 +72,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private SimplePager pager;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_SCROLL = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
@@ -369,7 +370,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-      if (DEBUG) logger.info("scrollToVisible new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      if (DEBUG_SCROLL) logger.info("scrollToVisible new start of prev page " + newStart + " vs current " + table.getVisibleRange());
 
       table.setVisibleRange(newStart, pageSize);
       return true;
@@ -377,14 +378,16 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
       int pageEnd = table.getPageStart() + pageSize;
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
-        if (DEBUG)
+        if (DEBUG_SCROLL)
           logger.info("scrollToVisible new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
               " vs current " + table.getVisibleRange());
 
         table.setVisibleRange(newStart, pageSize);
         return true;
       } else {
-        if (DEBUG) logger.info("nope -");
+        if (DEBUG_SCROLL) logger.info("nope -");
+        table.setVisibleRange(table.getPageStart(), table.getPageSize());
+
         return false;
       }
     }

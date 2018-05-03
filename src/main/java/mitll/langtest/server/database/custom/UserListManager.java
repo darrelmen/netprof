@@ -306,7 +306,6 @@ public class UserListManager implements IUserListManager {
   }
 
   private void addRandomItems(int reqSize, Project project, List<CommonExercise> items, Map<String, String> unitChapter) {
-    //List<CommonExercise> rawExercises = project.getRawExercises();
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
       if (!v.equalsIgnoreCase("All")) {
@@ -316,36 +315,34 @@ public class UserListManager implements IUserListManager {
 
     Collection<CommonExercise> exercisesForSelectionState;
     if (typeToSelection.isEmpty()) {
-      exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSelection);
-    } else {
       exercisesForSelectionState = project.getRawExercises();
+    } else {
+      exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSelection);
     }
-    logger.info("for " + unitChapter);
-    logger.info("exercisesForSelectionState " + exercisesForSelectionState.size());
-    ArrayList<CommonExercise> rawExercises = new ArrayList<>(exercisesForSelectionState);
-    logger.info("rawExercises " + rawExercises.size());
+    List<CommonExercise> rawExercises = new ArrayList<>(exercisesForSelectionState);
     addRandomItems(reqSize, items, rawExercises);
+
+    logger.info("exercisesForSelectionState " + typeToSelection + " : " + exercisesForSelectionState.size() + " items " + items.size());
   }
 
-  private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> rawExercises) {
-    int misses = 0;
+  private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> toChooseFrom) {
+  //  int misses = 0;
     Random random = new Random();
 
-    int size = rawExercises.size();
+  //  int size = toChooseFrom.size();
 
-    logger.info("size " + size);
-    logger.info("req " + reqSize);
     Set<Integer> exids = new TreeSet<>();
 
-    reqSize = Math.min(reqSize, rawExercises.size());
-    logger.info("reqSize " + reqSize);
-    logger.info("items.size() " + items.size());
+    reqSize = Math.min(reqSize, toChooseFrom.size());
 
     while (items.size() < reqSize) {
-      int i = random.nextInt(size);
-      CommonExercise commonExercise = rawExercises.get(i);
+      int i = random.nextInt(toChooseFrom.size());
+      CommonExercise commonExercise = toChooseFrom.get(i);
       boolean add = exids.add(commonExercise.getID());
       if (add) {
+        items.add(commonExercise);
+        toChooseFrom.remove(commonExercise);
+/*
         int numPhones = commonExercise.getNumPhones();
         if (numPhones > 0 || misses > 100) {
           if (numPhones > 3) {
@@ -358,7 +355,7 @@ public class UserListManager implements IUserListManager {
           logger.warn("no phones for " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + numPhones);
           misses++;
         }
-        //  quiz.addExercise(getShells(commonExercise));
+*/
       }
     }
   }

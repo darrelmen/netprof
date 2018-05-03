@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -82,10 +83,11 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  private final Logger logger = Logger.getLogger("CreateListDialog");
+
   private static final String ALL = "All";
   private static final String HEAR_ITEMS = "Hear Items";
   private static final String PLAY_AUDIO = "Play Audio?";
-  private final Logger logger = Logger.getLogger("CreateListDialog");
 
 
   private static final String QUIZ_SIZE = "# Items";
@@ -108,7 +110,7 @@ public class CreateListDialog extends BasicDialog {
   private static final int MIN_QUIZ_SIZE = 0;
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
-  private static final String CREATE_A_NEW_QUIZ = "Create a new quiz.";
+  private static final String CREATE_A_NEW_QUIZ = "Create a new quiz. (Items are chosen randomly.)";
   private static final String IS_A_QUIZ = "Is a quiz?";
 
   private static final String MAKE_A_QUIZ = "Make a quiz?";
@@ -258,7 +260,10 @@ public class CreateListDialog extends BasicDialog {
 
     if (isCreate) {
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-      for (String type : projectStartupInfo.getTypeOrder()) {
+      List<String> typeOrder = projectStartupInfo.getTypeOrder();
+
+      if (typeOrder.size()>2) typeOrder=typeOrder.subList(0,2);
+      for (String type : typeOrder) {
         grid.setWidget(row, col++, getLabel(type));
       }
 
@@ -267,7 +272,7 @@ public class CreateListDialog extends BasicDialog {
       List<ListBox> all = new ArrayList<>();
       allUnitChapter = all;
       boolean first = true;
-      for (String type : projectStartupInfo.getTypeOrder()) {
+      for (String type : typeOrder) {
         ListBox listBox = getListBox(100);
         listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all));
         all.add(listBox);
@@ -275,7 +280,7 @@ public class CreateListDialog extends BasicDialog {
         listBox.addItem(ALL);
 
         if (first) {
-          projectStartupInfo.getSectionNodes().forEach(sectionNode -> listBox.addItem(sectionNode.getName()));
+          addSorted(projectStartupInfo, listBox);
           first = false;
         }
 
@@ -300,6 +305,12 @@ public class CreateListDialog extends BasicDialog {
     grid.setWidget(row, col++, getMinScoreChoices());
     grid.setWidget(row, col++, getPlayAudioCheck());
     return grid;
+  }
+
+  private void addSorted(ProjectStartupInfo projectStartupInfo, ListBox listBox) {
+    List<String> items = new ArrayList<>();
+    projectStartupInfo.getSectionNodes().forEach(sectionNode -> items.add(sectionNode.getName()));
+    new ItemSorter().getSortedItems(items).forEach(listBox::addItem);
   }
 
   private void gotChangeFor(String type, ListBox listBox, List<ListBox> all) {
@@ -331,10 +342,16 @@ public class CreateListDialog extends BasicDialog {
             public void onSuccess(FilterResponse response) {
               Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
              // logger.info("got " + typeToValues);
-              Set<MatchInfo> matchInfos = typeToValues.get(controller.getProjectStartupInfo().getTypeOrder().get(nextIndex));
+              List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+            //   logger.info("got " + typeOrder );
+              String key = typeOrder.get(nextIndex);
+             // logger.info("key " + key );
+              Set<MatchInfo> matchInfos = typeToValues.get(key);
               nextBox.clear();
               nextBox.addItem(ALL);
-              matchInfos.forEach(matchInfo -> nextBox.addItem(matchInfo.getValue()));
+              if (matchInfos != null) {
+                matchInfos.forEach(matchInfo -> nextBox.addItem(matchInfo.getValue()));
+              }
             }
           });
 
@@ -681,6 +698,7 @@ public class CreateListDialog extends BasicDialog {
 
     if (allUnitChapter != null) {
       allUnitChapter.forEach(listBox -> unitToChapter.put(typeOrder.get(unitToChapter.size()), listBox.getSelectedValue()));
+      logger.info("addUserList " + unitToChapter);
     }
     controller.getListService().addUserList(
         safeText,
@@ -704,6 +722,7 @@ public class CreateListDialog extends BasicDialog {
             if (result == null) {
               markError(titleBox, "You already have a list named " + safeText);
             } else {
+              logger.info("addUserList onSuccess " + result);
               listView.madeIt(result);
             }
           }

@@ -266,6 +266,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
+ //   tableWithPager.setHeight("520px");
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
@@ -596,6 +597,8 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {
+    if (currentSelection == null) return;
+
     final int uniqueID = currentSelection.getID();
 
     delete.setEnabled(false);
@@ -625,13 +628,16 @@ public class ListView implements ContentView, CreateListComplete {
     listContainer.forgetItem(currentSelection);
     int numItems = listContainer.getNumItems();
     if (numItems == 0) {
-      delete.setEnabled(false);
+      //delete.setEnabled(false);
       listContainer.disableAll();
     } else {
       if (index == numItems) index = numItems - 1;
       HasID at = listContainer.getAt(index);
       //logger.info("next is " + at.getName());
-      listContainer.markCurrentExercise(at.getID());
+      int id = at.getID();
+//      listContainer.markCurrentExercise(id);
+      Scheduler.get().scheduleDeferred(() -> listContainer.markCurrentExercise(id));
+
     }
   }
 
@@ -765,16 +771,24 @@ public class ListView implements ContentView, CreateListComplete {
 
   @Override
   public void madeIt(UserList userList) {
-    dialogHelper.hide();
-    logger.info("made it " + userList.getName());
-    logger.info("made it ex " + userList.getExercises().size());
-    //logger.info("\n\n\ngot made list");
+   // logger.info("madeIt made it " + userList.getName());
 
-    myLists.addExerciseAfter(null, userList);
-    myLists.markCurrentExercise(userList.getID());
-    myLists.enableAll();
-    myLists.redraw();
-    names.add(userList.getName());
+    try {
+      dialogHelper.hide();
+    //  logger.info("made it ex " + userList.getExercises().size());
+      //logger.info("\n\n\ngot made list");
+
+      myLists.addExerciseAfter(null, userList);
+      myLists.enableAll();
+      //myLists.redraw();
+
+
+      names.add(userList.getName());
+    } catch (Exception e) {
+      logger.warning("got " +e);
+    }
+    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID())
+    );
   }
 
   /**
@@ -787,7 +801,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
-      super(ListView.this.controller, 20, true, MY_LISTS, 15, true);
+      super(ListView.this.controller, 18, true, MY_LISTS, 15, true);
     }
 
     @Override
@@ -814,7 +828,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void setShareHREF(UserList<CommonShell> user) {
     if (user != null) {
       setShareButtonHREF();
-     // share.setEnabled(!user.isFavorite());
+      // share.setEnabled(!user.isFavorite());
     }
   }
 

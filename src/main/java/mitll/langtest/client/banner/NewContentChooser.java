@@ -206,10 +206,10 @@ public class NewContentChooser implements INavigation {
 
   private void setInstanceHistory(VIEWS views) {
     if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
-      logger.info("setInstanceHistory clearing history for instance " + views);
+     // logger.info("setInstanceHistory clearing history for instance " + views);
       History.newItem(SelectionState.INSTANCE + "=" + views.toString());
     } else {
-      logger.info("setInstanceHistory NOT clearing history for instance " + views);
+   //   logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
