@@ -61,11 +61,9 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.PhoneStats;
 import mitll.langtest.shared.analysis.WordAndScore;
-import mitll.langtest.shared.project.ProjectType;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +104,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int SOUND_WIDTH = 65;
 
   private final PhoneExampleContainer exampleContainer;
-  private final PhonePlot phonePlot;
+  //  private final PhonePlot phonePlot;
   private final int listid;
   private final int userid;
 
@@ -121,24 +119,20 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @param controller
    * @param exampleContainer
-   * @param phonePlot
    * @param listid
    * @param userid
    * @see AnalysisTab#getPhoneReport
    */
   PhoneContainer(ExerciseController controller,
                  PhoneExampleContainer exampleContainer,
-                 PhonePlot phonePlot,
                  AnalysisServiceAsync analysisServiceAsync,
                  int listid,
                  int userid) {
     super(controller);
     this.exampleContainer = exampleContainer;
-    this.phonePlot = phonePlot;
     this.analysisServiceAsync = analysisServiceAsync;
     this.listid = listid;
     this.userid = userid;
-    //isPoly = controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT;
   }
 
   @Override
@@ -156,7 +150,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
-  private PhoneReport phoneReport;
+//  private PhoneReport phoneReport;
 
   /**
    * @param phoneReport
@@ -166,9 +160,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   public Panel getTableWithPager(PhoneReport phoneReport) {
     from = 0;
     to = System.currentTimeMillis();
-    this.phoneReport = phoneReport;
-    return getTableWithPagerForHistory(getPhoneAndStatsList(from, to));
+    //  this.phoneReport = phoneReport;
+    return getTableWithPagerForHistory(getPhoneAndStatsList(phoneReport, from, to));
   }
+
+  private int reqid = 0;
 
   /**
    * @param from
@@ -183,14 +179,40 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     this.from = from;
     this.to = to;
 
-    addItems(getPhoneAndStatsList(from, to));
+
+    analysisServiceAsync.getPhoneReport(userid, listid, from, to, reqid++, new AsyncCallback<PhoneReport>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(PhoneReport result) {
+        if (result.getReqid() + 1 != reqid) {
+          logger.info("skip stale req");
+        } else {
+          gotNewPhoneReport(result);
+        }
+      }
+    });
+//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
+//    addItems(phoneAndStatsList);
+//    showExamplesForSelectedSound();
+  }
+
+  private void gotNewPhoneReport(PhoneReport result) {
+    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsListForPeriod(result.getPhoneToAvgSorted(), from, to);
+    //  List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
+    addItems(phoneAndStatsList);
     showExamplesForSelectedSound();
   }
 
-  private List<PhoneAndStats> getPhoneAndStatsList(long from, long to) {
+
+  private List<PhoneAndStats> getPhoneAndStatsList(PhoneReport phoneReport, long from, long to) {
     return (phoneReport == null) ? Collections.emptyList() :
         getPhoneAndStatsListForPeriod(phoneReport.getPhoneToAvgSorted(), from, to);
   }
+
 
   private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted,
                                                             long first,
@@ -381,8 +403,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private boolean doesSessionOverlap(long first, long last, PhoneSession session) {
     long sessionStart = session.getStart();
-    return //isPoly ?
-        //first == session.getSessionStart() :
+    return
         (sessionStart >= first && sessionStart <= last) || // start inside window
             (session.getEnd() >= first && session.getEnd() <= last) ||    // end inside window
             (sessionStart < first && session.getEnd() > last);      // session starts before and ends after window
@@ -434,9 +455,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     if (list.isEmpty()) {
       logger.warning("showExamplesForSelectedSound : list empty?");
     } else {
-      String phone = list.get(0).getPhone();
-      //clickOnPhone(phone);
-      clickOnPhone2(phone);
+      clickOnPhone2(list.get(0).getPhone());
     }
   }
 
@@ -526,6 +545,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return (i == 0) ? compPhones(o1, o2) : i;
   }
 
+/*
   private ColumnSortEvent.ListHandler<PhoneAndStats> getRankSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
                                                                    List<PhoneAndStats> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
@@ -549,7 +569,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         });
     return columnSortHandler;
   }
-
+*/
 
 
   @Override
@@ -628,17 +648,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private void clickOnPhone2(String phone) {
-    PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
+//    PhoneStats statsForPhone = phoneReport.getPhoneToAvgSorted().get(phone);
     //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
-    List<PhoneSession> filtered = getFiltered(statsForPhone.getSessions(), from, to);
+    // List<PhoneSession> filtered = getFiltered(statsForPhone.getSessions(), from, to);
 
-    long min = Long.MAX_VALUE;
+   /* long min = Long.MAX_VALUE;
     long max = Long.MIN_VALUE;
     for (PhoneSession phoneSession : filtered) {
       if (phoneSession.getStart() < min) min = phoneSession.getStart();
       if (phoneSession.getEnd() > max) max = phoneSession.getEnd();
-    }
-    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, min, max, new AsyncCallback<List<WordAndScore>>() {
+    }*/
+
+    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, from, to, new AsyncCallback<List<WordAndScore>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting performance report for user and phone", caught);
@@ -649,8 +670,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         exampleContainer.addItems(phone,
             filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
             MAX_EXAMPLES);
-
-        phonePlot.showErrorBarData(filtered, phone);
+//        phonePlot.showErrorBarData(filtered, phone);
       }
     });
   }

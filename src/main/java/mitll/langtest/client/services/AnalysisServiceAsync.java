@@ -35,6 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -71,4 +72,6 @@ public interface AnalysisServiceAsync {
                             long fromTime, long toTime, int rangeStart, int rangeEnd, String sort,
                             int reqid,
                             AsyncCallback<WordsAndTotal> async);
+
+  void getPhoneReport(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneReport> async);
 }

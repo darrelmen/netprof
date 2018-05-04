@@ -41,8 +41,6 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -51,7 +49,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneReport;
 import org.jetbrains.annotations.NotNull;
@@ -97,8 +94,8 @@ public class AnalysisTab extends DivWidget {
 
   static final long TENMIN_DUR = 10 * MINUTE;
   static final long DAY_DUR = 24 * HOUR;
-  private static final long WEEK_DUR = 7 * DAY_DUR;
-  private static final long MONTH_DUR = 4 * WEEK_DUR;
+   static final long WEEK_DUR = 7 * DAY_DUR;
+   static final long MONTH_DUR = 4 * WEEK_DUR;
   static final long YEAR_DUR = 52 * WEEK_DUR;
   private static final long YEARS = 20 * YEAR_DUR;
 
@@ -281,8 +278,6 @@ public class AnalysisTab extends DivWidget {
           "\n\tphones word and score " + phoneReport.getPhoneToWordAndScoreSorted().values().size()
       );
     }
-    PhoneReport fphoneReport = phoneReport;
-
     long then2 = now;
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
 
@@ -292,7 +287,7 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, fphoneReport, reqInfo);
+    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, phoneReport, reqInfo);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -373,7 +368,7 @@ public class AnalysisTab extends DivWidget {
         monthChoice,
         sessionChoice,
 
-        scoreHeader);
+        scoreHeader, timeScale);
     return stepper;
   }
 
@@ -449,9 +444,7 @@ public class AnalysisTab extends DivWidget {
     timeScale.addStyleName("leftTenMargin");
     timeScale.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     timeScale.addChangeHandler(event -> {
-      int selectedIndex = timeScale.getSelectedIndex();
-      TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
-      analysisPlot.setTimeHorizon(horizon);
+      gotTimeScaleChange();
     });
 
     for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
@@ -471,6 +464,12 @@ public class AnalysisTab extends DivWidget {
     });
 
     return timeScale;
+  }
+
+  private void gotTimeScaleChange() {
+    int selectedIndex = timeScale.getSelectedIndex();
+    TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
+    analysisPlot.setTimeHorizon(horizon);
   }
 
   private Button getButtonChoice(TIME_HORIZON week) {
@@ -501,7 +500,6 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param lowerHalf
    * @param phoneReport
-   * @paramx showTab
    * @see #useReport
    */
   private void showWordScores(
@@ -598,8 +596,8 @@ public class AnalysisTab extends DivWidget {
                               AnalysisPlot analysisPlot) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
 
-    final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, analysisServiceAsync, listid, userid);
+   // final PhonePlot phonePlot = new PhonePlot();
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
 
     analysisPlot.addListener(phoneContainer);
 
@@ -607,7 +605,8 @@ public class AnalysisTab extends DivWidget {
   }
 
   private void showPhoneReport(PhoneReport phoneReport,
-                               PhoneContainer phoneContainer, Panel lowerHalf,
+                               PhoneContainer phoneContainer,
+                               Panel lowerHalf,
                                PhoneExampleContainer exampleContainer) {
     // #1 - phones
     // Panel phones = phoneContainer.getTableWithPager(phoneReport);

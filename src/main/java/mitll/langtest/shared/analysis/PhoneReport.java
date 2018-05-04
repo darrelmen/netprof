@@ -47,6 +47,7 @@ public class PhoneReport implements Serializable {
   private int overallPercent;
   private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
+private int reqid;
 
   private boolean valid;
 
@@ -97,5 +98,14 @@ public class PhoneReport implements Serializable {
     Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
     return "valid " + valid + " : " +
         (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
+  }
+
+  public int getReqid() {
+    return reqid;
+  }
+
+  public PhoneReport setReqid(int reqid) {
+    this.reqid = reqid;
+    return this;
   }
 }

@@ -42,16 +42,13 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.SlimSegment;
-import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -281,6 +278,43 @@ public abstract class Analysis extends DAO {
   }
 */
 
+
+  /**
+   * @param userid
+   * @param next
+   * @param project
+   * @param from
+   * @param to
+   * @return
+   * @see SlickAnalysis#getPhoneReportForPeriod
+   */
+  PhoneReport getPhoneReportForPeriod(int userid, UserInfo next, Project project, long from, long to) {
+    List<BestScore> resultsForQuery = next.getBestScores();
+
+    List<Integer> resultIDs = new ArrayList<>();
+    resultsForQuery.forEach(bs -> {
+      if (bs.getTimestamp() > from && bs.getTimestamp() <= to) {
+        resultIDs.add(bs.getResultID());
+      }
+    });
+
+    if (DEBUG)
+      logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + resultIDs.size() + " resultIDs ");
+
+    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, resultIDs, project);
+
+
+    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    if (phoneToAvgSorted.isEmpty()) {
+      logger.warn("getPhonesForUser : no phones for " + userid + "?");
+    } else {
+      if (DEBUG) logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
+    }
+
+    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted);
+    return phoneReport;
+  }
+
   /**
    * @param userid
    * @param next
@@ -289,9 +323,9 @@ public abstract class Analysis extends DAO {
    * @see SlickAnalysis#getPerformanceReportForUser
    */
   PhoneReport getPhoneReport(int userid, UserInfo next, Project project) {
-    //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
-    if (DEBUG)
+    if (DEBUG) {
       logger.debug(" getPhonesForUser " + userid + " got " + next);
+    }
 
     if (next == null) {
       return new PhoneReport();
@@ -324,7 +358,7 @@ public abstract class Analysis extends DAO {
         if (DEBUG) logger.info("phones for " + userid + " : " + phoneToAvgSorted.keySet());
       }
 
-      new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, project.getKind() == ProjectType.POLYGLOT);
+      new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted);
       return phoneReport;
     }
   }
@@ -375,10 +409,6 @@ public abstract class Analysis extends DAO {
       logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + resultIDs.size() + " resultIDs ");
     return resultIDs;
   }
-//
-//  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-//    new PhoneAnalysis().setSessionsWithPrune(phoneToAvgSorted, useSessionGran);
-//  }
 
   /**
    * remember the last best attempt we have in a sequence for an item, but if they come back to practice it more than 5 minutes later

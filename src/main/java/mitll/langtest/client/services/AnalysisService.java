@@ -62,9 +62,14 @@ public interface AnalysisService extends RemoteService {
    */
   List<CommonShell> getShells(Collection<Integer> ids) throws DominoSessionException;
 
-  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req) throws DominoSessionException, RestrictedOperationException;
+  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
+      throws DominoSessionException, RestrictedOperationException;
 
-  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime, int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
+  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime,
+                                     int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
 
-  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException, RestrictedOperationException;
+  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to)
+      throws DominoSessionException, RestrictedOperationException;
+
+  PhoneReport getPhoneReport(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
 }

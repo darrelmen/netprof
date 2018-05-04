@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
   public static final int HIDE_DELAY = 5000;
+  public static final boolean SHOW_DATE = false;
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
   public static final String SCORE = "Score";
@@ -135,7 +136,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   }
   protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-    if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
+   // if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
     return commonShell;
   }
 
@@ -208,7 +209,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
             "<br/>" +
 
-           // (showDate() ? dateToShow : "") +
+            (SHOW_DATE && showDate() ? dateToShow : "") +
 
             (showEx ?
                 getTooltipHint()

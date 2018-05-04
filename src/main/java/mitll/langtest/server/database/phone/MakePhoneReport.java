@@ -22,7 +22,6 @@ public class MakePhoneReport {
    * @param totalScore
    * @param totalItems
    * @param sortByLatestExample
-   * @param useSessionGran
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
@@ -30,8 +29,7 @@ public class MakePhoneReport {
                                     Map<String, List<WordAndScore>> phoneToWordAndScore,
                                     float totalScore,
                                     float totalItems,
-                                    boolean sortByLatestExample,
-                                    boolean useSessionGran) {
+                                    boolean sortByLatestExample) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
 
@@ -39,6 +37,7 @@ public class MakePhoneReport {
       logger.info(
           "getPhoneReport : \n\tscore " + overallScore +
               "\n\titems         " + totalItems +
+           //   "\n\tuseSessionGran         " + useSessionGran +
               "\n\tpercent       " + percentOverall +
               "\n\tphoneToScores " + phoneToScores.size() +
               "\n\tphones        " + phoneToScores.keySet());
@@ -49,7 +48,7 @@ public class MakePhoneReport {
 
     // set sessions on each phone stats
     //  setSessions(phoneToAvg, useSessionGran);
-    new PhoneAnalysis().setSessionsWithPrune(phoneToAvg, useSessionGran);
+    new PhoneAnalysis().setSessionsWithPrune(phoneToAvg);
 
     if (DEBUG && false) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
@@ -187,7 +186,7 @@ public class MakePhoneReport {
   /**
    * @param phoneToScores
    * @return
-   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
+   * @see #getPhoneReport(Map, Map, float, float, boolean)
    */
   private Map<String, PhoneStats> getPhoneToPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
     final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
@@ -206,7 +205,7 @@ public class MakePhoneReport {
    *
    * @param phoneAndScores
    * @return
-   * @see #getPhoneReport(Map, Map, float, float, boolean, boolean)
+   * @see #getPhoneReport(Map, Map, float, float, boolean)
    */
   private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> phoneAndScores) {
     float total = 0;

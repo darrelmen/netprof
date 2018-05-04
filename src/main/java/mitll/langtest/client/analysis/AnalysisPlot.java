@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
@@ -75,6 +76,11 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
 public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
+  private static final int HOUR_DUR = 60 * 60 * 1000;
+
+  private static final boolean DEBUG_TIMECHANGE = false;
+  private static final boolean DEBUG = false;
+
   private static final String HOUR = "Hour";
   private static final String DAY = "Day";
   private static final String WEEK = "Week";
@@ -104,7 +110,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final String NO_RECORDINGS_YET = "No recordings yet to analyze. Please record yourself.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT = "No recordings yet made by student to analyze.";
   public static final String LIST = "quiz";
-  public static final String LISTS = LIST+"zes";
+  public static final String LISTS = LIST + "zes";
   private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this " + LIST + ". Choose another " + LIST + " or don't filter on " + LISTS + ".";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this " + LIST + " by this student. Choose another " + LIST + " or student or don't filter on " + LISTS + ".";
 
@@ -182,15 +188,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service, exceptionSupport);
   }
 
+  private long timezoneOffset;
+
   private void populateGranToLabel() {
     this.granToLabel = new HashMap<>();
     granToLabel.put(AnalysisTab.HOUR, HOUR);
-    // granToLabel.put(QUARTER, "6 Hours");
     granToLabel.put(DAY_DUR, DAY);
     granToLabel.put(TIME_HORIZON.WEEK.getDuration(), WEEK);
     granToLabel.put(TIME_HORIZON.MONTH.getDuration(), MONTH);
     granToLabel.put(AnalysisTab.YEAR_DUR, YEAR);
-    // granToLabel.put(TENMIN.getDuration(), "Ten Minutes");
+
+    timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
+    //   logger.info("timezone offset " + timezoneOffset);
   }
 
   /**
@@ -203,7 +212,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   void showUserPerformance(UserPerformance userPerformance, String userChosenID, int listid, boolean isTeacherView) {
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
     this.rawBestScores = new TreeSet<>(rawBestScores);
-    //  logger.info("showUserPerformance scores = " + rawBestScores.size());
+    if (DEBUG) logger.info("showUserPerformance scores = " + rawBestScores.size());
 
     if (!rawBestScores.isEmpty()) {
       long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
@@ -214,7 +223,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TIME_HORIZON.DAY.getDuration());
-        days.addAll(getPeriods(phoneSessions, TIME_HORIZON.DAY.getDuration(), last));
+        SortedSet<Long> periods = getPeriods(phoneSessions, TIME_HORIZON.DAY.getDuration(), last);
+        if (DEBUG)
+          logger.info("showUserPerformance found " + phoneSessions.size() + " day sessions, " + periods.size() + " periods");
+        days.addAll(periods);
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TIME_HORIZON.WEEK.getDuration());
@@ -243,13 +255,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       }
     }
 
-    //  logger.info("total " + totalScore);
-    // logger.info("possible " + possible);
-    // float denom = (float) sessionSize == -1 ? n : sessionSize;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
-
-    //int n = simpleTimeAndScores.size();
-    float denom = (float) n;//(n <= 10 ? 10 : n <= 100 ? 100 : n);
-
+    float denom = (float) n;
     return getPercent(totalScore, denom);
   }
 
@@ -276,19 +282,33 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private SortedSet<Long> getPeriods(List<PhoneSession> phoneSessions, long granularity, final long lastTime) {
     int i = phoneSessions.size() - 1;
     SortedSet<Long> months2 = new TreeSet<>();
-    //   logger.info("Examine  " + granularity + " : " + phoneSessions.size() + " last " + new Date(lastTime));
-    long start = lastTime - granularity;
-    long last = lastTime;
+
+    long toDay = getRoundedTo(lastTime, DAY_DUR) + DAY_DUR;
+    long start = toDay - granularity;//(lastTime, granularity);
+    long last = toDay;// + granularity;
+
+    if (DEBUG) {
+      logger.info("getPeriods Examine 2 " + granularity + " " + (granularity / HOUR_DUR) + " hours" +
+          "\n\t : " + phoneSessions.size() +
+          " last " + new Date(lastTime) +
+          "\n\tstart " + new Date(start) +
+          "\n\tlast  " + new Date(last)
+      );
+    }
 
     while (i >= 0) {
       PhoneSession session = phoneSessions.get(i);
-      //  String sessionWindow = getShortDate(session.getStart()) + " - " + getShortDate(session.getEnd());
-      //  String window = getShortDate(start) + " - " + getShortDate(last);
-      if (
-          session.doesOverlap(start, last)
-          ) {
-  /*      logger.info("getPeriods session " + sessionWindow + " vs" + window +
-            " at " + i);*/
+      String sessionWindow = getDate(session.getStart()) + " - " + getDate(session.getEnd());
+      String window = getDate(start) + " - " + getDate(last);
+
+      if (session.doesOverlap(start, last)) {
+
+        if (DEBUG) {
+          logger.info("getPeriods" +
+              "\n\tsession " + sessionWindow +
+              "\n\tvs      " + window +
+              " at " + i);
+        }
         months2.add(start);
         start -= granularity;
         last -= granularity;
@@ -311,6 +331,17 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       months2.add(start);
     }
     return months2;
+  }
+
+  /**
+   * Worry about time zone offset - all the rounding is done in UTC (?) unix time...
+   *
+   * @param lastTime
+   * @param granularity
+   * @return
+   */
+  private long getRoundedTo(long lastTime, long granularity) {
+    return (((lastTime) / granularity) * granularity) + timezoneOffset;
   }
 
   private SortedSet<Long> getEasyPeriods(List<PhoneSession> sessions) {
@@ -348,10 +379,12 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     if (useSessionTimeHorizon) {
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
+    } else {
+      setTimeHorizon(TIME_HORIZON.ALL);
     }
 
-    String shortDate = firstTime > 1 ? getShortDate(firstTime, false) : "";
-    timeWidgets.setDisplay(shortDate);
+//    String shortDate = firstTime > 1 ? getShortDate(firstTime, false) : "";
+//    setTimeDisplay(shortDate);
   }
 
   @NotNull
@@ -528,7 +561,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-    //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    if (DEBUG) logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+
+    //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("logException stack " + exceptionAsString);
+
     Series errorSeries = null;
     Series averageSeries = null;
 
@@ -678,11 +715,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     chart.getXAxis()
         .setStartOnTick(true)
-        .setEndOnTick(true)
+//        .setEndOnTick(true)
         .setType(Axis.Type.DATE_TIME)
         .setAxisSetExtremesEventHandler(axisSetExtremesEvent -> {
           if (axisSetExtremesEvent != null) {
-            //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
+            logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
             gotExtremes(axisSetExtremesEvent);
           }
           return true;
@@ -690,8 +727,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
-//    chart.setWidth(width + // 1378
-//        "px");
   }
 
   private boolean isShort() {
@@ -711,17 +746,19 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-//      logger.info("gotExtremes got min " + min + " max " + max);
+      if (DEBUG) logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
         long start = min.longValue();
         long end = max.longValue();
-        //      logger.info("gotExtremes now min " + getFormat(start) + " max " + getFormat(end));
+        logger.info("gotExtremes 1 now min " + getDate(start) + " max " + getDate(end));
         setVisibility(start, end);
         timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
-        setVisibility(end - ALL.getDuration(), end);
-        setTimeWindowControlsToAll();
+        long start = end - ALL.getDuration();
+        logger.info("gotExtremes 2 now min " + getDate(start) + " max " + getDate(end));
+        setVisibility(start, end);
+        goToLast(TIME_HORIZON.ALL);
       }
       showSeriesByVisible();
 
@@ -749,16 +786,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       addTimeToExID(timeAndScore.getTimestamp(), id);
       toGet.add(id);
     }
-/*
-    if (toGet.isEmpty()) {
-      // logger.info("setRawBestScores got # raw best  " + rawBestScores.size() + " idToEx # = " + idToEx.size() + " - yielded none?");
-    }
-*/
+
     if (!rawBestScores.isEmpty()) {
       setTimeRange(rawBestScores);
 
       if (!toGet.isEmpty()) {
-        //  logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime) + " getting " + toGet.size());
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -768,13 +800,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
             commonShells.forEach(commonShell -> rememberExercise(commonShell));
-            // logger.info("setRawBestScores getShells got " + commonShells.size());
           }
         });
       }
-    } //else {
-    //logger.info("rawBest is empty?");
-    //}
+    }
   }
 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
@@ -787,10 +816,11 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @return
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
-  long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
+  void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
-    Long x = goToLast(timeHorizon);
-    return (x != null) ? x : 0;
+
+    goToLast(timeHorizon);
+    //return (x != null) ? x : 0;
   }
 
   /**
@@ -798,31 +828,37 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @return
    * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
    */
-  private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
-    // logger.info("goToLast set time from " + new Date(firstTime) + " to " + new Date(lastTime));
+  private void goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
+    logger.info("goToLast " +
+        timeHorizon +
+        " : set time from " + new Date(firstTime) + " to " + new Date(lastTime));
     XAxis xAxis;
     try {
       xAxis = chart.getXAxis();
     } catch (Exception e) {
       // somehow this is happening
-      return 0L;
+      return;
     }
 
     long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
       case SESSION:
         Long lastSessionStart = sessions.get(sessions.size() - 1);
-        return showLastTimePeriod(xAxis, SESSION.getDuration(), this.sessions, lastSessionStart, lastPlusSlack);
+        showLastTimePeriod(xAxis, SESSION.getDuration(), this.sessions, lastSessionStart, lastPlusSlack);
+        return;
       case DAY:
-        return showLastDay(xAxis, lastPlusSlack);
+        showLastDay(xAxis, lastPlusSlack);
+        return;
       case WEEK:
-        return showLastWeek(xAxis, lastPlusSlack);
+        showLastWeek(xAxis, lastPlusSlack);
+        return;
       case MONTH:
-        return showLastMonth(xAxis, lastPlusSlack);
+        showLastMonth(xAxis, lastPlusSlack);
+        return;
       case ALL:
-        return showAll(xAxis, lastPlusSlack);
+        showAll(xAxis, lastPlusSlack);
+        return;
     }
-    return null;
   }
 
   private long showLastDay(XAxis xAxis, long lastPlusSlack) {
@@ -840,7 +876,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   @NotNull
   private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long duration, List<Long> timePeriods) {
-    return showLastTimePeriod(xAxis, duration, timePeriods, lastTime - duration, lastPlusSlack);
+    long startOfPrevPeriod = getRoundedTo(lastPlusSlack, duration);
+    long endOfPeriod = startOfPrevPeriod + duration;
+    return showLastTimePeriod(xAxis, duration, timePeriods, startOfPrevPeriod, endOfPeriod);
   }
 
 
@@ -850,7 +888,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
                                   List<Long> timePeriods,
                                   long startOfPrevPeriod,
                                   long lastPlusSlack) {
-    xAxis.setExtremes(startOfPrevPeriod, lastPlusSlack);
+    if (DEBUG_TIMECHANGE)
+      logger.info("showLastTimePeriod from " + startOfPrevPeriod + "/" + new Date(startOfPrevPeriod) + " - " + new Date(lastPlusSlack));
+
+    xAxis.setExtremes(startOfPrevPeriod, lastPlusSlack);  // triggers time changed event
 
     int numPeriods = timePeriods.size();
     int lastPeriodIndex = numPeriods - 1;
@@ -860,9 +901,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.getPrevButton().setEnabled(numPeriods > 1);
     disableNext();
 
-    timeWidgets.setDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
+    setTimeDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
     setTitleScore(startOfPrevPeriod, lastPlusSlack, index);
-    timeChanged(startOfPrevPeriod, lastPlusSlack);
 
     return startOfPrevPeriod;
   }
@@ -875,23 +915,59 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @return
    */
   @NotNull
-  private Long showAll(XAxis xAxis, long lastPlusSlack) {
-    long min = firstTime - TIME_SLACK;
-    xAxis.setExtremes(min, lastPlusSlack);
-    setTimeWindowControlsToAll();
-    timeChanged(min, lastPlusSlack);
-
-    return firstTime;
+  private void showAll(XAxis xAxis, long lastPlusSlack) {
+    long[] adjusted = getAdjusted(firstTime, lastPlusSlack);
+    xAxis.setExtremes(adjusted[0], adjusted[1]);
+    setTimeWindowControlsToAll(adjusted[0]);
+    //return firstTime;
   }
 
-  private void setTimeWindowControlsToAll() {
+  private long[] getAdjusted(long firstW, long lastPlusSlack) {
+    long window = lastPlusSlack - firstTime;
+    long hours = window / HOUR_DUR;
+    if (hours < 24) {
+      logger.info("showAll hours " + hours);
+      firstW -= HOUR_DUR;
+      lastPlusSlack += HOUR_DUR;
+    } else if (window / DAY_DUR < 7) {
+      logger.info("showAll days " + (window / DAY_DUR));
+      firstW -= DAY_DUR;
+      lastPlusSlack += DAY_DUR;
+    } else if (window / WEEK_DUR < 4) {
+      logger.info("showAll week " + (window / WEEK_DUR));
+      firstW -= WEEK_DUR;
+      lastPlusSlack += WEEK_DUR;
+    } else {//if (window / MONTH_DUR < 12) {
+      logger.info("showAll month " + (window / MONTH_DUR));
+      firstW -= MONTH_DUR;
+      lastPlusSlack += MONTH_DUR;
+    }
+    long[] adjusted = new long[2];
+    adjusted[0] = firstW;
+    adjusted[1] = lastPlusSlack;
+    return adjusted;
+  }
+
+  /**
+   * Problem #1 - loose time steps when reset zoom
+   * Problem #2 - weird thing with the title not being consistent with number of dots
+   */
+  private void setTimeWindowControlsToAll(long firstW) {
     timeWidgets.getPrevButton().setEnabled(false);
     disableNext();
 
-    timeWidgets.setDisplay(getShortDate(firstTime, false));
+    String shortDate = getShortDate(firstW, false);
+    setTimeDisplay(shortDate);
     setTitleScore(-1, -1, index);
     timeWidgets.reset();
-    timeChanged(firstTime, lastTime);
+//    timeChanged(firstTime, lastTime);
+  }
+
+  private void setTimeDisplay(String shortDate) {
+//
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("setTimeDisplay stack " + exceptionAsString);
+    timeWidgets.setDisplay(shortDate);
   }
 
   private void disableNext() {
@@ -907,8 +983,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     timeWidgets.getPrevButton().setEnabled(index > 0);
     timeWidgets.getNextButton().setEnabled(true);
 
-    long offset = getOffsetPerSession();
-    showTimePeriod(offset, getPeriods());
+    showTimePeriod(getOffsetPerSession(), getPeriods());
   }
 
   /**
@@ -973,20 +1048,18 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void showTimePeriod(long offset, List<Long> periods) {
     Long periodStart = periods.get(index);
     String shortDate = periodStart > 1 ? getShortDate(periodStart, shouldShowHour(offset)) : "";
-    //  logger.info("showTimePeriod short date " + shortDate + " for " + periodStart);
-    timeWidgets.setDisplay(shortDate);
+    //   logger.info("showTimePeriod short date " + shortDate + " for " + periodStart);
+    setTimeDisplay(shortDate);
     long end = periodStart + offset;
 
 /*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));
     logger.info("showTimePeriod to        " + format.format(new Date(end)));
     logger.info("showTimePeriod" +
-       // "\n\tdur     " + offset +
-        "\n\t offset " + offset);
-    */
+        // "\n\tdur     " + offset +
+        "\n\t offset " + offset);*/
 
-    chart.getXAxis().setExtremes(periodStart, end);
+    chart.getXAxis().setExtremes(periodStart, end); // triggers a time changed event to go to listeners
     setTitleScore(periodStart, end, index);
-    timeChanged(periodStart, end);
   }
 
   private boolean shouldShowHour(long offset) {
@@ -1018,16 +1091,29 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see #showLastTimePeriod(XAxis, long, List, long, long)
    */
   private void timeChanged(long from, long to) {
+    if (DEBUG_TIMECHANGE) {
+      logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//      logger.info("timeChanged stack " + exceptionAsString);
+    }
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
     setTitleScore(from, to, index);
   }
 
+  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
+
+  private String debugFormat(long first) {
+    return debugShortFormat.format(new Date(first));
+  }
+
+
   private void setTitleScore(long from, long to, int index) {
     SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);
     if (timeAndScoresInRange.isEmpty()) {
-      logger.warning("no samples between " + new Date(from) + " and " + new Date(to));
-/*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      logger.warning("from " + exceptionAsString);*/
+      logger.warning("setTitleScore no samples between " + new Date(from) + " and " + new Date(to));
+    } else {
+//      if (DEBUG)
+//        logger.info("setTitleScore found " + timeAndScoresInRange.size() + " samples between " + new Date(from) + " and " + new Date(to));
     }
     timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) +
         "</span>");
@@ -1065,7 +1151,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       if (denom < 0) {
         denom = n;
       } else if (n > denom) {
-        logger.info("denom " + denom + " n " + n);
+        //logger.info("denom " + denom + " n " + n);
         denom = n; // denom never larger than numerator...
       }
 

@@ -116,7 +116,7 @@ class PhoneAndStats implements Comparable<PhoneAndStats> {
     this.rank = rank;
   }
 
-  public float getNdiff() {
+  float getNdiff() {
     return ndiff;
   }
 }

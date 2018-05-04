@@ -108,6 +108,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param listid
    * @param req
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
   @Override
@@ -127,6 +128,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long now = System.currentTimeMillis();
     logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
+  }
+
+
+  public PhoneReport getPhoneReportForPeriod(int userid, int listid, long from, long to) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+
+    Collection<UserInfo> userInfos = bestForUser.values();
+    UserInfo firstUser = bestForUser.isEmpty() ? null : userInfos.iterator().next();
+
+    return getPhoneReportForPeriod(userid, firstUser, project, from, to);
   }
 
   /**
@@ -212,7 +223,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         break;
       }
     }
-  //  logger.info("allSameDay " + allSameDay);
+    //  logger.info("allSameDay " + allSameDay);
     return allSameDay;
   }
 
@@ -239,11 +250,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * Support word async table sort columns
-   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
+   *
    * @param project
    * @param criteria
    * @param inTime
    * @return
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    * @see #getWordScoresForPeriod
    */
   private Comparator<BestScore> getComparator(Project project, List<String> criteria, List<BestScore> inTime) {
