@@ -124,6 +124,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(userManager.hasUser());
   }
 
+  /**
+   *
+   * @return
+   */
   @NotNull
   private Nav getRecNav() {
     Nav recnav = new Nav();
@@ -288,28 +292,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see NewContentChooser#showLearnList
-   */
-/*  @Override
-  public void showLearn() {
-    gotClickOnChoice(INavigation.VIEWS.LEARN.toString(), viewToLink.get(INavigation.VIEWS.LEARN), false);
-  }
-
-  @Override
-  public void showQuiz() {
-    gotClickOnChoice(VIEWS.QUIZ.toString(), viewToLink.get(INavigation.VIEWS.QUIZ), false);
-  }*/
-
-  /**
-   * @see NewContentChooser#showDrillList
-   */
-/*
-  public void showDrill() {
-    gotClickOnChoice(INavigation.VIEWS.DRILL.toString(), viewToLink.get(INavigation.VIEWS.DRILL), false);
-  }
-*/
-
-  /**
    *
    * @param instanceName
    * @param learn
@@ -323,11 +305,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void showSection(String instance1, boolean fromClick) {
     VIEWS choices = INavigation.VIEWS.NONE;
     try {
-//      if (instance1.equalsIgnoreCase(PRACTICE)) instance1= VIEWS.DRILL.toString();
       choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("showSection can't parse " + instance1);
-
     }
     navigation.showView(choices, false, fromClick);
   }
