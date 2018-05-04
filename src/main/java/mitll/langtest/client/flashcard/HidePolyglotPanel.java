@@ -14,8 +14,6 @@ import java.util.logging.Logger;
 class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
   private final Logger logger = Logger.getLogger("HidePolyglotPanel");
 
- // private boolean showAudio;
-
   /**
    * @param statsFlashcardFactory
    * @param controlState
@@ -46,9 +44,10 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
     if (showAudio) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
-    }
-    else {
-      logger.info("not showing audio for ");
+    } else {
+      if (logger != null) {
+        logger.info("not showing audio for ");
+      }
     }
     rightColumn.add(getKeyBinding());
     return rightColumn;

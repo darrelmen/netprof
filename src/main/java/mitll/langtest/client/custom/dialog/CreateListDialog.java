@@ -83,6 +83,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
+  public static final int LIST_WIDTH = 60;
   private final Logger logger = Logger.getLogger("CreateListDialog");
 
   private static final String ALL = "All";
@@ -142,7 +143,6 @@ public class CreateListDialog extends BasicDialog {
 
   private int quizSize = DEFAULT_QUIZ_SIZE;
   private int minScore = DEFAULT_MIN_SCORE;
-  private boolean madeSelection = false;
   private int duration = DEFAULT_DURATION;
 
   /**
@@ -167,10 +167,6 @@ public class CreateListDialog extends BasicDialog {
     this.listView = listView;
     this.controller = controller;
   }
-
-//  private boolean isThereALoggedInUser() {
-//    return controller.getUser() > 0;
-//  }
 
   /**
    * @param thirdRow
@@ -461,8 +457,7 @@ public class CreateListDialog extends BasicDialog {
 
   @NotNull
   private ListBox getListBox() {
-    int width = 50;
-    return getListBox(width);
+    return getListBox(LIST_WIDTH);
   }
 
   @NotNull
@@ -508,7 +503,6 @@ public class CreateListDialog extends BasicDialog {
 
   private void gotListSelection2(String value) {
     duration = Integer.parseInt(value);
-    madeSelection = true;
   }
 
   private void gotListSelection3(String value) {

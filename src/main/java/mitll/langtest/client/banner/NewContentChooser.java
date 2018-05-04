@@ -336,7 +336,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-    logger.info("pushUnitOrChapter ");
+   // logger.info("pushUnitOrChapter ");
     History.newItem(s + "=" + next.getValue());
   }
 
@@ -459,24 +459,18 @@ public class NewContentChooser implements INavigation {
   public ShowTab getShowTab() {
     return exid -> {
       boolean wasMade = learnHelper.getReloadable() != null;
-
    //   logger.info("getShowTab history - " + History.getToken());
       if (!wasMade) {
         banner.show(LEARN);
       }
-      // clear any other selections
-//      History.newItem(
-//        //  FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
-//              SelectionState.INSTANCE + "=" + LEARN.toString());
       learnHelper.loadExercise(exid);
       if (wasMade) {
         banner.show(LEARN);
       }
 
-      logger.info("getShowTab history after - " + History.getToken());
+   //   logger.info("getShowTab history after - " + History.getToken());
 
       History.newItem(
-          //  FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
           SelectionState.INSTANCE + "=" + LEARN.toString()+
               SelectionState.SECTION_SEPARATOR +SelectionState.ITEM +  "="+exid
       );
@@ -485,13 +479,13 @@ public class NewContentChooser implements INavigation {
 
   @Override
   public void showListIn(int listid, VIEWS view) {
-    logger.info("showListIn - " + listid + " " + view);
+   // logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view);
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
-    logger.info("showListIn - " + listid + " " + views);
+   // logger.info("showListIn - " + listid + " " + views);
     History.newItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             SelectionState.INSTANCE + "=" + views.toString());
