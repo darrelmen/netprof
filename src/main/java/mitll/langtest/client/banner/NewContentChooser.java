@@ -142,7 +142,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-   // logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    // logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -206,10 +206,10 @@ public class NewContentChooser implements INavigation {
 
   private void setInstanceHistory(VIEWS views) {
     if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
-     // logger.info("setInstanceHistory clearing history for instance " + views);
+      //   logger.info("setInstanceHistory clearing history for instance " + views);
       History.newItem(SelectionState.INSTANCE + "=" + views.toString());
     } else {
-   //   logger.info("setInstanceHistory NOT clearing history for instance " + views);
+      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
@@ -336,7 +336,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-   // logger.info("pushUnitOrChapter ");
+    // logger.info("pushUnitOrChapter ");
     History.newItem(s + "=" + next.getValue());
   }
 
@@ -383,7 +383,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-  //  logger.info("getCurrentStoredView instance = " + instance);
+    //  logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -453,13 +453,14 @@ public class NewContentChooser implements INavigation {
 
   /**
    * Clear any current selection of unit and chapter before choosing an exercise, so we guarantee it will appear.
+   *
    * @return
    */
   @NotNull
   public ShowTab getShowTab() {
     return exid -> {
       boolean wasMade = learnHelper.getReloadable() != null;
-   //   logger.info("getShowTab history - " + History.getToken());
+      //   logger.info("getShowTab history - " + History.getToken());
       if (!wasMade) {
         banner.show(LEARN);
       }
@@ -468,24 +469,24 @@ public class NewContentChooser implements INavigation {
         banner.show(LEARN);
       }
 
-   //   logger.info("getShowTab history after - " + History.getToken());
+      //   logger.info("getShowTab history after - " + History.getToken());
 
       History.newItem(
-          SelectionState.INSTANCE + "=" + LEARN.toString()+
-              SelectionState.SECTION_SEPARATOR +SelectionState.ITEM +  "="+exid
+          SelectionState.INSTANCE + "=" + LEARN.toString() +
+              SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
     };
   }
 
   @Override
   public void showListIn(int listid, VIEWS view) {
-   // logger.info("showListIn - " + listid + " " + view);
+    // logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view);
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
-   // logger.info("showListIn - " + listid + " " + views);
+    // logger.info("showListIn - " + listid + " " + views);
     History.newItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             SelectionState.INSTANCE + "=" + views.toString());

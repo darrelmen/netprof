@@ -178,10 +178,13 @@ public class UserListSupport {
 
   @NotNull
   String getMailToExercise(CommonShell exercise) {
-    String s = trimURL(Window.Location.getHref()) +
+    String s = getURL() +
         "#" +
-        SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
-        getProjectParam();
+        SelectionState.SECTION_SEPARATOR +
+        SelectionState.SEARCH +
+        "=" + exercise.getID() +
+        getProjectParam() +
+        getInstance(false);
 
     String encode = URL.encode(s);
     return "mailto:" +
@@ -195,43 +198,6 @@ public class UserListSupport {
         encode +
         getSuffix();
   }
-/*  @NotNull
-  String getMailToExerciseTrouble(CommonExercise exercise) {
-    String theURL = trimURL(Window.Location.getHref())
-        //+
-        //"#" +
-        //SelectionState.SECTION_SEPARATOR + "search=" + exercise.getID() +
-        //getProjectParam()
-        ;
-
-    String encodedURL = theURL;//URL.encode(theURL);
-    //  String anchor = "<a href='" + encode+ "'>" +encode+"</a>";
-    String english = exercise.getEnglish();
-    String foreignLanguage = exercise.getForeignLanguage();
-    String rawMailTO = "mailto:" +
-        "?" +
-        "Subject=Share netprof " + controller.getLanguage() +
-        " item " + english +
-        "&body=" +
-        //getPrefix()
-        "Hi,\n Here's a link to NetProF item\n\n"
-        + english + "/" + foreignLanguage + " : " +
-        //"\""+
-        // "<"+
-        theURL +
-        // "/>"+
-        //"\""+
-        "\n\nThanks,\n"+
-        getFullName()
-        //getSuffix()
-        ;
-    String encode = URL.encode(rawMailTO);
-    encode = encode.replaceAll("#","%23");
-    logger.info("raw    " + rawMailTO);
-    logger.info("encode " + encode);
-
-    return encode;
-  }*/
 
   private String getMailToList(IUserList ul) {
     return getMailTo(ul.getID(), ul.getName(), false);
@@ -240,18 +206,12 @@ public class UserListSupport {
   @NotNull
   public String getMailTo(int listid, String name, boolean isQuiz) {
     String selector = "Lists=" + listid;
-    String suffix = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" +
-        (isQuiz ?
-            INavigation.VIEWS.QUIZ.toString() :
-            INavigation.VIEWS.LEARN.toString()
-        );
 
-    String s = trimURL(Window.Location.getHref()) +
+    String s = getURL() +
         "#" +
         SelectionState.SECTION_SEPARATOR + selector +
-        getProjectParam()
-        +
-        suffix;
+        getProjectParam() +
+        getInstance(isQuiz);
 
     String encode = URL.encode(s);
     String type = isQuiz ? "quiz" : "list";
@@ -262,6 +222,16 @@ public class UserListSupport {
         getSubject(name, type) +
         "&body=" +
         getBody(name, encode, type);
+  }
+
+
+  @NotNull
+  private String getInstance(boolean isQuiz) {
+    return SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" +
+        (isQuiz ?
+            INavigation.VIEWS.QUIZ.toString() :
+            INavigation.VIEWS.LEARN.toString()
+        );
   }
 
   @NotNull
@@ -283,6 +253,10 @@ public class UserListSupport {
     return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + controller.getProjectStartupInfo().getProjectid();
   }
 
+  /**
+   * @param addToList
+   * @see ItemMenu#getDropdown
+   */
   void addSendLinkWhatYouSee(DropdownBase addToList) {
     final NavLink widget = new NavLink(SHARE_THESE_ITEMS);
     addToList.add(widget);
@@ -295,10 +269,15 @@ public class UserListSupport {
     SelectionState selectionState = new SelectionState(token, false);
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    String s = trimURL(Window.Location.getHref()) +
+    boolean hasProject = selectionState.getProject() != -1;
+    boolean hasInstance = !selectionState.getInstance().isEmpty();
+
+    String s = getURL() +
         "#" +
         token +
-        SelectionState.SECTION_SEPARATOR + "project=" + projectStartupInfo.getProjectid();
+        (hasProject ? "" : getProjectParam()) +
+        (hasInstance ? "" : getInstance(false));
+    ;
 
     String encode = s.replaceAll("\\s", "+");//URL.encode(s);
 
@@ -310,9 +289,9 @@ public class UserListSupport {
         "&body=" +
         getPrefix() +
         selectionState.getDescription(projectStartupInfo.getTypeOrder(), false) + " : " +
-        //"<" +
+
         encode +
-        //">" +
+
         getSuffix();
   }
 
@@ -331,6 +310,10 @@ public class UserListSupport {
 
   private String getFullName() {
     return controller.getUserManager().getCurrent().getFullName();
+  }
+
+  private String getURL() {
+    return trimURL(Window.Location.getHref());
   }
 
   private String trimURL(String url) {
