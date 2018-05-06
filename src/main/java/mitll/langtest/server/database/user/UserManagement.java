@@ -52,7 +52,6 @@ import java.util.Date;
 public class UserManagement {
   private static final Logger logger = LogManager.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
-  //private final IResultDAO resultDAO;
 
   /**
    * @param userDAO

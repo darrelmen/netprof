@@ -373,43 +373,24 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    */
   protected ClickablePagingContainer<CommonShell> makePagingContainer() {
     pagingContainer =
-        new ClickablePagingContainer<CommonShell>(controller
-        ) {
+        new ClickablePagingContainer<CommonShell>(controller) {
           public void gotClickOnItem(CommonShell e) {
           }
-
           protected void addTable(Panel column) {
           }
-
           @Override
           protected void addColumnsToTable(boolean sortEnglish) {
           }
-
           /**
            * @see SimplePagingContainer#configureTable
            * @param newRange
            */
           @Override
           protected void gotRangeChanged(final Range newRange) {
-            if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
+            //if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
             if (!isDrillView()) {
               askServerForExercise(-1);
             }
-//            long then = System.currentTimeMillis();
-            //     logger.info("gotRangeChanged event for " + newRange);
-/*            final int currentReq = incrReq();
-
-            //  logger.info("makePagingContainer : gotRangeChanged for " + newRange);
-            Scheduler.get().scheduleDeferred((Command) () -> {
-              if (isCurrentReq(currentReq)) {
-//                long now = System.currentTimeMillis();
-                //   logger.info("gotRangeChanged (" + (now - then) + ") req " + currentReq + "  for  " + newRange);
-                gotVisibleRangeChanged(getIdsForRange(newRange), currentReq);
-              }
-//              else {
-//                logger.warning("gotRangeChanged STALE req " + currentReq + "  for  " + newRange);
-//              }
-            });*/
           }
 
           @Override
@@ -421,20 +402,6 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         };
     return pagingContainer;
   }
-
-  /**
-   * NO-OP on drill view
-   *
-   * @param idsForRange
-   * @param currentReq
-   * @see #makePagingContainer
-   */
-/*
-  protected void gotVisibleRangeChanged(Collection<Integer> idsForRange, final int currentReq) {
-    if (DEBUG) logger.info("gotVisibleRangeChanged : visible range " + idsForRange);
-    askServerForVisibleExercises(-1, idsForRange, currentReq);
-  }
-*/
 
   /**
    * @see HistoryExerciseList#noSectionsGetExercises

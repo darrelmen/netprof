@@ -215,8 +215,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private void gotClickOnLearn() {
-    int exid = getSelected().getExid();
-    controller.getShowTab().showLearnAndItem(exid);
+    if (getSelected() != null) {
+      int exid = getSelected().getExid();
+      controller.getShowTab().showLearnAndItem(exid);
+    }
   }
 
   private static final boolean DEBUG = false;

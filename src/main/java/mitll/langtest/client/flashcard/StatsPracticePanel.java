@@ -356,7 +356,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     wifiStatus.addStyleName("floatRight");
     wifiStatus.setType(LabelType.WARNING);
     wifiStatus.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    wifiStatus.setVisible(true);
+    wifiStatus.setVisible(false);
     return wifiStatus;
   }
 

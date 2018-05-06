@@ -335,7 +335,7 @@
         <listener-class>mitll.hlt.domino.server.configuration.DominoServerInitializationManager</listener-class>
     </listener>
 
-
+<!--
     <filter>
         <filter-name>javamelody</filter-name>
         <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
@@ -343,6 +343,6 @@
             <param-name>authorized-users</param-name>
             <param-value>gvidaver:dliDLI1234, rbudd:dliDLI1234</param-value>
         </init-param>
-    </filter>
+    </filter>-->
 
 </web-app>

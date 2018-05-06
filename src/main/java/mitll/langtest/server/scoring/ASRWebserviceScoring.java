@@ -403,7 +403,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         imageOutDir,
         imageOptions,
         decode, prefix, noSuffix,
-        cached,//result.setScores(scores),
+        cached,
         cachedDuration, processDur, usePhoneToDisplay, jsonObject);
   }
 
@@ -684,7 +684,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           possibleProns); // where are the # coming from?
     }
   }
-
 
 
   private String getHydraTranscript(String cleaned) {

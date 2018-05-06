@@ -138,7 +138,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public Collection<Integer> getVisibleIDs() {
-   // Range visibleRange = getVisibleRange();
+    // Range visibleRange = getVisibleRange();
 //    logger.info("getVisibleIDs : visible range " + visibleRange);
 /*
     if (visibleRange.getLength() == 1) {
@@ -155,8 +155,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
         return visible;
       }
     } else {*/
-      return getIdsForRange(getVisibleRange());
-  //  }
+    return getIdsForRange(getVisibleRange());
+    //  }
   }
 
   /**
@@ -229,17 +229,23 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @see mitll.langtest.client.custom.userlist.ListView#madeIt
    */
   public void addExerciseAfter(T afterThisOne, T exercise) {
-    //logger.info("addExercise adding " + exercise);
+    if (DEBUG) logger.info("addExerciseAfter adding " + exercise);
     List<T> list = getList();
     int before = list.size();
-//    String id = exercise.getOldID();
+
     idToExercise.put(exercise.getID(), exercise);
-    int toUse = Math.max(0, before-1);
+    int toUse = Math.max(0, before - 1);
 
     int i = afterThisOne == null ? toUse : list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
-    // logger.info("data now has "+ after + " after adding " + exercise.getOldID());
+
+    if (DEBUG) {
+      logger.info("addExerciseAfter" +
+          "\n\tbefore  " + before +
+          "\n\tnow has " + after + " after adding " + exercise.getID());
+    }
+
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 

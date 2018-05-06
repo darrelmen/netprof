@@ -9,7 +9,11 @@ import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.logging.Logger;
+
 class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
+  private final Logger logger = Logger.getLogger("HidePolyglotPanel");
+
   /**
    * @param statsFlashcardFactory
    * @param controlState
@@ -28,7 +32,8 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
                     CommonAnnotatable e,
                     StickyState stickyState,
                     ListInterface<L, T> exerciseListToUse,
-                    int minPoly, boolean showAudio) {
+                    int minPoly,
+                    boolean showAudio) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, minPoly, showAudio);
   }
 
@@ -39,6 +44,10 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
     if (showAudio) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
+    } else {
+      if (logger != null) {
+        logger.info("not showing audio for ");
+      }
     }
     rightColumn.add(getKeyBinding());
     return rightColumn;

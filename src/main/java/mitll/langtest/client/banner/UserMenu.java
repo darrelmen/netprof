@@ -35,11 +35,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
-  public static final String ACTIVE_USERS = "Active Users";
-  public static final String TEST_EXCEPTION = "Test Exception";
-  public static final String TEST_EXCEPTION_MSG = "Test Exception - this tests to see that email error reporting is configured properly. Thanks!";
-  public static final String STATUS_REPORT_BEING_GENERATED = "Status report being generated.";
-  public static final String MESSAGE__504 = "504";
+  private static final String ACTIVE_USERS = "Active Users";
+  private static final String TEST_EXCEPTION = "Test Exception";
+  private static final String TEST_EXCEPTION_MSG = "Test Exception - this tests to see that email error reporting is configured properly. Thanks!";
+  private static final String STATUS_REPORT_BEING_GENERATED = "Status report being generated.";
+  private static final String MESSAGE__504 = "504";
 
   private final Logger logger = Logger.getLogger("UserMenu");
   //private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
