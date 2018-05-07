@@ -90,7 +90,7 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to) {
     return null;
   }
 

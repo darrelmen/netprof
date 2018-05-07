@@ -267,7 +267,7 @@ public class AnalysisTab extends DivWidget {
     PhoneReport phoneReport = result.getPhoneReport();
     if (phoneReport == null) {
       logger.warning("useReport : phone report is null?");
-      phoneReport = new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
+      phoneReport = new PhoneReport();
     }
 
     if (now - then > 2) {
@@ -275,7 +275,7 @@ public class AnalysisTab extends DivWidget {
           "\n\tfor    " + userid + " " + userChosenID +
           "\n\twords  " + result.getNumScores() +
           "\n\tphones " + phoneReport.getPhoneToAvgSorted().size() +
-          "\n\tphones word and score " + phoneReport.getPhoneToWordAndScoreSorted().values().size()
+          "\n\tphones word and score " + phoneReport.getPhoneToBigrams().values().size()
       );
     }
     long then2 = now;
@@ -517,9 +517,6 @@ public class AnalysisTab extends DivWidget {
           numScores,
           controller, analysisPlot,
           wordsTitle);
-
-      //  tableWithPager.setWidth(WORD_WIDTH + "px");
-
       {
         DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
         wordsContainer.addStyleName("cardBorderShadow");

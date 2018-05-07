@@ -162,7 +162,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
     } catch (Exception e) {
       logAndNotify.logAndNotifyServerException(e, "sql exception for user " + userid + " and result ids " + ids);
-      return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
+      return new PhoneReport();
     }
   }
 

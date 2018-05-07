@@ -89,7 +89,8 @@ public class MakePhoneReport {
     });
     // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
     return new PhoneReport(percentOverall,
-        phoneToBigram, phoneToAvgSorted//,
+        phoneToBigram, phoneToAvgSorted,phoneToBigramToWS
+        //,
         //   bigramToCount,bigramToScore
     );
   }

@@ -328,7 +328,7 @@ public abstract class Analysis extends DAO {
     }
 
     if (next == null) {
-      return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
+      return new PhoneReport();
     } else {
       long then = System.currentTimeMillis();
       long start = then;

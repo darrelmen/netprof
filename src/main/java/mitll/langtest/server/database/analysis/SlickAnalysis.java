@@ -349,7 +349,34 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return builder.toString().trim();
   }
 
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+  public List<Bigram> getBigramPhoneReportFor(int userid,
+                                              int listid,
+                                              String phone,
+                                              long from, long to) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+
+    long then = System.currentTimeMillis();
+
+    if (DEBUG || DEBUG_PHONE) {
+      logger.info("getPhoneReportFor for" +
+          "\n\tuser   " + next +
+          "\n\tuserid " + userid +
+          "\n\tlistid " + listid +
+          "\n\tphone  " + phone +
+          "\n\tfrom   " + from + " " + new Date(from) +
+          "\n\tto     " + to + " " + new Date(to)
+      );
+    }
+
+    PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
+    return phoneReportForPhone.getPhoneToBigrams().get(phone);
+  }
+
+  public List<WordAndScore> getPhoneReportFor(int userid,
+                                              int listid,
+                                              String phone,
+                                              String bigram, long from, long to) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
@@ -368,8 +395,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
-
-   // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
+    phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone).get(bigram);
+    return null;//phoneReportForPhone;
+    // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
 
 //    if (wordAndScores == null) {
 //      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
@@ -400,7 +428,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param listid
    * @return
    * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
-   * @see #getPhoneReportFor(int, int, String, long, long)
+   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();

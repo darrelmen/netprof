@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.analysis.IAnalysis;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +47,7 @@ import java.util.Map;
  */
 public class PhoneReport implements Serializable {
   private int overallPercent;
-  //private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
+  private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
   private int reqid;
   private Map<String, List<Bigram>> phoneToBigrams;
@@ -65,9 +67,10 @@ public class PhoneReport implements Serializable {
   public PhoneReport(int overallPercent,
                      //Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
                      Map<String,List<Bigram>> phoneToBigrams,
-                     Map<String, PhoneStats> phoneToAvgSorted) {
+                     Map<String, PhoneStats> phoneToAvgSorted,
+                     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
     this.overallPercent = overallPercent;
-   // this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+   this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
     this.phoneToBigrams=phoneToBigrams;
    // this.bigramToScore=bigramToScore;
@@ -78,11 +81,11 @@ public class PhoneReport implements Serializable {
    * Map of each phone to words it appears in.
    *
    * @return
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPhoneReportFor(int, int, String, long, long)
+   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
    */
-//  public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
-//    return phoneToWordAndScoreSorted;
-//  }
+  public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
+    return phoneToWordAndScoreSorted;
+  }
 
   public int getOverallPercent() {
     return overallPercent;

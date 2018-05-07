@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,20 @@ public class PhoneJSON {
     JSONObject jsonObject = new JSONObject();
 
     if (worstPhonesAndScore != null) {
-      Map<String, List<WordAndScore>> worstPhones = worstPhonesAndScore.getPhoneToWordAndScoreSorted();
+      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
+          worstPhonesAndScore.getPhoneToWordAndScoreSorted();
+      Map<String, List<WordAndScore>> worstPhones = new HashMap<>();
+      phoneToWordAndScoreSorted.forEach((k, v) -> {
+        Collection<List<WordAndScore>> values = v.values();
+        List<WordAndScore> wordAndScores = worstPhones.computeIfAbsent(k, k1 -> new ArrayList<>());
+
+        for (List<WordAndScore> value : values) {
+          wordAndScores.addAll(value);
+        }
+//        wordAndScores.addAll(values);
+      });
+
+      ///Map<String, List<WordAndScore>> worstPhones = (Map<String, List<WordAndScore>>) phoneToWordAndScoreSorted;
       Map<Long, String> resToAnswer = new HashMap<>();
       Map<Long, String> resToRef = new HashMap<>();
       Map<Long, String> resToResult = new HashMap<>();

@@ -659,7 +659,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       if (phoneSession.getEnd() > max) max = phoneSession.getEnd();
     }*/
 
-    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, from, to, new AsyncCallback<List<WordAndScore>>() {
+    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, "", from, to, new AsyncCallback<List<WordAndScore>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting performance report for user and phone", caught);
