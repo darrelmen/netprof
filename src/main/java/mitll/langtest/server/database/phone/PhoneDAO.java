@@ -162,7 +162,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
     } catch (Exception e) {
       logAndNotify.logAndNotifyServerException(e, "sql exception for user " + userid + " and result ids " + ids);
-      return new PhoneReport();
+      return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
     }
   }
 
@@ -272,10 +272,12 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       try {
-        WordAndScore wordAndScore = getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
-            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
-            "", wseq, word,
-            (int)rid, phone, seq, phoneScore, database.getLanguage());
+        WordAndScore wordAndScore = null;
+
+//            getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
+//            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
+//            "", wseq, word,
+//            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
           addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
@@ -290,7 +292,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
     finish(connection, statement, rs, sql);
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
+    return new MakePhoneReport().getPhoneReport(phoneToScores, null, bigramToCount, bigramToScore, totalScore, totalItems);
   }
 
   /**

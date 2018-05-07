@@ -72,10 +72,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private final int projid;
   private final Project project;
 
-  private static final boolean DEBUG = false;
   private final IAudioDAO audioDAO;
   private final boolean sortByPolyScore;
   private Collator collator;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PHONE = false;
 
   /**
    * @param database
@@ -354,7 +356,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 
-    if (DEBUG) {
+    if (DEBUG || DEBUG_PHONE) {
       logger.info("getPhoneReportFor for" +
           "\n\tuser   " + next +
           "\n\tuserid " + userid +
@@ -367,27 +369,29 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
 
-    List<WordAndScore> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
+   // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
 
-    if (wordAndScores == null) {
-      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
-      return new ArrayList<>();
-    } else {
-
-      if (DEBUG) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
-
-      SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
-      // examples.addAll(wordAndScores);
-      List<WordAndScore> filteredWords = new ArrayList<>(examples);
-
-      filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
-
-      long now = System.currentTimeMillis();
-      logger.info("getPhoneReportFor (took " + (now - then) + ") " +
-          "to get " + wordAndScores.size() + " " + filteredWords.size() +
-          "  report for " + userid + " and list " + listid);// + analysisReport);
-      return filteredWords;
-    }
+//    if (wordAndScores == null) {
+//      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
+//      return new ArrayList<>();
+//    } else {
+//
+//      if (DEBUG || DEBUG_PHONE) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+//
+//      SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
+//      // examples.addAll(wordAndScores);
+//      List<WordAndScore> filteredWords = new ArrayList<>(examples);
+//
+//      if (filteredWords.size() > MAX_TO_SEND) {
+//        filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
+//      }
+//
+//      long now = System.currentTimeMillis();
+//      logger.info("getPhoneReportFor (took " + (now - then) + ") " +
+//          "to get " + wordAndScores.size() + " " + filteredWords.size() +
+//          "  report for " + userid + " and list " + listid);// + analysisReport);
+//      return filteredWords;
+//    }
   }
 
   /**

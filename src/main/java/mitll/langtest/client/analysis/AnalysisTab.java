@@ -267,7 +267,7 @@ public class AnalysisTab extends DivWidget {
     PhoneReport phoneReport = result.getPhoneReport();
     if (phoneReport == null) {
       logger.warning("useReport : phone report is null?");
-      phoneReport = new PhoneReport();
+      phoneReport = new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
     }
 
     if (now - then > 2) {
@@ -595,7 +595,6 @@ public class AnalysisTab extends DivWidget {
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
-
    // final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
 
@@ -631,7 +630,6 @@ public class AnalysisTab extends DivWidget {
     sounds.add(phones);
     return sounds;
   }
-
 
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);

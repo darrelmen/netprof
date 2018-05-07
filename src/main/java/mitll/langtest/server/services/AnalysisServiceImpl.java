@@ -189,8 +189,11 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
    */
   @Override
-  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone,
-                                                                long from, long to)
+  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid,
+                                                                int listid,
+                                                                String phone,
+                                                                long from,
+                                                                long to)
       throws DominoSessionException, RestrictedOperationException {
     logger.info("getPerformanceForUser " + userid + " list " + listid + " phone " + phone);
     int projectID = getProjectIDFromUser();
@@ -212,7 +215,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     logger.info("getPerformanceForUser " + userid + " list " + listid);
     int projectID = getProjectIDFromUser();
     if (projectID == -1) {
-      return new PhoneReport();
+      return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, bigramToCount, bigramToScore);
     } else {
       if (hasTeacherPermOrSelf(userid)) {
         return getSlickAnalysis(projectID).getPhoneReportForPeriod(userid, listid, from, to).setReqid(reqid);

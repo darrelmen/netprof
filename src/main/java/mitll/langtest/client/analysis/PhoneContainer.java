@@ -100,7 +100,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   private static final String CURR = "Avg";//"Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
-  private static final String TOOLTIP = "Click to see examples and scores over time";
+  private static final String TOOLTIP = "Click to see examples";// and scores over time";
   private static final int SOUND_WIDTH = 65;
 
   private final PhoneExampleContainer exampleContainer;
@@ -174,7 +174,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (DEBUG) logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    if (DEBUG) logger.info("PhoneContainer.timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
 
     this.from = from;
     this.to = to;
@@ -689,7 +689,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getAvg())).toSafeHtml();
+        int avg = shell.getAvg();
+      //  logger.info("shell " + shell.getPhone() + " = " + avg);
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(avg)).toSafeHtml();
       }
     };
   }

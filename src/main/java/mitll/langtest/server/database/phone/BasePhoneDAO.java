@@ -44,7 +44,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import java.io.File;
 import java.util.*;
 
-public class BasePhoneDAO extends DAO {
+class BasePhoneDAO extends DAO {
   //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
   static final String PHONE = "phone";
@@ -53,12 +53,10 @@ public class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
-  //  private final ParseResultJson parseResultJson;
   private Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);
-    //  parseResultJson = new ParseResultJson(database.getServerProps(), language);
   }
 
   /**
@@ -99,7 +97,8 @@ public class BasePhoneDAO extends DAO {
    */
   WordAndScore getAndRememberWordAndScore(String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
-                                          Map<String, List<WordAndScore>> phoneToWordAndScore,
+                                          Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
+                                      //    Map<String, List<WordAndScore>> phoneToWordAndScore,
                                           int exid,
                                           String audioAnswer,
                                           String scoreJson,
@@ -109,12 +108,14 @@ public class BasePhoneDAO extends DAO {
                                           String word,
                                           int rid,
                                           String phone,
+                                          String bigram,
                                           int seq,
                                           float phoneScore,
                                           String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, getSessionTime(sessionToLong, device));
 
-    List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
+    Map<String, List<WordAndScore>> bigramToWords = phoneToBigramToWS.computeIfAbsent(phone, k -> new HashMap<>());
+    List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
 
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
@@ -127,7 +128,7 @@ public class BasePhoneDAO extends DAO {
         scoreJson,
         resultTime);
 
-    wordAndScores.add(wordAndScore);
+    wordAndScores1.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
 
     return wordAndScore;

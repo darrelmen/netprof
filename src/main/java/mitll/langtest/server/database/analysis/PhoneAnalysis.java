@@ -73,7 +73,7 @@ public class PhoneAnalysis {
   /**
    * @param phoneToAvgSorted
    * @see Analysis#getPhoneReport
-   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport(Map, Map, float, float, boolean)
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport(Map, Map, Map, Map, float, float)
    */
   public void setSessionsWithPrune(Map<String, PhoneStats> phoneToAvgSorted) {
     phoneToAvgSorted.forEach((phone, stats) ->

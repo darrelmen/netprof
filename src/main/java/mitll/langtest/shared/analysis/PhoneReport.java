@@ -45,9 +45,11 @@ import java.util.Map;
  */
 public class PhoneReport implements Serializable {
   private int overallPercent;
-  private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new HashMap<>();
+  //private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
-private int reqid;
+  private int reqid;
+  private Map<String, List<Bigram>> phoneToBigrams;
+//  private Map<String, Float> bigramToScore;
 
   private boolean valid;
 
@@ -57,15 +59,18 @@ private int reqid;
 
   /**
    * @param overallPercent
-   * @param phoneToWordAndScoreSorted
+   * @paramx phoneToWordAndScoreSorted
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneReport(int overallPercent,
-                     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
+                     //Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
+                     Map<String,List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted) {
     this.overallPercent = overallPercent;
-    this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+   // this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
+    this.phoneToBigrams=phoneToBigrams;
+   // this.bigramToScore=bigramToScore;
     valid = true;
   }
 
@@ -73,10 +78,11 @@ private int reqid;
    * Map of each phone to words it appears in.
    *
    * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPhoneReportFor(int, int, String, long, long)
    */
-  public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
-    return phoneToWordAndScoreSorted;
-  }
+//  public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
+//    return phoneToWordAndScoreSorted;
+//  }
 
   public int getOverallPercent() {
     return overallPercent;
@@ -107,5 +113,10 @@ private int reqid;
   public PhoneReport setReqid(int reqid) {
     this.reqid = reqid;
     return this;
+  }
+
+
+  public Map<String, List<Bigram>> getPhoneToBigrams() {
+    return phoneToBigrams;
   }
 }

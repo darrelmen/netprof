@@ -143,7 +143,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String QUIZ = "QUIZ";
   private static final String UNIT = "Unit";
   public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
-  private static final String QUIZ1 = "Quiz";
+  //private static final String QUIZ1 = "Quiz";
   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
 

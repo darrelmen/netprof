@@ -86,7 +86,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR TESTING
    */
-  private int debugProjectID = 2;
+  private int debugProjectID = 7;
 
   private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
