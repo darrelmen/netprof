@@ -37,6 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -53,6 +54,16 @@ public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
   public static final int MAX = 200;
 
+  @Test
+  public void testAnalysis() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    Project project = andPopulate.getProject(7);
+    AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(1474, 0, -1, 0);
+
+
+    //  andPopulate.sendReport(-1);
+    andPopulate.close();
+  }
 
 /*  @Test
   public void testReport() {

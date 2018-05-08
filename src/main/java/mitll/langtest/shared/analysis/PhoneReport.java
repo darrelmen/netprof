@@ -51,7 +51,6 @@ public class PhoneReport implements Serializable {
   private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
   private int reqid;
   private Map<String, List<Bigram>> phoneToBigrams;
-//  private Map<String, Float> bigramToScore;
 
   private boolean valid;
 

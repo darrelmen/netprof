@@ -292,7 +292,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
     finish(connection, statement, rs, sql);
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, null, bigramToCount, bigramToScore, totalScore, totalItems);
+    return null;//new MakePhoneReport().getPhoneReport(phoneToScores, null, bigramToCount, bigramToScore, totalScore, totalItems);
   }
 
   /**

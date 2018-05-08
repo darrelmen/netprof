@@ -136,21 +136,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     addPlayer();
   }
 
-  private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
-                                                                     List<WordAndScore> dataList) {
-    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0; // how?
-          }
-
-          // Compare the name columns.
-          return (o1 == null) ? -1 : (o2 == null) ? 1 : o1.getWord().compareTo(o2.getWord());
-        });
-    return columnSortHandler;
-  }
-
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
     {
@@ -169,6 +154,21 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     }
 
     new TooltipHelper().addTooltip(table, CLICK_ON);
+  }
+
+  private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
+                                                                     List<WordAndScore> dataList) {
+    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0; // how?
+          }
+
+          // Compare the name columns.
+          return (o1 == null) ? -1 : (o2 == null) ? 1 : o1.getWord().compareTo(o2.getWord());
+        });
+    return columnSortHandler;
   }
 
   /**

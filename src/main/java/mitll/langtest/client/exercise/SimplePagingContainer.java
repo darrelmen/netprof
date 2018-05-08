@@ -260,6 +260,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.addColumn(id2, header);
   }
 
+  protected void addColumn(Column<T, SafeHtml> id2, String headerName) {
+    addColumn(id2, new TextHeader(headerName));
+  }
+
   protected void clear() {
     List<T> list = getList();
     if (list == null) {

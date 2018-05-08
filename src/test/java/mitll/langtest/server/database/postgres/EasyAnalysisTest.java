@@ -71,10 +71,10 @@ public class EasyAnalysisTest extends BaseTest {
 */
     });
 
-    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = phoneReport.getPhoneToWordAndScoreSorted();
+    Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = phoneReport.getPhoneToWordAndScoreSorted();
 
     phoneToWordAndScoreSorted.forEach((phone, v) -> {
-      v.sort(Comparator.comparingLong(WordScore::getTimestamp));
+     // v.sort(Comparator.comparingLong(WordScore::getTimestamp));
 
       logger.info(phone + " = " + v.size() + " words");
 /*      v
@@ -143,7 +143,7 @@ public class EasyAnalysisTest extends BaseTest {
       to =1485273391652l;
       to++;
     //  return slickAnalysis.getPhoneReportFor(id, -1, phone, from, to);
-      return slickAnalysis.getPhoneReportFor(id, -1, phone, 0, to);
+      return slickAnalysis.getPhoneReportFor(id, -1, phone, "",0, to);
     }
   }
 

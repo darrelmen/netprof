@@ -14,7 +14,6 @@ public class ListOptions {
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
   private boolean showPager = true;
-//  private boolean contextOnly = false;
 
   public ListOptions() {
   }

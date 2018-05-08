@@ -16,15 +16,15 @@ public class Bigram implements Serializable {
     this.score = score;
   }
 
-  public int getCount() {
-    return count;
-  }
-
+  public int getCount() { return count;  }
   public String getBigram() {
     return bigram;
   }
-
   public float getScore() {
     return score;
+  }
+
+  public String toString() {
+    return bigram;// + " " + count + " = " + score;
   }
 }

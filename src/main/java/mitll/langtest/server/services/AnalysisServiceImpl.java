@@ -203,8 +203,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       return new ArrayList<>();
     } else {
       if (hasTeacherPermOrSelf(userid)) {
-        return getSlickAnalysis(projectID)
-            .getPhoneReportFor(userid, listid, phone, bigram, from, to);
+        return getSlickAnalysis(projectID).getPhoneReportFor(userid, listid, phone, bigram, from, to);
       } else {
         throw getRestricted("performance report for phone");
       }
@@ -215,7 +214,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   public List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
                                                                  int listid,
                                                                  String phone,
-                                                                  long from,
+                                                                 long from,
                                                                  long to)
       throws DominoSessionException, RestrictedOperationException {
     logger.info("getPerformanceForUser " + userid + " list " + listid + " phone " + phone);

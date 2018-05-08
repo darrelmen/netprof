@@ -290,7 +290,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
       int resultID = report.rid();
       int wseq = report.wseq();
-      if (prevResult != resultID || prevWord != wseq) {
+      boolean firstPhoneInWord = prevResult != resultID || prevWord != wseq;
+      if (firstPhoneInWord) {
         prevPhone = "_";
         prevScore = 0F;
 
@@ -300,9 +301,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       String phone = report.phone();
       String bigram = prevPhone + "-" + phone;
+      String rememPrev =prevPhone;
       prevPhone = phone;
       float phoneScore = report.pscore();
-      float bigramScore = (prevScore + phoneScore) / 2F;
+      float bigramScore = firstPhoneInWord ? phoneScore : (prevScore + phoneScore) / 2F;
       prevScore = phoneScore;
       bigramToCount.put(bigram, bigramToCount.getOrDefault(bigram, 0F) + 1);
       bigramToScore.put(bigram, bigramToScore.getOrDefault(bigram, 0F) + bigramScore);
@@ -324,6 +326,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           report.pseq(),
           phoneScore,
           language);
+
+      Map<String, List<WordAndScore>> bigramToWords = phoneToBigramToWS.computeIfAbsent(rememPrev, k -> new HashMap<>());
+      List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
+      wordAndScores1.add(wordAndScore);
 
       //Map<String, WordAndScore> bigramForPhone = phoneToBigramToWS.computeIfAbsent(phone, k -> new HashMap<>());
       // bigramForPhone.get
@@ -354,7 +360,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     List<String> sorted = new ArrayList<>(bigramToCount.keySet());
     sorted.sort(Comparator.naturalOrder());
-    logger.info("getPhoneReport : for " + userid +
+    logger.info("getPhoneReport : for user " + userid +
         " got " + sorted.size() + " bigrams");
     sorted.forEach(bigram -> logger.info(bigram + "\t" + bigramToCount.get(bigram) +
         "\t" + bigramToScore.get(bigram) / bigramToCount.get(bigram)));

@@ -56,6 +56,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.shared.analysis.Bigram;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.PhoneStats;
@@ -74,7 +75,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/20/15.
  */
-class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
+class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
   private static final boolean SORT_BY_RANK = false;
@@ -90,24 +91,22 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final int TABLE_WIDTH = 225;
   private static final int MAX_EXAMPLES = 25;
 
-  private static final String SOUND = "Sound";
+  private static final String SOUND = "Context";
   private static final String COUNT_COL_HEADER = "#";
   /**
    *
    */
-  private static final String CURR = "Avg";//"Average";//"Avg. Score";
+  private static final String CURR = "Avg";
   private static final int COUNT_COL_WIDTH = 45;
-  private static final String TOOLTIP = "Click to see examples";// and scores over time";
+  private static final String TOOLTIP = "Click to see examples";
   private static final int SOUND_WIDTH = 65;
 
-  // private final PhoneExampleContainer exampleContainer;
-  private final BigramContainer bigramContainer;
+  private final PhoneExampleContainer exampleContainer;
   private final int listid;
   private final int userid;
 
   private long from;
   private long to;
-  //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
 
   private static final boolean DEBUG = false;
@@ -115,18 +114,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   /**
    * @param controller
-   * @param bigramContainer
+   * @param exampleContainer
    * @param listid
    * @param userid
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneContainer(ExerciseController controller,
-                 BigramContainer bigramContainer,
-                 AnalysisServiceAsync analysisServiceAsync,
-                 int listid,
-                 int userid) {
+  BigramContainer(ExerciseController controller,
+                  PhoneExampleContainer exampleContainer,
+                  AnalysisServiceAsync analysisServiceAsync,
+                  int listid,
+                  int userid) {
     super(controller);
-    this.bigramContainer = bigramContainer;
+    this.exampleContainer = exampleContainer;
     this.analysisServiceAsync = analysisServiceAsync;
     this.listid = listid;
     this.userid = userid;
@@ -147,8 +146,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
-  PhoneReport phoneReport;
-
   /**
    * @param phoneReport
    * @return
@@ -157,72 +154,40 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   public Panel getTableWithPager(PhoneReport phoneReport) {
     from = 0;
     to = System.currentTimeMillis();
-    this.phoneReport = phoneReport;
-    return getTableWithPagerForHistory(getPhoneAndStatsList(phoneReport, from, to));
+//    Map<String, List<Bigram>> phoneToBigrams = phoneReport.getPhoneToBigrams();
+//    String phone = phoneToBigrams.keySet().iterator().next();
+//    Map<String, List<Bigram>> phoneToAvgSorted = phoneToBigrams;
+//    List<Bigram> bigrams = phoneToAvgSorted.get(phone);
+//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(bigrams);
+    return getTableWithPagerForHistory(new ArrayList<>());
   }
 
   private int reqid = 0;
 
-  /**
-   * @param from
-   * @param to
-   * @see AnalysisPlot#timeChanged
-   * @see #getTableWithPager
-   */
-  @Override
-  public void timeChanged(long from, long to) {
-    if (DEBUG) logger.info("PhoneContainer.timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+  String phone;
 
+  void gotNewPhoneReport(PhoneReport result, String phone, long from, long to) {
     this.from = from;
     this.to = to;
+    Map<String, List<Bigram>> phoneToAvgSorted = result.getPhoneToBigrams();
+    List<Bigram> bigrams = phoneToAvgSorted.get(phone);
+    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
+    logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
 
-    analysisServiceAsync.getPhoneReport(userid, listid, from, to, reqid++, new AsyncCallback<PhoneReport>() {
-      @Override
-      public void onFailure(Throwable caught) {
-
-      }
-
-      @Override
-      public void onSuccess(PhoneReport result) {
-        if (result.getReqid() + 1 != reqid) {
-          logger.info("skip stale req");
-        } else {
-          gotNewPhoneReport(result);
-        }
-      }
-    });
-//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
-//    addItems(phoneAndStatsList);
-//    showExamplesForSelectedSound();
-  }
-
-  private void gotNewPhoneReport(PhoneReport result) {
-    List<PhoneAndStats> phoneAndStatsList =
-        getPhoneAndStatsListForPeriod(result.getPhoneToAvgSorted(), from, to);
     addItems(phoneAndStatsList);
+    this.phone = phone;
     showExamplesForSelectedSound();
   }
 
-
-  private List<PhoneAndStats> getPhoneAndStatsList(PhoneReport phoneReport, long from, long to) {
-    return (phoneReport == null) ? Collections.emptyList() :
-        getPhoneAndStatsListForPeriod(phoneReport.getPhoneToAvgSorted(), from, to);
-  }
-
-
-  private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted,
-                                                            long first,
-                                                            long last) {
+  private List<PhoneAndStats> getPhoneAndStatsListForPeriod(List<Bigram> bigrams) {
 
     List<PhoneAndStats> phoneAndStatsList = new ArrayList<>();
-    if (phoneToAvgSorted == null) {
+    if (bigrams == null) {
       logger.warning("getPhoneAndStatsListForPeriod huh? phoneToAvgSorted is null ");
     } else {
-      if (DEBUG)
-        logger.info("getPhoneAndStatsListForPeriod From " + first +
-            "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last) + " over " + phoneToAvgSorted.size());
 
-      getPhoneStatuses(phoneAndStatsList, phoneToAvgSorted, first, last);
+      getPhoneStatuses(phoneAndStatsList, bigrams);
       if (phoneAndStatsList.isEmpty()) {
         logger.warning("getPhoneAndStatsListForPeriod phoneAndStatsList is empty? ");
       }
@@ -234,167 +199,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * Recalculate an average score for those sessions within the time period first to last.
    *
    * @param phoneAndStatses
-   * @param phoneToAvgSorted
-   * @param first
-   * @param last
-   * @see #timeChanged
+   * @paramx first
+   * @paramx last
+   * @seex #timeChanged
    */
   private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses,
-                                Map<String, PhoneStats> phoneToAvgSorted,
-                                long first, long last) {
-    if (DEBUG) {
-      logger.info("getPhoneStatuses From    " + first + "/" + debugFormat(first) + " : " + last + "/" + debugFormat(last));
-      logger.info("getPhoneStatuses examine " + phoneToAvgSorted.entrySet().size());
-    }
-
-    // if avg score is less than 75 = native
-    // get diff, weighted by total
-    // this diff is the rank - highest go first
-    // then above 75 weighted... how?
-
-    for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
-      PhoneStats value = ps.getValue();
-      List<PhoneSession> filtered = getFiltered(first, last, value);
-      //    logger.info("key " + ps.getKey() + " value " + filtered.size());
-      //  logger.info("Filtered " + filtered.size());
-
-      if (!filtered.isEmpty()) {
-        float total = 0;
-        long ltotal = 0;
-        float avg = 0;
-        float ndiff = 0;
-        for (PhoneSession session : filtered) {
-          long count1 = session.getCount();
-          ltotal += count1;
-          float fcount = Long.valueOf(count1).floatValue();
-          total += fcount;
-          double mean = session.getMean();
-          float fmean = Double.valueOf(mean).floatValue();
-          float diffNative = 0.75F - fmean;
-          if (fmean > 0.75) {
-            float diffN1 = (1F - fmean) / 100F;
-            ndiff += diffN1 * fcount;
-          } else {
-            float ldiff = (float) diffNative;
-            float weight = ldiff * fcount;
-            ndiff += weight;
-
-            if (SORT_BY_RANK)
-              logger.info(session.getPhone() + " diff " + diffNative +
-                  " ldiff " + ldiff + " * " + fcount + " = " + weight);
-          }
-
-          avg += fmean * fcount;
-        }
-        float overall = avg / total;
-
-        int v = Float.valueOf(overall * 100).intValue();
-        if (DEBUG) {
-          logger.info("getPhoneStatuses : overall " + overall + " avg " + avg + " total " + total + " report " + v);
-        }
-
-        // int totalCount = value.getTotalCount(filtered);
-        String thePhone = ps.getKey();
-        if (SORT_BY_RANK) logger.info(thePhone + " : total " + total + " ndiff " + ndiff);
-        phoneAndStatses.add(new PhoneAndStats(thePhone, v, Long.valueOf(ltotal).intValue()));
-      }
-    }
-
-//    if (SORT_BY_RANK) {
-//      phoneAndStatses.sort((o1, o2) -> {
-//        int compare = -1 * Float.compare(o1.getNdiff(), o2.getNdiff());
-//        return compare == 0 ? o1.compareTo(o2) : compare;
-//      });
-//
-//      for (int i = 0; i < phoneAndStatses.size(); i++) phoneAndStatses.get(i).setRank(i + 1);
-//    } else {
-    Collections.sort(phoneAndStatses);
-//    }
-    if (DEBUG) {
-      logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
-      if (phoneAndStatses.isEmpty()) {
-        phoneToAvgSorted.forEach((k, v) -> {
-          logger.info(k + " = " + v.getSessions().size() + " sessions");
-          v.getSessions()
-              .forEach(phoneSession -> logger.info("\t" + k + " = " +
-                  debugFormat(phoneSession.getStart()) + "-" + debugFormat(phoneSession.getEnd())));
-        });
-      }
-    }
-  }
-
-  /**
-   * Get sessions in this time period.
-   *
-   * @param first
-   * @param last
-   * @param value
-   * @return
-   * @see #getPhoneStatuses(List, Map, long, long)
-   */
-  private List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
-    List<PhoneSession> sessions = value.getSessions();
-    if (DEBUG) {
-      logger.info("getFiltered " + first + "/" +
-          debugFormat(first) + " - " + debugFormat(last) +
-          " over " + sessions.size() + " sessions");
-    }
-    return first == 0 ? sessions : getFiltered(sessions, first, last);
-  }
-
-  private String debugFormat(long first) {
-    return debugShortFormat.format(new Date(first));
-  }
-
-
-  /**
-   * TODO : this doesn't work properly - should do any sessions that overlap with the window
-   *
-   * @param orig
-   * @param first
-   * @param last
-   * @return
-   * @see #clickOnPhone2
-   * @see #getFiltered(long, long, PhoneStats)
-   */
-  private List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
-    if (DEBUG && true) {
-      logger.info("getFiltered : over " + orig.size() +
-          " From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
-    }
-
-    List<PhoneSession> filtered = new ArrayList<>();
-    for (PhoneSession session : orig) {
-      //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
-      if (doesSessionOverlap(first, last, session)) {
-        filtered.add(session);
-
-        if (DEBUG) {
-          logger.info("getFiltered included " + session.getPhone() +
-              " " +
-              debugFormat(session.getStart()) + "-" +
-              debugFormat(session.getEnd())
-          );
-        }
-      } else if (DEBUG) {
-        logger.info("getFiltered exclude " + session);
-      }
-    }
-    if (DEBUG) {
-      logger.info("getFiltered : over " + orig.size() +
-          " From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) +
-          " window dur " + (last - first) + " found " + filtered.size());
-//      logger.info("getFiltered : found " + filtered.size());
-    }
-    return filtered;
-  }
-
-  private boolean doesSessionOverlap(long first, long last, PhoneSession session) {
-    long sessionStart = session.getStart();
-    return
-        (sessionStart >= first && sessionStart <= last) || // start inside window
-            (session.getEnd() >= first && session.getEnd() <= last) ||    // end inside window
-            (sessionStart < first && session.getEnd() > last);      // session starts before and ends after window
+                                List<Bigram> bigrams) {
+    bigrams.forEach(bigram ->
+        phoneAndStatses.add(new PhoneAndStats(
+            bigram.getBigram(),
+            Math.round(100F * bigram.getScore()),
+            bigram.getCount()))
+    );
   }
 
   /**
@@ -406,7 +222,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     Panel tableWithPager = getTableWithPager(new ListOptions());
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
-    tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");
+    //  tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");
 
@@ -435,7 +251,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   /**
    * @see AnalysisTab#getPhoneReport
    */
-  void showExamplesForSelectedSound() {
+  public void showExamplesForSelectedSound() {
     List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
       logger.warning("showExamplesForSelectedSound : list empty?");
@@ -586,16 +402,29 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
-      //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
     } else {
       logger.info("got other event " + event.getType());
     }
   }
 
-  private void clickOnPhone2(String phone) {
-    logger.info("clickOnPhone2 : got click on phone " + phone);
-    bigramContainer.gotNewPhoneReport(phoneReport, phone, from, to);
+  protected void clickOnPhone2(String bigram) {
+    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, bigram, from, to, new AsyncCallback<List<WordAndScore>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting performance report for user and phone", caught);
+      }
+
+      @Override
+      public void onSuccess(List<WordAndScore> filteredWords) {
+        if (filteredWords == null) logger.warning("no result for " + phone + " " + bigram);
+        else {
+          exampleContainer.addItems(bigram,
+              filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
+              MAX_EXAMPLES);
+        }
+      }
+    });
   }
 
   private SafeHtml getSafeHtml(String columnText) {
@@ -652,6 +481,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
      */
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
-    PhoneContainer.LocalTableResources.TableStyle cellTableStyle();
+    BigramContainer.LocalTableResources.TableStyle cellTableStyle();
   }
 }

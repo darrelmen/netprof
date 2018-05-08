@@ -77,7 +77,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Collator collator;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PHONE = false;
+  private static final boolean DEBUG_PHONE = true;
 
   /**
    * @param database
@@ -376,7 +376,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public List<WordAndScore> getPhoneReportFor(int userid,
                                               int listid,
                                               String phone,
-                                              String bigram, long from, long to) {
+                                              String bigram,
+                                              long from,
+                                              long to) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
@@ -389,14 +391,24 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           "\n\tuserid " + userid +
           "\n\tlistid " + listid +
           "\n\tphone  " + phone +
+          "\n\tbigram " + bigram +
           "\n\tfrom   " + from + " " + new Date(from) +
           "\n\tto     " + to + " " + new Date(to)
       );
     }
 
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
-    phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone).get(bigram);
-    return null;//phoneReportForPhone;
+    Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
+        phoneReportForPhone.getPhoneToWordAndScoreSorted();
+    Map<String, List<WordAndScore>> bigramToExample = phoneToWordAndScoreSorted.get(phone);
+    if (bigramToExample == null) {
+      logger.warn("getPhoneReportFor no bigrams for phone '" + phone + "'");
+      return Collections.emptyList();
+    } else {
+      List<WordAndScore> wordAndScores = bigramToExample.get(bigram);
+      if (wordAndScores == null) logger.warn("getPhoneReportFor no examples for phone " + phone + " and " + bigram);
+      return wordAndScores;//phoneReportForPhone;
+    }
     // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
 
 //    if (wordAndScores == null) {

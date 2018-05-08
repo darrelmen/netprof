@@ -79,7 +79,7 @@ class BasePhoneDAO extends DAO {
    * look it up in a better way
    *
    * @param phoneToScores
-   * @param phoneToWordAndScore
+   * @param phoneToBigramToWS
    * @param exid
    * @param audioAnswer
    * @param scoreJson

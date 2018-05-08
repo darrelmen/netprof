@@ -50,6 +50,7 @@ import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.Bigram;
 import mitll.langtest.shared.analysis.PhoneReport;
 import org.jetbrains.annotations.NotNull;
 
@@ -238,7 +239,7 @@ public class AnalysisTab extends DivWidget {
       return userid;
     }
 
-    public int getMinRecordings() {
+    int getMinRecordings() {
       return minRecordings;
     }
 
@@ -434,7 +435,6 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
     buttonGroup.add(allChoice = getAllChoice());
 
-
     return buttonGroup;
   }
 
@@ -453,14 +453,10 @@ public class AnalysisTab extends DivWidget {
 
     Scheduler.get().scheduleDeferred(() -> {
       if (isPolyglot) {
-      //  logger.info("is poly...");
         timeScale.setSelectedValue(TIME_HORIZON.values()[0].getDisplay());
       } else {
         timeScale.setSelectedIndex(TIME_HORIZON.values().length - 1);
-//        timeScale.setSelectedValue(TIME_HORIZON.values()[TIME_HORIZON.values().length - 1].getDisplay());
       }
-     // int selectedIndex = timeScale.getSelectedIndex();
-     // logger.info("selectedIndex ..." + selectedIndex);
     });
 
     return timeScale;
@@ -547,8 +543,6 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param wordsTitle
    * @return
-   * @paramx showTab
-   * @paramx wordScores
    */
   private Panel getWordContainer(
       ReqInfo reqInfo,
@@ -592,21 +586,25 @@ public class AnalysisTab extends DivWidget {
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
-   // final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
+    final BigramContainer bigramContainer =
+        new BigramContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
+    final PhoneContainer phoneContainer =
+        new PhoneContainer(controller, bigramContainer, analysisServiceAsync, listid, userid);
 
     analysisPlot.addListener(phoneContainer);
 
-    showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer);
+    showPhoneReport(phoneReport, phoneContainer, bigramContainer,lowerHalf, exampleContainer);
   }
 
   private void showPhoneReport(PhoneReport phoneReport,
                                PhoneContainer phoneContainer,
+                               BigramContainer bigramContainer,
                                Panel lowerHalf,
                                PhoneExampleContainer exampleContainer) {
     // #1 - phones
-    // Panel phones = phoneContainer.getTableWithPager(phoneReport);
     lowerHalf.add(getSoundsContainer(phoneContainer.getTableWithPager(phoneReport)));
+
+    lowerHalf.add(getBigramContainer(bigramContainer.getTableWithPager(phoneReport)));
 
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
@@ -621,9 +619,18 @@ public class AnalysisTab extends DivWidget {
   }
 
   private DivWidget getSoundsContainer(Panel phones) {
+    return getContainer(phones, "SoundsContainer", SOUNDS);
+  }
+
+  private DivWidget getBigramContainer(Panel phones) {
+    return getContainer(phones, "BigramContainer", "Context");
+  }
+
+  @NotNull
+  private DivWidget getContainer(Panel phones, String bigramContainer, String context) {
     DivWidget sounds = new DivWidget();
-    sounds.getElement().setId("SoundsContainer");
-    sounds.add(getHeading(SOUNDS));
+    sounds.getElement().setId(bigramContainer);
+    sounds.add(getHeading(context));
     sounds.add(phones);
     return sounds;
   }
