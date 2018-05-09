@@ -47,15 +47,13 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
-  private final Logger logger = Logger.getLogger("WebAudioRecorder");
+ // private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
   private static boolean tried = false;
   private static boolean gotResponse = false;
   private Timer theTimer = null;
-
-  //private int attempts = 10*60/DELAY_MILLIS;
 
   /**
    *
@@ -152,16 +150,16 @@ public class WebAudioRecorder {
     return !gotResponse || webAudioMicAvailable;
   }
 
-  static void noWebRTC() {
-    webAudioMicAvailable = false;
-//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
-    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
-  }
-
   public static void webAudioPermissionDenied() {
     gotResponse = true;
     console("webAudioPermissionDenied!");
     noWebRTC();
+  }
+
+  private static void noWebRTC() {
+    webAudioMicAvailable = false;
+//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
   }
 
   /**

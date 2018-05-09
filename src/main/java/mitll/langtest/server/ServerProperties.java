@@ -33,12 +33,12 @@
 package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -814,6 +814,10 @@ public class ServerProperties {
     return getDefaultTrue(DO_AUDIO_CHECKS_IN_PRODUCTION);
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#ProjectManagement
+   * @return
+   */
   public boolean debugOneProject() {
     return getDefaultFalse(DEBUG_ONE_PROJECT);
   }

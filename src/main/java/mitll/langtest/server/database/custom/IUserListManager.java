@@ -53,10 +53,6 @@ public interface IUserListManager {
 
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
-/*
-  void ensureDryRun(int projid);
-*/
-
   UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
                    int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
 

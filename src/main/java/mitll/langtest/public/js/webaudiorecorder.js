@@ -30,23 +30,23 @@
  *
  */
 
-function __log(e, data) {
-//    $('#status').append("<p>"+e + "  at " + new Date().getTime());
-    console.log(e + "  at " + new Date().getTime());
+function __log(e) {
+    console.log(e + "  at " + new Date());
 }
 
 var audio_context;
 var recorder;
 var rememberedInput;
 var allZero;
+var mics = {};
 
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-    __log('Media stream created.');
+    // __log('Media stream created.');
 
     recorder = new Recorder(input);
-    __log('Recorder initialised.');
+//    __log('Recorder initialised.');
 
     rememberedInput = input;
     webAudioMicAvailable();
@@ -60,6 +60,7 @@ function onVisibilityChange() {
 
         if (rememberedInput) {
             recorder && recorder.stop();
+            audio_context && audio_context.suspend();
             //        __log('Stopped recording.');
         }
     } else {
@@ -69,18 +70,20 @@ function onVisibilityChange() {
 
 var start = new Date().getTime();
 
+// fix for bug where chrome prevents recording unless calls resume first
+// see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 function startRecording() {
-    recorder.clear();
+    recorder && recorder.clear();
+    audio_context && audio_context.resume();
     recorder && recorder.record();
-    //  start = new Date().getTime();
-
-   // __log('Recording...');
+    //    __log('Start Recording. ' + recorder);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
-    //__log('Stopped recording.');
+    audio_context && audio_context.suspend();
+    // __log('Stop Recording.');
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
     // get WAV from audio data blob
@@ -125,7 +128,7 @@ function bytesToBase64(aBytes) {
 
 function getAllZero() {
     recorder && recorder.getAllZero(function (blob) {
-        console.log("Got " + blob);
+        // console.log("Got " + blob);
         allZero = blob;
     });
 }
@@ -148,7 +151,7 @@ function grabWav() {
 
                 var bytes = bytesToBase64(myArray);
                 getBase64(bytes);
-            }
+            };
 
             reader.readAsArrayBuffer(blob);
         } catch (e) {
@@ -171,23 +174,15 @@ function initWebAudio() {
     try {
         // webkit shim
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        navigator.getMedia = ( navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia);
-        // window.URL = window.URL || window.webkitURL;
-        // __log('Audio context is something...');
-        //console.info("getting audio context...");
+        navigator.getMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
 
-        //  __log('Audio context is '+window.AudioContext);
+        //         __log('Audio context is '+window.AudioContext);
 
         audio_context = new AudioContext;
         gotAudioContext = true;
-        //   __log('initWebAudio Audio context set up.');
-
-//        __log('initWebAudio sample rate = ' +audio_context.sampleRate);
-
-        //console.info('Audio context set up.');
 
         __log('initWebAudio sample rate = ' + audio_context.sampleRate +
             ' navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
@@ -200,10 +195,11 @@ function initWebAudio() {
     if (gotAudioContext) {
         try {
             if (navigator.getMedia) {
-                //         __log('initWebAudio getMedia ...');
+             //   __log('initWebAudio getMedia ...');
                 navigator.getMedia({audio: true}, startUserMedia, function (e) {
                     __log('initWebAudio No live audio input: ' + e);
-                    if (e.name == "PermissionDeniedError") {
+                    __log('initWebAudio name: ' + e.name);
+                    if (e.name.startsWith("NotAllowedError")) {
                         webAudioPermissionDenied();
                     }
                     //console.error(e);
@@ -220,4 +216,65 @@ function initWebAudio() {
             webAudioMicNotAvailable();
         }
     }
+
+    navigator.mediaDevices.ondevicechange = function (event) {
+        __log("got device change... ");
+        location.reload();
+        //      initWebAudio();
+        //updateDeviceList();
+    };
+
+//    updateDeviceList();
+}
+
+function updateDeviceList() {
+    navigator.mediaDevices.enumerateDevices()
+        .then(function (devices) {
+
+            var newmics = [];
+            devices.forEach(function (device) {
+                var isMatch = device.kind === "audioinput";
+                // __log("got device " + device.label);
+                //
+                if (isMatch) {
+                    __log("got mic " + device.label);
+                    newmics.push(device.deviceId);
+                    // __log("got kind " + device.kind);
+                    // __log("got groupId " + device.groupId );
+                    //  __log("got deviceId " + device.deviceId );
+                    //  audioList.appendChild(elem);
+                }
+                else {
+                    __log("got not a mic " + device.label);
+                    __log("got kind " + device.kind);
+                    __log("got groupId " + device.groupId);
+                    __log("got deviceId " + device.deviceId);
+
+                }
+                //else if (type === "video") {
+                //     __log("got video " + message);
+                // }
+            });
+
+            newmics.sort();
+
+            if (newmics.length !== mics.length) {
+                __log("got mics " + newmics.length + " before " + mics.length);
+                // initWebAudio();
+            }
+            else {
+                __log("no change mics " + newmics.length + " before " + mics.length);
+            }
+
+            mics = newmics;
+            // else {
+            //     for (i = 0; i < newmics.length; i++) {
+            //         __log("mic " + i + " " + newmics[i]);
+            //         if (newmics[i] !== mics[i]) {
+            //             __log("different mic " + i + " " + newmics[i]);
+            //             break;
+            //         }
+            //     }
+            // }
+        });
 }
