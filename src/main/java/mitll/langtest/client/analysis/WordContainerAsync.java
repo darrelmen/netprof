@@ -130,7 +130,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private boolean isAllSameDay = false;
   private long from = 0, to = Long.MAX_VALUE;
   private int lastPlayed = -1;
-//  private List<WordScore> lastResults;
 
   /**
    * What sort order do we want?
@@ -308,13 +307,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private boolean onLast() {
-//    Range visibleRange = table.getVisibleRange();
-//    int i1 = visibleRange.getStart() + visibleRange.getLength();
-//    int rowCount = table.getRowCount();
-////    logger.info("next page " + i1 + " row " + rowCount);
-//    return rowCount == i1;
-//
-
     int visibleItemCount = table.getVisibleItemCount();
     if (visibleItemCount == 0) return true;
     else {
@@ -440,20 +432,19 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   /**
+   * Only sort with descending score.
    * @return
-   * @paramx sortedHistory
    * @see AnalysisTab#getWordContainer
    */
   public Panel getTableWithPager() {
     // logger.info("getTableWithPager " +listOptions);
-
     CellTable<WordScore> wordScoreCellTable = makeCellTable(new ListOptions().isSort());
 
-    if (isPolyglot()) {
-      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
-    } else {
-      wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-    }
+    //if (isPolyglot()) {
+    wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
+    //} else {
+    //  wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
+   // }
 
     createProvider(numWords, wordScoreCellTable);
 
