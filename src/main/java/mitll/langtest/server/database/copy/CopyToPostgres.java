@@ -99,7 +99,9 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES = "netprof.properties";
 
   enum ACTION {
-    COPY("c"), DROP("d"), DROPALL("a"), DROPALLBUT("b"), UPDATEUSER("u"), UNKNOWN("k");
+    COPY("c"), DROP("d"), DROPALL("a"), DROPALLBUT("b"), UPDATEUSER("u"),
+    //UPDATE("p"),
+    UNKNOWN("k");
 
     private String value;
 
@@ -377,58 +379,60 @@ public class CopyToPostgres<T extends CommonShell> {
 
     // check once if we've added it before
     if (slickUEDAO.isProjectEmpty(projectID)) {
-      ResultDAO resultDAO = new ResultDAO(db);
-      Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
-
-      Map<Integer, String> idToFL = new HashMap<>();
-
-      logger.info("copyOneConfig type order  " + typeOrder);
-
-      if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
-      Map<String, Integer> parentExToChild = new HashMap<>();
-      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild);
-
-      SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
-      copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(), db.getUserDAO().getDefaultUser());
-
-      logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
-
-      // add the audio table
-      Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, status == ProjectStatus.EVALUATION);
-      // logger.info("pathToAudioID num = " + pathToAudioID.size());
-
-      // copy ref results
-      if (!skipRefResult) {
-        copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
-      }
-
-      // add event table - why events on an old UI?
-      // copyEvents(db, projectID, oldToNewUser, exToID);
-
-      // copy results, words, and phones
-      {
-        Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew(projectID);
-
-        if (oldToNewResult.isEmpty()) {
-          logger.error("\n\n\nold to new result is EMPTY!");
-        }
-        Map<Integer, Integer> oldToNewWordID = copyWordsAndGetIDMap(db, oldToNewResult, projectID);
-
-        // phone DAO
-        copyPhone(db, oldToNewResult, oldToNewWordID, projectID);
-      }
-
-      // anno DAO
-      copyAnno(db, db.getUserDAO(), oldToNewUser, exToID);
-
-      copyReviewed(db, oldToNewUser, exToID, true);
-      copyReviewed(db, oldToNewUser, exToID, false);
+      copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID);
     } else {
       logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
     long now = System.currentTimeMillis();
 
     logger.info("copyOneConfig took " + ((now - then) / 1000) + " seconds to load " + optName);
+  }
+
+  private void copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult, Collection<String> typeOrder, int projectID) throws Exception {
+    SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
+    ResultDAO resultDAO = new ResultDAO(db);
+    Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
+
+    Map<Integer, String> idToFL = new HashMap<>();
+
+    logger.info("copyOneConfig type order  " + typeOrder);
+
+    if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
+    Map<String, Integer> parentExToChild = new HashMap<>();
+    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild);
+
+    SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
+    copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(), db.getUserDAO().getDefaultUser());
+
+    logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
+
+    // add the audio table
+    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, status == ProjectStatus.EVALUATION);
+    // logger.info("pathToAudioID num = " + pathToAudioID.size());
+
+    // copy ref results
+    if (!skipRefResult) {
+      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
+    }
+
+    // copy results, words, and phones
+    {
+      Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew(projectID);
+
+      if (oldToNewResult.isEmpty()) {
+        logger.error("\n\n\nold to new result is EMPTY!");
+      }
+      Map<Integer, Integer> oldToNewWordID = copyWordsAndGetIDMap(db, oldToNewResult, projectID);
+
+      // phone DAO
+      copyPhone(db, oldToNewResult, oldToNewWordID, projectID);
+    }
+
+    // anno DAO
+    copyAnno(db, db.getUserDAO(), oldToNewUser, exToID);
+
+    copyReviewed(db, oldToNewUser, exToID, true);
+    copyReviewed(db, oldToNewUser, exToID, false);
   }
 
   /**
@@ -1063,6 +1067,10 @@ public class CopyToPostgres<T extends CommonShell> {
       action = UPDATEUSER;
       updateUsersFile = cmd.getOptionValue(UPDATEUSER.toLower());
     }
+//    else if (cmd.hasOption(UPDATE.toLower())) {
+//      action = UPDATE;
+//      config = cmd.getOptionValue(UPDATE.toLower());
+//    }
 
     if (cmd.hasOption(NAME.toLower())) {
       optName = cmd.getOptionValue(NAME.toLower());
@@ -1148,6 +1156,11 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
         break;
+//        case UPDATE:
+//        logger.info("map old user ids to new user ids");
+//          boolean b = copyToPostgres.updateOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult);
+//
+//          break;
       default:
         formatter.printHelp("copy", options);
     }

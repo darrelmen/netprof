@@ -138,7 +138,6 @@ public class CreateListDialog extends BasicDialog {
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
-  private ListBox durationList, minScoreList;
   private boolean playAudio;
 
   private int quizSize = DEFAULT_QUIZ_SIZE;
@@ -258,7 +257,7 @@ public class CreateListDialog extends BasicDialog {
       ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
       List<String> typeOrder = projectStartupInfo.getTypeOrder();
 
-      if (typeOrder.size()>2) typeOrder=typeOrder.subList(0,2);
+      if (typeOrder.size() > 2) typeOrder = typeOrder.subList(0, 2);
       for (String type : typeOrder) {
         grid.setWidget(row, col++, getLabel(type));
       }
@@ -337,11 +336,11 @@ public class CreateListDialog extends BasicDialog {
             @Override
             public void onSuccess(FilterResponse response) {
               Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
-             // logger.info("got " + typeToValues);
+              // logger.info("got " + typeToValues);
               List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-            //   logger.info("got " + typeOrder );
+              //   logger.info("got " + typeOrder );
               String key = typeOrder.get(nextIndex);
-             // logger.info("key " + key );
+              // logger.info("key " + key );
               Set<MatchInfo> matchInfos = typeToValues.get(key);
               nextBox.clear();
               nextBox.addItem(ALL);
@@ -401,8 +400,7 @@ public class CreateListDialog extends BasicDialog {
 
   @NotNull
   private HTML getQuizSizeLabel() {
-    String quizSize = QUIZ_SIZE;
-    return getEditableLabel(quizSize);
+    return getEditableLabel(QUIZ_SIZE);
   }
 
   @NotNull
@@ -430,12 +428,8 @@ public class CreateListDialog extends BasicDialog {
     for (int i = MIN_DURATION; i < MAX_DURATION; i++) {
       w.addItem("" + i);
     }
-    if (isEditing()) {
-      w.setSelectedValue("" + current.getDuration());
-    } else {
-      w.setSelectedValue("" + DEFAULT_DURATION);
-    }
-    w.addChangeHandler(event -> gotListSelection2(w.getValue()));
+    w.setSelectedValue("" + (isEditing() ? (duration = current.getDuration()) : DEFAULT_DURATION));
+    w.addChangeHandler(event -> gotDurationSelection(w.getValue()));
     return w;
   }
 
@@ -445,11 +439,7 @@ public class CreateListDialog extends BasicDialog {
       w.addItem("" + i);
     }
 
-    if (isEditing()) {
-      w.setSelectedValue("" + current.getMinScore());
-    } else {
-      w.setSelectedValue("" + DEFAULT_MIN_SCORE);
-    }
+    w.setSelectedValue("" + (isEditing() ? (minScore = current.getMinScore()) : DEFAULT_MIN_SCORE));
 
     w.addChangeHandler(event -> gotListSelection3(w.getValue()));
     return w;
@@ -501,7 +491,7 @@ public class CreateListDialog extends BasicDialog {
     //   logger.info("got " + quizSize);
   }
 
-  private void gotListSelection2(String value) {
+  private void gotDurationSelection(String value) {
     duration = Integer.parseInt(value);
   }
 
@@ -686,7 +676,7 @@ public class CreateListDialog extends BasicDialog {
                            UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
     logger.info("addUserList " + safeText);
-    Map<String,String> unitToChapter = new LinkedHashMap<>();
+    Map<String, String> unitToChapter = new LinkedHashMap<>();
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
 
 

@@ -107,8 +107,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   public SlickUserExerciseList toSlick2(UserList<?> shared, int userid, int projid, int id) {
     String listtype = shared.getListType().toString();
-
-    logger.info("toSlick2 list type " + listtype + " id " + id + " proj " + projid);
+//    logger.info("toSlick2 list type " + listtype + " id " + id + " proj " + projid);
     return new SlickUserExerciseList(id,
         userid,
         new Timestamp(shared.getModified()),

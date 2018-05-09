@@ -129,6 +129,9 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     this.debugOne = properties.debugOneProject();
     this.debugProjectID = properties.debugProjectID();
+
+    //logger.info("debug one " + debugOne + " = " + debugProjectID);
+
     this.projectDAO = db.getProjectDAO();
 
     if (servletContext == null) {

@@ -89,7 +89,7 @@ public class InitialUI implements UILifecycle {
    * @see #confirmCurrentProject
    */
   public static final String CHECK_NETWORK_WIFI = "CHECK NETWORK/WIFI";
-  private static final int WIFI_MAX_WAIT = 5000;
+  private static final int WIFI_MAX_WAIT = 7000;
   private static final String DIVIDER = ">";
   private static final String ALL = "Home";
 
