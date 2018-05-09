@@ -53,14 +53,15 @@ import java.util.HashMap;
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
   public static final int MAX = 200;
+  public static final int USERID = 1474;
 
   @Test
   public void testAnalysis() {
     DatabaseImpl andPopulate = getAndPopulate();
     Project project = andPopulate.getProject(7);
-    AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(1474, 0, -1, 0);
+   //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
 
-
+    project.getAnalysis().getPhoneReportFor(USERID, -1, "b", "b-rf", 0, System.currentTimeMillis());
     //  andPopulate.sendReport(-1);
     andPopulate.close();
   }

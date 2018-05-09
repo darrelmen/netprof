@@ -352,7 +352,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   public List<Bigram> getBigramPhoneReportFor(int userid,
                                               int listid,
                                               String phone,
-                                              long from, long to) {
+                                              long from,
+                                              long to) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 

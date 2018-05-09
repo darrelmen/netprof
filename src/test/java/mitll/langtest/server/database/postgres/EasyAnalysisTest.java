@@ -54,7 +54,7 @@ public class EasyAnalysisTest extends BaseTest {
     AnalysisReport performanceReportForUser = getPerformanceReportForUser(andPopulate, 2, 295, 1, -1);
 
     logger.info("Got " + performanceReportForUser);
-  //  logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
+    //  logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
 
     PhoneReport phoneReport = performanceReportForUser.getPhoneReport();
     logger.info("phone Report " + phoneReport);
@@ -70,11 +70,12 @@ public class EasyAnalysisTest extends BaseTest {
               debugFormat(phoneSession.getStart()) + "-" + debugFormat(phoneSession.getEnd())));
 */
     });
+    getPerformanceReportForUser2(andPopulate, 7, 729, -1, "b", "b-jj");
 
     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = phoneReport.getPhoneToWordAndScoreSorted();
 
     phoneToWordAndScoreSorted.forEach((phone, v) -> {
-     // v.sort(Comparator.comparingLong(WordScore::getTimestamp));
+      // v.sort(Comparator.comparingLong(WordScore::getTimestamp));
 
       logger.info(phone + " = " + v.size() + " words");
 /*      v
@@ -85,7 +86,7 @@ public class EasyAnalysisTest extends BaseTest {
 
     String x = "nj";
     List<WordAndScore> performanceReportForUser2 = getPerformanceReportForUser2(andPopulate, 2, 295, x);
-    logger.info("for " +x+
+    logger.info("for " + x +
         " " + performanceReportForUser2.size());
 
   /*  List<WordScore> wordScores = performanceReportForUser.getWordScores();
@@ -113,9 +114,17 @@ public class EasyAnalysisTest extends BaseTest {
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      SlickAnalysis slickAnalysis = getSlickAnalysis(db, projectID);
+      return getSlickAnalysis(db, projectID).getPerformanceReportForUser(id, minRecordings, listid, 0);
+    }
+  }
 
-      return slickAnalysis.getPerformanceReportForUser(id, minRecordings, listid, 0);
+  private List<WordAndScore> getPerformanceReportForUser2(DatabaseImpl db,
+                                                          int projectID, int id, int listid, String phone, String bigram) {
+    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
+    if (projectID == -1) {
+      return new ArrayList<>();
+    } else {
+      return getSlickAnalysis(db, projectID).getPhoneReportFor(id, listid, phone, bigram, 0, Long.MAX_VALUE);
     }
   }
 
@@ -135,15 +144,15 @@ public class EasyAnalysisTest extends BaseTest {
       logger.info("from " + new Date(from));
       logger.info("to   " + new Date(to));
 
-       to = 1506463703650l;
+      to = 1506463703650l;
       // logger.info("from " + new Date(from));
 
-      from =1457051837030l;
+      from = 1457051837030l;
       from--;
-      to =1485273391652l;
+      to = 1485273391652l;
       to++;
-    //  return slickAnalysis.getPhoneReportFor(id, -1, phone, from, to);
-      return slickAnalysis.getPhoneReportFor(id, -1, phone, "",0, to);
+      //  return slickAnalysis.getPhoneReportFor(id, -1, phone, from, to);
+      return slickAnalysis.getPhoneReportFor(id, -1, phone, "", 0, to);
     }
   }
 
