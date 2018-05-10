@@ -60,7 +60,7 @@ function onVisibilityChange() {
 
         if (rememberedInput) {
             recorder && recorder.stop();
-            audio_context && audio_context.suspend();
+           // audio_context && audio_context.suspend();
             //        __log('Stopped recording.');
         }
     } else {
@@ -73,8 +73,8 @@ var start = new Date().getTime();
 // fix for bug where chrome prevents recording unless calls resume first
 // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 function startRecording() {
-    recorder && recorder.clear();
     audio_context && audio_context.resume();
+    recorder && recorder.clear();
     recorder && recorder.record();
     //    __log('Start Recording. ' + recorder);
 }
@@ -82,7 +82,8 @@ function startRecording() {
 // called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
-    audio_context && audio_context.suspend();
+   // audio_context && audio_context.suspend();
+
     // __log('Stop Recording.');
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
