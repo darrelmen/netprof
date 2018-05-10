@@ -78,7 +78,6 @@ import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
 
-  // private static final String POSTED_AUDIO = "postedAudio";
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
@@ -609,14 +608,24 @@ public class AudioFileHelper implements AlignDecode {
 
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
-    PrecalcScores precalcScores =
-        checkForWebservice(
-            exercise.getID(),
-            exercise.getEnglish(),
-            attribute.getTranscript(),
-            exercise.getProjectID(),
-            userID,
-            absoluteFile);
+    PrecalcScores precalcScores = null;
+    try {
+      precalcScores = checkForWebservice(
+          exercise.getID(),
+          exercise.getEnglish(),
+          attribute.getTranscript(),
+          exercise.getProjectID(),
+          userID,
+          absoluteFile);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+      logger.warn(
+          "exercise " + exercise +
+          "\n\tattribute    " + attribute +
+          "\n\tuserID       " + userID +
+          "\n\tabsoluteFile " + absoluteFile);
+      return null;
+    }
 
     PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, absolutePath, options) :
         getPretestScoreMaybeUseCache(-1,

@@ -202,7 +202,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         } else {  // not in the dictionary, let's ask LTS
           {
             String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
-            logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+            if (DEBUG) logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
           }
           if (!hasLTS) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");

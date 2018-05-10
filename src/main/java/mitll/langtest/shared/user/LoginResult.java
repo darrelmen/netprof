@@ -53,10 +53,10 @@ public class LoginResult implements IsSerializable {
     MissingInfo,
     Updated,
     Added,
-    Exists
+    Exists,
+    Multiple
   }
 
-  //private static final long serialVersionUID = -8359612864581208214L;
   private User loggedInUser;
   private ResultType resultType;
 
@@ -66,9 +66,11 @@ public class LoginResult implements IsSerializable {
   public LoginResult(ResultType resultType) {
     this(null, resultType);
   }
+
   public LoginResult(User loggedInUser) {
     this(loggedInUser, ResultType.Success);
   }
+
   public LoginResult(User loggedInUser, ResultType resultType) {
     this.loggedInUser = loggedInUser;
     this.resultType = resultType;
@@ -78,6 +80,7 @@ public class LoginResult implements IsSerializable {
   public User getLoggedInUser() {
     return loggedInUser;
   }
+
   public ResultType getResultType() {
     return resultType;
   }

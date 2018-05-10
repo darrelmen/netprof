@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.security;
 
+import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
@@ -17,7 +18,6 @@ public interface IUserSecurityManager {
   /**
    * The key to get/set the id of the user stored in the session
    * @see NPUserSecurityManager#getUserIDFromRequest
-   * @seex IUserSecurityManager#getUserIDFromSession
    * @see IUserSecurityManager#logoutUser
    */
   String USER_SESSION_ATT = "user-db-id";
@@ -38,6 +38,12 @@ public interface IUserSecurityManager {
 
   String getSessionID(HttpServletRequest request);
 
+  /**
+   * @see UserServiceImpl#logout
+   * @param request
+   * @param userId
+   * @param killAllSessions
+   */
   void logoutUser(HttpServletRequest request, int userId, boolean killAllSessions);
 
   /**

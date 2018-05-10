@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.user.client.Random;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
@@ -72,10 +71,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       HttpServletRequest request = getThreadLocalRequest();
       String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader("User-Agent");
-
-      // ensure a newSession is created.
-//      HttpSession newSession = createSession();
-      //logger.info("Login newSession " + newSession.getId() + " isNew=" + newSession.isNew());
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
     } catch (Exception e) {
       logger.error("got " + e, e);

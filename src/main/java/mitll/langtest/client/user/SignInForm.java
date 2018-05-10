@@ -64,7 +64,8 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String APPLICATION_PERMISSION = "I'm sorry, you do not have permission to access this application.";
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   /**
-   *
+   * @see #checkUserExists
+   * @see #handleLoginResponse
    */
   private static final String NO_USER_FOUND = "No user with this id - have you signed up?";
 
@@ -324,8 +325,8 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(String user, final String freeTextPassword) {
-//    logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
-//    );
+  logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
+    );
 //    String before = user;
 
     if (user != null) {

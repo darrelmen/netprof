@@ -250,7 +250,8 @@ public class UserListSupport {
 
   @NotNull
   private String getProjectParam() {
-    return SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + controller.getProjectStartupInfo().getProjectid();
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    return projectStartupInfo == null ? "" : SelectionState.SECTION_SEPARATOR + SelectionState.PROJECT + "=" + projectStartupInfo.getProjectid();
   }
 
   /**

@@ -116,22 +116,28 @@ public class NPUserSecurityManager implements IUserSecurityManager {
                                     String attemptedFreeTextPassword,
                                     String remoteAddr,
                                     String userAgent,
-                                    HttpSession session, boolean strictValidity) {
-    User loggedInUser = userDAO.loginUser(
+                                    HttpSession session,
+                                    boolean strictValidity) {
+    LoginResult result = userDAO.loginUser(
         userId,
         attemptedFreeTextPassword,
         userAgent,
         remoteAddr,
         session.getId());
 
-    boolean success = loggedInUser != null;
+    boolean success = result.getLoggedInUser() != null;
 
-    logActivity(userId, remoteAddr, userAgent, loggedInUser, success);
+    try {
+      logActivity(userId, remoteAddr, userAgent, success ? result.getLoggedInUser() : null, success);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     if (success) {
-      return getValidLogin(session, loggedInUser, strictValidity);
+      return getValidLogin(session, result.getLoggedInUser(), strictValidity);
     } else {
-      return getInvalidLoginResult(userDAO.getUserByID(userId));
+      return result.getResultType() == LoginResult.ResultType.Multiple ? result :
+          getInvalidLoginResult(userDAO.getUserByID(userId));
     }
   }
 
@@ -200,13 +206,13 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
-   * @see #setSessionUser(HttpSession, User, boolean)
    * @param session
    * @param id1
+   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
+   * @see #setSessionUser(HttpSession, User, boolean)
    */
   private void setSessionUserAndRemember(HttpSession session, int id1) {
-    log.info("setSessionUserAndRemember : set session user to " +id1);
+    log.info("setSessionUserAndRemember : set session user to " + id1);
 
     session.setAttribute(USER_SESSION_ATT, id1);
     String sessionID = session.getId();
@@ -260,14 +266,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     HttpSession session = getCurrentSession(request);
     if (session != null) {
       log.info("logoutUser : Invalidating session {}", session.getId());
-///      if (killAllSessions) {
       userSessionDAO.removeAllSessionsForUser(userId);
-//      } else {
-//        userSessionDAO.removeSession(session.getId());
-//      }
       // not strictly necessary, but ...
       session.removeAttribute(USER_SESSION_ATT);
       session.invalidate();
+      userDAO.refreshCacheFor(userId);
     } else {
       log.warn(">Session Activity> No session found on logout for id " + userId);
     }

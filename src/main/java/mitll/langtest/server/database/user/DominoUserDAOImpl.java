@@ -36,6 +36,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mongodb.MongoTimeoutException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.MongoGroupDAO;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
@@ -58,6 +60,7 @@ import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -122,6 +125,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String DEFAULT = "Default";
   private static final int EST_NUM_USERS = 8000;
   private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" +
+          "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
+          "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
+
   private static final long STALE_DUR = 5L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
 
@@ -158,7 +167,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) {
-             // logger.info("idToDBUser Load " + key);
+              // logger.info("idToDBUser Load " + key);
               return delegate.lookupDBUser(key);
             }
           });
@@ -295,10 +304,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public boolean isAdmin(int userid) {
     User user = getByID(userid);
     if (user == null) {
-      logger.error("huh? no user " +userid);
+      logger.error("huh? no user " + userid);
       return false;
-    }
-    else {
+    } else {
       return user.isAdmin();
     }
   }
@@ -660,28 +668,47 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param remoteAddr
    * @param sessionID
    * @return
-   * @see IUserSecurityManager#getLoginResult
+   * @see NPUserSecurityManager#getLoginResult
    */
-  public User loginUser(String userId,
-                        String attemptedTxtPass,
-                        String userAgent,
-                        String remoteAddr,
-                        String sessionID) {
+  public LoginResult loginUser(String userId,
+                               String attemptedTxtPass,
+                               String userAgent,
+                               String remoteAddr,
+                               String sessionID) {
     String encodedCurrPass = getUserCredentials(userId);
 
+    String toUse = userId;
+    boolean validAsEmail = isValidAsEmail(userId);
+
+    logger.info("userid " + userId + " is email " + validAsEmail);
+
+    if (encodedCurrPass == null && validAsEmail) {
+      List<String> userCredentialsEmail1 = getUserCredentialsEmail(userId);
+
+      if (userCredentialsEmail1.size() > 1) {
+        return new LoginResult(LoginResult.ResultType.Multiple);
+      } else if (userCredentialsEmail1.size() == 1) {
+        toUse = userCredentialsEmail1.get(0);
+      }
+    }
     DBUser loggedInUser =
         delegate.loginUser(
-            userId,
+            toUse,
             attemptedTxtPass,
             remoteAddr,
             userAgent,
             sessionID);
 
-    logger.info("loginUser '" + userId + "' pass num chars " + attemptedTxtPass.length() +
+    logger.info("loginUser '" + userId + "'/'" +toUse+
+        "' pass num chars " + attemptedTxtPass.length() +
         "\n\texisting credentials " + encodedCurrPass +
         "\n\tyielded              " + loggedInUser);
 
-    return getUser(loggedInUser);
+    return new LoginResult(getUser(loggedInUser));
+  }
+
+  public boolean isValidEmailRegex(String text) {
+    return text.trim().toLowerCase().matches(EMAIL_REGEX);
   }
 
   private final Map<String, Map<String, Boolean>> dominoToEncodedToMatch = new HashMap<>();
@@ -740,6 +767,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
+   * Match on email OK.
+   *
    * @param userId
    * @return
    * @see #isMatchingPassword
@@ -758,6 +787,26 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.warn("getUserCredentials : User not found in DB! Query: " + query);
     }
     return null;
+  }
+
+  private List<String> getUserCredentialsEmail(String email) {
+    Bson query = eq("email", email);
+    FindIterable<Document> id = pool
+        .getMongoCollection(USERS_C)
+        .find(query)
+        .projection(include("_id"));
+
+    MongoCursor<Document> iterator = id.iterator();
+
+    List<String> matches = new ArrayList<>();
+    for (; iterator.hasNext(); ) {
+      matches.add(iterator.next().getString(UID_F));
+    }
+
+    //if (matches.size() > 1) {
+      logger.info("getUserCredentialsEmail : found " + matches.size() + " accounts with email " + email);
+    //}
+    return matches;
   }
 
   /**
@@ -825,6 +874,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.warn("lookupUser got " + e);
       return delegate.lookupDBUser(id);
     }
+  }
+
+  public void refreshCacheFor(int userid) {
+    idToDBUser.refresh(userid);
+    idToUser.refresh(userid);
   }
 
   @Override
@@ -984,11 +1038,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (user.isPoly()) {
       logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
-      handleAffiliationUser(dominoUser, permissionSet, user,true);
+      handleAffiliationUser(dominoUser, permissionSet, user, true);
     } else if (user.isNPQ()) {
-      handleAffiliationUser(dominoUser, permissionSet, user,false);
-    }
-    else {
+      handleAffiliationUser(dominoUser, permissionSet, user, false);
+    } else {
 //      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
     }
     user.setPermissions(permissionSet);
@@ -997,11 +1050,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * @see #toUser
    * @param dominoUser
    * @param permissionSet
    * @param user
    * @param isPoly
+   * @see #toUser
    */
   private void handleAffiliationUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user, boolean isPoly) {
     if (isPoly) permissionSet.add(User.Permission.POLYGLOT);
@@ -1015,7 +1068,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         logger.info("handlePolyglotUser 1 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);
         userProjectDAO.upsert(id, projectAssignment);
       }
-    } else if (SWITCH_USER_PROJECT){
+    } else if (SWITCH_USER_PROJECT) {
       int projectAssignment = getProjectAssignment(dominoUser, id, isPoly);
       if (projectAssignment != -1 && projectAssignment != mostRecentByUser) {
         logger.info("handlePolyglotUser 2 before poly " + user.getUserID() + " was #" + mostRecentByUser + " will now be #" + projectAssignment);

@@ -66,12 +66,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see InitialUI#logout
    */
   public void logout() throws DominoSessionException {
-    //User sessionUser = getSessionUser();
     int sessionUserID = getSessionUserID();
     if (sessionUserID == -1) {
       logger.warn("logout : no session user on logout?");
     } else {
-      // String userID = sessionUser.getUserID();
       logger.info("logout : logging out " + sessionUserID);
       securityManager.logoutUser(getThreadLocalRequest(), sessionUserID, true);
     }

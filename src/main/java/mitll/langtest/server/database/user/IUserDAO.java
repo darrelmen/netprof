@@ -90,13 +90,13 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param remoteAddr
    * @param sessionID
    * @return
-   * @see UserServiceImpl#loginUser
+   * @see mitll.langtest.server.database.security.NPUserSecurityManager#getLoginResult
    */
-  User loginUser(String userId,
-                 String attemptedPassword,
-                 String userAgent,
-                 String remoteAddr,
-                 String sessionID);
+  LoginResult loginUser(String userId,
+                        String attemptedPassword,
+                        String userAgent,
+                        String remoteAddr,
+                        String sessionID);
 
   boolean isKnownUser(String userid);
 
@@ -125,6 +125,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see mitll.langtest.server.ScoreServlet#getUser
    */
   User getUserWhere(int userid);
+
+  void refreshCacheFor(int userid);
 
   /**
    * @return

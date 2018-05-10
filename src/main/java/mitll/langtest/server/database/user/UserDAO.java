@@ -38,10 +38,7 @@ import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.shared.user.FirstLastUser;
-import mitll.langtest.shared.user.Kind;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -263,7 +260,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User loginUser(String userId, String attemptedPassword, String userAgent, String remoteAddr, String sessionID) {
+  public LoginResult loginUser(String userId, String attemptedPassword, String userAgent, String remoteAddr, String sessionID) {
     return null;
   }
 
@@ -474,6 +471,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     }
 
     return users.iterator().next();
+  }
+
+  @Override
+  public void refreshCacheFor(int userid) {
+
   }
 
   private User getUserWhere(int userid, String sql) {
