@@ -115,8 +115,8 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     if (!knownUser && emailOK && db.getUserDAO().isValidAsEmail(id)) {
       List<String> usersWithThisEmail = db.getUserDAO().getUsersWithThisEmail(id);
       LoginResult resultType = getResultType(usersWithThisEmail);
-      logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
-      return resultType;//new LoginResult(resultType, usersWithThisEmail.size() == 1 ? usersWithThisEmail.iterator().next() : "");
+   //   logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
+      return resultType;
     } else {
       return new LoginResult(knownUser ? LoginResult.ResultType.Success : LoginResult.ResultType.Failed);
     }

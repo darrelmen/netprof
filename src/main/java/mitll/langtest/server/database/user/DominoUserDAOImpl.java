@@ -815,9 +815,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       matches.add(iterator.next().getString(UID_F));
     }
 
-    //if (matches.size() > 1) {
-    logger.info("getUsersWithThisEmail : found " + matches.size() + " (" + new HashSet<>(matches) + ") accounts with email " + email);
-    //}
+    logger.info("getUsersWithThisEmail : found " + matches.size() +
+        //" (" + new HashSet<>(matches) + ")" +
+        " accounts with email " + email);
+
     return matches;
   }
 
