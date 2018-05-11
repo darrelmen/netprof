@@ -39,9 +39,11 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
@@ -98,7 +100,16 @@ public interface IUserDAO extends IDAO, AutoCloseable {
                         String remoteAddr,
                         String sessionID);
 
+  /**
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
+   */
   boolean isKnownUser(String userid);
+
+  List<String> getUsersWithThisEmail(String email);
+
+  boolean isValidAsEmail(String text);
 
   /**
    * @param id
@@ -221,13 +232,14 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   /**
    * @param toUpdate
-   * @see UserServiceImpl#addUser
+   * @see OpenUserServiceImpl#addUser
    */
   void update(User toUpdate);
 
   void close() throws Exception;
 
   boolean isStudent(int userIDFromSessionOrDB);
+
   boolean isAdmin(int userid);
 
   DBUser getDominoAdminUser();
@@ -239,7 +251,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
     private List<ReportUser> allUsers;
     private List<ReportUser> deviceUsers;
 
-    public ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
+    ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
       this.allUsers = allUsers;
       this.deviceUsers = deviceUsers;
     }

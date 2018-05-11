@@ -816,9 +816,9 @@ private boolean hasNetworkProblem;
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
-    if (projectStartupInfo == null) {
-      logger.info("setProjectStartupInfo project startup null for " + user);
-    }
+//    if (projectStartupInfo == null) {
+//      logger.info("setProjectStartupInfo project startup null for " + user);
+//    }
     initialUI.showCogMenu();
   }
 

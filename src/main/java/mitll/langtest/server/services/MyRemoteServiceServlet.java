@@ -373,12 +373,12 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       logger.info("User reload during request.", ex);
     } else {
       //  logger.error("Got service Exception!", ex);
-      logAndNotifyServerException(ex, "Got service exception in " + this.getClass().getCanonicalName() + "!");
+      logAndNotifyServerException(ex, "Got service exception in " + this.getClass().getCanonicalName());
 
       // This may not be necessary in production, but some exceptions
       // traces did not include full cause details when running in dev mode.
       if (ex.getCause() != null) {
-        logger.warn("Tracing exception cause!", ex.getCause());
+        logger.warn("Tracing exception cause", ex.getCause());
       }
     }
     super.doUnexpectedFailure(ex);

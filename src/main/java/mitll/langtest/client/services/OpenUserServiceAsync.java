@@ -33,8 +33,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.domino.user.ChangePasswordView;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.*;
 
 public interface OpenUserServiceAsync {
@@ -60,7 +58,7 @@ public interface OpenUserServiceAsync {
 
   void forgetProject(AsyncCallback<Void> async);
 
-  void isKnownUser(String id, AsyncCallback<Boolean> async);
+  void isKnownUser(String id, boolean emailOK, AsyncCallback<LoginResult> async);
 
   void isValidUser(String id, AsyncCallback<Boolean> async);
 

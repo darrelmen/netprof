@@ -55,7 +55,6 @@ import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
@@ -87,6 +86,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.ServerInitializationManager.*;
@@ -124,6 +124,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String USER = "User";
   private static final String DEFAULT = "Default";
   private static final int EST_NUM_USERS = 8000;
+  /**
+   * @see #isValidAsEmail
+   */
   private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
 
   private static final String EMAIL_REGEX =
@@ -133,6 +136,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private static final long STALE_DUR = 5L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
+  public static final String ACTIVE = "active";
+  public static final String EMAIL = "email";
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
@@ -678,19 +683,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     String encodedCurrPass = getUserCredentials(userId);
 
     String toUse = userId;
-    boolean validAsEmail = isValidAsEmail(userId);
 
-    logger.info("userid " + userId + " is email " + validAsEmail);
-
-    if (encodedCurrPass == null && validAsEmail) {
-      List<String> userCredentialsEmail1 = getUserCredentialsEmail(userId);
+    boolean byEmail = false;
+    if (encodedCurrPass == null && isValidAsEmail(userId)) {
+      logger.info("loginUser userid " + userId + " is email ");
+      List<String> userCredentialsEmail1 = getUsersWithThisEmail(userId);
 
       if (userCredentialsEmail1.size() > 1) {
         return new LoginResult(LoginResult.ResultType.Multiple);
       } else if (userCredentialsEmail1.size() == 1) {
         toUse = userCredentialsEmail1.get(0);
+        byEmail = true;
       }
     }
+
     DBUser loggedInUser =
         delegate.loginUser(
             toUse,
@@ -699,12 +705,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             userAgent,
             sessionID);
 
-    logger.info("loginUser '" + userId + "'/'" +toUse+
+    User user = getUser(loggedInUser);
+    LoginResult loginResult = new LoginResult(user, byEmail ? LoginResult.ResultType.Email : LoginResult.ResultType.Success).setUserID(toUse);
+
+    logger.info("loginUser '" + userId + "'/'" + toUse +
         "' pass num chars " + attemptedTxtPass.length() +
         "\n\texisting credentials " + encodedCurrPass +
-        "\n\tyielded              " + loggedInUser);
+        "\n\tyielded              " + loggedInUser +
+        "\n\tuser                 " + user +
+        "\n\tloginResult          " + loginResult
+    );
 
-    return new LoginResult(getUser(loggedInUser));
+    return loginResult;
   }
 
   public boolean isValidEmailRegex(String text) {
@@ -789,12 +801,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return null;
   }
 
-  private List<String> getUserCredentialsEmail(String email) {
-    Bson query = eq("email", email);
+  public List<String> getUsersWithThisEmail(String email) {
+    Bson query = and(eq(EMAIL, email), eq(ACTIVE, true));
     FindIterable<Document> id = pool
         .getMongoCollection(USERS_C)
         .find(query)
-        .projection(include("_id"));
+        .projection(include(UID_F));
 
     MongoCursor<Document> iterator = id.iterator();
 
@@ -804,7 +816,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     //if (matches.size() > 1) {
-      logger.info("getUserCredentialsEmail : found " + matches.size() + " accounts with email " + email);
+    logger.info("getUsersWithThisEmail : found " + matches.size() + " (" + new HashSet<>(matches) + ") accounts with email " + email);
     //}
     return matches;
   }
@@ -1739,7 +1751,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return clientUserDetailSResult;
   }
 
-  private boolean isValidAsEmail(String text) {
+  public boolean isValidAsEmail(String text) {
     return text.trim().toUpperCase().matches(VALID_EMAIL);
   }
 

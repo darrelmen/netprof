@@ -136,8 +136,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     if (success) {
       return getValidLogin(session, result.getLoggedInUser(), strictValidity);
     } else {
-      return result.getResultType() == LoginResult.ResultType.Multiple ? result :
-          getInvalidLoginResult(userDAO.getUserByID(userId));
+      LoginResult.ResultType resultType = result.getResultType();
+      return resultType == LoginResult.ResultType.Multiple ? result :
+          getInvalidLoginResult(userDAO.getUserByID(resultType == LoginResult.ResultType.Email ? result.getUserID() : userId));
     }
   }
 

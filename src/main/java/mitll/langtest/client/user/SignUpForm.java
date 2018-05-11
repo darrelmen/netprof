@@ -134,10 +134,10 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see UserPassLogin#UserPassLogin
    */
   SignUpForm(PropertyHandler props,
-                    UserManager userManager,
-                    EventRegistration eventRegistration,
-                    UserPassDialog userPassLogin,
-                    StartupInfo startupInfo) {
+             UserManager userManager,
+             EventRegistration eventRegistration,
+             UserPassDialog userPassLogin,
+             StartupInfo startupInfo) {
     super(props);
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
@@ -200,7 +200,6 @@ public class SignUpForm extends UserDialog implements SignUp {
                     null;
 
     if (askForDemographic) {
-      registrationInfo.setGender(candidate.getRealGender());
       if (firstFocus == null) {
         boolean isValid = registrationInfo.checkValidity();
         if (!isValid) {
@@ -208,6 +207,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         }
       }
     }
+    registrationInfo.setGender(candidate.getRealGender());
 
     if (firstFocus != null) {
       setFormAndButtonTitles();
@@ -339,15 +339,15 @@ public class SignUpForm extends UserDialog implements SignUp {
       //    logger.info("\tonUserIDBlur checking " + text);
 
       if (hasSpaces(text)) {
-        openUserService.isKnownUser(normalizeSpaces(text), new AsyncCallback<Boolean>() {
+        openUserService.isKnownUser(normalizeSpaces(text), false, new AsyncCallback<LoginResult>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\tgot FAILURE on userExists " + text);
           }
 
           @Override
-          public void onSuccess(Boolean found) {
-            if (found) {
+          public void onSuccess(LoginResult found) {
+            if (isSuccess(found)) {
               reallyOnUserIDBlur(text);
               //          logger.warning("got no user for " + text);
             } else {
@@ -361,16 +361,20 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
   }
 
+  private boolean isSuccess(LoginResult found) {
+    return found.getResultType() == LoginResult.ResultType.Success;
+  }
+
   private void reallyOnUserIDBlur(String uidVal) {
-    openUserService.isKnownUser(uidVal, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(uidVal, false, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + uidVal);
       }
 
       @Override
-      public void onSuccess(Boolean found) {
-        boolean isNewUser = !found;
+      public void onSuccess(LoginResult found) {
+        boolean isNewUser = !isSuccess(found);
         setSignUpButtonTitle(isNewUser);
         setNewUserPrompt(isNewUser);
       }
@@ -479,15 +483,15 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpClickHandler
    */
   private void signUpNewOrAddInfoToOld(final String userID) {
-    openUserService.isKnownUser(signUpUser.getSafeText(), new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(signUpUser.getSafeText(), false, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
 
       }
 
       @Override
-      public void onSuccess(Boolean found) {
-        if (found) {
+      public void onSuccess(LoginResult found) {
+        if (isSuccess(found)) {
           // existing legacy users can have shorter userids than
           String fUserID = userID.trim();
           if (hasSpaces(fUserID)) {
@@ -533,15 +537,15 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
-    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(testUserID, false, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
+      public void onSuccess(LoginResult result) {
+        if (isSuccess(result)) {
           logger.info("checkLegacyUserWithSpaces try again with " + testUserID);
           isFormValid(testUserID);
         } else {
@@ -554,15 +558,15 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void checkLegacyUserWithSpacesLong(String userID) {
     String testUserID = normalizeSpaces(userID);
-    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(testUserID, false, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on userExists " + testUserID);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
+      public void onSuccess(LoginResult result) {
+        if (isSuccess(result)) {
           logger.info("checkLegacyUserWithSpacesLong try again with " + testUserID);
           isFormValidLongUserID(testUserID);
         } else {
@@ -661,7 +665,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         lastName.getSafeText(),
         affiliations.get(affBox.getSelectedIndex() - 1).getAbb());
 
-   // logger.info("OK sending " + newUser + " " + newUser.getAffiliation());
+    // logger.info("OK sending " + newUser + " " + newUser.getAffiliation());
     openUserService.addUser(
         newUser,
         Window.Location.getHref(),

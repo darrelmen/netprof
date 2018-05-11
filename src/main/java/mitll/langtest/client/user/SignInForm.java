@@ -48,11 +48,12 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
-import javax.servlet.http.HttpSession;
 import java.util.logging.Logger;
 
 public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignInForm");
+
+  private static final String MULTIPLE_ACCOUNTS_WITH_THIS_EMAIL = "Multiple accounts with this email.";
 
   static final String NO_SPACES = "Please no spaces in user id.";
 
@@ -79,9 +80,12 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
+  /**
+   * @see #gotBadPassword
+   */
   private static final String BAD_PASSWORD = "Wrong password, please try again.";
   private static final String PASSWORD = "Password";
-  private static final String USERNAME = "Username";
+  private static final String USERNAME = "Username or email";
   private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
 
@@ -95,6 +99,9 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String SIGN_UP_WIDTH = "266px";
 
+  /**
+   * @see #makeSignInUserName
+   */
   private FormField userField;
   /**
    * @see #populateSignInForm
@@ -255,18 +262,19 @@ public class SignInForm extends UserDialog implements SignIn {
   private void checkLegacyUserWithSpaces(String userID) {
     String testUserID = normalizeSpaces(userID);
 
-  //  logger.warning("checking using "+ openUserService);
- //   logger.warning("checking using "+ openUserService.getClass());
+    //  logger.warning("checking using "+ openUserService);
+    //   logger.warning("checking using "+ openUserService.getClass());
 
-    openUserService.isKnownUser(testUserID, new AsyncCallback<Boolean>() {
+    openUserService.isKnownUser(testUserID, false, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on checkLegacyUserWithSpaces isKnownUser " + testUserID);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
+      public void onSuccess(LoginResult result) {
+       // logger.info("checkLegacyUserWithSpaces  " + testUserID + " = " + result);
+        if (result.getResultType() == LoginResult.ResultType.Success) {
           //    logger.info("try again with " + testUserID);
           tryLoginWithUserID(testUserID);
         } else {
@@ -278,30 +286,38 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void checkUserExists(String text) {
-    logger.warning("checkUserExists checking using "+ openUserService);
-
-    logger.warning("checkUserExists checking using "+ openUserService.getClass());
-
-    openUserService.isKnownUser(text, new AsyncCallback<Boolean>() {
+//    logger.warning("checkUserExists  " + text);
+//    logger.warning("checkUserExists checking using " + openUserService.getClass());
+    openUserService.isKnownUser(text, true, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("\tgot FAILURE on checkUserExists isKnownUser " + text);
       }
 
       @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
+      public void onSuccess(LoginResult result) {
+        LoginResult.ResultType resultType = result.getResultType();
+
+//        logger.warning("checkUserExists onSuccess  " + text + " = " + result + " " + resultType);
+
+        if (resultType == LoginResult.ResultType.Success) {
           checkUserValid(text);
+        } else if (resultType == LoginResult.ResultType.Email) {
+          checkUserValid(result.getUserID());
+        } else if (resultType == LoginResult.ResultType.Multiple) {
+          markUserMessage(MULTIPLE_ACCOUNTS_WITH_THIS_EMAIL);
         } else {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password and unknown user");
-          markErrorBlur(userField, NO_USER_FOUND, Placement.BOTTOM);
-          signIn.setEnabled(true);
+          markUserMessage(NO_USER_FOUND);
         }
       }
     });
   }
 
   private void checkUserValid(String text) {
+    if (text == null) {
+      logger.warning("text is null?");
+    }
     openUserService.isValidUser(text, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -314,7 +330,7 @@ public class SignInForm extends UserDialog implements SignIn {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
           markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         }
-        signIn.setEnabled(true);
+        enableSignIn();
       }
     });
   }
@@ -325,16 +341,11 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(String user, final String freeTextPassword) {
-  logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
-    );
-//    String before = user;
+  //  logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
+//    );
 
     if (user != null) {
-      String trim = user.trim();
-      user = normalizeSpaces(trim);
- //     if (!user.equals(before)) {
- //       logger.info("hack for spaces - user now " + user + " was " + before);
-   //   }
+      user = normalizeSpaces(user.trim());
     } else {
       logger.warning("huh? user id is null?");
     }
@@ -346,7 +357,7 @@ public class SignInForm extends UserDialog implements SignIn {
         new AsyncCallback<LoginResult>() {
           @Override
           public void onFailure(Throwable caught) {
-            signIn.setEnabled(true);
+            enableSignIn();
             markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
           }
 
@@ -358,42 +369,66 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void handleLoginResponse(LoginResult result, String user, String freeTextPassword) {
-    if (result.getResultType() == LoginResult.ResultType.Failed) {
-      eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
-      logger.info("handleLoginResponse No userField with that name '" + user +
-          "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+    LoginResult.ResultType resultType = result.getResultType();
 
-      markErrorBlur(password, NO_USER_FOUND, Placement.BOTTOM);
-      signIn.setEnabled(true);
+//    logger.info("handleLoginResp " + result + " user " + user);
+    if (resultType == LoginResult.ResultType.Failed) {
+      gotFailed(user, freeTextPassword);
+    } else if (resultType == LoginResult.ResultType.Multiple) {
+      markUserMessage(MULTIPLE_ACCOUNTS_WITH_THIS_EMAIL);
     } else {
-      User loggedInUser = result.getLoggedInUser();
-      if (!loggedInUser.isEnabled()) {
-        markErrorBlur(userField, DEACTIVATED, Placement.BOTTOM);
-        signIn.setEnabled(true);
-      } else if (!loggedInUser.isHasAppPermission()) {
-        markErrorBlur(userField, APPLICATION_PERMISSION, Placement.BOTTOM);
-        signIn.setEnabled(true);
+      gotUser(result);
+    }
+  }
+
+  private void gotUser(LoginResult result) {
+    User loggedInUser = result.getLoggedInUser();
+    if (!loggedInUser.isEnabled()) {
+      markUserMessage(DEACTIVATED);
+    } else if (!loggedInUser.isHasAppPermission()) {
+      markUserMessage(APPLICATION_PERMISSION);
+    } else {
+      //   logger.info("handleLoginResponse user is enabled... result " + result.getResultType());
+      /**
+       * {@link mitll.langtest.server.database.security.NPUserSecurityManager#getValidLogin}
+       */
+      if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
+        copyInfoToSignUp(loggedInUser.getUserID(), loggedInUser);
+        enableSignIn();
       } else {
-        //   logger.info("handleLoginResponse user is enabled... result " + result.getResultType());
-        /**
-         * {@link mitll.langtest.server.database.security.NPUserSecurityManager#getValidLogin}
-         */
-        if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
-          copyInfoToSignUp(user, loggedInUser);
-          signIn.setEnabled(true);
-        } else {
-          gotGoodOrBadPassword(result);
-        }
+        gotGoodOrBadPassword(result);
       }
     }
   }
 
+  private void markUserMessage(String deactivated) {
+    markErrorBlur(userField, deactivated, Placement.BOTTOM);
+    enableSignIn();
+  }
+
+  private void enableSignIn() {
+    signIn.setEnabled(true);
+  }
+
+  private void gotFailed(String user, String freeTextPassword) {
+    eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
+//    logger.info("handleLoginResponse No userField with that name '" + user +
+//        "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+
+    markErrorBlur(password, NO_USER_FOUND, Placement.BOTTOM);
+    enableSignIn();
+  }
+
+  /**
+   * @param result
+   * @see #gotUser
+   */
   private void gotGoodOrBadPassword(LoginResult result) {
+    //  logger.info("gotGoodOrBad " + result);
     if (result == null || result.getResultType() != LoginResult.ResultType.Success) {
-      gotBadPassword(/*result.getLoggedInUser(), freeTextPassword*/);
+      gotBadPassword();
     } else {
-      gotGoodPassword(result.getLoggedInUser()
-      );
+      gotGoodPassword(result.getLoggedInUser());
     }
   }
 
@@ -406,7 +441,7 @@ public class SignInForm extends UserDialog implements SignIn {
     } else {
       eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
       markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
-      signIn.setEnabled(true);
+      enableSignIn();
     }
   }
 
@@ -418,7 +453,7 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   private void gotBadPassword(/*User foundUser, String freeTextPassword*/) {
     //String enteredPass = Md5Hash.getHash(password.getText());
-//    if (freeTextPassword.equals(MAGIC_PASS)) {  // TODO : do masquerade
+//    if (freeTextPassword.equals(MAGIC_PASS)) {  // TODO : do masquerade?
 //      // special pathway...
 //      String user = foundUser.getUserID();
 //      eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
@@ -429,8 +464,7 @@ public class SignInForm extends UserDialog implements SignIn {
     //  logger.info("admin " + Md5Hash.getHash("adm!n"));
     eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
     markErrorBlur(password, BAD_PASSWORD);
-    signIn.setEnabled(true);
-
+    enableSignIn();
     //}
   }
 
@@ -443,9 +477,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   private void copyInfoToSignUp(String userID, User candidate) {
-    signUpForm.copyInfoToSignUp(
-        userID,
-        candidate);
+    signUpForm.copyInfoToSignUp(userID, candidate);
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
   }
 
@@ -499,12 +531,7 @@ public class SignInForm extends UserDialog implements SignIn {
         if (isValid) {
           sendEmail.showSendEmail(forgotPassword, safeText, true);
         } else {
-//          String testUserID = normalizeSpaces(safeText);
-  //        if (testUserID.equalsIgnoreCase(safeText)) {
-            markErrorBlur(userField, NO_USER_FOUND, Placement.BOTTOM);
-    //      } else {
-      //      sendEmailIfExists(forgotPassword, testUserID);
-        //  }
+          markErrorBlur(userField, NO_USER_FOUND, Placement.BOTTOM);
         }
       }
     });

@@ -186,13 +186,6 @@ class RegistrationInfo extends BasicDialog {
     male.addFocusHandler(f);
     female.addFocusHandler(f);
   }
-/*  private RadioButton getMale() {
-    return male;
-  }
-
-  private RadioButton getFemale() {
-    return female;
-  }*/
 
   public void setGender(MiniUser.Gender gender) {
     if (gender == MiniUser.Gender.Male) male.setValue(true);

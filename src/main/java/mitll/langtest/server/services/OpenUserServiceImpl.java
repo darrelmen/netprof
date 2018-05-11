@@ -42,10 +42,13 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import java.util.List;
 
 import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.*;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
@@ -53,8 +56,10 @@ import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 @SuppressWarnings("serial")
 public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenUserService {
   private static final Logger logger = LogManager.getLogger(OpenUserServiceImpl.class);
-  private static final int BOUND = 10000;
-  private static final boolean SIMULATE_NETWORK = false;
+  //private static final int BOUND = 10000;
+  //private static final boolean SIMULATE_NETWORK = false;
+  private static final String USER_AGENT = "User-Agent";
+  private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
   /**
    * If successful, establishes a session.
@@ -70,7 +75,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     try {
       HttpServletRequest request = getThreadLocalRequest();
       String remoteAddr = getRemoteAddr(request);
-      String userAgent = request.getHeader("User-Agent");
+      String userAgent = request.getHeader(USER_AGENT);
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -80,7 +85,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   private String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();
     }
@@ -99,7 +104,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * @return
    */
   @Override
-  public boolean isKnownUser(String id) {
+  public LoginResult isKnownUser(String id, boolean emailOK) {
     boolean knownUser = db.getUserDAO().isKnownUser(id);
     if (!knownUser) {
       String normalized = normalizeSpaces(id);
@@ -107,7 +112,26 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         knownUser = db.getUserDAO().isKnownUser(normalized);
       }
     }
-    return knownUser;
+    if (!knownUser && emailOK && db.getUserDAO().isValidAsEmail(id)) {
+      List<String> usersWithThisEmail = db.getUserDAO().getUsersWithThisEmail(id);
+      LoginResult resultType = getResultType(usersWithThisEmail);
+      logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
+      return resultType;//new LoginResult(resultType, usersWithThisEmail.size() == 1 ? usersWithThisEmail.iterator().next() : "");
+    } else {
+      return new LoginResult(knownUser ? LoginResult.ResultType.Success : LoginResult.ResultType.Failed);
+    }
+  }
+
+  @NotNull
+  private LoginResult getResultType(List<String> usersWithThisEmail) {
+    int numMatches = usersWithThisEmail.size();
+    if (numMatches == 0) {
+      return new LoginResult(LoginResult.ResultType.Failed);
+    } else if (numMatches == 1) {
+      return new LoginResult(LoginResult.ResultType.Email, usersWithThisEmail.iterator().next());
+    } else {
+      return new LoginResult(LoginResult.ResultType.Multiple);
+    }
   }
 
   @Override
@@ -360,7 +384,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           new Thread(() -> updateVisited(sid)).start();
         }
 
-        if (SIMULATE_NETWORK) simulateNetworkIssue();
+        //    if (SIMULATE_NETWORK) simulateNetworkIssue();
         return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
       }
     } catch (DominoSessionException e) {
@@ -400,7 +424,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           logger.info("setCurrentProjectForUser : sess user " + sessionUserID + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
         }
 
-        simulateNetworkIssue();
+        //      simulateNetworkIssue();
         return new HeartbeatStatus(true, codeHasUpdated);
       }
     } catch (DominoSessionException e) {
@@ -409,16 +433,15 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     }
   }
 
-  private void simulateNetworkIssue() {
+/*  private void simulateNetworkIssue() {
     try {
-      logger.info("checkHeartbeat sleep...");
+//      logger.info("checkHeartbeat sleep...");
       java.util.Random random = new java.util.Random();
-
       int millis = random.nextInt(BOUND);
       Thread.sleep(millis);
       logger.info("checkHeartbeat finished sleep... for " + millis);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 }

@@ -42,6 +42,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 
 public class LoginResult implements IsSerializable {
+
+
   public enum ResultType implements IsSerializable {
     Success,
     Failed,
@@ -54,9 +56,11 @@ public class LoginResult implements IsSerializable {
     Updated,
     Added,
     Exists,
-    Multiple
+    Multiple,
+    Email
   }
 
+  private String userID;
   private User loggedInUser;
   private ResultType resultType;
 
@@ -65,6 +69,11 @@ public class LoginResult implements IsSerializable {
 
   public LoginResult(ResultType resultType) {
     this(null, resultType);
+  }
+
+  public LoginResult(ResultType resultType, String userID) {
+    this(null, resultType);
+    this.userID = userID;
   }
 
   public LoginResult(User loggedInUser) {
@@ -76,6 +85,14 @@ public class LoginResult implements IsSerializable {
     this.resultType = resultType;
   }
 
+  public String getUserID() {
+    return userID;
+  }
+
+  public LoginResult setUserID(String userID) {
+    this.userID = userID;
+    return this;
+  }
 
   public User getLoggedInUser() {
     return loggedInUser;
@@ -86,6 +103,6 @@ public class LoginResult implements IsSerializable {
   }
 
   public String toString() {
-    return "Login result " + resultType + " : " + loggedInUser;
+    return "Login result " + resultType + " : " + loggedInUser + " or " + getUserID();
   }
 }

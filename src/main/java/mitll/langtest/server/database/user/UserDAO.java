@@ -269,6 +269,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return false;
   }
 
+  @Override
+  public List<String> getUsersWithThisEmail(String email) {
+    return null;
+  }
+
+  @Override
+  public boolean isValidAsEmail(String text) {
+    return false;
+  }
+
   /**
    * Not case sensitive.
    *

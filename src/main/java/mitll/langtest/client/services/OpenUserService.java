@@ -85,7 +85,7 @@ public interface OpenUserService extends RemoteService {
    */
   LoginResult addUser(SignUpUser user, String url);
 
-  boolean isKnownUser(String id);
+  LoginResult isKnownUser(String id,boolean emailOK);
   boolean isKnownUserWithEmail(String id);
   boolean isValidUser(String id);
 
