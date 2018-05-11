@@ -23,14 +23,6 @@ public class ImportDoc {
     this.vocabularyItem = item;
   }
 
-  public String toString() {
-    return "doc " + docID + " at " + new Date(timestamp) +
-        "\n\t " + vocabularyItem.getTermVal() +
-        "\n\t " + vocabularyItem.getAlternateFormVal() +
-        "\n\t " + vocabularyItem.getTransliterationVal() +
-        "\n\t " + vocabularyItem.getMeaningVal();
-  }
-
   public int getDocID() {
     return docID;
   }
@@ -41,5 +33,13 @@ public class ImportDoc {
 
   public VocabularyItem getVocabularyItem() {
     return vocabularyItem;
+  }
+
+  public String toString() {
+    return "doc " + docID + " at " + new Date(timestamp) +
+        "\n\t " + vocabularyItem.getTermVal() +
+        "\n\t " + vocabularyItem.getAlternateFormVal() +
+        "\n\t " + vocabularyItem.getTransliterationVal() +
+        "\n\t " + vocabularyItem.getMeaningVal();
   }
 }

@@ -41,13 +41,12 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC;
+import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC_LC;
 import static mitll.langtest.server.database.exercise.SectionHelper.SUB_TOPIC;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
@@ -319,13 +318,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
-    if (rootTypes.contains(SUBTOPIC)) {
-      parentToChild.put(lowerTopic, SUBTOPIC);
+    if (rootTypes.contains(SUBTOPIC_LC)) {
+      parentToChild.put(lowerTopic, SUBTOPIC_LC);
     } else if (rootTypes.contains(SUB_TOPIC)) {
       parentToChild.put(lowerTopic, SUB_TOPIC);
     }
   }
 
+  /**
+   * @see #setRootTypes
+   * @param attributeTypes
+   * @return
+   */
   private Set<String> removeSubtopic(Collection<String> attributeTypes) {
     return attributeTypes
         .stream()

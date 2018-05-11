@@ -233,7 +233,6 @@ public class DominoExerciseDAO {
     docArr.forEach(docObj -> exercises.add(getExerciseFromVocabularyItem(projid, creator, unitName, chapterName, docObj)));
     return exercises;
   }*/
-
   @NotNull
   private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
                                                        DominoImport.ChangedAndDeleted changedAndDeleted) {
@@ -304,11 +303,41 @@ public class DominoExerciseDAO {
       boolean isNPID = name.equals(V_NP_ID);
       if (name.startsWith(PREFIX) && !isNPID) {
         name = name.substring(2);
+
+        logger.info("addAttributes for ex " + ex.getID() + " unit " + unitName + " chapter " + chapterName +
+            "\n\tfield " + name + " = " + displayValue);
+
         addAttribute(unitName, chapterName, name, displayValue, ex);
       }
     }
   }
 
+  private void addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
+    if (name.equals(UNIT)) {
+      ex.addUnitToValue(unitName, displayValue);
+    } else if (name.equals(CHAPTER)) {
+      ex.addUnitToValue(chapterName, displayValue);
+    } else {
+      if (!displayValue.trim().isEmpty()) {
+//            logger.info("addAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
+        ex.addAttribute(new ExerciseAttribute(getNormName(name), displayValue));
+      }
+    }
+  }
+
+  private String getNormName(String name) {
+    if (name.equalsIgnoreCase(SectionHelper.SUBTOPIC_LC)) {
+      return SectionHelper.SUB_TOPIC;
+    } else {
+      return name.substring(0, 1).toUpperCase() + name.substring(1);
+    }
+  }
+
+  /**
+   * @param vocabularyItem
+   * @return
+   * @see #getExerciseFromVocab
+   */
   private String getNPId(MetadataComponentBase vocabularyItem) {
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
     for (IMetadataField field : metadataFields) {
@@ -320,19 +349,6 @@ public class DominoExerciseDAO {
       }
     }
     return "unknown";
-  }
-
-  private void addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
-    if (name.equals(UNIT)) {
-      ex.addUnitToValue(unitName, displayValue);
-    } else if (name.equals(CHAPTER)) {
-      ex.addUnitToValue(chapterName, displayValue);
-    } else {
-      if (!displayValue.trim().isEmpty()) {
-//            logger.info("addAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
-        ex.addAttribute(new ExerciseAttribute(name, displayValue));
-      }
-    }
   }
 
   /**
@@ -475,7 +491,7 @@ public class DominoExerciseDAO {
         0,
         dominoID);
 
-    logger.info("getExerciseFromVocabularyItem : made new ex" +
+    logger.info("getExerciseFromVocabularyItem : made ex" +
         "\n\tdominoID " + exercise.getDominoID() +
         "\n\tnpID     " + exercise.getOldID() +
         "\n\tex id    " + exercise.getID() +

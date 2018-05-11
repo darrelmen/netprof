@@ -65,13 +65,11 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-//  private static final String POLYGLOT_ICON = LangTest.LANGTEST_IMAGES + "300MIBdeSSI_Small_44.png";
-
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
   private static final String COURSES = COURSE1 + "s";
 
-  private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
+  private static final boolean ALLOW_SYNC_WITH_DOMINO = false;
 
   private static final String RECALC_REF = "Recalc Ref";
   private static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
@@ -125,7 +123,6 @@ public class ProjectChoices {
    * @see InitialUI#populateRootPanel
    */
   private DivWidget contentRow;
-  //private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -548,11 +545,6 @@ public class ProjectChoices {
         thumbnail.add(button);
 
         boolean hasChildren = projectForLang.hasChildren();
-
-/*
-        maybeAddPolyglotIcon(projectForLang, button, hasChildren);
-*/
-
         if (isQC) {
           if (!hasChildren) {
             addPopover(projectForLang, button);
@@ -575,47 +567,6 @@ public class ProjectChoices {
       return thumbnail;
     }
   }
-
-/*  private void maybeAddPolyglotIcon(SlimProject projectForLang, PushButton button, boolean hasChildren) {
-    ProjectType projectType = projectForLang.getProjectType();
-    // logger.info("project " + projectForLang + " has children "+ hasChildren + " type " + projectType);
-    {
-      if (hasChildren) {
-        addPolyglotIcon(projectForLang, button);
-      } else {
-        if (projectType == ProjectType.POLYGLOT) {
-          //   logger.info("adding poly icon to " +projectForLang);
-          addPolyIcon(button);
-        }
-//          else {
-        //logger.info("not adding poly icon to " +projectForLang);
-        //        }
-      }
-    }
-  }*/
-
-  /**
-   * Add poly icon to parent if any child is a polyglot game project.
-   *
-   * @param projectForLang
-   * @param container
-   */
-/*  private void addPolyglotIcon(SlimProject projectForLang, UIObject container) {
-    boolean hasPoly = !projectForLang.getChildren()
-        .stream()
-        .filter(this::isPolyglot).collect(Collectors.toList()).isEmpty();
-
-    if (hasPoly) {
-      addPolyIcon(container);
-    }
-  }*/
-
-/*  private void addPolyIcon(UIObject container) {
-    Image polyglot = new Image(UriUtils.fromSafeConstant(POLYGLOT_ICON));
-    polyglot.addStyleName("floatRight");
-    polyglot.getElement().getStyle().setMarginTop(9, Style.Unit.PX);
-    DOM.appendChild(container.getElement(), polyglot.getElement());
-  }*/
 
   /**
    * @param name
@@ -644,8 +595,7 @@ public class ProjectChoices {
 
   private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
-        new UnitChapterItemHelper<>(typeOrder);
+    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
   }
 
@@ -667,8 +617,7 @@ public class ProjectChoices {
 
   private void addPopover(SlimProject projectForLang, FocusWidget button) {
     Set<String> typeOrder = projectForLang.getProps().keySet();
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper =
-        new UnitChapterItemHelper<>(typeOrder);
+    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
   }
 
@@ -688,7 +637,6 @@ public class ProjectChoices {
     if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
   }
-
 
   /**
    * @param name
@@ -713,7 +661,6 @@ public class ProjectChoices {
     }
 
     if (hasChildren) {
-      // int size = getNumVisible(projectForLang);
       String suffix = (numVisibleChildren == 1) ? COURSE1 : COURSES;
       label.setSubtext(numVisibleChildren + suffix);
     } else {
@@ -798,8 +745,8 @@ public class ProjectChoices {
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
-    w.setIcon(IconType.EXCHANGE);
 
+    w.setIcon(IconType.EXCHANGE);
     w.setEnabled(ALLOW_SYNC_WITH_DOMINO);
 
     w.addClickHandler(event -> {
@@ -848,7 +795,6 @@ public class ProjectChoices {
     projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {
-
         button.setEnabled(true);
         controller.handleNonFatalError("add pending exercises to project", caught);
       }
@@ -920,9 +866,9 @@ public class ProjectChoices {
 
       @Override
       public void gotHidden() {
-
       }
     };
+
     new DialogHelper(true).show(
         "Delete " + projectForLang.getName() + " forever?",
         new Heading(2, "Are you sure?"),

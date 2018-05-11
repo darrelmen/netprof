@@ -61,8 +61,7 @@ public class DominoUpdateResponse implements IsSerializable {
 
   public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT}
 
-  public DominoUpdateResponse() {
-  }
+  public DominoUpdateResponse() {}
 
   public DominoUpdateResponse(UPLOAD_STATUS success,
                               int dominoID,
@@ -72,11 +71,6 @@ public class DominoUpdateResponse implements IsSerializable {
     this.dominoID = dominoID;
     this.currentDominoID = currentDominoID;
     this.props = props;
-  }
-
-
-  public String toString() {
-    return "response " + dominoID + " " + currentDominoID + " " + props;
   }
 
   public Map<String, String> getProps() {
@@ -101,5 +95,9 @@ public class DominoUpdateResponse implements IsSerializable {
 
   public UPLOAD_STATUS getStatus() {
     return status;
+  }
+
+  public String toString() {
+    return "response " + dominoID + " " + currentDominoID + " " + props;
   }
 }

@@ -60,7 +60,7 @@ function onVisibilityChange() {
 
         if (rememberedInput) {
             recorder && recorder.stop();
-           // audio_context && audio_context.suspend();
+            // audio_context && audio_context.suspend();
             //        __log('Stopped recording.');
         }
     } else {
@@ -82,7 +82,7 @@ function startRecording() {
 // called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
-   // audio_context && audio_context.suspend();
+    // audio_context && audio_context.suspend();
 
     // __log('Stop Recording.');
     //   var end = new Date().getTime();
@@ -196,7 +196,7 @@ function initWebAudio() {
     if (gotAudioContext) {
         try {
             if (navigator.getMedia) {
-             //   __log('initWebAudio getMedia ...');
+                //   __log('initWebAudio getMedia ...');
                 navigator.getMedia({audio: true}, startUserMedia, function (e) {
                     __log('initWebAudio No live audio input: ' + e);
                     __log('initWebAudio name: ' + e.name);
@@ -218,13 +218,14 @@ function initWebAudio() {
         }
     }
 
-    navigator.mediaDevices.ondevicechange = function (event) {
-        __log("got device change... ");
-        location.reload();
-        //      initWebAudio();
-        //updateDeviceList();
-    };
-
+    if (navigator.mediaDevices) {
+        navigator.mediaDevices.ondevicechange = function (event) {
+            __log("got device change... ");
+            location.reload();
+            //      initWebAudio();
+            //updateDeviceList();
+        };
+    }
 //    updateDeviceList();
 }
 

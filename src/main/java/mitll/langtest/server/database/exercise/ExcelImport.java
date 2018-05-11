@@ -620,7 +620,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           //     logger.info("Remember attr " + exerciseAttribute1);
           pairToAttr.put(propertyValuePair, exerciseAttribute1);
           if (pairToAttr.size() > REASONABLE_PROPERTY_SPACE_LIMIT) {
-            logger.warn("getExerciseAttributes more than " + pairToAttr.size() + " distinct values for property " + property);
+            logger.warn("getExerciseAttributes more than " + pairToAttr.size() + " distinct values for property " + property +
+                " e.g. " + propertyValuePair + " = " + exerciseAttribute1);
           }
         }
         toAdd.add(exerciseAttribute1);

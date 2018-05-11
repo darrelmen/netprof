@@ -46,35 +46,29 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAttribute extends Pair {
-  public ExerciseAttribute() {
-  }
-
-  public ExerciseAttribute(String status, String value) {
-    super(status, value);
-  }
-
-/*
-  public void setProperty(String property) {
-    this.property = property;
-  }
-*/
-
-/*
-  public void setValue(String value) {
-    this.value = value;
-  }
-*/
+  public ExerciseAttribute() {}
+  public ExerciseAttribute(String status, String value) {   super(status, value);  }
 
   @Override
   public int hashCode() {
     return Arrays.hashCode(new Object[]{property, value});
   }
 
+  /**
+   * Don't worry about case...
+   *
+   * deals with dashes in topics
+   * @param other
+   * @return
+   */
   public boolean equals(Object other) {
     if (!(other instanceof ExerciseAttribute)) return false;
     else {
       ExerciseAttribute ea = (ExerciseAttribute) other;
-      return property.equals(ea.property) && value.equals(ea.value);
+      String propNoDash = property.replaceAll("-","");
+      String property = ea.property.replaceAll("-","");
+
+      return propNoDash.equalsIgnoreCase(property) && value.equalsIgnoreCase(ea.value);
     }
   }
 }

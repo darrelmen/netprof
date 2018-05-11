@@ -266,14 +266,14 @@ public class DominoImport implements IDominoImport {
     List<ImportDoc> importDocs = new ArrayList<>(changedSince.size());
 
     changedSince.forEach(doc -> {
-      VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
-      importDocs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), vocabularyItem));
+      //VocabularyItem vocabularyItem = (VocabularyItem) doc.getDocument();
+      importDocs.add(new ImportDoc(doc.getId(), doc.getUpdateTime().getTime(), (VocabularyItem) doc.getDocument()));
 //      logger.info("\t getImportDocs : found changed " + vocabularyItem);
     });
 
     long now = System.currentTimeMillis();
 
-    logger.info("getImportDocs : took " + (now - then) + " to get " + importDocs.size());
+    logger.info("getImportDocs : took " + (now - then) + " to get " + importDocs.size() + " document.");
     return importDocs;
   }
 

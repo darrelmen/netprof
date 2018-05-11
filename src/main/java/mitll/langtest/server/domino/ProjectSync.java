@@ -1067,20 +1067,17 @@ public class ProjectSync implements IProjectSync {
                         List<CommonExercise> updateEx,
                         Collection<String> typeOrder2,
                         Map<Integer, SlickExercise> legacyToEx,
-                        Map<String, SlickExercise> oldIDToExer
-                        //    ,
-                        //                    Set<CommonExercise> bringBack
-  ) {
+                        Map<String, SlickExercise> oldIDToExer) {
     int failed = 0;
 
     Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getIDToPair(projectid);
     Map<ExerciseAttribute, Integer> attrToID = getAttributeToID(allByProject);
 
-    Collection<ExerciseAttribute> allKnownAttributes = new HashSet<>(allByProject.values());
+    Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = populatePropToValue(allByProject.values());
 
-    logger.info("doUpdate for project " + projectid + " found " + allKnownAttributes.size() + " attributes");
-
-    allKnownAttributes.forEach(exerciseAttribute -> logger.debug("\t " + exerciseAttribute));
+    logger.info("doUpdate for project " + projectid + " found " + allByProject.values().size() + " attributes");
+    logger.info("doUpdate for project " + projectid + " props " + propToValueToAttr.keySet());
+    logger.info("doUpdate for project " + projectid + " values " + propToValueToAttr.values());
 
     Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = slickUEDAO.getAllJoinByProject(projectid);
 
@@ -1103,7 +1100,7 @@ public class ProjectSync implements IProjectSync {
         logger.info("Exercise #" + currentExercise.id() + " with domino id " + toUpdate.getDominoID() + " : '" + currentExercise.english() + "' is a new import!");
       }
 
-      boolean changed = newImport || changed(currentExercise, toUpdate, first, second);// || bringBack.contains(toUpdate);
+      boolean changed = newImport || changed(currentExercise, toUpdate, first, second);
       if (!changed) {
         logger.info("Exercise #" + currentExercise.id() + " " + currentExercise.english() + " has not changed");
       }
@@ -1129,15 +1126,15 @@ public class ProjectSync implements IProjectSync {
       List<ExerciseAttribute> updateAttributes = toUpdate.getAttributes();
       logger.info("doUpdate exercise " + toUpdate.getID() + " has " + updateAttributes.size() + " attributes");
 
-      List<ExerciseAttribute> newAttributes = getNewAttributes(allKnownAttributes, updateAttributes);
+      List<ExerciseAttribute> newAttributes = getNewAttributes(propToValueToAttr, updateAttributes);
 
       if (!newAttributes.isEmpty()) {
-        logger.info("doUpdate found " + newAttributes.size() + " new attributes for " + updateExerciseID + " given " + allKnownAttributes.size() + " known.");
+        logger.info("doUpdate found " + newAttributes.size() + " new attributes for " + updateExerciseID + " given " + propToValueToAttr.size() + " known props.");
+        // first, figure out which are new attributes (no join yet) and store them so we can join/reference to them
+        // store and remember the new ones
+        storeAndRememberAttributes(projectid, importUser, slickUEDAO, attrToID, now, newAttributes);
+        rememberAttributes(newAttributes, propToValueToAttr);
       }
-      // first, figure out which are new attributes (no join yet) and store them so we can join/reference to them
-      // store and remember the new ones
-      storeAndRememberAttributes(projectid, importUser, slickUEDAO, attrToID, now, newAttributes);
-      allKnownAttributes.addAll(newAttributes);
 
       // for join set, some are on there already, some need to be added, some need to be removed
 
@@ -1191,6 +1188,30 @@ public class ProjectSync implements IProjectSync {
       logger.warn("\n\n\n\ndoUpdate somehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
   }
 
+  private Map<String, Map<String, ExerciseAttribute>> populatePropToValue(Collection<ExerciseAttribute> allKnownAttributes) {
+    Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = new HashMap<>();
+
+    return rememberAttributes(allKnownAttributes, propToValueToAttr);
+  }
+
+  private Map<String, Map<String, ExerciseAttribute>> rememberAttributes(Collection<ExerciseAttribute> allKnownAttributes, Map<String, Map<String, ExerciseAttribute>> propToValueToAttr) {
+    allKnownAttributes.forEach(exerciseAttribute -> {
+      Map<String, ExerciseAttribute> valueToAttr = propToValueToAttr.computeIfAbsent(getNormProp(exerciseAttribute), k -> new HashMap<>());
+      valueToAttr.putIfAbsent(getNormValue(exerciseAttribute), exerciseAttribute);
+    });
+    return propToValueToAttr;
+  }
+
+  @NotNull
+  private String getNormValue(ExerciseAttribute exerciseAttribute) {
+    return exerciseAttribute.getValue().toLowerCase();
+  }
+
+  @NotNull
+  private String getNormProp(ExerciseAttribute exerciseAttribute) {
+    return exerciseAttribute.getProperty().toLowerCase().replaceAll("-", "");
+  }
+
   private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
     String currentUnit = toUpdate.getUnitToValue().get(first);
     String currentChapter = toUpdate.getUnitToValue().get(second);
@@ -1215,18 +1236,28 @@ public class ProjectSync implements IProjectSync {
     }
   }
 
+  /**
+   * @param propToValueToAttr
+   * @param updateAttributes
+   * @return
+   * @see #doUpdate
+   */
   @NotNull
-  private List<ExerciseAttribute> getNewAttributes(Collection<ExerciseAttribute> allKnownAttributes,
-                                                   //         int updateExerciseID,
-                                                   List<ExerciseAttribute> updateAttributes) {
+  private List<ExerciseAttribute> getNewAttributes(Map<String, Map<String, ExerciseAttribute>> propToValueToAttr, List<ExerciseAttribute> updateAttributes) {
     List<ExerciseAttribute> newAttributes = new ArrayList<>();
     for (ExerciseAttribute updateAttr : updateAttributes) {
       //logger.info("doUpdate examine " + updateExerciseID + " : " + updateAttr);
-      if (allKnownAttributes.contains(updateAttr)) {
-        //  knownAttributes.add(updateAttr);
-      } else {
+      Map<String, ExerciseAttribute> valueToAttr = propToValueToAttr.get(getNormProp(updateAttr));
+
+      if (valueToAttr == null) {
+        logger.info("getNewAttributes : attr " + updateAttr + " is new - prop " + getNormProp(updateAttr));
         newAttributes.add(updateAttr);
-        logger.info("attr " + updateAttr + " is new");
+      } else {
+        ExerciseAttribute knownAttr = valueToAttr.get(getNormValue(updateAttr));
+        if (knownAttr == null) {
+          logger.info("getNewAttributes : attr " + updateAttr + " is new - value " + getNormValue(updateAttr));
+          newAttributes.add(updateAttr);
+        }
       }
     }
     return newAttributes;

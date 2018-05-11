@@ -35,7 +35,6 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.*;
-import mitll.npdata.dao.SlickExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -56,13 +55,22 @@ import java.util.*;
 public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
+  /**
+   * These are fixed!
+   */
   static final String TOPIC = "Topic";
   static final String SUB_TOPIC = "Sub-topic";
-  static final String SUBTOPIC = "subtopic";
-  static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC));
+
   private static final String GRAMMAR = "Grammar";
   private static final String DIALECT = "Dialect";
   private static final String DIFFICULTY = "Difficulty";
+
+  static final String SUBTOPIC_LC = "subtopic";
+  /**
+   * @see DBExerciseDAO#removeSubtopic
+   */
+  static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC_LC));
+
   /**
    * @see #getTypeToMatchPairs(List, SectionNode)
    */
@@ -180,7 +188,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     //logger.info("reorderTypes " + types);
     putAtEnd(types, TOPIC);
     putAtEnd(types, SUB_TOPIC);
-    putAtEnd(types, SUBTOPIC);
+    //putAtEnd(types, SUBTOPIC_LC);
     putAtEnd(types, GRAMMAR);
     putAtEnd(types, DIALECT);
     putAtEnd(types, DIFFICULTY);
@@ -808,6 +816,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   /**
    * Get the first chapter inside a unit or the first unit if no chapter.
    * get the exercises for that first section.
+   *
    * @return
    */
   @Override
@@ -823,7 +832,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     //matchInfos.forEach(matchInfo -> logger.info("\tgot " + matchInfo.getValue() + " = " + matchInfo.getCount()));
     Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Collections.singletonList(new Pair(first, firstUnit)));
-  //  logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
+    //  logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
 
     Map<String, Collection<String>> typeToSection = new HashMap<>();
     typeToSection.put(first, Collections.singleton(firstUnit));
@@ -838,7 +847,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToSection.put(secondType, Collections.singleton(second));
     }
 
-   // logger.info("getFirst matching " + typeToSection);
+    // logger.info("getFirst matching " + typeToSection);
     Collection<T> exercisesForSelectionState = getExercisesForSelectionState(typeToSection);
     if (exercisesForSelectionState.size() < minFirstSize) {
       //logger.info("getFirst Fall back to " + firstOnly);
@@ -852,7 +861,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     for (MatchInfo matchInfo : matchInfos1) {
       if (matchInfo.getCount() > i) {
         second = matchInfo.getValue();
-       // logger.info("getFirst choose " +matchInfo);
+        // logger.info("getFirst choose " +matchInfo);
         break;
       }
     }
@@ -1014,7 +1023,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       logger.info("getTypeToValues request is      " + typeToSelection);
     }
     Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-    if (DEBUG)  logger.info("getTypeToValues typeToMatches is " + typeToMatches);
+    if (DEBUG) logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
@@ -1030,7 +1039,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      if (DEBUG)  logger.info("getTypeToValues try search again with " + typeToSelection2);
+      if (DEBUG) logger.info("getTypeToValues try search again with " + typeToSelection2);
 
       Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2);
       return new FilterResponse(request.getReqID(), typeToMatches1, typesToInclude1, userListID);
