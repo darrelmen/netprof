@@ -613,8 +613,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public List<String> isValidEmail(String email) {
     List<DBUser> users = getDbUsers(getEmailFilter(email));
+    List<User> npUsers = new ArrayList<>(users.size());
+    users.forEach(dbUser -> {
+      User user = getUser(dbUser);
+      if (user.isHasAppPermission()) npUsers.add(user);
+    });
     List<String> ids = new ArrayList<>(users.size());
-    users.forEach(dbUser -> ids.add(dbUser.getUserId()));
+    npUsers.forEach(dbUser -> ids.add(dbUser.getUserID()));
     return ids;
   }
 
@@ -731,15 +736,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   public String getMostRecentUserID(List<String> userCredentialsEmail1) {
     String latest = "";
-    List<User> users = new ArrayList<>(userCredentialsEmail1.size());
-    userCredentialsEmail1.forEach(userWithEmail -> {
-      User userByID = getUserByID(userWithEmail);
-
-      if (userByID != null && userByID.isHasAppPermission()) {
-        users.add(userByID);
-        logger.info("\tgetMostRecentUserID user " + userByID + " = " + new Date(userByID.getTimestampMillis()));
-      }
-    });
+    List<User> users = getUserWithNetprofPermission(userCredentialsEmail1);
 
     Optional<User> max = users.stream().max(Comparator.comparingLong(SimpleUser::getTimestampMillis));
     if (max.isPresent()) {
@@ -748,6 +745,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("getMostRecentUserID most recent user " + latest + " = " + new Date(user.getTimestampMillis()));
     }
     return latest;
+  }
+
+  @NotNull
+  private List<User> getUserWithNetprofPermission(List<String> userCredentialsEmail1) {
+    List<User> users = new ArrayList<>(userCredentialsEmail1.size());
+    userCredentialsEmail1.forEach(userWithEmail -> {
+      User userByID = getUserByID(userWithEmail);
+      if (userByID != null && userByID.isHasAppPermission()) {
+        users.add(userByID);
+        logger.info("\tgetMostRecentUserID user " + userByID + " = " + new Date(userByID.getTimestampMillis()));
+      }
+    });
+    return users;
   }
 
   public boolean isValidEmailRegex(String text) {
