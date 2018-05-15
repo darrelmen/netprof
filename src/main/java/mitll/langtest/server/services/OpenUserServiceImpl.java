@@ -40,6 +40,7 @@ import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.user.*;
+import mitll.langtest.shared.user.LoginResult.ResultType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,9 @@ import javax.servlet.http.HttpSession;
 
 import java.util.List;
 
-import static mitll.langtest.shared.user.ChoosePasswordResult.ResultType.*;
+import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
+import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.Success;
+import static mitll.langtest.shared.user.LoginResult.ResultType.*;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 
 @SuppressWarnings("serial")
@@ -69,7 +72,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * @param userId
    * @param attemptedFreeTextPassword
    * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
   public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
     try {
@@ -114,11 +117,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     }
     if (!knownUser && emailOK && db.getUserDAO().isValidAsEmail(id)) {
       List<String> usersWithThisEmail = db.getUserDAO().getUsersWithThisEmail(id);
-      LoginResult resultType = getResultType(usersWithThisEmail);
-   //   logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
-      return resultType;
+      // LoginResult resultType = getResultType(usersWithThisEmail);
+      //   logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
+      return getResultType(usersWithThisEmail);
     } else {
-      return new LoginResult(knownUser ? LoginResult.ResultType.Success : LoginResult.ResultType.Failed);
+      return new LoginResult(knownUser ? ResultType.Success : Failed);
     }
   }
 
@@ -126,11 +129,13 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   private LoginResult getResultType(List<String> usersWithThisEmail) {
     int numMatches = usersWithThisEmail.size();
     if (numMatches == 0) {
-      return new LoginResult(LoginResult.ResultType.Failed);
+      return new LoginResult(Failed);
     } else if (numMatches == 1) {
-      return new LoginResult(LoginResult.ResultType.Email, usersWithThisEmail.iterator().next());
+      return new LoginResult(Email, usersWithThisEmail.iterator().next());
     } else {
-      return new LoginResult(LoginResult.ResultType.Multiple);
+      String mostRecentUserID = db.getUserDAO().getMostRecentUserID(usersWithThisEmail);
+
+      return new LoginResult(mostRecentUserID.isEmpty() ? Failed : Email, mostRecentUserID);
     }
   }
 
@@ -179,7 +184,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     User userByID = getUserByID(user.getUserID());
 
     if (userByID != null) {
-      LoginResult.ResultType resultType = LoginResult.ResultType.Exists;
+      ResultType resultType = Exists;
       if (!userByID.isValid()) {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
@@ -189,7 +194,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         userByID.setAffiliation(user.getAffiliation());
         logger.info("addUser user " + userByID + " updating.");
         db.getUserDAO().update(userByID);
-        resultType = LoginResult.ResultType.Updated;
+        resultType = Updated;
       }
       return new LoginResult(userByID, resultType);
     } else {
@@ -197,9 +202,9 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
 
       if (newUser == null) {
         logger.error("addUser somehow couldn't add " + user.getUserID());
-        return new LoginResult(null, LoginResult.ResultType.Failed);
+        return new LoginResult(null, Failed);
       } else {
-        return new LoginResult(newUser, LoginResult.ResultType.Added);
+        return new LoginResult(newUser, Added);
       }
     }
   }
@@ -280,14 +285,13 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   /**
-   * @param emailH
    * @param email
    * @return
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
+   * @see mitll.langtest.client.user.UserPassLogin#getForgotUser
    */
   @Override
-  public boolean forgotUsername(String emailH, String email) {
-    String userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
+  public boolean forgotUsername(String email) {
+    List<String> userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
     getEmailHelper().getUserNameEmail(email, getBaseURL(), userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
@@ -362,14 +366,17 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
         return new HeartbeatStatus(false, false);
       } else {
-        // logger.info("setCurrentProjectForUser : session user " + sessionUserID + " for " + projid);
-        long then = System.currentTimeMillis();
-        int before = db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
-        long now = System.currentTimeMillis();
-        if (now - then > 10 || projid != before) {
-          logger.info("setCurrentProjectForUser : took " + (now - then) + " to set current session user " + sessionUserID +
-              " and set project to " + projid + " from " + before);
-        }
+        if (projid == -1) {
+          logger.warn("huh? trying to set invalid current project for user #" + sessionUserID);
+        } else {
+          // logger.info("setCurrentProjectForUser : session user " + sessionUserID + " for " + projid);
+          long then = System.currentTimeMillis();
+          int before = db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
+          long now = System.currentTimeMillis();
+          if (now - then > 10 || projid != before) {
+            logger.info("setCurrentProjectForUser : took " + (now - then) + " to set current session user " + sessionUserID +
+                " and set project to " + projid + " from " + before);
+          }
      /*   if (!b) {
           if (hasSession) {
             logger.info("setCurrentProjectForUser : no most recent project for " + sessionUserID + ", tried " + projid);
@@ -378,19 +385,22 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           }
         }
 */
-        {
-          final String sid = getSessionID();
-          // TODO : expensive?
-          new Thread(() -> updateVisited(sid)).start();
         }
 
-        //    if (SIMULATE_NETWORK) simulateNetworkIssue();
+        updateVisitedLater();
+
         return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
       }
     } catch (DominoSessionException e) {
       logger.error("setCurrentProjectForUser got  " + e, e);
       return new HeartbeatStatus(false, false);
     }
+  }
+
+  private void updateVisitedLater() {
+    final String sid = getSessionID();
+    // TODO : expensive?
+    new Thread(() -> updateVisited(sid)).start();
   }
 
   private void updateVisited(String sid) {
@@ -406,7 +416,9 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   private boolean checkCodeHasUpdated(int projid, String implVersion, int sessionUserID) {
     boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
     if (codeHasUpdated) {
-      logger.info("\n\n\nsetCurrentProjectForUser : sess user " + sessionUserID + " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
+      logger.info("\n\n\nsetCurrentProjectForUser : " +
+          "sess user " + sessionUserID +
+          " for " + projid + " client was " + implVersion + " but current is " + serverProps.getImplementationVersion());
     }
     return codeHasUpdated;
   }

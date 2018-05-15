@@ -106,32 +106,16 @@ public class EmailHelper {
   /**
    * @param email
    * @param url
-   * @param userID
+   * @param userIDs
    * @see mitll.langtest.server.services.OpenUserServiceImpl#forgotUsername
    */
-  public void getUserNameEmail(String email, String url, String userID) {
-    url = trimURL(url);
-
-    if (userID != null) {
-      //logger.debug("Sending user email...");
-      sendEmail(url // baseURL
-          ,
-          email, // destination email
-          YOUR_USER_NAME, // subject
-          getUserNameMessage(userID),
-          "Click here to return to the site." // link text
-      );
-    } else {
-      logger.warn("no user with email " + email);
-    }
-  }
-
-  private String getUserNameMessage(String userID) {
-    return "Hi " + userID + ",<br/>" +
-        YOUR_USER_NAME +
-        " is " + userID + "." +
-        "<br/><br/>" +
-        CLOSING;
+  public void getUserNameEmail(String email, String url, List<String> userIDs) {
+    sendEmail(trimURL(url), // baseURL
+        email, // destination email
+        YOUR_USER_NAME, // subject
+        getUserNameMessage(userIDs),
+        "Click here to return to the site." // link text
+    );
   }
 
   /**
@@ -139,7 +123,7 @@ public class EmailHelper {
    * @param userID
    * @see RestUserManagement#forgotUsername
    */
-  public void getUserNameEmailDevice(String email, String userID) {
+  public void getUserNameEmailDevice(String email, List<String> userID) {
     //logger.debug("Sending user email...");
     sendEmail(null // baseURL
         ,
@@ -148,6 +132,17 @@ public class EmailHelper {
         getUserNameMessage(userID),
         null // link text
     );
+  }
+
+  private String getUserNameMessage(List<String> userIDs) {
+    int size = userIDs.size();
+    String message = size == 0 ? " could not be found" : size == 1 ? " is " + userIDs.get(0) : " choices are " + String.join(", ", userIDs);
+    String salutation = size == 0 ? "Unknown User" : size == 1 ? userIDs.get(0) : (userIDs.get(0) + " etc.");
+    return "Hi " + salutation + ",<br/>" +
+        YOUR_USER_NAME +
+        message + "." +
+        "<br/><br/>" +
+        CLOSING;
   }
 
   /**

@@ -110,6 +110,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @param session
    * @param strictValidity
    * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#loginUser
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#loginUser
    */
   @Override
   public LoginResult getLoginResult(String userId,

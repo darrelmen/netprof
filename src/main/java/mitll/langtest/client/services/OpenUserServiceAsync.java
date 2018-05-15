@@ -52,7 +52,7 @@ public interface OpenUserServiceAsync {
       String url,
       AsyncCallback<LoginResult> async);
 
-  void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
+  void forgotUsername(String email, AsyncCallback<Boolean> async);
 
   void setProject(int projectid, AsyncCallback<User> async);
 

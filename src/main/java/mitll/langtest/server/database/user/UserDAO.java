@@ -228,7 +228,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public String isValidEmail(String emailH) {
+  public List<String> isValidEmail(String emailH) {
     String sql = "SELECT " +
         ID +
         " from " + USERS +
@@ -238,7 +238,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         "'";
 
     int i = userExistsSQL("N/A", sql);
-    return i == -1 ? null : getUserWhere(i).getUserID();
+    return i == -1 ? null : Collections.singletonList(getUserWhere(i).getUserID());
   }
 
   @Override
@@ -271,6 +271,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   @Override
   public List<String> getUsersWithThisEmail(String email) {
+    return null;
+  }
+
+  @Override
+  public String getMostRecentUserID(List<String> userCredentialsEmail1) {
     return null;
   }
 

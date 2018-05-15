@@ -608,12 +608,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * @param email
    * @return
-   * @see OpenUserServiceImpl#forgotUsername(String, String)
+   * @see OpenUserServiceImpl#forgotUsername
    */
   @Override
-  public String isValidEmail(String email) {
+  public List<String> isValidEmail(String email) {
     List<DBUser> users = getDbUsers(getEmailFilter(email));
-    return users.isEmpty() ? null : users.get(0).getUserId();
+    List<String> ids = new ArrayList<>(users.size());
+    users.forEach(dbUser -> ids.add(dbUser.getUserId()));
+    return ids;
   }
 
   @Override
@@ -674,6 +676,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param sessionID
    * @return
    * @see NPUserSecurityManager#getLoginResult
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#loginUser
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
   public LoginResult loginUser(String userId,
                                String attemptedTxtPass,
@@ -681,6 +685,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
                                String remoteAddr,
                                String sessionID) {
     String encodedCurrPass = getUserCredentials(userId);
+    logger.info("loginUser userid " + userId + " " + encodedCurrPass);
 
     String toUse = userId;
 
@@ -690,7 +695,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       List<String> userCredentialsEmail1 = getUsersWithThisEmail(userId);
 
       if (userCredentialsEmail1.size() > 1) {
-        return new LoginResult(LoginResult.ResultType.Multiple);
+        String mostRecentUserID = getMostRecentUserID(userCredentialsEmail1);
+        if (!mostRecentUserID.isEmpty()) {
+          toUse = mostRecentUserID;
+          byEmail = true;
+        }
+        //return new LoginResult(LoginResult.PasswordResultType.Multiple);
       } else if (userCredentialsEmail1.size() == 1) {
         toUse = userCredentialsEmail1.get(0);
         byEmail = true;
@@ -717,6 +727,27 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     );
 
     return loginResult;
+  }
+
+  public String getMostRecentUserID(List<String> userCredentialsEmail1) {
+    String latest = "";
+    List<User> users = new ArrayList<>(userCredentialsEmail1.size());
+    userCredentialsEmail1.forEach(userWithEmail -> {
+      User userByID = getUserByID(userWithEmail);
+
+      if (userByID != null && userByID.isHasAppPermission()) {
+        users.add(userByID);
+        logger.info("\tgetMostRecentUserID user " + userByID + " = " + new Date(userByID.getTimestampMillis()));
+      }
+    });
+
+    Optional<User> max = users.stream().max(Comparator.comparingLong(SimpleUser::getTimestampMillis));
+    if (max.isPresent()) {
+      User user = max.get();
+      latest = user.getUserID();
+      logger.info("getMostRecentUserID most recent user " + latest + " = " + new Date(user.getTimestampMillis()));
+    }
+    return latest;
   }
 
   public boolean isValidEmailRegex(String text) {

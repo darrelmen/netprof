@@ -130,7 +130,8 @@ public class ServerProperties {
   private static final String IOS_VERSION = "1.0.1";
   private static final String I_OS_VERSION = "iOSVersion";
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
-  public static final String DEFAULT_MAIL_FROM = "gordon.vidaver@ll.mit.edu";
+  public static final String DEFAULT_MAIL_FROM = "netprof-admin@netprof.ll.mit.edu";
+
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 

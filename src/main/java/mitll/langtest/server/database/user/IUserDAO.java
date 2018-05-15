@@ -108,6 +108,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   boolean isKnownUser(String userid);
 
   List<String> getUsersWithThisEmail(String email);
+  String getMostRecentUserID(List<String> userCredentialsEmail1);
 
   boolean isValidAsEmail(String text);
 
@@ -171,9 +172,9 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   /**
    * @param emailH
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#forgotUsername
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgotUsername
    */
-  String isValidEmail(String emailH);
+  List<String> isValidEmail(String emailH);
 
   /**
    * @param user

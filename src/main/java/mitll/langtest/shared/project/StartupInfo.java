@@ -56,7 +56,7 @@ public class StartupInfo implements IsSerializable {
   private List<SlimProject> projects;
   private String message = "";
   private String implementationVersion;
-  public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
+  private static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
   /**
    * Name.IMPLEMENTATION_VERSION
    */

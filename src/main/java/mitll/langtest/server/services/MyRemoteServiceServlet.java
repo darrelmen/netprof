@@ -317,12 +317,19 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
 
       String subject = "Server Exception on " + getHostName() + " at " + installPath;
-      sendEmail(subject, getInfo(prefixedMessage));
+      String info = getInfo(prefixedMessage);
 
-      if (e != null) {
-        logger.warn("logAndNotify : " + e, e);
-      }
-      logger.error(getInfo(prefixedMessage), e);
+      logger.warn("logAndNotifyServerException : about to send message with" +
+          "\n\tsubject   : " + subject +
+          "\n\tmessage   : " + info+
+          "\n\texception : " + e
+      );
+
+      sendEmail(subject, info);
+//      if (e != null) {
+//        logger.warn("logAndNotify : " + e, e);
+//      }
+//      logger.error(info, e);
     } else {
       logger.error("\n\nlogAndNotifyServerException : got " + e, e);
     }
@@ -368,7 +375,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   @Override
   protected void doUnexpectedFailure(Throwable ex) {
-    logger.info("Look at exception {}", ex.getClass().getCanonicalName());
+    logger.info("Look at exception {} = {} ", ex.getClass().getCanonicalName(), ex.getMessage());
     if (ex.getClass().getCanonicalName().equals("org.apache.catalina.connector.ClientAbortException")) {
       logger.info("User reload during request.", ex);
     } else {

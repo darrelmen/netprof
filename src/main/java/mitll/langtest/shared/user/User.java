@@ -49,30 +49,29 @@ import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser implements ReportUser {
   private static final String NOT_SET = "NOT_SET";
+
   @Deprecated
   private int experience;
-  private String ipaddr;
-
   /**
    * @deprecated
    */
   private String passwordHash;
+  @Deprecated
+  private String nativeLang;
+  @Deprecated
+  private String dialect;
+  @Deprecated
+  private String resetKey;
+
+  private String ipaddr;
+
   private String email = "";
   private boolean enabled;
   private boolean admin;
 
   private Kind userKind;
 
-  @Deprecated
-  private String nativeLang;
-
-  @Deprecated
-  private String dialect;
-
   private String device;
-
-  @Deprecated
-  private String resetKey;
 
   private boolean hasAppPermission;
 

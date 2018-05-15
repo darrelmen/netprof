@@ -66,7 +66,6 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
   //  private final Logger logger = Logger.getLogger("UserPassLogin");
-
   public static final String USER_NAME_BOX = "UserNameBox";
 
   /**
@@ -304,7 +303,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
             }
 
             sendUsernameEmail.setEnabled(false);
-            openUserService.forgotUsername(Md5Hash.getHash(text), text, new AsyncCallback<Boolean>() {
+            openUserService.forgotUsername(text, new AsyncCallback<Boolean>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendUsernameEmail.setEnabled(true);

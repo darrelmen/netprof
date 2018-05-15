@@ -42,13 +42,13 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+
+import static mitll.langtest.server.ServerProperties.DEFAULT_MAIL_FROM;
 
 /**
  * * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -59,9 +59,7 @@ import java.util.*;
 public class MailSupport {
   private static final Logger logger = LogManager.getLogger(MailSupport.class);
 
-  private static final String RECIPIENT_NAME = "Gordon Vidaver";
-  private static final String DATA_COLLECT_WEBMASTER = "Netprof Admin";
-  private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String NETPROF_ADMIN = "Netprof Admin";
 
   /**
    * @see #email
@@ -69,11 +67,14 @@ public class MailSupport {
   private static final int MAIL_PORT = 25;
   private static final int TEST_MAIL_PORT = 2525;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
-  private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
+  private static final String MAIL_DEBUG = "mail.debug";
   private static final String TEXT_HTML = "text/html";
+  private static final String CONTENT_TYPE = "Content-Type";
+
   private final boolean debugEmail;
   private final boolean testEmail;
+
   private final String mailServer;
   private final String mailFrom;
 
@@ -81,8 +82,8 @@ public class MailSupport {
     this(serverProps.isDebugEMail(),
         serverProps.isTestEmail(),
         serverProps.getMailServer(),
-        serverProps.getMailFrom(),
-        serverProps.getMailReplyTo());
+        serverProps.getMailFrom()
+    );
   }
 
   /**
@@ -91,12 +92,11 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    * @see RestUserManagement#getMailSupport()
    */
-  private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom, String replyTo) {
+  private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom) {
     this.debugEmail = debugEmail;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
     this.mailFrom = mailFrom;
-  //  this.replyTo = replyTo;
     if (testEmail) logger.warn("MailSupport --->using test email");
   }
 
@@ -195,14 +195,14 @@ public class MailSupport {
    */
   public void email(String receiver, String subject, String message) {
     if (receiver.contains(",")) {
-      String[] split = receiver.split(",");
-      Arrays.asList(split).forEach(
-          rec ->
-              normalEmail(RECIPIENT_NAME, rec, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer)
-      );
+      Arrays.asList(receiver.split(",")).forEach(rec -> sendEmail(subject, message, rec));
     } else {
-      normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer);
+      sendEmail(subject, message, receiver);
     }
+  }
+
+  private void sendEmail(String subject, String message, String rec) {
+    normalEmail(rec, rec, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer);
   }
 
   /**
@@ -215,44 +215,36 @@ public class MailSupport {
    * @see IReport#sendExcelViaEmail(MailSupport, List, List, List, PathHelper)
    */
   public boolean emailAttachment(String receiver, String subject, String messageBody, File toAttach, String receiverName) {
-    Message message = new MimeMessage(getMailSession(mailServer, testEmail));
+    Message message = new MimeMessage(getMailSession());
 
     try {
-      message.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
-      InternetAddress address = new InternetAddress(receiver, receiverName);
+      String from = DEFAULT_MAIL_FROM;
+      message.setFrom(getAddress(NETPROF_ADMIN, from));
+      InternetAddress address = getAddress(receiverName, receiver);
 
-      logger.info("makeMessage sending to " + address + " at port " + MAIL_PORT + " via " + mailServer);
+      logger.info("emailAttachment sending to " + address + " at port " + MAIL_PORT + " via " + mailServer);
 
       message.addRecipient(Message.RecipientType.TO, address);
       message.setSubject(subject);
       message.setSentDate(new Date());
 
-      Multipart multipart = new MimeMultipart();
-
-      {// creates body part for the message
-        MimeBodyPart messageBodyPart = new MimeBodyPart();
-        String htmlEmail = getHTMLEmail(null, messageBody, null);
-        messageBodyPart.setContent(htmlEmail, "text/html");
-        // messageBodyPart.setText(htmlEmail, "utf-8", "text/html");
-
-        // adds parts to the multipart
-        multipart.addBodyPart(messageBodyPart);
-      }
-
-      // creates body part for the attachment
-      {
-        MimeBodyPart attachPart = new MimeBodyPart();
-        attachPart.setContent(message, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        attachPart.attachFile(toAttach);
-
-        multipart.addBodyPart(attachPart);
-      }
+      Multipart multipart = getMultipart(messageBody, toAttach, message);
 
       // sets the multipart as message's content
       message.setContent(multipart);
 
+      logger.info("emailAttachment sending..." +
+          "\n\tto   " + receiver +
+          "\n\tfrom " + from +
+          "\n\tsub  " + subject);
+
       Transport.send(message);
-      logger.info("emailAttachment sent to " + receiver + " from " + EMAIL + " sub " + subject);
+
+      logger.info("emailAttachment sent" +
+          "\n\tto   " + receiver +
+          "\n\tfrom " + from +
+          "\n\tsub  " + subject);
+
       return true;
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -260,6 +252,31 @@ public class MailSupport {
       return false;
     }
   }
+
+  private Multipart getMultipart(String messageBody, File toAttach, Message message) throws MessagingException, IOException {
+    Multipart multipart = new MimeMultipart();
+
+    {// creates body part for the message
+      MimeBodyPart messageBodyPart = new MimeBodyPart();
+      String htmlEmail = getHTMLEmail(null, messageBody, null);
+      messageBodyPart.setContent(htmlEmail, "text/html");
+      // messageBodyPart.setText(htmlEmail, "utf-8", "text/html");
+
+      // adds parts to the multipart
+      multipart.addBodyPart(messageBodyPart);
+    }
+
+    // creates body part for the attachment
+    {
+      MimeBodyPart attachPart = new MimeBodyPart();
+      attachPart.setContent(message, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      attachPart.attachFile(toAttach);
+
+      multipart.addBodyPart(attachPart);
+    }
+    return multipart;
+  }
+
 
   /**
    * @param recipientName
@@ -306,6 +323,11 @@ public class MailSupport {
     }
   }
 
+  @NotNull
+  private Session getMailSession() {
+    return getMailSession(mailServer, testEmail);
+  }
+
   private Session getMailSession(String email_server, boolean testEmail) {
     return Session.getInstance(getMailProps(email_server, testEmail), null);
   }
@@ -342,11 +364,12 @@ public class MailSupport {
                                   String subject,
                                   String message) {
     try {
-      Transport.send(makeHTMLMessage(getMailSession(mailServer, testEmail),
-          senderName,
-          senderEmail,
-          replyToEmail, recipientEmails,
-          ccEmails, subject, message));
+      Transport.send(
+          makeHTMLMessage(getMailSession(),
+              senderName,
+              senderEmail,
+              replyToEmail, recipientEmails,
+              ccEmails, subject, message));
       return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
@@ -402,36 +425,30 @@ public class MailSupport {
 
   private void configure(String recipientName,
                          String recipientEmail,
-
                          Collection<String> ccEmails,
                          String subject,
                          String message,
                          Message msg,
                          String from,
                          String smtp) throws MessagingException, UnsupportedEncodingException {
-    InternetAddress address = new InternetAddress(recipientEmail, recipientName);
+    InternetAddress address = getAddress(recipientName, recipientEmail);
 
     logger.info("email: " +
         "\n\tsending to " + address +
+        "\n\tfrom       " + from +
         (ccEmails.isEmpty() ? "" : "\n\tcc         " + ccEmails) +
-        "\n\tsmtp       " + smtp +
+        "\n\tvia smtp   " + smtp +
         "\n\tat port    " + MAIL_PORT +
         "\n\tsubject    " + subject +
         "\n\tmessage    " + message);
 
     msg.addRecipient(Message.RecipientType.TO, address);
     addCC(ccEmails, msg);
-    msg.setFrom(new InternetAddress(from, DATA_COLLECT_WEBMASTER));
+    msg.setFrom(getAddress(NETPROF_ADMIN, from));
 
     msg.setSubject(subject);
     msg.setText(message);
     msg.setSentDate(new Date());
-  }
-
-  private void addCC(Collection<String> ccEmails, Message msg) throws MessagingException {
-    for (String ccEmail : ccEmails) {
-      msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
-    }
   }
 
   /**
@@ -453,22 +470,42 @@ public class MailSupport {
                                   String replyToEmail,
                                   Collection<String> recipientEmails,
                                   Collection<String> ccEmails,
-                                  String subject, String message) throws Exception {
-    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject);
+                                  String subject,
+                                  String message)
+      throws MessagingException, UnsupportedEncodingException {
+    logger.info("makeHTMLMessage sending" +
+        "\n\tfrom " + senderEmail + " " + senderName +
+        "\n\tto   " + recipientEmails +
+        "\n\tsub  " + subject);
 
     Message msg = new MimeMessage(session);
-    msg.setFrom(new InternetAddress(senderEmail, senderName));
+    msg.setFrom(getAddress(senderName, senderEmail));
+
     for (String receiver : recipientEmails) {
       //logger.info("\tSending  to " + receiver);
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
     }
     addCC(ccEmails, msg);
+
     msg.setSubject(subject);
+    msg.setSentDate(new Date());
     msg.setText(message);
-    msg.addHeader("Content-Type", TEXT_HTML);
+
+    msg.addHeader(CONTENT_TYPE, TEXT_HTML);
     //logger.info("Session is " + session + " message " + msg);
     addReplyTo(replyToEmail, msg);
     return msg;
+  }
+
+  @NotNull
+  private InternetAddress getAddress(String recipientName, String recipientEmail) throws UnsupportedEncodingException {
+    return new InternetAddress(recipientEmail, recipientName);
+  }
+
+  private void addCC(Collection<String> ccEmails, Message msg) throws MessagingException {
+    for (String ccEmail : ccEmails) {
+      msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
+    }
   }
 
   private void addReplyTo(String replyToEmail, Message msg) throws MessagingException {

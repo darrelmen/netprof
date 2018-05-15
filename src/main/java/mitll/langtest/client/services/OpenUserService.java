@@ -69,12 +69,11 @@ public interface OpenUserService extends RemoteService {
 
   /**
    * Open call - no session.
-   * @param emailH
    * @param email
    * @return
    * @see UserPassLogin#getForgotUser
    */
-  boolean forgotUsername(String emailH, String email);
+  boolean forgotUsername(String email);
 
   /**
    * No session created - we need to do set password via email first.

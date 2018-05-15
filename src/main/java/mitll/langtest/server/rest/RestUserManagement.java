@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
@@ -376,7 +377,7 @@ public class RestUserManagement {
    */
   private boolean forgotUsername(String email) {
     // String hash = Md5Hash.getHash(email);
-    String valid = db.getUserDAO().isValidEmail(email);
+    List<String> valid = db.getUserDAO().isValidEmail(email);
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
       return true;

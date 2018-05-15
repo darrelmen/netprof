@@ -222,14 +222,14 @@ public class ResetPassword extends UserDialog {
 
             @Override
             public void onSuccess(ChoosePasswordResult result) {
-              ChoosePasswordResult.ResultType resultType = result.getResultType();
-              if (resultType == ChoosePasswordResult.ResultType.AlreadySet) {
+              ChoosePasswordResult.PasswordResultType resultType = result.getResultType();
+              if (resultType == ChoosePasswordResult.PasswordResultType.AlreadySet) {
                 markErrorBlur(changePassword, PASSWORD_HAS_ALREADY_BEEN_CHANGED, Placement.TOP);
                 changePassword.setEnabled(true);
-              } else if (resultType == ChoosePasswordResult.ResultType.NotExists) {
+              } else if (resultType == ChoosePasswordResult.PasswordResultType.NotExists) {
                 markErrorBlur(changePassword, "No user with this id.", Placement.TOP);
                 changePassword.setEnabled(true);
-              } else if (resultType == ChoosePasswordResult.ResultType.Success) {
+              } else if (resultType == ChoosePasswordResult.PasswordResultType.Success) {
                 markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.TOP);
                 reloadPageInThreeSeconds(result.getUser());
               }
