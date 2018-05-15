@@ -194,7 +194,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   public List<WordAndScore> getPerformanceReportForUserForPhone(int userid,
                                                                 int listid,
                                                                 String phone,
-                                                                String bigram, long from,
+                                                                String bigram,
+                                                                long from,
                                                                 long to)
       throws DominoSessionException, RestrictedOperationException {
     logger.info("getPerformanceForUser " + userid + " list " + listid + " phone " + phone);

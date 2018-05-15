@@ -77,7 +77,7 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  private static final boolean SORT_BY_RANK = false;
+  //private static final boolean SORT_BY_RANK = false;
 
   /**
    * @see #getTableWithPagerForHistory
@@ -278,10 +278,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
             float ldiff = (float) diffNative;
             float weight = ldiff * fcount;
             ndiff += weight;
-
-            if (SORT_BY_RANK)
-              logger.info(session.getPhone() + " diff " + diffNative +
-                  " ldiff " + ldiff + " * " + fcount + " = " + weight);
           }
 
           avg += fmean * fcount;
@@ -295,7 +291,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
         // int totalCount = value.getTotalCount(filtered);
         String thePhone = ps.getKey();
-        if (SORT_BY_RANK) logger.info(thePhone + " : total " + total + " ndiff " + ndiff);
+        //if (SORT_BY_RANK) logger.info(thePhone + " : total " + total + " ndiff " + ndiff);
         phoneAndStatses.add(new PhoneAndStats(thePhone, v, Long.valueOf(ltotal).intValue()));
       }
     }

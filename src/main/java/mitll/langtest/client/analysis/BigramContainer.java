@@ -78,8 +78,6 @@ import java.util.logging.Logger;
 class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  private static final boolean SORT_BY_RANK = false;
-
   /**
    * @see #getTableWithPagerForHistory
    */
@@ -107,10 +105,10 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
 
   private long from;
   private long to;
-  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
-
-  private static final boolean DEBUG = false;
+  //  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
   private final AnalysisServiceAsync analysisServiceAsync;
+
+  //  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -164,7 +162,7 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
 
   private int reqid = 0;
 
-  String phone;
+  private String phone;
 
   void gotNewPhoneReport(PhoneReport result, String phone, long from, long to) {
     this.from = from;
@@ -181,7 +179,6 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
   }
 
   private List<PhoneAndStats> getPhoneAndStatsListForPeriod(List<Bigram> bigrams) {
-
     List<PhoneAndStats> phoneAndStatsList = new ArrayList<>();
     if (bigrams == null) {
       logger.warning("getPhoneAndStatsListForPeriod huh? phoneToAvgSorted is null ");
@@ -408,6 +405,11 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
     }
   }
 
+  /**
+   * TODO : common base class
+   *
+   * @param bigram
+   */
   protected void clickOnPhone2(String bigram) {
     analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, bigram, from, to, new AsyncCallback<List<WordAndScore>>() {
       @Override
@@ -417,9 +419,12 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
 
       @Override
       public void onSuccess(List<WordAndScore> filteredWords) {
-        if (filteredWords == null) logger.warning("no result for " + phone + " " + bigram);
-        else {
-          exampleContainer.addItems(bigram,
+        if (filteredWords == null) {
+          logger.warning("clickOnPhone2 no result for " + phone + " " + bigram);
+          exampleContainer.addItems(phone, Collections.emptyList(), MAX_EXAMPLES);
+        } else {
+          filteredWords.forEach(wordAndScore -> logger.info("got " + wordAndScore));
+          exampleContainer.addItems(phone,
               filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
               MAX_EXAMPLES);
         }

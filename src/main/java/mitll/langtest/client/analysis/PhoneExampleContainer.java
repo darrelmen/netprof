@@ -66,6 +66,9 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   static final String CLICK_ON = "Click on an item to review.";
   private static final String EXAMPLES_OF_SOUND = "Examples of sound";
 
+  /**
+   * @see #addItems
+   */
   private static final String WORDS_USING = "Vocabulary with ";
 
   private static final int ITEM_WIDTH = 200;
@@ -114,7 +117,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param phone
    * @param sortedHistory
    * @param maxExamples
-   * @see PhoneContainer#clickOnPhone2
+   * @see BigramContainer#clickOnPhone2
    */
   void addItems(String phone, Collection<WordAndScore> sortedHistory, int maxExamples) {
     this.phone = phone;

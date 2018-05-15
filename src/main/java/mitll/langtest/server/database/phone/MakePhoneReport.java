@@ -98,7 +98,7 @@ public class MakePhoneReport {
 
     phoneToBigram.forEach((k,v)->{
       v.sort((o1, o2) -> Float.compare(o1.getScore(),o2.getScore()));
-      logger.info(k + " has " + v);
+      logger.info("getPhoneReport " + k + " has " + v);
     });
     // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
     return new PhoneReport(percentOverall,

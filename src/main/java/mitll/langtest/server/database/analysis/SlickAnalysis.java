@@ -407,7 +407,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       return Collections.emptyList();
     } else {
       List<WordAndScore> wordAndScores = bigramToExample.get(bigram);
-      if (wordAndScores == null) logger.warn("getPhoneReportFor no examples for phone " + phone + " and " + bigram);
+      //if (wordAndScores == null) {
+        logger.warn("getPhoneReportFor no examples for" +
+            "\n\tphone  " + phone +
+            "\n\tbigram " + bigram+
+            "\n\tknown  " + bigramToExample.keySet()
+            +"\n\twords " + wordAndScores
+        );
+      //}
       return wordAndScores;//phoneReportForPhone;
     }
     // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);

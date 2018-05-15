@@ -132,7 +132,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
 
     since.forEach((k, pair) -> {
       ActiveInfo value = new ActiveInfo(k, pair._1(), pair._2(), usersToProject.getOrDefault(k, -1));
-      logger.info(k + "->" + value);
+      //logger.info(k + "->" + value);
       integerActiveInfoHashMap.put(k, value);
     });
     return integerActiveInfoHashMap;
