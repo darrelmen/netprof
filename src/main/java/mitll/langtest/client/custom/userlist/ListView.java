@@ -266,7 +266,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
- //   tableWithPager.setHeight("520px");
+    //   tableWithPager.setHeight("520px");
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
@@ -474,7 +474,11 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private int getListID(ListContainer container) {
-    return getCurrentSelection(container).getID();
+    if (container == null) return -1;
+    else {
+      UserList<CommonShell> currentSelection = getCurrentSelection(container);
+      return currentSelection == null ? -1 : currentSelection.getID();
+    }
   }
 
   @NotNull
@@ -771,11 +775,11 @@ public class ListView implements ContentView, CreateListComplete {
 
   @Override
   public void madeIt(UserList userList) {
-   // logger.info("madeIt made it " + userList.getName());
+    // logger.info("madeIt made it " + userList.getName());
 
     try {
       dialogHelper.hide();
-    //  logger.info("made it ex " + userList.getExercises().size());
+      //  logger.info("made it ex " + userList.getExercises().size());
       //logger.info("\n\n\ngot made list");
 
       myLists.addExerciseAfter(null, userList);
@@ -785,7 +789,7 @@ public class ListView implements ContentView, CreateListComplete {
 
       names.add(userList.getName());
     } catch (Exception e) {
-      logger.warning("got " +e);
+      logger.warning("got " + e);
     }
     Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID())
     );

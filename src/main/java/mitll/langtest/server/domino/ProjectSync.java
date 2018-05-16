@@ -9,10 +9,7 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.DominoProject;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickAudio;
@@ -105,7 +102,7 @@ public class ProjectSync implements IProjectSync {
     int jsonDominoID = importFromDomino.getDominoID();
     if (dominoid != -1 && dominoid != jsonDominoID) {
       logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
-      return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+      return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>());
     } else {
       if (dominoid == -1) {  // relevant? possible?
         List<Project> existingBound = getProjectForDominoID(jsonDominoID);
@@ -126,6 +123,8 @@ public class ProjectSync implements IProjectSync {
 
       Map<String, SlickExercise> oldIDToExer = getNewAndChangedExercises(projectid, importFromDomino, dominoToNonContextEx, newEx, importUpdateEx);
 
+      List<DominoUpdateItem> updates = new ArrayList<>();
+
       {
         Collection<String> typeOrder2 = project.getTypeOrder();
 
@@ -141,6 +140,7 @@ public class ProjectSync implements IProjectSync {
               newEx,
               typeOrder2,
               new HashMap<>());
+          newEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.ADD)));
         }
 
         if (!newContextEx.isEmpty()) {
@@ -153,9 +153,10 @@ public class ProjectSync implements IProjectSync {
           // update the exercises...
           logger.info("addPending updating  " + importUpdateEx.size() + " exercises");
           doUpdate(projectid, importUser, slickUEDAO, importUpdateEx, typeOrder2, dominoToNonContextEx, oldIDToExer);//, bringBack);
+          importUpdateEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE)));
         }
 
-        doDelete(importFromDomino, dominoToNonContextEx);
+        updates.addAll(doDelete(importFromDomino, dominoToNonContextEx));
 
 /*
           if (!deleteEx.isEmpty()) {
@@ -170,16 +171,25 @@ public class ProjectSync implements IProjectSync {
 
       updateProjectIfSomethingChanged(jsonDominoID, newEx, importUpdateEx, project.getProject(), requestTime);
 
-      // todo : shoudl we configure project if it didn't change?
-      int i = projectManagement.configureProject(project, false, true);
-      return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), i));
+      // todo : should we configure project if it didn't change?
+      int numExercises = projectManagement.configureProject(project, false, true);
+      return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), numExercises), updates);
     }
   }
 
+  /**
+   * @param projectid
+   * @param importFromDomino
+   * @param dominoToNonContextEx
+   * @param newEx
+   * @param importUpdateEx
+   * @return
+   */
   @NotNull
   private Map<String, SlickExercise> getNewAndChangedExercises(int projectid,
                                                                ImportInfo importFromDomino,
                                                                Map<Integer, SlickExercise> dominoToNonContextEx,
+
                                                                List<CommonExercise> newEx,
                                                                List<CommonExercise> importUpdateEx) {
     Map<String, SlickExercise> oldIDToExer = new HashMap<>();
@@ -346,6 +356,15 @@ public class ProjectSync implements IProjectSync {
     }
     return oldIDToExer;
   }*/
+
+
+  /**
+   * @param dominoToNonContextEx
+   * @param oldIDToExer
+   * @param dominoID
+   * @param npID
+   * @return
+   */
   @Nullable
   private SlickExercise getKnownSlickExercise(Map<Integer, SlickExercise> dominoToNonContextEx,
                                               Map<String, SlickExercise> oldIDToExer,
@@ -425,13 +444,15 @@ public class ProjectSync implements IProjectSync {
    * TODO : delete by np id
    *
    * @param importFromDomino
-   * @param dominoToEx
+   * @param dominoToEx       domino id-> exercise
    * @see #addPending
    */
-  private void doDelete(ImportInfo importFromDomino, Map<Integer, SlickExercise> dominoToEx) {
+  private List<DominoUpdateItem> doDelete(ImportInfo importFromDomino,
+                                          Map<Integer, SlickExercise> dominoToEx) {
     Collection<Integer> deletedDominoIDs = importFromDomino.getDeletedDominoIDs();
-    List<Integer> toDelete = new ArrayList<>(deletedDominoIDs.size());
+    Collection<Integer> toDelete = new HashSet<>(deletedDominoIDs.size());
 
+    List<DominoUpdateItem> deletes = new ArrayList<>();
     Set<Integer> missing = new TreeSet<>();
     deletedDominoIDs.forEach(id -> {
       SlickExercise slickExercise = dominoToEx.get(id);
@@ -439,24 +460,43 @@ public class ProjectSync implements IProjectSync {
         missing.add(id);
       } else {
         int exid = slickExercise.id();
-        toDelete.add(exid);
+        //toDelete.add(exid);
 
         CommonExercise byExID = userExerciseDAO.getByExID(exid);
         if (byExID == null) {
-          logger.warn("doDelete :  no ex by " + exid);
+          logger.warn("doDelete : no ex by " + exid + " from domino #"+id);
         } else {
-          toDelete.add(byExID.getID());
+          boolean add = toDelete.add(byExID.getID());
+          if (add) {
+            deletes.add(new DominoUpdateItem(byExID, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.DELETE));
+          }
         }
       }
     });
 
 
-    logger.info("doDelete : Deleting " + toDelete.size() + " exercises, given " + deletedDominoIDs.size());
+    importFromDomino.getDeletedNPIDs().forEach(npExID->{
+      CommonExercise byExID = userExerciseDAO.getByExOldID(npExID);
+      if (byExID == null) {
+        logger.warn("doDelete : no ex by old np id " + npExID  );
+      } else {
+        boolean add = toDelete.add(byExID.getID());
+        if (add) {
+          deletes.add(new DominoUpdateItem(byExID, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.DELETE));
+        }
+      }
+    });
+
+    logger.info("doDelete : Deleting " + toDelete.size() + " exercises," +
+        "\n\tgiven " + deletedDominoIDs.size() + " deleted domino ids and" +
+        "\n\t      " + importFromDomino.getDeletedNPIDs().size() + " np ids");
 
     if (!missing.isEmpty()) {
       logger.warn("doDelete : " + missing + " could not be deleted?");
     }
     userExerciseDAO.deleteByExID(toDelete);
+
+    return deletes;
   }
 
   /**
@@ -580,7 +620,7 @@ public class ProjectSync implements IProjectSync {
 
     logger.info("getAnotherProjectResponse found existing (" + name + ") project " + project);
 
-    DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>());
+    DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>());
     dominoUpdateResponse.setMessage(name);
     return dominoUpdateResponse;
   }

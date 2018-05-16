@@ -69,8 +69,9 @@ public class MailSupport {
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
   private static final String MAIL_DEBUG = "mail.debug";
-  private static final String TEXT_HTML = "text/html";
   private static final String CONTENT_TYPE = "Content-Type";
+  private static final String TEXT_HTML = "text/html";// charset=UTF-8";
+  public static final int TRIES = 3;
 
   private final boolean debugEmail;
   private final boolean testEmail;
@@ -93,11 +94,13 @@ public class MailSupport {
    * @see RestUserManagement#getMailSupport()
    */
   private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom) {
-    this.debugEmail = debugEmail;
+    this.debugEmail = true;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
     this.mailFrom = mailFrom;
-    if (testEmail) logger.warn("MailSupport --->using test email");
+    if (testEmail) {
+      logger.warn("MailSupport --->using test email");
+    }
   }
 
   /**
@@ -226,19 +229,18 @@ public class MailSupport {
 
       message.addRecipient(Message.RecipientType.TO, address);
       message.setSubject(subject);
-      message.setSentDate(new Date());
 
-      Multipart multipart = getMultipart(messageBody, toAttach, message);
+      addHeaders(message);
 
       // sets the multipart as message's content
-      message.setContent(multipart);
+      message.setContent(getMultipart(messageBody, toAttach, message));
 
       logger.info("emailAttachment sending..." +
           "\n\tto   " + receiver +
           "\n\tfrom " + from +
           "\n\tsub  " + subject);
 
-      Transport.send(message);
+      sendMessage(message);
 
       logger.info("emailAttachment sent" +
           "\n\tto   " + receiver +
@@ -252,6 +254,33 @@ public class MailSupport {
       return false;
     }
   }
+
+  private void sendMessage(Message message) {
+    sendMessage(message, TRIES);
+  }
+
+  private void sendMessage(Message message, int tries) {
+    if (tries > 0) {
+      try {
+        logger.info("sendMessage about to send email (" + tries + ") :" +
+            "\n\tmessage " + message
+        //    +            "\n\tsession " + message.getSession()
+        );
+
+        long then = System.currentTimeMillis();
+
+        Transport.send(message);
+        long now = System.currentTimeMillis();
+        logger.info("sendMessage sent (" + (now - then) + ") email " + message);
+      } catch (MessagingException e) {
+        logger.warn("sendMessage got " + e, e);
+        if (e.getMessage().contains("421")) {
+          sendMessage(message, --tries);
+        }
+      }
+    }
+  }
+
 
   private Multipart getMultipart(String messageBody, File toAttach, Message message) throws MessagingException, IOException {
     Multipart multipart = new MimeMultipart();
@@ -298,15 +327,15 @@ public class MailSupport {
                            String email_server,
                            boolean useTestPort, String from, String smtpHost) {
     try {
-      Transport.send(
-          makeMessage(
-              getMailSession(email_server, useTestPort),
-              recipientName,
-              recipientEmail,
-              ccEmails,
-              subject,
-              message,
-              from, smtpHost));
+      Message msg = makeMessage(
+          getMailSession(email_server, useTestPort),
+          recipientName,
+          recipientEmail,
+          ccEmails,
+          subject,
+          message,
+          from, smtpHost);
+      sendMessage(msg);
     } catch (MailConnectException e) {
       if (!useTestPort) {
         normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true, from, smtpHost);
@@ -338,6 +367,9 @@ public class MailSupport {
     props.put(MAIL_SMTP_HOST, email_server);
     props.put(MAIL_DEBUG, "" + debugEmail);
 
+    logger.info("getMailProps : smtp host = " + email_server);
+    logger.info("getMailProps : props     = " + props);
+
     if (useTestEmail) {
       props.put(MAIL_SMTP_PORT, "" + TEST_MAIL_PORT);
       logger.debug("getMailProps : using port " + TEST_MAIL_PORT);
@@ -364,18 +396,18 @@ public class MailSupport {
                                   String subject,
                                   String message) {
     try {
-      Transport.send(
-          makeHTMLMessage(getMailSession(),
-              senderName,
-              senderEmail,
-              replyToEmail, recipientEmails,
-              ccEmails, subject, message));
+      Message msg = makeHTMLMessage(getMailSession(),
+          senderName,
+          senderEmail,
+          replyToEmail, recipientEmails,
+          ccEmails, subject, message);
+      sendMessage(msg);
       return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
         logger.warn("couldn't send email - no mail daemon? subj " + subject + " : " + e.getMessage());
       } else {
-        logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
+        logger.warn("Couldn't send email to " + recipientEmails + ". Got " + e, e);
       }
       return false;
     }
@@ -427,8 +459,8 @@ public class MailSupport {
                          String recipientEmail,
                          Collection<String> ccEmails,
                          String subject,
-                         String message,
-                         Message msg,
+                         String messageBody,
+                         Message message,
                          String from,
                          String smtp) throws MessagingException, UnsupportedEncodingException {
     InternetAddress address = getAddress(recipientName, recipientEmail);
@@ -440,15 +472,16 @@ public class MailSupport {
         "\n\tvia smtp   " + smtp +
         "\n\tat port    " + MAIL_PORT +
         "\n\tsubject    " + subject +
-        "\n\tmessage    " + message);
+        "\n\tmessage    " + messageBody);
 
-    msg.addRecipient(Message.RecipientType.TO, address);
-    addCC(ccEmails, msg);
-    msg.setFrom(getAddress(NETPROF_ADMIN, from));
+    message.addRecipient(Message.RecipientType.TO, address);
+    addCC(ccEmails, message);
+    message.setFrom(getAddress(NETPROF_ADMIN, from));
 
-    msg.setSubject(subject);
-    msg.setText(message);
-    msg.setSentDate(new Date());
+    message.setSubject(subject);
+    message.setText(messageBody);
+
+    addHeaders(message);
   }
 
   /**
@@ -488,13 +521,20 @@ public class MailSupport {
     addCC(ccEmails, msg);
 
     msg.setSubject(subject);
-    msg.setSentDate(new Date());
+    //msg.setSentDate(new Date());
     msg.setText(message);
 
+    addHeaders(msg);
     msg.addHeader(CONTENT_TYPE, TEXT_HTML);
     //logger.info("Session is " + session + " message " + msg);
     addReplyTo(replyToEmail, msg);
     return msg;
+  }
+
+  private void addHeaders(Message message) throws MessagingException {
+    // message.addHeader("format", "flowed");
+    // message.addHeader("Content-Transfer-Encoding", "8bit");
+    message.setSentDate(new Date());
   }
 
   @NotNull

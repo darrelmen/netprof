@@ -290,6 +290,8 @@ public class ExerciseCopy {
   }
 
   /**
+   * Actually add the exercises to postgres exercise table.
+   *
    * @param projectid
    * @param slickUEDAO
    * @param importUser

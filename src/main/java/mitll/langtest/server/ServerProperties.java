@@ -130,7 +130,8 @@ public class ServerProperties {
   private static final String IOS_VERSION = "1.0.1";
   private static final String I_OS_VERSION = "iOSVersion";
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
-  public static final String DEFAULT_MAIL_FROM = "netprof-admin@netprof.ll.mit.edu";
+  public static final String DEFAULT_MAIL_FROM = "noreply@ll.mit.edu";
+  private static final String MAIL_REPLYTO = "mail.replyto";
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -149,7 +150,8 @@ public class ServerProperties {
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String RELEASE_DATE = "releaseDate";
-  private static final String LLMAIL_LL_MIT_EDU = "llmail.ll.mit.edu";
+  // TODO : for now seems to work for domino
+  private static final String LLMAIL_LL_MIT_EDU = "localhost";//"llmail.ll.mit.edu";
 
   private static final String NP_SERVER = "netprof.ll.mit.edu";
 
@@ -888,8 +890,10 @@ public class ServerProperties {
   }
 
   public String getMailServer() {
-    String property = System.getProperty("log.mailhost");
-    return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
+
+    return LLMAIL_LL_MIT_EDU;
+  //  String property = System.getProperty("log.mailhost");
+  //  return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
   }
 
   public String getMailFrom() {
@@ -898,8 +902,8 @@ public class ServerProperties {
   }
 
   public String getMailReplyTo() {
-    String property = System.getProperty("mail.replyto");
-    return property == null ? props.getProperty("mail.replyto", "admin@" +getNPServer()) : property;
+    String property = System.getProperty(MAIL_REPLYTO);
+    return property == null ? props.getProperty(MAIL_REPLYTO, "admin@" +getNPServer()) : property;
   }
 
   /**

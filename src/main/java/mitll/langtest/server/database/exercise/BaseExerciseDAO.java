@@ -507,6 +507,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * Only on import...
    *
    * @see #getRawExercises
+   * @see #afterReadingExercises
    */
   private void addNewExercises() {
     if (addRemoveDAO != null) {

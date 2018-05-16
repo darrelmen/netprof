@@ -57,7 +57,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
- // private final Logger logger = Logger.getLogger("ModalInfoDialog");
+  // private final Logger logger = Logger.getLogger("ModalInfoDialog");
   private static final List<String> MESSAGES = Collections.emptyList();
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 
@@ -67,6 +67,11 @@ public class ModalInfoDialog {
   public ModalInfoDialog(String title, String message) {
     this(title, message, null);
   }
+
+  public ModalInfoDialog(String title, Widget widget, int height) {
+    this(title, null, Collections.emptyList(),  widget, null, false, true, 600, height);
+  }
+
   public ModalInfoDialog(String title, Collection<String> messages) {
     this(title, messages, Collections.emptyList(),
         null, null, false, true, 600, 200);
@@ -85,15 +90,16 @@ public class ModalInfoDialog {
                          HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding, int width, int height) {
     Modal modal = getModal(title, messages, values, widget, handler, bigger, addEnterKeyBinding);
     modal.setWidth(width);
-    modal.setHeight(height+"px");
-    modal.setMaxHeigth(height+"px");
+    modal.setHeight(height + "px");
+    modal.setMaxHeigth(height + "px");
 
     modal.show();
   }
 
   public Modal getModal(String title,
                         Collection<String> messages,
-                        Collection<String> values, Widget widget,
+                        Collection<String> values,
+                        Widget widget,
                         HiddenHandler handler,
                         boolean bigger,
                         boolean addEnterKeyBinding) {

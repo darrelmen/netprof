@@ -1,13 +1,6 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.Section;
-import com.github.gwtbootstrap.client.ui.Thumbnail;
-import com.github.gwtbootstrap.client.ui.Thumbnails;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -805,7 +798,7 @@ public class ProjectChoices {
         DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
         if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
           projectForLang.getProps().putAll(result.getProps());
-          new ModalInfoDialog("Success", "Sync with domino complete!");
+          showResponseReport(result);
 
         } else {
           String title = "";
@@ -839,6 +832,44 @@ public class ProjectChoices {
         new FileUploader().getForm(projectForLang.getID()),
         listener,
         550);*/
+  }
+
+  private void showResponseReport(DominoUpdateResponse result) {
+
+//    TabPane dwPane = new TabPane("Sync with domino complete!");
+    DivWidget cDivWidget = new DivWidget();
+    cDivWidget.addStyleName("bulk-update-modal-content");
+
+    com.google.gwt.user.client.ui.Label label = getLabel(result.getMessage());
+
+    cDivWidget.add(label);
+
+    TabPanel tp = new TabPanel();
+    cDivWidget.add(tp);
+
+//    {
+//      TabPane dwPane = new TabPane(SUMMARY);
+//      dwPane.add(getSummary());
+//      tp.add(dwPane);
+//    }
+//
+//    tp.add(getResultDetails());
+//    tp.add(getUnmatchedRows());
+//    tp.add(getExcelColReport());
+//    tp.add(getRowReport());
+    tp.selectTab(0);
+
+
+    new ModalInfoDialog("Success", "Sync with domino complete!");
+  }
+
+
+  @NotNull
+  protected com.google.gwt.user.client.ui.Label getLabel(String messageStr) {
+    com.google.gwt.user.client.ui.Label msgLabel = new com.google.gwt.user.client.ui.Label(messageStr);
+    msgLabel.addStyleName("bulk-update-modal-msg-label");
+    //msgLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+    return msgLabel;
   }
 
   private void showDeleteDialog(SlimProject projectForLang, Heading label) {

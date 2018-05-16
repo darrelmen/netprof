@@ -754,7 +754,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       User userByID = getUserByID(userWithEmail);
       if (userByID != null && userByID.isHasAppPermission()) {
         users.add(userByID);
-        logger.info("\tgetMostRecentUserID user " + userByID + " = " + new Date(userByID.getTimestampMillis()));
+//        logger.info("\tgetMostRecentUserID user " + userByID + " = " + new Date(userByID.getTimestampMillis()));
       }
     });
     return users;

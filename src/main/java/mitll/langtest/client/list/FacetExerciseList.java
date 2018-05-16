@@ -1931,7 +1931,8 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       }
     }
 
-    addPlayer();
+    Scheduler.get().scheduleDeferred(this::addPlayer);
+
 /*
   long now = System.currentTimeMillis();
 logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs current " +

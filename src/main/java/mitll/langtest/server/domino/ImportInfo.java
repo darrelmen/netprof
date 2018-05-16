@@ -25,7 +25,9 @@ public class ImportInfo {
    */
   public ImportInfo(ImportProjectInfo importProjectInfo,
                     List<CommonExercise> changedExercises,
-                    List<CommonExercise> addedExercises, Collection<Integer> deletedDominoIDs, Set<String> deletedNPIDs) {
+                    List<CommonExercise> addedExercises,
+                    Collection<Integer> deletedDominoIDs,
+                    Set<String> deletedNPIDs) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),
@@ -77,7 +79,7 @@ public class ImportInfo {
   /**
    * @return
    */
-  public List<CommonExercise> getChangedExercises() {
+  List<CommonExercise> getChangedExercises() {
     return changedExercises;
   }
 
@@ -92,7 +94,7 @@ public class ImportInfo {
    * @return
    * @see ProjectSync#doDelete
    */
-  public Collection<Integer> getDeletedDominoIDs() {
+  Collection<Integer> getDeletedDominoIDs() {
     return deletedDominoIDs;
   }
 
@@ -100,13 +102,18 @@ public class ImportInfo {
     return deletedNPIDs;
   }
 
-  public List<CommonExercise> getAddedExercises() {
+  List<CommonExercise> getAddedExercises() {
     return addedExercises;
   }
 
   public String toString() {
-    return "lang " + language + "/" + lang + " " + getDominoID() + " " + getExportTime() +
-        " added " + getAddedExercises().size() +
-        " changed " + getChangedExercises().size() + " deleted " + getDeletedDominoIDs().size();
+    return "lang " + language + "/" + lang +
+        "\n\tdomino #" + getDominoID() +
+        "n\tat       " + getExportTime() +
+        "\n\tadded   " + getAddedExercises().size() +
+        "\n\tchanged " + getChangedExercises().size() +
+        "\n\tdeleted " + getDeletedDominoIDs().size() +
+        "\n\tdeleted np " + getDeletedNPIDs().size()
+        ;
   }
 }

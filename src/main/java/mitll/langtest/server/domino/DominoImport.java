@@ -352,13 +352,7 @@ public class DominoImport implements IDominoImport {
       return deleted2;
     }
 
-/*
-    public void setDeleted2(List<Integer> deleted2) {
-      this.deleted2 = deleted2;
-    }
-*/
-
-    /**
+     /**
      * @see DominoExerciseDAO#readExercises
      * @return
      */

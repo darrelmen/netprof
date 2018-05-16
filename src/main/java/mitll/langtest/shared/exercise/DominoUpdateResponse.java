@@ -35,14 +35,16 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
+ * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
+ * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
  */
 public class DominoUpdateResponse implements IsSerializable {
   private Map<String, String> props = new HashMap<>();
@@ -51,26 +53,36 @@ public class DominoUpdateResponse implements IsSerializable {
   private UPLOAD_STATUS status;
   private String message;
 
-  public String getMessage() {
-    return message;
+  private List<DominoUpdateItem> updates;
+
+
+
+
+  public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT;}
+
+
+  public DominoUpdateResponse() {
   }
 
-  public void setMessage(String message) {
-    this.message = message;
-  }
-
-  public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT}
-
-  public DominoUpdateResponse() {}
-
+  /**
+   *
+   * @param success
+   * @param dominoID
+   * @param currentDominoID
+   * @param props
+   * @param updates
+   */
   public DominoUpdateResponse(UPLOAD_STATUS success,
                               int dominoID,
                               int currentDominoID,
-                              Map<String, String> props) {
+                              Map<String, String> props,
+                              List<DominoUpdateItem> updates
+  ) {
     this.status = success;
     this.dominoID = dominoID;
     this.currentDominoID = currentDominoID;
     this.props = props;
+    this.updates = updates;
   }
 
   public Map<String, String> getProps() {
@@ -95,6 +107,18 @@ public class DominoUpdateResponse implements IsSerializable {
 
   public UPLOAD_STATUS getStatus() {
     return status;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+  public List<DominoUpdateItem> getUpdates() {
+    return updates;
   }
 
   public String toString() {

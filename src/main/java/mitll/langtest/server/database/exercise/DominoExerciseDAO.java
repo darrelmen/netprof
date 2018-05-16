@@ -125,7 +125,8 @@ public class DominoExerciseDAO {
     return new ImportInfo(projectInfo,
         changedCommonExercises,
         addedCommonExercises,
-        importDocs.getDeleted2(), importDocs.getDeletedNPIDs());
+        importDocs.getDeleted2(),
+        importDocs.getDeletedNPIDs());
   }
 
  /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
