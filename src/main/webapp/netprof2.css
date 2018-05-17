@@ -2134,3 +2134,10 @@ body .modal-body .bulk-update-modal-content .tabbable {
 body .modal-body .bulk-update-result-detail TD.centered-col {
     text-align: center;
 }
+
+body .modal-body .bulk-update-result-pdiv.narrow {
+    display: inline-block;
+}
+body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-detail TD:FIRST-CHILD {
+    text-align: right;
+}
