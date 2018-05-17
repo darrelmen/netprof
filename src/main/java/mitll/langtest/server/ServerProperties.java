@@ -952,4 +952,8 @@ public class ServerProperties {
   public String getImplementationVersion() {
     return manifest.getOrDefault(IMPL_VERSION, "unset");
   }
+
+  public boolean addUserViaEmail() {
+    return getDefaultTrue("addUserViaEmail");
+  }
 }

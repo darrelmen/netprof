@@ -60,8 +60,8 @@ public class User extends MiniUser implements ReportUser {
   private String nativeLang;
   @Deprecated
   private String dialect;
-  @Deprecated
-  private String resetKey;
+
+  private String resetKey ="";
 
   private String ipaddr;
 
@@ -116,6 +116,10 @@ public class User extends MiniUser implements ReportUser {
    */
   public boolean isHasAppPermission() {
     return hasAppPermission;
+  }
+
+  public void setResetKey(String resetKey) {
+    this.resetKey = resetKey;
   }
 
   /**
@@ -378,12 +382,10 @@ public class User extends MiniUser implements ReportUser {
     this.enabled = enabled;
   }
 
-  @Deprecated
   public boolean hasResetKey() {
     return resetKey != null && !resetKey.isEmpty();
   }
 
-  @Deprecated
   public String getResetKey() {
     return resetKey;
   }

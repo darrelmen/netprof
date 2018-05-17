@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 
 /**
@@ -17,19 +18,32 @@ import java.security.spec.KeySpec;
  */
 class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
   private static final Logger log = LogManager.getLogger(MyMongoUserServiceDelegate.class);
+  private static final UserServiceDelegateBase.PasswordEncoding DEFAULT_ENC = UserServiceDelegateBase.PasswordEncoding.common_v1;
 
-  boolean DEBUG =false;
+  boolean DEBUG = false;
 //  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
 //    super(props, mailer, appName, mongoPool);
 //  }
 
-  boolean isMatch( String encoded, String attempt) {
+  boolean isMatch(String encoded, String attempt) {
 //      String encodedAttemptedPass = LegacyMd5Hash.getHash(attempt);
 //      return encodedAttemptedPass.equals(encoded);
-    return authenticate( encoded, attempt);
+    return authenticate(encoded, attempt);
   }
 
-  private boolean authenticate( String encodedCurrPass, String attemptedTxtPass) {
+  String encodeNewUserPass(String txtPass) throws Exception {
+    byte[] salt = generateUserSalt(DEFAULT_ENC);
+    return encodePass(txtPass, salt, DEFAULT_ENC);
+  }
+
+  protected byte[] generateUserSalt(UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
+    SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+    byte[] salt = new byte[pEnc.saltLength];
+    random.nextBytes(salt);
+    return salt;
+  }
+
+  private boolean authenticate(String encodedCurrPass, String attemptedTxtPass) {
     try {
       // ensure we go through the motions for unmatched usernames
       // to avoid returning too quickly and
@@ -42,8 +56,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
       if (encodedAttemptedPass.equals(encodedCurrPass)) {
         log.info("Decoded using SHA-512.");
         return true;
-      }
-      else if (DEBUG) log.debug("1 no match " +
+      } else if (DEBUG) log.debug("1 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 
@@ -52,8 +65,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
       if (encodedAttemptedPass.equals(encodedCurrPass)) {
         log.info("Decoded using SHA1.");
         return true;
-      }
-      else if (DEBUG)  log.debug("2 no match " +
+      } else if (DEBUG) log.debug("2 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 
@@ -62,8 +74,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
       if (encodedAttemptedPass.equals(encodedCurrPass)) {
         log.info("Decoded using NetProF-MD5.");
         return true;
-      }
-      else if (DEBUG)  log.debug("3 no match " +
+      } else if (DEBUG) log.debug("3 no match " +
           "\n\tcurrent " + encodedCurrPass +
           "\n\tattempt " + encodedAttemptedPass);
 

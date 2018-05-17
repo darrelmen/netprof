@@ -136,11 +136,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private static final long STALE_DUR = 5L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
-  public static final String ACTIVE = "active";
-  public static final String EMAIL = "email";
+  private static final String ACTIVE = "active";
+  private static final String EMAIL = "email";
+
+  /**
+   * If false, don't use email to set the initial user password via email.
+   *
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
+   */
+  private final boolean addUserViaEmail;
 
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
+
+  private MyUserService myUserService;
 
   private Mongo pool = null;
   private boolean usedDominoResources = true;
@@ -162,6 +171,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
+
+  /**
+   * @see #getMiniUser(int)
+   */
+  //private Map<Integer, MiniUser> miniUserCache = null;
+  // private int lastCount = -1;
+  // private long lastCache = 0;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       //  .concurrencyLevel(4)
@@ -203,10 +219,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     populateRoles();
 
     Object attribute = servletContext == null ? null : servletContext.getAttribute(USER_SVC);
+    Properties props = database.getServerProps().getProps();
+
+    addUserViaEmail = database.getServerProps().addUserViaEmail();
+
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
+
+      makeUserService(database, props);
+
       doAfterGetDelegate();
     } else {
       if (servletContext != null) {
@@ -217,12 +240,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
       usedDominoResources = false;
       try {
-        connectToMongo(database, database.getServerProps().getProps());
+        connectToMongo(database, props);
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
       }
     }
+  }
+
+  private void makeUserService(Database database, Properties props) {
+    ServerProperties dominoProps = getDominoProps(database, props);
+    UserServiceProperties userServiceProperties = dominoProps.getUserServiceProperties();
+    myUserService = new MyUserService(userServiceProperties,
+        new Mailer(new MailerProperties(props)), dominoProps.getAcctTypeName(), pool);
+
+    myUserService.initializeDAOs(serializer);
   }
 
   /**
@@ -237,11 +269,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
-    props.setProperty(CACHE_ENABLED_PROP, "" + USE_DOMINO_CACHE);
-    ServerProperties dominoProps =
-        new ServerProperties(props, "1.0", "demo", "0", "now");
-
-    dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, database.getServerProps().getAppTitle());
+    ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
     //     logger.info("DominoUserDAOImpl app name is " + appName);
 
@@ -258,6 +286,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.debug("DominoUserDAOImpl no cache");
     }
     delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
+    makeUserService(database, props);
 
     logger.debug("made" +
         "\ndelegate " + delegate.getClass() +
@@ -267,9 +296,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     doAfterGetDelegate();
   }
 
+  @NotNull
+  private ServerProperties getDominoProps(Database database, Properties props) {
+    props.setProperty(CACHE_ENABLED_PROP, "" + USE_DOMINO_CACHE);
+    ServerProperties dominoProps =
+        new ServerProperties(props, "1.0", "demo", "0", "now");
+
+    dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, database.getServerProps().getAppTitle());
+    return dominoProps;
+  }
+
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
+
   }
 
   public JSONSerializer getSerializer() {
@@ -398,8 +438,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
-    invalidateCache();
-
+    //invalidateCache();
 /*    if (user.getGender() != UNSPECIFIED) {
       logger.info("addAndGet going in " + user.getGender() + " for user '" + user.getUserId() + "'");
     }*/
@@ -431,7 +470,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return delegate.addUser(sendEmail ? user : adminUser, user, url);
   }
 
+
+  private MyUserService.LoginResult addUserToMongoNoEmail(ClientUserDetail user, String url, boolean sendEmail) {
+    return myUserService.addUserNoEmail(sendEmail ? user : adminUser, user, url);
+  }
+
   /**
+   * Create a user and send email to the new user email account.
+   * Also we have an option to not sent an email and use the reset password token directly.
+   *
    * @param age
    * @param gender
    * @param experience
@@ -455,51 +502,66 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see UserManagement#addUser
    */
   @Override
-  public int addUser(int age,
-                     MiniUser.Gender gender,
-                     int experience,
-                     String userAgent,
-                     String trueIP,
-                     String nativeLang,
-                     String dialect,
-                     String userID,
-                     boolean enabled,
-                     Collection<User.Permission> permissions,
-                     Kind kind,
+  public LoginResult addUser(int age,
+                             MiniUser.Gender gender,
+                             int experience,
+                             String userAgent,
+                             String trueIP,
+                             String nativeLang,
+                             String dialect,
+                             String userID,
+                             boolean enabled,
+                             Collection<User.Permission> permissions,
+                             Kind kind,
 
-                     String emailH,
-                     String email,
-                     String device,
-                     String first,
-                     String last,
-                     String url,
-                     String affiliation) {
-    mitll.hlt.domino.shared.model.user.User.Gender gender1 = mitll.hlt.domino.shared.model.user.User.Gender.valueOf(gender.name());
+                             String emailH,
+                             String email,
+                             String device,
+                             String first,
+                             String last,
+                             String url,
+                             String affiliation) {
+
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
         first,
         last,
         email,
         affiliation,
-        gender1,
+        mitll.hlt.domino.shared.model.user.User.Gender.valueOf(gender.name()),
         Collections.singleton(kind.getRole()),
         getGroup(),
 
         APPLICATION_ABBREVIATIONS
     );
 
+    setCreationTime(updateUser);
+
+    MyUserService.LoginResult loginResult =
+        addUserViaEmail ?
+            loginViaEmail(url, updateUser) :
+            addUserToMongoNoEmail(updateUser, url, true);
+
+    SResult<ClientUserDetail> clientUserDetailSResult = loginResult.result;
+    if (clientUserDetailSResult == null) {
+      return new LoginResult(-1, ""); // password error?
+    } else {
+      ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+      // invalidateCache();
+      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(), loginResult.emailToken);
+    }
+  }
+
+  private void setCreationTime(ClientUserDetail updateUser) {
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
     acctDetail.setCrTime(new Date());
-    SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser, url, true);
+  }
 
-    if (clientUserDetailSResult == null) {
-      return -1; // password error?
-    } else {
-      ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-      invalidateCache();
-      return clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID();
-    }
+  private MyUserService.LoginResult loginViaEmail(String url, ClientUserDetail updateUser) {
+    SResult<ClientUserDetail> clientUserDetailSResultOrig = addUserToMongo(updateUser, url, true);
+    MyUserService.LoginResult loginResult1 = new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
+    return loginResult1;
   }
 
 
@@ -1341,7 +1403,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         .collect(Collectors.toList());
   }
 
-  private Map<Integer, MiniUser> miniUserCache = null;
 
   /**
    * It seems like it's slow to get users out of domino users table, without ignite...
@@ -1356,7 +1417,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public synchronized Map<Integer, MiniUser> getMiniUsers() {
-    long now = System.currentTimeMillis();
+    logger.warn("should not be called ---\n\n\n\n");
+    return new HashMap<>();
+/*    long now = System.currentTimeMillis();
 
     int userCount = delegate.getUserCount();
     logger.debug("getMiniUsers user childCount is " + userCount, new Exception());
@@ -1382,18 +1445,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return idToUser;
     } else {
       return miniUserCache;
-    }
+    }*/
   }
 
-  private int lastCount = -1;
-  private long lastCache = 0;
 
   /**
    * It seems like getting users in and out of mongo is slow... trying to use a cache to mitigate that.
    */
-  private synchronized void invalidateCache() {
+/*  private synchronized void invalidateCache() {
     miniUserCache = null;
-  }
+  }*/
 
   /**
    * TODO: try to avoid - super slow, doesn't scale...

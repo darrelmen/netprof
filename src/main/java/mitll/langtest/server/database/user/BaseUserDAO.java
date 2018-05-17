@@ -36,10 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.shared.user.Kind;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,8 +50,7 @@ public abstract class BaseUserDAO extends DAO {
   protected static final String IMPORT_USER = "importUser";
 
   public static final String USERS = "users";
-  //public static final String MALE = "male";
-  //public static final String FEMALE = "female";
+
   static final String PERMISSIONS = "permissions";
   static final String KIND = "kind";
   static final String PASS = "passwordH";
@@ -75,7 +71,6 @@ public abstract class BaseUserDAO extends DAO {
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
-  // private final boolean enableAllUsers;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -161,8 +156,10 @@ public abstract class BaseUserDAO extends DAO {
     String userID = user.getUserID();
     User currentUser = getUserByID(userID);
     if (currentUser == null) {
-      int userid = addUserAndGetID(user);
+      LoginResult loginResult = addUserAndGetID(user);
+      int userid = loginResult.getId();
       User userWhere = userid == -1 ? null : getUserWhere(userid);
+      if (userWhere!=null) userWhere.setResetKey(loginResult.getToken());
       logger.warn(" : addUser : added new user " + userWhere);
       return userWhere;
     } else {
@@ -192,7 +189,7 @@ public abstract class BaseUserDAO extends DAO {
    * @paramx perms
    * @see #addUser
    */
-  private int addUserAndGetID(SignUpUser user) {
+  private LoginResult addUserAndGetID(SignUpUser user) {
     String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/netprof";
 
     // logger.info("addUserAndGetID user will see url = " + urlToUse);
@@ -266,7 +263,7 @@ public abstract class BaseUserDAO extends DAO {
         first,
         last,
         "",
-        "MIT-LL");
+        "MIT-LL").getId();
   }
 
   abstract int getIdForUserID(String id);
@@ -293,24 +290,24 @@ public abstract class BaseUserDAO extends DAO {
    * @see #addShellUser
    * @see #addUserAndGetID
    */
-  abstract int addUser(int age,
-                       MiniUser.Gender gender,
-                       int experience,
-                       String userAgent,
-                       String trueIP,
-                       String nativeLang,
-                       String dialect,
-                       String userID,
-                       boolean enabled,
-                       Collection<User.Permission> permissions,
-                       Kind kind,
+  abstract LoginResult addUser(int age,
+                               MiniUser.Gender gender,
+                               int experience,
+                               String userAgent,
+                               String trueIP,
+                               String nativeLang,
+                               String dialect,
+                               String userID,
+                               boolean enabled,
+                               Collection<User.Permission> permissions,
+                               Kind kind,
 
 
-                       String emailH,
-                       String email,
-                       String device,
-                       String first,
-                       String last,
-                       String url,
-                       String affiliation);
+                               String emailH,
+                               String email,
+                               String device,
+                               String first,
+                               String last,
+                               String url,
+                               String affiliation);
 }

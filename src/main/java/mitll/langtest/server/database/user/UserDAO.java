@@ -66,7 +66,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       ensureDefaultUsers();
     } catch (Exception e) {
       logger.error("UserDAO : got " + e, e);
-  //    database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN, projID);
+      //    database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN, projID);
     }
   }
 
@@ -106,13 +106,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see UserManagement#addUser
    */
   @Override
-  public int addUser(int age, MiniUser.Gender gender, int experience, String userAgent,
-                     String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
-                     Collection<User.Permission> permissions,
-                     Kind kind,
-                     //String freeTextPassword,
-                     //String passwordH,
-                     String emailH, String email, String device, String first, String last, String url, String aff) {
+  public LoginResult addUser(int age, MiniUser.Gender gender, int experience, String userAgent,
+                             String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
+                             Collection<User.Permission> permissions,
+                             Kind kind,
+                             //String freeTextPassword,
+                             //String passwordH,
+                             String emailH, String email, String device, String first, String last, String url, String aff) {
     //if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -171,12 +171,12 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       finish(connection, statement);
 
-      return newID;
+      return new LoginResult(newID, "");
     } catch (Exception ee) {
       logger.error("addUser Got " + ee, ee);
-   //   database.logEvent("unk", "adding user: " + ee.toString(), 0, device, projID);
+      //   database.logEvent("unk", "adding user: " + ee.toString(), 0, device, projID);
     }
-    return 0;
+    return new LoginResult(0, "");
   }
 
   /**

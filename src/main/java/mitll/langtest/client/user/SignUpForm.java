@@ -44,15 +44,19 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.*;
+import scala.sys.Prop;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.hlt.domino.shared.Constants.CHANGE_PW_PNM;
+import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
@@ -729,7 +733,11 @@ public class SignUpForm extends UserDialog implements SignUp {
         userManager.setPendingUserStorage(theUser.getUserID());
         if (theUser.isEnabled()) {
           eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
-          pleaseCheck.setVisible(true);
+          if (theUser.hasResetKey()) {
+            reloadPage(theUser);
+          } else {
+            pleaseCheck.setVisible(true);
+          }
         } else {
           eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser) +
               "but gotta check email for next step..."
@@ -739,6 +747,14 @@ public class SignUpForm extends UserDialog implements SignUp {
         }
       }
     }
+  }
+
+  private void reloadPage(User user) {
+    // String changePwPnm = CHANGE_PW_PNM;
+    String changePwPnm = PropertyHandler.CPW_TOKEN2;
+    String newURL = trimURL(Window.Location.getHref()) + "?" + changePwPnm + "=" + user.getResetKey() + RESET_PW_HASH;
+    userManager.rememberUser(user);
+    Window.Location.replace(newURL);
   }
 
   private boolean isMale() {

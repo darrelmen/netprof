@@ -56,7 +56,7 @@ public class PropertyHandler {
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
-  private static final String CPW_TOKEN2 = "CPW-token";
+  public static final String CPW_TOKEN2 = "CPW-token";
 
   private static final String FONT_FAMILY = "fontFamily";
   private static final String IS_AMAS = "isAMAS";
