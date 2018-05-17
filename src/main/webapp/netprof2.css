@@ -2131,3 +2131,6 @@ body .modal-body .bulk-update-modal-content .tabbable {
 .bulk-update-header-cell .bulk-update-modal-msg-label {
     text-align: center;
 }
+body .modal-body .bulk-update-result-detail TD.centered-col {
+    text-align: center;
+}

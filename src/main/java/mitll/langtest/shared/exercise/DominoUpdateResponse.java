@@ -55,11 +55,7 @@ public class DominoUpdateResponse implements IsSerializable {
 
   private List<DominoUpdateItem> updates;
 
-
-
-
   public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT;}
-
 
   public DominoUpdateResponse() {
   }

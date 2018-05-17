@@ -76,10 +76,12 @@ public class DominoImport implements IDominoImport {
     if (matches.isEmpty()) {
       return null;
     } else {
-      ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
-
+//      ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
       return new DominoExerciseDAO()
-          .readExercises(projID, matches.iterator().next(), getChangedDocs(sinceInUTC, dominoAdminUser, next)
+          .readExercises(projID,
+              matches.iterator().next(),
+              getChangedDocs(sinceInUTC, dominoAdminUser,
+                  getClientPMProject(dominoID, dominoAdminUser))
           );
     }
   }
@@ -229,9 +231,9 @@ public class DominoImport implements IDominoImport {
   @NotNull
   private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject) {
     Set<Integer> added = new HashSet<>();
-    List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject,added);
+    List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
 
-    List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject,added);
+    List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
 
     Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId());
 
@@ -352,9 +354,9 @@ public class DominoImport implements IDominoImport {
       return deleted2;
     }
 
-     /**
-     * @see DominoExerciseDAO#readExercises
+    /**
      * @return
+     * @see DominoExerciseDAO#readExercises
      */
     public Set<String> getDeletedNPIDs() {
       return deletedNPIDs;

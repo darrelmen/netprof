@@ -152,7 +152,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       Collection<Project> productionProjects = db.getProjectManagement().getProductionProjects();
 
-      logger.info("setDefaultsIfMissing examing " + productionProjects.size()+ " production projects.");
+      logger.info("setDefaultsIfMissing examing " + productionProjects.size() + " production projects.");
 
       Project mostRecent = productionProjects.stream()
           .filter(project -> project.getLanguage().equalsIgnoreCase(language) && project.getModelsDir() != null)
@@ -201,9 +201,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    */
   @Override
-  public DominoUpdateResponse addPending(int projectid) throws DominoSessionException, RestrictedOperationException {
+  public DominoUpdateResponse addPending(int projectid, boolean doChange) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).addPending(projectid, getImportUser());
+      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).addPending(projectid, getImportUser(), doChange);
     } else {
       throw getRestricted("adding pending exercises");
     }

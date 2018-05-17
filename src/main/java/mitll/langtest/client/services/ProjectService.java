@@ -75,7 +75,7 @@ public interface ProjectService extends RemoteService {
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
 
-  DominoUpdateResponse addPending(int id) throws DominoSessionException, RestrictedOperationException;
+  DominoUpdateResponse addPending(int id, boolean doChange) throws DominoSessionException, RestrictedOperationException;
 
   List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException;
 

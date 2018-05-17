@@ -49,7 +49,7 @@ public interface ProjectServiceAsync {
 
   void delete(int id, AsyncCallback<Boolean> async);
 
-  void addPending(int id, AsyncCallback<DominoUpdateResponse> async);
+  void addPending(int id, boolean doChange, AsyncCallback<DominoUpdateResponse> async);
 
   void getDominoForLanguage(String lang, AsyncCallback<List<DominoProject>> async);
 

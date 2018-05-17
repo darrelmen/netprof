@@ -33,6 +33,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.DominoUpdateItem;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
@@ -744,7 +745,7 @@ public class ProjectChoices {
 
     w.addClickHandler(event -> {
       w.setEnabled(false);
-      showImportDialog(projectForLang, w);
+      showImportDialog(projectForLang, w, false);
     });
     return w;
   }
@@ -784,8 +785,9 @@ public class ProjectChoices {
         DIALOG_HEIGHT);
   }
 
-  private void showImportDialog(SlimProject projectForLang, Button button) {
-    projectServiceAsync.addPending(projectForLang.getID(), new AsyncCallback<DominoUpdateResponse>() {
+  private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
+    logger.info("showImport " + doChange);
+    projectServiceAsync.addPending(projectForLang.getID(), doChange, new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {
         button.setEnabled(true);
@@ -796,33 +798,14 @@ public class ProjectChoices {
       public void onSuccess(DominoUpdateResponse result) {
         button.setEnabled(true);
         DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
-        if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS) {
+        logger.info("showImport got " + status);
+        if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS && !doChange) {
+          logger.info("showImport show " + status);
           projectForLang.getProps().putAll(result.getProps());
-          showResponseReport(result);
-
+          showResponseReport(projectForLang, button, result);
         } else {
-          String title = "";
-          String message = "";
-
-          switch (status) {
-            case FAIL:
-              title = "Import failed";
-              message = "Server error importing items - please report.";
-              break;
-            case WRONG_PROJECT:
-              title = "Wrong domino project";
-              message = "Upload data is from domino project #" + result.getDominoID() +
-                  " but this project is for #" + result.getCurrentDominoID() +
-                  ".<br/>You probably want to make a new NetProF project and add it to there.";
-              break;
-            case ANOTHER_PROJECT:
-              title = "Another domino project";
-              message = "Upload data is from domino project #" + result.getDominoID() +
-                  ", which is already associated with the " + result.getMessage() + " project." +
-                  "<br/>You probably want to add it to there.";
-              break;
-          }
-          new ModalInfoDialog(title, message);
+          logger.info("showImport 2 show " + status);
+          showStatus(result, status);
         }
       }
     });
@@ -834,7 +817,36 @@ public class ProjectChoices {
         550);*/
   }
 
-  private void showResponseReport(DominoUpdateResponse result) {
+  private void showStatus(DominoUpdateResponse result, DominoUpdateResponse.UPLOAD_STATUS status) {
+    String title = "";
+    String message = "";
+
+    switch (status) {
+      case SUCCESS:
+        title = "Success";
+        message = "Sync with domino complete!";
+        break;
+      case FAIL:
+        title = "Import failed";
+        message = "Server error importing items - please report.";
+        break;
+      case WRONG_PROJECT:
+        title = "Wrong domino project";
+        message = "Upload data is from domino project #" + result.getDominoID() +
+            " but this project is for #" + result.getCurrentDominoID() +
+            ".<br/>You probably want to make a new NetProF project and add it to there.";
+        break;
+      case ANOTHER_PROJECT:
+        title = "Another domino project";
+        message = "Upload data is from domino project #" + result.getDominoID() +
+            ", which is already associated with the " + result.getMessage() + " project." +
+            "<br/>You probably want to add it to there.";
+        break;
+    }
+    new ModalInfoDialog(title, message);
+  }
+
+  private void showResponseReport(SlimProject projectForLang, Button button, DominoUpdateResponse result) {
 
 //    TabPane dwPane = new TabPane("Sync with domino complete!");
     DivWidget cDivWidget = new DivWidget();
@@ -842,7 +854,21 @@ public class ProjectChoices {
 
     com.google.gwt.user.client.ui.Label label = getLabel(result.getMessage());
 
-    cDivWidget.add(label);
+    int add = 0, change = 0, delete = 0;
+    for (DominoUpdateItem item : result.getUpdates()) {
+      if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.ADD) {
+        add++;
+      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.CHANGE) {
+        change++;
+      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.DELETE) {
+        delete++;
+      }
+    }
+    ;
+    cDivWidget.add(getLabel("This update would make the following changes."));
+    cDivWidget.add(getLabel(add + " items would be added."));
+    cDivWidget.add(getLabel(change + " items would be changed."));
+    cDivWidget.add(getLabel(delete + " items would be deleted."));
 
     TabPanel tp = new TabPanel();
     cDivWidget.add(tp);
@@ -857,10 +883,28 @@ public class ProjectChoices {
 //    tp.add(getUnmatchedRows());
 //    tp.add(getExcelColReport());
 //    tp.add(getRowReport());
-    tp.selectTab(0);
+//    tp.selectTab(0);
 
 
-    new ModalInfoDialog("Success", "Sync with domino complete!");
+    new DialogHelper(true).show(
+        "Do you want to continue?", cDivWidget, new DialogHelper.CloseListener() {
+          @Override
+          public boolean gotYes() {
+            showImportDialog(projectForLang, button, true);
+            return true;
+          }
+
+          @Override
+          public void gotNo() {
+
+          }
+
+          @Override
+          public void gotHidden() {
+
+          }
+        }, 600);
+    // new ModalInfoDialog("Success", "Sync with domino complete!");
   }
 
 
