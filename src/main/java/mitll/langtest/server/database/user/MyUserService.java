@@ -1,17 +1,44 @@
 package mitll.langtest.server.database.user;
 
+import com.mongodb.client.MongoCollection;
 import mitll.hlt.domino.server.user.MongoUserServiceDelegate;
 import mitll.hlt.domino.server.util.Mailer;
 import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.server.util.UserServiceProperties;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.include;
+import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
+
 public class MyUserService extends MongoUserServiceDelegate {
+
+  private static final String ID_F = "_id";
+  private static final String UID_F = "userId";
+  private static final String ENC_EMAIL_TOKEN_F = "encEmailToken";
+  private static final String EMAIL_TOKEN_EXP_F = "emailTokenExp";
+  private static final String PASS_F = "pass";
+  private static final String LNAME_F = "lastName";
+  private static final String FNAME_F = "firstName";
+  private static final String EMAIL_F = "email";
+  private static final String AFFILIATION_F = "affiliation";
+  private static final String GENDER_F = "gender";
+  private static final String ACTIVE_F = "active";
+  private static final String SESSION_IDS_F = "sessionIds";
+  private static final String ROLES_F = "roles";
+  private static final String DLI_APPLICATIONS_F = "dliApplications";
+  private static final String PRI_GROUP_F = "priGroupId";
+  private static final String SEC_GROUPS_F = "secGroupIds";
+
+  private Clock theClock = Clock.systemUTC();
+
   public MyUserService(UserServiceProperties props, Mailer mailer, String acctTypeName, Mongo mongoPool) {
     super(props, mailer, acctTypeName, mongoPool);
   }
@@ -25,7 +52,6 @@ public class MyUserService extends MongoUserServiceDelegate {
       log.error("Add attempt with incomplete user! " + addUser);
       return new LoginResult(new SResult<>("Missing user details."), "");
     }
-    Clock theClock = Clock.systemUTC();
 
     Date now = Date.from(Instant.now(theClock));
     AccountDetail acctDtl = new AccountDetail(currUser, now);
@@ -130,6 +156,114 @@ public class MyUserService extends MongoUserServiceDelegate {
     } else {
       log.info("Skip user prepare for save. No primary group or actDtl. This is probably a self-update. User: " + user);
     }
+  }
+
+  @Override
+  public boolean changePassword(String userId, String providedToken, String newPassword, String urlBase) {
+    log.info("Changing password for {}.", userId);
+    boolean success = false;
+    DBUser changeUser = getDBUser(userId);
+    UserCredentials cred = null;
+    String encodedSavedToken = null;
+    if (changeUser != null) {
+      cred = getMyUserCredentials(changeUser.getDocumentDBID());
+      if (cred != null) {
+        encodedSavedToken = cred.encEmailToken;
+      }
+    }
+
+    // ensure we go through the motions for unmatched tokens/ids
+    // to avoid returning too quickly and providing information about user name validity.
+    if (encodedSavedToken == null) {
+      encodedSavedToken = makeFakeEncodedPass();
+    }
+    String encodedProvidedToken = null;
+    try {
+      encodedProvidedToken = new MyMongoUserServiceDelegate().encodePass(encodedSavedToken, providedToken, PasswordEncoding.common_v1);
+    } catch (Exception ex) {
+      log.error("Exception decoding password for " + userId);
+    }
+    if (encodedSavedToken.equals(encodedProvidedToken)) {
+      log.info("Password Token match for {}!", changeUser.getNameWithId());
+
+      Instant expiresTime = cred.emailTokenExp.toInstant().plusSeconds(60 * 60 * EMAIL_VERIFY_LINK_HRS);
+      if (expiresTime.isAfter(Instant.now(theClock))) {
+        success = (doChangePassword(changeUser, cred.encPass, newPassword) != null);
+        // log event and send notification to user.
+        if (success) {
+          getEventDAO().logEvent(changeUser, UserEventType.PWChange, changeUser, false);
+
+          new Thread(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                mailer.sendTextEmail(changeUser.getEmail(), acctTypeName + " Password Changed",
+                    "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
+                        "If you did not change your password, you can recover access by resetting your password" +
+                        " at the following link:\n\n" + urlBase + RESET_PW_HASH +
+                        "\n\nThanks,\n   " + acctTypeName + " Administrator");
+              } catch (Exception e) {
+                log.warn("couldn't send email " + e, e);
+              }
+            }
+          }).start();
+
+        }
+      } else {
+        log.info("Password Token Expired for {}!", changeUser.getNameWithId());
+        doClearResetLink(changeUser);
+      }
+    } else {
+      log.info("Token mismatch for {}.", userId);
+    }
+    return success;
+  }
+
+  private UserCredentials getMyUserCredentials(int userDBId) {
+    return getUserCredentials(eq(ID_F, userDBId));
+  }
+
+  private UserCredentials getUserCredentials(Bson query) {
+    UserCredentials cred = null;
+    Document user = users().find(query).projection(include(PASS_F, ACTIVE_F, ENC_EMAIL_TOKEN_F, EMAIL_TOKEN_EXP_F)).first();
+
+    if (user != null) {
+      String encodedPass = user.getString(PASS_F);
+      boolean active = user.getBoolean(ACTIVE_F, false);
+      String emailVKey = user.getString(ENC_EMAIL_TOKEN_F);
+      Date emailVExp = user.getDate(EMAIL_TOKEN_EXP_F);
+
+      cred = new UserCredentials(encodedPass, active, emailVKey, emailVExp);
+    } else {
+      log.warn("User not found in DB! Query: " + query);
+    }
+    return cred;
+  }
+
+  private String makeFakeEncodedPass() {
+    char[] enc = new char[ENCODED_PASS_LEN];
+    Arrays.fill(enc, '0');
+    return new String(enc);
+  }
+
+  private MongoCollection<Document> users() {
+    return mongoPool.getMongoCollection(USERS_C);
+  }
+
+  // package access for testing.
+  static class UserCredentials {
+    public final String encPass;
+    public final boolean active;
+    public final String encEmailToken;
+    public final Date emailTokenExp;
+
+    public UserCredentials(String encodedPass, boolean active, String encEmailToken, Date emailTokenExp) {
+      this.encPass = encodedPass;
+      this.active = active;
+      this.encEmailToken = encEmailToken;
+      this.emailTokenExp = emailTokenExp;
+    }
+
   }
 
 

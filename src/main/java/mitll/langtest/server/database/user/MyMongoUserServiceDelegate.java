@@ -85,7 +85,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
     return false;
   }
 
-  private String encodePass(String encodedCurrPass, String txtPass, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
+  public String encodePass(String encodedCurrPass, String txtPass, UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     return encodePass(txtPass, extractSalt(encodedCurrPass, pEnc), pEnc);
   }
 

@@ -150,8 +150,8 @@ public class ServerProperties {
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String RELEASE_DATE = "releaseDate";
-  // TODO : for now seems to work for domino
-  private static final String LLMAIL_LL_MIT_EDU = "localhost";//"llmail.ll.mit.edu";
+  // ???
+  private static final String LLMAIL_LL_MIT_EDU = "llmx2.ll.mit.edu";//"llmail.ll.mit.edu";
 
   private static final String NP_SERVER = "netprof.ll.mit.edu";
 
@@ -818,8 +818,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#ProjectManagement
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#ProjectManagement
    */
   public boolean debugOneProject() {
     return getDefaultFalse(DEBUG_ONE_PROJECT);
@@ -890,10 +890,9 @@ public class ServerProperties {
   }
 
   public String getMailServer() {
-
-    return LLMAIL_LL_MIT_EDU;
-  //  String property = System.getProperty("log.mailhost");
-  //  return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
+//    return LLMAIL_LL_MIT_EDU;
+    String property = System.getProperty("log.mailhost");
+    return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
   }
 
   public String getMailFrom() {
@@ -903,7 +902,7 @@ public class ServerProperties {
 
   public String getMailReplyTo() {
     String property = System.getProperty(MAIL_REPLYTO);
-    return property == null ? props.getProperty(MAIL_REPLYTO, "admin@" +getNPServer()) : property;
+    return property == null ? props.getProperty(MAIL_REPLYTO, "admin@" + getNPServer()) : property;
   }
 
   /**
@@ -936,7 +935,7 @@ public class ServerProperties {
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
    */
- public Map<String, String> getUIProperties() {
+  public Map<String, String> getUIProperties() {
     return getPropertyMap(uiprops);
   }
 

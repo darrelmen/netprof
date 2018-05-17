@@ -1153,7 +1153,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     if (user.isPoly()) {
-      logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
+      //logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
       handleAffiliationUser(dominoUser, permissionSet, user, true);
     } else if (user.isNPQ()) {
       handleAffiliationUser(dominoUser, permissionSet, user, false);
@@ -1753,7 +1753,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    */
   public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
-    return delegate.changePassword(userId, userKey, newPassword, url);
+    return addUserViaEmail ?
+        delegate.changePassword(userId, userKey, newPassword, url) :
+        myUserService.changePassword(userId, userKey, newPassword, url);
   }
 
   /**
