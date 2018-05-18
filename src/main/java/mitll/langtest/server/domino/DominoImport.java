@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.ne;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.VocabularyMetadata.V_NP_ID;
 import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
@@ -201,6 +202,10 @@ public class DominoImport implements IDominoImport {
       if (name.equals(V_NP_ID) && !displayValue.isEmpty()) {
         return displayValue;
       }
+      else {
+        logger.warn("not np id '" +name+
+            "' vs " + V_NP_ID);
+      }
     }
     return "unknown";
   }
@@ -292,6 +297,7 @@ public class DominoImport implements IDominoImport {
     Set<String> deletedNPIDs = new TreeSet<>();
 
     deletedDocsSince.forEach(id -> {
+      logger.info("\tgetDeletedIDs check " + id);
       FindOptions<DocumentColumn> options1 = new FindOptions<>();
       options1.addFilter(new FilterDetail<>(DocumentColumn.Id, "" + id, FilterDetail.Operator.EQ));
 
@@ -304,9 +310,12 @@ public class DominoImport implements IDominoImport {
         VocabularyItem vocabularyItem = (VocabularyItem) document;
         deletedNPIDs.add(getNPId(vocabularyItem));
       }
+      else {
+        logger.warn("\tgetDeletedIDs no heavy for " + id + " in " + next);
+      }
     });
 
-    logger.info("getDeletedIDs got " + deletedNPIDs + " deleted np items");
+    logger.info("getDeletedIDs got " + deletedNPIDs + " deleted np items, given " + deletedDocsSince.size());
     return deletedNPIDs;
   }
 
@@ -340,7 +349,7 @@ public class DominoImport implements IDominoImport {
 
     /**
      * @return
-     * @see DominoExerciseDAO#getCommonExercises
+     * @seex DominoExerciseDAO#getCommonExercises
      */
     public List<ImportDoc> getChanged() {
       return changed;
@@ -432,7 +441,7 @@ public class DominoImport implements IDominoImport {
       cursor.close();
     }
 
-    logger.info("getDeletedDocsSince : found " + ids.size() + " deleted from " + total);
+    logger.info("getDeletedDocsSince : found " + ids.size() + " deleted from " + total + " known documents.");
     return ids;
   }
 

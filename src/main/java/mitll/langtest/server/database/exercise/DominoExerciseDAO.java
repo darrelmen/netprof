@@ -304,9 +304,8 @@ public class DominoExerciseDAO {
       boolean isNPID = name.equals(V_NP_ID);
       if (name.startsWith(PREFIX) && !isNPID) {
         name = name.substring(2);
-
-        logger.info("addAttributes for ex " + ex.getID() + " unit " + unitName + " chapter " + chapterName +
-            "\n\tfield " + name + " = " + displayValue);
+//        logger.info("addAttributes for ex " + ex.getID() + " unit " + unitName + " chapter " + chapterName +
+//            "\n\tfield " + name + " = " + displayValue);
 
         addAttribute(unitName, chapterName, name, displayValue, ex);
       }
