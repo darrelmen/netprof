@@ -209,6 +209,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.pathHelper = pathHelper;
 
     connectToDatabases(pathHelper, servletContext);
+
+    getMailSupport();
   }
 
   /**
@@ -504,7 +506,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return project.getSectionHelper();
     }
   }
-
 
 
   private boolean isAmas() {
@@ -934,11 +935,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     if (projid == -1) {
       return new JSONObject();
-    }
-    else {
+    } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JSONObject():jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
+      return jsonSupportForProject == null ? new JSONObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
     }
   }
 
@@ -1206,6 +1206,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("close got " + e, e);
     }
 
+    mailSupport.stopHeartbeat();
     try {
 //      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
@@ -1675,7 +1676,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return stats;
   }
 
-  private MailSupport getMailSupport() {  return new MailSupport(serverProps);  }
+  MailSupport mailSupport;
+  ;
+
+  private MailSupport getMailSupport() {
+    if (mailSupport == null) {
+      mailSupport = new MailSupport(serverProps);
+      mailSupport.addHeartbeat();
+    }
+    return mailSupport;
+  }
 
   /**
    * @param year

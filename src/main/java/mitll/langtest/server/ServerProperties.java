@@ -955,4 +955,10 @@ public class ServerProperties {
   public boolean addUserViaEmail() {
     return getDefaultTrue("addUserViaEmail");
   }
+
+  public boolean sendHeartbeat() { return getDefaultTrue("sendHeartbeat"); }
+
+  public int getHeartbeatPeriod() {
+    return getIntPropertyDef("heartbeatPeriod", 1*60*1000);
+  }
 }

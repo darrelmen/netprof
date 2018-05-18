@@ -46,7 +46,11 @@ import javax.mail.internet.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mitll.langtest.server.ServerProperties.DEFAULT_MAIL_FROM;
 
@@ -71,20 +75,67 @@ public class MailSupport {
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String TEXT_HTML = "text/html";// charset=UTF-8";
-  public static final int TRIES = 3;
+  private static final int TRIES = 3;
+  private static final long PERIOD = 1000 * 10;//60 * 5L;
+  public static final String METRONOME = "Metronome";
+  public static final String REC = "gordon.vidaver@ll.mit.edu";
+  private long period = PERIOD;
 
   private final boolean debugEmail;
   private final boolean testEmail;
+  private boolean doHeartbeat = false;
 
   private final String mailServer;
   private final String mailFrom;
+
+  private AtomicInteger sent = new AtomicInteger(), failure = new AtomicInteger(), success = new AtomicInteger();
+  private Set<Message> pending = new HashSet<>();
+
 
   public MailSupport(ServerProperties serverProps) {
     this(serverProps.isDebugEMail(),
         serverProps.isTestEmail(),
         serverProps.getMailServer(),
-        serverProps.getMailFrom()
+        serverProps.getMailFrom(),
+        serverProps.sendHeartbeat(),
+        serverProps.getHeartbeatPeriod()
     );
+  }
+
+  private Timer timer = new Timer();
+  private Date startDate = null;
+
+  public void addHeartbeat() {
+    if (doHeartbeat) {
+      logger.info("\n\n\n\naddHearbeat --- \n\n\n\n");
+      TimerTask myTask = new TimerTask() {
+        @Override
+        public void run() {
+          if (startDate == null) startDate = new Date();
+          sendTestEmail();
+        }
+      };
+
+      long now = System.currentTimeMillis();
+      long rounded = ((1000) * (now / 1000)) + 5000;
+
+      long delay = rounded - now;
+      logger.info("addHeartbeat delay " + delay + " period " + period);
+      timer.schedule(myTask, delay, period);
+    }
+  }
+
+  public void stopHeartbeat() {
+    logger.info("stopHeartbeat ");
+    timer.cancel();
+  }
+
+  protected String getHostName() {
+    try {
+      return java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      return "unknown host?";
+    }
   }
 
   /**
@@ -93,14 +144,18 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    * @see RestUserManagement#getMailSupport()
    */
-  private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom) {
+  private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom, boolean doHeartbeat,
+                      long period) {
     this.debugEmail = true;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
     this.mailFrom = mailFrom;
+    this.period = period;
+    this.doHeartbeat = doHeartbeat;
     if (testEmail) {
       logger.warn("MailSupport --->using test email");
     }
+
   }
 
   /**
@@ -198,14 +253,14 @@ public class MailSupport {
    */
   public void email(String receiver, String subject, String message) {
     if (receiver.contains(",")) {
-      Arrays.asList(receiver.split(",")).forEach(rec -> sendEmail(subject, message, rec));
+      Arrays.asList(receiver.split(",")).forEach(rec -> sendEmail(subject, message, rec, false));
     } else {
-      sendEmail(subject, message, receiver);
+      sendEmail(subject, message, receiver, false);
     }
   }
 
-  private void sendEmail(String subject, String message, String rec) {
-    normalEmail(rec, rec, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer);
+  private void sendEmail(String subject, String message, String rec, boolean withStats) {
+    normalEmail(rec, rec, new ArrayList<>(), subject, message, mailServer, testEmail, mailFrom, mailServer, withStats);
   }
 
   /**
@@ -262,9 +317,9 @@ public class MailSupport {
   private void sendMessage(Message message, int tries) {
     if (tries > 0) {
       try {
-        logger.info("sendMessage about to send email (" + tries + ") :" +
-            "\n\tmessage " + message
-        //    +            "\n\tsession " + message.getSession()
+        logger.info("sendMessage about to sendLater email (" + tries + ") :" +
+                "\n\tmessage " + message
+            //    +            "\n\tsession " + message.getSession()
         );
 
         long then = System.currentTimeMillis();
@@ -277,6 +332,37 @@ public class MailSupport {
         if (e.getMessage().contains("421")) {
           sendMessage(message, --tries);
         }
+      }
+    }
+  }
+
+
+  private void sendLater(Message message) {
+    ForkJoinPool.commonPool().execute(new RecursiveAction() {
+      @Override
+      protected void compute() {
+        sendStats(message);
+      }
+    });
+  }
+
+  private void sendStats(Message message) {
+    try {
+      long then = System.currentTimeMillis();
+      pending.add(message);
+      sent.getAndIncrement();
+      Transport.send(message);
+      success.getAndIncrement();
+      synchronized (this) {
+        pending.remove(message);
+      }
+      long now = System.currentTimeMillis();
+      logger.info("sendMessage sent (" + (now - then) + ") email " + message);
+    } catch (MessagingException e) {
+      failure.getAndIncrement();
+      logger.warn("sendMessage got " + e, e);
+      synchronized (this) {
+        pending.remove(message);
       }
     }
   }
@@ -306,6 +392,24 @@ public class MailSupport {
     return multipart;
   }
 
+  private void sendTestEmail() {
+//    logger.info("send --- ");
+    String message =
+        "sent    " + sent +
+            "\nfailure " + failure +
+            "\nsuccess " + success +
+            "\npending " + pending.size() +
+            "\nvia     " + mailServer +
+            "\nstarted " + startDate;
+
+    String suffix = "";
+    if (failure.get() > 0) {
+      suffix += failure.get() + " failures since " + startDate;
+    }
+
+    String hearbeat = METRONOME;
+    sendEmail(hearbeat + " #" + sent + " from " + getHostName() + " " + suffix, message, REC, true);
+  }
 
   /**
    * @param recipientName
@@ -317,6 +421,7 @@ public class MailSupport {
    * @param useTestPort
    * @param from
    * @param smtpHost
+   * @param withStats
    * @see #email(String, String, String)
    */
   private void normalEmail(String recipientName,
@@ -325,7 +430,9 @@ public class MailSupport {
                            String subject,
                            String message,
                            String email_server,
-                           boolean useTestPort, String from, String smtpHost) {
+                           boolean useTestPort,
+                           String from,
+                           String smtpHost, boolean withStats) {
     try {
       Message msg = makeMessage(
           getMailSession(email_server, useTestPort),
@@ -335,19 +442,23 @@ public class MailSupport {
           subject,
           message,
           from, smtpHost);
-      sendMessage(msg);
+      if (withStats) {
+        sendLater(msg);
+      } else {
+        sendMessage(msg);
+      }
     } catch (MailConnectException e) {
       if (!useTestPort) {
-        normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true, from, smtpHost);
+        normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true, from, smtpHost, false);
       } else {
-        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
+        logger.error("Couldn't sendLater email to " + recipientEmail + ". Got " + e, e);
       }
       // OK try with test email
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.warn("couldn't send email - no mail daemon (" + mailServer + ") " + "? " + e);
+        logger.warn("couldn't sendLater email - no mail daemon (" + mailServer + ") " + "? " + e);
       } else {
-        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
+        logger.error("Couldn't sendLater email to " + recipientEmail + ". Got " + e, e);
       }
     }
   }
@@ -405,9 +516,9 @@ public class MailSupport {
       return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.warn("couldn't send email - no mail daemon? subj " + subject + " : " + e.getMessage());
+        logger.warn("couldn't sendLater email - no mail daemon? subj " + subject + " : " + e.getMessage());
       } else {
-        logger.warn("Couldn't send email to " + recipientEmails + ". Got " + e, e);
+        logger.warn("Couldn't sendLater email to " + recipientEmails + ". Got " + e, e);
       }
       return false;
     }
@@ -441,7 +552,7 @@ public class MailSupport {
    * @param smtpHost
    * @return
    * @throws Exception
-   * @see #normalEmail(String, String, List, String, String, String, boolean, String, String)
+   * @see #normalEmail(String, String, List, String, String, String, boolean, String, String, boolean)
    */
   private Message makeMessage(Session session,
                               String recipientName,
