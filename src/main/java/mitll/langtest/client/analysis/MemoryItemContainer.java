@@ -378,7 +378,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn(int maxLength) {
+  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -459,13 +459,4 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     }
   }
 
-  protected SafeHtml getNoWrapContent(String noWrapContent) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-        noWrapContent +
-        "</span>");
-
-    sb.appendHtmlConstant("</div>");
-    return sb.toSafeHtml();
-  }
 }

@@ -124,8 +124,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * @see #getButtons
    */
-  private static final String MY_STUDENT = "My Student";
-  private static final int NUM_WIDTH = 50;
+ // private static final String MY_STUDENT = "My Student";
+ // private static final int NUM_WIDTH = 50;
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;

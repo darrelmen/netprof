@@ -1,26 +1,28 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.TabPane;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.ui.FlexTable;
+import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.DominoUpdateItem;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class ResponseModal extends JsonImportResultModal{
+public class ResponseModal {
   private static final Logger log = Logger.getLogger(ResponseModal.class.getName());
-  private static final String IMPORT_ARC = "Import Excel";
+  /*private static final String IMPORT_ARC = "Import Excel";
   private static final String FILE_COUNT = "Total Import Rows";
   private static final String FILE_MATCH_COUNT = "Matching Import Rows";
   private static final String FILE_UNMATCHED_COUNT = "Unmatched Import Rows";
@@ -31,26 +33,154 @@ public class ResponseModal extends JsonImportResultModal{
 
   private static final String UNMATCHED_ROW = "Unmatched Row";
   private static final String SUMMARY = "Summary";
-  private static final String FILE_SUMMARY = "Excel Summary";
- // private static List<String> COLS = Arrays.asList(INDEX, COL, TASK, FIELD, KEY, MESSAGE);
+  private static final String FILE_SUMMARY = "Excel Summary";*/
+  // private static List<String> COLS = Arrays.asList(INDEX, COL, TASK, FIELD, KEY, MESSAGE);
 
+  DominoUpdateResponse result;
+  ExerciseController controller;
 
   /**
    * @param title
    * @param message
-   * @param results
+   * @param result
    */
   ResponseModal(String title,
-                            String message,
-                            String importFilename,
-                            String cmt,
-                            String fileFormat,
-                            JSONObject results) {
-    super(title, message,
-        cmt, importFilename, fileFormat, results);
+                String message,
+                String importFilename,
+                String cmt,
+                String fileFormat,
+                DominoUpdateResponse result,
+                DialogHelper.CloseListener closeListener,
+                ExerciseController controller) {
+//    super(title, message,
+//        cmt, importFilename, fileFormat, null);
+    this.result = result;
+    this.closeListener = closeListener;
+    this.controller = controller;
   }
 
-/*	private TabPane getUnmatchedDocuments() {
+  DialogHelper.CloseListener closeListener;
+
+
+//  @Override
+//  protected void prepareContentWidget() {
+//    DivWidget cDivWidget = new DivWidget();
+//    cDivWidget.addStyleName("bulk-update-modal-content");
+//
+//    Label label = getLabel(messageStr);
+//    if (!messageStr.equals(IMPORT_SUCCESS_MSG)) {
+//      markRed(label);
+//    }
+//    cDivWidget.add(label);
+//
+//    TabPanel tp = new TabPanel();
+//    cDivWidget.add(tp);
+//
+//    {
+//      TabPane dwPane = new TabPane(SUMMARY);
+//      dwPane.add(getSummary());
+//      tp.add(dwPane);
+//    }
+//
+//    tp.add(getResultDetails());
+//    tp.add(getUnmatchedRows());
+//    tp.add(getExcelColReport());
+//    tp.add(getRowReport());
+//    tp.selectTab(0);
+//    contentWidget = cDivWidget;
+//  }
+
+
+  //@Override
+  public void prepareContentWidget() {
+
+//    TabPane dwPane = new TabPane("Sync with domino complete!");
+    DivWidget cDivWidget = new DivWidget();
+    //cDivWidget.addStyleName("bulk-update-modal-content");
+
+    //com.google.gwt.user.client.ui.Label label = getLabel(result.getMessage());
+
+    //   int add = 0, change = 0, delete = 0;
+    List<DominoUpdateItem> added = new ArrayList<>();
+    List<DominoUpdateItem> changed = new ArrayList<>();
+    List<DominoUpdateItem> deleted = new ArrayList<>();
+    for (DominoUpdateItem item : result.getUpdates()) {
+      if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.ADD) {
+        added.add(item);
+      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.CHANGE) {
+        changed.add(item);
+      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.DELETE) {
+        deleted.add(item);
+      }
+    }
+
+    DivWidget upper = new DivWidget();
+    upper.add(getLabel("This update would make the following changes."));
+    upper.add(getLabel(" "));
+    upper.add(getLabel(added.size() + " items would be added."));
+    upper.add(getLabel(changed.size() + " items would be changed."));
+    upper.add(getLabel(deleted.size() + " items would be deleted."));
+
+    upper.setHeight("110px");
+    cDivWidget.add(upper);
+    TabPanel tp = new TabPanel();
+    tp.addStyleName("bottomFiveMargin");
+    tp.setHeight("400px");
+
+    cDivWidget.add(tp);
+    tp.add(getUnmatchedRows2("Added", added));
+    tp.add(getUnmatchedRows2("Changed", changed));
+    tp.add(getUnmatchedRows2("Deleted", deleted));
+//    {
+//      TabPane dwPane = new TabPane(SUMMARY);
+//      dwPane.add(getSummary());
+//      tp.add(dwPane);
+//    }
+//
+//    tp.add(getResultDetails());
+//    tp.add(getUnmatchedRows());
+//    tp.add(getExcelColReport());
+//    tp.add(getRowReport());
+    tp.selectTab(0);
+    tp.addStyleName("cardBorderShadow");
+
+    //contentWidget = cDivWidget;
+
+    new DialogHelper(true).show(
+        "Do you want to continue?", cDivWidget, closeListener, 600, 800);
+    // new ModalInfoDialog("Success", "Sync with domino complete!");
+  }
+
+
+  @NotNull
+  protected Label getLabel(String messageStr) {
+    Label msgLabel = new Label(messageStr);
+    msgLabel.addStyleName("bulk-update-modal-msg-label");
+    //msgLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+    return msgLabel;
+  }
+
+  private int addLabel(Grid g, int row, int col, String string) {
+    return addLabel(g, row, col, string, false);
+  }
+
+  protected int addLabel(Grid g, int row, int col, String string, boolean isCentered) {
+    SafeHtmlBuilder shb = new SafeHtmlBuilder();
+    shb.appendEscapedLines(string);
+    HTML idlblVal = new HTML(shb.toSafeHtml());
+    g.setWidget(row, col, idlblVal);
+    if (isCentered) {
+      g.getCellFormatter().addStyleName(row, col, "centered-col");
+    }
+    return ++col;
+  }
+
+  //@Override
+  protected void handleSave() {
+    closeListener.gotYes();
+  }
+
+  /*	private TabPane getUnmatchedDocuments() {
 		JSONValue matchResults = results.get(MetadataImportResultContainer.UNMATCHED_DOCUMENTS);
 
 			JSONArray matches = matchResults.isArray();
@@ -103,9 +233,19 @@ public class ResponseModal extends JsonImportResultModal{
     // add header
     int col = 0;
     int row = 0;
-    addHeader(g, row, col++, "Row");
+    addHeader(g, row, col++, "Domino ID");
+    addHeader(g, row, col++, "Netprof ID");
+    addHeader(g, row, col++, "Exercise ID");
+    addHeader(g, row, col++, "English");
+    addHeader(g, row, col++, "Vocabulary");
+    addHeader(g, row, col++, "Message");
   }
 
+  protected int addHeader(Grid g, int row, int col, String string) {
+    return addLabel(g, row, col, string, true);
+  }
+
+/*
   private void addMatchedHeader(Grid g) {
     int col = 0;
     int row = 0;
@@ -134,23 +274,29 @@ public class ResponseModal extends JsonImportResultModal{
       addHeader(g, row, col++, col1);
     }
   }
+*/
 
-  /*private TabPane getUnmatchedRows() {
-    JSONValue matchResults = results.get(UNMATCHED_ROWS);
-    JSONArray matches = matchResults.isArray();
-    int numMatches = matches.size();
+  private TabPane getUnmatchedRows(String prefix, List<DominoUpdateItem> items) {
+    // JSONValue matchResults = results.get(UNMATCHED_ROWS);
+    // JSONArray matches = matchResults.isArray();
+    int numMatches = items.size();
     String suffix = numMatches == 0 ? "" : " (" + numMatches + ")";
-    TabPane dwPane = new TabPane(UNMATCHED_ROW + suffix);
+    TabPane dwPane = new TabPane(prefix + suffix);
 
     if (numMatches == 0) {
-      dwPane.add(new Label("All rows were assigned."));
+      com.github.gwtbootstrap.client.ui.Label w = new com.github.gwtbootstrap.client.ui.Label("Nothing " + prefix.toLowerCase() + ".");
+      w.addStyleName("topFiveMargin");
+
+      w.setType(LabelType.INFO);
+
+      dwPane.add(w);
     } else {
 
       log.info("getUnmatchedRows Num unmatched : " + numMatches);
 
       DivWidget d = new DivWidget("bulk-update-result-pdiv");
       d.addStyleName("narrow");
-      Grid g = new Grid(numMatches + 1, 2);
+      Grid g = new Grid(numMatches + 1, 6);
       d.add(g);
       g.addStyleName("bulk-update-result-detail");
 
@@ -160,17 +306,55 @@ public class ResponseModal extends JsonImportResultModal{
       row++;
 
       for (int i = 0; i < numMatches; i++) {
-        JSONObject oneResult = matches.get(i).isObject();
-//				log.info("getUnmatchedRows unmatched      " + oneResult);
-//				log.info("getUnmatchedRows unmatched keys " + oneResult.keySet());
+        DominoUpdateItem dominoUpdateItem = items.get(i);
+
         int col = 0;
-        col = addIntCol(g, row, col, oneResult, "row", false);
-        addStringCol(g, row++, col, oneResult, "name");
+        addLabel(g, row, col++, "" + dominoUpdateItem.getDominoID(), false);
+        addLabel(g, row, col++, "" + dominoUpdateItem.getNetprofID(), false);
+        addLabel(g, row, col++, "" + dominoUpdateItem.getId(), false);
+        addLabel(g, row, col++, "" + dominoUpdateItem.getEnglish(), false);
+        addLabel(g, row, col++, "" + dominoUpdateItem.getForeignLanguage(), false);
+        String string = dominoUpdateItem.getChangedFields().isEmpty() ? "" : "" + dominoUpdateItem.getChangedFields();
+        addLabel(g, row, col++, string, false);
+
       }
       dwPane.add(d);
     }
     return dwPane;
   }
+
+
+  private TabPane getUnmatchedRows2(String prefix, Collection<DominoUpdateItem> items) {
+    // JSONValue matchResults = results.get(UNMATCHED_ROWS);
+    // JSONArray matches = matchResults.isArray();
+    int numMatches = items.size();
+    String suffix = numMatches == 0 ? "" : " (" + numMatches + ")";
+    TabPane dwPane = new TabPane(prefix + suffix);
+
+    if (numMatches == 0) {
+      com.github.gwtbootstrap.client.ui.Label w = new com.github.gwtbootstrap.client.ui.Label("Nothing " + prefix.toLowerCase() + ".");
+      w.addStyleName("topFiveMargin");
+
+      w.setType(LabelType.INFO);
+
+      dwPane.add(w);
+    } else {
+
+      log.info("getUnmatchedRows Num unmatched : " + numMatches);
+
+
+
+
+      Panel tableWithPager = new DominoUpdateResponseSimplePagingContainer(controller, prefix).getTableWithPager(items);
+
+      dwPane.add(tableWithPager);
+
+
+    }
+    return dwPane;
+  }
+
+  /*
 
   private TabPane getExcelColReport() {
     JSONValue matchResults = results.get(COLUMN_REPORT);
@@ -269,34 +453,6 @@ public class ResponseModal extends JsonImportResultModal{
 
     dwPane.add(d);
     return dwPane;
-  }
-
-  @Override
-  protected void prepareContentWidget() {
-    DivWidget cDivWidget = new DivWidget();
-    cDivWidget.addStyleName("bulk-update-modal-content");
-
-    Label label = getLabel(messageStr);
-    if (!messageStr.equals(IMPORT_SUCCESS_MSG)) {
-      markRed(label);
-    }
-    cDivWidget.add(label);
-
-    TabPanel tp = new TabPanel();
-    cDivWidget.add(tp);
-
-    {
-      TabPane dwPane = new TabPane(SUMMARY);
-      dwPane.add(getSummary());
-      tp.add(dwPane);
-    }
-
-    tp.add(getResultDetails());
-    tp.add(getUnmatchedRows());
-    tp.add(getExcelColReport());
-    tp.add(getRowReport());
-    tp.selectTab(0);
-    contentWidget = cDivWidget;
   }
 
   @NotNull
@@ -403,7 +559,7 @@ public class ResponseModal extends JsonImportResultModal{
 *//*		resp.setWidget(row, 0, getLabel((isSuccess ? UNMATCHED_DOCUMENTS_SUCCESS : UNMATCHED_DOCUMENTS_FAIL)));
 		resp.setWidget(row++, 1, getLabel(Integer.toString(unmatchedDocCount)));*//*
 
-*//*		resp.setWidget(row, 0, getLabel(TOT_DOCS_UNIQUE));
+   *//*		resp.setWidget(row, 0, getLabel(TOT_DOCS_UNIQUE));
 		resp.setWidget(row++, 1, getLabel(Integer.toString(uniqueDocCount)));*//*
 
 

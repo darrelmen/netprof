@@ -8,14 +8,11 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -33,7 +30,6 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.DominoUpdateItem;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
@@ -49,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.user.User.Permission.*;
 
@@ -59,11 +54,13 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
+
+
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
   private static final String COURSES = COURSE1 + "s";
 
-  private static final boolean ALLOW_SYNC_WITH_DOMINO = false;
 
   private static final String RECALC_REF = "Recalc Ref";
   private static final String ALL_PROJECTS_COMPLETE = "All projects complete.";
@@ -496,7 +493,7 @@ public class ProjectChoices {
         CREATE_NEW_PROJECT,
         projectEditForm.getForm(new ProjectInfo(), true),
         listener,
-        DIALOG_HEIGHT);
+        DIALOG_HEIGHT, -1);
   }
 
   /**
@@ -782,11 +779,11 @@ public class ProjectChoices {
         "Edit " + projectForLang.getName(),
         projectEditForm.getForm(projectForLang, false),
         listener,
-        DIALOG_HEIGHT);
+        DIALOG_HEIGHT, -1);
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
-    logger.info("showImport " + doChange);
+    // logger.info("showImport " + doChange);
     projectServiceAsync.addPending(projectForLang.getID(), doChange, new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -809,12 +806,6 @@ public class ProjectChoices {
         }
       }
     });
-/*
-    new DialogHelper(true).show(
-        IMPORT_DATA_INTO + projectForLang.getName(),
-        new FileUploader().getForm(projectForLang.getID()),
-        listener,
-        550);*/
   }
 
   private void showStatus(DominoUpdateResponse result, DominoUpdateResponse.UPLOAD_STATUS status) {
@@ -847,64 +838,24 @@ public class ProjectChoices {
   }
 
   private void showResponseReport(SlimProject projectForLang, Button button, DominoUpdateResponse result) {
-
-//    TabPane dwPane = new TabPane("Sync with domino complete!");
-    DivWidget cDivWidget = new DivWidget();
-    cDivWidget.addStyleName("bulk-update-modal-content");
-
-    com.google.gwt.user.client.ui.Label label = getLabel(result.getMessage());
-
-    int add = 0, change = 0, delete = 0;
-    for (DominoUpdateItem item : result.getUpdates()) {
-      if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.ADD) {
-        add++;
-      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.CHANGE) {
-        change++;
-      } else if (item.getStatus() == DominoUpdateItem.ITEM_STATUS.DELETE) {
-        delete++;
+    new ResponseModal("Do you want to continue?", "", "", "", "", result, new DialogHelper.CloseListener() {
+      @Override
+      public boolean gotYes() {
+        showImportDialog(projectForLang, button, true);
+        return true;
       }
-    }
-    ;
-    cDivWidget.add(getLabel("This update would make the following changes."));
-    cDivWidget.add(getLabel(add + " items would be added."));
-    cDivWidget.add(getLabel(change + " items would be changed."));
-    cDivWidget.add(getLabel(delete + " items would be deleted."));
 
-    TabPanel tp = new TabPanel();
-    cDivWidget.add(tp);
+      @Override
+      public void gotNo() {
 
-//    {
-//      TabPane dwPane = new TabPane(SUMMARY);
-//      dwPane.add(getSummary());
-//      tp.add(dwPane);
-//    }
-//
-//    tp.add(getResultDetails());
-//    tp.add(getUnmatchedRows());
-//    tp.add(getExcelColReport());
-//    tp.add(getRowReport());
-//    tp.selectTab(0);
+      }
 
+      @Override
+      public void gotHidden() {
 
-    new DialogHelper(true).show(
-        "Do you want to continue?", cDivWidget, new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            showImportDialog(projectForLang, button, true);
-            return true;
-          }
-
-          @Override
-          public void gotNo() {
-
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        }, 600);
-    // new ModalInfoDialog("Success", "Sync with domino complete!");
+      }
+    }, controller
+    ).prepareContentWidget();
   }
 
 
@@ -948,7 +899,7 @@ public class ProjectChoices {
         "Delete " + projectForLang.getName() + " forever?",
         new Heading(2, "Are you sure?"),
         listener,
-        DIALOG_HEIGHT);
+        DIALOG_HEIGHT, -1);
   }
 
   private boolean isQC() {

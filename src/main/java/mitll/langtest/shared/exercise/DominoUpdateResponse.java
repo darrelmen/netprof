@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,11 +43,11 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 3/30/16.
  * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
  * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
+ * @since 3/30/16.
  */
-public class DominoUpdateResponse implements IsSerializable {
+public class DominoUpdateResponse implements HasID {
   private Map<String, String> props = new HashMap<>();
   private int dominoID;
   private int currentDominoID;
@@ -55,13 +56,22 @@ public class DominoUpdateResponse implements IsSerializable {
 
   private List<DominoUpdateItem> updates;
 
+  @Override
+  public int getID() {
+    return dominoID;
+  }
+
+  @Override
+  public int compareTo(@NotNull HasID o) {
+    return Integer.compare(getID(), o.getID());
+  }
+
   public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT;}
 
   public DominoUpdateResponse() {
   }
 
   /**
-   *
    * @param success
    * @param dominoID
    * @param currentDominoID

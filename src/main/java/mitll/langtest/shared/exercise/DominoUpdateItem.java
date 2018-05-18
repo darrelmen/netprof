@@ -1,10 +1,11 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class DominoUpdateItem implements IsSerializable {
+public class DominoUpdateItem implements HasID {
 
   private int dominoID;
   private String netprofID;
@@ -34,6 +35,17 @@ public class DominoUpdateItem implements IsSerializable {
     this.changedFields = changedFields;
     this.status = status;
   }
+
+  @Override
+  public int getID() {
+    return dominoID;
+  }
+
+  @Override
+  public int compareTo(@NotNull HasID o) {
+    return Integer.compare(getID(), o.getID());
+  }
+
 
   public int getDominoID() {
     return dominoID;

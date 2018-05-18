@@ -51,7 +51,6 @@ import java.util.List;
  */
 public class DialogHelper {
   //private final Logger logger = Logger.getLogger("DialogHelper");
-
   private final boolean doYesAndNo;
   private Modal dialogBox;
 
@@ -84,8 +83,8 @@ public class DialogHelper {
     show(title, msgs, null, "Yes", "No", listener, -1);
   }
 
-  public Button show(String title, Widget contents, CloseListener listener, int max) {
-    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max, false);
+  public Button show(String title, Widget contents, CloseListener listener, int max, int width) {
+    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max, width, false);
   }
 
   public Button show(String title,
@@ -95,7 +94,7 @@ public class DialogHelper {
                      String cancelButtonName,
                      final CloseListener listener,
                      int maxHeight) {
-    return show(title, msgs, other, buttonName, cancelButtonName, listener, maxHeight, false);
+    return show(title, msgs, other, buttonName, cancelButtonName, listener, maxHeight, -1, false);
   }
 
   /**
@@ -104,6 +103,7 @@ public class DialogHelper {
    * @param title
    * @param msgs
    * @param maxHeight
+   * @param width
    * @see mitll.langtest.client.download.DownloadHelper#showDialog
    */
   public Button show(String title,
@@ -113,13 +113,13 @@ public class DialogHelper {
                      String cancelButtonName,
                      final CloseListener listener,
                      int maxHeight,
-                     boolean isBig) {
-    return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, getCloseButton(buttonName), isBig);
+                     int width, boolean isBig) {
+    return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, width, getCloseButton(buttonName), isBig);
   }
 
   @NotNull
   private Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
-                            CloseListener listener, int maxHeight, Button closeButton,
+                            CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
 
@@ -135,6 +135,7 @@ public class DialogHelper {
     }
     dialogBox.setTitle("<b>" + title + "</b>");
     if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
+    if (width > 0) dialogBox.setWidth(width + "px");
 
     FluidContainer container = getPrompt(msgs);
 

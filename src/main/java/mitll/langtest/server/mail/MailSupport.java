@@ -40,6 +40,7 @@ import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.tritonus.share.ArraySet;
 
 import javax.mail.*;
 import javax.mail.internet.*;
@@ -77,7 +78,7 @@ public class MailSupport {
   private static final String TEXT_HTML = "text/html";// charset=UTF-8";
   private static final int TRIES = 3;
   private static final long PERIOD = 1000 * 10;//60 * 5L;
-  public static final String METRONOME = "Metronome";
+  private static final String METRONOME = "Metronome";
   public static final String REC = "gordon.vidaver@ll.mit.edu";
   private long period = PERIOD;
 
@@ -90,7 +91,7 @@ public class MailSupport {
 
   private AtomicInteger sent = new AtomicInteger(), failure = new AtomicInteger(), success = new AtomicInteger();
   private Set<Message> pending = new HashSet<>();
-
+  private Set<Date> failures = new HashSet<>();
 
   public MailSupport(ServerProperties serverProps) {
     this(serverProps.isDebugEMail(),
@@ -317,7 +318,7 @@ public class MailSupport {
   private void sendMessage(Message message, int tries) {
     if (tries > 0) {
       try {
-        logger.info("sendMessage about to sendLater email (" + tries + ") :" +
+        logger.info("sendMessage about to send email (" + tries + ") :" +
                 "\n\tmessage " + message
             //    +            "\n\tsession " + message.getSession()
         );
@@ -346,11 +347,13 @@ public class MailSupport {
     });
   }
 
+  //Random random=new Random();
   private void sendStats(Message message) {
+    long then = System.currentTimeMillis();
     try {
-      long then = System.currentTimeMillis();
       pending.add(message);
       sent.getAndIncrement();
+   //   if (random.nextInt(10)<5) throw new MessagingException("dude!");
       Transport.send(message);
       success.getAndIncrement();
       synchronized (this) {
@@ -360,6 +363,7 @@ public class MailSupport {
       logger.info("sendMessage sent (" + (now - then) + ") email " + message);
     } catch (MessagingException e) {
       failure.getAndIncrement();
+      failures.add(new Date(then));
       logger.warn("sendMessage got " + e, e);
       synchronized (this) {
         pending.remove(message);
@@ -407,6 +411,50 @@ public class MailSupport {
       suffix += failure.get() + " failures since " + startDate;
     }
 
+    Calendar cal = Calendar.getInstance();
+    Map<Integer, Map<Integer, Set<Integer>>> dayToHourToMin = new HashMap<>();
+    int month=-1;
+    for (Date f : failures) {
+      cal.setTime(f);
+      if (month ==-1) month=cal.get(Calendar.MONTH)+1;
+      int day = cal.get(Calendar.DAY_OF_MONTH);
+      Map<Integer, Set<Integer>> hourToMin = dayToHourToMin.computeIfAbsent(day, k -> new HashMap<>());
+      int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+      Set<Integer> minInHour = hourToMin.computeIfAbsent(hour, k -> new TreeSet<>());
+      int minute = cal.get(Calendar.MINUTE);
+      minInHour.add(minute);
+    }
+
+    StringBuilder builder=new StringBuilder();
+    builder.append("\n\nFailure times : \n");
+    for (int day : dayToHourToMin.keySet()) {
+      builder.append("Day ")
+          .append(month)
+          .append("-")
+          .append(day).append(":\n");
+      Map<Integer, Set<Integer>> hourToMin = dayToHourToMin.get(day);
+      for (int hour : hourToMin.keySet()) {
+        Set<Integer> minutes = hourToMin.get(hour);
+        builder.append("\tHour ")
+            .append(hour)
+            .append(
+                //"(" +minutes.size()+ ")" +
+                    " : ")
+        ;
+        for (int min : minutes) {
+          if (min < 10) {
+            builder.append("0").append(min).append(", ");
+          }
+          else {
+            builder.append(min).append(", ");
+          }
+        }
+        builder.append("\n");
+      }
+      builder.append("\n");
+    }
+    message += builder;
     String hearbeat = METRONOME;
     sendEmail(hearbeat + " #" + sent + " from " + getHostName() + " " + suffix, message, REC, true);
   }
@@ -451,14 +499,14 @@ public class MailSupport {
       if (!useTestPort) {
         normalEmail(recipientName, recipientEmail, ccEmails, subject, message, email_server, true, from, smtpHost, false);
       } else {
-        logger.error("Couldn't sendLater email to " + recipientEmail + ". Got " + e, e);
+        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
       // OK try with test email
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.warn("couldn't sendLater email - no mail daemon (" + mailServer + ") " + "? " + e);
+        logger.warn("couldn't send email - no mail daemon (" + mailServer + ") " + "? " + e);
       } else {
-        logger.error("Couldn't sendLater email to " + recipientEmail + ". Got " + e, e);
+        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
     }
   }
@@ -516,9 +564,9 @@ public class MailSupport {
       return true;
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.warn("couldn't sendLater email - no mail daemon? subj " + subject + " : " + e.getMessage());
+        logger.warn("couldn't send email - no mail daemon? subj " + subject + " : " + e.getMessage());
       } else {
-        logger.warn("Couldn't sendLater email to " + recipientEmails + ". Got " + e, e);
+        logger.warn("Couldn't send email to " + recipientEmails + ". Got " + e, e);
       }
       return false;
     }

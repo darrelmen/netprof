@@ -785,11 +785,11 @@ fieldset > legend {
     border-bottom: inset rgba(0, 0, 0, 0.1);
 }
 
-.userListContent {
+/*.userListContent {
     margin-top: 10px;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
-}
+}*/
 
 .userNPFContent {
     margin-top: 2px;
@@ -805,12 +805,12 @@ fieldset > legend {
     padding: 5px 5px 5px 5px;
 }
 
-.shadowBorder {
+/*.shadowBorder {
     margin-top: 2px;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px 5px 5px 5px;
-}
+}*/
 
 .userListBackground {
     background-color: #ffffff;
@@ -943,6 +943,7 @@ fieldset > legend {
     font-family: sans-serif;
 }
 
+/*
 .buttonGroupInsetFirst {
     background-color: #89B0D5;
     border: 1px solid #E3E3E3;
@@ -951,6 +952,7 @@ fieldset > legend {
     min-height: 30px;
     padding: 5px;
 }
+*/
 
 .buttonGroupInset {
     background-color: #89B0D5;

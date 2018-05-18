@@ -23,7 +23,6 @@ import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -421,7 +420,7 @@ public class ListView implements ContentView, CreateListComplete {
           public void gotNo() {
 
           }
-        }, 660, true);
+        }, 660, -1, true);
 
     closeButton.setType(ButtonType.SUCCESS);
 
@@ -597,7 +596,7 @@ public class ListView implements ContentView, CreateListComplete {
 
           }
         },
-        500);
+        500, -1);
   }
 
   private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {

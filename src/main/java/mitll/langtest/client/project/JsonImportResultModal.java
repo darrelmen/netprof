@@ -28,23 +28,24 @@ package mitll.langtest.client.project;
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
+
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import mitll.hlt.domino.client.common.DominoSimpleModal;
+import mitll.langtest.client.domino.common.DominoSaveableModal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 import static mitll.hlt.domino.server.extern.importers.audio.AudioImportResult.STATUS_FIELD;
+import static mitll.langtest.client.domino.common.DominoSimpleModal.ModalSize.Normal;
 
-public class JsonImportResultModal  {
+public abstract  class JsonImportResultModal extends DominoSaveableModal {
   private static final Logger log = Logger.getLogger(JsonImportResultModal.class.getName());
 
   protected static final String NAME = "Name";
@@ -59,10 +60,9 @@ public class JsonImportResultModal  {
 
   public JsonImportResultModal(String title,
                                String message,
-                               //ModalSize mType,
                                String cmt,
                                String importFilename, String fileFormat, JSONObject results) {
-    //super(title, mType);
+    super(true,title,"Save",Normal);
     this.cmt = cmt;
     this.importFilename = importFilename;
     this.fileFormat = fileFormat;

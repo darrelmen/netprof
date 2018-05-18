@@ -521,16 +521,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     };
   }
 
-  private SafeHtml getNoWrapContent(String noWrapContent) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-        noWrapContent +
-        "</span>");
-
-    sb.appendHtmlConstant("</div>");
-    return sb.toSafeHtml();
-  }
-
   private String getVariableInfoDateStamp(WordScore shell) {
     Date date = new Date(shell.getTimestamp());
     String timeFormatted = format.format(date);

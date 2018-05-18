@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -251,6 +252,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     selectionModel.setSelected(toSelect, true);
   }
 
+  protected void addColumn(Column<T, SafeHtml> id2, String title) {
+    addColumn(id2,new TextHeader(title));
+  }
+
   /**
    * @param id2
    * @param header
@@ -370,7 +375,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     if (i < pageStart) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-      if (DEBUG_SCROLL) logger.info("scrollToVisible new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      if (DEBUG_SCROLL)
+        logger.info("scrollToVisible new start of prev page " + newStart + " vs current " + table.getVisibleRange());
 
       table.setVisibleRange(newStart, pageSize);
       return true;
@@ -430,6 +436,16 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public int getNumItems() {
     return getList().size();
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
   }
 
 /*  private static class NoFunnyPagingSimplePager extends SimplePager {
