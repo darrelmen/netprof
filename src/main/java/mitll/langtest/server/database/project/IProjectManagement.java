@@ -44,6 +44,7 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -128,11 +129,9 @@ public interface IProjectManagement {
   /**
    * @see ProjectServiceImpl#addPending
    * @param projID
-   * @param dominoID
-   * @param sinceInUTC
    * @return
    */
-  ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC);
+  ImportInfo getImportFromDomino(int projID);
 
   List<ImportProjectInfo> getVocabProjects();
 }

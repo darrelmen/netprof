@@ -80,6 +80,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
+import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.UserServiceImpl;
@@ -317,6 +318,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 //      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
       userDAO.setProjectManagement(getProjectManagement());
+
+
+
+//      Project project = getProject(16);
+      ImportInfo importFromDomino = getProjectManagement().getImportFromDomino(16);
+
     }
     return this;
   }

@@ -365,26 +365,15 @@ public class DominoExerciseDAO {
                                    String npID,
                                    IDocumentComposite samples,
                                    Exercise parentExercise) {
-    // IDocumentComposite samples = vocabularyItem.getSamples();
-/*
-    boolean isInt = false;
-    int npInt = -1;
-    try {
-      npInt = Integer.parseInt(npID);
-      isInt = true;
-    } catch (NumberFormatException e) {
-      e.printStackTrace();
-    }*/
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
-      //int compid = docID * 10 + sample.getNum();  // NO NO NO
-      String contextNPID = /*isInt ? "" + npInt * 10 + sample.getNum() :*/ (npID + "_" + sample.getNum());
+      String contextNPID = (npID + "_" + sample.getNum());
 
       String sentenceVal = sample.getSentenceVal();
       logger.info("addContextSentences : context" +
           "\n\timport id " + docID +
           "\n\tnpID      " + contextNPID +
-          " " + sentenceVal);
+          "\n\tsentence  " + sentenceVal);
 
       if (!sentenceVal.trim().isEmpty()) {
         Exercise context = getExerciseFromVocabularyItem(

@@ -20,12 +20,12 @@ public class ImportProjectInfo {
   }
 
   /**
-   * @see DominoImport#getImportProjectInfos(FindOptions, DBUser)
    * @param dominoProjectID
    * @param creatorID
    * @param name
    * @param language
    * @param createTime
+   * @see DominoImport#getImportProjectInfos(FindOptions, DBUser)
    */
   ImportProjectInfo(int dominoProjectID, int creatorID, String name, String language, long createTime) {
     this.dominoProjectID = dominoProjectID;
@@ -71,11 +71,11 @@ public class ImportProjectInfo {
     this.dominoProjectID = dominoProjectID;
   }
 
-  public int getDominoProjectID() {
+  int getDominoProjectID() {
     return dominoProjectID;
   }
 
-  public Date getCreateDate() {
+  Date getCreateDate() {
     return new Date(createTime);
   }
 
@@ -87,7 +87,7 @@ public class ImportProjectInfo {
     this.unitName = unitName;
   }
 
-  public void setChapterName(String chapterName) {
+  void setChapterName(String chapterName) {
     this.chapterName = chapterName;
   }
 

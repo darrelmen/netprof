@@ -10,6 +10,7 @@ import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.*;
+import mitll.hlt.domino.shared.model.metadata.MetadataTypes;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.project.ProjectColumn;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
@@ -28,9 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.ne;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.VocabularyMetadata.V_NP_ID;
 import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
@@ -40,6 +39,14 @@ public class DominoImport implements IDominoImport {
   private static final String VOCABULARY = "Vocabulary";
   private static final String V_UNIT = "v-unit";
   private static final String V_CHAPTER = "v-chapter";
+  public static final String ID = "_id";
+  public static final String ACTIVE = "active";
+  public static final String DELETE_TIME = "deleteTime";
+  public static final String PROJ_ID = "projId";
+  public static final String V_NP_ID = "v-np-id";
+  public static final String METADATA = "metadata";
+  public static final String DOC_CONTENT = "docContent";
+  public static final String VALUE = "value";
 
   private final ProjectServiceDelegate projectDelegate;
   private final DocumentServiceDelegate documentDelegate;
@@ -50,6 +57,7 @@ public class DominoImport implements IDominoImport {
    * @param projectDelegate
    * @param workflowDelegate
    * @param documentDelegate
+   * @see ProjectManagement#setupDominoProjectImport
    */
   public DominoImport(ProjectServiceDelegate projectDelegate, IProjectWorkflowDAO workflowDelegate,
                       DocumentServiceDelegate documentDelegate,
@@ -77,11 +85,12 @@ public class DominoImport implements IDominoImport {
     if (matches.isEmpty()) {
       return null;
     } else {
-//      ClientPMProject next = getClientPMProject(dominoID, dominoAdminUser);
       return new DominoExerciseDAO()
           .readExercises(projID,
               matches.iterator().next(),
-              getChangedDocs(sinceInUTC, dominoAdminUser,
+              getChangedDocs(
+                  sinceInUTC,
+                  dominoAdminUser,
                   getClientPMProject(dominoID, dominoAdminUser))
           );
     }
@@ -199,12 +208,11 @@ public class DominoImport implements IDominoImport {
       String name = field.getName();
       String displayValue = field.getDisplayValue();
 
-      if (name.equals(V_NP_ID) && !displayValue.isEmpty()) {
+      if (name.equals(MetadataTypes.VocabularyMetadata.V_NP_ID) && !displayValue.isEmpty()) {
         return displayValue;
-      }
-      else {
-        logger.warn("not np id '" +name+
-            "' vs " + V_NP_ID);
+      } else {
+        logger.warn("not np id '" + name +
+            "' vs " + MetadataTypes.VocabularyMetadata.V_NP_ID);
       }
     }
     return "unknown";
@@ -240,9 +248,11 @@ public class DominoImport implements IDominoImport {
 
     List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
 
-    Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId());
+    Set<String> deletedNPIDs = new TreeSet<>();
 
-    Set<String> deletedNPIDs = getDeletedIDs(dominoAdminUser, dominoProject, deletedDocsSince);
+    Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs);
+
+    // Set<String> deletedNPIDs = getDeletedIDs(dominoAdminUser, dominoProject, deletedDocsSince);
 
     logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
     return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports);
@@ -291,7 +301,9 @@ public class DominoImport implements IDominoImport {
    * @param next
    * @param deletedDocsSince
    * @return
+   * @see #getChangedDocs(String, DBUser, ClientPMProject)
    */
+/*
   @NotNull
   private Set<String> getDeletedIDs(DBUser dominoAdminUser, ClientPMProject next, Collection<Integer> deletedDocsSince) {
     Set<String> deletedNPIDs = new TreeSet<>();
@@ -309,8 +321,7 @@ public class DominoImport implements IDominoImport {
         IDocument document = headDocumentRevision.getDocument();
         VocabularyItem vocabularyItem = (VocabularyItem) document;
         deletedNPIDs.add(getNPId(vocabularyItem));
-      }
-      else {
+      } else {
         logger.warn("\tgetDeletedIDs no heavy for " + id + " in " + next);
       }
     });
@@ -318,6 +329,7 @@ public class DominoImport implements IDominoImport {
     logger.info("getDeletedIDs got " + deletedNPIDs + " deleted np items, given " + deletedDocsSince.size());
     return deletedNPIDs;
   }
+*/
 
   /**
    *
@@ -398,51 +410,77 @@ public class DominoImport implements IDominoImport {
    * @return
    * @see #getChangedDocs(String, DBUser, ClientPMProject)
    */
-  private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid) {
+  private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid, Set<String> npIDs) {
     LocalDateTime sinceThen = getModifiedTime(sinceInUTC);
     logger.info("getDeletedDocsSince since " + sinceInUTC + " or " + sinceThen);
 
     Bson query = and(
-        eq("projId", projid)
-//        ,
-//        eq("active", "false")
-        //,
-        //gt("updateTime", sinceInUTC)
+        eq(PROJ_ID, projid),
+        eq(ACTIVE, false),
+        gt(DELETE_TIME, sinceInUTC)
     );
 
     FindIterable<Document> projection = pool
         .getMongoCollection("document_heads")
         .find(query)
-        .projection(include("_id", "deleteTime", "active"));
+        .projection(include(ID, DELETE_TIME, /*ACTIVE,*/ DOC_CONTENT));
 
     List<Integer> ids = new ArrayList<>();
 
-    int total = 0;
-    MongoCursor<Document> cursor = projection.iterator();
-    try {
+//    Map<Integer, String> dominoToNPID = new HashMap<>();
+    try (MongoCursor<Document> cursor = projection.iterator()) {
       while (cursor.hasNext()) {
         Document doc = cursor.next();
-        Integer id = doc.getInteger("_id");
-        Boolean active = doc.getBoolean("active");
-        if (!active) {
-          String updateTime = doc.getString("deleteTime");
-          LocalDateTime update = getModifiedTime(updateTime);
-          if (update.isAfter(sinceThen)) {
-            logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
-            ids.add(id);
-          } else {
-            logger.info("getDeletedDocsSince for " + id + " = " + updateTime + " or " + update + " not after " + sinceThen);
+        Integer id = doc.getInteger(ID);
+        // Boolean active = doc.getBoolean(ACTIVE);
+        //  if (!active) {
+        String updateTime = doc.getString(DELETE_TIME);
+        logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
 
-            total++;
+        ids.add(id);
+
+        Object docContent = doc.get(DOC_CONTENT);
+        // logger.info("getDeletedDocsSince docContent " + docContent);
+
+        if (docContent instanceof Document) {
+          Document dd = (Document) docContent;
+          Object metadata = dd.get(METADATA);
+
+          //logger.info("\tmeta " + metadata);
+          if (metadata != null && metadata instanceof List) {
+            //logger.info("\tmeta " + metadata.getClass());
+            List<Document> collect = getNPMetadata(metadata);
+            if (!collect.isEmpty()) {
+              Document matchingMeta = collect.iterator().next();
+              logger.info("\tgot " + matchingMeta);
+              String npID = matchingMeta.getString(VALUE);
+              if (npID != null) {
+                npIDs.add(npID);
+//                  dominoToNPID.put(id, npID);
+              }
+            }
+            else {
+              logger.warn("no metadata on " + metadata);
+            }
           }
-        } else total++;
+        }
+        else {
+          logger.warn("docContent not a document " + docContent);
+        }
+
       }
-    } finally {
-      cursor.close();
     }
 
-    logger.info("getDeletedDocsSince : found " + ids.size() + " deleted from " + total + " known documents.");
+    logger.info("getDeletedDocsSince : found " + ids.size() +
+       // " deleted from " + total + " known documents," +
+        "\n\n\n\n" +
+        "\n\tfound : " + npIDs);
     return ids;
+  }
+
+  private List<Document> getNPMetadata(Object metadataObj) {
+    List<Document> metadata = (List<Document>) metadataObj;
+    return metadata.stream().filter(document -> document.values().contains(V_NP_ID)).collect(Collectors.toList());
   }
 
   @NotNull

@@ -651,6 +651,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.parentDominoID = parentDominoID;
   }
 
+  /**
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoIDToContextExercise
+   * @return
+   */
   @Override
   public int getDominoContextIndex() {
     return dominoContextIndex;

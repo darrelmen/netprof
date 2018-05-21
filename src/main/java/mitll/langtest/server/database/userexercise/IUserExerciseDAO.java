@@ -79,9 +79,10 @@ public interface IUserExerciseDAO extends IDAO {
   /**
    * @see BaseExerciseDAO#addNewExercises
    * @param oldid
+   * @param projID
    * @return
    */
-  CommonExercise getByExOldID(String oldid);
+  CommonExercise getByExOldID(String oldid, int projID);
 
   CommonExercise getTemplateExercise(int projID);
 

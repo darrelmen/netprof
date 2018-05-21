@@ -363,7 +363,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param exid
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getReviewedUserExercises
+   * @see mitll.langtest.server.database.custom.UserListManager
    * @see IUserListManager#markState(CommonExercise, STATE, int)
    */
   private CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
@@ -420,7 +420,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public CommonExercise getByExOldID(String oldid) {
+  public CommonExercise getByExOldID(String oldid, int projID) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + oldid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();

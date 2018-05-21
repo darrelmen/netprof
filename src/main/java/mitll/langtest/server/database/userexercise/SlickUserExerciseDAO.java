@@ -59,7 +59,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
- // public static final int MAX_LENGTH = 300;
+  // public static final int MAX_LENGTH = 300;
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
 
   /**
@@ -90,6 +90,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
+
+  private CommonExercise templateExercise;
+  private int unknownExerciseID;
 
   /**
    * @param database
@@ -910,22 +913,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   @Override
-  public CommonExercise getByExOldID(String oldid) {
-    throw new IllegalArgumentException("dont call me");
-    //return null;
-  }
-
-  @Override
   public CommonExercise getTemplateExercise(int projID) {
     if (templateExercise == null) {
-      Collection<SlickExercise> byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
-      templateExercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+      templateExercise = getByExOldID(NEW_USER_EXERCISE, projID);
     }
     return templateExercise;
   }
 
-  private CommonExercise templateExercise;
-  private int unknownExerciseID;
+  @Override
+  public CommonExercise getByExOldID(String oldid, int projID) {
+    Collection<SlickExercise> byExid = dao.getByExid(oldid, projID);
+    return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+  }
 
   /**
    * @param projID
@@ -1039,13 +1038,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   /**
-   * @see ProjectSync#doDelete
    * @param exids
+   * @see ProjectSync#doDelete
    */
   public void deleteByExID(Collection<Integer> exids) {
     int i = dao.deleteByIDs(exids);
     if (i != exids.size()) {
-      logger.warn("deleteByExID tried to delete " +exids.size() + " but only changed " + i + " rows?");
+      logger.warn("deleteByExID tried to delete " + exids.size() + " but only changed " + i + " rows?");
     }
   }
 
@@ -1287,14 +1286,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param oldToNew
    * @see #getOldToNew
    */
-  private void addToDominoMap(List<SlickExercise> allPredefByProject, Map<Integer, Integer> oldToNew) {
+/*  private void addToDominoMap(List<SlickExercise> allPredefByProject, Map<Integer, Integer> oldToNew) {
     allPredefByProject.forEach(exercise -> {
       if (oldToNew.put(exercise.legacyid(), exercise.id()) != null) {
         logger.warn("addToDominoMap : huh? already saw an exercise with id " + exercise.exid() + ", domino id " + exercise.legacyid() +
             " replace with " + exercise);
       }
     });
-  }
+  }*/
 
   /**
    * @param projid

@@ -69,8 +69,12 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -94,6 +98,10 @@ public class ProjectManagement implements IProjectManagement {
   public static final String MODIFIED = "Modified";
   public static final String NUM_ITEMS = "Num Items";
   private static final String DOMINO_ID = "Domino ID";
+
+  private static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+  private static final ZoneId UTC = ZoneId.of("UTC");
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -143,13 +151,17 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private DominoImport setupDominoProjectImport(ServletContext servletContext) {
-    IProjectWorkflowDAO workflowDelegate;
     SimpleDominoContext simpleDominoContext = new SimpleDominoContext();
     simpleDominoContext.init(servletContext);
+
     ProjectServiceDelegate projectDelegate = simpleDominoContext.getProjectDelegate();
-    workflowDelegate = simpleDominoContext.getWorkflowDAO();
+    IProjectWorkflowDAO workflowDelegate = simpleDominoContext.getWorkflowDAO();
     DocumentServiceDelegate documentDelegate = simpleDominoContext.getDocumentDelegate();
-    return new DominoImport(projectDelegate, workflowDelegate, documentDelegate,
+
+    return new DominoImport(
+        projectDelegate,
+        workflowDelegate,
+        documentDelegate,
         (Mongo) servletContext.getAttribute(MONGO_ATT_NAME));
   }
 
@@ -518,6 +530,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * If the project has become retired or deleted, they get kicked out.
+   *
    * @param userid
    * @return
    */
@@ -971,6 +984,41 @@ public class ProjectManagement implements IProjectManagement {
     return status;
   }
 
+  public ImportInfo getImportFromDomino(int projID) {
+    Project project = getProject(projID);
+
+    Timestamp modified = project.getProject().lastimport();
+
+    String sinceInUTC = getModifiedTimestamp(project, modified);
+
+    logger.info("getImportFromDomino getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
+
+    int dominoid = project.getProject().dominoid();
+    return getImportFromDomino(projID, dominoid, sinceInUTC);
+  }
+
+  /**
+   * If the project is empty, go to the beginning of time, more or less.
+   * So if you make a project in domino, then in netprof, will pick up everything in domino.
+   *
+   * @param project
+   * @param modified
+   * @return
+   */
+  @NotNull
+  private String getModifiedTimestamp(Project project, Timestamp modified) {
+    ZonedDateTime zdt;
+
+    if (project.getRawExercises().isEmpty()) {
+      Date fiveYearsAgo = new Date(System.currentTimeMillis() - FIVE_YEARS);
+      //  logger.info("Start from " + fiveYearsAgo);
+      zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), UTC);
+    } else {
+      zdt = ZonedDateTime.ofInstant(modified.toInstant(), UTC);
+    }
+    return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
+  }
+
   /**
    * @param projID
    * @param dominoID
@@ -978,9 +1026,8 @@ public class ProjectManagement implements IProjectManagement {
    * @return
    * @see mitll.langtest.server.domino.ProjectSync#addPending
    */
-  @Override
-  public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
-    return dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
+  private ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
+    return dominoImport == null ? null : dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
   }
 
   /**
@@ -988,6 +1035,6 @@ public class ProjectManagement implements IProjectManagement {
    * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
    */
   public List<ImportProjectInfo> getVocabProjects() {
-    return dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());
+    return dominoImport == null ? Collections.emptyList() : dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());
   }
 }

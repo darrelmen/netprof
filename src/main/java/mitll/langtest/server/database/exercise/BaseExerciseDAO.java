@@ -513,7 +513,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     if (addRemoveDAO != null) {
       for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
         String oldid = id.getOldid();
-        CommonExercise where = userExerciseDAO.getByExOldID(oldid);
+        CommonExercise where = userExerciseDAO.getByExOldID(oldid, -1);
         if (where == null) {
           logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
         } else {
