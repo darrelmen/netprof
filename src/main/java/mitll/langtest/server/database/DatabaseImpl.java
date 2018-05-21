@@ -319,11 +319,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       projectManagement.populateProjects();
       userDAO.setProjectManagement(getProjectManagement());
 
-
-
-//      Project project = getProject(16);
       ImportInfo importFromDomino = getProjectManagement().getImportFromDomino(16);
-
     }
     return this;
   }

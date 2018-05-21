@@ -92,6 +92,7 @@ public class MailSupport {
   private AtomicInteger sent = new AtomicInteger(), failure = new AtomicInteger(), success = new AtomicInteger();
   private Set<Message> pending = new HashSet<>();
   private Set<Date> failures = new HashSet<>();
+  private List<String> recs;
 
   public MailSupport(ServerProperties serverProps) {
     this(serverProps.isDebugEMail(),
@@ -99,7 +100,8 @@ public class MailSupport {
         serverProps.getMailServer(),
         serverProps.getMailFrom(),
         serverProps.sendHeartbeat(),
-        serverProps.getHeartbeatPeriod()
+        serverProps.getHeartbeatPeriod(),
+        serverProps.getHeartbeatRec()
     );
   }
 
@@ -108,7 +110,7 @@ public class MailSupport {
 
   public void addHeartbeat() {
     if (doHeartbeat) {
-      logger.info("\n\n\n\naddHearbeat --- \n\n\n\n");
+      //  logger.info("\n\n\n\naddHearbeat --- \n\n\n\n");
       TimerTask myTask = new TimerTask() {
         @Override
         public void run() {
@@ -127,7 +129,7 @@ public class MailSupport {
   }
 
   public void stopHeartbeat() {
-    logger.info("stopHeartbeat ");
+//    logger.info("stopHeartbeat ");
     timer.cancel();
   }
 
@@ -146,13 +148,14 @@ public class MailSupport {
    * @see RestUserManagement#getMailSupport()
    */
   private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom, boolean doHeartbeat,
-                      long period) {
+                      long period, List<String> recs) {
     this.debugEmail = true;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
     this.mailFrom = mailFrom;
     this.period = period;
     this.doHeartbeat = doHeartbeat;
+    this.recs = recs;
     if (testEmail) {
       logger.warn("MailSupport --->using test email");
     }
@@ -353,7 +356,7 @@ public class MailSupport {
     try {
       pending.add(message);
       sent.getAndIncrement();
-   //   if (random.nextInt(10)<5) throw new MessagingException("dude!");
+      //   if (random.nextInt(10)<5) throw new MessagingException("dude!");
       Transport.send(message);
       success.getAndIncrement();
       synchronized (this) {
@@ -413,10 +416,10 @@ public class MailSupport {
 
     Calendar cal = Calendar.getInstance();
     Map<Integer, Map<Integer, Set<Integer>>> dayToHourToMin = new HashMap<>();
-    int month=-1;
+    int month = -1;
     for (Date f : failures) {
       cal.setTime(f);
-      if (month ==-1) month=cal.get(Calendar.MONTH)+1;
+      if (month == -1) month = cal.get(Calendar.MONTH) + 1;
       int day = cal.get(Calendar.DAY_OF_MONTH);
       Map<Integer, Set<Integer>> hourToMin = dayToHourToMin.computeIfAbsent(day, k -> new HashMap<>());
       int hour = cal.get(Calendar.HOUR_OF_DAY);
@@ -426,7 +429,18 @@ public class MailSupport {
       minInHour.add(minute);
     }
 
-    StringBuilder builder=new StringBuilder();
+    StringBuilder builder = getSummary(dayToHourToMin, month);
+    message += builder;
+    String hearbeat = METRONOME;
+
+    for (String rec : recs) {
+      sendEmail(hearbeat + " #" + sent + " from " + getHostName() + " " + suffix, message, rec, true);
+    }
+  }
+
+  @NotNull
+  private StringBuilder getSummary(Map<Integer, Map<Integer, Set<Integer>>> dayToHourToMin, int month) {
+    StringBuilder builder = new StringBuilder();
     builder.append("\n\nFailure times : \n");
     for (int day : dayToHourToMin.keySet()) {
       builder.append("Day ")
@@ -440,13 +454,12 @@ public class MailSupport {
             .append(hour)
             .append(
                 //"(" +minutes.size()+ ")" +
-                    " : ")
+                " : ")
         ;
         for (int min : minutes) {
           if (min < 10) {
             builder.append("0").append(min).append(", ");
-          }
-          else {
+          } else {
             builder.append(min).append(", ");
           }
         }
@@ -454,9 +467,7 @@ public class MailSupport {
       }
       builder.append("\n");
     }
-    message += builder;
-    String hearbeat = METRONOME;
-    sendEmail(hearbeat + " #" + sent + " from " + getHostName() + " " + suffix, message, REC, true);
+    return builder;
   }
 
   /**

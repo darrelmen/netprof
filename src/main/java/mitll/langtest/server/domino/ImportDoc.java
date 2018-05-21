@@ -5,6 +5,7 @@ import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.user.DBUser;
 
 import java.util.Date;
+import java.util.List;
 
 public class ImportDoc {
   private int docID;
@@ -31,6 +32,10 @@ public class ImportDoc {
     return timestamp;
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#getExerciseFromImport(int, int, String, String, List)
+   * @return
+   */
   public VocabularyItem getVocabularyItem() {
     return vocabularyItem;
   }

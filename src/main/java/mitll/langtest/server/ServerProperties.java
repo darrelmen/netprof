@@ -132,6 +132,9 @@ public class ServerProperties {
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
   public static final String DEFAULT_MAIL_FROM = "noreply@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
+  private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
+
+  private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -642,7 +645,7 @@ public class ServerProperties {
    * @deprecated
    */
   public boolean getOldSchoolService() {
-    return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));// || props.getProperty("webserviceHostPort") == null;
+    return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));
   }
 
   /**
@@ -956,9 +959,16 @@ public class ServerProperties {
     return getDefaultTrue("addUserViaEmail");
   }
 
-  public boolean sendHeartbeat() { return getDefaultTrue("sendHeartbeat"); }
+  public boolean sendHeartbeat() {
+    return getDefaultTrue("sendHeartbeat");
+  }
+
+  public List<String> getHeartbeatRec() {
+    String heartbeatRec = props.getProperty("heartbeatRec", HEARTBEAT_REC);
+    return Arrays.asList(heartbeatRec.split(","));
+  }
 
   public int getHeartbeatPeriod() {
-    return getIntPropertyDef("heartbeatPeriod", 1*60*1000);
+    return getIntPropertyDef("heartbeatPeriod", 5 * 60 * 1000);
   }
 }

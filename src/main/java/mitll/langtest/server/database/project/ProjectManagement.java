@@ -987,14 +987,16 @@ public class ProjectManagement implements IProjectManagement {
   public ImportInfo getImportFromDomino(int projID) {
     Project project = getProject(projID);
 
-    Timestamp modified = project.getProject().lastimport();
+    if (project != null) {
+      Timestamp modified = project.getProject().lastimport();
 
-    String sinceInUTC = getModifiedTimestamp(project, modified);
+      String sinceInUTC = getModifiedTimestamp(project, modified);
 
-    logger.info("getImportFromDomino getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
+      logger.info("getImportFromDomino getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
 
-    int dominoid = project.getProject().dominoid();
-    return getImportFromDomino(projID, dominoid, sinceInUTC);
+      int dominoid = project.getProject().dominoid();
+      return getImportFromDomino(projID, dominoid, sinceInUTC);
+    } else return null;
   }
 
   /**

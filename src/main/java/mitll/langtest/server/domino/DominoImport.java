@@ -9,7 +9,10 @@ import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.*;
+import mitll.hlt.domino.shared.model.document.DocumentColumn;
+import mitll.hlt.domino.shared.model.document.IMetadataField;
+import mitll.hlt.domino.shared.model.document.MetadataComponentBase;
+import mitll.hlt.domino.shared.model.document.VocabularyItem;
 import mitll.hlt.domino.shared.model.metadata.MetadataTypes;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.project.ProjectColumn;
@@ -31,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
-import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.VocabularyMetadata.V_NP_ID;
 import static mitll.langtest.server.domino.ProjectSync.MONGO_TIME;
 
 public class DominoImport implements IDominoImport {
@@ -39,14 +41,14 @@ public class DominoImport implements IDominoImport {
   private static final String VOCABULARY = "Vocabulary";
   private static final String V_UNIT = "v-unit";
   private static final String V_CHAPTER = "v-chapter";
-  public static final String ID = "_id";
-  public static final String ACTIVE = "active";
-  public static final String DELETE_TIME = "deleteTime";
-  public static final String PROJ_ID = "projId";
-  public static final String V_NP_ID = "v-np-id";
-  public static final String METADATA = "metadata";
-  public static final String DOC_CONTENT = "docContent";
-  public static final String VALUE = "value";
+  private static final String ID = "_id";
+  private static final String ACTIVE = "active";
+  private static final String DELETE_TIME = "deleteTime";
+  private static final String PROJ_ID = "projId";
+  private static final String V_NP_ID = "v-np-id";
+  private static final String METADATA = "metadata";
+  private static final String DOC_CONTENT = "docContent";
+  private static final String VALUE = "value";
 
   private final ProjectServiceDelegate projectDelegate;
   private final DocumentServiceDelegate documentDelegate;
@@ -168,24 +170,20 @@ public class DominoImport implements IDominoImport {
     } else {
       workflow
           .getTaskSpecs()
-          .forEach(taskSpecification -> {
-            taskSpecification
-                .getMetadataLists()
-                .forEach(metadataList -> {
-                  metadataList
-                      .getList()
-                      .forEach(metadataSpecification -> {
-                        String dbName = metadataSpecification.getDBName();
-                        String longName = metadataSpecification.getLongName();
+          .forEach(taskSpecification -> taskSpecification
+              .getMetadataLists()
+              .forEach(metadataList -> metadataList
+                  .getList()
+                  .forEach(metadataSpecification -> {
+                    String dbName = metadataSpecification.getDBName();
+                    String longName = metadataSpecification.getLongName();
 
-                        if (dbName.equalsIgnoreCase(V_UNIT)) {
-                          importProjectInfo.setUnitName(longName);
-                        } else if (dbName.equalsIgnoreCase(V_CHAPTER)) {
-                          importProjectInfo.setChapterName(longName);
-                        }
-                      });
-                });
-          });
+                    if (dbName.equalsIgnoreCase(V_UNIT)) {
+                      importProjectInfo.setUnitName(longName);
+                    } else if (dbName.equalsIgnoreCase(V_CHAPTER)) {
+                      importProjectInfo.setChapterName(longName);
+                    }
+                  })));
 
       String unitName = importProjectInfo.getUnitName();
       String chapterName = importProjectInfo.getChapterName();
@@ -249,6 +247,8 @@ public class DominoImport implements IDominoImport {
     List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
 
     Set<String> deletedNPIDs = new TreeSet<>();
+
+    //Map<String, Integer> npToDomino = new HashMap<>();
 
     Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs);
 
@@ -338,8 +338,8 @@ public class DominoImport implements IDominoImport {
     private final List<ImportDoc> added;
     private final List<ImportDoc> changed;
     private final List<ImportDoc> deleted;
-    private Collection<Integer> deleted2;
-    private Set<String> deletedNPIDs;
+    private final Collection<Integer> deleted2;
+    private final Set<String> deletedNPIDs;
 
     /**
      * @param changed
@@ -427,7 +427,8 @@ public class DominoImport implements IDominoImport {
 
     List<Integer> ids = new ArrayList<>();
 
-//    Map<Integer, String> dominoToNPID = new HashMap<>();
+    //Map<String, Integer> npToDomino = new HashMap<>();
+
     try (MongoCursor<Document> cursor = projection.iterator()) {
       while (cursor.hasNext()) {
         Document doc = cursor.next();
@@ -456,15 +457,13 @@ public class DominoImport implements IDominoImport {
               String npID = matchingMeta.getString(VALUE);
               if (npID != null) {
                 npIDs.add(npID);
-//                  dominoToNPID.put(id, npID);
+             //   npToDomino.put(npID,id);
               }
-            }
-            else {
+            } else {
               logger.warn("no metadata on " + metadata);
             }
           }
-        }
-        else {
+        } else {
           logger.warn("docContent not a document " + docContent);
         }
 
@@ -472,9 +471,12 @@ public class DominoImport implements IDominoImport {
     }
 
     logger.info("getDeletedDocsSince : found " + ids.size() +
-       // " deleted from " + total + " known documents," +
+        // " deleted from " + total + " known documents," +
         "\n\n\n\n" +
-        "\n\tfound : " + npIDs);
+        "\n\tfound      : " + npIDs
+        //+
+        //"\n\tnpToDomino : " + npToDomino
+    );
     return ids;
   }
 

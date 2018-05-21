@@ -660,6 +660,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return dominoContextIndex;
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
+   * @param dominoContextIndex
+   */
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;
   }

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
 
@@ -39,6 +40,7 @@ public class DominoExerciseDAO {
   private static final String V_NP_ID = "v-np-id";
   private static final String PREFIX = "v-";
   public static final String EDIT = "edit";
+  public static final String UNKNOWN = "unknown";
 
   private final JSONSerializer ser;
 
@@ -52,45 +54,6 @@ public class DominoExerciseDAO {
   public DominoExerciseDAO(JSONSerializer serializer) {
     this.ser = serializer;
   }
-
-  /**
-   * TODO : use domino language object
-   *
-   * @param file        null except for testing
-   * @param inputStream null only when testing
-   * @param projid      for this project
-   * @param importUser  who is doing the importing - marked as the creator of the exercises
-   * @return
-   * @see mitll.langtest.server.FileUploadHelper#readJSON
-   * @deprecated
-   */
-/*  public ImportInfo readExercises(String file, InputStream inputStream, int projid, int importUser) {
-    try {
-      JsonObject readObj = getJsonObject(file, inputStream);
-
-      ImportProjectInfo projectInfo = getProjectInfo(readObj);
-      setProjectInfo(importUser, readObj, projectInfo);
-
-      List<CommonExercise> exercises =
-          getChangedCommonExercises(
-              projid,
-              projectInfo.getCreatorID(),
-              projectInfo.getUnitName(),
-              projectInfo.getChapterName(),
-
-              readObj.getJsonArray(DOCUMENTS)
-          );
-
-      return new ImportInfo(
-          projectInfo,
-          exercises
-      );
-
-    } catch (FileNotFoundException e) {
-      logger.error("Got " + e, e);
-    }
-    return null;
-  }*/
 
   /**
    * @param projid
@@ -129,77 +92,6 @@ public class DominoExerciseDAO {
         importDocs.getDeletedNPIDs());
   }
 
- /* private JsonObject getJsonObject(String file, InputStream inputStream) throws FileNotFoundException {
-    JsonReader reader = file == null ?
-        Json.createReader(inputStream) :
-        Json.createReader(new FileReader(file));
-
-    return (JsonObject) reader.read();
-  }
-
-  private void setProjectInfo(int importUser, JsonObject readObj, ImportProjectInfo projectInfo) {
-    ProjectDescriptor pd = getProjectDescriptor(readObj);
-    logger.info("readExercises got ProjectDescriptor " + pd + " : " + projectInfo.getUnitName() + ", " + projectInfo.getChapterName());
-
-    String languageName = getLanguage(pd);
-    int creator = getCreator(importUser, pd);
-    Date createTime = pd.getCreateTime();
-    int id = pd.getId();
-
-    projectInfo.setCreatorID(creator);
-    projectInfo.setDominoProjectID(id);
-    projectInfo.setCreateTime(createTime.getTime());
-    projectInfo.setLanguage(languageName);
-  }*/
-
-
-  /**
-   * Get the unit and chapter from the workflow
-   *
-   * @param readObj
-   * @return
-   */
-/*
-  @NotNull
-  private ImportProjectInfo getProjectInfo(JsonObject readObj) {
-    return getImportProjectInfoFromWorkflow(getProjectWorkflow(readObj));
-  }
-*/
-
-  /**
-   * @param pw
-   * @return
-   * @see mitll.langtest.server.database.project.ProjectManagement#getImportProjectInfos
-   */
-/*
-  @NotNull
-  private ImportProjectInfo getImportProjectInfoFromWorkflow(ProjectWorkflow pw) {
-    TaskSpecification taskSpec = pw.getTaskSpec(EDIT);
-    Collection<MetadataList> metadataLists = taskSpec.getMetadataLists();
-    String unitName = "";
-    String chapterName = "";
-    for (MetadataList metadataList : metadataLists) {
-      MetadataSpecification metadata = metadataList.getMetadata(V_UNIT);
-      unitName = metadata.getShortName();
-      MetadataSpecification metadata2 = metadataList.getMetadata(V_CHAPTER);
-      chapterName = metadata2.getShortName();
-
-
-      if (!unitName.isEmpty()) break;
-    }
-
-    return new ImportProjectInfo(unitName, chapterName);
-  }
-
-  private ProjectDescriptor getProjectDescriptor(JsonObject readObj) {
-    return ser.deserialize(ProjectDescriptor.class, readObj.getJsonObject(PROJECT).toString());
-  }
-
-  private ProjectWorkflow getProjectWorkflow(JsonObject readObj) {
-    return ser.deserialize(ProjectWorkflow.class, readObj.getJsonObject(WORKFLOW).toString());
-  }
-*/
-
 
   /**
    * Get the language from the content descriptor.
@@ -216,24 +108,6 @@ public class DominoExerciseDAO {
     return content.getLanguageName();
   }
 
-  /**
-   * Get the creator from the project descriptor
-   *
-   * @param importUser
-   * @param pd
-   * @return
-   */
-/*  private int getCreator(int importUser, ProjectDescriptor pd) {
-    UserDescriptor creator1 = pd.getCreator();
-    return creator1 != null ? creator1.getDocumentDBID() : importUser;
-  }
-
-  @NotNull
-  private List<CommonExercise> getChangedCommonExercises(int projid, int creator, String unitName, String chapterName, JsonArray docArr) {
-    List<CommonExercise> exercises = new ArrayList<>();
-    docArr.forEach(docObj -> exercises.add(getExerciseFromVocabularyItem(projid, creator, unitName, chapterName, docObj)));
-    return exercises;
-  }*/
   @NotNull
   private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
                                                        DominoImport.ChangedAndDeleted changedAndDeleted) {
@@ -348,7 +222,7 @@ public class DominoExerciseDAO {
         return displayValue;
       }
     }
-    return "unknown";
+    return UNKNOWN;
   }
 
   /**
@@ -376,27 +250,39 @@ public class DominoExerciseDAO {
           "\n\tsentence  " + sentenceVal);
 
       if (!sentenceVal.trim().isEmpty()) {
-        Exercise context = getExerciseFromVocabularyItem(
-            projid,
-            contextNPID,
-            docID, // parent domino id
-            creator,
+        int parentDominoID = parentExercise.getDominoID();
+        Map<String, String> unitToValue = parentExercise.getUnitToValue();
 
-            removeMarkup(sentenceVal),
-            removeMarkup(sample.getAlternateFormVal()),
-            removeMarkup(sample.getTransliterationVal()),
-            removeMarkup(sample.getTranslationVal()),
+        Exercise context =
+            getContextExercise(projid, creator, docID, sample, contextNPID, sentenceVal, parentDominoID, unitToValue);
 
-            true);
+        logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentDominoID);
 
-        context.setDominoContextIndex(sample.getNum());
-
-        context.setUnitToValue(parentExercise.getUnitToValue());
         parentExercise.getDirectlyRelated().add(context);
-        logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentExercise.getDominoID());
-        context.setParentDominoID(parentExercise.getDominoID());
       }
     }
+  }
+
+  @NotNull
+  private Exercise getContextExercise(int projid, int creator, int docID, SampleSentence sample, String contextNPID, String sentenceVal, int parentDominoID, Map<String, String> unitToValue) {
+    Exercise context = getExerciseFromVocabularyItem(
+        projid,
+        contextNPID,
+        docID, // parent domino id
+        creator,
+
+        removeMarkup(sentenceVal),
+        removeMarkup(sample.getAlternateFormVal()),
+        removeMarkup(sample.getTransliterationVal()),
+        removeMarkup(sample.getTranslationVal()),
+
+        true);
+
+    context.setDominoContextIndex(sample.getNum());
+
+    context.setUnitToValue(unitToValue);
+    context.setParentDominoID(parentDominoID);
+    return context;
   }
 
   /**
