@@ -148,7 +148,7 @@ public class ProjectSync implements IProjectSync {
 
         // if (!newContextEx.isEmpty()) {
         Set<Integer> toDelete = new HashSet<>();
-        getNewAndChangedContextExercises(projectid, importFromDomino, oldIDToExer, dominoToNonContextEx, newContextEx, importUpdateEx, toDelete, importToKnownID);
+        updates.addAll(getNewAndChangedContextExercises(projectid, importFromDomino, oldIDToExer, dominoToNonContextEx, newContextEx, importUpdateEx, toDelete, importToKnownID));
         logger.info("Context to delete " + toDelete);
         // }
 
@@ -272,7 +272,7 @@ public class ProjectSync implements IProjectSync {
         if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
           importUpdateEx.add(importEx);
           MutableExercise mutable = importEx.getMutable();
-          int id = importEx.getID();
+          int id = currentKnownExercise.id();
           logger.info("\tbefore " + id + "/" + importEx.getOldID() + " domino " + importEx.getDominoID());
           mutable.setID(currentKnownExercise.id());
           mutable.setOldID(npID);
@@ -335,16 +335,17 @@ public class ProjectSync implements IProjectSync {
    */
 
   @NotNull
-  private void getNewAndChangedContextExercises(int projectid,
-                                                ImportInfo importFromDomino,
-                                                Map<String, SlickExercise> oldIDToExer,
+  private List<DominoUpdateItem> getNewAndChangedContextExercises(int projectid,
+                                                                  ImportInfo importFromDomino,
+                                                                  Map<String, SlickExercise> oldIDToExer,
 
-                                                Map<Integer, SlickExercise> dominoToNonContextEx,
+                                                                  Map<Integer, SlickExercise> dominoToNonContextEx,
 
-                                                List<CommonExercise> newContextEx,
-                                                List<CommonExercise> importUpdateEx,
-                                                Set<Integer> toDelete,
-                                                Map<CommonExercise, Integer> importToKnownID) {
+                                                                  List<CommonExercise> newContextEx,
+                                                                  List<CommonExercise> importUpdateEx,
+                                                                  Set<Integer> toDelete,
+                                                                  Map<CommonExercise, Integer> importToKnownID) {
+    List<DominoUpdateItem> updateItems = new ArrayList<>();
     {
       Map<CommonExercise, CommonExercise> childToParent = new HashMap<>();
       Map<String, CommonExercise> dominoIDToContextChangedExercise = getDominoIDToContextExercise(importFromDomino.getChangedExercises(), childToParent);
@@ -354,7 +355,6 @@ public class ProjectSync implements IProjectSync {
           "\n\timporting " + dominoIDToContextChangedExercise.size() +
           "\n\tcontext : " + dominoIDToContextChangedExercise.keySet());
 
-      List<DominoUpdateItem> updateItems=new ArrayList<>();
       // three piles:
       // currentIDs exercises for the project that are not in the import should be deleted
       // import exercises not in the currentIDs set are new and need to be added
@@ -380,19 +380,11 @@ public class ProjectSync implements IProjectSync {
             List<CommonExercise> dominoContext = importEx.getDirectlyRelated();
 
             // match on domino id or np id...?
-            boolean found = false;
-            for (CommonExercise dContext : dominoContext) {
-              if (context.getDominoID() == dContext.getDominoID()) {
-                logger.info("getNewAndChangedContextExercises found existing " + context.getID() + " domino " + context.getDominoID());
-                found = true;
-              } else if (context.getOldID().equalsIgnoreCase(dContext.getOldID())) {
-                logger.info("getNewAndChangedContextExercises 2 found existing " + context.getID() + " domino " + context.getDominoID() + " " + context.getOldID());
-                found = true;
-              }
-            }
+            boolean found = hasMatchingExistingContext(context, dominoContext);
 
             if (!found) {
               toDelete.add(context.getID());
+              updateItems.add(new DominoUpdateItem(context, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.DELETE));
               logger.info("getNewAndChangedContextExercises 3 found to delete " + context.getID() +
                   "\n\t ex: " + context);
             }
@@ -400,37 +392,6 @@ public class ProjectSync implements IProjectSync {
         }
       });
 
-/*      for (CommonExercise importParent : importFromDomino.getChangedExercises()) {
-        SlickExercise parentExercise = dominoToNonContextEx.get(importParent.getDominoID());
-        if (parentExercise != null) {
-          CommonExercise currentParent = exerciseServices.getExercise(projectid, parentExercise.id());
-          List<CommonExercise> currentContext = currentParent.getDirectlyRelated();
-
-          logger.info("getNewAndChangedContextExercises importParent " + currentParent.getID() + " has " + currentContext.size());
-
-          for (CommonExercise context : currentContext) {
-            List<CommonExercise> dominoContext = importParent.getDirectlyRelated();
-
-            boolean found = false;
-            for (CommonExercise dContext : dominoContext) {
-              if (context.getDominoID() == dContext.getDominoID()) {
-                logger.info("getNewAndChangedContextExercises found existing " + context.getID() + " domino " + context.getDominoID());
-                found = true;
-              } else if (context.getOldID().equalsIgnoreCase(dContext.getOldID())) {
-                logger.info("getNewAndChangedContextExercises 2 found existing " + context.getID() + " domino " + context.getDominoID() + " " + context.getOldID());
-                found = true;
-              }
-            }
-            if (!found) {
-              toDelete.add(context.getID());
-              logger.info("getNewAndChangedContextExercises 3 found to delete " + context.getID() + " " + context);
-            }
-          }
-          // now look at the
-        } else {
-          logger.warn("getNewAndChangedContextExercises can't find import by domino id " + importParent.getDominoID());
-        }
-      }*/
 
 // could have added context or changed.
       dominoIDToContextChangedExercise.forEach((dominoID, contextEx) -> {
@@ -454,36 +415,66 @@ public class ProjectSync implements IProjectSync {
         if (maybeKnown == null) {  // it's new
           logger.info("getNewAndChangedContextExercises no known ex by " + npID + " for " + dominoID);
           newContextEx.add(contextEx);
+          updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.ADD));
         } else {  // it's known but different.
-          CommonExercise currentContext = exerciseServices.getExercise(projectid, maybeKnown.getID());
+          int id = maybeKnown.getID();
+          logger.info("getNewAndChangedContextExercises known ex by " + npID + " for " + dominoID + " = " + id);
 
-          String english = currentContext.getEnglish();
-          if (!english.equalsIgnoreCase(dominoEnglish)) {
-            logger.info("english changed" +
-                "\n\tcurrent " + english +
-                "\n\tdomino  " + dominoEnglish);
+          CommonExercise currentContext = exerciseServices.getExercise(projectid, id);
 
-            rememberExID(importUpdateEx, contextEx, currentContext);
+          if (currentContext == null) {
+            logger.warn("\n\ncan't find context by " + id);
           } else {
-            String fl = currentContext.getForeignLanguage();
-            String dominoFL = contextEx.getForeignLanguage();
-            if (!fl.equalsIgnoreCase(dominoFL)) {
-              logger.info("fl changed" +
-                  "\n\tcurrent " + fl +
-                  "\n\tdomino  " + dominoFL);
+            String english = currentContext.getEnglish();
+            if (!english.equalsIgnoreCase(dominoEnglish)) {
+              logger.info("english changed" +
+                  "\n\tcurrent " + english +
+                  "\n\tdomino  " + dominoEnglish);
 
               rememberExID(importUpdateEx, contextEx, currentContext);
-            } else if (didChange(contextEx, currentContext)) {
-              logger.info("changed for " + contextEx);
-            } else {
-              logger.info("no change for " + currentContext);
+              updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
 
+            } else {
+              String fl = currentContext.getForeignLanguage();
+              String dominoFL = contextEx.getForeignLanguage();
+              if (!fl.equalsIgnoreCase(dominoFL)) {
+                logger.info("fl changed" +
+                    "\n\tcurrent " + fl +
+                    "\n\tdomino  " + dominoFL);
+
+                rememberExID(importUpdateEx, contextEx, currentContext);
+                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
+
+              } else if (didChange(contextEx, currentContext)) {
+                logger.info("changed for " + contextEx);
+                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
+
+              } else {
+                logger.info("no change for " + currentContext);
+
+              }
             }
           }
 
         }
       });
     }
+
+    return updateItems;
+  }
+
+  private boolean hasMatchingExistingContext(CommonExercise context, List<CommonExercise> dominoContext) {
+    boolean found = false;
+    for (CommonExercise dContext : dominoContext) {
+      if (context.getDominoID() == dContext.getDominoID()) {
+        logger.info("getNewAndChangedContextExercises found existing " + context.getID() + " domino " + context.getDominoID());
+        found = true;
+      } else if (context.getOldID().equalsIgnoreCase(dContext.getOldID())) {
+        logger.info("getNewAndChangedContextExercises 2 found existing " + context.getID() + " domino " + context.getDominoID() + " " + context.getOldID());
+        found = true;
+      }
+    }
+    return found;
   }
 
   private void rememberExID(List<CommonExercise> importUpdateEx, CommonExercise contextEx, CommonExercise currentContext) {
@@ -493,6 +484,8 @@ public class ProjectSync implements IProjectSync {
   }
 
   /**
+   * Cheesy - just want it for it's id not the whole object...
+   *
    * @param dominoToNonContextEx
    * @param oldIDToExer
    * @param dominoID
