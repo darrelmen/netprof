@@ -159,13 +159,18 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.user" level="WARN">
+        <logger name="mitll.hlt.domino.server.util.Mailer" level="INFO">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
+        <logger name="mitll.hlt.domino.server.user" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
 
         <logger name="org.eclipse.jetty" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
+
         <logger name="org.eclipse.jetty.io" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>

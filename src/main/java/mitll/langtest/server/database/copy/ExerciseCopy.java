@@ -23,7 +23,7 @@ import java.util.*;
 public class ExerciseCopy {
   private static final Logger logger = LogManager.getLogger(ExerciseCopy.class);
 
-  private boolean DEBUG = false;
+  private boolean DEBUG = true;
 
   /**
    * TODO :  How to make sure we don't add duplicates?

@@ -245,7 +245,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String english,
                   String foreignLanguage,
-                  String noAccentFL, String altFL,
+                  String noAccentFL,
+                  String altFL,
                   String transliteration,
                   boolean isOverride,
                   Map<String, String> unitToValue,
@@ -294,7 +295,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   @Override
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, getContext(), getContextTranslation());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
   }
 
   private void copyAudio(AudioRefExercise exercise) {

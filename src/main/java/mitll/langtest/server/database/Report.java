@@ -40,6 +40,7 @@ import mitll.langtest.server.database.excel.ReportToExcel;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.result.MonitorResult;
@@ -114,10 +115,10 @@ public class Report implements IReport {
   private static final String SKIP_USER = "gvidaver";
   static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
   private static final int MIN_DURATION = 250;
-   private static final String WEEK1 = "week";
+  private static final String WEEK1 = "week";
   private static final String YEAR = "year";
   private static final String REFERENCE_RECORDINGS = "referenceRecordings";
-   private static final String HOST = "host";
+  private static final String HOST = "host";
   private static final String TIME_ON_TASK_IOS = "iPad/iPhone Time on Task";
   private static final int ALL_YEARS = -1;
   private static final String FOOTER = "</body></head></html>";
@@ -125,7 +126,7 @@ public class Report implements IReport {
   /**
    * When sending all years, don't go back before this year.
    */
-  private static final int EARLIEST_YEAR = 2015;
+  public static final int EARLIEST_YEAR = 2015;
   private static final String DATA = "data";
   private static final String WEEK_OF_YEAR = "weekOfYear";
   private static final String DATE = "date";
@@ -143,7 +144,13 @@ public class Report implements IReport {
 
   private final Map<Integer, String> idToUser = new HashMap<>();
 
+  /**
+   * @see #isLincoln
+   * @see #shouldSkipUser
+   */
   private final Set<String> lincoln = new HashSet<>(Arrays.asList(SKIP_USER,
+      "demo",
+      "demo_",
       "rbudd",
       "jmelot",
       "esalesky",
@@ -171,7 +178,9 @@ public class Report implements IReport {
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+  // private IUserDAO userDAO;
+  private Map<Integer, String> idToUserID = new HashMap<>();
 
   /**
    * @param resultDAO
@@ -183,6 +192,7 @@ public class Report implements IReport {
   Report(IResultDAO resultDAO,
          IEventDAO eventDAO,
          IAudioDAO audioDAO,
+
          List<ReportUser> users,
          List<ReportUser> deviceUsers,
          Map<Integer, Integer> userToProject,
@@ -193,14 +203,26 @@ public class Report implements IReport {
     this.audioDAO = audioDAO;
     this.users = users;
 
+    users.forEach(user -> idToUserID.put(user.getID(), user.getUserID()));
+
+    Set<ReportUser> foundLincoln = new HashSet<>();
     users.forEach(reportUser -> {
       Kind userKind = reportUser.getUserKind();
-      if (userKind == Kind.STUDENT) allStudents.add(reportUser.getID());
+      if (userKind == Kind.STUDENT) {
+        if (isLincoln(reportUser)) {
+          foundLincoln.add(reportUser);
+        } else {
+          allStudents.add(reportUser.getID());
+        }
+      }
       if (userKind == Kind.TEACHER) allTeachers.add(reportUser.getID());
     });
 
+    StringBuilder builder = new StringBuilder();
+    foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
+    logger.info("found lincoln users " + builder);
+
     this.deviceUsers = deviceUsers;
-    // this.hostname = hostname;
     this.userToProject = userToProject;
     this.logAndNotify = logAndNotify;
   }
@@ -989,6 +1011,11 @@ public class Report implements IReport {
     return user.getID() + " " + user.getUserID() + " " + user.getUserKind();
   }
 
+  /**
+   * @param user
+   * @return
+   * @see #getUsers(StringBuilder, Collection, String, JSONObject, int, boolean, String)
+   */
   private boolean isLincoln(ReportUser user) {
     boolean contains = false;
     for (String ll : lincoln) {
@@ -1480,7 +1507,7 @@ public class Report implements IReport {
         if (yearTimeRange.inYear(timestamp)) {  // if it's in the requested year
           calendar.setTimeInMillis(timestamp);
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          boolean firstWeeks = DEBUG & year == 2018 && w == 7;// w==5;
+          boolean firstWeeks = DEBUG & year == 2015 && w == 2;// w==5;
 
           if (!isRefAudioResult(result)) {      // and not ref audio
             tallyWeek(weekToAll, w);
@@ -1513,11 +1540,14 @@ public class Report implements IReport {
 
                 boolean add = skipped.add(userid);
                 if (add) {
-                  if (DEBUG) logger.info(language + " " + w +
-                      " skipping not a student " + userid + " " + result.getUniqueID() + " " + new Date(result.getTimestamp()));
+                  if (DEBUG) {
+                    logger.info(language + " " + w +
+                        " skipping not a student " +
+                        getUserInfo(userid) + "\n\tresult id " + result.getUniqueID() + " on " + new Date(result.getTimestamp()));
+                  }
 
                   if (!allTeachers.contains(userid)) {
-                    logger.warn("hmm " + userid + "is not a teacher?");
+                    logger.warn("hmm " + getUserInfo(userid) + " is not a teacher?");
                   }
                 }
 
@@ -1592,6 +1622,11 @@ public class Report implements IReport {
     } else {
       reportStats.putIntMulti(INFO.DEVICE_RECORDINGS_WEEKLY, getWeekToCount(weekToCount, year, language));
     }
+  }
+
+  @NotNull
+  private String getUserInfo(int userid) {
+    return userid + "/" + idToUserID.get(userid);
   }
 
   private void tallyWeek(Map<Integer, Integer> weekToAll, int w) {

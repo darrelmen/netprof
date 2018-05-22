@@ -82,14 +82,14 @@ public class JSONExportTest extends JsonExport {
   }
 */
 
-  @Test
+/*  @Test
   public void testExport2() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, database.getExercises(-1));
     logger.info("got " + jsonObject);
 
-  }
+  }*/
 
  /* @Test
   public void testExport3() {
@@ -103,7 +103,7 @@ public class JSONExportTest extends JsonExport {
     Collection<CommonExercise> exercises = jsonExport.getExercises(s);
   }*/
 
-  @Test
+/*  @Test
   public void testExport4() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     Collection<CommonExercise> exercises = database.getExercises(-1);
@@ -126,9 +126,9 @@ public class JSONExportTest extends JsonExport {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
-  @Test
+/*  @Test
   public void testExportSpanish() {
     exportTo("spanishNew.json");
   }
@@ -136,9 +136,9 @@ public class JSONExportTest extends JsonExport {
   @Test
   public void testExportMandarin() {
     exportTo("mandarin.json");
-  }
+  }*/
 
-  void exportTo(String pathname) {
+/*  void exportTo(String pathname) {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     Collection<CommonExercise> exercises = database.getExercises(-1);
     List<CommonExercise> copy = new ArrayList<>(exercises);
@@ -153,7 +153,7 @@ public class JSONExportTest extends JsonExport {
     logger.debug("writing to  " + file.getAbsolutePath());
 
     writeToFile(text, file);
-  }
+  }*/
 
   void writeToFile(String text, File file) {
     try {
@@ -175,7 +175,7 @@ public class JSONExportTest extends JsonExport {
       e.printStackTrace();
     }
   }
-
+/*
   @Test
   public void testExport6() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
@@ -200,7 +200,7 @@ public class JSONExportTest extends JsonExport {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   @Test
   public void testExport5() {

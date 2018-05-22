@@ -51,8 +51,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
-  private String cforeignLanguage = "";
-  private String cenglish = "";
+//  private String cforeignLanguage = "";
+//  private String cenglish = "";
   int numPhones;
   private int score = -1;//.0f;
 
@@ -63,7 +63,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see AudioExercise#AudioExercise(int, int)
    */
   ExerciseShell(int realID) {
-    this("", "", "", realID, 0, "", "");
+    this("", "", "", realID, 0);
   }
 
   /**
@@ -71,8 +71,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @param meaning
    * @param foreignLanguage
    * @param realID
-   * @param cfl
-   * @param cenglish
    * @see CommonShell#getShell()
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
@@ -80,16 +78,14 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
                 String meaning,
                 String foreignLanguage,
                 int realID,
-                int numPhones,
-                String cfl,
-                String cenglish) {
+                int numPhones) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
     this.numPhones = numPhones;
-    this.cforeignLanguage = cfl;
-    this.cenglish = cenglish;
+//    this.cforeignLanguage = cfl;
+//    this.cenglish = cenglish;
   }
 
   /**
@@ -97,7 +93,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, "", "");
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
   }
 
   public String getEnglish() {

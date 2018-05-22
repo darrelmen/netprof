@@ -370,8 +370,8 @@ public class DominoExerciseDAO {
         "\n\tdominoID " + exercise.getDominoID() +
         "\n\tnpID     " + exercise.getOldID() +
         "\n\tex id    " + exercise.getID() +
-        "\n\teng      " + exercise.getEnglish() +
-        "\n\tfl       " + exercise.getForeignLanguage() +
+        "\n\teng      '" + exercise.getEnglish() + "'" +
+        "\n\tfl       '" + exercise.getForeignLanguage() + "'" +
         "\n\tcontext  " + isContext);
 
     exercise.setPredef(true);

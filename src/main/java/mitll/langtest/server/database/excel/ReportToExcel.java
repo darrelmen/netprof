@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+import static mitll.langtest.server.database.Report.EARLIEST_YEAR;
+
 /**
  * Created by go22670 on 3/25/16.
  */
@@ -24,7 +26,10 @@ public class ReportToExcel {
   private static final Logger logger = LogManager.getLogger(ReportToExcel.class);
 
   private static final String NET_PRO_F_HISTORICAL = "NetProF Historical";
-  private static final String NET_PRO_F_YTD = "NetProF-Vrt";
+  /**
+   * @see #writeYTDAndHistorical
+   */
+  private static final String NET_PROF_VRT = "NetProF-Vrt";
   private static final String INCREASE = "INCREASE";
   private static final String LANGUAGE = "Language";
   private static final String PROJECT = "Project";
@@ -101,16 +106,45 @@ public class ReportToExcel {
 
     {
       INFO allRecordingsWeekly = deviceRecordings ? INFO.DEVICE_RECORDINGS_WEEKLY : INFO.ALL_RECORDINGS_WEEKLY;
-      int rownum = langToYearToStats.isEmpty() ? 1 :
-          writeWeeklySheet(wb, wb.createSheet(NET_PRO_F_YTD + suffix), langToYearToStats, perProject, allRecordingsWeekly);
-      long now = System.currentTimeMillis();
-      if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
-          " rows to sheet, or " + (now - then) / rownum + " millis/row");
+
+      int thisYear = getThisYear();
+      if (suffix.isEmpty()) {
+        for (int year = thisYear; year >= EARLIEST_YEAR; year--) {
+          String suffixToUse = (year == thisYear) ? "" : "_" + year;
+          int rownum = langToYearToStats.isEmpty() ? 1 :
+              writeWeeklySheetForYear(
+                  wb,
+                  wb.createSheet(NET_PROF_VRT + suffixToUse),
+                  langToYearToStats,
+                  perProject,
+                  allRecordingsWeekly,
+                  year);
+          long now = System.currentTimeMillis();
+          if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
+              " rows to sheet, or " + (now - then) / rownum + " millis/row");
+        }
+      } else {
+        int rownum = langToYearToStats.isEmpty() ? 1 :
+            writeWeeklySheet(
+                wb,
+                wb.createSheet(NET_PROF_VRT + suffix),
+                langToYearToStats,
+                perProject,
+                allRecordingsWeekly);
+        long now = System.currentTimeMillis();
+        if (now - then > 100) logger.warn("toXLSX : took " + (now - then) + " millis to write " + rownum +
+            " rows to sheet, or " + (now - then) / rownum + " millis/row");
+      }
     }
 
     // write the historical sheet
     {
-      writeHistoricalSheet(wb, stats, wb.createSheet(NET_PRO_F_HISTORICAL + suffix), langToYearToStats, perProject,
+      writeHistoricalSheet(
+          wb,
+          stats,
+          wb.createSheet(NET_PRO_F_HISTORICAL + suffix),
+          langToYearToStats,
+          perProject,
           deviceRecordings ? INFO.DEVICE_RECORDINGS : INFO.ALL_RECORDINGS);
     }
   }
@@ -162,9 +196,7 @@ public class ReportToExcel {
 //        logger.info("For " + lang + " " + year + " got " + reportStats);
         Integer orDefault = reportStats == null ? 0 : reportStats.getIntKeyToValue().getOrDefault(recordingType, 0);
         {
-          Cell cell = row.createCell(col++);
-          cell.setCellStyle(cellStyle);
-          cell.setCellValue(orDefault);
+          col = addCellAtCol(cellStyle, row, col, orDefault);
         }
         yearToTotal.put(year, yearToTotal.getOrDefault(year, 0) + orDefault);
       }
@@ -186,9 +218,7 @@ public class ReportToExcel {
       }
 
       for (Integer year : yearsFromStats) {
-        Cell cell = row.createCell(col++);
-        cell.setCellStyle(brightGreenStyle);
-        cell.setCellValue(yearToTotal.getOrDefault(year, 0));
+        col = addCellAtCol(brightGreenStyle, row, col, yearToTotal.getOrDefault(year, 0));
       }
 
       {
@@ -220,7 +250,7 @@ public class ReportToExcel {
           yearToStats.put(year, reportStats);
 //          logger.info("getLangToYearToStats : not merging " + reportStats + " byLanguage " + byLanguage + " " + year);
         } else {
-  //        logger.info("getLangToYearToStats : merging " + reportStats + " into " + current + " byLanguage " + byLanguage + " " + year);
+          //        logger.info("getLangToYearToStats : merging " + reportStats + " into " + current + " byLanguage " + byLanguage + " " + year);
           ReportStats merged = current.getMerged(reportStats);
           yearToStats.put(year, merged);
         }
@@ -327,8 +357,16 @@ public class ReportToExcel {
                                Map<String, Map<Integer, ReportStats>> langToYearToStats,
                                boolean perProject,
                                INFO recordingType) {
-    int thisYear = getThisYear();
-    logger.info("writeWeekly per project " + perProject + " type " + recordingType + " for year " + thisYear);
+    return writeWeeklySheetForYear(workbook, sheet, langToYearToStats, perProject, recordingType, getThisYear());
+  }
+
+  private int writeWeeklySheetForYear(XSSFWorkbook workbook,
+                                      Sheet sheet,
+                                      Map<String, Map<Integer, ReportStats>> langToYearToStats,
+                                      boolean perProject,
+                                      INFO recordingType,
+                                      int yearToReport) {
+    logger.info("writeWeeklySheetForYear per project " + perProject + " type " + recordingType + " for year " + yearToReport);
 
     int rownum = 0;
 
@@ -339,7 +377,7 @@ public class ReportToExcel {
     if (langToYearToStats.isEmpty()) {
       logger.error("huh? no data in " + langToYearToStats);
     }
-    Map<String, Integer> weekToCountFirstLang = getWeektoCountFirstLang(langToYearToStats, thisYear);
+    Map<String, Integer> weekToCountFirstLang = getWeektoCountFirstLang(langToYearToStats, yearToReport);
 
     Map<String, Integer> langToLastWeek = new HashMap<>();
     Map<String, Integer> langToCurrent = new HashMap<>();
@@ -356,7 +394,7 @@ public class ReportToExcel {
     int maxCol = 0;
 
     for (String week : weekToCountFirstLang.keySet()) {
-      if (DEBUG) logger.info("writeWeeklySheet : week " + week + " = " + weekToCountFirstLang.get(week));
+      if (DEBUG) logger.info("writeWeeklySheetForYear : week " + week + " = " + weekToCountFirstLang.get(week));
       Row row = sheet.createRow(rownum++);
 
       int col = 0;
@@ -367,31 +405,39 @@ public class ReportToExcel {
 
       // for every lang per week
       for (String lang : sortedLang) {
-       // boolean debug = lang.startsWith("Pas");
-        ReportStats reportStats = langToYearToStats.get(lang).get(thisYear);
-      //  if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " stats " + reportStats);
-        Map<String, Integer> weekToCountForLang = reportStats.getKeyToValue(recordingType);
+        Map<Integer, ReportStats> yearToStats = langToYearToStats.get(lang);
 
-        Integer count = weekToCountForLang.getOrDefault(week, 0);
-       // if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " count " + count);
+        if (yearToStats == null) {
+          logger.warn("writeWeeklySheetForYear : no stats for " + lang);
+          col = addCellAtCol(cellStyle, row, col, 0);
+        } else {
+          ReportStats reportStats = yearToStats.get(yearToReport);
 
-        int cumulative = langToCurrent.getOrDefault(lang, 0) + count;
-       // if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " cumulative " + cumulative);
+          if (reportStats == null) {
+            logger.warn("writeWeeklySheetForYear : no stats for " + lang + " and year " + yearToReport);
+            col = addCellAtCol(cellStyle, row, col, 0);
+          } else {
+            //  if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " stats " + reportStats);
+            Map<String, Integer> weekToCountForLang = reportStats.getKeyToValue(recordingType);
 
-        marginalTotal += cumulative;
-        langToCurrent.put(lang, cumulative);
+            Integer count = weekToCountForLang.getOrDefault(week, 0);
+            // if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " count " + count);
 
-        {
-          Cell cell = row.createCell(col++);
-          cell.setCellStyle(cellStyle);
-          cell.setCellValue(cumulative);
-        }
-        int diffLastWeek = cumulative - langToPrev.getOrDefault(lang, 0);
-     //   if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " diffLastWeek " + diffLastWeek);
+            int cumulative = langToCurrent.getOrDefault(lang, 0) + count;
+            // if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " cumulative " + cumulative);
+
+            marginalTotal += cumulative;
+            langToCurrent.put(lang, cumulative);
+
+            col = addCellAtCol(cellStyle, row, col, cumulative);
+            int diffLastWeek = cumulative - langToPrev.getOrDefault(lang, 0);
+            //   if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " diffLastWeek " + diffLastWeek);
 
 //        logger.info("lang " + lang + " = " + diffLastWeek);
-        langToLastWeek.put(lang, diffLastWeek);
-        langToPrev.put(lang, cumulative);
+            langToLastWeek.put(lang, diffLastWeek);
+            langToPrev.put(lang, cumulative);
+          }
+        }
       }
 
       {
@@ -405,14 +451,19 @@ public class ReportToExcel {
       if (maxCol < col) maxCol = col;
     }
 
-    Row row = sheet.createRow(rownum++);
-
-    doIncreaseRow(workbook, sortedLang, langToLastWeek, marginalDiff, row);
+    doIncreaseRow(workbook, sortedLang, langToLastWeek, marginalDiff, sheet.createRow(rownum++));
 
     rownum = addFooterRow(workbook, sheet, rownum, sortedLang, greenStyle, perProject);
 
     autoSizeColumns(sheet, maxCol);
     return rownum;
+  }
+
+  private int addCellAtCol(XSSFCellStyle cellStyle, Row row, int col, int cumulative) {
+    Cell cell = row.createCell(col++);
+    cell.setCellStyle(cellStyle);
+    cell.setCellValue(cumulative);
+    return col;
   }
 
   private void autoSizeColumns(Sheet sheet, int maxCol) {

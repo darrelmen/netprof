@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.json;
 
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
@@ -71,9 +70,9 @@ public class JsonExport {
   private static final String CT = "ct";
   private static final String CTR = "ctr";
   private static final String MN = "mn";
-  private static final String COUNT = "Count";
-  private static final String UNIT_ORDER = "UnitOrder";
-  private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
+//  private static final String COUNT = "Count";
+//  private static final String UNIT_ORDER = "UnitOrder";
+//  private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
   private static final int MAX_DEPTH = 2;
 
   private final Map<String, Integer> phoneToCount;
@@ -103,7 +102,7 @@ public class JsonExport {
    * @paramx json
    * @seex JSONExerciseDAO#readExercises
    */
-  public List<CommonExercise> getExercises(String json) {
+/*  public List<CommonExercise> getExercises(String json) {
     JSONObject object = JSONObject.fromObject(json);
     Collection<String> types = getTypes(object);
 
@@ -117,8 +116,9 @@ public class JsonExport {
       logger.info("got " + ex);
     }
     return exercises;
-  }
+  }*/
 
+/*
   private List<String> getTypes(JSONObject object) {
     List<String> types = new ArrayList<>();
     JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
@@ -128,33 +128,37 @@ public class JsonExport {
     if (types.size() > MAX_DEPTH) types = types.subList(0, MAX_DEPTH);
     return types;
   }
+*/
 
   /**
-   * @param jsonObject
-   * @param exercises
-   * @param <T>
-   * @see ScoreServlet#getJSONExerciseExport
+   * @paramx xjsonObject
+   * @paramx exercises
+   * @paramx <T>
+   * @seex ScoreServlet#getJSONExerciseExport
    */
-  public <T extends CommonExercise> void addJSONExerciseExport(JSONObject jsonObject, Collection<T> exercises) {
+/*  public <T extends CommonExercise> void addJSONExerciseExport(JSONObject jsonObject, Collection<T> exercises) {
     jsonObject.put(COUNT, exercises.size());
     jsonObject.put(UNIT_ORDER, addUnitsInOrder());
     jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodesForTypes()));
     jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
-  }
+  }*/
+/*
 
   private JSONArray addUnitsInOrder() {
     JSONArray value = new JSONArray();
-    getTypeOrder().forEach(type -> value.add(type));
+    getTypeOrder().forEach(value::add);
     return value;
   }
+*/
 
-  private List<String> getTypeOrder() {
+/*  private List<String> getTypeOrder() {
     List<String> typeOrder = sectionHelper.getTypeOrder();
     if (typeOrder.size() > MAX_DEPTH) typeOrder = typeOrder.subList(0, MAX_DEPTH);
     logger.info("type order " + typeOrder);
     return typeOrder;
-  }
+  }*/
 
+/*
   private JSONArray addSections(Collection<SectionNode> sectionNodes) {
     JSONArray nesting = new JSONArray();
 
@@ -172,14 +176,15 @@ public class JsonExport {
     }
     return nesting;
   }
+*/
 
   /**
    * @param exercises
    * @param <T>
    * @return
-   * @see #addJSONExerciseExport(JSONObject, Collection)
+   * @seex #addJSONExerciseExport(JSONObject, Collection)
    */
-  private <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
+/*  private <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
     JSONArray jsonArray = new JSONArray();
     Collection<T> sortedByID = getSortedByID(exercises);
 
@@ -191,17 +196,17 @@ public class JsonExport {
       //  if (c++ > 10)break;
     }
     return jsonArray;
-  }
+  }*/
 
-  private <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
+/*  private <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
     List<T> copy = new ArrayList<>(exercises);
-    copy.sort((o1, o2) -> Integer.compare(o1.getID(), o2.getID()));
+    copy.sort(Comparator.comparingInt(HasID::getID));
     return copy;
-  }
+  }*/
 
-  private int c = 0;
+//  private int c = 0;
 
-  private <T extends CommonShell & HasUnitChapter> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
+/*  private <T extends CommonShell & HasUnitChapter> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
     for (String type : getTypeOrder()) {
       String value = exercise.getUnitToValue().get(type);
       if (value == null) {
@@ -211,7 +216,7 @@ public class JsonExport {
       }
       jsonForCommonExercise.put(type, value);
     }
-  }
+  }*/
 
   /**
    * @param removeExercisesWithMissingAudio
@@ -332,7 +337,7 @@ public class JsonExport {
    *
    * @param copy
    * @return
-   * @see #getJsonForSelection(Map, boolean)
+   * @seex #getJsonForSelection(Map, boolean)
    */
   private JSONArray getJsonArray(Collection<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
@@ -437,7 +442,7 @@ public class JsonExport {
    * @param types
    * @return
    */
-  private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
+/*  private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
     String id = jsonObject.getString(ID);
     CommonExercise exercise = new Exercise(
         id,
@@ -461,7 +466,7 @@ public class JsonExport {
       logger.warn("toExercise : got " + e + " for " + exercise.getID());
     }
     return exercise;
-  }
+  }*/
 
   /**
    * Male/female reg/slow speed

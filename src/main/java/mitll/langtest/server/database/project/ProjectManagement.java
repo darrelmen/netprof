@@ -90,7 +90,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR TESTING
    */
-  private int debugProjectID = 2;
+  private int debugProjectID = 17;
 
   private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
@@ -138,7 +138,7 @@ public class ProjectManagement implements IProjectManagement {
     this.debugOne = properties.debugOneProject();
     this.debugProjectID = properties.debugProjectID();
 
-    //logger.info("debug one " + debugOne + " = " + debugProjectID);
+    logger.info("ProjectManagement debug one " + debugOne + " = " + debugProjectID);
 
     this.projectDAO = db.getProjectDAO();
 
@@ -996,7 +996,9 @@ public class ProjectManagement implements IProjectManagement {
 
       int dominoid = project.getProject().dominoid();
       return getImportFromDomino(projID, dominoid, sinceInUTC);
-    } else return null;
+    } else {
+      return null;
+    }
   }
 
   /**

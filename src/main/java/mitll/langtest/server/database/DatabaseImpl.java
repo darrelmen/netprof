@@ -81,6 +81,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.domino.ImportInfo;
+import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.UserServiceImpl;
@@ -136,7 +137,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private static final String UNKNOWN = "unknown";
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
-  private static final int DAY = 24 * 60 * 60 * 1000;
+
+  /**
+   *
+   */
+  private static final long DAY = 24 * 60 * 60 * 1000L;
+ // private static final long DAY = 5 * 60 * 1000L;
 
   private static final boolean REPORT_ALL_PROJECTS = true;
   private static final boolean SEND_ALL_YEARS = true;
@@ -144,8 +150,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String QUIZ = "QUIZ";
   private static final String UNIT = "Unit";
   public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
-  private static final String QUIZ1 = "Quiz";
-  public static final String DRY_RUN = "Dry Run";
+   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
 
   private IUserDAO userDAO;
@@ -319,7 +324,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       projectManagement.populateProjects();
       userDAO.setProjectManagement(getProjectManagement());
 
-      ImportInfo importFromDomino = getProjectManagement().getImportFromDomino(16);
+    //  ImportInfo importFromDomino = getProjectManagement().getImportFromDomino(16);
+
+      new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this)
+          .addPending(16, userDAO.getImportUser(), false);
+
     }
     return this;
   }
@@ -1545,7 +1554,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (isTodayAGoodDay()) {
         sendReports(getReport(), false, -1);
       } else {
-        logger.debug("not sending email report since this is not monday...");
+        logger.debug("doReport : not sending email report since this is not monday...");
       }
       tryTomorrow();
     } else {
@@ -1554,9 +1563,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private void tryTomorrow() {
+    long now = System.currentTimeMillis();
+    long nextDay = now + DAY;
+
+    nextDay = (nextDay / DAY) * DAY;  // on day boundary
+
+    long toWait = nextDay - now;
+
+    Date date = new Date(nextDay);
+
     new Thread(() -> {
       try {
-        Thread.sleep(DAY);
+        logger.info("tryTomorrow : Waiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
+            "\n\tto fire at " + date);
+        Thread.sleep(toWait);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -1591,6 +1611,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     populateRecipients(userID, reportEmails, receiverNames);
 
     logger.info("sendReports to" +
+        "\n\tat     : " + new Date() +
         "\n\temails : " + reportEmails +
         "\n\tnames  : " + receiverNames
     );
