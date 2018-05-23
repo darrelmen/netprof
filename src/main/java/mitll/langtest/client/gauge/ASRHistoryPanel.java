@@ -69,7 +69,7 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
-  public static final String BEST_SCORE = "Best Score";
+  private static final String BEST_SCORE = "Best Score";
   private final Logger logger = Logger.getLogger("ASRHistoryPanel");
 
   private static final int YEAR_LENGTH = 2;
@@ -99,7 +99,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - YEAR_LENGTH);
-    this.addPlayer=addPlayer;
+    this.addPlayer = addPlayer;
   }
 
   private String getVariableInfoDateStamp(Date date) {
@@ -140,7 +140,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public void addScore(CorrectAndScore hydecScore) {
     if (currentMax == null || hydecScore.getScore() > currentMax.getScore()) {
       currentMax = hydecScore;
-    //  logger.info("current max now " + hydecScore);
+      //  logger.info("current max now " + hydecScore);
     }
   }
 
@@ -220,9 +220,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   private String getDateToDisplay(long timestamp) {
-    return timestamp > 0 ?
-        getVariableInfoDateStamp(new Date(timestamp)) :
-        "";
+    return timestamp > 0 ? getVariableInfoDateStamp(new Date(timestamp)) : "";
   }
 
 

@@ -42,6 +42,8 @@ public class ProjectSync implements IProjectSync {
   public static final String NAME = "name";
   public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
+  private final SimpleDateFormat format = new SimpleDateFormat("MMM d, yy h:mm a");
+
   static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
   public static final ZoneId UTC = ZoneId.of("UTC");
@@ -97,10 +99,12 @@ public class ProjectSync implements IProjectSync {
 
     int dominoid = project.getProject().dominoid();
     ImportInfo importFromDomino = projectManagement.getImportFromDomino(projectid);
+    Timestamp modified = project.getProject().lastimport();
+    String timestamp = format.format(modified);
     int jsonDominoID = importFromDomino.getDominoID();
     if (dominoid != -1 && dominoid != jsonDominoID) {
       logger.warn("addPending - json domino id = " + dominoid + " vs import project id " + jsonDominoID);
-      return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>());
+      return new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.WRONG_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>(),"");
     } else {
       if (dominoid == -1) {  // relevant? possible?
         List<Project> existingBound = getProjectForDominoID(jsonDominoID);
@@ -186,7 +190,7 @@ public class ProjectSync implements IProjectSync {
       logger.info("\n\n\n\naddPending got here " + importUpdateEx.size());
       // todo : should we configure project if it didn't change?
       int numExercises = projectManagement.configureProject(project, false, doChange);
-      return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), numExercises), updates);
+      return new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), numExercises), updates, timestamp);
     }
   }
 
@@ -384,7 +388,7 @@ public class ProjectSync implements IProjectSync {
 
             if (!found) {
               toDelete.add(context.getID());
-              updateItems.add(new DominoUpdateItem(context, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.DELETE));
+              updateItems.add(new DominoUpdateItem(context, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.DELETE).addChangedField("Context sentence."));
               logger.info("getNewAndChangedContextExercises 3 found to delete " + context.getID() +
                   "\n\t ex: " + context);
             }
@@ -415,7 +419,7 @@ public class ProjectSync implements IProjectSync {
         if (maybeKnown == null) {  // it's new
           logger.info("getNewAndChangedContextExercises no known ex by " + npID + " for " + dominoID);
           newContextEx.add(contextEx);
-          updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.ADD));
+          updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.ADD).addChangedField("Context sentence."));
         } else {  // it's known but different.
           int id = maybeKnown.getID();
           logger.info("getNewAndChangedContextExercises known ex by " + npID + " for " + dominoID + " = " + id);
@@ -432,7 +436,7 @@ public class ProjectSync implements IProjectSync {
                   "\n\tdomino  " + dominoEnglish);
 
               rememberExID(importUpdateEx, contextEx, currentContext);
-              updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
+              updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE).addChangedField("Context sentence."));
 
             } else {
               String fl = currentContext.getForeignLanguage();
@@ -443,15 +447,13 @@ public class ProjectSync implements IProjectSync {
                     "\n\tdomino  " + dominoFL);
 
                 rememberExID(importUpdateEx, contextEx, currentContext);
-                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
+                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE).addChangedField("Context sentence."));
 
               } else if (didChange(contextEx, currentContext)) {
                 logger.info("changed for " + contextEx);
-                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE));
-
+                updateItems.add(new DominoUpdateItem(contextEx, new ArrayList<>(), DominoUpdateItem.ITEM_STATUS.CHANGE).addChangedField("Context sentence."));
               } else {
                 logger.info("no change for " + currentContext);
-
               }
             }
           }
@@ -748,6 +750,13 @@ public class ProjectSync implements IProjectSync {
     return existingBound;
   }
 
+  /**
+   * Not sure how this can happen anymore...
+   * @param dominoid
+   * @param jsonDominoID
+   * @param existingBound
+   * @return
+   */
   @NotNull
   private DominoUpdateResponse getAnotherProjectResponse(int dominoid, int jsonDominoID, List<Project> existingBound) {
     SlickProject project = existingBound.iterator().next().getProject();
@@ -755,7 +764,7 @@ public class ProjectSync implements IProjectSync {
 
     logger.info("getAnotherProjectResponse found existing (" + name + ") project " + project);
 
-    DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>());
+    DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(DominoUpdateResponse.UPLOAD_STATUS.ANOTHER_PROJECT, jsonDominoID, dominoid, new HashMap<>(), new ArrayList<>(),"");
     dominoUpdateResponse.setMessage(name);
     return dominoUpdateResponse;
   }

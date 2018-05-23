@@ -54,7 +54,11 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  private static final boolean ALLOW_SYNC_WITH_DOMINO = false;
+  private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
+  /**
+   * @see #getImportButton(SlimProject)
+   */
+  private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
 
   private static final int DIALOG_HEIGHT = 550;
@@ -838,7 +842,7 @@ public class ProjectChoices {
   }
 
   private void showResponseReport(SlimProject projectForLang, Button button, DominoUpdateResponse result) {
-    new ResponseModal("Do you want to continue?", "", "", "", "", result, new DialogHelper.CloseListener() {
+    new ResponseModal(DO_YOU_WANT_TO_CONTINUE, "", "", "", "", result, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
         showImportDialog(projectForLang, button, true);

@@ -122,6 +122,7 @@ public class ScoreServlet extends DatabaseServlet {
    * for now we force decode requests into forced alignment... better to do false positive than false negative
    */
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
+  private static final String MESSAGE = "message";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -137,7 +138,7 @@ public class ScoreServlet extends DatabaseServlet {
     UNKNOWN
   }
 
-  public enum PostRequest {EVENT, HASUSER, ADDUSER, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
+  public enum PostRequest {EVENT, HASUSER, ADDUSER, SETPROJECT, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
 
   private final Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
@@ -329,7 +330,8 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private final Set<String> notInteresting = new HashSet<>(Arrays.asList("Accept-Encoding",
+  private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
+      "Accept-Encoding",
       "Accept-Language",
       "accept",
       "connection",
@@ -354,6 +356,12 @@ public class ScoreServlet extends DatabaseServlet {
     return queryString;
   }
 
+  /**
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   * @see #doGet
+   */
   private int checkSession(HttpServletRequest request) throws DominoSessionException {
     int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
     logger.info("doGet user id from session is " + userIDFromSession);
@@ -661,6 +669,9 @@ public class ScoreServlet extends DatabaseServlet {
         case ADDUSER:
           userManagement.addUser(request, requestType, deviceType, device, jsonObject);
           break;
+        case SETPROJECT:  // client needs to set the current user's project
+          setProjectForUser(request, jsonObject);
+          break;
         case ALIGN:
         case DECODE:
         case RECORD:
@@ -720,6 +731,29 @@ public class ScoreServlet extends DatabaseServlet {
         getUserID(request),
         getPass(request),
         false);
+  }
+
+  private void setProjectForUser(HttpServletRequest request, JSONObject jsonObject) {
+    try {
+      int userID = checkSession(request);
+
+      if (userID == -1) {  // how can this happen?
+        jsonObject.put(MESSAGE, "no user id");
+      } else {
+        reportOnHeaders(request);
+
+        int projID = getProjID(request);
+
+        if (projID > 0) {
+          userManagement.setProjectForUser(jsonObject, userID, projID);
+        } else {
+          jsonObject.put(MESSAGE, "no project id");
+        }
+      }
+    } catch (DominoSessionException dse) {
+      logger.info("got " + dse);
+      jsonObject.put(MESSAGE, NO_SESSION);
+    }
   }
 
   /**
@@ -923,7 +957,7 @@ public class ScoreServlet extends DatabaseServlet {
     } catch (DominoSessionException dse) {
       logger.info("got " + dse);
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put("message", NO_SESSION);
+      jsonObject.put(MESSAGE, NO_SESSION);
       return jsonObject;
     }
 
@@ -1197,18 +1231,11 @@ public class ScoreServlet extends DatabaseServlet {
 
   private static class UserAndSelection {
     private final String[] split1;
-    //private String user;
     private Map<String, Collection<String>> selection;
 
     UserAndSelection(String... split1) {
       this.split1 = split1;
     }
-
-/*
-    public String getUser() {
-      return user;
-    }
-*/
 
     Map<String, Collection<String>> getSelection() {
       return selection;

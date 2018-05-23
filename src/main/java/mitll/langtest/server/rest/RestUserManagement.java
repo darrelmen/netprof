@@ -72,6 +72,7 @@ public class RestUserManagement {
 
   /**
    * called from ios : EAFForgotPasswordViewController.resetPassword
+   *
    * @see #doGet
    */
   private static final String RESET_PASS = "resetPassword";
@@ -121,6 +122,8 @@ public class RestUserManagement {
   public static final String MALE = "male";
   private static final String FIRST = "First";
   private static final String LAST = "Last";
+  public static final String LOGIN_RESULT = "loginResult";
+  public static final String TRUE = "TRUE";
 
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -268,23 +271,28 @@ public class RestUserManagement {
       int userid = userFound.getID();
       toReturn.put(USERID, userid);
       // TODO : do we need to do something else here?
-      toReturn.put(EMAIL_H, "");//userFound.getEmailHash());
-      toReturn.put(EMAIL, userFound.getEmail());//userFound.getEmailHash());
+      toReturn.put(EMAIL_H, "");
+      toReturn.put(EMAIL, userFound.getEmail());
       toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
       toReturn.put(TOKEN, userFound.getResetKey());
 
       // so we can tell if we need to collect more info, etc.
       LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
-      toReturn.put("loginResult", loginResult.getResultType().name());
+      toReturn.put(LOGIN_RESULT, loginResult.getResultType().name());
 
-      if (loginResult.getResultType() == Success) {
-        db.rememberUsersCurrentProject(userid, projid);
-        toReturn.put(PASSWORD_CORRECT, "TRUE");
-      } else {
-        toReturn.put(PASSWORD_CORRECT, FALSE);
+      if (loginResult.getResultType() == Success && projid > 0) {
+        setProjectForUser(toReturn, userid, projid);
       }
+
+      toReturn.put(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
     }
+  }
+
+  public void setProjectForUser(JSONObject toReturn, int userID, int projid) {
+    logger.debug("setProjectForUser user " + userID);
+    db.rememberUsersCurrentProject(userID, projid);
+    toReturn.put("success", TRUE);
   }
 
   public LoginResult loginUser(String userId,
@@ -396,10 +404,10 @@ public class RestUserManagement {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    * @param user
    * @param request
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
   private String resetPassword(String user, HttpServletRequest request) {
     if (user.length() == 4) user = user + "_";

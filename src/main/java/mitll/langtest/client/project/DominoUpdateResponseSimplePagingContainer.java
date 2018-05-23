@@ -11,13 +11,18 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.DominoUpdateItem;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
 class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<DominoUpdateItem> {
+  /**
+   * @param controller
+   * @param selectedUserKey
+   * @see ResponseModal#getUnmatchedRows2
+   */
   public DominoUpdateResponseSimplePagingContainer(ExerciseController controller,
-                                                   String selectedUserKey
-  ) {
+                                                   String selectedUserKey) {
     super(controller, selectedUserKey, "Domino ID", 10, 7);
   }
 
@@ -28,11 +33,11 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     addNP(list, 15);
     addExerciseID(list, 15);
     addEnglish(list, 15);
-    addFL(list, 15);
+    addFL(list, 40);
     addMessage(list, 15);
   }
 
-  protected void addNP(List<DominoUpdateItem> list, int maxLength) {
+  private void addNP(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getNetprofID);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
@@ -40,7 +45,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     table.addColumnSortHandler(getNPSorter(userCol, list));
   }
 
-  protected void addEnglish(List<DominoUpdateItem> list, int maxLength) {
+  private void addEnglish(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getEnglish);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
@@ -48,15 +53,15 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     table.addColumnSortHandler(getEnglishSorter(userCol, list));
   }
 
-  protected void addFL(List<DominoUpdateItem> list, int maxLength) {
+  private void addFL(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getForeignLanguage);
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, getIdWidth() + "px");
+    table.setColumnWidth(userCol, 200 + "px");
     addColumn(userCol, "Vocabulary");
     table.addColumnSortHandler(getFLorter(userCol, list));
   }
 
-  protected void addMessage(List<DominoUpdateItem> list, int maxLength) {
+  private void addMessage(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> shell.getChangedFields().isEmpty() ? "" : shell.getChangedFields().toString());
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 100 + "px");
@@ -64,7 +69,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     table.addColumnSortHandler(getMessageSorter(userCol, list));
   }
 
-  protected Column<DominoUpdateItem, SafeHtml> getNPColumn(int maxLength, GetSafe getSafe) {
+  private Column<DominoUpdateItem, SafeHtml> getNPColumn(int maxLength, GetSafe getSafe) {
     return new Column<DominoUpdateItem, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, DominoUpdateItem object, NativeEvent event) {
@@ -113,7 +118,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   }
 
 
-  protected void addExerciseID(List<DominoUpdateItem> list, int maxLength) {
+  private void addExerciseID(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> "" + shell.getId());
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
@@ -121,9 +126,11 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     table.addColumnSortHandler(getExSorter(userCol, list));
   }
 
+/*
   private String getS(DominoUpdateItem i) {
     return "" + i.getId();
   }
+*/
 
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getExSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {

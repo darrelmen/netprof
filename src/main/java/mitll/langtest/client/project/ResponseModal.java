@@ -115,7 +115,31 @@ public class ResponseModal {
     }
 
     DivWidget upper = new DivWidget();
-    upper.add(getLabel("This update would make the following changes."));
+    DivWidget row = new DivWidget();
+    row.setWidth("100%");
+    upper.add(row);
+
+    {
+      Label label1 = getLabel("Changes since last sync on");// <b>" + result.getTimestamp() + "</b>");
+      row.add(label1);
+      label1.addStyleName("floatLeft");
+
+      com.github.gwtbootstrap.client.ui.Label modified = new com.github.gwtbootstrap.client.ui.Label(LabelType.IMPORTANT, result.getTimestamp());
+      modified.addStyleName("leftFiveMargin");
+      modified.addStyleName("floatLeft");
+      row.add(modified);
+      row.addStyleName("floatLeftAndClear");
+      row.addStyleName("bottomFiveMargin");
+    }
+
+
+    Label w = getLabel(" ");
+    w.addStyleName("floatLeftAndClear");
+    upper.add(w);
+
+    Label label = getLabel("This update would make the following changes.");
+    label.addStyleName("bottomFiveMargin");
+    upper.add(label);
     upper.add(getLabel(" "));
     upper.add(getLabel(added.size() + " items would be added."));
     upper.add(getLabel(changed.size() + " items would be changed."));
@@ -341,8 +365,6 @@ public class ResponseModal {
     } else {
 
       log.info("getUnmatchedRows Num unmatched : " + numMatches);
-
-
 
 
       Panel tableWithPager = new DominoUpdateResponseSimplePagingContainer(controller, prefix).getTableWithPager(items);

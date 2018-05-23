@@ -132,6 +132,7 @@ public class ServerProperties {
   public static final String DEFAULT_MAIL_FROM = "noreply@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
+  public static final int DEFAULT_PERIOD = 5 * 60 * 1000;
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -955,11 +956,15 @@ public class ServerProperties {
   }
 
   public boolean addUserViaEmail() {
-    return getDefaultTrue("addUserViaEmail");
+    return getDefaultFalse("addUserViaEmail");
   }
 
+  /**
+   *
+   * @return
+   */
   public boolean sendHeartbeat() {
-    return getDefaultTrue("sendHeartbeat");
+    return getDefaultFalse("sendHeartbeat");
   }
 
   public List<String> getHeartbeatRec() {
@@ -968,6 +973,6 @@ public class ServerProperties {
   }
 
   public int getHeartbeatPeriod() {
-    return getIntPropertyDef("heartbeatPeriod", 5 * 60 * 1000);
+    return getIntPropertyDef("heartbeatPeriod", DEFAULT_PERIOD);
   }
 }

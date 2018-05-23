@@ -3,6 +3,7 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DominoUpdateItem implements HasID {
@@ -13,7 +14,7 @@ public class DominoUpdateItem implements HasID {
 
   private String english;
   private String foreignLanguage;
-  private List<String> changedFields;
+  private List<String> changedFields = new ArrayList<>();
 
   private ITEM_STATUS status;
 
@@ -69,6 +70,11 @@ public class DominoUpdateItem implements HasID {
 
   public List<String> getChangedFields() {
     return changedFields;
+  }
+
+  public DominoUpdateItem addChangedField(String message) {
+    changedFields.add(message);
+    return this;
   }
 
   public ITEM_STATUS getStatus() {

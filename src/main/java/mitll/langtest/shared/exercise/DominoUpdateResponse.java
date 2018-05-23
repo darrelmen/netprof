@@ -53,6 +53,7 @@ public class DominoUpdateResponse implements HasID {
   private int currentDominoID;
   private UPLOAD_STATUS status;
   private String message;
+  private String timestamp;
 
   private List<DominoUpdateItem> updates;
 
@@ -64,6 +65,10 @@ public class DominoUpdateResponse implements HasID {
   @Override
   public int compareTo(@NotNull HasID o) {
     return Integer.compare(getID(), o.getID());
+  }
+
+  public String getTimestamp() {
+    return timestamp;
   }
 
   public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT;}
@@ -82,13 +87,15 @@ public class DominoUpdateResponse implements HasID {
                               int dominoID,
                               int currentDominoID,
                               Map<String, String> props,
-                              List<DominoUpdateItem> updates
+                              List<DominoUpdateItem> updates,
+                              String timestamp
   ) {
     this.status = success;
     this.dominoID = dominoID;
     this.currentDominoID = currentDominoID;
     this.props = props;
     this.updates = updates;
+    this.timestamp = timestamp;
   }
 
   public Map<String, String> getProps() {
