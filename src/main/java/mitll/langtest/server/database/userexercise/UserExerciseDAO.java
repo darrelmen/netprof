@@ -682,6 +682,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   }
 
+  @Override
+  public int deleteRelated(int related) {
+    return 0;
+  }
+
   private void addColumnToTable(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, TRANSLITERATION);
   }

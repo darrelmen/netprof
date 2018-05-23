@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * @see ProjectSync#addPending
+ */
 public class ImportInfo {
   private final Date createTime;
   private final List<CommonExercise> changedExercises;
@@ -24,8 +27,7 @@ public class ImportInfo {
    * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted)
    */
   public ImportInfo(ImportProjectInfo importProjectInfo,
-                    List<CommonExercise> changedExercises,
-                    List<CommonExercise> addedExercises,
+                    List<CommonExercise> addedExercises, List<CommonExercise> changedExercises,
                     Collection<Integer> deletedDominoIDs,
                     Set<String> deletedNPIDs) {
     this(
@@ -33,8 +35,7 @@ public class ImportInfo {
         importProjectInfo.getLanguage(),
         importProjectInfo.getCreateDate(),
 
-        changedExercises,
-        addedExercises,
+        addedExercises, changedExercises,
         deletedDominoIDs);
 
     this.deletedNPIDs = deletedNPIDs;
@@ -44,17 +45,17 @@ public class ImportInfo {
    * @param dominoID
    * @param language
    * @param exportTime
-   * @param exercises
+   * @param changed
    */
   private ImportInfo(int dominoID,
                      String language,
                      Date exportTime,
-                     List<CommonExercise> exercises,
                      List<CommonExercise> addedExercises,
+                     List<CommonExercise> changed,
                      Collection<Integer> deletedDominoIDs) {
     this.createTime = exportTime;
-    this.changedExercises = exercises;
     this.addedExercises = addedExercises;
+    this.changedExercises = changed;
     this.language = language;
     this.lang = getLanguage(language);
     this.dominoID = dominoID;

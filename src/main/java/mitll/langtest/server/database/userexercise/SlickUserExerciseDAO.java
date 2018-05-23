@@ -1385,4 +1385,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     relatedExerciseDAOWrapper.deleteForProject(projID);
     dao.deleteForProject(projID);
   }
+
+  @Override
+  public int deleteRelated(int related) {
+    return relatedExerciseDAOWrapper.deleteRelated(related);
+   }
 }

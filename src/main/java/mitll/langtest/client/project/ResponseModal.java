@@ -335,7 +335,7 @@ public class ResponseModal {
         int col = 0;
         addLabel(g, row, col++, "" + dominoUpdateItem.getDominoID(), false);
         addLabel(g, row, col++, "" + dominoUpdateItem.getNetprofID(), false);
-        addLabel(g, row, col++, "" + dominoUpdateItem.getId(), false);
+        addLabel(g, row, col++, "" + dominoUpdateItem.getExerciseID(), false);
         addLabel(g, row, col++, "" + dominoUpdateItem.getEnglish(), false);
         addLabel(g, row, col++, "" + dominoUpdateItem.getForeignLanguage(), false);
         String string = dominoUpdateItem.getChangedFields().isEmpty() ? "" : "" + dominoUpdateItem.getChangedFields();

@@ -1,8 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.shared.model.document.*;
-import mitll.hlt.domino.shared.model.project.ProjectContentDescriptor;
-import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -22,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static mitll.hlt.domino.shared.model.metadata.MetadataTypes.SkillType.Vocabulary;
-
 /**
  * Read export from domino!
  * <p>
@@ -42,17 +38,16 @@ public class DominoExerciseDAO {
   public static final String EDIT = "edit";
   public static final String UNKNOWN = "unknown";
 
-  private final JSONSerializer ser;
+  //private final JSONSerializer ser;
 
   public DominoExerciseDAO() {
-    ser = null;
   }
 
   /**
    * @param serializer
    */
   public DominoExerciseDAO(JSONSerializer serializer) {
-    this.ser = serializer;
+
   }
 
   /**
@@ -66,6 +61,15 @@ public class DominoExerciseDAO {
                                   ImportProjectInfo projectInfo,
                                   DominoImport.ChangedAndDeleted importDocs
   ) {
+    List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
+        projid,
+        projectInfo.getCreatorID(),
+        projectInfo.getUnitName(),
+        projectInfo.getChapterName(),
+
+        importDocs
+    );
+
     List<CommonExercise> changedCommonExercises =
         getChangedCommonExercises(
             projid,
@@ -76,18 +80,10 @@ public class DominoExerciseDAO {
             importDocs
         );
 
-    List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
-        projid,
-        projectInfo.getCreatorID(),
-        projectInfo.getUnitName(),
-        projectInfo.getChapterName(),
-
-        importDocs
-    );
 
     return new ImportInfo(projectInfo,
-        changedCommonExercises,
         addedCommonExercises,
+        changedCommonExercises,
         importDocs.getDeleted2(),
         importDocs.getDeletedNPIDs());
   }
@@ -99,7 +95,7 @@ public class DominoExerciseDAO {
    * @param pd
    * @return
    */
-  private String getLanguage(ProjectDescriptor pd) {
+ /* private String getLanguage(ProjectDescriptor pd) {
     ProjectContentDescriptor content = pd.getContent();
     if (content.getSkill() != Vocabulary) {
       logger.error("readExercises huh? skill type is " + content.getSkill());
@@ -107,7 +103,7 @@ public class DominoExerciseDAO {
 
     return content.getLanguageName();
   }
-
+*/
   @NotNull
   private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
                                                        DominoImport.ChangedAndDeleted changedAndDeleted) {

@@ -27,7 +27,7 @@ public class ImportProjectInfo {
    * @param createTime
    * @see DominoImport#getImportProjectInfos(FindOptions, DBUser)
    */
-  ImportProjectInfo(int dominoProjectID, int creatorID, String name, String language, long createTime) {
+  public ImportProjectInfo(int dominoProjectID, int creatorID, String name, String language, long createTime) {
     this.dominoProjectID = dominoProjectID;
     this.creatorID = creatorID;
     this.name = name;

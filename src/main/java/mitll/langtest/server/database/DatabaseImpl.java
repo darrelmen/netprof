@@ -81,6 +81,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.domino.ImportInfo;
+import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
@@ -142,7 +143,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    */
   private static final long DAY = 24 * 60 * 60 * 1000L;
- // private static final long DAY = 5 * 60 * 1000L;
+  // private static final long DAY = 5 * 60 * 1000L;
 
   private static final boolean REPORT_ALL_PROJECTS = true;
   private static final boolean SEND_ALL_YEARS = true;
@@ -150,7 +151,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String QUIZ = "QUIZ";
   private static final String UNIT = "Unit";
   public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
-   public static final String DRY_RUN = "Dry Run";
+  public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
 
   private IUserDAO userDAO;
@@ -323,14 +324,308 @@ public class DatabaseImpl implements Database, DatabaseServices {
       projectManagement.populateProjects();
       userDAO.setProjectManagement(getProjectManagement());
 
-      try {
-        new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this)
-            .addPending(16, userDAO.getImportUser(), false);
-      } catch (Exception e) {
-        e.printStackTrace();
+      if (false) {  // right now I can't run the test since I need mongo.. etc.
+        try {
+          syncTests();
+
+          testSyncContextChange();
+          close();
+          System.exit(0);
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
     return this;
+  }
+
+  private void syncTests() {
+    int projectid = 16;
+
+    int importUser = userDAO.getImportUser();
+    DominoUpdateResponse dominoUpdateResponse = getProjectSync()
+        .addPending(projectid, importUser, false);
+
+    logger.info("--- Got " + dominoUpdateResponse);
+    dominoUpdateResponse.getUpdates().forEach(logger::info);
+
+    // logger.info("Got " + dominoUpdateResponse);
+
+    Project project = getProject(projectid);
+    Iterator<String> iterator = project.getTypeOrder().iterator();
+    String unit = iterator.next();
+    String chapter = iterator.next();
+    ImportProjectInfo importProjectInfo = new ImportProjectInfo(489, importUser,
+        unit, chapter, new Date().getTime());
+
+    {
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(), new ArrayList<>(),
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got 2 " + dominoUpdateResponse2);
+      dominoUpdateResponse2.getUpdates().forEach(logger::info);
+    }
+
+    {
+      List<CommonExercise> changedExercises = new ArrayList<>();
+      CommonExercise first = project.getRawExercises().iterator().next();
+      logger.info("First " + first);
+      changedExercises.add(first);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          changedExercises,
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got add " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 1) {
+        logger.error("\n\nexpecting 1 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.CHANGE) logger.error("should be add " + next);
+        if (next.getExerciseID() != first.getID()) logger.error("should be add " + first.getID());
+      }
+    }
+
+    int dominoID = 999999;
+    {
+      List<CommonExercise> changedExercises = new ArrayList<>();
+      CommonExercise first = new Exercise(-1, "unkn", importUser, "new add ", "new add trans", "new add trans", "alt fl", "transliter", false,
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, new ArrayList<>(), dominoID);
+      logger.info("\n\n\nFirst " + first);
+      changedExercises.add(first);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          changedExercises,
+          new ArrayList<>(),
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got change " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 1) {
+        logger.error("expecting 1 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.ADD) logger.error("should be add " + next);
+        if (next.getExerciseID() != first.getID()) logger.error("should be add " + first.getID());
+      }
+    }
+
+    {
+      int exid = 176521;
+
+      CommonExercise first = project.getExerciseByID(exid);
+      logger.info("delete by " + exid + " First " + first);
+      List<Integer> deletedDominoIDs = new ArrayList<>();
+
+      deletedDominoIDs.add(143179);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          new ArrayList<>(),
+          deletedDominoIDs,
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got delete by domino id " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 1) {
+        logger.error("expecting 1 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.DELETE) logger.error("should be add " + next);
+        if (next.getExerciseID() != first.getID()) logger.error("should be add " + first.getID());
+      }
+    }
+
+    // test deleting orig import
+    {
+
+      CommonExercise first = project.getExerciseByID(155368);
+      String netprofID = first.getOldID();
+      logger.info("delete by " + 155368 + " First " + first);
+
+      HashSet<String> deletedNPIDs = new HashSet<>();
+      deletedNPIDs.add(netprofID);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          new ArrayList<>(),
+          new ArrayList<>(),
+          deletedNPIDs);
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got delete by np id " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 1) {
+        logger.error("expecting 1 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.DELETE) logger.error("should be add " + next);
+        if (next.getExerciseID() != first.getID()) logger.error("should be add " + first.getID());
+      }
+    }
+
+    // test deleting context exercise with np id
+    {
+      // this guy is missing the context exercise...
+
+      CommonExercise withNoContext = new Exercise(-1, "" + 612, importUser, "new add ", "new add trans", "new add trans", "alt fl", "transliter", false,
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, new ArrayList<>(), dominoID);
+
+      CommonExercise parent = project.getExerciseByID(154838);
+      CommonExercise context = parent.getDirectlyRelated().iterator().next();
+
+      List<CommonExercise> changedExercises = new ArrayList<>();
+      changedExercises.add(withNoContext);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          changedExercises,
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got delete context sentence  " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 2) {
+        logger.error("expecting 2 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.DELETE) {
+          logger.error("should be delete " + next);
+        }
+        if (next.getExerciseID() != context.getID()) {
+          logger.error("should be context id " + context.getID() + " but was " + next.getExerciseID());
+        }
+      }
+    }
+
+    // test adding context exercise with np id
+    {
+      // this guy has a new context exercise...
+      CommonExercise withAnotherContext = new Exercise(project.getExerciseByID(154838));
+
+      withAnotherContext.getDirectlyRelated().add(new Exercise(-1, "", importUser, "second context ", "second context trans", "second context trans", "alt fl", "transliter", false,
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, 0, new ArrayList<>(), dominoID));
+
+      List<CommonExercise> changedExercises = new ArrayList<>();
+      changedExercises.add(withAnotherContext);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          changedExercises,
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got add context  " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 2) {
+        logger.error("expecting 2 but got " + updates.size());
+      } else {
+        DominoUpdateItem next = updates.iterator().next();
+        if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.ADD) {
+          logger.error("should be add " + next);
+        }
+        if (next.getDominoID() != dominoID) {
+          logger.error("should have domino id " + dominoID + " but was " + next.getDominoID());
+        }
+      }
+    }
+
+
+  }
+
+  private void testSyncContextChange() {
+    int projectid = 16;
+    int dominoID = 999999;
+
+    int importUser = userDAO.getImportUser();
+    DominoUpdateResponse dominoUpdateResponse = getProjectSync()
+        .addPending(projectid, importUser, false);
+
+    logger.info("--- Got " + dominoUpdateResponse);
+    dominoUpdateResponse.getUpdates().forEach(logger::info);
+
+    // logger.info("Got " + dominoUpdateResponse);
+
+    Project project = getProject(projectid);
+    Iterator<String> iterator = project.getTypeOrder().iterator();
+    String unit = iterator.next();
+    String chapter = iterator.next();
+    ImportProjectInfo importProjectInfo = new ImportProjectInfo(489, importUser,
+        unit, chapter, new Date().getTime());
+
+    // test changing context exercise with np id
+    {
+      // this guy has a changed context exercise...
+      CommonExercise withAnotherContext = new Exercise(project.getExerciseByID(154838));
+
+      List<CommonExercise> directlyRelated = withAnotherContext.getDirectlyRelated();
+      CommonExercise orig = directlyRelated.iterator().next();
+
+      CommonExercise copyContext = new Exercise(orig);
+      copyContext.getMutable().setEnglish(orig.getEnglish() + " _ CHANGED");
+      withAnotherContext.getDirectlyRelated().clear();
+      withAnotherContext.getDirectlyRelated().add(copyContext);
+//
+//      directlyRelated.add(new Exercise(-1, "", importUser, "second context ", "second context trans", "second context trans", "alt fl", "transliter", false,
+//          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, 0, new ArrayList<>(), dominoID));
+
+      List<CommonExercise> changedExercises = new ArrayList<>();
+      changedExercises.add(withAnotherContext);
+      ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
+          new ArrayList<>(),
+          changedExercises,
+          new ArrayList<>(),
+          new HashSet<>());
+
+      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+
+      logger.info("--- Got changed context  " + dominoUpdateResponse2);
+      List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
+      updates.forEach(logger::info);
+
+      if (updates.size() != 2) {
+        logger.error("expecting 2 but got " + updates.size());
+      } else {
+        for (DominoUpdateItem next : updates) {
+          if (next.getStatus() != DominoUpdateItem.ITEM_STATUS.CHANGE) {
+            logger.error("should be change " + next);
+          }
+
+          if (next.getParent() > -1) {
+            if (next.getExerciseID() != copyContext.getID()) {
+              logger.error("should have ex id " + copyContext.getID() + " but was " + next.getExerciseID());
+            }
+          }
+        }
+
+      }
+    }
   }
 
   /**
@@ -1921,6 +2216,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public boolean isHasValidDB() {
     return hasValidDB;
+  }
+
+
+  @NotNull
+  public ProjectSync getProjectSync() {
+    return new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this);
   }
 
   public String toString() {

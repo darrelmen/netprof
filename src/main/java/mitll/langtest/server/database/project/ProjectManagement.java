@@ -143,7 +143,7 @@ public class ProjectManagement implements IProjectManagement {
     this.projectDAO = db.getProjectDAO();
 
     if (servletContext == null) {
-      logger.warn("ProjectManagement : no servlet context, no domino delegates");
+      logger.warn("\n\n\nProjectManagement : no servlet context, no domino delegates");
       dominoImport = null;
     } else {
       dominoImport = setupDominoProjectImport(servletContext);
@@ -992,9 +992,11 @@ public class ProjectManagement implements IProjectManagement {
 
       String sinceInUTC = getModifiedTimestamp(project, modified);
 
-      logger.info("getImportFromDomino getting changes sinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC);
-
       int dominoid = project.getProject().dominoid();
+      logger.info("getImportFromDomino getting changes" +
+          "\n\tsinceInUTC last import " + new Date(modified.getTime()) + " = " + sinceInUTC +
+          "\n\tdomino id              " + dominoid);
+
       return getImportFromDomino(projID, dominoid, sinceInUTC);
     } else {
       return null;

@@ -160,9 +160,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param contextTranslation
    * @param noAccentFL
    * @param projectid
+   * @Deprecated - use related exercise join table
    * @see #addContext
-   @Deprecated - use related exercise join table
-    *  */
+   */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, String noAccentFL, int projectid) {
     super(-1, projectid);
@@ -270,17 +270,20 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * be careful not to lose any fields
+   *
    * @param exercise
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
     super(exercise.getID(), exercise.getProjectID());
     this.isPredef = exercise.isPredefined();
-    this.isContext= exercise.isContext();
+    this.isContext = exercise.isContext();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
+    this.dominoID = exercise.getDominoID();
+    this.oldid = exercise.getOldID();
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
@@ -381,7 +384,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
-   //   logger.info("addContext adding " + contextExercise);
+      //   logger.info("addContext adding " + contextExercise);
     }
   }
 
@@ -399,8 +402,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow
    * @return
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow
    */
   public List<CorrectAndScore> getScores() {
     return scores;
@@ -484,8 +487,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    * @param safeToDecode
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void setSafeToDecode(boolean safeToDecode) {
     this.safeToDecode = safeToDecode;
@@ -518,14 +521,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   @Deprecated
-  public String getOldID() {  return oldid;  }
+  public String getOldID() {
+    return oldid;
+  }
 
   /**
    * @param id
    * @see IUserExerciseDAO#add
    */
 
-  public void setOldID(String id) {    this.oldid = id;  }
+  public void setOldID(String id) {
+    this.oldid = id;
+  }
 
   /**
    * @return
@@ -549,8 +556,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
         getID() +
         ", domino # " + getDominoID() +
-        " np id '" + getOldID() +  "'" +
-        " context index " + dominoContextIndex+
+        " np id '" + getOldID() + "'" +
+        " context index " + dominoContextIndex +
         " project " + projectid +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
@@ -604,8 +611,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addExerciseToSectionHelper(SlickExercise, Collection, ISection, Map, IPronunciationLookup, Exercise, Collection, List)
    * @param numPhones
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addExerciseToSectionHelper(SlickExercise, Collection, ISection, Map, IPronunciationLookup, Exercise, Collection, List)
    */
   public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
@@ -635,8 +642,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#addPending
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#addPending
    */
   @Override
   public int getParentDominoID() {
@@ -644,8 +651,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
    * @param parentDominoID
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
    */
   @Override
   public void setParentDominoID(int parentDominoID) {
@@ -653,8 +660,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#getDominoIDToContextExercise
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoIDToContextExercise
    */
   @Override
   public int getDominoContextIndex() {
@@ -662,8 +669,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
    * @param dominoContextIndex
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
    */
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;

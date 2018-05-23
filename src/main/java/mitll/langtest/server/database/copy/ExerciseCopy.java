@@ -148,9 +148,16 @@ public class ExerciseCopy {
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
     for (CommonExercise context : exercises) {
-      SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
-          now, context.getParentExerciseID(), context);
-      pairs.add(e);
+
+      logger.info("addContextExercises adding context " + context);
+      logger.info("addContextExercises context id " + context.getID() + " with parent " + context.getParentExerciseID());
+
+
+      if (context.getParentExerciseID() > 0) {
+        SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
+            now, context.getParentExerciseID(), context);
+        pairs.add(e);
+      }
     }
 
     slickUEDAO.addBulkRelated(pairs);

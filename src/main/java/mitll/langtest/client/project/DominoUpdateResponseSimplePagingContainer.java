@@ -11,7 +11,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.DominoUpdateItem;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -64,7 +63,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   private void addMessage(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> shell.getChangedFields().isEmpty() ? "" : shell.getChangedFields().toString());
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, 100 + "px");
+    table.setColumnWidth(userCol, 200 + "px");
     addColumn(userCol, "Message");
     table.addColumnSortHandler(getMessageSorter(userCol, list));
   }
@@ -119,7 +118,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
 
 
   private void addExerciseID(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> "" + shell.getId());
+    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> "" + shell.getExerciseID());
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, "Exercise ID");
@@ -135,7 +134,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getExSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {
     ColumnSortEvent.ListHandler<DominoUpdateItem> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, Comparator.comparingInt(DominoUpdateItem::getId));
+    columnSortHandler.setComparator(englishCol, Comparator.comparingInt(DominoUpdateItem::getExerciseID));
     return columnSortHandler;
   }
 

@@ -112,4 +112,6 @@ public interface IUserExerciseDAO extends IDAO {
   int getUnknownExerciseID();
 
   void deleteForProject(int projID);
+
+  int deleteRelated(int related);
 }

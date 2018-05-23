@@ -48,6 +48,7 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -203,7 +204,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public DominoUpdateResponse addPending(int projectid, boolean doChange) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).addPending(projectid, getImportUser(), doChange);
+      return db.getProjectSync().addPending(projectid, getImportUser(), doChange);
     } else {
       throw getRestricted("adding pending exercises");
     }
@@ -212,12 +213,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      return new ProjectSync(db, db.getProjectManagement(), db, db.getUserExerciseDAO(), db).getDominoForLanguage(lang);
+      return db.getProjectSync().getDominoForLanguage(lang);
     } else {
       throw getRestricted("getting domino projects");
     }
   }
-
 
   @Override
   public String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException {

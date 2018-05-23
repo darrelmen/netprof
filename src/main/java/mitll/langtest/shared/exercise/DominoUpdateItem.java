@@ -1,16 +1,19 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.domino.ImportInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DominoUpdateItem implements HasID {
-
   private int dominoID;
   private String netprofID;
   private int id;
+  private int parent = -1;
 
   private String english;
   private String foreignLanguage;
@@ -18,16 +21,25 @@ public class DominoUpdateItem implements HasID {
 
   private ITEM_STATUS status;
 
+
   public enum ITEM_STATUS implements IsSerializable {ADD, CHANGE, DELETE}
 
   public DominoUpdateItem() {
   }
 
+  /**
+   * @param commonExercise
+   * @param changedFields
+   * @param status
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
+   * @see mitll.langtest.server.domino.ProjectSync#getNewAndChangedContextExercises
+   */
   public DominoUpdateItem(CommonExercise commonExercise, List<String> changedFields, ITEM_STATUS status) {
     this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), changedFields, status);
   }
 
-  public DominoUpdateItem(int id, int dominoID, String netprofID, String english, String foreignLanguage, List<String> changedFields, ITEM_STATUS status) {
+  public DominoUpdateItem(int id, int dominoID, String netprofID, String english, String foreignLanguage,
+                          List<String> changedFields, ITEM_STATUS status) {
     this.id = id;
     this.dominoID = dominoID;
     this.netprofID = netprofID;
@@ -56,7 +68,7 @@ public class DominoUpdateItem implements HasID {
     return netprofID;
   }
 
-  public int getId() {
+  public int getExerciseID() {
     return id;
   }
 
@@ -81,7 +93,31 @@ public class DominoUpdateItem implements HasID {
     return status;
   }
 
+
+  public int getParent() {
+    return parent;
+  }
+
+  public DominoUpdateItem setParent(int parent) {
+    this.parent = parent;
+    return this;
+  }
+
+  public DominoUpdateItem setParent(CommonExercise context) {
+    this.parent = context.getParentExerciseID();
+    return this;
+  }
+
   public String toString() {
-    return "exid " + id + " " + english + "/" + foreignLanguage + " : " + status;
+    return
+        "update" +
+            "\n\texid      " + id +
+            "\n\tdominoID  " + dominoID +
+            "\n\tnetprofID " + netprofID +
+            "\n\tparent    " + parent +
+            "\n\teng       " + english +
+            "\n\tfl        " + foreignLanguage +
+            "\n\tstatus    " + status +
+            "\n\tchanges   " + changedFields;
   }
 }

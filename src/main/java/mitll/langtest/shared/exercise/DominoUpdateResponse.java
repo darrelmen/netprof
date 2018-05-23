@@ -135,6 +135,15 @@ public class DominoUpdateResponse implements HasID {
   }
 
   public String toString() {
-    return "response " + dominoID + " " + currentDominoID + " " + props;
+
+    return "response" +
+        "\n\tdomino ID : " + dominoID +
+        "\n\tdomino ID " + currentDominoID +
+        "\n\tprops     " + props +
+        "\n\tstatus    " + status +
+        "\n\tmessage    " + message +
+        "\n\tgetUpdates " + updates.size() +
+        "\n\ttimestamp  " + timestamp
+        ;
   }
 }
