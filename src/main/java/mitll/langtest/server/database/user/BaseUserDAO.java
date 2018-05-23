@@ -159,7 +159,7 @@ public abstract class BaseUserDAO extends DAO {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
       User userWhere = userid == -1 ? null : getUserWhere(userid);
-      if (userWhere!=null) userWhere.setResetKey(loginResult.getToken());
+      if (userWhere != null) userWhere.setResetKey(loginResult.getToken());
       logger.warn(" : addUser : added new user " + userWhere);
       return userWhere;
     } else {

@@ -77,7 +77,7 @@ public class MailSupport {
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String TEXT_HTML = "text/html";// charset=UTF-8";
   private static final int TRIES = 3;
-  private static final long PERIOD = 1000 * 10;//60 * 5L;
+  private static final long PERIOD = 1000 * 10;
   private static final String METRONOME = "Metronome";
   public static final String REC = "gordon.vidaver@ll.mit.edu";
   private long period = PERIOD;
@@ -149,7 +149,7 @@ public class MailSupport {
    */
   private MailSupport(boolean debugEmail, boolean testEmail, String mailServer, String mailFrom, boolean doHeartbeat,
                       long period, List<String> recs) {
-    this.debugEmail = true;
+    this.debugEmail = debugEmail;
     this.testEmail = testEmail;
     this.mailServer = mailServer;
     this.mailFrom = mailFrom;
@@ -350,13 +350,11 @@ public class MailSupport {
     });
   }
 
-  //Random random=new Random();
   private void sendStats(Message message) {
     long then = System.currentTimeMillis();
     try {
       pending.add(message);
       sent.getAndIncrement();
-      //   if (random.nextInt(10)<5) throw new MessagingException("dude!");
       Transport.send(message);
       success.getAndIncrement();
       synchronized (this) {
@@ -685,13 +683,11 @@ public class MailSupport {
     msg.setFrom(getAddress(senderName, senderEmail));
 
     for (String receiver : recipientEmails) {
-      //logger.info("\tSending  to " + receiver);
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
     }
     addCC(ccEmails, msg);
 
     msg.setSubject(subject);
-    //msg.setSentDate(new Date());
     msg.setText(message);
 
     addHeaders(msg);

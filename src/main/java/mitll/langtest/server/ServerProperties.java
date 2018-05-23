@@ -33,7 +33,6 @@
 package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
@@ -134,7 +133,7 @@ public class ServerProperties {
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
 
-  private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
+  //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -886,7 +885,7 @@ public class ServerProperties {
   /**
    * @return
    * @see
-   * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, IUserDAO, MailSupport, PathHelper)
+   * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, MailSupport)
    */
   public String getNPServer() {
     return props.getProperty(SERVER_NAME, NP_SERVER);

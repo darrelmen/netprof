@@ -7,6 +7,7 @@ import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.server.util.UserServiceProperties;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
+import mitll.langtest.server.mail.MailSupport;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -16,35 +17,30 @@ import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
+import static mitll.hlt.domino.shared.Constants.CHANGE_PW_PNM;
 import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 
 public class MyUserService extends MongoUserServiceDelegate {
 
   private static final String ID_F = "_id";
-  private static final String UID_F = "userId";
+
   private static final String ENC_EMAIL_TOKEN_F = "encEmailToken";
   private static final String EMAIL_TOKEN_EXP_F = "emailTokenExp";
   private static final String PASS_F = "pass";
-  private static final String LNAME_F = "lastName";
-  private static final String FNAME_F = "firstName";
-  private static final String EMAIL_F = "email";
-  private static final String AFFILIATION_F = "affiliation";
-  private static final String GENDER_F = "gender";
+
   private static final String ACTIVE_F = "active";
-  private static final String SESSION_IDS_F = "sessionIds";
-  private static final String ROLES_F = "roles";
-  private static final String DLI_APPLICATIONS_F = "dliApplications";
-  private static final String PRI_GROUP_F = "priGroupId";
-  private static final String SEC_GROUPS_F = "secGroupIds";
+
+  private final MailSupport mailSupport;
 
   private Clock theClock = Clock.systemUTC();
 
-  public MyUserService(UserServiceProperties props, Mailer mailer, String acctTypeName, Mongo mongoPool) {
+   MyUserService(UserServiceProperties props, Mailer mailer, String acctTypeName, Mongo mongoPool, MailSupport mailSupport) {
     super(props, mailer, acctTypeName, mongoPool);
+    this.mailSupport = mailSupport;
   }
 
   //  @Override
-  public LoginResult addUserNoEmail(User currUser, ClientUserDetail addUser, String urlBase) {
+  LoginResult addUserNoEmail(User currUser, ClientUserDetail addUser, String urlBase) {
     log.info("Adding a user: " + addUser);
     if (addUser == null || addUser.getUserId() == null || addUser.getUserId().isEmpty() ||
         addUser.getFirstName() == null || addUser.getLastName() == null ||
@@ -115,7 +111,7 @@ public class MyUserService extends MongoUserServiceDelegate {
       // Either email user, and log create event, or a pending request.
       if (result.get().getAcctDetail().getPendingRequest() == null) {
         getEventDAO().logEvent(currUser, UserEventType.Create, result.get(), false, Collections.emptyList());
-        //sendNewUserEmails(cleanAddUser, emailToken, urlBase);
+        sendNewUserEmails(cleanAddUser, emailToken, urlBase);
       } else {
         getEventDAO().logEvent(currUser, result.get().getAcctDetail().getPendingRequest());
       }
@@ -124,6 +120,29 @@ public class MyUserService extends MongoUserServiceDelegate {
     }
     log.info("Adding a user: " + cleanAddUser);
     return new LoginResult(result, emailToken);
+  }
+
+  private void sendNewUserEmails(ClientUserDetail newUser, String emailToken, String urlBase) {
+    String fullName = newUser.getFirstName() + " " + newUser.getLastName();
+    log.info("Adding {} : {}", fullName, newUser.getEmail());
+
+    String passLink = urlBase + "?" + CHANGE_PW_PNM + "=" + emailToken + RESET_PW_HASH;
+
+    mailSupport.email(newUser.getEmail(),
+        acctTypeName + " Account Activation", fullName + ",\n"
+            + "You have been registered for a new " + acctTypeName
+            + " account. You will receive your username in a separate email.\n"
+            + "You can use the following link set your password:\n\n" + passLink
+            + "\n\nIf you don’t use this link within " + EMAIL_VERIFY_LINK_HRS
+            + " hours, it will expire. To get a new password reset link, visit "
+            + urlBase + RESET_PW_HASH + "\n\nThanks,\n   " + acctTypeName + " Administrator");
+
+    mailSupport.email(newUser.getEmail(),
+        acctTypeName + " Account Activation Username", fullName + ",\n"
+            + "You have been registered for a new " + acctTypeName +
+            " account. You will receive a link to reset your password in a separate email.\n"
+            + "Your username is: " + newUser.getUserId()
+            + "\n\nThanks,\n   " + acctTypeName + " Administrator");
   }
 
   static class LoginResult {
@@ -197,7 +216,7 @@ public class MyUserService extends MongoUserServiceDelegate {
             @Override
             public void run() {
               try {
-                mailer.sendTextEmail(changeUser.getEmail(), acctTypeName + " Password Changed",
+                mailSupport.email(changeUser.getEmail(), acctTypeName + " Password Changed",
                     "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
                         "If you did not change your password, you can recover access by resetting your password" +
                         " at the following link:\n\n" + urlBase + RESET_PW_HASH +

@@ -320,15 +320,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projectManagement == null) {
       logger.info("populateProjects no project management yet...");
     } else {
-//      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
       userDAO.setProjectManagement(getProjectManagement());
 
-    //  ImportInfo importFromDomino = getProjectManagement().getImportFromDomino(16);
-
-      new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this)
-          .addPending(16, userDAO.getImportUser(), false);
-
+      try {
+        new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this)
+            .addPending(16, userDAO.getImportUser(), false);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
     return this;
   }

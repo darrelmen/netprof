@@ -15,9 +15,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static mitll.langtest.server.database.Report.EARLIEST_YEAR;
+import static mitll.langtest.server.database.Report.WEEKLY_FORMAT;
 
 /**
  * Created by go22670 on 3/25/16.
@@ -383,6 +385,7 @@ public class ReportToExcel {
     Map<String, Integer> langToCurrent = new HashMap<>();
     Map<String, Integer> langToPrev = new HashMap<>();
     int marginalDiff = 0;
+    int prevMarginalDiff = 0;
     XSSFCellStyle cellStyle = getCellStyle(workbook);
     setBorder(cellStyle);
     XSSFCellStyle greenStyle = getDarkGreenStyle(workbook);
@@ -393,14 +396,23 @@ public class ReportToExcel {
 
     int maxCol = 0;
 
+    SimpleDateFormat df = new SimpleDateFormat(WEEKLY_FORMAT);
+    String today = df.format(new Date());
+    boolean isThisYear = getThisYear() == yearToReport;
+
+    String finalWeek = "";
     for (String week : weekToCountFirstLang.keySet()) {
       if (DEBUG) logger.info("writeWeeklySheetForYear : week " + week + " = " + weekToCountFirstLang.get(week));
       Row row = sheet.createRow(rownum++);
 
       int col = 0;
-      Cell cell1 = row.createCell(col++);
-      cell1.setCellValue(getWeek(week));
-      cell1.setCellStyle(greenStyle);
+
+      {
+        Cell cell1 = row.createCell(col++);
+        cell1.setCellValue(getWeek(week));
+        cell1.setCellStyle(greenStyle);
+      }
+
       int marginalTotal = 0;
 
       // for every lang per week
@@ -445,10 +457,28 @@ public class ReportToExcel {
         cell.setCellValue(marginalTotal);
         cell.setCellStyle(greenStyleWeeklyTotal);
       }
+      prevMarginalDiff = marginalDiff;
       marginalDiff = marginalTotal - prevMarginal;
+
+      if (isThisYear) {
+        //logger.info("week " + week + " marginal " + marginalDiff + " vs " + today);
+        finalWeek = week;
+      }
       prevMarginal = marginalTotal;
 
       if (maxCol < col) maxCol = col;
+    }
+
+    if (isThisYear) {
+//      logger.info("week " + finalWeek + " marginal " + marginalDiff + " vs " + today);
+      if (!finalWeek.equals(today)) {
+        marginalDiff = prevMarginalDiff;
+        logger.info("using" +
+            "\n\tprev marginal " + prevMarginalDiff +
+            "\n\tinstead of    " + marginalDiff +
+            "\n\tfinal week    " + finalWeek +
+            "\n\ttoday week    " + today);
+      }
     }
 
     doIncreaseRow(workbook, sortedLang, langToLastWeek, marginalDiff, sheet.createRow(rownum++));
@@ -472,8 +502,7 @@ public class ReportToExcel {
 
   private Map<String, Integer> getWeektoCountFirstLang(Map<String, Map<Integer, ReportStats>> langToYearToStats, int thisYear) {
     Map<Integer, ReportStats> firstLanguage = langToYearToStats.values().iterator().next();
-    ReportStats statsForFirstLang = firstLanguage.get(thisYear);
-    return statsForFirstLang.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+    return firstLanguage.get(thisYear).getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
   }
 
   private int addFooterRow(XSSFWorkbook workbook, Sheet sheet, int rownum, Set<String> sortedLang, XSSFCellStyle greenStyle, boolean perProject) {
@@ -509,8 +538,6 @@ public class ReportToExcel {
 
     XSSFCellStyle brightGreenStyle = getBrightGreenStyle(workbook);
     XSSFCellStyle yellowStyle = getYellowStyle(workbook);
-
-    //  logger.info("doIncreaseRow marginal " + marginalDiff);
 
     {
       Cell cell = row.createCell(col++);

@@ -71,6 +71,7 @@ public class RestUserManagement {
   private static final String FORGOT_USERNAME = "forgotUsername";
 
   /**
+   * called from ios : EAFForgotPasswordViewController.resetPassword
    * @see #doGet
    */
   private static final String RESET_PASS = "resetPassword";
@@ -114,12 +115,12 @@ public class RestUserManagement {
    * @see EmailHelper#resetPassword
    * @deprecated
    */
-  public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
+//  public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
   public static final String USERS = "users";
   public static final String DLIFLC = "DLIFLC";
   public static final String MALE = "male";
-  public static final String FIRST = "First";
-  public static final String LAST = "Last";
+  private static final String FIRST = "First";
+  private static final String LAST = "Last";
 
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -178,7 +179,8 @@ public class RestUserManagement {
         toReturn.put(TOKEN, token);
       }
       return true;
-    } else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
+    }
+/*    else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
       logger.warn("\n\n\n calling reset password? ");
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
@@ -195,7 +197,8 @@ public class RestUserManagement {
         reply(response, rep);
       }
       return true;
-    } else if (queryString.startsWith(SET_PASSWORD)) {
+    } */
+    else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
@@ -233,7 +236,6 @@ public class RestUserManagement {
   }
 
   /**
-   * @see ScoreServlet#checkUserAndLogin
    * @param toReturn
    * @param request
    * @param securityManager
@@ -241,6 +243,7 @@ public class RestUserManagement {
    * @param user
    * @param freeTextPassword
    * @param strictValidity
+   * @see ScoreServlet#checkUserAndLogin
    */
   public void tryToLogin(JSONObject toReturn,
                          HttpServletRequest request,
@@ -294,7 +297,13 @@ public class RestUserManagement {
       String userAgent = request.getHeader("User-Agent");
       // ensure a session is created.
       HttpSession session = createSession(request);
-      logger.info("loginUser : Login session " + session.getId() + " isNew=" + session.isNew() + " userid " + userId);
+      logger.info("loginUser :" +
+          "\n\tLogin session " + session.getId() +
+          "\n\tisNew=        " + session.isNew() +
+          "\n\tuserid        " + userId +
+          "\n\tremoteAddr    " + remoteAddr +
+          "\n\tuserAgent     " + userAgent
+      );
 //      logger.info("loginUser : userid " + userId);// + " password '" + attemptedHashedPassword + "'");
       return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, session, strictValidity);
     } catch (Exception e) {
@@ -386,6 +395,12 @@ public class RestUserManagement {
     }
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @param user
+   * @param request
+   * @return
+   */
   private String resetPassword(String user, HttpServletRequest request) {
     if (user.length() == 4) user = user + "_";
     else if (user.length() == 3) user = user + "__";
@@ -428,7 +443,7 @@ public class RestUserManagement {
   }
 
   private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);
+    return new EmailHelper(serverProps, getMailSupport());
   }
 
   private MailSupport getMailSupport() {

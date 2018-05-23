@@ -58,7 +58,6 @@ import java.util.Map;
  */
 public class UnitChapterItemHelper<T extends CommonExercise> {
   //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
-
   private static final int MAXLEN = 10;
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
@@ -95,25 +94,13 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   }
 
   /**
-   * Prefer domino id
    *
    * @param e
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemHeader(T e) {
-    // logger.info("got " + e + " and " + e.getDominoID());
-//    int dominoID = e.getDominoID();
-//    int idToUse = dominoID != -1 ? dominoID : e.getID();
-    String subtext = getID(e);// + (e.getOldID().isEmpty() ? "" : "/" + e.getOldID());
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, subtext);
-    // w.getElement().setId("ItemHeading");
-    return w;
-  }
-
-  @NotNull
-  private String getID(T e) {
-    return "" + e.getID();
+    return new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
 
   protected SafeHtml getSafeHtml(String columnText) {

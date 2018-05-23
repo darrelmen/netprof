@@ -34,9 +34,7 @@ package mitll.langtest.server.mail;
 
 import com.google.gwt.util.tools.shared.Md5Utils;
 import com.google.gwt.util.tools.shared.StringUtils;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import org.apache.logging.log4j.LogManager;
@@ -45,8 +43,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collections;
 import java.util.List;
 
-import static mitll.langtest.server.rest.RestUserManagement.RESET_PASSWORD_FROM_EMAIL;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -54,49 +50,36 @@ import static mitll.langtest.server.rest.RestUserManagement.RESET_PASSWORD_FROM_
  * @since 9/30/14.
  */
 public class EmailHelper {
-  private static final Logger logger = LogManager.getLogger(EmailHelper.class);
+  //private static final Logger logger = LogManager.getLogger(EmailHelper.class);
 
   /**
    *
    */
   private static final String CLOSING = "Regards, Administrator";
 
-  private static final String RP = RESET_PASSWORD_FROM_EMAIL;//"rp";
-  private static final String PASSWORD_RESET = "Password Reset";
-  private static final String RESET_PASSWORD = "Reset Password";
+  //private static final String PASSWORD_RESET = "Password Reset";
+ // private static final String RESET_PASSWORD = "Reset Password";
   private static final String YOUR_USER_NAME = "Your user name";
-  // private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
-  //private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
 
-  private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
-  public static final String LOCALHOST = "127.0.0.1";
+ // private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
+  private static final String LOCALHOST = "127.0.0.1";
 
-  private final IUserDAO userDAO;
+ // private final IUserDAO userDAO;
   private final MailSupport mailSupport;
-  private final ServerProperties serverProperties;
-  private final PathHelper pathHelper;
-  private final String REPLY_TO;
-  private final String NP_SERVER;
+ // private final ServerProperties serverProperties;
+//  private final PathHelper pathHelper;
+  private final String replyTo;
+  //private final String NP_SERVER;
 
   /**
    * @param serverProperties
-   * @param userDAO
    * @param mailSupport
-   * @param pathHelper
    * @see RestUserManagement#getEmailHelper
    * @see OpenUserServiceImpl#getEmailHelper
    */
-  public EmailHelper(ServerProperties serverProperties,
-                     IUserDAO userDAO,
-                     MailSupport mailSupport,
-                     PathHelper pathHelper) {
-    this.serverProperties = serverProperties;
-
-    this.userDAO = userDAO;
+  public EmailHelper(ServerProperties serverProperties, MailSupport mailSupport) {
     this.mailSupport = mailSupport;
-    this.pathHelper = pathHelper;
-    NP_SERVER = serverProperties.getNPServer();
-    REPLY_TO = serverProperties.getMailReplyTo();
+    replyTo = serverProperties.getMailReplyTo();
   }
 
   private String getHash(String toHash) {
@@ -154,6 +137,7 @@ public class EmailHelper {
    * @return true if there's a user with this email
    * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
    */
+/*
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user + " url " + url);
     user = user.trim();
@@ -203,6 +187,7 @@ public class EmailHelper {
       return false;
     }
   }
+*/
 
   /**
    * @param link
@@ -210,19 +195,18 @@ public class EmailHelper {
    * @param subject
    * @param message
    * @param linkText
-   * @see #resetPassword(String, String, String)
+   * @seex #resetPassword
    * @see #getUserNameEmail
    */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
-    List<String> ccEmails = Collections.emptyList();
     mailSupport.sendEmail(
         link,
         to,
-        REPLY_TO,
+        replyTo,
         subject,
         message,
         linkText,
-        ccEmails);
+        Collections.emptyList());
   }
 
   private String trimURL(String url) {

@@ -146,10 +146,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
   private void logActivity(String userId, String remoteAddr, String userAgent, User loggedInUser, boolean success) {
     String resultStr = success ? " was successful" : " failed";
-    log.info(">Session Activity> User login for id " + userId + resultStr +
-        ". IP: " + remoteAddr +
-        ", UA: " + userAgent +
-        (success ? ", user: " + loggedInUser.getID() : ""));
+    log.info(">Session Activity> User login for" +
+        "\n\tid " + userId + resultStr + "." +
+        "\n\tIP " + remoteAddr +
+        "\n\tUA " + userAgent +
+        (success ? "\n\tuser: " + loggedInUser.getID() : ""));
   }
 
   /**
@@ -220,6 +221,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     session.setAttribute(USER_SESSION_ATT, id1);
     String sessionID = session.getId();
 
+
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     userSessionDAO.add(
         new SlickUserSession(-1,
@@ -233,6 +235,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   private void logSetSession(HttpSession session1, String sessionID) {
+
     log.info("setSessionUser : Adding user to " +
         "\nsession        " + sessionID +
         "\nlookup user    " + getUserIDFromSession(session1) +
@@ -464,6 +467,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return session;
   }
 
+  /**
+   * @see mitll.langtest.server.rest.RestUserManagement#loginUser
+   * @param request
+   * @return
+   */
   public String getRemoteAddr(HttpServletRequest request) {
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -489,6 +497,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
     if (session != null) {
       int uidI = getUserIDFromSession(session);
+
       log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
               //"SID={} " +
               "Request SID={}, Session Created={}, isNew={}, result={}",

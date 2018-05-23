@@ -35,7 +35,6 @@ package mitll.langtest.server.services;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -210,7 +209,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   }
 
   private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), new PathHelper(getServletContext(), serverProps));
+    return new EmailHelper(serverProps, getMailSupport());
   }
 
   private MailSupport getMailSupport() {

@@ -56,7 +56,7 @@ public class PropertyHandler {
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
-  public static final String CPW_TOKEN2 = "CPW-token";
+  public static final String CPW_TOKEN_2 = "CPW-token";
 
   private static final String FONT_FAMILY = "fontFamily";
   private static final String IS_AMAS = "isAMAS";
@@ -348,7 +348,7 @@ public class PropertyHandler {
       logger.info("1 found cpw token '" + resetPassToken + "'");
     }
 
-    dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN2);
+    dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN_2);
     if (dominoResetPasswordID != null) {
       resetPassToken = dominoResetPasswordID;
       logger.info("2 found cpw token '" + resetPassToken + "'");
@@ -358,11 +358,11 @@ public class PropertyHandler {
     }
     if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
-      if (spectrogram) logger.info("spectrogram is " + spectrogram);
+      if (spectrogram) logger.info("show spectrogram");
     }
     if (Window.Location.getParameter(SHOW_SPECTROGRAM2) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM2).equals("false");
-      if (spectrogram) logger.info("spectrogram is " + spectrogram);
+      if (spectrogram) logger.info("show spectrogram");
     }
     if (Window.Location.getParameter(USE_PHONE_TO_DISPLAY) != null) {
       usePhoneToDisplay = !Window.Location.getParameter(USE_PHONE_TO_DISPLAY).equals("false");

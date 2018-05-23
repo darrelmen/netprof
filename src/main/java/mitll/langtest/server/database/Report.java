@@ -132,6 +132,8 @@ public class Report implements IReport {
   private static final String DATE = "date";
   private static final String YYYY_MM_DD = "yyyy_MM_dd";
   private static final String DLIFLC_NET_PRO_F_QUICK_LOOK_SUMMARY = "_DLIFLC_NetProF_Quick-Look-Summary";
+  public static final String WEEKLY_FORMAT = "MM-dd";
+  private static final String MM_DD_YY1 = "MM-dd-yy";
 
   /**
    * @see #getReportForProject
@@ -179,7 +181,6 @@ public class Report implements IReport {
   private final LogAndNotify logAndNotify;
 
   private static final boolean DEBUG = true;
-  // private IUserDAO userDAO;
   private Map<Integer, String> idToUserID = new HashMap<>();
 
   /**
@@ -228,7 +229,7 @@ public class Report implements IReport {
   }
 
   /**
-   * TODO : do in reference to projects
+   * in reference to projects
    * <p>
    * Sends a usage report to the email list at property {@link mitll.langtest.server.ServerProperties#getReportEmails()}.
    * Sends it out first thing every monday.
@@ -1128,7 +1129,7 @@ public class Report implements IReport {
     jsonObject.put(MONTH1, monthArray);
 
     JSONArray weekArray = new JSONArray();
-    String weekCol = getWC(weekToCount, WEEK, users1, weekArray, year);
+    String weekCol = getWC(weekToCount, users1, weekArray, year);
 
     if (DEBUG) {
       logger.info("getSectionReport :" +
@@ -1303,14 +1304,12 @@ public class Report implements IReport {
 
   /**
    * @param weekToCount
-   * @param unit
    * @param count
    * @return
    * @see #getSectionReport(int, Map, Map, String, JSONObject, int)
    * @see #getEvents
    */
   private String getWC(Map<Integer, ?> weekToCount,
-                       String unit,
                        String count,
                        JSONArray jsonArray,
                        int year) {
@@ -1319,8 +1318,8 @@ public class Report implements IReport {
     Integer max = getMax(weekToCount);
     long initial = calendar.getTimeInMillis();
 
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
-    SimpleDateFormat fullFormat = new SimpleDateFormat("MM-dd-yy");
+    SimpleDateFormat df = new SimpleDateFormat(WEEKLY_FORMAT);
+    SimpleDateFormat fullFormat = new SimpleDateFormat(MM_DD_YY1);
 
 //    logger.info(unit +" before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
     for (int week = 1; week <= max; week++) {
@@ -1342,7 +1341,7 @@ public class Report implements IReport {
     return "<table style='background-color: #eaf5fb'>" +
         "<tr>" +
         "<th>" +
-        unit +
+        WEEK +
         "</th>" +
         "<th>" + count + "</th>" +
         "</tr>" +
@@ -1362,7 +1361,7 @@ public class Report implements IReport {
     if (DEBUG) logger.info("getWeekToCount " + year + " num weeks = " + weekToCount.size());
     Calendar calendar = getCalendarForYear(year);
     Integer max = getMax(weekToCount);
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
+    SimpleDateFormat df = new SimpleDateFormat(WEEKLY_FORMAT);
 
     Map<String, Integer> weekToCountFormatted = new TreeMap<>();
 
@@ -1975,7 +1974,7 @@ public class Report implements IReport {
     String yearMonthWeekTable = getYearMonthWeekTable(tableLabel,
         getYTD(ytdHours, TOTAL_TIME_ON_TASK_HOURS, yearJSON, year),
         getMonthToCount(getMinMap(monthToDur), MONTH, TIME_ON_TASK_MINUTES, tableLabel, monthArray, year),
-        getWC(getMinMap(weekToDur), WEEK, TIME_ON_TASK_MINUTES, weekArray, year)
+        getWC(getMinMap(weekToDur), TIME_ON_TASK_MINUTES, weekArray, year)
     );
 
     timeOnTaskJSON.put(YEAR, yearJSON);

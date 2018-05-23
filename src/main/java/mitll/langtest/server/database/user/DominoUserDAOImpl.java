@@ -56,6 +56,7 @@ import mitll.langtest.server.database.audio.BaseAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.*;
@@ -138,6 +139,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
+  public static final boolean SKIP_SIGNUP_EMAIL = false;
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -180,8 +182,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   // private long lastCache = 0;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
-      //  .concurrencyLevel(4)
-      //  .weakKeys()
+
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -195,8 +196,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
 
   private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
-      //  .concurrencyLevel(4)
-      //  .weakKeys()
+
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -252,7 +252,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     ServerProperties dominoProps = getDominoProps(database, props);
     UserServiceProperties userServiceProperties = dominoProps.getUserServiceProperties();
     myUserService = new MyUserService(userServiceProperties,
-        new Mailer(new MailerProperties(props)), dominoProps.getAcctTypeName(), pool);
+        new Mailer(new MailerProperties(props)), dominoProps.getAcctTypeName(), pool,
+        new MailSupport(database.getServerProps()));
 
     myUserService.initializeDAOs(serializer);
   }
@@ -547,8 +548,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return new LoginResult(-1, ""); // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-      // invalidateCache();
-      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(), loginResult.emailToken);
+      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(), SKIP_SIGNUP_EMAIL ? loginResult.emailToken : "");
     }
   }
 
@@ -1728,8 +1728,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public boolean isMale(int userid) {
     return lookupUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
-//    User byID = getByID(userid);
-//    return byID.isMale();
   }
 
   /**
@@ -1818,7 +1816,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getLastName() == null) updateUser.setLastName("");
     if (updateUser.getEmail().isEmpty()) updateUser.setEmail("UNSET");
 
-
     if (updateUser.getUserId() == null) logger.error("no user id for " + updateUser);
     if (updateUser.getUserId().isEmpty()) logger.error("empty user id for " + updateUser);
     if (updateUser.getFirstName() == null) logger.error("no first  for " + updateUser);
@@ -1831,29 +1828,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       //logger.warn("updateUser empty affiliation for " + updateUser);
     }
 
-    ClientUserDetail clientUserDetail1 = getClientUserDetail(updateUser);
-
-    {
-      String affiliation = clientUserDetail1.getAffiliation();
-      if (affiliation == null || affiliation.isEmpty()) {
-        // logger.warn("client user affilation = '" + affiliation + "' for " + clientUserDetail1);
-      }
-    }
-
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.updateUser(adminUser, clientUserDetail1);
-
-/*
-    ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-
-    if (clientUserDetail != null) {
-      String affiliation = clientUserDetail.getAffiliation();
-      if (affiliation == null || affiliation.isEmpty()) {
-        logger.warn("after " + affiliation + " for " + clientUserDetail);
-      }
-    }
-    logger.info("after " + clientUserDetailSResult);*/
-
-    return clientUserDetailSResult;
+    return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
 
   public boolean isValidAsEmail(String text) {
