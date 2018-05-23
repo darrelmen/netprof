@@ -35,6 +35,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -45,10 +46,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -64,6 +62,8 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private static final int HEADING_FOR_UNIT_LESSON = 4;
   private static final String ITEM = "Item";
+  private static final String ID = "ID";
+  private static final String TIME = "Time";
 
   private final Collection<String> typeOrder;
 
@@ -94,7 +94,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   }
 
   /**
-   *
    * @param e
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
@@ -178,21 +177,25 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
         Placement.LEFT));
   }
 
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy h:mm a");
+
   /**
    * @param exercise
    * @return
    * @see #showPopup(CommonExercise)
    */
   private String getUnitLessonForExercise2(T exercise) {
-    return getTypeToValue(this.typeOrder, exercise.getUnitToValue(), exercise.getID());
+    long update = exercise.getUpdateTime();
+    String updateTime = this.format.format(new Date(update));
+    return getTypeToValue(this.typeOrder, exercise.getUnitToValue(), exercise.getID(), updateTime);
   }
 
   public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue) {
-    return getTypeToValue(typeOrder, unitToValue, -1);
+    return getTypeToValue(typeOrder, unitToValue, -1, "");
   }
 
   @NotNull
-  private String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id) {
+  private String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id, String updateTime) {
     StringBuilder builder = new StringBuilder();
     for (String type : typeOrder) {
       String subtext = unitToValue.get(type);
@@ -201,7 +204,11 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
       }
     }
     if (id > 0) {
-      builder.append(getTypeAndValue("ID", "" + id));
+      builder.append(getTypeAndValue(ID, "" + id));
+    }
+
+    if (!updateTime.isEmpty()) {
+      builder.append(getTypeAndValue(TIME, updateTime));
     }
     return builder.toString();
   }
