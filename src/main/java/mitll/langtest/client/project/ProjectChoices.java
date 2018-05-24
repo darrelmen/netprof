@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -36,16 +37,10 @@ import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.user.User.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.user.User.Permission.*;
 
 /**
@@ -113,7 +108,7 @@ public class ProjectChoices {
 
   private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-
+  private MessageHelper messageHelper;
   /**
    * @see InitialUI#populateRootPanel
    */
@@ -128,6 +123,7 @@ public class ProjectChoices {
     this.lifecycleSupport = langTest;
     this.props = langTest.getProps();
     this.controller = langTest;
+    messageHelper = langTest.getMessageHelper();
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
     userService = langTest.getOpenUserService();
@@ -611,9 +607,13 @@ public class ProjectChoices {
   }
 
   private void addPopover(SlimProject projectForLang, FocusWidget button) {
-    Set<String> typeOrder = projectForLang.getProps().keySet();
+    Set<String> typeOrder = getProps(projectForLang).keySet();
     UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+  }
+
+  private TreeMap<String, String> getProps(SlimProject projectForLang) {
+    return projectForLang.getProps();
   }
 
   private void showPopover(SlimProject projectForLang,
@@ -623,7 +623,7 @@ public class ProjectChoices {
     basicDialog.showPopover(
         button,
         null,
-        commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, projectForLang.getProps()),
+        commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, getProps(projectForLang)),
         Placement.RIGHT);
   }
 
@@ -787,22 +787,31 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
-    // logger.info("showImport " + doChange);
+    logger.info("showImport " + doChange);
+    String s = getProps(projectForLang).get(NUM_ITEMS);
+    String msg = "Please wait...";
+    if (s.equals("0")) msg += " this could take awhile the first time.";
+    final Object waitToken = messageHelper.startWaiting(msg);
+
     projectServiceAsync.addPending(projectForLang.getID(), doChange, new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {
+        messageHelper.stopWaiting(waitToken);
         button.setEnabled(true);
+
         controller.handleNonFatalError("add pending exercises to project", caught);
       }
 
       @Override
       public void onSuccess(DominoUpdateResponse result) {
+        messageHelper.stopWaiting(waitToken);
         button.setEnabled(true);
+
         DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
         logger.info("showImport got " + status);
         if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS && !doChange) {
           logger.info("showImport show " + status);
-          projectForLang.getProps().putAll(result.getProps());
+          getProps(projectForLang).putAll(result.getProps());
           showResponseReport(projectForLang, button, result);
         } else {
           logger.info("showImport 2 show " + status);

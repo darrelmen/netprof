@@ -65,6 +65,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
+
 /**
  * MessageHelper: a helper to create dialogs, popups, etc. and do server
  * logging as necessary.
@@ -114,7 +116,7 @@ public class MessageHelper {
   /**
    * Start waiting. This creates a dialog when necessary. Return a token to use when we're done waiting.
    */
-  private Object startWaiting(String message) {
+  public Object startWaiting(String message) {
     if (waitDialog == null) {
       waitDialog = makeInternalDialog(message, DDialogType.Loading, true);
       waitDialog.addHideHandler(HideEvent::stopPropagation);
@@ -259,7 +261,9 @@ public class MessageHelper {
         return "<br/><br/>An administrator has been notified.<br/>" +
             "Please wait a few minutes and reload your browser window.<br/>";
       case Loading:
-        return "<br/><br/><img src='img/ajax-loader.gif'/>";
+        return "<br/><br/><img src='" +
+            LANGTEST_IMAGES+
+            "ajax-loader.gif'/>";
       case NonFatalError:
         return "<br/><br/>An administrator has been notified.<br/>" +
             "Please reload your browser if you <br/>" +

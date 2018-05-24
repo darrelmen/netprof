@@ -660,7 +660,6 @@ private boolean hasNetworkProblem;
     if (message != null && !message.isEmpty()) {
       showErrorMessage("Configuration Error", message);
     }
-    //}
   }
 
   /**
@@ -1257,6 +1256,9 @@ private boolean hasNetworkProblem;
 
   @Override
   public MessageHelper getMessageHelper() {
+    if (messageHelper == null) {
+      messageHelper = new MessageHelper(initialUI, this);
+    }
     return messageHelper;
   }
 
