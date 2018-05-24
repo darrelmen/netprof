@@ -54,7 +54,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public class ProjectChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
+  //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
   /**
    * @see #getImportButton(SlimProject)
    */
@@ -842,7 +842,7 @@ public class ProjectChoices {
   }
 
   private void showResponseReport(SlimProject projectForLang, Button button, DominoUpdateResponse result) {
-    new ResponseModal(DO_YOU_WANT_TO_CONTINUE, "", "", "", "", result, new DialogHelper.CloseListener() {
+    new ResponseModal(result, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
         showImportDialog(projectForLang, button, true);

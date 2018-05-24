@@ -421,7 +421,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exercise.setRefSentences(translations); // ?
     }
 
-    exercise.setUpdateTime(lastModified);
+    exercise.setUpdateTime(slick.modified().getTime());
     exercise.setAltFL(slick.altfl());
     return exercise;
   }
@@ -911,6 +911,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return exercise;
   }
 
+  public SlickExercise getByID(int exid) {
+    Collection<SlickExercise> byExid = dao.byID(exid);
+    return byExid.isEmpty() ? null : byExid.iterator().next();
+  }
+
   @Override
   public CommonExercise getTemplateExercise(int projID) {
     if (templateExercise == null) {
@@ -1373,6 +1378,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
     return dao.getLegacyToExercise(projectid);
   }
+
+/*  public Map<Integer, SlickExercise> getLegacyContextToEx(int projectid) {
+    return dao.getAllContextPredefByProject(projectid);
+  }
+
+
+  List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);*/
 
   public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
     return dao.getLegacyToDeletedExercise(projectid);

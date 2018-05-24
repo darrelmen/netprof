@@ -76,6 +76,7 @@ public interface IUserExerciseDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   CommonExercise getByExID(int exid);
+  SlickExercise getByID(int exid);
 
   /**
    * @see BaseExerciseDAO#addNewExercises

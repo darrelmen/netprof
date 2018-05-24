@@ -1225,7 +1225,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("close got " + e, e);
     }
 
-    mailSupport.stopHeartbeat();
+    if (mailSupport != null) {
+      mailSupport.stopHeartbeat();
+    }
     try {
 //      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();

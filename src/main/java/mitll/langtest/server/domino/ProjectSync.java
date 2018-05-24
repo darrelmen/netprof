@@ -210,7 +210,7 @@ public class ProjectSync implements IProjectSync {
       int numExercises = projectManagement.configureProject(project, false, doChange);
       DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), numExercises), updates, timestamp);
       logger.info("returning " + dominoUpdateResponse);
-      dominoUpdateResponse.getUpdates().forEach(dominoUpdateItem -> logger.info(dominoUpdateItem));
+      dominoUpdateResponse.getUpdates().forEach(logger::info);
       return dominoUpdateResponse;
     }
   }
@@ -1160,8 +1160,10 @@ public class ProjectSync implements IProjectSync {
         .getProductionProjects()
         .stream()
         .filter(project ->
-            project.getLanguage().equals(language) &&
-                project.getID() != projectid).collect(Collectors.toList());
+                project.getLanguage().equals(language) //&&
+            //        project.getID() != projectid
+        )
+        .collect(Collectors.toList());
   }
 
   /**
@@ -1193,7 +1195,9 @@ public class ProjectSync implements IProjectSync {
     for (CommonExercise ex : newEx) {
       String oldID = ex.getOldID();
       Integer exid = exToInt.get(oldID);
-      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid + " " + ex.getEnglish() + " " + ex.getForeignLanguage());
+      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid +
+          "\n\teng " + ex.getEnglish() +
+          "\n\tfl  " + ex.getForeignLanguage());
 
       if (exid == null) {
         logger.error("getSlickAudios : huh? can't find " + oldID + " in " + exToInt.size());
@@ -1295,7 +1299,7 @@ public class ProjectSync implements IProjectSync {
           match++;
         } else {
           logger.info("getSlickAudios context " + prefix +
-              "  no match '" + context.getEnglish() + "' = '" + cfl + "'");
+              "\n\tno match '" + context.getEnglish() + "' = '" + cfl + "'");
           nomatch++;
         }
       }
@@ -1382,7 +1386,7 @@ public class ProjectSync implements IProjectSync {
    * @param slickUEDAO
    * @param updateEx
    * @param typeOrder
-   * @see #addPending
+   * @see #getDominoUpdateResponse
    */
   private void doUpdate(int projectid,
                         int importUser,
@@ -1398,8 +1402,10 @@ public class ProjectSync implements IProjectSync {
 
     Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = populatePropToValue(allByProject.values());
 
-    logger.info("doUpdate for project " + projectid + " found " + allByProject.values().size() + " attributes" +
-        "\n\tprops " + propToValueToAttr.keySet() +
+    logger.info("doUpdate for project " + projectid +
+        "\n\tupdate num " + updateEx.size() +
+        "\n\tfound      " + allByProject.values().size() + " attributes" +
+        "\n\tprops      " + propToValueToAttr.keySet() +
         "\n\tdoUpdate for project " + projectid + " values " + propToValueToAttr.values());
 
     Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = slickUEDAO.getAllJoinByProject(projectid);
@@ -1415,12 +1421,21 @@ public class ProjectSync implements IProjectSync {
     String second = iterator.hasNext() ? iterator.next() : "";
 
     for (CommonExercise toUpdate : updateEx) {
-      SlickExercise currentExercise = legacyToEx.get(toUpdate.getDominoID());
+      SlickExercise currentExercise = (toUpdate.isContext()) ? userExerciseDAO.getByID(toUpdate.getID()) : legacyToEx.get(toUpdate.getDominoID());
 
       boolean newImport = currentExercise == null;
+
       if (newImport) {
-        currentExercise = oldIDToExer.get(toUpdate.getOldID());
-        logger.info("Exercise #" + currentExercise.id() + " with domino id " + toUpdate.getDominoID() + " : '" + currentExercise.english() + "' is a new import!");
+        String oldID = toUpdate.getOldID();
+        currentExercise = oldIDToExer.get(oldID);
+
+        if (currentExercise == null) {
+          logger.warn("doUpdate no exercise with np id " + oldID + " with domino id " + toUpdate.getDominoID());
+        } else {
+          logger.info("Exercise #" + currentExercise.id() +
+              " with domino id " + toUpdate.getDominoID() +
+              " : '" + currentExercise.english() + "' is a new import!");
+        }
       }
 
       boolean changed = newImport || changed(currentExercise, toUpdate, first, second);

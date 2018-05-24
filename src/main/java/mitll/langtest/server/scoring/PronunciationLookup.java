@@ -32,9 +32,9 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, russian, french, removeAllPunct;
-  boolean hasLTS = true;
-  boolean emptyLTS = false;
+  private boolean korean, russian, french, german, removeAllPunct;
+  private boolean hasLTS ;
+  private boolean emptyLTS;
 
   /**
    * @param dictionary
@@ -52,6 +52,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     korean = language.equalsIgnoreCase("korean");
     russian = language.equalsIgnoreCase("russian");
     french = language.equalsIgnoreCase("french");
+    german = language.equalsIgnoreCase("german");
     removeAllPunct = !language.equalsIgnoreCase("french");
     makeDecoder();
   }
@@ -220,6 +221,17 @@ public class PronunciationLookup implements IPronunciationLookup {
     return dict.toString();
   }
 
+  /**
+   *
+   * @param transcript
+   * @param transliteration
+   * @param justPhones
+   * @param dict
+   * @param numTokens
+   * @param index
+   * @param candidates
+   * @param word
+   */
   private void useLTS(String transcript,
                       String transliteration,
                       boolean justPhones,
@@ -274,7 +286,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       }
     } else { // it's ok -use it
       if (process.length > 50) {
-        logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in " + transcript);
+        logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in '" + transcript + "'");
       }
       int max = MAX_FROM_ANY_TOKEN;
       List<String> prons = new ArrayList<>();

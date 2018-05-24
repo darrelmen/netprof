@@ -11,6 +11,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.DominoUpdateItem;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,7 +19,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   /**
    * @param controller
    * @param selectedUserKey
-   * @see ResponseModal#getUnmatchedRows2
+   * @see ResponseModal#getReportTab(String, Collection)
    */
   public DominoUpdateResponseSimplePagingContainer(ExerciseController controller,
                                                    String selectedUserKey) {
@@ -31,16 +32,20 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     addItemID(list, 15);
     addNP(list, 15);
     addExerciseID(list, 15);
-    addIsContext(list, 15);
+    addIsContext(list, 10);
     addEnglish(list, 15);
     addFL(list, 40);
     addMessage(list, 40);
   }
 
+  protected int getIdWidth() {
+    return 60;
+  }
+
   private void addNP(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getNetprofID);
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, getIdWidth() + "px");
+    table.setColumnWidth(userCol, 60 + "px");
     addColumn(userCol, "Netprof ID");
     table.addColumnSortHandler(getNPSorter(userCol, list));
   }
@@ -72,24 +77,6 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     addColumn(userCol, "Message");
     table.addColumnSortHandler(getMessageSorter(userCol, list));
   }
-
-/*
-  private Column<DominoUpdateItem, SafeHtml> getNPColumn(int maxLength, GetSafe getSafe) {
-    return new Column<DominoUpdateItem, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, DominoUpdateItem object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(DominoUpdateItem shell) {
-        return getNoWrapContent(truncate(getSafe.getSafe(shell), maxLength));
-      }
-    };
-  }
-
-*/
 
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getNPSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {
@@ -132,7 +119,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   private void addIsContext(List<DominoUpdateItem> list, int maxLength) {
     Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, shell -> shell.isContext() ? "Yes" : "No");
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, 60 + "px");
+    table.setColumnWidth(userCol, 50 + "px");
     addColumn(userCol, "Context?");
     table.addColumnSortHandler(getExSorter(userCol, list));
   }
@@ -145,11 +132,9 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     return columnSortHandler;
   }
 
-
   protected int getIDCompare(DominoUpdateItem o1, DominoUpdateItem o2) {
     return Integer.compare(o1.getDominoID(), o2.getDominoID());
   }
-
 
   @Override
   protected int getDateCompare(DominoUpdateItem o1, DominoUpdateItem o2) {

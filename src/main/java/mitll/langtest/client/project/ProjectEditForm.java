@@ -124,6 +124,9 @@ public class ProjectEditForm extends UserDialog {
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private HTML feedback;
+  /**
+   *
+   */
   private FormField hydraPort, nameField, unit, chapter, course, hydraHost;
   /**
    * @see #addLanguage
@@ -285,7 +288,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   boolean isValid() {
-    logger.info("isValid unit " + unit.getSafeText());
+    logger.info("isValid unit '" + unit.getSafeText() +"'");
 
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
@@ -505,9 +508,12 @@ public class ProjectEditForm extends UserDialog {
         });
 
         Scheduler.get().scheduleDeferred(() -> {
-          if (result.size() == 1) {
+          if (!result.isEmpty()) {
             setUnitAndChapter("", result.iterator().next());
           }
+//          else {
+  //          logger.info("---> addLanguage : results size = " + result.size());
+    //      }
         });
       }
     }));
@@ -572,6 +578,8 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
+          logger.info("got " +result.size() + " matching projects.");
+
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
 
@@ -582,12 +590,18 @@ public class ProjectEditForm extends UserDialog {
     }
   }
 
+  /**
+   * @see #addLanguage(ProjectInfo, Fieldset, boolean)
+   * @see #addDominoProject(ProjectInfo, Fieldset, boolean)
+   * @param selectedValue
+   * @param dominoProject
+   */
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-      //logger.info("setUnitAndChapter got " + dominoProject);
+      logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
-//      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
+      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
       logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }

@@ -424,6 +424,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
+  public SlickExercise getByID(int exid) {
+    return null;
+  }
+
+  @Override
   public CommonExercise getByExOldID(String oldid, int projID) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + oldid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);

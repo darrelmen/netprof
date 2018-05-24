@@ -23,7 +23,7 @@ import java.util.*;
 public class ExerciseCopy {
   private static final Logger logger = LogManager.getLogger(ExerciseCopy.class);
 
-  private boolean DEBUG = true;
+  private boolean DEBUG = false;
 
   /**
    * TODO :  How to make sure we don't add duplicates?
@@ -131,37 +131,23 @@ public class ExerciseCopy {
                                   SlickUserExerciseDAO slickUEDAO,
                                   Collection<CommonExercise> exercises,
                                   Collection<String> typeOrder) {
-
-//    logger.info("copyUserAndPredefExercises for project " + projectid +
-//        "\n\tfound " + exercises.size() + " old exercises" +
-//        "\n\tand   " + idToCandidateOverride.size() + " overrides");
-//
-//    // TODO : why not add it to interface?
-//    Map<String, Integer> exToInt = addExercisesAndAttributes(importUser, projectid, slickUEDAO, exercises, typeOrder, idToCandidateOverride);
-//    idToFL.putAll(slickUEDAO.getIDToFL(projectid));
-//
-//    logger.info("copyUserAndPredefExercises old->new for project #" + projectid + " : " + exercises.size() + " exercises, " + exToInt.size());
-//    return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
-
     List<SlickRelatedExercise> pairs = new ArrayList<>();
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
     for (CommonExercise context : exercises) {
-
-      logger.info("addContextExercises adding context " + context);
-      logger.info("addContextExercises context id " + context.getID() + " with parent " + context.getParentExerciseID());
-
-
+//      logger.info("addContextExercises adding context " + context);
+ //     logger.info("addContextExercises context id " + context.getID() + " with parent " + context.getParentExerciseID());
       if (context.getParentExerciseID() > 0) {
         SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
             now, context.getParentExerciseID(), context);
         pairs.add(e);
+      }else {
+        logger.warn("addContextExercises ex " + context.getID() + " " + context.getEnglish() + " has no parent id set?");
       }
     }
 
     slickUEDAO.addBulkRelated(pairs);
-
   }
 
   /**

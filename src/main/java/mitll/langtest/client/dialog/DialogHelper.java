@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
 
@@ -122,6 +123,9 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
+    if (width>900) {
+      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
+    }
 
     this.closeButton = closeButton;
     if (isBig) {

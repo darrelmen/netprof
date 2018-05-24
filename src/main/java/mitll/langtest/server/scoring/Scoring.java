@@ -89,7 +89,7 @@ public abstract class Scoring {
   final LogAndNotify logAndNotify;
 
   /**
-   * @see SLFFile#createSimpleSLFFile(Collection, String, float, boolean)
+   * @see SLFFile#createSimpleSLFFile
    */
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
