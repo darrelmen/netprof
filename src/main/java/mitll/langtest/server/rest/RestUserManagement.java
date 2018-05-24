@@ -33,7 +33,6 @@
 package mitll.langtest.server.rest;
 
 import mitll.hlt.domino.server.util.ServletUtil;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -111,37 +110,29 @@ public class RestUserManagement {
   private static final String DIALECT = "dialect";
   private static final String KIND = "kind";
 
-  /**
-   * @see #doGet
-   * @see EmailHelper#resetPassword
-   * @deprecated
-   */
-//  public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
   public static final String USERS = "users";
-  public static final String DLIFLC = "DLIFLC";
-  public static final String MALE = "male";
+  private static final String DLIFLC = "DLIFLC";
+  private static final String MALE = "male";
   private static final String FIRST = "First";
   private static final String LAST = "Last";
-  public static final String LOGIN_RESULT = "loginResult";
-  public static final String TRUE = "TRUE";
+  private static final String LOGIN_RESULT = "loginResult";
+  private static final String TRUE = "TRUE";
+  private static final String SUCCESS = "success";
 
-  private DatabaseImpl db;
-  private ServerProperties serverProps;
+  private final DatabaseImpl db;
+  private final ServerProperties serverProps;
   protected String configDir;
-  private PathHelper pathHelper;
+//  private PathHelper pathHelper;
 
   /**
    * @param db
    * @param serverProps
-   * @param pathHelper
    * @see ScoreServlet#makeAudioFileHelper
    */
-  public RestUserManagement(DatabaseImpl db,
-                            ServerProperties serverProps,
-                            PathHelper pathHelper) {
+  public RestUserManagement(DatabaseImpl db, ServerProperties serverProps) {
     this.db = db;
     this.serverProps = serverProps;
-    this.pathHelper = pathHelper;
+    // this.pathHelper = pathHelper;
   }
 
   /**
@@ -282,24 +273,31 @@ public class RestUserManagement {
       toReturn.put(LOGIN_RESULT, loginResult.getResultType().name());
 
       if (loginResult.getResultType() == Success && projid > 0) {
-        setProjectForUser(toReturn, userid, projid);
+        db.rememberUsersCurrentProject(userid, projid);
       }
 
       toReturn.put(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
     }
   }
 
+  /**
+   * Largely a no-op if no change to user -> project association
+   *
+   * @param toReturn
+   * @param userID
+   * @param projid
+   */
   public void setProjectForUser(JSONObject toReturn, int userID, int projid) {
     logger.debug("setProjectForUser user " + userID);
-    db.rememberUsersCurrentProject(userID, projid);
-    toReturn.put("success", TRUE);
+    db.getUserProjectDAO().setCurrentProjectForUser(userID, projid);
+    toReturn.put(SUCCESS, TRUE);
   }
 
-  public LoginResult loginUser(String userId,
-                               String attemptedFreeTextPassword,
-                               HttpServletRequest request,
-                               IUserSecurityManager securityManager,
-                               boolean strictValidity) {
+  private LoginResult loginUser(String userId,
+                                String attemptedFreeTextPassword,
+                                HttpServletRequest request,
+                                IUserSecurityManager securityManager,
+                                boolean strictValidity) {
     try {
       String remoteAddr = securityManager.getRemoteAddr(request);
       String userAgent = request.getHeader("User-Agent");

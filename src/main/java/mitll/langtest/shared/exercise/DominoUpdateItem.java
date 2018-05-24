@@ -38,6 +38,11 @@ public class DominoUpdateItem implements HasID {
     this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), changedFields, status);
   }
 
+  public DominoUpdateItem(CommonExercise commonExercise, String changedField, ITEM_STATUS status) {
+    this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), new ArrayList<>(), status);
+    changedFields.add(changedField);
+  }
+
   public DominoUpdateItem(int id, int dominoID, String netprofID, String english, String foreignLanguage,
                           List<String> changedFields, ITEM_STATUS status) {
     this.id = id;
@@ -106,6 +111,10 @@ public class DominoUpdateItem implements HasID {
   public DominoUpdateItem setParent(CommonExercise context) {
     this.parent = context.getParentExerciseID();
     return this;
+  }
+
+  public boolean isContext() {
+    return parent > -1;
   }
 
   public String toString() {

@@ -65,6 +65,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
+
+
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
   private static final String CUSTOM_PREFIX = "Custom_";
 
@@ -366,7 +368,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see mitll.langtest.server.database.custom.UserListManager
    * @see IUserListManager#markState(CommonExercise, STATE, int)
    */
-  private CommonExercise getPredefExercise(int exid) {  return exerciseDAO.getExercise(exid);  }
+  private CommonExercise getPredefExercise(int exid) {
+    return exerciseDAO.getExercise(exid);
+  }
 
   @Override
   public List<CommonExercise> getCommonExercises(int listID) {
@@ -757,5 +761,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    */
   private CommonExercise getExercise(HasID ue) {
     return exerciseDAO.getExercise(ue.getID());
+  }
+
+  @Override
+  public boolean updateModified(int exid) {
+    return false;
   }
 }

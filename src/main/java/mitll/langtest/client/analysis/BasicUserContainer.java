@@ -36,15 +36,12 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.user.SimpleUser;
 
 import java.util.Collection;
@@ -90,7 +87,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     addDateCol(list);
 
     table.setWidth("100%", true);
-    }
+  }
 
   /**
    * @param o1
@@ -112,7 +109,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return -1;
   }
 
-  private  int getFirstCompare(T o1, T o2) {
+  private int getFirstCompare(T o1, T o2) {
     if (o1 == o2) {
       return 0;
     }
@@ -192,7 +189,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return TABLE_WIDTH;
   }
 
-  private  void addFirstName(List<T> list) {
+  private void addFirstName(List<T> list) {
     Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {

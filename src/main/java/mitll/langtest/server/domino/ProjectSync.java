@@ -44,7 +44,10 @@ public class ProjectSync implements IProjectSync {
   public static final String NAME = "name";
   public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
-  public static final String CONTEXT_SENTENCE = "Context sentence.";
+  /**
+   * @see #getNewAndChangedContextExercises(int, ImportInfo, List, List, Set, Map)
+   */
+  private static final String CONTEXT_SENTENCE = "Context sentence.";
   private final SimpleDateFormat format = new SimpleDateFormat("MMM d, yy h:mm a");
 
   static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -172,17 +175,7 @@ public class ProjectSync implements IProjectSync {
         // }
 
         if (!newContextEx.isEmpty() && doChange) {
-          logger.info("addPending adding " + newEx.size() + " new Context exercises");
-
-//          new ExerciseCopy().addExercises(
-//              importUser,
-//              projectid,
-//              new HashMap<>(),
-//              slickUEDAO,
-//              newContextEx,
-//              typeOrder,
-//              new HashMap<>());
-
+          logger.info("addPending adding " + newContextEx.size() + " new context exercises");
           // creates and adds
           new ExerciseCopy().addContextExercises(importUser, projectid, slickUEDAO, newContextEx, typeOrder);
         }
@@ -198,34 +191,16 @@ public class ProjectSync implements IProjectSync {
         }
         if (doChange) {
           logger.info("addPending deleting  " + contextDeletes.size() + " context exercises");
-          userExerciseDAO.deleteByExID(contextDeletes);
-
-          for (int id : contextDeletes) {
-            int i = userExerciseDAO.deleteRelated(id);
-            if (i == 1) {
-              logger.info("Deleted relation for context " + id);
-            } else if (i == 0) {
-              logger.warn("Did not deleted relation for context " + id);
-            } else {
-              logger.warn("Deleted " + i +
-                  " relations for context " + id);
-
-            }
-          }
+          doContextDeletes(contextDeletes);
         }
         updates.addAll(doDelete(importFromDomino, dominoToNonContextEx, doChange, projectid));
-
-/*
-          if (!deleteEx.isEmpty()) {
-            logger.info("deleting " + deleteEx.size() + " exercises");
-            db.getUserExerciseDAO().deleteByExID(deleteEx);
-          }*/
       }
 
       if (doChange) {
         Map<String, Integer> oldToNew = slickUEDAO.getOldToNew(projectid).getOldToNew();
         copyAudio(projectid, newEx, oldToNew);
         copyAudio(projectid, importUpdateEx, oldToNew);
+        copyAudio(projectid, newContextEx, oldToNew);
 
         updateProjectIfSomethingChanged(jsonDominoID, newEx, importUpdateEx, project.getProject(), requestTime);
       }
@@ -234,9 +209,26 @@ public class ProjectSync implements IProjectSync {
       // todo : should we configure project if it didn't change?
       int numExercises = projectManagement.configureProject(project, false, doChange);
       DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, getProps(project.getProject(), numExercises), updates, timestamp);
-      logger.info("response " + dominoUpdateResponse);
+      logger.info("returning " + dominoUpdateResponse);
       dominoUpdateResponse.getUpdates().forEach(dominoUpdateItem -> logger.info(dominoUpdateItem));
       return dominoUpdateResponse;
+    }
+  }
+
+  private void doContextDeletes(Set<Integer> contextDeletes) {
+    userExerciseDAO.deleteByExID(contextDeletes);
+
+    for (int id : contextDeletes) {
+      int i = userExerciseDAO.deleteRelated(id);
+      if (i == 1) {
+        logger.info("Deleted relation for context " + id);
+      } else if (i == 0) {
+        logger.warn("Did not deleted relation for context " + id);
+      } else {
+        logger.warn("Deleted " + i +
+            " relations for context " + id);
+
+      }
     }
   }
 
@@ -409,7 +401,6 @@ public class ProjectSync implements IProjectSync {
       // import exercises not in the currentIDs set are new and need to be added
       // matching exercises need to be checked to see if they have changed
 
-      // first determine if any sentences have been deleted.
       importToKnownID.forEach((importEx, id) -> {
 
         logger.info("getNewAndChangedContextExercises current " + importEx.getID() + " = " + id);
@@ -417,16 +408,79 @@ public class ProjectSync implements IProjectSync {
 
         CommonExercise currentParent = exerciseServices.getExercise(projectid, id);
 
+        List<CommonExercise> importContext = importEx.getDirectlyRelated();
         if (currentParent == null) {
-          logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importEx.getDirectlyRelated().size() + " but can't find it by " + id);
+          logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importContext.size() + " but can't find it by " + id);
         } else {
-          List<CommonExercise> currentContextOnParent = currentParent.getDirectlyRelated();
+          List<CommonExercise> currentContextOnParent = new ArrayList<>(currentParent.getDirectlyRelated());
 
           logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size());
-          logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importEx.getDirectlyRelated().size() + " context");
+          logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importContext.size() + " context");
+
+          // first figure out matching sentences, regardless of order
+          List<CommonExercise> unchangedImport = new ArrayList<>();
+
+          for (CommonExercise importC : importContext) {
+            CommonExercise knownContextMatch = null;
+            for (CommonExercise knownContext : currentContextOnParent) {
+              if (!didChange(importC, knownContext)) {
+                logger.info("\tgetNewAndChangedContextExercises no change for " + knownContext);
+                unchangedImport.add(importC);
+                //     unchangedKnown.add(knownContext);
+                knownContextMatch = knownContext;
+                break;
+              }
+            }
+
+            if (knownContextMatch != null) {
+              currentContextOnParent.remove(knownContextMatch);
+            }
+          }
+
+          Iterator<CommonExercise> currentSentences = currentContextOnParent.iterator();
+          importContext = new ArrayList<>(importContext);
+          importContext.removeAll(unchangedImport);
+          Iterator<CommonExercise> importSentences = importContext.iterator();
+
+          logger.info("\tcomparing current num = " + currentContextOnParent.size() + " vs import " + importContext.size());
+
+          while (currentSentences.hasNext() && importSentences.hasNext()) {
+            CommonExercise currentSentence = currentSentences.next();
+            CommonExercise importSentence = importSentences.next();
+
+            if (didChange(importSentence, currentSentence)) {
+              logger.info("\tchanged for       " + currentSentence);
+              logger.info("\tchanged import is " + importSentence);
+              updateItems.add(getChanged(currentSentence, importSentence));
+              rememberExID(importUpdateEx, importSentence, currentSentence);
+            }
+          }
+
+          String changedField = "for " + currentParent.getEnglish() + "/" + currentParent.getForeignLanguage();
+
+          // run to the end of imports -- rest of current are deletes.
+          while (currentSentences.hasNext()) {
+            CommonExercise currentSentence = currentSentences.next();
+            toDelete.add(currentSentence.getID());
+            updateItems.add(new DominoUpdateItem(currentSentence, changedField, DELETE).setParent(id));
+            logger.info("\tgetNewAndChangedContextExercises 3 found to delete " + currentSentence.getID() +
+                "\n\t ex: " + currentSentence);
+          }
+
+          // run to end of current - rest of import are new to add
+          while (importSentences.hasNext()) {
+            CommonExercise importSentence = importSentences.next();
+
+            logger.info("\tadd import is " + importSentence);
+            //  logger.info("getNewAndChangedContextExercises no known ex by " + npID + " for " + dominoID);
+            newContextEx.add(importSentence);
+            importSentence.getMutable().setParentExerciseID(id);
+            updateItems.add(new DominoUpdateItem(importSentence, changedField, ADD).setParent(currentParent));
+
+          }
 
 
-          for (CommonExercise context : currentContextOnParent) {
+   /*       for (CommonExercise context : currentContextOnParent) {
             List<CommonExercise> dominoContext = importEx.getDirectlyRelated();
             // match on domino id or np id...
             CommonExercise matchingDominoContext = getMatchToExistingContext(context, dominoContext);
@@ -446,9 +500,10 @@ public class ProjectSync implements IProjectSync {
                 rememberExID(importUpdateEx, matchingDominoContext, context);
               }
             }
-          }
+          }*/
 
           // any on import that don't match current are adds
+   /*       logger.info("getNewAndChangedContextExercises check for adds on " + importEx);
           for (CommonExercise dominoContext : importEx.getDirectlyRelated()) {
             CommonExercise matchingCurrent = getMatchToExistingContext(dominoContext, currentContextOnParent);
             if (matchingCurrent == null) {
@@ -458,7 +513,7 @@ public class ProjectSync implements IProjectSync {
               dominoContext.getMutable().setParentExerciseID(id);
               updateItems.add(new DominoUpdateItem(dominoContext, new ArrayList<>(), ADD).addChangedField(CONTEXT_SENTENCE).setParent(currentParent));
             }
-          }
+          }*/
         }
       });
 
@@ -533,16 +588,22 @@ public class ProjectSync implements IProjectSync {
   }
 
   private DominoUpdateItem getChanged(CommonExercise contextEx, CommonExercise updatedContext) {
-    return new DominoUpdateItem(contextEx, new ArrayList<>(), CHANGE).addChangedField(updatedContext.getDominoID() + " : " + updatedContext.getEnglish() + "/" + updatedContext.getForeignLanguage()).setParent(contextEx);
+    return new DominoUpdateItem(contextEx, new ArrayList<>(), CHANGE)
+        .addChangedField(updatedContext.getDominoID() + " : " + updatedContext.getEnglish() + "/" + updatedContext.getForeignLanguage())
+        .setParent(contextEx);
   }
 
   /**
+   * NOPE - can't compare on domino ids - these are the parent..
+   *
+   *
    * IF you can't find the current context in the domino set, then it should be deleted
    *
-   * @param context
-   * @param dominoContext
    * @return
+   * @paramx context
+   * @paramx dominoContext
    */
+/*
   private CommonExercise getMatchToExistingContext(CommonExercise context, List<CommonExercise> dominoContext) {
     //boolean found = false;
     for (CommonExercise dContext : dominoContext) {
@@ -567,7 +628,7 @@ public class ProjectSync implements IProjectSync {
     }
     return null;
   }
-
+*/
   private void rememberExID(List<CommonExercise> importUpdateEx, CommonExercise contextEx, CommonExercise currentContext) {
     importUpdateEx.add(contextEx);
     MutableExercise mutable = contextEx.getMutable();
@@ -718,6 +779,7 @@ public class ProjectSync implements IProjectSync {
     if (!missing.isEmpty()) {
       logger.warn("doDelete : " + missing + " could not be deleted?");
     }
+
     if (doChange) {
       userExerciseDAO.deleteByExID(toDelete);
     }
@@ -725,27 +787,6 @@ public class ProjectSync implements IProjectSync {
     return deletes;
   }
 
-  /**
-   * If the project is empty, go to the beginning of time, more or less.
-   * So if you make a project in domino, then in netprof, will pick up everything in domino.
-   *
-   * @param project
-   * @param modified
-   * @return
-   */
-  @NotNull
-  private String getModifiedTimestamp(Project project, Timestamp modified) {
-    ZonedDateTime zdt;
-
-    if (project.getRawExercises().isEmpty()) {
-      Date fiveYearsAgo = new Date(System.currentTimeMillis() - FIVE_YEARS);
-      //  logger.info("Start from " + fiveYearsAgo);
-      zdt = ZonedDateTime.ofInstant(fiveYearsAgo.toInstant(), UTC);
-    } else {
-      zdt = ZonedDateTime.ofInstant(modified.toInstant(), UTC);
-    }
-    return zdt.format(DateTimeFormatter.ofPattern(MONGO_TIME));
-  }
 
   /**
    * @param lang
@@ -926,16 +967,17 @@ public class ProjectSync implements IProjectSync {
    */
   private void copyAudio(int projectid, List<CommonExercise> newEx, Map<String, Integer> exToInt) {
     try {
-      List<Project> matches = getProjectsForSameLanguage(projectid);
+      List<Project> sourceProjects = getProjectsForSameLanguage(projectid);
 
-      logger.info("copyAudio found " + matches.size() + " source projects for project " + projectid + " : ex->id " + exToInt.size());
+      logger.info("copyAudio found " + sourceProjects.size() + " source projects for project " + projectid + " : ex->id " + exToInt.size());
       Collection<AudioMatches> copyAudioForEx = new ArrayList<>();
       Collection<AudioMatches> copyAudioForContext = new ArrayList<>();
 
-      for (Project match : matches) {
+      for (Project match : sourceProjects) {
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(match.getID());
-        logger.info("copyAudio for project " + match.getID() + "/" + match.getProject().name() +
-            " got " + transcriptToAudio.size() + " source candidates");
+        logger.info("copyAudio for " +
+            "\n\tproject " + match.getID() + "/" + match.getProject().name() +
+            "\n\tgot     " + transcriptToAudio.size() + " source candidates");
         getSlickAudios(projectid,
             newEx,
             exToInt,
@@ -944,14 +986,14 @@ public class ProjectSync implements IProjectSync {
             copyAudioForContext);
       }
 
-      if (!matches.isEmpty()) {
+      if (!sourceProjects.isEmpty()) {
         List<SlickAudio> copies = getSlickAudios(copyAudioForEx, copyAudioForContext);
         logger.info("copyAudio :" +
-            "\n\tcopying " + copyAudioForEx + "/" + copyAudioForContext +
-            "audio " + copies.size() +
-            "\n\tfrom " + newEx.size() +
-            "\n\tfrom " + matches.size() +
-            " projects, e.g. " + matches.iterator().next().getProject().name());
+            "\n\tcopying      " + copyAudioForEx + "/" + copyAudioForContext +
+            "\n\taudio        " + copies.size() +
+            "\n\tfrom         " + newEx.size() +
+            "\n\tfrom sources " + sourceProjects.size() +
+            " projects, e.g.  " + sourceProjects.iterator().next().getProject().name());
 
         daoContainer.getAudioDAO().addBulk(copies);
       }
@@ -1356,9 +1398,9 @@ public class ProjectSync implements IProjectSync {
 
     Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = populatePropToValue(allByProject.values());
 
-    logger.info("doUpdate for project " + projectid + " found " + allByProject.values().size() + " attributes");
-    logger.info("doUpdate for project " + projectid + " props " + propToValueToAttr.keySet());
-    logger.info("doUpdate for project " + projectid + " values " + propToValueToAttr.values());
+    logger.info("doUpdate for project " + projectid + " found " + allByProject.values().size() + " attributes" +
+        "\n\tprops " + propToValueToAttr.keySet() +
+        "\n\tdoUpdate for project " + projectid + " values " + propToValueToAttr.values());
 
     Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = slickUEDAO.getAllJoinByProject(projectid);
 
@@ -1387,8 +1429,10 @@ public class ProjectSync implements IProjectSync {
       }
 
       if (changed && !slickUEDAO.update(toUpdate, false, typeOrder)) {
-        logger.warn("doUpdate update failed to update " + toUpdate);
+        logger.warn("\n\ndoUpdate update failed to update " + toUpdate);
         failed++;
+      } else if (!slickUEDAO.updateModified(toUpdate.getID())) {
+        logger.warn("\n\ndoUpdate update failed to update modified date on " + toUpdate);
       }
 
       // compare new attributes on toUpdate to existing attributes...

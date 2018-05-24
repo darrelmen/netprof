@@ -126,11 +126,14 @@ public class DominoExerciseDAO {
   }
 
   @NotNull
-  private List<CommonExercise> getExerciseFromImport(int projid, int creator, String unitName, String chapterName, List<ImportDoc> changed) {
+  private List<CommonExercise> getExerciseFromImport(int projid, int creator, String unitName, String chapterName,
+                                                     List<ImportDoc> changed) {
     List<CommonExercise> exercises = new ArrayList<>(changed.size());
 
     changed.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
-        creator, unitName, chapterName, docObj.getDocID(), docObj.getTimestamp(),
+        creator, unitName, chapterName,
+        docObj.getDocID(),
+        docObj.getTimestamp(),
         docObj.getVocabularyItem()
     )));
     return exercises;
@@ -259,8 +262,21 @@ public class DominoExerciseDAO {
     }
   }
 
+  /**
+   * So at the moment of import - we know the parent domino id and it's sample num, but nothing else about it.
+   * @param projid
+   * @param creator
+   * @param docID
+   * @param sample
+   * @param contextNPID
+   * @param sentenceVal
+   * @param parentDominoID
+   * @param unitToValue
+   * @return
+   */
   @NotNull
-  private Exercise getContextExercise(int projid, int creator, int docID, SampleSentence sample, String contextNPID, String sentenceVal, int parentDominoID, Map<String, String> unitToValue) {
+  private Exercise getContextExercise(int projid, int creator, int docID, SampleSentence sample, String contextNPID,
+                                      String sentenceVal, int parentDominoID, Map<String, String> unitToValue) {
     Exercise context = getExerciseFromVocabularyItem(
         projid,
         contextNPID,

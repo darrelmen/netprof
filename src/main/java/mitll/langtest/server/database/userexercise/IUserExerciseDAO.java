@@ -47,6 +47,7 @@ import mitll.npdata.dao.SlickExercise;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @see
@@ -98,7 +99,15 @@ public interface IUserExerciseDAO extends IDAO {
 
   void deleteByExID(Collection<Integer> exids);
 
+  /**
+   * @see mitll.langtest.server.domino.ProjectSync#doUpdate
+   * @param userExercise
+   * @param isContext
+   * @param typeOrder
+   * @return
+   */
   boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
+  boolean updateModified(int exid);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO

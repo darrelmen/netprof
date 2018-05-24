@@ -1199,7 +1199,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (db != null) {
         setPaths();
         ServerProperties serverProps = db.getServerProps();
-        this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
+        this.userManagement = new RestUserManagement(db, serverProps);
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
         jsonScoring = new JsonScoring(db);
       }

@@ -471,11 +471,7 @@ public class DominoImport implements IDominoImport {
     }
 
     logger.info("getDeletedDocsSince : found " + ids.size() +
-        // " deleted from " + total + " known documents," +
-        "\n\n\n\n" +
         "\n\tfound      : " + npIDs
-        //+
-        //"\n\tnpToDomino : " + npToDomino
     );
     return ids;
   }

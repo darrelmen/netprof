@@ -59,7 +59,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
-  // public static final int MAX_LENGTH = 300;
   private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
 
   /**
@@ -1082,6 +1081,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       didIt &= update(contextEx, true, typeOrder);
     }*/
     return didIt;
+  }
+
+  public boolean updateModified(int exid) {
+    return dao.updateModified(exid) > 0;
   }
 
   /**

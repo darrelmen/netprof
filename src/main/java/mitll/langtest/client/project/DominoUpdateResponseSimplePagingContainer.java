@@ -31,13 +31,14 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     addItemID(list, 15);
     addNP(list, 15);
     addExerciseID(list, 15);
+    addIsContext(list, 15);
     addEnglish(list, 15);
     addFL(list, 40);
-    addMessage(list, 15);
+    addMessage(list, 40);
   }
 
   private void addNP(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getNetprofID);
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getNetprofID);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, "Netprof ID");
@@ -45,7 +46,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   }
 
   private void addEnglish(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getEnglish);
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getEnglish);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, "English");
@@ -53,7 +54,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   }
 
   private void addFL(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, DominoUpdateItem::getForeignLanguage);
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getForeignLanguage);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 200 + "px");
     addColumn(userCol, "Vocabulary");
@@ -61,13 +62,18 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   }
 
   private void addMessage(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> shell.getChangedFields().isEmpty() ? "" : shell.getChangedFields().toString());
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, shell -> {
+      List<String> changedFields = shell.getChangedFields();
+      String s = changedFields.toString();
+      return changedFields.isEmpty() ? "" : s.substring(1, s.length() - 2);
+    });
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 200 + "px");
     addColumn(userCol, "Message");
     table.addColumnSortHandler(getMessageSorter(userCol, list));
   }
 
+/*
   private Column<DominoUpdateItem, SafeHtml> getNPColumn(int maxLength, GetSafe getSafe) {
     return new Column<DominoUpdateItem, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -83,9 +89,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     };
   }
 
-  interface GetSafe {
-    String getSafe(DominoUpdateItem shell);
-  }
+*/
 
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getNPSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {
@@ -118,18 +122,21 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
 
 
   private void addExerciseID(List<DominoUpdateItem> list, int maxLength) {
-    Column<DominoUpdateItem, SafeHtml> userCol = getNPColumn(maxLength, shell -> "" + shell.getExerciseID());
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, shell -> "" + shell.getExerciseID());
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, "Exercise ID");
+    table.setColumnWidth(userCol, 50 + "px");
+    addColumn(userCol, "ID");
     table.addColumnSortHandler(getExSorter(userCol, list));
   }
 
-/*
-  private String getS(DominoUpdateItem i) {
-    return "" + i.getId();
+  private void addIsContext(List<DominoUpdateItem> list, int maxLength) {
+    Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, shell -> shell.isContext() ? "Yes" : "No");
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, 60 + "px");
+    addColumn(userCol, "Context?");
+    table.addColumnSortHandler(getExSorter(userCol, list));
   }
-*/
+
 
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getExSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {

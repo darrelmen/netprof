@@ -349,8 +349,6 @@ public class ResponseModal {
 
 
   private TabPane getUnmatchedRows2(String prefix, Collection<DominoUpdateItem> items) {
-    // JSONValue matchResults = results.get(UNMATCHED_ROWS);
-    // JSONArray matches = matchResults.isArray();
     int numMatches = items.size();
     String suffix = numMatches == 0 ? "" : " (" + numMatches + ")";
     TabPane dwPane = new TabPane(prefix + suffix);

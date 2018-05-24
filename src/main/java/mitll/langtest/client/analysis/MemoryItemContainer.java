@@ -378,7 +378,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
+  private Column<T, SafeHtml> getItemColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getItemLabel);
+  }
+
+  protected Column<T, SafeHtml> getTruncatedCol(int maxLength, GetSafe<T> getSafe) {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -388,14 +392,19 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
       @Override
       public SafeHtml getValue(T shell) {
-        return getNoWrapContent(getTruncatedItemLabel(shell, maxLength));
+        return getNoWrapContent(truncate(getSafe.getSafe(shell), maxLength));
       }
     };
   }
 
+  protected interface GetSafe<T> {
+    String getSafe(T shell);
+  }
+
+/*
   private String getTruncatedItemLabel(T shell, int maxLength) {
     return truncate(getItemLabel(shell), maxLength);
-  }
+  }*/
 
   protected abstract String getItemLabel(T shell);
 
