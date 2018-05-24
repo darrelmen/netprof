@@ -787,7 +787,7 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
-    logger.info("showImport " + doChange);
+  //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
     String msg = "Please wait...";
     if (s.equals("0")) msg += " this could take awhile the first time.";
@@ -808,13 +808,13 @@ public class ProjectChoices {
         button.setEnabled(true);
 
         DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
-        logger.info("showImport got " + status);
+   //     logger.info("showImport got " + status);
         if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS && !doChange) {
-          logger.info("showImport show " + status);
+     //     logger.info("showImport show " + status);
           getProps(projectForLang).putAll(result.getProps());
           showResponseReport(projectForLang, button, result);
         } else {
-          logger.info("showImport 2 show " + status);
+       //   logger.info("showImport 2 show " + status);
           showStatus(result, status);
         }
       }
