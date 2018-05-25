@@ -82,7 +82,7 @@ public abstract class Scoring {
   private static final String END_SIL = "</s>";
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
-  
+
   public static final String JAPANESE = "Japanese";
   public static final String KOREAN = "Korean";
 

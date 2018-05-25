@@ -1,6 +1,5 @@
 package mitll.langtest.server.database.instrumentation;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;

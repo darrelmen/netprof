@@ -9,7 +9,7 @@ public class SlimResult implements ISlimResult {
   protected final boolean valid;
   protected final float pronScore;
   private transient String jsonScore;
-  protected final int exID;
+  private final int exID;
   private final int audioID;
 
   /**

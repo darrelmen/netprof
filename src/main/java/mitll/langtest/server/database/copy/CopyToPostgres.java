@@ -76,6 +76,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static mitll.langtest.server.ServerProperties.DEFAULT_NETPROF_AUDIO_DIR;
@@ -146,6 +147,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param displayOrder
    * @param isEval
    * @param skipRefResult
+   * @param doUpdate
    * @see #main
    */
   private boolean copyOneConfigCommand(String config,
@@ -153,12 +155,10 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optionalName,
                                        int displayOrder,
                                        boolean isEval,
-                                       boolean skipRefResult) {
+                                       boolean skipRefResult, boolean doUpdate) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
-    DatabaseImpl databaseLight = null;
-    try {
-      databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
+    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF)) {
       String language = databaseLight.getLanguage();
       ServerProperties serverProps = databaseLight.getServerProps();
       boolean hasModel = serverProps.hasModel();
@@ -177,15 +177,11 @@ public class CopyToPostgres<T extends CommonShell> {
           displayOrder,
           ProjectType.NP,
           getProjectStatus(isEval, hasModel),
-          skipRefResult);
+          skipRefResult, doUpdate);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
       return false;
-    } finally {
-      if (databaseLight != null) {
-        databaseLight.close();
-      }
     }
   }
 
@@ -349,6 +345,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projectType
    * @param status        i.e. not production
    * @param skipRefResult
+   * @param doUpdate
    * @see #copyOneConfigCommand
    */
   public void copyOneConfig(DatabaseImpl db,
@@ -357,7 +354,8 @@ public class CopyToPostgres<T extends CommonShell> {
                             int displayOrder,
                             ProjectType projectType,
                             ProjectStatus status,
-                            boolean skipRefResult) throws Exception {
+                            boolean skipRefResult,
+                             boolean doUpdate) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -367,6 +365,10 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\ttype order          " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
+
+    // TODO if update - sinceWhen is from creation of existing project
+    long sinceWhen = 0;
+
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, projectType, status);  // TODO : course?
 
     logger.info("copyOneConfig" +
@@ -375,11 +377,9 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     // first add the user table
-    SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
-
     // check once if we've added it before
-    if (slickUEDAO.isProjectEmpty(projectID)) {
-      copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID);
+    if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
+      copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
     } else {
       logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
     }
@@ -388,7 +388,9 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyOneConfig took " + ((now - then) / 1000) + " seconds to load " + optName);
   }
 
-  private void copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult, Collection<String> typeOrder, int projectID) throws Exception {
+  private void copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
+                             Collection<String> typeOrder, int projectID,
+                             long sinceWhen) throws Exception {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     ResultDAO resultDAO = new ResultDAO(db);
     Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
@@ -399,22 +401,25 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
     Map<String, Integer> parentExToChild = new HashMap<>();
-    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild);
+    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild, sinceWhen);
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
-    copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(), db.getUserDAO().getDefaultUser());
+    copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
+        db.getUserDAO().getDefaultUser(), sinceWhen);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
     // add the audio table
-    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, status == ProjectStatus.EVALUATION);
+    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen);
     // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
     // copy ref results
     if (!skipRefResult) {
-      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID);
+      copyRefResult(db, oldToNewUser, exToID, pathToAudioID, projectID, sinceWhen);
     }
 
+    // TODO
+    // TODO : fill in for words and phones that are since some moment...
     // copy results, words, and phones
     {
       Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew(projectID);
@@ -429,10 +434,10 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     // anno DAO
-    copyAnno(db, db.getUserDAO(), oldToNewUser, exToID);
+    copyAnno(db, db.getUserDAO(), oldToNewUser, exToID, sinceWhen);
 
-    copyReviewed(db, oldToNewUser, exToID, true);
-    copyReviewed(db, oldToNewUser, exToID, false);
+    copyReviewed(db, oldToNewUser, exToID, true, sinceWhen);
+    copyReviewed(db, oldToNewUser, exToID, false, sinceWhen);
   }
 
   /**
@@ -481,6 +486,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param idToFL
    * @param typeOrder
+   * @param sinceWhen
    * @return map of parent exercise to context sentence
    * @see #copyOneConfig
    */
@@ -489,7 +495,8 @@ public class CopyToPostgres<T extends CommonShell> {
                                                                   Map<Integer, Integer> oldToNewUser,
                                                                   Map<Integer, String> idToFL,
                                                                   Collection<String> typeOrder,
-                                                                  Map<String, Integer> parentToChild) {
+                                                                  Map<String, Integer> parentToChild,
+                                                                  long sinceWhen) {
     Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
@@ -514,7 +521,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
-   * @param isEval
+   * @param sinceWhen
    * @see #copyOneConfig
    */
   private Map<String, Integer> copyAudio(DatabaseImpl db,
@@ -522,11 +529,14 @@ public class CopyToPostgres<T extends CommonShell> {
                                          Map<String, Integer> exToID,
                                          Map<String, Integer> parentExToChild,
                                          int projid,
-                                         boolean isEval) {
+                                         long sinceWhen) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
-    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProjectThatHaveBeenChecked(projid, false);
+    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO()
+        .getAudioAttributesByProjectThatHaveBeenChecked(projid, false)
+        .stream().filter(audioAttribute -> audioAttribute.getTimestamp() > sinceWhen).collect(Collectors.toList());
+
     logger.info("copyAudio h2 audio  " + audioAttributes.size());
     int missing = 0;
     int skippedMissingUser = 0;
@@ -576,7 +586,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param att
    * @param oldexid
    * @return
-   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int, boolean)
+   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int, long)
    */
   private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
     Integer id = exToID.get(oldexid);
@@ -599,14 +609,20 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param dominoUserDAO
    * @param oldToNewUser
    * @param exToID
+   * @param sinceWhen
    */
   private void copyAnno(DatabaseImpl db, IUserDAO dominoUserDAO, Map<Integer, Integer> oldToNewUser,
-                        Map<String, Integer> exToID) {
+                        Map<String, Integer> exToID, long sinceWhen) {
     SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
     List<SlickAnnotation> bulk = new ArrayList<>();
     int missing = 0;
     Set<Long> missingUsers = new HashSet<>();
-    Collection<UserAnnotation> all = new AnnotationDAO(db, dominoUserDAO).getAll();
+
+    Collection<UserAnnotation> all = new AnnotationDAO(db, dominoUserDAO)
+        .getAll()
+        .stream()
+        .filter(userAnnotation -> userAnnotation.getTimestamp() > sinceWhen).collect(Collectors.toList());
+
     for (UserAnnotation annotation : all) {
       long creatorID = annotation.getCreatorID();
       Integer userID = oldToNewUser.get((int) creatorID);
@@ -677,10 +693,12 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projID
    * @see #copyOneConfig
    */
-  private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult,
-                        SlickWordDAO slickWordDAO, int projID) {
+  private void copyWord(DatabaseImpl db,
+                        Map<Integer, Integer> oldToNewResult,
+                        SlickWordDAO slickWordDAO,
+                        int projID) {
     long then = System.currentTimeMillis();
-    int c = 0;
+    //int c = 0;
     List<SlickWord> bulk = new ArrayList<>();
     for (Word word : new WordDAO(db).getAll(projID)) {
       Integer rid = oldToNewResult.get((int) word.getRid());
@@ -819,6 +837,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projid
    * @param exToID
    * @param resultDAO
+   * @param sinceWhen
    * @see #copyOneConfig
    */
   private void copyResult(
@@ -829,7 +848,8 @@ public class CopyToPostgres<T extends CommonShell> {
       ResultDAO resultDAO,
       Map<Integer, String> idToFL,
       int unknownExerciseID,
-      int unknownUserID) {
+      int unknownUserID,
+      long sinceWhen) {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
@@ -842,7 +862,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     Set<Integer> missingUserIDs = new HashSet<>();
 
-    for (Result result : results) {
+    for (Result result : getSinceWhen(results, sinceWhen)) {
       int oldUserID = result.getUserid();
       Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
@@ -860,21 +880,16 @@ public class CopyToPostgres<T extends CommonShell> {
         missing2++;
         realExID = unknownExerciseID;
       }
-      //else {
       String transcript = idToFL.get(realExID);
 
-      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript == null ? "no transcript found" : transcript);
-//        if (e == null) {
-//          if (missing < 10 || true) logger.warn("missing exid ref " + result.getOldExID() + " so skipping " + result);
-//          missing++;
-//        } else {
+      SlickResult e = slickResultDAO
+          .toSlick(result, projid, realExID, transcript == null ? "no transcript found" : transcript);
       bulk.add(e);
       if (bulk.size() % 50000 == 0) logger.debug("copyResult : made " + bulk.size() + " results...");
-      //   }
-      //}
-
     }
-//    if (missing > 0) {
+
+
+    //    if (missing > 0) {
 //      logger.warn("skipped " + missing + "/" + results.size() +
 //          "  results b/c of exercise id fk missing");
 //    }
@@ -890,20 +905,24 @@ public class CopyToPostgres<T extends CommonShell> {
     slickResultDAO.addBulk(bulk);
     long now = System.currentTimeMillis();
     logger.debug("copyResult added  " + bulk.size() + " results in " + (now - then) / 1000 + " seconds.");
-    //}
   }
 
   private void copyReviewed(DatabaseImpl db,
                             Map<Integer, Integer> oldToNewUser,
                             Map<String, Integer> exToID,
-                            boolean isReviewed) {
+                            boolean isReviewed, long sinceWhen) {
     SlickReviewedDAO dao = (SlickReviewedDAO) (isReviewed ? db.getReviewedDAO() : db.getSecondStateDAO());
 
     String tableName = isReviewed ? ReviewedDAO.REVIEWED : ReviewedDAO.SECOND_STATE;
     ReviewedDAO originalDAO = new ReviewedDAO(db, tableName);
     List<SlickReviewed> bulk = new ArrayList<>();
-    Collection<StateCreator> all = originalDAO.getAll();
-    logger.info("found " + all.size() + " for " + tableName);
+
+    Collection<StateCreator> all = originalDAO
+        .getAll()
+        .stream()
+        .filter(stateCreator -> stateCreator.getWhen() > sinceWhen).collect(Collectors.toList());
+
+    logger.info("copyReviewed found " + all.size() + " for " + tableName);
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
 
@@ -933,13 +952,15 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
+   * @param sinceWhen
    * @see #copyOneConfig
    */
   private void copyRefResult(DatabaseImpl db,
                              Map<Integer, Integer> oldToNewUser,
                              Map<String, Integer> exToID,
                              Map<String, Integer> pathToAudioID,
-                             int projid) {
+                             int projid,
+                             long sinceWhen) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> toImport = new RefResultDAO(db, false).getResults();
@@ -949,7 +970,7 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyRefResult found " + pathToAudioID.size() + " path to audio id entries.");
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
-    for (Result result : toImport) {
+    for (Result result : getSinceWhen(toImport, sinceWhen)) {
       int userid = result.getUserid();
       Integer userID = oldToNewUser.get(userid);
       if (userID == null) {
@@ -982,6 +1003,10 @@ public class CopyToPostgres<T extends CommonShell> {
     if (missing > 0) logger.warn("copyRefResult missing " + missing + " due to missing ex id fk");
 
     logger.info("copyRefResult END   : added " + bulk.size() + " and now has " + dao.getNumResults() + " took " + diff + " seconds");
+  }
+
+  private List<Result> getSinceWhen(Collection<Result> toImport, long sinceWhen) {
+    return toImport.stream().filter(result -> result.getTimestamp() > sinceWhen).collect(Collectors.toList());
   }
 
   private Integer getAudioID(Map<String, Integer> pathToAudioID, String answer) {
@@ -1126,7 +1151,7 @@ public class CopyToPostgres<T extends CommonShell> {
             "\neval      " + isEval
         );
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false);
           if (!b) {
             System.exit(1);  // ?
           }
