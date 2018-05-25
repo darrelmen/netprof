@@ -157,17 +157,13 @@ public class ProjectSync implements IProjectSync {
           newEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, new ArrayList<>(), ADD)));
         }
 
-
         // add change messages for all normal exercises
-        importUpdateEx.forEach(commonExercise ->
-            updates.add(new DominoUpdateItem(commonExercise, new ArrayList<>(), CHANGE)));
+        importUpdateEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, new ArrayList<>(), CHANGE)));
 
-        // if (!newContextEx.isEmpty()) {
         Set<Integer> contextDeletes = new HashSet<>();
         updates.addAll(getNewAndChangedContextExercises(projectid, importFromDomino, newContextEx, importUpdateEx, contextDeletes, importToKnownID));
         logger.info("Context to delete " + contextDeletes);
         logger.info("Context to add    " + newContextEx);
-        // }
 
         if (!newContextEx.isEmpty() && doChange) {
           logger.info("addPending adding " + newContextEx.size() + " new context exercises");
@@ -193,10 +189,15 @@ public class ProjectSync implements IProjectSync {
 
       if (doChange) {
         Map<String, Integer> oldToNew = slickUEDAO.getOldToNew(projectid).getOldToNew();
-        copyAudio(projectid, newEx, oldToNew);
-        copyAudio(projectid, importUpdateEx, oldToNew);
-        copyAudio(projectid, newContextEx, oldToNew);
-
+        if (!newEx.isEmpty()) {
+          copyAudio(projectid, newEx, oldToNew);
+        }
+        if (!importUpdateEx.isEmpty()) {
+          copyAudio(projectid, importUpdateEx, oldToNew);
+        }
+        if (!newContextEx.isEmpty()) {
+          copyAudio(projectid, newContextEx, oldToNew);
+        }
         updateProjectIfSomethingChanged(jsonDominoID, newEx, importUpdateEx, project.getProject(), requestTime);
       }
 
@@ -279,14 +280,14 @@ public class ProjectSync implements IProjectSync {
   }
 
   private void addChangedExercises(Map<Integer, CommonExercise> dominoIDToChangedExercise,
-                                                           Map<Integer, SlickExercise> dominoToNonContextEx,
-                                                           Map<String, SlickExercise> oldIDToExer,
-                                                           Set<Integer> currentIDs,
-                                                           Set<String> oldIDs,
+                                   Map<Integer, SlickExercise> dominoToNonContextEx,
+                                   Map<String, SlickExercise> oldIDToExer,
+                                   Set<Integer> currentIDs,
+                                   Set<String> oldIDs,
 
-                                                           List<CommonExercise> newEx,
-                                                           List<CommonExercise> importUpdateEx,
-                                                           Map<CommonExercise, Integer> importToKnownID) {
+                                   List<CommonExercise> newEx,
+                                   List<CommonExercise> importUpdateEx,
+                                   Map<CommonExercise, Integer> importToKnownID) {
     dominoIDToChangedExercise.forEach((dominoID, importEx) -> {
       String npID = importEx.getOldID();
 
@@ -305,7 +306,7 @@ public class ProjectSync implements IProjectSync {
 
       if (currentKnownExercise == null) {  // how can this happen???
         logger.warn("\n\n\naddPending found new CHANGED ex for domino id " + dominoID + " / " + npID + " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
-        newEx.add(importEx);
+        //    newEx.add(importEx);
       } else {
 
         if (currentIDs.contains(dominoID) || oldIDs.contains(npID)) {
@@ -517,6 +518,8 @@ public class ProjectSync implements IProjectSync {
       currentKnownExercise = oldIDToExer.get(npID);
       if (currentKnownExercise != null) {
         logger.info("\taddPending found ex by netprof id " + npID);
+      } else {
+        logger.info("\taddPending can't found ex by netprof id '" + npID + "' in " + oldIDToExer.keySet().size() + " keys");
       }
     }
     return currentKnownExercise;
@@ -781,16 +784,19 @@ public class ProjectSync implements IProjectSync {
 
       if (!sourceProjects.isEmpty()) {
         List<SlickAudio> copies = getSlickAudios(copyAudioForEx, copyAudioForContext);
-        logger.info("copyAudio :" +
-            "\n\tcopying      " + copyAudioForEx + "/" + copyAudioForContext +
-            "\n\taudio        " + copies.size() +
-            "\n\tfrom         " + newEx.size() +
-            "\n\tfrom sources " + sourceProjects.size() +
-            " projects, e.g.  " + sourceProjects.iterator().next().getProject().name());
+        if (copies.isEmpty()) {
+          logger.info("copyAudio - no audio copies...");
+        } else {
+          logger.info("copyAudio :" +
+              "\n\tcopying      " + copyAudioForEx + "/" + copyAudioForContext +
+              "\n\taudio        " + copies.size() +
+              "\n\tfrom         " + newEx.size() +
+              "\n\tfrom sources " + sourceProjects.size() +
+              " projects, e.g.  " + sourceProjects.iterator().next().getProject().name());
 
-        daoContainer.getAudioDAO().addBulk(copies);
+          daoContainer.getAudioDAO().addBulk(copies);
+        }
       }
-
     } catch (Exception e) {
       logger.info("Got " + e, e);
     }
@@ -800,17 +806,8 @@ public class ProjectSync implements IProjectSync {
   private List<SlickAudio> getSlickAudios(Collection<AudioMatches> copyAudioForEx,
                                           Collection<AudioMatches> copyAudioForContext) {
     List<SlickAudio> copies = new ArrayList<>();
-
-    // Collection<AudioMatches> copyAudioForEx = transcriptToAudioMatch.values();
-    for (AudioMatches m : copyAudioForEx) {
-//          logger.info("copyAudio got transcript match " + m);
-      m.deposit(copies);
-    }
-    // Collection<AudioMatches> copyAudioForContext = transcriptToContextAudioMatch.values();
-    for (AudioMatches m : copyAudioForContext) {
-      logger.info("copyAudio got context match " + m);
-      m.deposit(copies);
-    }
+    copyAudioForEx.forEach(audioMatches -> audioMatches.deposit(copies));
+    copyAudioForContext.forEach(audioMatches -> audioMatches.deposit(copies));
     return copies;
   }
 
@@ -826,8 +823,8 @@ public class ProjectSync implements IProjectSync {
      * @see #copyMatchingAudio(int, int, List, AudioMatches)
      */
     void add(SlickAudio candidate) {
-      //   int gender = candidate.gender();
       boolean regularSpeed = getAudioType(candidate).isRegularSpeed();
+      //   int gender = candidate.gender();
 //      logger.info("AudioMatches Examine candidate " + candidate);
 //      logger.info("AudioMatches Examine regularSpeed " + regularSpeed + " " + audioType);
 //      logger.info("AudioMatches Examine gender " + gender );

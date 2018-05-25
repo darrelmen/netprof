@@ -1236,17 +1236,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   public BothMaps getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-//    Map<Integer, Integer> dominoToNew = new HashMap<>();
 
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(projectid);
-
     addToLegacyIdToIdMap(allPredefByProject, oldToNew);
-    //  addToDominoMap(allPredefByProject, dominoToNew);
 
-    List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);
-
+    List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
     addToLegacyIdToIdMap(allContextPredefByProject, oldToNew);
-    //addToDominoMap(allContextPredefByProject, dominoToNew);
 
     logger.info("getOldToNew found for" +
         "\n\tproject #" + projectid +
@@ -1254,7 +1249,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         "\n\t" + allContextPredefByProject.size() + " context predef exercises," +
         "\n\t" + oldToNew.size() + " old->new mappings");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
-    return new BothMaps(oldToNew);//, dominoToNew);
+    return new BothMaps(oldToNew);
   }
 
   public class BothMaps {
