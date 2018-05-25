@@ -122,10 +122,6 @@ public class AnswerInfo {
     public String getTranscript() {
       return transcript;
     }
-
-/*    public void setTranscript(String transcript) {
-      this.transcript = transcript;
-    }*/
   }
 
   public static class ScoreInfo {
@@ -251,7 +247,6 @@ public class AnswerInfo {
                      double snr,
 
                      boolean correct, float pronScore, String scoreJson, int processDur
-                     //  int roundTripDur,
   ) {
     this.userid = userid;
     this.projid = projid;

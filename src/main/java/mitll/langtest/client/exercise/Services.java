@@ -24,6 +24,8 @@ public interface Services extends EventRegistration {
 
   Collection<AudioServiceAsync> getAllAudioServices();
 
+  void tellHydraServerToRefreshProject(int projID);
+
   /**
    *
    * @return

@@ -75,6 +75,8 @@ import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  public static final String DYNAMIC_RANGE = "Dynamic Range";
+  public static final String VALIDITY = "Validity";
   private final Logger logger = Logger.getLogger("ResultManager");
 
 
@@ -548,8 +550,8 @@ public class ResultManager extends PagerTable {
       }
     };
     validity.setSortable(true);
-    table.addColumn(validity, "Validity");
-    rememberColumn(validity, "Validity");
+    table.addColumn(validity, VALIDITY);
+    rememberColumn(validity, VALIDITY);
 
     TextColumn<MonitorResult> dynamicRange = new TextColumn<MonitorResult>() {
       @Override
@@ -558,8 +560,8 @@ public class ResultManager extends PagerTable {
       }
     };
     dynamicRange.setSortable(true);
-    table.addColumn(dynamicRange, "Dynamic Range");
-    rememberColumn(dynamicRange, "Dynamic Range");
+    table.addColumn(dynamicRange, DYNAMIC_RANGE);
+    rememberColumn(dynamicRange, DYNAMIC_RANGE);
 
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override

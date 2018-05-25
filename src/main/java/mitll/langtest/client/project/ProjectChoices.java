@@ -612,19 +612,19 @@ public class ProjectChoices {
     button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
   }
 
-  private TreeMap<String, String> getProps(SlimProject projectForLang) {
-    return projectForLang.getProps();
-  }
-
   private void showPopover(SlimProject projectForLang,
                            Widget button,
                            Set<String> typeOrder,
-                           UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper) {
+                           UnitChapterItemHelper<CommonExercise> unitChapterItemHelper) {
     basicDialog.showPopover(
         button,
         null,
-        commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, getProps(projectForLang)),
+        unitChapterItemHelper.getTypeToValue(typeOrder, getProps(projectForLang)),
         Placement.RIGHT);
+  }
+
+  private TreeMap<String, String> getProps(SlimProject projectForLang) {
+    return projectForLang.getProps();
   }
 
   @NotNull
@@ -790,10 +790,11 @@ public class ProjectChoices {
   //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
     String msg = "Please wait...";
-    if (s.equals("0")) msg += " this could take awhile the first time.";
+  //  if (s.equals("0")) msg += " this could take awhile the first time.";
     final Object waitToken = messageHelper.startWaiting(msg);
 
-    projectServiceAsync.addPending(projectForLang.getID(), doChange, new AsyncCallback<DominoUpdateResponse>() {
+    int id = projectForLang.getID();
+    projectServiceAsync.addPending(id, doChange, new AsyncCallback<DominoUpdateResponse>() {
       @Override
       public void onFailure(Throwable caught) {
         messageHelper.stopWaiting(waitToken);
@@ -816,6 +817,11 @@ public class ProjectChoices {
         } else {
        //   logger.info("showImport 2 show " + status);
           showStatus(result, status);
+
+          /**
+           * Make sure the other servers internally know that the project has changed and should go look at the database again.
+           */
+          controller.tellHydraServerToRefreshProject(id);
         }
       }
     });

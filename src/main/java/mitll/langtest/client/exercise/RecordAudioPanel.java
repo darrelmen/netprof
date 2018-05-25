@@ -55,6 +55,9 @@ import mitll.langtest.shared.exercise.*;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static com.google.gwt.dom.client.Style.*;
+import static com.google.gwt.dom.client.Style.Unit.*;
+
 /**
  * A waveform record button and a play audio button.
  * <p>
@@ -144,17 +147,25 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    HTML label = new HTML(DYNAMIC_RANGE);
-    label.addStyleName("leftTenMargin");
-    label.addStyleName("topBarMargin");
-    afterPlayWidget.add(label);
-    afterPlayWidget.add(progressBar);
+    {
+      HTML label = new HTML(DYNAMIC_RANGE);
+      label.addStyleName("leftTenMargin");
+      //  label.addStyleName("topBarMargin");
+      label.getElement().getStyle().setMarginTop(2, PX);
+      afterPlayWidget.add(label);
+    }
 
+    afterPlayWidget.add(progressBar);
     afterPlayWidget.setVisible(false);
+
     progressBar.setWidth("300px");
+    progressBar.setHeight("25px");
+
     Style style = progressBar.getElement().getStyle();
-    style.setMarginLeft(5, Style.Unit.PX);
+    style.setMarginTop(0, PX);
+    style.setMarginLeft(5, PX);
     progressBar.addStyleName("topBarMargin");
+
     return afterPlayWidget;
   }
 
@@ -296,9 +307,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
       add(recordImage2);
       recordImage2.setVisible(false);
 
-      getElement().setId("MyPlayAudioPanel");
-      // setHeight(HEIGHT_OF_RECORD_ROW + "px");
-
+//      getElement().setId("MyPlayAudioPanel");
       postAudioRecordButton.addStyleName("leftFiveMargin");
       postAudioRecordButton.addStyleName("floatLeft");
       playButton.addStyleName("floatLeft");

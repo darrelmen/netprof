@@ -464,7 +464,7 @@ public class ServerProperties {
    * @return
    */
   public boolean isFirstHydra() {
-    return getHostName().startsWith("hydra.");
+    return getHostName().startsWith("hydra.") || getHostName().startsWith("hydra-dev.");
   }
 
   public String getHostName() {

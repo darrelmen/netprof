@@ -353,7 +353,6 @@ public class ProjectManagement implements IProjectManagement {
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       //logMemory();
 
-      //db.getUserListManager().ensureDryRun(projectID);
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.
@@ -683,10 +682,10 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProject(int projectid) {
-/*    if (projectid == IMPORT_PROJECT_ID && !idToProject.isEmpty()) {
-      logger.info("getProject not returning project for " + projectid);
-      return null;//getFirstProject();
-    } else {*/
+    if (projectid == -1) {
+      logger.warn("getProject called with -1 projectid?", new IllegalArgumentException("project id = -1"));
+    }
+
     Project project = idToProject.get(projectid);
 
     if (project == null) {
@@ -695,15 +694,12 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (project == null && !idToProject.isEmpty()) {
-        //Project firstProject = getFirstProject();
         logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-            ") ");//,
-        //new IllegalArgumentException());
-        return null;//firstProject;
+            ") ");
+        return null;
       }
     }
     return project;
-    //  }
   }
 
   /**

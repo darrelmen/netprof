@@ -1062,6 +1062,20 @@ private boolean hasNetworkProblem;
     return new HashSet<>(projectToAudioService.values());
   }
 
+  public void tellHydraServerToRefreshProject(int projID) {
+    getScoringService().configureAndRefresh(projID, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Updating project on hydra server.", caught);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2).");
+      }
+    });
+  }
+
   /**
    * Find host-specific scoring service - e.g. msa is on hydra2
    *

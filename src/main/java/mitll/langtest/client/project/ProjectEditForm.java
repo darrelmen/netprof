@@ -219,6 +219,9 @@ public class ProjectEditForm extends UserDialog {
     info.setShowOniOS(showOniOSBox.getValue());
     //   logger.info("updateProject now " + info);
 
+    /**
+     * Make sure the other servers internally know that the project has changed and should go look at the database again.
+     */
     projectServiceAsync.update(info, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -228,21 +231,7 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Boolean result) {
         lifecycleSupport.refreshStartupInfo(true);
-        tellHydraServerToRefreshProject(info.getID());
-      }
-    });
-  }
-
-  private void tellHydraServerToRefreshProject(int projID) {
-    services.getScoringService().configureAndRefresh(projID, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        messageHelper.handleNonFatalError("Updating project on hydra server.", caught);
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2).");
+        services.tellHydraServerToRefreshProject(info.getID());
       }
     });
   }
@@ -335,6 +324,9 @@ public class ProjectEditForm extends UserDialog {
 //    logger.info("domino id is " + info.getDominoID());
     setCommonFields();
 
+    /**
+     * Make sure the other servers internally know that the project has changed and should go look at the database again.
+     */
     projectServiceAsync.create(info, new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -348,7 +340,7 @@ public class ProjectEditForm extends UserDialog {
           Window.alert("Sorry, couldn't create a new project.");
         } else {
           lifecycleSupport.refreshStartupInfo(true);
-          tellHydraServerToRefreshProject(projID);
+          services.tellHydraServerToRefreshProject(projID);
         }
       }
     });

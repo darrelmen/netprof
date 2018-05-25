@@ -180,8 +180,9 @@ public class Report implements IReport {
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
 
-  private static final boolean DEBUG = true;
   private Map<Integer, String> idToUserID = new HashMap<>();
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param resultDAO
@@ -1545,8 +1546,8 @@ public class Report implements IReport {
                         getUserInfo(userid) + "\n\tresult id " + result.getUniqueID() + " on " + new Date(result.getTimestamp()));
                   }
 
-                  if (!allTeachers.contains(userid)) {
-                    logger.warn("hmm " + getUserInfo(userid) + " is not a teacher?");
+                  if (!allTeachers.contains(userid) && !lincoln.contains(userid)) {
+                    logger.warn("getResultsForSet hmm " + getUserInfo(userid) + " is not a teacher?");
                   }
                 }
 

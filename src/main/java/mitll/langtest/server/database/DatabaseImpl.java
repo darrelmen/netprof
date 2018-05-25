@@ -1563,21 +1563,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (isTodayAGoodDay()) {
         sendReports(getReport(), false, -1);
       } else {
-        logger.debug("doReport : not sending email report since this is not monday...");
+        logger.info("doReport : not sending email report since this is not monday...");
       }
       tryTomorrow();
     } else {
-      logger.debug("doReport Host " + serverProps.getHostName() + " not generating a report.");
+      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
   }
 
   private void tryTomorrow() {
     long now = System.currentTimeMillis();
-    long nextDay = now + DAY;
+    long days = now / DAY;
+    long nextDay = (days + 1) * DAY;  // on day boundary
 
-    nextDay = (nextDay / DAY) * DAY;  // on day boundary
-
-    long toWait = nextDay - now;
+    long toWait = nextDay - now + 10 * 1000;
 
     Date date = new Date(nextDay);
 

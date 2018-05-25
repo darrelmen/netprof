@@ -83,6 +83,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private static final String PRACTICED = " practiced.";
   private static final String NO_SCORE = "No score yet.";
   private static final String PERFECT = "100% Perfect!";
+
+  /**
+   * @see #showAvgScore
+   */
   private static final String AVG_SCORE = " avg. score";
   /**
    *
@@ -376,11 +380,14 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         new ClickablePagingContainer<CommonShell>(controller) {
           public void gotClickOnItem(CommonShell e) {
           }
+
           protected void addTable(Panel column) {
           }
+
           @Override
           protected void addColumnsToTable(boolean sortEnglish) {
           }
+
           /**
            * @see SimplePagingContainer#configureTable
            * @param newRange
@@ -1084,7 +1091,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #addRemoveClickHandler
    */
   private void setHistory(Map<String, String> candidate) {
-    logger.info("setHistory "+candidate);
+    // logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1107,7 +1114,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     if (!isThereALoggedInUser()) return;
 
     List<Pair> pairs = getPairs(typeToSelection);
-    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    //  logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     final long then = System.currentTimeMillis();
 
@@ -2003,19 +2010,21 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
-  private static final boolean DEBUGSCORE = false;
+  private static final boolean DEBUGSCORE = true;
 
   /**
-   * @param result
+   * @param displayed
    * @see #showExercises
    */
-  private void setProgressBarScore(Collection<CommonShell> result, final int reqid) {
+  private void setProgressBarScore(Collection<CommonShell> displayed, final int reqid) {
     exercisesWithScores.clear();
+    exerciseToScore.clear();
+
     float total = 0f;
     int withScore = 0;
     // long then = System.currentTimeMillis();
-    //logger.info("setProgressBarScore checking " + result.size());
-    for (CommonShell exercise : result) {
+    if (DEBUGSCORE) logger.info("setProgressBarScore checking " + displayed.size());
+    for (CommonShell exercise : displayed) {
       if (exercise.hasScore()) {
         if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         exercisesWithScores.add(exercise.getID());
@@ -2034,7 +2043,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }*/
 
     if (isCurrentReq(reqid)) {
-      showScore(exercisesWithScores.size(), result.size());
+      showScore(exercisesWithScores.size(), displayed.size());
       if (DEBUGSCORE) logger.info("setProgressBarScore total " + total + " denom " + withScore);
 
       showAvgScore(total, withScore);
@@ -2063,26 +2072,29 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     showAvgScore();
   }
 
+  /**
+   * filter to just those displayed...
+   */
   private void showAvgScore() {
     float total = 0f;
     int withScore = exerciseToScore.size();
     // long then = System.currentTimeMillis();
-    if (DEBUGSCORE) logger.info("showAvgScore checking " + withScore);
-    for (float score : exerciseToScore.values()) {
-      total += score;
+    if (DEBUGSCORE) logger.info("showAvgScore checking " + withScore + " exercises ");
+    for (Map.Entry<Integer, Float> pair : exerciseToScore.entrySet()) {
+      total += pair.getValue();
+      if (DEBUGSCORE) logger.info("\tshowAvgScore ex " + pair.getKey() + " = " + pair.getValue());
     }
     if (DEBUGSCORE) logger.info("showAvgScore total " + total + " denom " + withScore);
 
     showAvgScore(total, withScore);
-    // if (!isCurrentReq(reqid)) break;
   }
 
   private void showAvgScore(float total, int withScore) {
-    float a = total * 10f;
+    float numer = total * 10f;
     int denom = withScore * 10;
     float fdenom = (float) denom;
-    float avg = a / fdenom;
-    //logger.info("total " + avg + " " + denom);
+    float avg = denom == 0 ? 0F : numer / fdenom;
+    if (DEBUGSCORE) logger.info("showAvgScore total " + avg + " " + denom);
     showAvgScore(Math.round(avg * 100));
   }
 
@@ -2106,21 +2118,27 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                             String oneHundredPercent,
                             String suffix,
                             boolean useColorGradient) {
-    double score = (float) num / (float) denom;
+    float fnumer = (float) num;
+    float fdenom = (float) denom;
+
+    double score = fnumer / fdenom;
     double percent = 100 * score;
+    if (DEBUGSCORE) logger.info("showProgress percent " + percent);
+
     practicedProgress.setPercent(num == 0 ? 100 : percent);
     boolean allDone = num == denom;
 
-    String text =
-        num == 0 ? zeroPercent :
-            allDone ? oneHundredPercent : (num + suffix);
+    {
+      String text =
+          num == 0 ? zeroPercent :
+              allDone ? oneHundredPercent : (num + suffix);
 
-    practicedProgress.setText(text);
-
-    double round = Math.max(percent, 30);
-    if (percent == 0d) round = 100d;
+      practicedProgress.setText(text);
+    }
 
     if (useColorGradient && num > 0) {
+      double round = Math.max(percent, 30);
+      if (percent == 0d) round = 100d;
       new ScoreProgressBar(false).setColor(practicedProgress, score, round, false);
     } else {
       practicedProgress.setColor(
