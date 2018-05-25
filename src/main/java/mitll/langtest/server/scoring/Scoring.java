@@ -82,8 +82,9 @@ public abstract class Scoring {
   private static final String END_SIL = "</s>";
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
-  private static final String JAPANESE = "Japanese";
-  private static final String KOREAN = "Korean";
+  
+  public static final String JAPANESE = "Japanese";
+  public static final String KOREAN = "Korean";
 
   final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 

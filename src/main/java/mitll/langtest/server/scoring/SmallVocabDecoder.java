@@ -350,7 +350,7 @@ public class SmallVocabDecoder {
       if (DEBUG_SEGMENT) {
         logger.info("segmentation couldn't segment '" + phrase + "' fall back to character based segmentation.");
       }
-      
+
       StringBuilder builder = new StringBuilder();
 
       List<Character> characters = new ArrayList<>(phrase.length());
