@@ -112,6 +112,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1563,7 +1567,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (isTodayAGoodDay()) {
         sendReports(getReport(), false, -1);
       } else {
-        logger.info("doReport : not sending email report since this is not monday...");
+        logger.info("doReport : not sending email report since this is not Sunday...");
       }
       tryTomorrow();
     } else {
@@ -1571,19 +1575,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  /**
+   * Fire at Sunday midnight EST (or local)
+   * Smarter would be to figure out how long to wait until sunday...
+   */
   private void tryTomorrow() {
-    long now = System.currentTimeMillis();
-    long days = now / DAY;
-    long nextDay = (days + 1) * DAY;  // on day boundary
+    ZoneId zone = ZoneId.systemDefault();
+    ZonedDateTime now = ZonedDateTime.now(zone);
 
-    long toWait = nextDay - now + 10 * 1000;
-
-    Date date = new Date(nextDay);
-
+    LocalDate tomorrow = now.toLocalDate().plusDays(1);
+    ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
+    Duration duration = Duration.between(now, tomorrowStart);
+    long toWait = duration.toMillis() + 1000;
     new Thread(() -> {
       try {
-        logger.info("tryTomorrow : Waiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
-            "\n\tto fire at " + date);
+        logger.info("tryTomorrow :" +
+            "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
+            "\n\tto fire at " + tomorrowStart);
         Thread.sleep(toWait);
       } catch (InterruptedException e) {
         e.printStackTrace();

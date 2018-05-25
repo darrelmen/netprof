@@ -52,6 +52,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagerTable {
+  public static final String WHITE_SPACE_NOWRAP = "white-space: nowrap;";
 /*  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     com.github.gwtbootstrap.client.ui.SimplePager.Resources DEFAULT_RESOURCES = GWT.create(com.github.gwtbootstrap.client.ui.SimplePager.Resources.class);
     com.github.gwtbootstrap.client.ui.SimplePager pager = new com.github.gwtbootstrap.client.ui.SimplePager(com.github.gwtbootstrap.client.ui.SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
@@ -101,7 +102,7 @@ public abstract class PagerTable {
 
   protected SafeHtml getNoWrapContent(String noWrapContent) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+    sb.appendHtmlConstant("<div style='" + WHITE_SPACE_NOWRAP + "'><span>" +
         noWrapContent +
         "</span>");
 

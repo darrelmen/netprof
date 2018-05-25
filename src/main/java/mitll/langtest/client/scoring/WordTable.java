@@ -53,6 +53,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.client.table.PagerTable.WHITE_SPACE_NOWRAP;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -60,9 +62,20 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-  private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
-
   private final Logger logger = Logger.getLogger("WordTable");
+
+  private static final String TABLE = "<table>";
+  private static final String TABLEEND = "</table>";
+
+  private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
+  private static final String TEXT_ALIGN_CENTER = "text-align:center;";
+  private static final String BACKGROUND_COLOR = "background-color";
+
+  /**
+   * Fix for japanese word wrap issue.
+   */
+  private static final String HEADER = "<th style='" + TEXT_ALIGN_CENTER + WHITE_SPACE_NOWRAP + BACKGROUND_COLOR + ":";
+
   private static final int PHONE_WIDTH = 25;
 
   private static final String TR = "tr";
@@ -82,7 +95,7 @@ public class WordTable {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
 
-    builder.append("<table>");
+    builder.append(TABLE);
 
     {
       builder.append(THEAD);
@@ -95,20 +108,20 @@ public class WordTable {
 
       for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
         builder.append("<td>");
-        builder.append("<table>");
+        builder.append(TABLE);
         builder.append(THEAD);
 
         addPhones(filter, builder, pair);
 
         builder.append("</thead>");
-        builder.append("</table>");
+        builder.append(TABLEEND);
         builder.append("</td>");
       }
 
       builder.append("</tr>");
     }
 
-    builder.append("</table>");
+    builder.append(TABLEEND);
     return builder.toString();
   }
 
@@ -117,7 +130,7 @@ public class WordTable {
       float score = word.getScore();
       String color = getColor(score);
       //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
-      builder.append("<th style='text-align:center; background-color:").append(color).append("'>");
+      builder.append(HEADER).append(color).append("'>");
       builder.append(word.getEvent());
       builder.append("</th>");
     });
@@ -134,9 +147,12 @@ public class WordTable {
     for (TranscriptSegment phone : pair.getValue()) {
       String event = phone.getDisplayEvent();
       if (!event.equals(SIL)) {
-        boolean match = event.equals(filter);
-        String color = match ? " background-color:" + getColor(phone) : "";
-        builder.append("<th style='text-align:center;").append(color).append("'>");
+        String color = event.equals(filter) ? " " + BACKGROUND_COLOR + ":" + getColor(phone) : "";
+        builder
+            .append("<th style='" + TEXT_ALIGN_CENTER
+            )
+            .append(color)
+            .append("'>");
         builder.append(event);
         builder.append("</th>");
       }
@@ -147,7 +163,7 @@ public class WordTable {
     List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<SlimSegment> filtered = words.stream().filter(slimSegment -> !shouldSkipPhone(slimSegment.getEvent())).collect(Collectors.toList());
     StringBuilder builder = new StringBuilder();
-    builder.append("<table>");
+    builder.append(TABLE);
 
     {
       builder.append(THEAD);
@@ -155,7 +171,7 @@ public class WordTable {
       builder.append("</thead>");
     }
 
-    builder.append("</table>");
+    builder.append(TABLEEND);
     return builder.toString();
   }
 
@@ -213,10 +229,10 @@ public class WordTable {
         "style='" +
         "padding:3px; " +
         "margin-left:3px; " +
-        "text-align:center; " +
+        TEXT_ALIGN_CENTER + " " +
         "font-family:sans-serif; " +
         "white-space:nowrap; " +
-        "background-color:" + getColor(score) +
+        BACKGROUND_COLOR + ":" + getColor(score) +
         "'>");
     builder.append(event);
     builder.append("</span>");
@@ -249,10 +265,6 @@ public class WordTable {
     int id = 0;
     Collection<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries =
         getWordToPhones(netPronImageTypeToEndTime).entrySet();
-
-/*
-    netPronImageTypeToEndTime.forEach((k, v) -> logger.info("getDivWord : type " + k + " = " + v));
-*/
 
     if (isRTL) {
       List<Map.Entry<TranscriptSegment, List<TranscriptSegment>>> entries1 = new ArrayList<>(entries);
@@ -464,14 +476,7 @@ public class WordTable {
                                    AudioControl audioControl,
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
-                                   TranscriptSegment wordSegment//,
-                                   //boolean isRTL
-  ) {
-/*    if (isRTL) {
-      List<TranscriptSegment> copy = new ArrayList<>(phoneSegments);
-      Collections.reverse(copy);
-      phoneSegments = copy;
-    }*/
+                                   TranscriptSegment wordSegment) {
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
@@ -591,7 +596,6 @@ public class WordTable {
     }
     return wordToPhones;
   }
-
 
   private boolean shouldSkipPhone(String event) {
     return event.equalsIgnoreCase(SIL) || event.equals("<s>") || event.equals("</s>");
