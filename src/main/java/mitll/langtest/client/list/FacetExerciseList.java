@@ -1430,7 +1430,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @param itemID
    * @param visibleIDs
    * @param currentReq
-   * @see #gotVisibleRangeChanged
+   * @see #getExercises(Collection, int)
    */
   private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
     // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
@@ -1748,8 +1748,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     }
   }
 
-
-  private final Set<Integer> exercisesWithScores = new HashSet<>();
+//  private final Set<Integer> exercisesWithScores = new HashSet<>();
   private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, CommonExercise> fetched = new ConcurrentHashMap<>();
 
@@ -2010,14 +2009,14 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
-  private static final boolean DEBUGSCORE = true;
+  private static final boolean DEBUGSCORE = false;
 
   /**
    * @param displayed
    * @see #showExercises
    */
   private void setProgressBarScore(Collection<CommonShell> displayed, final int reqid) {
-    exercisesWithScores.clear();
+    //exercisesWithScores.clear();
     exerciseToScore.clear();
 
     float total = 0f;
@@ -2027,7 +2026,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     for (CommonShell exercise : displayed) {
       if (exercise.hasScore()) {
         if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
-        exercisesWithScores.add(exercise.getID());
+    //    exercisesWithScores.add(exercise.getID());
         float score = exercise.getScore();
         total += score;
         exerciseToScore.put(exercise.getID(), score);
@@ -2043,7 +2042,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }*/
 
     if (isCurrentReq(reqid)) {
-      showScore(exercisesWithScores.size(), displayed.size());
+      showScore(exerciseToScore.size(), displayed.size());
       if (DEBUGSCORE) logger.info("setProgressBarScore total " + total + " denom " + withScore);
 
       showAvgScore(total, withScore);
@@ -2060,15 +2059,14 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   public void setScore(int id, float hydecScore) {
     super.setScore(id, hydecScore);
     if (hydecScore > -1f) {
-      exercisesWithScores.add(id);
-
+     // exercisesWithScores.add(id);
       if (DEBUGSCORE) logger.info("setScore # " + id + " Score " + hydecScore);
 
       exerciseToScore.put(id, hydecScore);
     } else {
       logger.info("skipping low score for " + id);
     }
-    showScore(exercisesWithScores.size(), pagingContainer.getSize());
+    showScore(exerciseToScore.size(), pagingContainer.getSize());
     showAvgScore();
   }
 

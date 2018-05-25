@@ -42,11 +42,9 @@
         <!--
             The SMTP mailer appears to only work when smtp debug is true.
           -->
-<!--
-        <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
-              from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
-              bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
--->
+                <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
+                      from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
+                      bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
 
         <RollingFile name="LogFile"
                      fileName="${sys:catalina.base}/logs/netprof-app.log"
@@ -69,9 +67,9 @@
             </Policies>
         </RollingFile>
 
-        <Console name="STDOUT" target="SYSTEM_OUT">
+ <!--       <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-20.30c{1}:%-4L] - %m%n%throwable"/>
-        </Console>
+        </Console>-->
 
     </appenders>
     <loggers>
@@ -197,9 +195,9 @@
                </logger>
                -->
 
-        <root level="debug">
+        <root level="info">
             <appender-ref ref="LogFile" level="info"/>
-            <appender-ref ref="LogFile" level="error"/>
+            <appender-ref ref="Mail" level="error"/>
         </root>
 
         <!--

@@ -621,9 +621,9 @@ public class AudioFileHelper implements AlignDecode {
       logger.error("Got " + e, e);
       logger.warn(
           "exercise " + exercise +
-          "\n\tattribute    " + attribute +
-          "\n\tuserID       " + userID +
-          "\n\tabsoluteFile " + absoluteFile);
+              "\n\tattribute    " + attribute +
+              "\n\tuserID       " + userID +
+              "\n\tabsoluteFile " + absoluteFile);
       return null;
     }
 
@@ -1186,7 +1186,10 @@ public class AudioFileHelper implements AlignDecode {
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to " +
           requestToServer +
-          " '" + english + "' = '" + foreignLanguage + "'");
+          "\n\teng '" + english + "'" +
+          "\n\tfl  '" + foreignLanguage + "'" +
+          (language.equalsIgnoreCase("Japanese") ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
+      );
 
       {
         List<WordAndProns> possibleProns = new ArrayList<>();
@@ -1673,6 +1676,12 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  /**
+   * JUST FOR TESTING
+   *
+   * @param transcript
+   * @return
+   */
   public String getSegmented(String transcript) {
     return asrScoring.getSegmented(transcript);
   }
