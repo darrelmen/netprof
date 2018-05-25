@@ -76,11 +76,12 @@ class CheckLTS {
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
-    smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+    smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
     this.language = languageProperty != null ? languageProperty : "";
     this.isAsianLanguage = isAsianLanguage;
     removeAllAccents = !language.equalsIgnoreCase("french");
 
+//    logger.info("lang " + languageProperty  + " asian " + isAsianLanguage);
 //    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
   }
 
@@ -336,7 +337,8 @@ class CheckLTS {
    */
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
   private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+ //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false);
 
     List<String> firstPron = new ArrayList<>();
@@ -347,7 +349,7 @@ class CheckLTS {
       for (String token : tokens) {
         String segmentation = smallVocabDecoder.segmentation(token.trim());
         if (segmentation.isEmpty()) {
-          logger.warn("no segmentation for " + foreignLanguagePhrase + " token " + token + " trying transliteration");
+          logger.warn("checkLTS2 : no segmentation for " + foreignLanguagePhrase + " token " + token + " trying transliteration");
         } else {
           Collections.addAll(token2, segmentation.split(" "));
         }

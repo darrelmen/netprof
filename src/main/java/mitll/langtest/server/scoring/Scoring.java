@@ -82,6 +82,9 @@ public abstract class Scoring {
   private static final String END_SIL = "</s>";
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
+  private static final String JAPANESE = "Japanese";
+  private static final String KOREAN = "Korean";
+
   final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 
   private final String deployPath;
@@ -117,6 +120,7 @@ public abstract class Scoring {
     this.language = language;
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
+//    logger.info("isAsian " + isAsianLanguage + " lang " + language);
 //    if (isAsianLanguage) {
 //      logger.warn("using mandarin segmentation.");
 //    }
@@ -136,8 +140,8 @@ public abstract class Scoring {
 
   private boolean isAsianLanguage(String language) {
     return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase("Japanese") ||
-        language.equalsIgnoreCase("Korean");
+        language.equalsIgnoreCase(JAPANESE) ||
+        language.equalsIgnoreCase(KOREAN);
   }
 
   LTS getLTS() {

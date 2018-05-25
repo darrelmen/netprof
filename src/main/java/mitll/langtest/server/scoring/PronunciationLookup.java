@@ -1,6 +1,5 @@
 package mitll.langtest.server.scoring;
 
-import corpus.EmptyLTS;
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -10,8 +9,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.Normalizer;
 import java.util.*;
+
+import static mitll.langtest.server.autocrt.DecodeCorrectnessChecker.MANDARIN;
+import static mitll.langtest.server.scoring.Scoring.JAPANESE;
+import static mitll.langtest.server.scoring.Scoring.KOREAN;
 
 public class PronunciationLookup implements IPronunciationLookup {
   private static final Logger logger = LogManager.getLogger(PronunciationLookup.class);
@@ -32,8 +34,8 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, russian, french, german, removeAllPunct;
-  private boolean hasLTS ;
+  private boolean korean, russian, french, german, removeAllPunct, isAsianLanguage;
+  private boolean hasLTS;
   private boolean emptyLTS;
 
   /**
@@ -54,13 +56,21 @@ public class PronunciationLookup implements IPronunciationLookup {
     french = language.equalsIgnoreCase("french");
     german = language.equalsIgnoreCase("german");
     removeAllPunct = !language.equalsIgnoreCase("french");
+    this.isAsianLanguage = isAsianLanguage(language);
+
     makeDecoder();
   }
 
   private void makeDecoder() {
     if (svDecoderHelper == null && htkDictionary != null) {
-      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
+      svDecoderHelper = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
     }
+  }
+
+  private boolean isAsianLanguage(String language) {
+    return language.equalsIgnoreCase(MANDARIN) ||
+        language.equalsIgnoreCase(JAPANESE) ||
+        language.equalsIgnoreCase(KOREAN);
   }
 
   /**
@@ -222,7 +232,6 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   /**
-   *
    * @param transcript
    * @param transliteration
    * @param justPhones
@@ -231,6 +240,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @param index
    * @param candidates
    * @param word
+   * @see #getPronunciationsFromDictOrLTS
    */
   private void useLTS(String transcript,
                       String transliteration,
@@ -279,7 +289,9 @@ public class PronunciationLookup implements IPronunciationLookup {
       } else {
 //                logger.info("can't use transliteration");
         if (!seen.contains(key)) {
-          logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts + " for '" + word1 + "' in " + transcript);
+          logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts +
+              "\n\tfor '" + word1 + "'" +
+              "\n\tin  '" + transcript + "'");
         }
         seen.add(key);
         addUnkPron(transcript, dict, candidates, word);
@@ -460,14 +472,6 @@ public class PronunciationLookup implements IPronunciationLookup {
     return p.equalsIgnoreCase(POUND);
   }
 
-
-//
-//  List<String> getPhoneSeqs(String[] phoneSequence) {
-//    List<String> possibleProns = new ArrayList<>(1);
-//    addPhoneSeq(possibleProns, phoneSequence);
-//    return possibleProns;
-//  }
-
   private void addPhoneSeq(List<String> possibleProns, Collection<String> phoneSequence) {
     possibleProns.add(getPhoneSeq(phoneSequence));
   }
@@ -628,7 +632,6 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @see #getUsedTokens
    */
   private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
-    String sentence;
     Set<String> backSet = new HashSet<>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<>(backgroundVocab);
     List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
@@ -637,12 +640,11 @@ public class PronunciationLookup implements IPronunciationLookup {
         mergedVocab.add(foregroundToken);
       }
     }
+
+
     StringBuilder builder = new StringBuilder();
-
     for (String token : mergedVocab) builder.append(token).append(" ");
-
-    sentence = builder.toString();
-    return sentence;
+    return builder.toString();
   }
 
   @Override

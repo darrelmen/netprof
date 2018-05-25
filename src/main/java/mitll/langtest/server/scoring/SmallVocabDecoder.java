@@ -63,6 +63,11 @@ public class SmallVocabDecoder {
    */
   private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
+
+  /**
+   * @see #segmentation
+   */
+  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022]";
   private static final String OE = "oe";
 
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -71,17 +76,25 @@ public class SmallVocabDecoder {
   private static final String FRENCH_PUNCT = "[,.?]";
 
   private HTKDictionary htkDictionary;
+  private boolean isAsianLanguage;
+
+  private static final int TOO_LONG = 8;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_SEGMENT = false;
 
   public SmallVocabDecoder() {
   }
 
   /**
    * @param htkDictionary
+   * @param isAsianLanguage
    * @see PronunciationLookup#makeDecoder
    */
-  public SmallVocabDecoder(HTKDictionary htkDictionary) {
+  public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage) {
     this.htkDictionary = htkDictionary;
-    //logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict"));
+    this.isAsianLanguage = isAsianLanguage;
+//    logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict") + " asian " + isAsianLanguage);
   }
 
   /**
@@ -173,10 +186,16 @@ public class SmallVocabDecoder {
     return builder.toString();
   }
 
+  /**
+   * @param isMandarin
+   * @param fl
+   * @param removeAllAccents
+   * @return
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#isCorrect(Collection, String, boolean, boolean)
+   */
   public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
     return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
   }
-
 
   /**
    * @param sentence
@@ -222,7 +241,7 @@ public class SmallVocabDecoder {
    */
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
-//    logger.info("getMandarinTokens '" + foreignLanguage +  "' = '" + segmentation + "'");
+    if (DEBUG) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
     return getTokens(segmentation, false);
   }
 
@@ -239,9 +258,7 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.trie.ExerciseTrie#addSuffixes
    */
   public String getTrimmed(String sentence) {
-    String trim = getTrimmedLeaveLastSpace(sentence)
-        //.replaceAll("\\s+", " ")
-        .trim();
+    String trim = getTrimmedLeaveLastSpace(sentence).trim();
     //logger.warn("getTrimmed before " + sentence + " after "+ trim);
     return trim;
   }
@@ -251,14 +268,7 @@ public class SmallVocabDecoder {
    * @return
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
    */
-/*  public String getTrimmedRemoveAccents(String sentence) {
-    String trim = getTrimmedLeaveLastSpace(removeAccents(sentence))
-        //.replaceAll("\\s+", " ")
-        .trim();
-    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
-    return trim;
-  }*/
-  public String getTrimmedLeaveAccents(String sentence) {
+  private String getTrimmedLeaveAccents(String sentence) {
     String trim = sentence
         .replaceAll(FRENCH_PUNCT, "")
         .replaceAll(REPLACE_ME_OE, OE)
@@ -268,7 +278,7 @@ public class SmallVocabDecoder {
     return trim;
   }
 
-  public String removeAccents(String text) {
+  String removeAccents(String text) {
     return text == null ? null :
         Normalizer.normalize(text, Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
@@ -325,9 +335,6 @@ public class SmallVocabDecoder {
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_SEGMENT = false;
-
   /**
    * @param phrase
    * @return
@@ -335,10 +342,15 @@ public class SmallVocabDecoder {
    */
   String segmentation(String phrase) {
     Map<String, String> phraseToPrefix = new HashMap<>();
+
+    phrase = phrase.replaceAll(JAPANESE_PUNCT, "");
     String s = longest_prefix(phrase, 0, phraseToPrefix);
     boolean failedToSegment = s.trim().isEmpty();
     if (failedToSegment) {
-      if (DEBUG_SEGMENT) logger.info("couldn't segment " + phrase + " fall back to character based segmentation.");
+      if (DEBUG_SEGMENT) {
+        logger.info("segmentation couldn't segment '" + phrase + "' fall back to character based segmentation.");
+      }
+      
       StringBuilder builder = new StringBuilder();
 
       List<Character> characters = new ArrayList<>(phrase.length());
@@ -354,7 +366,7 @@ public class SmallVocabDecoder {
         if (third != null) {
           String trigram = String.valueOf(first) + second + third;
           if (inDict(trigram)) {
-            if (DEBUG_SEGMENT) logger.info("match trigram " + trigram);
+            if (DEBUG_SEGMENT) logger.info("segmentation match trigram " + trigram);
             builder.append(trigram).append(" ");
             i++;
             i++;
@@ -366,7 +378,7 @@ public class SmallVocabDecoder {
           if (second != null) {
             String bigram = String.valueOf(first) + second;
             if (inDict(bigram)) {
-              if (DEBUG_SEGMENT) logger.info("match bigram " + bigram);
+              if (DEBUG_SEGMENT) logger.info("segmentation match bigram " + bigram);
               builder.append(bigram).append(" ");
               i++;
             } else {
@@ -379,7 +391,9 @@ public class SmallVocabDecoder {
       }
 
       String result = builder.toString();
-      if (DEBUG_SEGMENT) logger.info("phrase " + phrase + " = " + result);
+      if (DEBUG_SEGMENT) logger.info("segmentation" +
+          "\n\tphrase    " + phrase +
+          "\n\tsegmented " + result);
       return result;
     } else {
       return s;
@@ -392,7 +406,16 @@ public class SmallVocabDecoder {
       return "";
     int endOfPrefix = phrase.length() - i;
     String prefix = phrase.substring(0, endOfPrefix);
-    if (inDict(prefix.trim())) {
+    String trim = prefix.trim();
+    boolean prefixTooLong = false;
+    if (isAsianLanguage) {
+      prefixTooLong = prefix.length() > TOO_LONG;
+      if (DEBUG && prefixTooLong) {
+        logger.warn("longest_prefix not looking in dict for long asian prefix " + prefix);
+      }
+    }
+
+    if (!prefixTooLong && inDict(trim)) {
       if (i == 0) {
         if (DEBUG) logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
         return phrase;
@@ -406,7 +429,7 @@ public class SmallVocabDecoder {
       } else {
 //        logger.info("found " + substring + " = " + memo);
       }
-      String rest = memo;// longest_prefix(substring, 0,phraseToPrefix);
+      String rest = memo;
 
       if (!rest.isEmpty()) {
         String s = prefix + " " + rest;
@@ -434,7 +457,7 @@ public class SmallVocabDecoder {
 //      }
 
       if (DEBUG && b) {
-        logger.debug("inDict token '" + token + "'");
+        logger.debug("---> inDict '" + token + "'");
       }
       return b;
     } catch (Exception e) {

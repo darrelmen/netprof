@@ -595,6 +595,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
+
+
       logger.info("runHydra now for asian language (" + language + "): " +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
@@ -745,7 +747,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #runHydra(String, String, String, Collection, String, boolean, int)
    */
   public String getSegmented(String transcript) {
-    return pronunciationLookup.getSmallVocabDecoder().getSegmented(transcript.trim(), removeAllAccents);
+    return pronunciationLookup
+        .getSmallVocabDecoder()
+        .getSegmented(transcript.trim(), removeAllAccents);
   }
 
   @NotNull
