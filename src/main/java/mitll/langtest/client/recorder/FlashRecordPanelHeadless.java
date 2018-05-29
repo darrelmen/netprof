@@ -64,7 +64,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
+  /**
+   *
+   */
   private static final int FLASH_RECORDING_STOP_DELAY = 210; // was 160
+  private static final int DELAY_MILLIS = 100;
+
   private final String id = "flashcontent";
   static MicPermission micPermission;
   private boolean didPopup = false;
@@ -336,21 +341,36 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (usingWebRTC()) {
-      stopWebRTCRecording(wavCallback);
+      stopWebRTCRecordingLater(wavCallback);
     } else if (usingFlash()) {
       stopFlashRecording(wavCallback);
     }
   }
 
-  private void stopFlashRecording(final WavCallback wavCallback) {
-   // final long then = System.currentTimeMillis();
-//      logger.info("stopRecording - initial ");
+  private void stopWebRTCRecordingLater(final WavCallback wavCallback) {
+    final long then = System.currentTimeMillis();
+    logger.info("stopWebRTCRecordingLater - initial ");
 
     Timer t = new Timer() {
       @Override
       public void run() {
-//          long now = System.currentTimeMillis();
-//          logger.info("stopRecording timer at " + now + " diff " + (now - then));
+        long now = System.currentTimeMillis();
+        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
+        stopWebRTCRecording(wavCallback);
+      }
+    };
+    t.schedule(DELAY_MILLIS); // add flash delay
+  }
+
+  private void stopFlashRecording(final WavCallback wavCallback) {
+    final long then = System.currentTimeMillis();
+    logger.info("stopFlashRecording - initial ");
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        long now = System.currentTimeMillis();
+        logger.info("stopFlashRecording timer at " + now + " diff " + (now - then));
         flashStopRecording();
         wavCallback.getBase64EncodedWavFile(flashGetWav());
       }

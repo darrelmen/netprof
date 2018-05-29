@@ -44,6 +44,7 @@ import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SimpleHighlightSegment;
+import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -62,6 +63,7 @@ import static mitll.langtest.client.table.PagerTable.WHITE_SPACE_NOWRAP;
  * @since 10/21/15.
  */
 public class WordTable {
+  public static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
   private final Logger logger = Logger.getLogger("WordTable");
 
   private static final String TABLE = "<table>";
@@ -74,7 +76,7 @@ public class WordTable {
   /**
    * Fix for japanese word wrap issue.
    */
-  private static final String HEADER = "<th style='" + TEXT_ALIGN_CENTER + WHITE_SPACE_NOWRAP + BACKGROUND_COLOR + ":";
+  private static final String HEADER = "<th style='" + TEXT_ALIGN_CENTER + PagerTable.WHITE_SPACE_NOWRAP + BACKGROUND_COLOR + ":";
 
   private static final int PHONE_WIDTH = 25;
 
@@ -231,7 +233,7 @@ public class WordTable {
         "margin-left:3px; " +
         TEXT_ALIGN_CENTER + " " +
         "font-family:sans-serif; " +
-        "white-space:nowrap; " +
+        WHITE_SPACE_NOWRAP + " " +
         BACKGROUND_COLOR + ":" + getColor(score) +
         "'>");
     builder.append(event);

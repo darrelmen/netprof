@@ -179,8 +179,8 @@ function downsampleBuffer(buffer, bufferSampleRate, sampleRate) {
     var sampleRateRatio = bufferSampleRate / sampleRate;
     var newLength = Math.round(buffer.length / sampleRateRatio);
 
-    console.log("downsampleBuffer : old rate   " + bufferSampleRate + " new " + sampleRate);
-    console.log("downsampleBuffer : old length " + buffer.length + " new " + newLength);
+    // console.log("downsampleBuffer : old rate   " + bufferSampleRate + " new " + sampleRate);
+    // console.log("downsampleBuffer : old length " + buffer.length + " new " + newLength);
 
     var result = new Float32Array(newLength);
     var offsetResult = 0;

@@ -67,7 +67,6 @@ public enum AudioType implements IsSerializable {
     this.speed = speed;
   }
 
-
   @Override
   public String toString() {
     return text;

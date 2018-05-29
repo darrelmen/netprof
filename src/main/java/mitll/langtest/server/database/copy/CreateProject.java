@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
@@ -68,6 +69,12 @@ public class CreateProject {
       logger.info("createProjectIfNotExists found project " + byName + " for language '" + oldLanguage + "'");
     }
     return byName;
+  }
+
+  public int getExisting(DatabaseImpl db, String optName) {
+    String oldLanguage = getOldLanguage(db);
+    String name = optName != null ? optName : oldLanguage;
+    return db.getProjectDAO().getByName(name);
   }
 
   /**
@@ -153,7 +160,7 @@ public class CreateProject {
                            ProjectServices projectServices,
                            ProjectInfo info) {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
-    int byName = projectDAO.getByLanguageAndName(info.getLanguage(),info.getName());
+    int byName = projectDAO.getByLanguageAndName(info.getLanguage(), info.getName());
 
 
     if (byName == -1) {
@@ -175,8 +182,7 @@ public class CreateProject {
       if (host.isEmpty()) {
         host = h2Languages.contains(info.getLanguage()) ? "h2" : WEBSERVICE_HOST_DEFAULT;
         logger.info("createProject choosing host for " + info.getLanguage() + " = " + host);
-      }
-      else {
+      } else {
         logger.info("createProject host=" + host);
       }
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST, host);
@@ -189,7 +195,7 @@ public class CreateProject {
       projectServices.rememberProject(projectID);
       return projectID;
     } else {
-      logger.info("createProject : PROJECT EXISTS with name " + info.getName()+" : create new " + info);
+      logger.info("createProject : PROJECT EXISTS with name " + info.getName() + " : create new " + info);
       return -1;
     }
   }
@@ -231,7 +237,7 @@ public class CreateProject {
         dominoID);
   }
 
-  private String getOldLanguage(DatabaseImpl db) {
+  public String getOldLanguage(DatabaseImpl db) {
     return db.getLanguage();
   }
 
@@ -280,6 +286,12 @@ public class CreateProject {
       cc = "us";
     }
     return cc;
+  }
+
+  public long getSinceWhen(DatabaseImpl db, int projectID) {
+    Project project = db.getProject(projectID);
+    long time = project.getProject().created().getTime();
+    return time;
   }
 
   private static class Pair {

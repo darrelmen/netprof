@@ -559,7 +559,15 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<SlickResult> allByProject = dao.getAllByProject(projID);
     Map<Integer, Integer> oldToNew = new HashMap<>(allByProject.size());
     allByProject.forEach(slickResult -> oldToNew.put(slickResult.legacyid(), slickResult.id()));
-    logger.info("getOldToNew for  " + projID + " -> found " + oldToNew.size());
+    logger.info("getOldToNew for " + projID + " -> found " + oldToNew.size());
+    return oldToNew;
+  }
+
+  public Map<Integer, Integer> getOldToNewSince(int projID, long since) {
+    List<SlickResult> allByProject = dao.getAllByProjectSince(projID, since);
+    Map<Integer, Integer> oldToNew = new HashMap<>(allByProject.size());
+    allByProject.forEach(slickResult -> oldToNew.put(slickResult.legacyid(), slickResult.id()));
+    logger.info("getOldToNewSince for " + projID + " -> found " + oldToNew.size());
     return oldToNew;
   }
 

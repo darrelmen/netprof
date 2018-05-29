@@ -101,7 +101,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   enum ACTION {
     COPY("c"), DROP("d"), DROPALL("a"), DROPALLBUT("b"), UPDATEUSER("u"),
-    //UPDATE("p"),
+    UPDATE("p"),
     UNKNOWN("k");
 
     private String value;
@@ -155,7 +155,8 @@ public class CopyToPostgres<T extends CommonShell> {
                                        String optionalName,
                                        int displayOrder,
                                        boolean isEval,
-                                       boolean skipRefResult, boolean doUpdate) {
+                                       boolean skipRefResult,
+                                       boolean doUpdate) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF)) {
@@ -177,7 +178,8 @@ public class CopyToPostgres<T extends CommonShell> {
           displayOrder,
           ProjectType.NP,
           getProjectStatus(isEval, hasModel),
-          skipRefResult, doUpdate);
+          skipRefResult,
+          doUpdate);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -355,7 +357,7 @@ public class CopyToPostgres<T extends CommonShell> {
                             ProjectType projectType,
                             ProjectStatus status,
                             boolean skipRefResult,
-                             boolean doUpdate) throws Exception {
+                            boolean doUpdate) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -369,28 +371,47 @@ public class CopyToPostgres<T extends CommonShell> {
     // TODO if update - sinceWhen is from creation of existing project
     long sinceWhen = 0;
 
-    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, projectType, status);  // TODO : course?
+    CreateProject createProject = getCreateProject(db);
+    int projectID = doUpdate ?
+        createProject.getExisting(db, optName) :
+        createProjectIfNotExists(db, cc, optName, displayOrder, typeOrder, projectType, status);  // TODO : course?
 
     logger.info("copyOneConfig" +
         "\n\tproject #             " + projectID +
         "\n\ttype order            " + typeOrder +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
-    // first add the user table
-    // check once if we've added it before
-    if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
-      copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+    if (doUpdate) {
+      if (projectID == -1) {
+        logger.error("no project found for " + createProject.getOldLanguage(db) + " or " + optName);
+      } else {
+        sinceWhen = createProject.getSinceWhen(db, projectID);
+        copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+      }
     } else {
-      logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
+      // first add the user table
+      // check once if we've added it before
+      if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
+        copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+      } else {
+        logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
+      }
     }
     long now = System.currentTimeMillis();
 
     logger.info("copyOneConfig took " + ((now - then) / 1000) + " seconds to load " + optName);
   }
 
+  @NotNull
+  private CreateProject getCreateProject(DatabaseImpl db) {
+    return getCreateProject(db.getServerProps());
+  }
+
   private void copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
                              Collection<String> typeOrder, int projectID,
                              long sinceWhen) throws Exception {
+    if (sinceWhen > 0) logger.info("\n\n\n only changes since " + (new Date(sinceWhen)));
+
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     ResultDAO resultDAO = new ResultDAO(db);
     Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
@@ -422,7 +443,9 @@ public class CopyToPostgres<T extends CommonShell> {
     // TODO : fill in for words and phones that are since some moment...
     // copy results, words, and phones
     {
-      Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew(projectID);
+      Map<Integer, Integer> oldToNewResult = sinceWhen > 0 ?
+          slickResultDAO.getOldToNewSince(projectID, sinceWhen) :
+          slickResultDAO.getOldToNew(projectID);
 
       if (oldToNewResult.isEmpty()) {
         logger.error("\n\n\nold to new result is EMPTY!");
@@ -476,7 +499,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                        Collection<String> typeOrder,
                                        ProjectType projectType,
                                        ProjectStatus status) {
-    return getCreateProject(db.getServerProps())
+    return getCreateProject(db)
         .createProjectIfNotExists(db, cc, optName, "", displayOrder, typeOrder, projectType, status);
   }
 
@@ -612,7 +635,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param sinceWhen
    */
   private void copyAnno(DatabaseImpl db, IUserDAO dominoUserDAO, Map<Integer, Integer> oldToNewUser,
-                        Map<String, Integer> exToID, long sinceWhen) {
+                        Map<String, Integer> exToID,
+                        long sinceWhen) {
     SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
     List<SlickAnnotation> bulk = new ArrayList<>();
     int missing = 0;
@@ -1091,11 +1115,10 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(UPDATEUSER.toLower())) {
       action = UPDATEUSER;
       updateUsersFile = cmd.getOptionValue(UPDATEUSER.toLower());
+    } else if (cmd.hasOption(UPDATE.toLower())) {
+      action = UPDATE;
+      config = cmd.getOptionValue(UPDATE.toLower());
     }
-//    else if (cmd.hasOption(UPDATE.toLower())) {
-//      action = UPDATE;
-//      config = cmd.getOptionValue(UPDATE.toLower());
-//    }
 
     if (cmd.hasOption(NAME.toLower())) {
       optName = cmd.getOptionValue(NAME.toLower());
@@ -1181,11 +1204,13 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
         break;
-//        case UPDATE:
-//        logger.info("map old user ids to new user ids");
-//          boolean b = copyToPostgres.updateOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult);
-//
-//          break;
+      case UPDATE:
+        logger.info("map old user ids to new user ids");
+        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true);
+        if (!b) {
+          System.exit(1);  // ?
+        }
+        break;
       default:
         formatter.printHelp("copy", options);
     }

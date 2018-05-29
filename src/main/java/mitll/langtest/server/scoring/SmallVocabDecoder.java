@@ -238,6 +238,8 @@ public class SmallVocabDecoder {
   /**
    * @param foreignLanguage
    * @return
+   * @see #getTokensAllLanguages
+   * @see #segmentation(String)
    */
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
