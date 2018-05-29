@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
-              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-         version="3.0"
-         xmlns="http://java.sun.com/xml/ns/javaee"
-         metadata-complete="true">-->
-
     <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
@@ -19,14 +12,6 @@
         <param-name>domino.cfg.home</param-name>
         <param-value>/opt/netprof/config/</param-value>
     </context-param>
-
-    <!--
-        <context-param>
-            <param-name>domino.cfg.file</param-name>
-            <param-value>/opt/netprof/config/netprof.properties</param-value>
-        </context-param>
-    -->
-
 
     <!-- ==================================================================== -->
     <!-- Start RPC mappings                                                   -->
@@ -334,15 +319,4 @@
     <listener>
         <listener-class>mitll.hlt.domino.server.configuration.DominoServerInitializationManager</listener-class>
     </listener>
-
-<!--
-    <filter>
-        <filter-name>javamelody</filter-name>
-        <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
-        <init-param>
-            <param-name>authorized-users</param-name>
-            <param-value>gvidaver:dliDLI1234, rbudd:dliDLI1234</param-value>
-        </init-param>
-    </filter>-->
-
 </web-app>
