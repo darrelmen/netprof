@@ -127,6 +127,7 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   boolean easyUpdate(SlickProject changed);
+  boolean easyUpdateNetprof(SlickProject changed, long sinceWhen);
 
   /**
    * @see mitll.langtest.server.services.ProjectServiceImpl#update

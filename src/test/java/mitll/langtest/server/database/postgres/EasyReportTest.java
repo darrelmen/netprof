@@ -36,8 +36,11 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.domino.ImportInfo;
+import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -64,9 +67,49 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void test() {
     DatabaseImpl andPopulate = getAndPopulate();
-  //  andPopulate.sendReport(-1);
+    //  andPopulate.sendReport(-1);
     andPopulate.close();
   }
+
+  @Test
+  public void testSegment() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    Project project = andPopulate.getProject(21);
+
+    String temp = "１";
+    String sentence = "きのうの午後５時から７時まで黒い車が止まっていました";
+    logger.info("\n\ntestSegment for " + sentence);
+
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    String res = project.getAudioFileHelper().getSegmented(sentence);
+
+    logger.info("\n\ntestSegment res " + res);
+
+    andPopulate.close();
+
+  }
+
+  @Test
+  public void testSync() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    int projectid = 16;
+
+    ProjectSync projectSync = andPopulate.getProjectSync();
+
+    ImportInfo importFromDomino = andPopulate.getProjectManagement().getImportFromDomino(projectid);
+    DominoUpdateResponse dominoUpdateResponse = projectSync.getDominoUpdateResponse(projectid, 2, false, importFromDomino);
+
+
+    logger.info("Got " + dominoUpdateResponse);
+
+    andPopulate.close();
+  }
+
   @Test
   public void testSendReport() {
     DatabaseImpl andPopulate = getAndPopulate();
@@ -116,6 +159,7 @@ public class EasyReportTest extends BaseTest {
     andPopulate.doReportForYear(-1);
     andPopulate.close();
   }
+
   @Test
   public void testFind() {
     DatabaseImpl andPopulate = getAndPopulate();
@@ -136,7 +180,7 @@ public class EasyReportTest extends BaseTest {
     // long now = System.currentTimeMillis();
 
     JSONArray contentAsJson = jsonExport.getContentAsJson(false);
-    logger.info("Got\n\t" +contentAsJson);
+    logger.info("Got\n\t" + contentAsJson);
   }
 
   @Test
@@ -148,7 +192,7 @@ public class EasyReportTest extends BaseTest {
     JSONObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
     // long now = System.currentTimeMillis();
 
-    logger.info("Got\n\t" +jsonPhoneReport);
+    logger.info("Got\n\t" + jsonPhoneReport);
   }
 
 

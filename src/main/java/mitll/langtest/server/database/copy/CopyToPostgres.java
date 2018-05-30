@@ -40,7 +40,6 @@ import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
@@ -94,13 +93,18 @@ import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
-  private static final int WARN_RID_MISSING_THRESHOLD = 50;
+  private static final int WARN_RID_MISSING_THRESHOLD = 10;
   private static final int WARN_MISSING_THRESHOLD = 10;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
+  private static final String CONFIG = "config";
 
   enum ACTION {
-    COPY("c"), DROP("d"), DROPALL("a"), DROPALLBUT("b"), UPDATEUSER("u"),
+    COPY("c"),
+    DROP("d"),
+    DROPALL("a"),
+    DROPALLBUT("b"),
+    UPDATEUSER("u"),
     UPDATE("p"),
     UNKNOWN("k");
 
@@ -159,7 +163,15 @@ public class CopyToPostgres<T extends CommonShell> {
                                        boolean doUpdate) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
-    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF)) {
+    long sinceWhen = 0;
+
+    // Set<Long> sinceCandidates = new HashSet<>();
+    // Set<Long> sinceCandidate = new HashSet<>();
+    if (doUpdate) {
+      sinceWhen = getSinceWhen(config, optionalProperties);
+    }
+
+    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
       String language = databaseLight.getLanguage();
       ServerProperties serverProps = databaseLight.getServerProps();
       boolean hasModel = serverProps.hasModel();
@@ -168,23 +180,61 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tloading  " + language +
           "\n\thasModel " + hasModel +
           "\n\tisEval   " + isEval +
+          "\n\tdoUpdate " + doUpdate +
           "\n\tmodel    " + serverProps.getCurrentModel());
 
       String nameToUse = optionalName == null ? language : optionalName;
 
-      copyToPostgres.copyOneConfig(databaseLight,
+      copyToPostgres.copyOneConfig(
+          databaseLight,
           getCreateProject(serverProps).getCC(language),
           nameToUse,
           displayOrder,
           ProjectType.NP,
           getProjectStatus(isEval, hasModel),
           skipRefResult,
-          doUpdate);
+          doUpdate,
+          sinceWhen);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
       return false;
     }
+  }
+
+  private long getSinceWhen(String config, String optionalProperties) {
+    long sinceWhen = 0;
+
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig");
+
+    if (databaseLight == null) logger.warn("no old config under " + OPT_NETPROF);
+    else {
+      {
+        ResultDAO resultDAO = new ResultDAO(databaseLight);
+        List<Result> results = resultDAO.getResults();
+        logger.info("got " + results.size() + " results");
+        for (Result result : results) {
+          if (result != null && result.getTimestamp() > sinceWhen) sinceWhen = result.getTimestamp();
+        }
+      }
+
+      logger.info("latest result " + new Date(sinceWhen));
+
+      {
+        List<Result> results1 = new RefResultDAO(databaseLight, false).getResults();
+        logger.info("got " + results1.size() + " ref results");
+        long maxRes = 0;
+
+        for (Result result : results1) {
+          if (result != null && result.getTimestamp() > sinceWhen) sinceWhen = result.getTimestamp();
+          if (result != null && result.getTimestamp() > maxRes) maxRes = result.getTimestamp();
+        }
+        logger.info("latest result " + new Date(sinceWhen) + " ref result " + new Date(maxRes));
+      }
+
+    }
+    logger.info("UPDATE : Since when " + new Date(sinceWhen));
+    return sinceWhen;
   }
 
   @NotNull
@@ -261,20 +311,22 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param useH2
    * @param optPropsFile
    * @param installPath
-   * @return
+   * @return null if can't find the config file
    * @see #copyOneConfigCommand
    */
   public static DatabaseImpl getDatabaseLight(String config,
                                               boolean useH2,
                                               boolean useLocal,
                                               String optPropsFile,
-                                              String installPath) {
+                                              String installPath,
+                                              String rootConfigDir) {
     // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
     logger.info("getDatabaseLight db " + config + " props " + propsFile);
 
-    File configFile = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
+    //String rootConfigDir = CONFIG;
+    File configFile = new File(installPath + File.separator + rootConfigDir + File.separator + config + File.separator + propsFile);
 
     logger.info("getDatabaseLight path " + configFile.getAbsolutePath());
 
@@ -294,7 +346,9 @@ public class CopyToPostgres<T extends CommonShell> {
     String parent = configFile.getParentFile().getAbsolutePath();
     String name = configFile.getName();
 
-    DatabaseImpl database = new H2DatabaseImpl(parent,
+    logger.info("getDatabaseLight parent " + parent + " name " + name);
+    DatabaseImpl database = new H2DatabaseImpl(
+        configFile.getParentFile().getAbsolutePath(),
         serverProps.getH2Database(),
         serverProps,
         new PathHelper(installPath, serverProps), false, null, false);
@@ -311,9 +365,11 @@ public class CopyToPostgres<T extends CommonShell> {
     String configFileFullPath = serverProps2.getConfigFileFullPath();
     try {
       logger.info("readProps reading from " + configFileFullPath);
-      serverProps.getProps().load(new FileInputStream(configFileFullPath));
+      FileInputStream inStream = new FileInputStream(configFileFullPath);
+      serverProps.getProps().load(inStream);
+      inStream.close();
     } catch (Exception e) {
-      logger.error("can't find " + configFileFullPath);
+      logger.error("readProps can't find " + configFileFullPath);
     }
   }
 
@@ -322,14 +378,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param propsFile
    * @param installPath
    * @return
-   * @see #getDatabaseLight(String, boolean, boolean, String, String)
+   * @see #getDatabaseLight
    */
   private static ServerProperties getServerProperties(String config, String propsFile, String installPath) {
     String configDir = config.isEmpty() ? config : config + File.separator;
-    File file = new File(installPath + File.separator +
-        "config" + File.separator +
-        configDir +
-        propsFile);
+    File file = new File(installPath + File.separator + CONFIG + File.separator + configDir + propsFile);
 
     if (!file.exists()) {
       logger.error("\n\ngetServerProperties can't find config file " + file.getAbsolutePath());
@@ -348,6 +401,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param status        i.e. not production
    * @param skipRefResult
    * @param doUpdate
+   * @param oldSinceWhen
    * @see #copyOneConfigCommand
    */
   public void copyOneConfig(DatabaseImpl db,
@@ -357,7 +411,8 @@ public class CopyToPostgres<T extends CommonShell> {
                             ProjectType projectType,
                             ProjectStatus status,
                             boolean skipRefResult,
-                            boolean doUpdate) throws Exception {
+                            boolean doUpdate,
+                            long oldSinceWhen) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -365,6 +420,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\tproject            " + optName +
         "\n\tcc                  " + cc +
         "\n\ttype order          " + typeOrder +
+        "\n\tdoUpdate            " + doUpdate +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
 
@@ -385,8 +441,15 @@ public class CopyToPostgres<T extends CommonShell> {
       if (projectID == -1) {
         logger.error("no project found for " + createProject.getOldLanguage(db) + " or " + optName);
       } else {
-        sinceWhen = createProject.getSinceWhen(db, projectID);
-        copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        sinceWhen = Math.max(createProject.getSinceWhen(db, projectID), oldSinceWhen);
+        logger.info("UPDATE : sinceWhen is " + new Date(sinceWhen));
+        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        if (maxTime == 0) {
+          logger.info("UPDATE : no change - no updated results\n\n\n ");
+        } else {
+          logger.info("UPDATE : latest result or audio is " + new Date(maxTime));
+          createProject.updateNetprof(db, projectID, maxTime);
+        }
       }
     } else {
       // first add the user table
@@ -394,7 +457,7 @@ public class CopyToPostgres<T extends CommonShell> {
       if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
         copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
       } else {
-        logger.warn("\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n");
+        logger.warn("\n\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n\n");
       }
     }
     long now = System.currentTimeMillis();
@@ -407,7 +470,7 @@ public class CopyToPostgres<T extends CommonShell> {
     return getCreateProject(db.getServerProps());
   }
 
-  private void copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
+  private long copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
                              Collection<String> typeOrder, int projectID,
                              long sinceWhen) throws Exception {
     if (sinceWhen > 0) logger.info("\n\n\n only changes since " + (new Date(sinceWhen)));
@@ -425,13 +488,14 @@ public class CopyToPostgres<T extends CommonShell> {
     Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild, sinceWhen);
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
-    copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
+    long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
         db.getUserDAO().getDefaultUser(), sinceWhen);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
+    Set<Long> maxTimeAudio = new HashSet<>();
     // add the audio table
-    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen);
+    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen, maxTimeAudio);
     // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
     // copy ref results
@@ -461,6 +525,13 @@ public class CopyToPostgres<T extends CommonShell> {
 
     copyReviewed(db, oldToNewUser, exToID, true, sinceWhen);
     copyReviewed(db, oldToNewUser, exToID, false, sinceWhen);
+
+    if (!maxTimeAudio.isEmpty()) {
+      Long next = maxTimeAudio.iterator().next();
+      if (next > maxTime) maxTime = next;
+    }
+//    if (maxTime == 0) maxTime = System.currentTimeMillis();
+    return maxTime;
   }
 
   /**
@@ -520,21 +591,23 @@ public class CopyToPostgres<T extends CommonShell> {
                                                                   Collection<String> typeOrder,
                                                                   Map<String, Integer> parentToChild,
                                                                   long sinceWhen) {
-    Map<String, Integer> exToID = new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
+    Map<String, Integer> exToID = sinceWhen > 0 ?
+        new ExerciseCopy().getOldToNewExIDs(db, projectID) :
+        new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
-    copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID);
+    Set<Integer> includedOldLists = copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID, sinceWhen);
 
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew(projectID);
-    copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
-    copyUserExListJoin(db, exToID, projectID);
+    copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO(), sinceWhen);
+    copyUserExListJoin(db, exToID, projectID, includedOldLists);
     return exToID;
   }
 
-  private void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt, int projectid) {
+  private void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt, int projectid, Set<Integer> includedOldLists) {
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew(projectid);
-    copyUserExerciseListJoin(db, oldToNewUserList, exToInt);
+    copyUserExerciseListJoin(db, oldToNewUserList, exToInt, includedOldLists);
   }
 
   /**
@@ -552,7 +625,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                          Map<String, Integer> exToID,
                                          Map<String, Integer> parentExToChild,
                                          int projid,
-                                         long sinceWhen) {
+                                         long sinceWhen, Set<Long> maxTime) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
@@ -564,9 +637,10 @@ public class CopyToPostgres<T extends CommonShell> {
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
-
+    long max = 0;
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
+      if (att.getTimestamp() > max) max = att.getTimestamp();
       Integer id = getModernIDForExercise(exToID, parentExToChild, att, oldexid);
       if (id != null) {
         att.setExid(id); // set the exercise id reference - either to a normal exercise or to a context exercise
@@ -585,9 +659,9 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     long then = System.currentTimeMillis();
-    logger.debug("copyAudio start    adding bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
+    logger.info("copyAudio start    adding bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
     slickAudioDAO.addBulk(bulk);
-    logger.debug("copyAudio finished adding bulk : " + bulk.size() + " audio...");
+    logger.info("copyAudio finished adding bulk : " + bulk.size() + " audio...");
 
     long now = System.currentTimeMillis();
 
@@ -600,6 +674,7 @@ public class CopyToPostgres<T extends CommonShell> {
     Map<String, Integer> pairs = slickAudioDAO.getPairs(projid);
     logger.info("copyAudio took " + (now - then) + " for project " + projid + " , postgres audio count = " + pairs.size());
 
+    maxTime.add(max);
     return pairs;
   }
 
@@ -705,7 +780,7 @@ public class CopyToPostgres<T extends CommonShell> {
     long then = System.currentTimeMillis();
     logger.info("copyPhone adding " + bulk.size());
     slickPhoneAO.addBulk(bulk);
-    logger.info("copyPhone added  " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis() - then) + " millis.");
+    logger.info("copyPhone now has " + slickPhoneAO.getNumRows() + " took " + (System.currentTimeMillis() - then) + " millis.");
   }
 
   private final Set<Integer> missingRIDs = new HashSet<>();
@@ -740,7 +815,7 @@ public class CopyToPostgres<T extends CommonShell> {
     slickWordDAO.addBulk(bulk);
     long now = System.currentTimeMillis();
 
-    logger.info("copy word - complete in " + (now - then) / 1000 + " seconds.");
+    logger.info("copyWord copy word - copied " + bulk.size() + " in " + (now - then) / 1000 + " seconds.");
   }
 
   /**
@@ -752,21 +827,26 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private void copyUserExerciseListJoin(DatabaseImpl db,
                                         Map<Integer, Integer> oldToNewUserList,
-                                        Map<String, Integer> exToInt
+                                        Map<String, Integer> exToInt,
+                                        Set<Integer> includedOldLists
   ) {
-    IUserListManager userListManager = db.getUserListManager();
-    IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
-    SlickUserListExerciseJoinDAO slickUserListExerciseJoinDAO = (SlickUserListExerciseJoinDAO) dao;
-    // if (slickUserListExerciseJoinDAO.isEmpty()) {
+    SlickUserListExerciseJoinDAO slickUserListExerciseJoinDAO = (SlickUserListExerciseJoinDAO) db.getUserListManager().getUserListExerciseJoinDAO();
+
     Collection<UserListExerciseJoinDAO.Join> all = new UserListExerciseJoinDAO(db).getAll();
-    logger.info("copyUserExerciseListJoin copying " + all.size() + " exercise->list joins");
-    for (UserListExerciseJoinDAO.Join join : all) {
-      int oldID = join.userlistid;
+    List<UserListExerciseJoinDAO.Join> filtered = all
+        .stream()
+        .filter(join -> includedOldLists.contains(join.getUserlistid()))
+        .collect(Collectors.toList());
+
+    logger.info("copyUserExerciseListJoin copying " + filtered.size() + " exercise->list joins from total " + all.size());
+
+    for (UserListExerciseJoinDAO.Join join : filtered) {
+      int oldID = join.getUserlistid();
       Integer userListID = oldToNewUserList.get(oldID);
       if (userListID == null) {
-        logger.error("copyUserExerciseListJoin UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
+        logger.warn("copyUserExerciseListJoin UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
       } else {
-        String exerciseID = join.exerciseID;
+        String exerciseID = join.getExerciseID();
         Integer id = exToInt.get(exerciseID);
 //        CommonExercise customOrPredefExercise = null;
         if (id == null)
@@ -791,32 +871,39 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUser
    * @param slickUserListDAO
+   * @param sinceWhen
    * @see #copyUserAndPredefExercisesAndLists
    */
-  private void copyUserExerciseList(DatabaseImpl db,
-                                    Map<Integer, Integer> oldToNewUser,
-                                    SlickUserListDAO slickUserListDAO,
-                                    int projid) {
+  private Set<Integer> copyUserExerciseList(DatabaseImpl db,
+                                            Map<Integer, Integer> oldToNewUser,
+                                            SlickUserListDAO slickUserListDAO,
+                                            int projid, long sinceWhen) {
     Collection<UserList<CommonShell>> oldUserLists = new UserListDAO(db, new UserDAO(db)).getAll();
     int count = 0;
     logger.info("copyUserExerciseList copying " + oldUserLists.size() + " user exercise lists");
     List<SlickUserExerciseList> bulk = new ArrayList<>();
 
-    for (UserList<CommonShell> list : oldUserLists) {
+    List<UserList<CommonShell>> filtered =
+        oldUserLists
+            .stream()
+            .filter(commonShellUserList -> commonShellUserList.getModified() > sinceWhen)
+            .collect(Collectors.toList());
+    Set<Integer> oldUserListIncluded = new HashSet<>();
+    for (UserList<CommonShell> list : filtered) {
       int oldID = list.getUserID();
       Integer newUserID = oldToNewUser.get(oldID);
       if (newUserID == null) {
         logger.warn("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
       } else {
+        oldUserListIncluded.add(oldID);
         SlickUserExerciseList user = slickUserListDAO.toSlick2(list, newUserID, projid, -1);
         bulk.add(user);
-        // slickUserListDAO.addWithUser(list, newUserID, projid);
         count++;
       }
     }
     slickUserListDAO.addBulk(bulk);
     logger.info("copyUserExerciseList copied  " + count + " user exercise lists");
-
+    return oldUserListIncluded;
   }
 
   /**
@@ -826,16 +913,23 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param oldToNewUserList
    * @param visitorDAO
+   * @param sinceWhen
    */
   private void copyUserExerciseListVisitor(DatabaseImpl db,
                                            Map<Integer, Integer> oldToNewUser,
                                            Map<Integer, Integer> oldToNewUserList,
-                                           SlickUserListExerciseVisitorDAO visitorDAO) {
+                                           SlickUserListExerciseVisitorDAO visitorDAO,
+                                           long sinceWhen) {
     UserExerciseListVisitorDAO uelDAO = new UserExerciseListVisitorDAO(db);
     Collection<UserExerciseListVisitorDAO.Pair> all = uelDAO.getAll();
     logger.info("copying " + all.size() + " user exercise list visitors");
+    List<UserExerciseListVisitorDAO.Pair> filtered =
+        all
+            .stream()
+            .filter(pair -> pair.getWhen() > sinceWhen)
+            .collect(Collectors.toList());
 
-    for (UserExerciseListVisitorDAO.Pair pair : all) {
+    for (UserExerciseListVisitorDAO.Pair pair : filtered) {
       int oldID = pair.getUser();
       Integer currentUser = oldToNewUser.get(oldID);
       if (currentUser == null) {
@@ -849,7 +943,6 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
     }
-    //}
   }
 
 
@@ -862,9 +955,9 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param exToID
    * @param resultDAO
    * @param sinceWhen
-   * @see #copyOneConfig
+   * @see #copyAllTables
    */
-  private void copyResult(
+  private long copyResult(
       SlickResultDAO slickResultDAO,
       Map<Integer, Integer> oldToNewUser,
       int projid,
@@ -877,17 +970,20 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
-    logger.info("copyResult " + projid + " : copying " + results.size() + " results...");
+    List<Result> filtered = getSinceWhen(results, sinceWhen);
+    logger.info("copyResult " + projid + " : copying " + results.size() + " results, filtered to " + filtered.size() + " since " + new Date(sinceWhen));
 
     //  int missing = 0;
     int missing2 = 0;
 
+    long maxTime = 0;
     logger.info("copyResult id->fl has " + idToFL.size() + " items");
 
     Set<Integer> missingUserIDs = new HashSet<>();
 
-    for (Result result : getSinceWhen(results, sinceWhen)) {
+    for (Result result : filtered) {
       int oldUserID = result.getUserid();
+      if (maxTime < result.getTimestamp()) maxTime = result.getTimestamp();
       Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
         boolean add = missingUserIDs.add(oldUserID);
@@ -909,7 +1005,7 @@ public class CopyToPostgres<T extends CommonShell> {
       SlickResult e = slickResultDAO
           .toSlick(result, projid, realExID, transcript == null ? "no transcript found" : transcript);
       bulk.add(e);
-      if (bulk.size() % 50000 == 0) logger.debug("copyResult : made " + bulk.size() + " results...");
+      if (bulk.size() % 50000 == 0) logger.info("copyResult : made " + bulk.size() + " results...");
     }
 
 
@@ -924,11 +1020,13 @@ public class CopyToPostgres<T extends CommonShell> {
     if (!missingUserIDs.isEmpty()) {
       logger.warn("found " + missingUserIDs.size() + " missing users " + missingUserIDs);
     }
-    logger.debug("copyResult adding " + bulk.size() + " results...");
+    logger.info("copyResult adding " + bulk.size() + " results...");
     long then = System.currentTimeMillis();
     slickResultDAO.addBulk(bulk);
     long now = System.currentTimeMillis();
-    logger.debug("copyResult added  " + bulk.size() + " results in " + (now - then) / 1000 + " seconds.");
+    logger.info("copyResult added  " + bulk.size() + " results in " + (now - then) / 1000 + " seconds.");
+
+    return maxTime;
   }
 
   private void copyReviewed(DatabaseImpl db,
@@ -988,13 +1086,16 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> toImport = new RefResultDAO(db, false).getResults();
-    logger.info("copyRefResult for project " + projid + " found " + toImport.size() + " original ref results.");
+    List<Result> sinceWhen1 = getSinceWhen(toImport, sinceWhen);
+    logger.info("copyRefResult for project " + projid + " found " + toImport.size() +
+        " original ref results, " + sinceWhen1.size() + " since " + new Date(sinceWhen));
+
     logger.info("copyRefResult found " + oldToNewUser.size() + " oldToNewUser entries.");
     logger.info("copyRefResult found " + exToID.size() + " ex to id entries.");
     logger.info("copyRefResult found " + pathToAudioID.size() + " path to audio id entries.");
     int missing = 0;
     Set<Integer> missingUsers = new HashSet<>();
-    for (Result result : getSinceWhen(toImport, sinceWhen)) {
+    for (Result result : sinceWhen1) {
       int userid = result.getUserid();
       Integer userID = oldToNewUser.get(userid);
       if (userID == null) {
@@ -1088,6 +1189,8 @@ public class CopyToPostgres<T extends CommonShell> {
     String optConfigValue = null;
     int displayOrderValue = 0;
     boolean isEval, skipRefResult;
+
+    logger.info("command " + cmd);
     if (cmd.hasOption(COPY.toLower())) {
       action = COPY;
       config = cmd.getOptionValue(COPY.toLower());
@@ -1119,6 +1222,8 @@ public class CopyToPostgres<T extends CommonShell> {
       action = UPDATE;
       config = cmd.getOptionValue(UPDATE.toLower());
     }
+
+    logger.info("action " + action + " config " + config);
 
     if (cmd.hasOption(NAME.toLower())) {
       optName = cmd.getOptionValue(NAME.toLower());
@@ -1205,7 +1310,7 @@ public class CopyToPostgres<T extends CommonShell> {
         doUpdateUser(updateUsersFile);
         break;
       case UPDATE:
-        logger.info("map old user ids to new user ids");
+        logger.info("import netprof 1 content into existing netprof project");
         boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true);
         if (!b) {
           System.exit(1);  // ?
@@ -1280,6 +1385,11 @@ public class CopyToPostgres<T extends CommonShell> {
 
     {
       Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file (two column csv)");
+      options.addOption(mapFile);
+    }
+
+    {
+      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "import netprof 1 data into existing netprof 2 project");
       options.addOption(mapFile);
     }
 

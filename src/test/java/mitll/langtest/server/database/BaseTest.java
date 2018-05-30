@@ -29,7 +29,6 @@ public class BaseTest {
   protected static DatabaseImpl getH2Database(String config) {
     return getDatabase(config, true);
   }
-
   protected static DatabaseImpl getDatabase(String config, boolean useH2) {
     return getDatabase("war", config, useH2);
   }
@@ -70,16 +69,8 @@ public class BaseTest {
                                                  boolean useH2,
                                                  boolean useLocal,
                                                  String optPropsFile) {
-    return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war");
+    return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war", "config");
   }
-
-/*
-  private static ServerProperties getServerProperties(String config, String propsFile) {
-    // String s = "quizlet.properties";
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
-    return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
-  }
-*/
 
   protected static DatabaseImpl getDatabaseVeryLight(String config, String propsFile, boolean useH2) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);

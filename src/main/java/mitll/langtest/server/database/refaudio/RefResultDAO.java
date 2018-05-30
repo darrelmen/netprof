@@ -324,16 +324,6 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     return new ArrayList<>();
   }
 
-/*  @Override
-  public List<SlickRefResultJson> getJsonResults() {
-    return null;
-  }
-
-  @Override
-  public List<SlickRefResultJson> getJsonResultsForProject(int projid) {
-    return null;
-  }*/
-
   @Override
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
     return null;

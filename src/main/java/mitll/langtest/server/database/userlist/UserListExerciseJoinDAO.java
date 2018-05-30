@@ -155,12 +155,20 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
   }
 
   public static class Join {
-    public int userlistid;
-    public String exerciseID;
+    private int userlistid;
+    private String exerciseID;
 
     Join(int userlistid, String exerciseID) {
       this.userlistid = userlistid;
       this.exerciseID = exerciseID;
+    }
+
+    public int getUserlistid() {
+      return userlistid;
+    }
+
+    public String getExerciseID() {
+      return exerciseID;
     }
   }
 

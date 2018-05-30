@@ -288,10 +288,27 @@ public class CreateProject {
     return cc;
   }
 
-  public long getSinceWhen(DatabaseImpl db, int projectID) {
+  /**
+   * latest of netprof update and creation
+   *
+   * @param db
+   * @param projectID
+   * @return
+   * @see CopyToPostgres#copyOneConfig
+   */
+  long getSinceWhen(DatabaseImpl db, int projectID) {
     Project project = db.getProject(projectID);
-    long time = project.getProject().created().getTime();
-    return time;
+   // long createdTime = project.getProject().created().getTime();
+    long netprofUpdate = project.getProject().lastnetprof().getTime();
+
+    return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;
+  }
+
+  void updateNetprof(DatabaseImpl db, int projectID, long sinceWhen) {
+    Project project = db.getProject(projectID);
+    if (!db.getProjectDAO().easyUpdateNetprof(project.getProject(), sinceWhen)) {
+      logger.warn("couldn't update project " + projectID);
+    }
   }
 
   private static class Pair {

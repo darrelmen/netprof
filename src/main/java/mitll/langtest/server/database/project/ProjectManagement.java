@@ -927,8 +927,9 @@ public class ProjectManagement implements IProjectManagement {
         project.created().getTime(),
         project.lastimport().getTime(),
 
-        pproject.getWebserviceHost(),
+        project.lastnetprof().getTime(),
 
+        pproject.getWebserviceHost(),
         pproject.getPort(),
         pproject.getModelsDir(),
 

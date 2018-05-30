@@ -799,7 +799,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             colNormalized.contains(LESSON) ||
             colNormalized.contains(MODULE)
         );
-    logger.info("check '" + colNormalized + "' vs '" + typeSpecified + "' = " + b);
+    logger.info("isSecondTypeMatch check '" + colNormalized + "' vs '" + typeSpecified + "' = " + b);
     return b;
   }
 

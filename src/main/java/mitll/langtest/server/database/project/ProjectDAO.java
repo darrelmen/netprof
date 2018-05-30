@@ -44,7 +44,6 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -52,11 +51,16 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static java.util.Calendar.YEAR;
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
   private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
+  public static final long MIN = 60 * 1000L;
+  public static final long HOUR = 60 * MIN;
+  public static final long DAY = 24 * HOUR;
+  public static final long YEAR = 365 * DAY;
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
@@ -113,6 +117,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.update(changed) > 0;
   }
 
+  @Override
+  public boolean easyUpdateNetprof(SlickProject changed, long sinceWhen) {
+    changed.updateNetprof(sinceWhen);
+    return dao.update(changed) > 0;
+  }
+
   /**
    * Why some things are slots on SlickProject and why some things are project properties is kinda arbitrary...
    *
@@ -133,6 +143,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         new Timestamp(projectInfo.getCreated()),   // created
         new Timestamp(System.currentTimeMillis()), // modified - now!
         new Timestamp(projectInfo.getLastImport()),// last import - maintain it
+        new Timestamp(projectInfo.getLastNetprof()),// last netprof 1 update - maintain it
         projectInfo.getName(),
         projectInfo.getLanguage(),
         projectInfo.getCourse(),
@@ -382,12 +393,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
                  int displayOrder,
                  int dominoID) {
     Timestamp created = new Timestamp(modified);
+    Timestamp lastNetprof = new Timestamp(modified - (5 * YEAR));
     return dao.insert(new SlickProject(
         -1,
         userid,
         created,
         created,
         created,
+        lastNetprof,
         name,
         language,
         course,
@@ -402,8 +415,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getReport
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getReport
    */
   @Override
   public Collection<SlickProject> getAll() {

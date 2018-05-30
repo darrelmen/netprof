@@ -52,6 +52,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   private long created = 0;
   private long lastImport = 0;
+  private long lastNetprof = 0;
 
   private String host = Project.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
@@ -78,7 +79,11 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      int displayOrder,
 
                      long created,
-                     long lastImport, String host,
+                     long lastImport,
+
+                     long lastNetprof,
+
+                     String host,
                      int port,
                      String modelsDir,
                      String first,
@@ -91,6 +96,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.course = course;
     this.created = created;
     this.lastImport = lastImport;
+    this.lastNetprof = lastNetprof;
     this.status = status;
     this.projectType = projectType;
     this.displayOrder = displayOrder;
@@ -235,6 +241,10 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return lastImport;
   }
 
+  public long getLastNetprof() {
+    return lastNetprof;
+  }
+
   public boolean isAudioPerProject() {
     return audioPerProject;
   }
@@ -251,6 +261,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
         "\ndomino    " + getDominoID() +
         "\nown audio " + audioPerProject +
         "\nshowOniOS " + showOniOS +
-        "\nimported  " + new Date(lastImport);
+        "\nimported  " + new Date(lastImport) +
+        "\nupdated  " + new Date(lastNetprof)
+        ;
   }
 }

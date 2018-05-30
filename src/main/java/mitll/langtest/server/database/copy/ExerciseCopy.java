@@ -62,11 +62,15 @@ public class ExerciseCopy {
         typeOrder,
         idToCandidateOverride));
 
-    Map<String, Integer> exToInt = slickUEDAO.getOldToNew(projectid).getOldToNew();
+    Map<String, Integer> exToInt = getOldToNewExIDs(db, projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, exercises);
 
     logger.info("copyUserAndPredefExercises : finished copying exercises - found " + exToInt.size());
     return exToInt;
+  }
+
+  Map<String, Integer> getOldToNewExIDs(DatabaseImpl db, int projectid) {
+    return ((SlickUserExerciseDAO) db.getUserExerciseDAO()).getOldToNew(projectid).getOldToNew();
   }
 
   private void reallyAddingUserExercises(int projectid,

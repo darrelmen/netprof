@@ -46,8 +46,6 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IRefResultDAO extends IDAO {
- // boolean removeForExercise(int exid);
-
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    * @param userID
@@ -85,7 +83,6 @@ public interface IRefResultDAO extends IDAO {
   /**
    * @see RefResultDecoder#getDecodedFiles
    * @return
-   * @deprecated
    */
   List<Result> getResults();
 
