@@ -40,9 +40,11 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.user.SimpleUser;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,9 +62,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   private static final int LAST_WIDTH = 100;
   private static final String FIRST = "First";
 
-  public BasicUserContainer(ExerciseController controller,
-                            String selectedUserKey,
-                            String header) {
+  public BasicUserContainer(ExerciseController controller, String selectedUserKey, String header) {
     super(controller, selectedUserKey, header, 10, 7);
   }
 
@@ -87,6 +87,20 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     addDateCol(list);
 
     table.setWidth("100%", true);
+  }
+
+  protected int getRealIDCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
+    }
+
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        return Integer.compare(o1.getID(), o2.getID());
+      }
+    }
+    return -1;
   }
 
   /**
@@ -190,19 +204,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   }
 
   private void addFirstName(List<T> list) {
-    Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getSafeHtml(shell.getFirst());
-      }
-    };
-    userCol.setSortable(true);
+    Column<T, SafeHtml> userCol = getClickable(SimpleUser::getFirst);
     table.setColumnWidth(userCol, FIRST_WIDTH + "px");
     addColumn(userCol, new TextHeader(FIRST));
     table.addColumnSortHandler(getFirstSorter(userCol, list));
@@ -216,19 +218,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   }
 
   private void addLastName(List<T> list) {
-    Column<T, SafeHtml> userCol = new Column<T, SafeHtml>(new ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getSafeHtml(shell.getLast());
-      }
-    };
-    userCol.setSortable(true);
+    Column<T, SafeHtml> userCol = getClickable(SimpleUser::getLast);
     table.setColumnWidth(userCol, LAST_WIDTH + "px");
     addColumn(userCol, new TextHeader("Last"));
     table.addColumnSortHandler(getLastSorter(userCol, list));
@@ -240,5 +230,4 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     columnSortHandler.setComparator(englishCol, this::getLastCompare);
     return columnSortHandler;
   }
-
 }

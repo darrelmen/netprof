@@ -45,6 +45,7 @@ import scala.Tuple2;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +64,6 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     super(database);
     dao = new UserSessionDAOWrapper(dbConnection);
     this.userProjectDAO = userProjectDAO;
-  //  logger.info("since last week " + lastWeek());
   }
 
   public void createTable() {
@@ -116,29 +116,18 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
     dao.removeAllSessionsForUser(userId);
   }
 
-/*
-  private Map<Integer, ActiveInfo> lastWeek() {
-    return getActiveSince(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
-  }
-*/
-
   @Override
   public Map<Integer, ActiveInfo> getActiveSince(long when) {
     Map<Integer, Tuple2<Long, Long>> since = dao.since(new Timestamp(when));
-
+   // logger.info("found " + since.size() + " since " + new Date(when));
     Map<Integer, Integer> usersToProject = userProjectDAO.getUsersToProject(since.keySet());
-
     Map<Integer, ActiveInfo> integerActiveInfoHashMap = new HashMap<>();
 
     since.forEach((k, pair) -> {
       ActiveInfo value = new ActiveInfo(k, pair._1(), pair._2(), usersToProject.getOrDefault(k, -1));
-      logger.info(k + "->" + value);
+     // logger.info("getActiveSince " + k + "->" + value);
       integerActiveInfoHashMap.put(k, value);
     });
     return integerActiveInfoHashMap;
   }
-
-/*  public int getNumRows() {
-    return dao.numRows();
-  }*/
 }

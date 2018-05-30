@@ -52,6 +52,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -64,6 +65,7 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
+  public static final int SESSION_AVG_WIDTH = 85;
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int MAX_NAME_LENGTH = 16;
@@ -81,11 +83,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private static final String LIFETIME = "Life. #";
   private static final int LIFETIME_AVG_WIDTH = 65;
   private static final String LIFETIME_AVG = "Life. Avg";
-  private static final String OVERALL_SCORE = "Adjust.";
+  private static final String OVERALL_SCORE = "Session Avg";//"Adjust.";
+
   /**
-   * @see #addLastSession
+   * @seex #addLastSession
    */
-  private static final int COMPLETED_WIDTH = 60;
+//  private static final int COMPLETED_WIDTH = 60;
   private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
   // private static final int CURRENT_WIDTH = 60;
 
@@ -124,8 +127,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * @see #getButtons
    */
- // private static final String MY_STUDENT = "My Student";
- // private static final int NUM_WIDTH = 50;
+  // private static final String MY_STUDENT = "My Student";
+  // private static final int NUM_WIDTH = 50;
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
@@ -474,7 +477,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 */
 
     addPolyNumber(list);
-    addLastSession(list);
+  //  addLastSession(list);
     table.getColumnSortList().push(addLastOverallScore(list));
 
     table.setWidth("100%", true);
@@ -483,25 +486,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 
   private void addName(List<UserInfo> list) {
-    Column<UserInfo, SafeHtml> userCol = new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getNoWrapContent(truncate(shell.getName(), MAX_NAME_LENGTH));
-      }
-    };
-
-    userCol.setSortable(true);
-
+    Column<UserInfo, SafeHtml> userCol = getTruncatedCol(MAX_NAME_LENGTH, UserInfo::getName);
     table.setColumnWidth(userCol, NAME_WIDTH + "px");
-
     addColumn(userCol, new TextHeader(NAME));
-
     table.addColumnSortHandler(getNameSorter(userCol, list));
   }
 
@@ -514,28 +501,24 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
-    current.setSortable(true);
     addColumn(current, new TextHeader(LIFETIME_AVG));
     table.setColumnWidth(current, LIFETIME_AVG_WIDTH + "px");
     table.addColumnSortHandler(getCurrentSorter(current, list));
   }
 
-  private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
+/*  private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getLastSession();
-    current.setSortable(true);
     addColumn(current, new TextHeader(SCORE_FOR_COMPLETED));
     table.setColumnWidth(current, COMPLETED_WIDTH + "px");
 
     table.addColumnSortHandler(getLastSessionSorter(current, list));
     return current;
-  }
+  }*/
 
   private Column<UserInfo, SafeHtml> addLastOverallScore(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getOverall();
-    current.setSortable(true);
     addColumn(current, new TextHeader(OVERALL_SCORE));
-    table.setColumnWidth(current, 80 + "px");
-
+    table.setColumnWidth(current, SESSION_AVG_WIDTH + "px");
     table.addColumnSortHandler(getOverallSorter(current, list));
     return current;
   }
@@ -551,8 +534,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
-    num.setSortable(true);
-
     addColumn(num, new TextHeader(LIFETIME));
     table.addColumnSortHandler(getNumSorter(num, list));
     table.setColumnWidth(num, LIFETIME_WIDTH + "px");
@@ -560,7 +541,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addPolyNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getPolyNum();
-    num.setSortable(true);
     addColumn(num, new TextHeader(POLY_NUMBER));
     table.addColumnSortHandler(getPolyNumSorter(num, list));
     table.setColumnWidth(num, SESSION_WIDTH + "px");
@@ -604,7 +584,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private ColumnSortEvent.ListHandler<UserInfo> getPolyNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-
 
     columnSortHandler.setComparator(englishCol,
         (o1, o2) -> {
@@ -727,22 +706,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }*/
 
 
-  private Column<UserInfo, SafeHtml> getCurrent() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
+  private Column<UserInfo, SafeHtml> getCurrent() {    return getClickable(this::getCurrentText);  }
 
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getCurrent());
-      }
-    };
-  }
+  @NotNull
+  private String getCurrentText(UserInfo shell) {    return "" + shell.getCurrent();  }  @NotNull
+  private String getNumText(UserInfo shell) {    return "" + shell.getNum();  }
 
-  private Column<UserInfo, SafeHtml> getLastSession() {
+/*  private Column<UserInfo, SafeHtml> getLastSession() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
@@ -757,33 +727,28 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        int lastSessionScore = shell.getLastSessionScore() / 10;
-        // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
-        return getSafeHtml("" + lastSessionScore);
-      }
-    };
-  }
-
-  private Column<UserInfo, SafeHtml> getOverall() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public boolean isDefaultSortAscending() {
-        return false;
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        String columnText = "" + getAdjustedScore(shell);
-        if (!columnText.contains(".")) columnText += ".0";
+        String columnText = getLastSessionScore(shell);
         return getSafeHtml(columnText);
       }
     };
+  }*/
+
+  private Column<UserInfo, SafeHtml> getLastSession() {    return getClickableDesc(this::getLastSessionScore);  }
+
+  @NotNull
+  private String getLastSessionScore(UserInfo shell) {
+    int lastSessionScore = shell.getLastSessionScore() / 10;
+    // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
+    return "" + lastSessionScore;
+  }
+
+  private Column<UserInfo, SafeHtml> getOverall() {    return getClickableDesc(this::getOverallScore);  }
+
+  @NotNull
+  private String getOverallScore(UserInfo shell) {
+    String columnText = "" + getAdjustedScore(shell);
+    if (!columnText.contains(".")) columnText += ".0";
+    return columnText;
   }
 
   private float getAdjustedScore(UserInfo shell) {
@@ -822,43 +787,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 */
 
-  private Column<UserInfo, SafeHtml> getNum() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
+  private Column<UserInfo, SafeHtml> getNum() {    return getClickable(this::getNumText);  }
+  private Column<UserInfo, SafeHtml> getPolyNum() {    return getNoWrapCol(this::getPolyNumValue);  }
 
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml("" + shell.getNum());
-      }
-    };
-  }
-
-  private Column<UserInfo, SafeHtml> getPolyNum() {
-    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(UserInfo shell) {
-        int lastSessionNum = shell.getLastSessionNum();
-        int lastSessionSize = shell.getLastSessionSize();
-        if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
-        boolean same = lastSessionNum == lastSessionSize;
-        String columnText = same ?
-            ("" + lastSessionNum) :
-            "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
-                "%)";
-
-        return getNoWrapContent(columnText);
-      }
-    };
+  @NotNull
+  private String getPolyNumValue(UserInfo shell) {
+    int lastSessionNum = shell.getLastSessionNum();
+    int lastSessionSize = shell.getLastSessionSize();
+    if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
+    boolean same = lastSessionNum == lastSessionSize;
+    return same ?
+        ("" + lastSessionNum) :
+        "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
+            "%)";
   }
 
 
@@ -907,13 +848,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         this));
   }
 
-  public Button getAdd() {
+/*  public Button getAdd() {
     return add;
   }
-
   public Button getRemove() {
     return remove;
-  }
+  }*/
 
   @Override
   public void gotKey(String text) {

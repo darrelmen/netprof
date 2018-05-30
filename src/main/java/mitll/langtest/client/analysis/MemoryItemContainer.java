@@ -180,7 +180,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   protected void addItemID(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getItemColumn(maxLength);
-    userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader(header));
     table.addColumnSortHandler(getUserSorter(userCol, list));
@@ -301,8 +300,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   @Override
   protected void setMaxWidth() {
-    int tableWidth = getMaxTableWidth();
-    table.getElement().getStyle().setProperty("maxWidth", tableWidth + "px");
+    table.getElement().getStyle().setProperty("maxWidth", getMaxTableWidth() + "px");
   }
 
   protected int getMaxTableWidth() {
@@ -364,7 +362,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
-   // logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+    // logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
@@ -378,12 +376,35 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn(int maxLength) {
-    return getTruncatedCol(maxLength, this::getItemLabel);
+  private Column<T, SafeHtml> getItemColumn(int maxLength) {  return getTruncatedCol(maxLength, this::getItemLabel);  }
+
+  protected Column<T, SafeHtml> getNoWrapCol(GetSafe<T> getSafe) {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getNoWrapContent(getSafe.getSafe(shell));
+      }
+    };
+    column.setSortable(true);
+
+    return column;
   }
 
+
+  /**
+   * Is sortable.
+   * @param maxLength
+   * @param getSafe
+   * @return
+   */
   protected Column<T, SafeHtml> getTruncatedCol(int maxLength, GetSafe<T> getSafe) {
-    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -395,16 +416,67 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         return getNoWrapContent(truncate(getSafe.getSafe(shell), maxLength));
       }
     };
+    column.setSortable(true);
+
+    return column;
+  }
+
+  /**
+   * Is sortable.
+   * @param getSafe
+   * @return
+   */
+  @NotNull
+  protected Column<T, SafeHtml> getClickable(GetSafe<T> getSafe) {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getSafeHtml(getSafe.getSafe(shell));
+      }
+    };
+    column.setSortable(true);
+
+    return column;
+  }
+
+  /**
+   * Is sortable.
+   * @param getSafe
+   * @return
+   */
+  @NotNull
+  protected Column<T, SafeHtml> getClickableDesc(GetSafe<T> getSafe) {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public boolean isDefaultSortAscending() {
+        return false;
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getSafeHtml(getSafe.getSafe(shell));
+      }
+    };
+    column.setSortable(true);
+
+    return column;
   }
 
   protected interface GetSafe<T> {
     String getSafe(T shell);
   }
-
-/*
-  private String getTruncatedItemLabel(T shell, int maxLength) {
-    return truncate(getItemLabel(shell), maxLength);
-  }*/
 
   protected abstract String getItemLabel(T shell);
 
@@ -413,7 +485,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #addDateCol
    */
   private Column<T, SafeHtml> getDateColumn() {
-    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return getClickableDesc(shell -> getNoWrapDate(getItemDate(shell)));
+/*    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -429,12 +502,21 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       public SafeHtml getValue(T shell) {
         return getFormattedDate(getItemDate(shell));
       }
-    };
+    };*/
   }
 
-  protected SafeHtml getFormattedDate(Long itemDate) {
-    String signedUp = getFormattedDateString(itemDate);
-    return getSafeHtml("<span style='white-space:nowrap;'>" + signedUp + "</span>");
+//  private SafeHtml getFormattedDate(Long itemDate) {
+//    return getSafeHtml(getNoWrapDate(itemDate));
+//  }
+
+  @NotNull
+  protected String getNoWrapDate(Long itemDate) {
+    return getNoWrapDate(getFormattedDateString(itemDate));
+  }
+
+  @NotNull
+  private String getNoWrapDate(String signedUp) {
+    return "<span style='white-space:nowrap;'>" + signedUp + "</span>";
   }
 
   protected String getFormattedDateString(Long itemDate) {
@@ -467,5 +549,4 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       storeSelectedUser(user.getID());
     }
   }
-
 }
