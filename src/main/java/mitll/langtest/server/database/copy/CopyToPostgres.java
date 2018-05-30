@@ -61,6 +61,7 @@ import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
@@ -98,6 +99,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
   private static final String CONFIG = "config";
+  public static final String NO_TRANSCRIPT_FOUND = "no transcript found";
 
   enum ACTION {
     COPY("c"),
@@ -455,7 +457,9 @@ public class CopyToPostgres<T extends CommonShell> {
       // first add the user table
       // check once if we've added it before
       if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
-        copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        logger.info("CREATE : latest result or audio is " + new Date(maxTime));
+        createProject.updateNetprof(db, projectID, maxTime);
       } else {
         logger.warn("\n\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n\n");
       }
@@ -485,7 +489,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
     Map<String, Integer> parentExToChild = new HashMap<>();
-    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL, typeOrder, parentExToChild, sinceWhen);
+    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, typeOrder, sinceWhen, idToFL, parentExToChild);
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
     long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
@@ -578,22 +582,36 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param projectID
    * @param oldToNewUser
-   * @param idToFL
    * @param typeOrder
    * @param sinceWhen
+   * @param idToFL
    * @return map of parent exercise to context sentence
    * @see #copyOneConfig
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser,
+                                                                  Collection<String> typeOrder, long sinceWhen,
+
+
                                                                   Map<Integer, String> idToFL,
-                                                                  Collection<String> typeOrder,
-                                                                  Map<String, Integer> parentToChild,
-                                                                  long sinceWhen) {
-    Map<String, Integer> exToID = sinceWhen > 0 ?
+                                                                  Map<String, Integer> parentToChild) {
+    boolean isUpdate = sinceWhen > 0;
+
+    Map<String, Integer> exToID = isUpdate ?
         new ExerciseCopy().getOldToNewExIDs(db, projectID) :
         new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
+
+    if (isUpdate) {
+      List<CommonExercise> exercises = db.getExercises(projectID);
+      exercises.forEach(commonExercise -> idToFL.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
+      exercises.forEach(commonExercise -> commonExercise.getDirectlyRelated().forEach(context -> {
+        parentToChild.put(commonExercise.getOldID(), context.getID());
+      }));
+
+      logger.info("copyUserAndPredefExercisesAndLists now idToFl " + idToFL.size() + " and parentToChild " + parentToChild.size());
+    }
+
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     Set<Integer> includedOldLists = copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID, sinceWhen);
@@ -684,7 +702,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param att
    * @param oldexid
    * @return
-   * @see #copyAudio(DatabaseImpl, Map, Map, Map, int, long)
+   * @see #copyAudio
    */
   private Integer getModernIDForExercise(Map<String, Integer> exToID, Map<String, Integer> parentExToChild, AudioAttribute att, String oldexid) {
     Integer id = exToID.get(oldexid);
@@ -977,6 +995,7 @@ public class CopyToPostgres<T extends CommonShell> {
     int missing2 = 0;
 
     long maxTime = 0;
+    int noTransCount = 0;
     logger.info("copyResult id->fl has " + idToFL.size() + " items");
 
     Set<Integer> missingUserIDs = new HashSet<>();
@@ -1002,8 +1021,10 @@ public class CopyToPostgres<T extends CommonShell> {
       }
       String transcript = idToFL.get(realExID);
 
-      SlickResult e = slickResultDAO
-          .toSlick(result, projid, realExID, transcript == null ? "no transcript found" : transcript);
+      boolean noTrans = transcript == null;
+      if (noTrans) noTransCount++;
+      String transcript1 = noTrans ? NO_TRANSCRIPT_FOUND : transcript;
+      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript1);
       bulk.add(e);
       if (bulk.size() % 50000 == 0) logger.info("copyResult : made " + bulk.size() + " results...");
     }
@@ -1026,6 +1047,9 @@ public class CopyToPostgres<T extends CommonShell> {
     long now = System.currentTimeMillis();
     logger.info("copyResult added  " + bulk.size() + " results in " + (now - then) / 1000 + " seconds.");
 
+    if (noTransCount > 0) {
+      logger.warn("copyResult no trans found for  " + noTransCount);
+    }
     return maxTime;
   }
 
