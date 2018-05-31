@@ -113,7 +113,7 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
 
   private AudioConversion audioConversion;
-  private boolean isNoModel;
+  private boolean hasModel;
   private String language;
 
   private EnsureAudioHelper ensureAudioHelper;
@@ -145,7 +145,7 @@ public class AudioFileHelper implements AlignDecode {
 
     this.language = project.getLanguage();
     removeAccents = !language.equalsIgnoreCase(FRENCH);
-    isNoModel = project.isNoModel();
+    hasModel = project.hasModel();
     makeASRScoring(project);
     this.project = project;
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
@@ -914,8 +914,9 @@ public class AudioFileHelper implements AlignDecode {
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise1.getID());
   }
 */
+
   private boolean hasModel() {
-    return !isNoModel;
+    return hasModel;
   }
 
   /**
@@ -1573,8 +1574,9 @@ public class AudioFileHelper implements AlignDecode {
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 300) {
-        logger.info("makeDict for " + getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+      if (now - then > 0) {
+        logger.info("makeDict for " + getLanguage() + " read" +
+            "\n\tdict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
       return htkDictionary;
     } else {

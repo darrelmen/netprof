@@ -65,9 +65,11 @@ public class SmallVocabDecoder {
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   /**
+   * u00B7 = middle dot
+   *
    * @see #segmentation
    */
-  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022]";
+  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022\\u00B7]";
   private static final String OE = "oe";
 
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -81,6 +83,7 @@ public class SmallVocabDecoder {
   private static final int TOO_LONG = 8;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
 
   public SmallVocabDecoder() {
@@ -179,10 +182,6 @@ public class SmallVocabDecoder {
     Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
-//    for (String token : tokens) {
-//      builder.append(segmentation(token.trim()));
-//      builder.append(" ");
-//    }
     return builder.toString();
   }
 
@@ -212,7 +211,13 @@ public class SmallVocabDecoder {
     //  logger.info("getTokens initial    '" + sentence + "'");
     String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
     //if (removeAllAccents) {
-    // logger.info("getTokens after trim '" + trimmedSent + "'");
+
+
+    if (false && !sentence.equalsIgnoreCase(trimmedSent)) {
+      logger.info("getTokens " +
+          "\n\tbefore     '" + sentence + "'" +
+          "\n\tafter trim '" + trimmedSent + "'");
+    }
     // }
 
     for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
@@ -225,6 +230,12 @@ public class SmallVocabDecoder {
 //        }
       }
     }
+
+/*    logger.info("getTokens " +
+        "\n\tbefore     '" + sentence + "'" +
+        "\n\tafter trim '" + trimmedSent + "'"+
+        "\n\tall        " + all
+    );*/
 
     return all;
   }
@@ -412,14 +423,14 @@ public class SmallVocabDecoder {
     boolean prefixTooLong = false;
     if (isAsianLanguage) {
       prefixTooLong = prefix.length() > TOO_LONG;
-      if (DEBUG && prefixTooLong) {
+      if (DEBUG_PREFIX && prefixTooLong) {
         logger.warn("longest_prefix not looking in dict for long asian prefix " + prefix);
       }
     }
 
     if (!prefixTooLong && inDict(trim)) {
       if (i == 0) {
-        if (DEBUG) logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
+        if (DEBUG_PREFIX) logger.debug("longest_prefix : found '" + prefix + "' in '" + phrase + "'");
         return phrase;
       }
 
@@ -435,17 +446,17 @@ public class SmallVocabDecoder {
 
       if (!rest.isEmpty()) {
         String s = prefix + " " + rest;
-        if (DEBUG) {
+        if (DEBUG_PREFIX) {
           logger.debug("longest_prefix : found '" + rest + "' in '" + phrase + "' returning " + s);
         }
         return s;
       } else {
-        if (DEBUG) {
+        if (DEBUG_PREFIX) {
           logger.debug("longest_prefix : did not find '" + rest + "' in '" + phrase + "' from  " + endOfPrefix + " to " + phrase.length());
         }
       }
     } else {
-      if (DEBUG) logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
+      if (DEBUG_PREFIX) logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
     }
     return longest_prefix(phrase, i + 1, phraseToPrefix);
   }
@@ -458,7 +469,7 @@ public class SmallVocabDecoder {
 //        logger.debug("inDict token '" +token + "' not in " +htkDictionary.size());
 //      }
 
-      if (DEBUG && b) {
+      if (DEBUG_PREFIX && b) {
         logger.debug("---> inDict '" + token + "'");
       }
       return b;

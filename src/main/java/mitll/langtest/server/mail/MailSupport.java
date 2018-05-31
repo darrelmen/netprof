@@ -535,7 +535,7 @@ public class MailSupport {
     props.put(MAIL_SMTP_HOST, email_server);
     props.put(MAIL_DEBUG, "" + debugEmail);
 
-    logger.info("getMailProps : smtp host = " + email_server);
+   // logger.info("getMailProps : smtp host = " + email_server);
     logger.info("getMailProps : props     = " + props);
 
     if (useTestEmail) {

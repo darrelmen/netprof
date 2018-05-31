@@ -174,12 +174,10 @@ public class Project implements IPronunciationLookup {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
   }
 
-  public boolean isNoModel() {
-    return getModelsDir() == null;
-  }
+  public boolean hasModel() {    return !isNoModel();  }
 
-  public boolean hasModel() {
-    return !isNoModel();
+  private boolean isNoModel() {
+    return getModelsDir() == null || getModelsDir().isEmpty();
   }
 
   public SlickProject getProject() {
@@ -189,7 +187,6 @@ public class Project implements IPronunciationLookup {
   public ProjectType getKind() {
     return ProjectType.valueOf(project.kind());
   }
-
 
   public boolean shouldLoad() {
     return project != null && !toSkip.contains(ProjectStatus.valueOf(project.status()));
@@ -683,6 +680,6 @@ public class Project implements IPronunciationLookup {
   }
 
   public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+    return "Project\n\tproject = " + project + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

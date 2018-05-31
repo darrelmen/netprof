@@ -99,7 +99,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
   private static final String CONFIG = "config";
-  public static final String NO_TRANSCRIPT_FOUND = "no transcript found";
+  private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
 
   enum ACTION {
     COPY("c"),
@@ -108,6 +108,7 @@ public class CopyToPostgres<T extends CommonShell> {
     DROPALLBUT("b"),
     UPDATEUSER("u"),
     UPDATE("p"),
+    IMPORT("i"),
     UNKNOWN("k");
 
     private String value;
@@ -146,6 +147,10 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES_FULL = OPT_NETPROF_ROOT + File.separator + "config/netprof.properties";
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
+  private long getImportDate(String config, String optionalProperties) {
+    return getSinceWhen(config, optionalProperties);
+  }
+
   /**
    * @param config
    * @param optionalProperties
@@ -167,8 +172,6 @@ public class CopyToPostgres<T extends CommonShell> {
 
     long sinceWhen = 0;
 
-    // Set<Long> sinceCandidates = new HashSet<>();
-    // Set<Long> sinceCandidate = new HashSet<>();
     if (doUpdate) {
       sinceWhen = getSinceWhen(config, optionalProperties);
     }
@@ -204,6 +207,13 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
+  /**
+   * Look under oldConfig for date.
+   *
+   * @param config
+   * @param optionalProperties
+   * @return
+   */
   private long getSinceWhen(String config, String optionalProperties) {
     long sinceWhen = 0;
 
@@ -1245,6 +1255,9 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(UPDATE.toLower())) {
       action = UPDATE;
       config = cmd.getOptionValue(UPDATE.toLower());
+    } else if (cmd.hasOption(IMPORT.toLower())) {
+      action = IMPORT;
+      config = cmd.getOptionValue(IMPORT.toLower());
     }
 
     logger.info("action " + action + " config " + config);
@@ -1340,6 +1353,11 @@ public class CopyToPostgres<T extends CommonShell> {
           System.exit(1);  // ?
         }
         break;
+      case IMPORT:
+        logger.info("get import date from old config");
+        long importDate = copyToPostgres.getImportDate(config, optConfigValue);
+        logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
+        break;
       default:
         formatter.printHelp("copy", options);
     }
@@ -1356,6 +1374,11 @@ public class CopyToPostgres<T extends CommonShell> {
 
     {
       Option copy = new Option(COPY.getValue(), COPY.toLower(), true, "copy this config or language into netprof");
+      copy.setRequired(false);
+      options.addOption(copy);
+    }
+    {
+      Option copy = new Option(IMPORT.getValue(), IMPORT.toLower(), true, "get netprof 1 original import date");
       copy.setRequired(false);
       options.addOption(copy);
     }
@@ -1412,10 +1435,10 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(mapFile);
     }
 
-    {
-      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "import netprof 1 data into existing netprof 2 project");
-      options.addOption(mapFile);
-    }
+//    {
+//      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "import netprof 1 data into existing netprof 2 project");
+//      options.addOption(mapFile);
+//    }
 
     return options;
   }

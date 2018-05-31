@@ -79,7 +79,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  public static final int SLOW_ROUND_TRIP = 3000;
+  private static final int SLOW_ROUND_TRIP = 3000;
 
   private IEnsureAudioHelper ensureAudioHelper;
 
@@ -214,7 +214,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
         //Map<Integer, ISlimResult> audioToResult = getAudioIDMap(projectID);
         //    logger.info("getAllAlignments recalc " +audioToResult.size() + " alignments...");
-        recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, getAudioIDMap(projectID), true);
+        recalcAlignments(projectID, audioIDs, audioFileHelper, userIDFromSession, getAudioIDMap(projectID), db.getProject(projectID).hasModel());
 
         long now = System.currentTimeMillis();
 
@@ -626,6 +626,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * Doesn't really need to be on the scoring service...
    *
    * Send email if it's slow.
+   *
    * @param resultID
    * @param roundTrip
    */
@@ -636,11 +637,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (roundTrip > SLOW_ROUND_TRIP) {
       try {
         int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+        String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
         new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
-            getInfo("Slow round trip (" +
-            roundTrip +
-            ") recording #" +resultID+
-            " by user #" + userIDFromSessionOrDB))).start();
+            getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
+                " by user #" + userIDFromSessionOrDB + "/" + userChosenID))).start();
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
@@ -738,7 +738,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param projID should be a projid from project table...
    * @throws DominoSessionException
    * @throws RestrictedOperationException
-   * @see mitll.langtest.client.project.ProjectEditForm#tellHydraServerToRefreshProject
+   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
    */
   @Override
   public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {
