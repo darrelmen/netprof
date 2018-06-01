@@ -189,9 +189,8 @@ public class CreateProject {
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 
-      for (Map.Entry<String, String> pair : info.getPropertyValue().entrySet()) {
-        projectDAO.addProperty(projectID, pair.getKey(), pair.getValue(), PROPERTY, "");
-      }
+      info.getPropertyValue().forEach((k, v) -> projectDAO.addProperty(projectID, k, v, PROPERTY, ""));
+
       projectServices.rememberProject(projectID);
       return projectID;
     } else {
@@ -298,7 +297,7 @@ public class CreateProject {
    */
   long getSinceWhen(DatabaseImpl db, int projectID) {
     Project project = db.getProject(projectID);
-   // long createdTime = project.getProject().created().getTime();
+    // long createdTime = project.getProject().created().getTime();
     long netprofUpdate = project.getProject().lastnetprof().getTime();
 
     return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;

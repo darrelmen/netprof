@@ -55,6 +55,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,6 +83,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean DEBUG = false;
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;
+  public static final String RECORDED1 = "Recorded";
+  public static final String RECORDED = RECORDED1;
 
   /**
    * @param request
@@ -99,21 +102,41 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      FilterResponse typeToValues = sectionHelper.getTypeToValues(request);
+      FilterResponse response = sectionHelper.getTypeToValues(request);
+      addUserListFacet(request, response);
 
-      int userListID = request.getUserListID();
-      UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
 
-      if (next != null) {  // echo it back
-        //logger.info("\tgetTypeToValues " + request + " include list " + next);
-        typeToValues.getTypesToInclude().add(LISTS);
+      User userFromSession = getUserFromSession();
+
+      logger.info("getTypeToValues got " + userFromSession);
+      logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+      if (request.isRecordRequest() && userFromSession != null) { //how no user???
+        response.getTypesToInclude().add(RECORDED);
         Set<MatchInfo> value = new HashSet<>();
-        value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-        typeToValues.getTypeToValues().put(LISTS, value);
+        boolean isMale = userFromSession.isMale();
+        String s = isMale ? "Males" : "Females";
+        value.add(new MatchInfo("Recorded by " + s, 0, -1, false, ""));
+        value.add(new MatchInfo("Unrecorded by " + s, 0, -1, false, ""));
+        response.getTypeToValues().put(RECORDED, value);
+        response.getTypesToInclude().add(RECORDED);
       }
-      return typeToValues;
+
+      return response;
     }
     //}
+  }
+
+  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
+    int userListID = request.getUserListID();
+    UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
+
+    if (next != null) {  // echo it back
+      //logger.info("\tgetTypeToValues " + request + " include list " + next);
+      typeToValues.getTypesToInclude().add(LISTS);
+      Set<MatchInfo> value = new HashSet<>();
+      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
+      typeToValues.getTypeToValues().put(LISTS, value);
+    }
   }
 
  /* public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
@@ -473,7 +496,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
+    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
+    typeToSelection.remove(RECORDED1);
+
+    Collection<CommonExercise> exercisesForState =
+        typeToSelection.isEmpty() ? getExercises(projid) :
+            sectionHelper.getExercisesForSelectionState(typeToSelection);
+
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
 /*    if (request.isQuiz()) {
       Collator collator = getAudioFileHelper(projid).getCollator();
@@ -930,8 +959,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       List<CommonExercise> exercises,
       int projid) {
     if (request.isOnlyUnrecordedByMe()) {
-      logger.info("Filter for matching gender to " + request.getUserID());
-      return getUnrecordedExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
+      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
+      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), false);
+    } else if (request.isOnlyRecordedByMatchingGender()) {
+      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
+      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), true);
     } else {
       return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
     }
@@ -945,13 +977,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercises
    * @param projid
    * @param onlyExamples
+   * @param onlyRecorded
    * @return
    */
   @NotNull
-  private List<CommonExercise> getUnrecordedExercisesMatchingGender(int userID,
-                                                                    Collection<CommonExercise> exercises,
-                                                                    int projid,
-                                                                    boolean onlyExamples) {
+  private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
+                                                                      Collection<CommonExercise> exercises,
+                                                                      int projid,
+                                                                      boolean onlyExamples, boolean onlyRecorded) {
 
     Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
 
@@ -971,16 +1004,25 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
 
-    logger.debug("getUnrecordedExercisesMatchingGender " + onlyExamples +
+    logger.debug("getRecordFilterExercisesMatchingGender " + onlyExamples +
         "\n\texToTranscript " + exToTranscript.size());
     Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
-    logger.debug("getUnrecordedExercisesMatchingGender" +
+
+    logger.debug("getRecordFilterExercisesMatchingGender" +
         "\n\tall exercises " + unrecordedIDs.size() +
         "\n\tfor project #" + projid +
         "\n\tuserid # " + userID +
-        "\n\tremoving " + recordedBySameGender.size());
-    unrecordedIDs.removeAll(recordedBySameGender);
-    logger.debug("getUnrecordedExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
+        "\n\tremoving " + recordedBySameGender.size() +
+        "\n\tretain " + onlyRecorded
+    );
+
+    if (onlyRecorded) {
+      unrecordedIDs.retainAll(recordedBySameGender);
+    } else {
+      unrecordedIDs.removeAll(recordedBySameGender);
+    }
+
+    logger.debug("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
     List<CommonExercise> unrecordedExercises = new ArrayList<>();
 
@@ -998,7 +1040,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
 
-    logger.debug("getUnrecordedExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
+    logger.debug("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 
     return unrecordedExercises;
   }
@@ -1008,7 +1050,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param projid
    * @param onlyExamples
    * @return
-   * @see #getUnrecordedExercisesMatchingGender
+   * @see #getRecordFilterExercisesMatchingGender
    */
   private Collection<Integer> getRecordedByMatchingGender(int userID,
                                                           int projid,

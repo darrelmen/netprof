@@ -328,7 +328,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         selectionState.getItem(),
 
         newState.isOnlyWithAudioDefects(),
-        newState.isOnlyUnrecorded(),
         newState.isOnlyDefault(),
         newState.isOnlyUninspected());
   }
@@ -479,7 +478,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
     if (DEBUG) logger.info("HistoryExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
-    loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
+    loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
   }
 
   /**
@@ -489,7 +488,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param prefix
    * @param exerciseID
    * @param onlyWithAudioAnno
-   * @param onlyUnrecorded
    * @param onlyDefaultUser
    * @param onlyUninspected
    * @see PagingExerciseList#loadExercises
@@ -500,11 +498,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                           int exerciseID,
 
                                           boolean onlyWithAudioAnno,
-                                          boolean onlyUnrecorded,
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {
     ExerciseListRequest request =
-        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
+        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +
@@ -544,12 +541,13 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
-                                                       boolean onlyWithAudioAnno, boolean onlyUnrecorded,
-                                                       boolean onlyDefaultUser, boolean onlyUninspected) {
+                                                       boolean onlyWithAudioAnno,
+                                                       boolean onlyDefaultUser,
+                                                       boolean onlyUninspected) {
     return getRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        .setOnlyUnrecordedByMe(onlyUnrecorded)
+       // .setOnlyUnrecordedByMe(onlyUnrecorded)
         .setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected);
   }
@@ -559,7 +557,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param prefix
    * @param exerciseID
    * @param request
-   * @see #loadExercisesUsingPrefix(Map, String, int, boolean, boolean, boolean, boolean)
+   * @see #loadExercisesUsingPrefix(Map, String, int, boolean, boolean, boolean)
    */
   private void getExerciseIDs(Map<String, Collection<String>> typeToSection,
                               String prefix,
@@ -568,6 +566,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     waitCursorHelper.scheduleWaitTimer();
     if (DEBUG) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID + " for " + request);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//      logger.info("logException stack " + exceptionAsString);
     }
     if (controller.getUser() > 0) {
      // final long then = System.currentTimeMillis();
@@ -583,7 +584,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), -1, false, false, false, false);
+    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), -1, false, false, false);
   }
 
   /**

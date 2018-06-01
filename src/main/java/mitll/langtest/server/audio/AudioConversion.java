@@ -65,7 +65,7 @@ public class AudioConversion extends AudioBase {
 //  private final long trimMillisBefore;
 //  private final long trimMillisAfter;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_DETAIL = false;
   private boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
@@ -649,7 +649,7 @@ public class AudioConversion extends AudioBase {
 
       if (!fileUnderParent2.exists()) {
         if (spew4++ < 100) {
-          logger.warn("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath());
+          logger.warn("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath(), new Exception());
         }
       } else {
         // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());

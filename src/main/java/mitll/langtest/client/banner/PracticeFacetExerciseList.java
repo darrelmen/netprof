@@ -46,12 +46,10 @@ class PracticeFacetExerciseList extends FacetExerciseList {
   /**
    * The issue is there should only be only keyboard focus - either the space bar and prev/next or
    * the search box. - so we should hide the search box.
-   *
-   * @param typeToSection
+   *  @param typeToSection
    * @param prefix
    * @param exerciseID
    * @param onlyWithAudioAnno
-   * @param onlyUnrecorded
    * @param onlyDefaultUser
    * @param onlyUninspected
    */
@@ -59,8 +57,8 @@ class PracticeFacetExerciseList extends FacetExerciseList {
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                           String prefix,
                                           int exerciseID, boolean onlyWithAudioAnno,
-                                          boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
-    super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
+                                          boolean onlyDefaultUser, boolean onlyUninspected) {
+    super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
     getStatsFlashcardFactory().setSelection(typeToSection);
   }
 

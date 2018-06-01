@@ -459,7 +459,7 @@ public abstract class SingleSelectExerciseList
         //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection childCount = " + count);
         loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), -1,
-            false, false, false, false);
+            false, false, false);
       } else {
         // logger.warning("not enough selections " +childCount);
         gotEmptyExerciseList();

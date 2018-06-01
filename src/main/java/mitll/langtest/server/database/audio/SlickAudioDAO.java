@@ -60,6 +60,7 @@ import static mitll.langtest.shared.user.MiniUser.Gender.Male;
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
   private static final String BEST_AUDIO = "bestAudio";
+  public static final boolean DEBUG = false;
 
   private final AudioDAOWrapper dao;
   private final long now = System.currentTimeMillis();
@@ -299,11 +300,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Map<Integer, Collection<Tuple2<Integer, Integer>>> countForGender4 =
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
-    logger.info("getCountForGender" +
-        "\n\tfor       '" + speed + "'" +
-        "\n\tgiven ids " + uniqueIDs.size() +
-        "\n\tex->trans " + exToTranscript.size() +
-        "\n\tgot       " + countForGender4.size());
+    if (DEBUG) {
+      logger.info("getCountForGender" +
+          "\n\tfor       '" + speed + "'" +
+          "\n\tgiven ids " + uniqueIDs.size() +
+          "\n\tex->trans " + exToTranscript.size() +
+          "\n\tgot       " + countForGender4.size());
+    }
 
 //    countForGender4.forEach((k,v)->{});
 
@@ -320,10 +323,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
     }
 
-    logger.info("getCountForGender " +
-        "\n\tfor     '" + speed + "'" +
-        "\n\tmales   " + idsOfRecordedExercisesForMales.size() +
-        "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
+    if (DEBUG) {
+      logger.info("getCountForGender " +
+          "\n\tfor     '" + speed + "'" +
+          "\n\tmales   " + idsOfRecordedExercisesForMales.size() +
+          "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
+    }
   }
 
   @Override

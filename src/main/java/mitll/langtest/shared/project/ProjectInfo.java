@@ -33,10 +33,12 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.client.project.ProjectEditForm;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +63,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private boolean audioPerProject = false;
 
   private Map<String, String> propertyValue = new HashMap<>();
+  private int userID;
 
   public ProjectInfo() {
   } // for serialization
@@ -89,7 +92,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String first,
                      String secondType,
                      boolean showOniOS,
-                     int dominoID) {
+                     int dominoID,
+                     int userID) {
     super(dominoID, name, first, secondType);
     this.language = language;
     this.id = projectid;
@@ -105,6 +109,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.port = port;
     this.modelsDir = modelsDir;
     this.showOniOS = showOniOS;
+    this.userID = userID;
   }
 
   public String getLanguage() {
@@ -175,21 +180,29 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.modelsDir = modelsDir;
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   * @return
+   */
   public Map<String, String> getPropertyValue() {
     return propertyValue;
   }
 
-  public void addProp(String key, String value) {
+/*  public void addProp(String key, String value) {
     propertyValue.put(key, value);
-  }
+  }*/
 
+/*
   public String getProp(String key) {
     return propertyValue.get(key);
   }
+*/
 
+/*
   public String removeProp(String key) {
     return propertyValue.remove(key);
   }
+*/
 
   public void setCourse(String course) {
     this.course = course;
@@ -253,9 +266,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.audioPerProject = audioPerProject;
   }
 
+  public boolean isMine(int sessionUser) {
+    return userID == sessionUser;
+  }
+
   public String toString() {
     return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +
         "\nlang      " + language +
+        "\nowner     " + userID +
         "\nhost      " + host + ":" + port +
         "\ntypes     [" + getFirstType() + ", " + getSecondType() + "]" +
         "\ndomino    " + getDominoID() +

@@ -161,9 +161,9 @@ public class ReviewItemHelper extends NPFHelper {
         @Override
         protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                              String prefix,
-                                                             boolean onlyWithAudioAnno, boolean onlyUnrecorded,
+                                                             boolean onlyWithAudioAnno,
                                                              boolean onlyDefaultUser, boolean onlyUninspected) {
-          ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser,
+          ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser,
               onlyUninspected)
               .setQC(true)
               .setAddContext(false);

@@ -47,6 +47,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  public static final String PLEASE_WAIT = "Please wait...";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
@@ -113,7 +114,7 @@ public class ProjectChoices {
    * @see InitialUI#populateRootPanel
    */
   private DivWidget contentRow;
-
+  private int sessionUser = -1;
   /**
    * @param langTest
    * @param uiLifecycle
@@ -121,6 +122,7 @@ public class ProjectChoices {
    */
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
+    this.sessionUser = langTest.getUser();
     this.props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
@@ -692,7 +694,7 @@ public class ProjectChoices {
     }
 
     {
-      if (projectForLang.getStatus() != ProjectStatus.PRODUCTION) {
+      if (isAllowedToDelete(projectForLang)) {
         Button deleteButton = getDeleteButton(projectForLang, label);
         deleteButton.addStyleName("leftFiveMargin");
         horiz2.add(getButtonContainer(deleteButton));
@@ -700,6 +702,18 @@ public class ProjectChoices {
     }
 
     return horiz2;
+  }
+
+  /**
+   * You can only delete a project if it's not in production, or it's yours or you're an admin.
+   * @param projectForLang
+   * @return
+   */
+  private boolean isAllowedToDelete(SlimProject projectForLang) {
+    return
+        projectForLang.getStatus() != ProjectStatus.PRODUCTION &&
+            (projectForLang.isMine(sessionUser) ||
+                controller.getUserManager().isAdmin());
   }
 
   @NotNull
@@ -789,7 +803,8 @@ public class ProjectChoices {
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
   //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
-    String msg = "Please wait...";
+    logger.info("showImportDialog # items = " + s);
+    String msg = PLEASE_WAIT;
   //  if (s.equals("0")) msg += " this could take awhile the first time.";
     final Object waitToken = messageHelper.startWaiting(msg);
 

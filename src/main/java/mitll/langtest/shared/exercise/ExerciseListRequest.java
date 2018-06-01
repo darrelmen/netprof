@@ -33,13 +33,11 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.answer.ActivityType;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +58,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
+  private boolean onlyRecordedByMatchingGender = false;
   private boolean onlyExamples = false;
   private boolean incorrectFirstOrder = false;
   private boolean onlyWithAudioAnno = false;
@@ -88,6 +87,7 @@ public class ExerciseListRequest implements IsSerializable {
         prefix.isEmpty() &&
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
+        !onlyRecordedByMatchingGender &&
         !onlyExamples &&
         !incorrectFirstOrder &&
         !onlyWithAudioAnno &&
@@ -110,6 +110,7 @@ public class ExerciseListRequest implements IsSerializable {
     return prefix.equals(other.getPrefix()) &&
         typeToSelection.equals(other.getTypeToSelection()) &&
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
+        onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
         onlyExamples == other.onlyExamples &&
         incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAudioAnno == other.onlyWithAudioAnno &&
@@ -162,11 +163,6 @@ public class ExerciseListRequest implements IsSerializable {
     return userID;
   }
 
-/*  public ExerciseListRequest setUserID(int userID) {
-    this.userID = userID;
-    return this;
-  }*/
-
   /**
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
@@ -197,7 +193,14 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyUnrecordedByMe = onlyUnrecordedByMe;
     return this;
   }
+  public boolean isOnlyRecordedByMatchingGender() {
+    return onlyRecordedByMatchingGender;
+  }
 
+  public ExerciseListRequest setOnlyRecordedByMatchingGender(boolean onlyRecordedByMatchingGender) {
+    this.onlyRecordedByMatchingGender = onlyRecordedByMatchingGender;
+    return this;
+  }
   /**
    * @return
    */
@@ -346,6 +349,7 @@ public class ExerciseListRequest implements IsSerializable {
             (activityType == ActivityType.UNSET ? "" :
                 "\n\tactivity             " + activityType) +
             (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +
+            (onlyRecordedByMatchingGender ? "\n\tonly recorded by matching gender" : "") +
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAudioAnno ? "\n\tonly with audio     " : "") +
             (onlyDefaultAudio ? "\n\tonlyDefaultAudio     " : "") +
@@ -361,13 +365,5 @@ public class ExerciseListRequest implements IsSerializable {
     return plainVocab;
   }
 
- /* public boolean isQuiz() {
-    return quiz;
-  }
-*/
-/*
-  public void setQuiz(boolean quiz) {
-    this.quiz = quiz;
-  }
-*/
+
 }

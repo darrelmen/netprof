@@ -49,11 +49,17 @@ public class FilterRequest implements IsSerializable {
   private String prefix = "";
   private int limit = -1;
   private int userListID = -1;
-  //private boolean isQuiz =false;
+  private boolean recordRequest = false;
 
   public FilterRequest() {
   }
 
+  /**
+   * @param reqID
+   * @param pairs
+   * @param userListID
+   * @see mitll.langtest.client.list.FacetExerciseList#getRequest
+   */
   public FilterRequest(int reqID, List<Pair> pairs, int userListID) {
     this.reqID = reqID;
     this.typeToSelection = pairs;
@@ -118,14 +124,14 @@ public class FilterRequest implements IsSerializable {
     return userListID;
   }
 
-/*  public boolean isQuiz() {
-    return isQuiz;
+  public boolean isRecordRequest() {
+    return recordRequest;
   }
 
-  public FilterRequest setQuiz(boolean quiz) {
-    isQuiz = quiz;
+  public FilterRequest setRecordRequest(boolean recordRequest) {
+    this.recordRequest = recordRequest;
     return this;
-  }*/
+  }
 
   /**
    * @return
@@ -135,6 +141,7 @@ public class FilterRequest implements IsSerializable {
         (userListID == -1 ? "" : "userListID =" + userListID) +
             (limit == -1 ? "" : "limit '" + limit + "'") +
             (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
+            (recordRequest ? "" : "recordRequest") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 }

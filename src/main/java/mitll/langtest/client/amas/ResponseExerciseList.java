@@ -377,7 +377,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    */
 //  @Override
   protected void loadExercises(final Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getPrefix(), -1, false, false, false, false);
+    loadExercisesUsingPrefix(typeToSection, getPrefix(), -1, false, false, false);
   }
 
   /**

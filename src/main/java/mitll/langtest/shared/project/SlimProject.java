@@ -61,6 +61,7 @@ public class SlimProject extends ProjectInfo {
    * @param port
    * @param modelsDir
    * @param dominoID
+   * @param userID
    * @see mitll.langtest.server.database.project.ProjectManagement#getProjectInfo
    */
   public SlimProject(int projectid,
@@ -84,9 +85,11 @@ public class SlimProject extends ProjectInfo {
                      String firstType,
                      String secondType,
                      boolean showOniOS,
-                     int dominoID, TreeMap<String, String> props) {
+                     int dominoID,
+                     TreeMap<String, String> props,
+                     int userID) {
     super(projectid, name, language, course, countryCode, status, type, displayOrder, created, lastImport, lastNetprof, host, port, modelsDir,
-        firstType, secondType, showOniOS, dominoID);
+        firstType, secondType, showOniOS, dominoID, userID);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
     this.props = props;

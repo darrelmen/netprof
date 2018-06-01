@@ -91,7 +91,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   public Map<Integer, T> getIdToExercise() {
     Map<Integer, T> idToExercise = pagingContainer.getIdToExercise();
-   // logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
+    // logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
     return idToExercise;
   }
 
@@ -426,13 +426,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitCursorHelper.showFinished();
   }
 
-  /**
-   * @see FacetExerciseList#gotEmptyExerciseList
-   */
-//  protected void showEmptySelection() {
-//    Scheduler.get().scheduleDeferred((Command) this::showEmptyExercise);
-//  }
-
   String getHistoryTokenFromUIState(String search, int id) {
     return
         getSearchTerm(search) +
@@ -556,7 +549,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
-  //@Override
   public T simpleRemove(int id) {
     T es = byID(id);
     pagingContainer.forgetItem(es);
@@ -591,13 +583,15 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.redraw();
   }
 
-  private boolean isOnlyExamples() {
+  protected boolean isOnlyExamples() {
     return onlyExamples;
   }
 
+/*
   protected void setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
   }
+*/
 
   @Override
   ActivityType getActivityType() {

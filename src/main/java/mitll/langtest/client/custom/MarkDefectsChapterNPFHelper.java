@@ -111,15 +111,14 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
            * @param typeToSection
            * @param prefix
            * @param onlyWithAudioAnno
-           * @param onlyUnrecorded
            * @param onlyDefaultUser
            * @param onlyUninspected
            * @return
            */
           @Override
-          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
             ExerciseListRequest exerciseListRequest = super
-                .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected)
+                .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
                 .setQC(true)
                 .setAddContext(true);
             return exerciseListRequest;

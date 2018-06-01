@@ -388,7 +388,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       typeToMatch.put(type, matches);
       Map<String, MatchInfo> matchesForType = typeToMatchInfo.get(type);
       if (matchesForType == null) {
-        if (!type.equals(LISTS)) {
+        if (!isDynamicFacet(type)) {
           logger.warn("getTypeToMatchPairs no known type " + type + " in " + typeToMatchInfo.keySet());
         }
       } else {
@@ -397,7 +397,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       iterator.remove();
 
       if (pairs.isEmpty()) {
-        if (!type.equals(LISTS)) {
+        if (!isDynamicFacet(type)) {
           logger.warn("getTypeToMatchPairs : huh? pairs is empty for type " + type);
         }
       } else {
@@ -408,6 +408,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     }
 
     return typeToMatch;
+  }
+
+  private boolean isDynamicFacet(String type) {
+    return type.equals(LISTS) || type.equals("Recorded");
   }
 
   /**
@@ -1073,7 +1077,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       Set<MatchInfo> matches = typeToMatches.get(type);
       if (matches == null || matches.isEmpty()) {
         typesToInclude1.remove(type);
-        logger.info("checkIfAnyTypesAreEmpty removing " + type + " matches = " + matches);
+        logger.info("checkIfAnyTypesAreEmpty removing '" + type + "' matches = " + matches);
         someEmpty = true;
       }
     }

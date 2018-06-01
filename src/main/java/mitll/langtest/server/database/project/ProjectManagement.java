@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.project;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
@@ -87,6 +88,7 @@ public class ProjectManagement implements IProjectManagement {
    * JUST FOR TESTING
    */
   private static final String LANG_TO_LOAD = "";
+  public static final String SYNCED = "SYNCED";
   /**
    * JUST FOR TESTING
    */
@@ -96,6 +98,11 @@ public class ProjectManagement implements IProjectManagement {
   private static final boolean ADD_DEFECTS = false;
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
+   * @see #addExerciseDerivedProperties
+   * @see mitll.langtest.server.domino.ProjectSync#getProps
+   */
   public static final String NUM_ITEMS = "Num Items";
   private static final String DOMINO_ID = "Domino ID";
 
@@ -937,7 +944,8 @@ public class ProjectManagement implements IProjectManagement {
         project.second(),
         pproject.isOnIOS(),
         project.dominoid(),
-        info);
+        info,
+        project.userid());
   }
 
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
@@ -966,8 +974,8 @@ public class ProjectManagement implements IProjectManagement {
   private void addDateProps(SlickProject project, Map<String, String> info) {
     info.put(CREATED, format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
+    info.put(SYNCED, format.format(project.lastnetprof()));
   }
-
 
   @NotNull
   private ProjectStatus getProjectStatus(SlickProject project) {

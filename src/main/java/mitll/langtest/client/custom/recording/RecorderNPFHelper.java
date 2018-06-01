@@ -40,13 +40,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.exercise.AudioChangedEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
@@ -59,9 +57,7 @@ import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -83,7 +79,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   private final boolean doNormalRecording;
   private boolean added = false;
   private final RecordingProgressTable flex = new RecordingProgressTable();
-  private Widget outerBottomRow;
   private INavigation.VIEWS myView;
 
   /**
@@ -103,15 +98,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
-      final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-//      return getFactoryInject(exerciseList,
-//          e -> new RecordRefAudioPanel(e, controller, exerciseList, exerciseList.getInstance()));
-//
-    ExercisePanelFactory<CommonShell, CommonExercise> exercisePanelFactory =
-        new RecordFactory(exerciseList);
-
-    return exercisePanelFactory;
+  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+    return new RecordFactory(exerciseList);
   }
 
   @Override
@@ -119,15 +107,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       final FlexListLayout outerLayout = this;
 
-/*
-      protected void styleTopRow(Panel twoRows, Panel topRow) {
-        twoRows.add(topRow);
-      }
-*/
-
       protected void styleBottomRow(Panel bottomRow) {
-//        bottomRow.setWidth("100%");
-//        bottomRow.addStyleName("inlineFlex");
         bottomRow.addStyleName("centerPractice");
       }
 
@@ -137,7 +117,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        return new RecordingFacetExerciseList(controller, RecorderNPFHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+        return new RecordingFacetExerciseList(controller,
+            topRow, currentExercisePanel, instanceName, listHeader);
 
         /*        return new NPExerciseList(currentExercisePanel,
             outerLayout.getController(),
@@ -210,14 +191,14 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     };
   }
 
-  private void addEventHandler(final String instanceName) {
+/*  private void addEventHandler(final String instanceName) {
     LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
       if (!authenticationEvent.getSource().equals(instanceName)) {
         // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
         getProgressInfo();
       }
     });
-  }
+  }*/
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
@@ -262,7 +243,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 
-    @Override protected boolean showPrevButton() {
+    @Override
+    protected boolean showPrevButton() {
       return true;
     }
 
@@ -384,7 +366,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   }
 
   private class RecordFactory extends ExercisePanelFactory<CommonShell, CommonExercise> {
-    public RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+     RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
       super(RecorderNPFHelper.this.controller, exerciseList);
     }
 

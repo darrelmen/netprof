@@ -99,7 +99,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected Panel createdPanel;
   private int lastReqID = 0;
-  final boolean allowPlusInURL;
+  protected final boolean allowPlusInURL;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   boolean doShuffle;
 

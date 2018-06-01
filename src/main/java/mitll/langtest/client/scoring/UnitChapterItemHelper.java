@@ -64,6 +64,8 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   private static final String ITEM = "Item";
   private static final String ID = "ID";
   private static final String TIME = "Time";
+  public static final String DOMINO_ID = "Domino ID";
+  public static final String NP_ID = "NP ID";
 
   private final Collection<String> typeOrder;
 
@@ -126,7 +128,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private Panel getUnitLessonForExercise(T exercise) {
     Panel flow = new HorizontalPanel();
-    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
+    //flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
     // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
@@ -138,8 +140,18 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
         flow.add(child);
       }
     }
-    if (exercise.getDominoID() > 0) {
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, "Domino ID", "" + exercise.getDominoID());
+
+    int dominoID = exercise.getDominoID();
+    if (dominoID > 0 &&
+        !("" + dominoID).equals(exercise.getOldID())
+        ) {
+      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, DOMINO_ID, "" + exercise.getDominoID());
+      child.addStyleName("rightFiveMargin");
+      flow.add(child);
+    }
+
+    if (!exercise.getOldID().isEmpty()) {
+      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, NP_ID, exercise.getOldID());
       child.addStyleName("rightFiveMargin");
       flow.add(child);
     }

@@ -228,8 +228,9 @@ import java.util.logging.Logger;
  */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
-  public static final String LOCALHOST = "127.0.0.1";
   private final Logger logger = Logger.getLogger("LangTest");
+
+  private static final String LOCALHOST = "127.0.0.1";
 
   private static final String CAN_T_RECORD_AUDIO = "Can't record audio";
   private static final String RECORDING_AUDIO_IS_NOT_SUPPORTED = "Recording audio is not supported.";

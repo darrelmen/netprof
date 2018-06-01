@@ -62,7 +62,7 @@ import java.util.logging.Logger;
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
-  private static final String NO_AUDIO_TO_RECORD = "No in-context audio for this exercise.";
+  private static final String NO_AUDIO_TO_RECORD = "No in-context sentence for this exercise.";
   public static final String CONTEXT = "context=";
 
   /**

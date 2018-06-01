@@ -126,11 +126,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String noAccentFL) {
     super(-1, projectid);
     this.oldid = id;
-    try {
+/*    try {
       this.dominoID = Integer.parseInt(id);
     } catch (NumberFormatException e) {
       //
-    }
+    }*/
     this.meaning = meaning;
     this.updateTime = updateTime;
     this.isPredef = true;
