@@ -92,9 +92,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param addPrevButton
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
    */
-  public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface<T, ?> listContainer, boolean addButtons, boolean addKeyHandler,
-                          boolean enableNextOnlyWhenAllCompleted, boolean addPrevButton) {
+  NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
+                   ListInterface<T, ?> listContainer, boolean addButtons, boolean addKeyHandler,
+                   boolean enableNextOnlyWhenAllCompleted,
+                   boolean addPrevButton) {
     this.provider = provider;
     this.listContainer = listContainer;
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
@@ -116,7 +117,8 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @see NavigationHelper#NavigationHelper
    */
   private void getNextAndPreviousButtons(final HasID e,
-                                         final ExerciseController controller, boolean addButtons,
+                                         final ExerciseController controller,
+                                         boolean addButtons,
                                          boolean addKeyHandler) {
     makePrevButton(e, addButtons, addKeyHandler);
     makeNextButton(e, controller, addButtons);
@@ -181,7 +183,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     //logger.info("clickNext " + exercise.getID());
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
-       // logger.info("clickNext  post answers " + exercise.getID());
+        // logger.info("clickNext  post answers " + exercise.getID());
         provider.postAnswers(controller, exercise);
       } else {
         logger.info("clickNext NO PROVIDER " + exercise.getID());

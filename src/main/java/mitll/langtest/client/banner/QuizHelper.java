@@ -100,30 +100,6 @@ public class QuizHelper extends PracticeHelper {
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, QUIZ) {
 
-/*      @Override
-      public Panel getExercisePanel(CommonExercise e) {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
-        boolean hasSelectionForType = exerciseList.hasSelectionForType(LISTS);
-        if (hasSelectionForType) {
-          return super.getExercisePanel(e);
-        } else {
-          return new QuizIntro(exerciseList.getIdToList(), listid -> {
-            chosenList = listid;
-            logger.info("got choice " + listid);
-*//*
-           Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
-            candidate.put(LISTS, "" + listid);
-            SelectionState.INSTANCE + "=" +
-            //logger.info("setHistory " + candidate);
-            exerciseList.setHistory(candidate);*//*
-
-            removeItemFromHistory(chosenList);
-            showQuizForReal();
-          },
-              controller.getUserManager().getUserID());
-        }
-      }*/
-
       @Override
       public PolyglotDialog.MODE_CHOICE getMode() {
         return POLYGLOT;
@@ -139,7 +115,6 @@ public class QuizHelper extends PracticeHelper {
         } else {
           if (chosenList == -1) {
             setChosenList(exerciseList);
-            //reallyStartOver();
           }
 
           IUserList iUserList = idToList.get(chosenList);

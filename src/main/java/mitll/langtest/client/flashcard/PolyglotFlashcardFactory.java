@@ -3,7 +3,6 @@ package mitll.langtest.client.flashcard;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
@@ -42,7 +41,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
  // private static final boolean DEBUG = false;
 
   PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
-    super(controller, exerciseList, instance);
+    super(controller, exerciseList);
   }
 
   /**

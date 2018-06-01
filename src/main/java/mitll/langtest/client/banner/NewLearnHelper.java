@@ -6,6 +6,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.FacetExerciseList;

@@ -84,15 +84,12 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * @param controller
    * @param exerciseList
-   * @param instance
    * @see mitll.langtest.client.banner.PracticeHelper#getFactory
    */
   public StatsFlashcardFactory(ExerciseController controller,
-                               ListInterface<L, T> exerciseList,
-                               String instance) {
+                               ListInterface<L, T> exerciseList) {
     super(controller, exerciseList);
     controlState = new ControlState();
-    // this.instance = instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<L>() {

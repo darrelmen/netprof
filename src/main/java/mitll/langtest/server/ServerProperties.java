@@ -153,8 +153,8 @@ public class ServerProperties {
   private static final String UI_PROPERTIES = "ui.properties";
   private static final String CONFIG_FILE1 = "config.file";
   private static final String RELEASE_DATE = "releaseDate";
-  // ???
-  private static final String LLMAIL_LL_MIT_EDU = "llmx2.ll.mit.edu";//"llmail.ll.mit.edu";
+  // use postfix relay to llmx2
+  private static final String LLMAIL_LL_MIT_EDU = "localhost";//llmx2.ll.mit.edu";//"llmail.ll.mit.edu";
 
   private static final String NP_SERVER = "netprof.ll.mit.edu";
 
@@ -162,7 +162,6 @@ public class ServerProperties {
    * For development, from a laptop.
    */
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
-//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 

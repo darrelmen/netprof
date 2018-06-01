@@ -88,7 +88,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
       polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, PRACTICE);
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
-      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, PRACTICE);
+      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList);
     }
 
     statsFlashcardFactory.setContentPanel(outerBottomRow);

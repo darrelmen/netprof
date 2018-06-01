@@ -133,7 +133,15 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   }
 
   private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<>(exercise, controller, this, exerciseList, true, true, true, false);
+    return new NavigationHelper<>(exercise, controller, this, exerciseList,
+        true,
+        true,
+        true,
+        showPrevButton());
+  }
+
+  protected boolean showPrevButton() {
+    return false;
   }
 
   void addInstructions() {

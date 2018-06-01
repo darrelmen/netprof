@@ -32,12 +32,11 @@
 
 package mitll.langtest.client.custom.recording;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -47,20 +46,23 @@ import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.exercise.*;
-import mitll.langtest.client.list.*;
+import mitll.langtest.client.exercise.AudioChangedEvent;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -73,7 +75,7 @@ import java.util.logging.Logger;
  * <T extends CommonShell & AudioRefExercise>
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
- // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
+  // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   /**
    *
@@ -81,6 +83,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   private final boolean doNormalRecording;
   private boolean added = false;
   private final RecordingProgressTable flex = new RecordingProgressTable();
+  private Widget outerBottomRow;
+  private INavigation.VIEWS myView;
 
   /**
    * @param controller
@@ -89,20 +93,25 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    * @param myView
    * @see INavigation#showView
    */
-  public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  public RecorderNPFHelper(ExerciseController controller,
+                           boolean doNormalRecording,
+                           IViewContaner viewContaner,
+                           INavigation.VIEWS myView) {
     super(controller, viewContaner, myView);
+    this.myView = myView;
     this.doNormalRecording = doNormalRecording;
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    final String oinstance = exerciseList.getInstance();
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      @Override
-      public Panel getExercisePanel(final CommonExercise e) {
-        return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
-      }
-    };
+  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
+      final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+//      return getFactoryInject(exerciseList,
+//          e -> new RecordRefAudioPanel(e, controller, exerciseList, exerciseList.getInstance()));
+//
+    ExercisePanelFactory<CommonShell, CommonExercise> exercisePanelFactory =
+        new RecordFactory(exerciseList);
+
+    return exercisePanelFactory;
   }
 
   @Override
@@ -110,13 +119,16 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
       final FlexListLayout outerLayout = this;
 
+/*
       protected void styleTopRow(Panel twoRows, Panel topRow) {
         twoRows.add(topRow);
       }
+*/
 
       protected void styleBottomRow(Panel bottomRow) {
-        bottomRow.setWidth("100%");
-        bottomRow.addStyleName("inlineFlex");
+//        bottomRow.setWidth("100%");
+//        bottomRow.addStyleName("inlineFlex");
+        bottomRow.addStyleName("centerPractice");
       }
 
       @Override
@@ -125,7 +137,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        return new NPExerciseList(currentExercisePanel,
+        return new RecordingFacetExerciseList(controller, RecorderNPFHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+
+        /*        return new NPExerciseList(currentExercisePanel,
             outerLayout.getController(),
             new ListOptions()
                 .setInstance(instanceName)
@@ -171,12 +185,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
           }
 
-          /**
-           * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
-           * @param search
-           * @param id
-           * @return
-           */
+          *//**
+         * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
+         * @param search
+         * @param id
+         * @return
+         *//*
           protected String getHistoryTokenFromUIState(String search, int id) {
             String s = super.getHistoryTokenFromUIState(search, id) +
                 SelectionState.SECTION_SEPARATOR +
@@ -191,7 +205,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             super.restoreUIState(selectionState);
             filterOnly.setValue(selectionState.isOnlyUnrecorded());
           }
-        };
+        };*/
       }
     };
   }
@@ -213,7 +227,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
   /**
    * @see #doMaleFemale()
-   * @see MyWaveformExercisePanel#onLoad
+   * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
     //logger.info("Get progress info for " +getClass() + " instance " + instance);
@@ -233,8 +247,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   /**
    * @see #getFactory(PagingExerciseList)
    */
-  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
-    //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
+  private class RecordRefAudioPanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
+    //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
+
     /**
      * @param e
      * @param controller1
@@ -242,8 +257,13 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
+    RecordRefAudioPanel(CommonExercise e, ExerciseController controller1,
+                        ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
+    }
+
+    @Override protected boolean showPrevButton() {
+      return true;
     }
 
     @Override
@@ -360,6 +380,18 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
             public void onSuccess(Void result) {
             }
           });
+    }
+  }
+
+  private class RecordFactory extends ExercisePanelFactory<CommonShell, CommonExercise> {
+    public RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+      super(RecorderNPFHelper.this.controller, exerciseList);
+    }
+
+    @Override
+    public Panel getExercisePanel(CommonExercise e) {
+      Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
+      return new RecordRefAudioPanel(e, controller, exerciseList, myView.toString());
     }
   }
 }

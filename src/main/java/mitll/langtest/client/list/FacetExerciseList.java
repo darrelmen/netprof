@@ -566,7 +566,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @return
    * @see #addFacetsForReal
    */
-  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
+  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(LISTS);
     populateListChoices(liForDimensionForType, typeToValues);
     return liForDimensionForType;
@@ -1398,7 +1398,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    */
   @Override
   public void flushWith(Comparator<CommonShell> comparator) {
-    logger.info("flushWith ");
+   // logger.info("flushWith ");
     super.flushWith(comparator);
     askServerForExercise(-1);
   }
