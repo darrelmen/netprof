@@ -65,7 +65,7 @@ public class AudioConversion extends AudioBase {
 //  private final long trimMillisBefore;
 //  private final long trimMillisAfter;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
   private boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
@@ -635,7 +635,7 @@ public class AudioConversion extends AudioBase {
 //      String audioBaseDir = serverProps.getAudioBaseDir();
       parent = audioBaseDir;// + File.separator + language;
       if (DEBUG)
-        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+        logger.info("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
     }
 
     File fileUnderParent = new File(parent, wavFile);
@@ -645,7 +645,7 @@ public class AudioConversion extends AudioBase {
       File fileUnderParent2 = new File(parent, wavFile);
 
       if (DEBUG)
-        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+        logger.info("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
 
       if (!fileUnderParent2.exists()) {
         if (spew4++ < 100) {

@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -115,27 +116,30 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected void addItemsAtTop(Panel container) {
-    Map<String, String> unitToValue = newUserExercise.getUnitToValue();
-    if (!unitToValue.isEmpty()) {
-      Panel flow = new HorizontalPanel();
-      flow.getElement().setId("addItemsAtTop_unitLesson");
-      flow.addStyleName("leftFiveMargin");
+    //Map<String, String> unitToValue = newUserExercise.getUnitToValue();
+//    if (!unitToValue.isEmpty()) {
+//      Panel flow = new HorizontalPanel();
+//      flow.getElement().setId("addItemsAtTop_unitLesson");
+//      flow.addStyleName("leftFiveMargin");
+//
+//      for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
+//        String subtext = unitToValue.get(type);
+//        if (subtext != null && !subtext.isEmpty()) {
+//          Heading child = new Heading(4, type, subtext);
+//          child.addStyleName("rightFiveMargin");
+//          flow.add(child);
+//        }
+//      }
+//
+//      Heading child = new Heading(4, ITEM, "" + newUserExercise.getID());
+//      child.addStyleName("rightFiveMargin");
+//      flow.add(child);
 
-      for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
-        String subtext = unitToValue.get(type);
-        if (subtext != null && !subtext.isEmpty()) {
-          Heading child = new Heading(4, type, subtext);
-          child.addStyleName("rightFiveMargin");
-          flow.add(child);
-        }
-      }
+      UnitChapterItemHelper<CommonExercise> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
+     unit.addUnitChapterItem(newUserExercise,container);
 
-      Heading child = new Heading(4, ITEM, "" + newUserExercise.getID());
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
-
-      container.add(flow);
-    }
+     // container.add(tUnitChapterItemHelper;
+//    }
   }
 
   boolean shouldDisableNext() {

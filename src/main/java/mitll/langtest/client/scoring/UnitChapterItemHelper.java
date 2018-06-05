@@ -64,8 +64,8 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   private static final String ITEM = "Item";
   private static final String ID = "ID";
   private static final String TIME = "Time";
-  public static final String DOMINO_ID = "Domino ID";
-  public static final String NP_ID = "NP ID";
+  private static final String DOMINO_ID = "Domino ID";
+  private static final String NP_ID = "NP ID";
 
   private final Collection<String> typeOrder;
 
@@ -147,6 +147,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
         ) {
       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, DOMINO_ID, "" + exercise.getDominoID());
       child.addStyleName("rightFiveMargin");
+      child.getWidget(1);
       flow.add(child);
     }
 

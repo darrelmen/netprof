@@ -268,7 +268,9 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
   public void setEnabled(boolean val) {
     //logger.info("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
-    if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
+    if (postAudioRecordButton.hasValidAudio()){
+      playAudioPanel.setEnabled(val);
+    }
   }
 
   public void setExercise(T exercise) {

@@ -50,6 +50,8 @@ import mitll.langtest.shared.exercise.CommonAudioExercise;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
+
 /**
  * A play button, and an interface with the SoundManagerAPI to call off into the soundmanager.js
  * package to play, pause, and track the progress of audio.<br></br>
@@ -70,6 +72,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
+
   protected static final IconType PLAY = IconType.PLAY;
 
   /**
@@ -361,11 +364,20 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   }
 
   /**
+   * Don't change the  button state if the audio is playing.
+   *
    * @param val
    * @see
    */
   public void setEnabled(boolean val) {
-    playButton.setEnabled(val);
+//    if (DEBUG) {
+//      logger.info(" setEnabled val " + val);
+//    //  logger.warning("askServerForExercise got " + getExceptionAsString(new Exception()));
+//    }
+
+    if (!isPlaying()) {
+      playButton.setEnabled(val);
+    }
   }
 
 
