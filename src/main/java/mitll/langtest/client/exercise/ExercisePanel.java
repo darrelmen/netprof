@@ -320,7 +320,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   }
 
   protected void enableNext() {
-    //logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
+//    logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
     navigationHelper.enableNextButton(isCompleted());
   }
 

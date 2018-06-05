@@ -124,8 +124,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
             return exerciseListRequest;
           }
 
-          protected ExerciseListRequest getRequest(String prefix) {
-            return super.getRequest(prefix).setQC(true);
+          protected ExerciseListRequest getExerciseListRequest(String prefix) {
+            return super.getExerciseListRequest(prefix).setQC(true);
           }
 
           @Override

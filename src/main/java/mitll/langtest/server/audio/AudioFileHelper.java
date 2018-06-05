@@ -392,10 +392,10 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private void ensureCompressed(CommonExercise exercise1, AudioContext audioContext, String wavPath) {
-    //   String actualPath =
-    ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
-        audioContext.getAudioType(), language, new HashMap<>());
-    //logger.info("writeAudioFile wav path " + wavPath +" compressed actual " + actualPath);
+    String actualPath =
+        ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
+            audioContext.getAudioType(), language, new HashMap<>());
+    logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
   }
 
 /*
@@ -914,7 +914,6 @@ public class AudioFileHelper implements AlignDecode {
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise1.getID());
   }
 */
-
   private boolean hasModel() {
     return hasModel;
   }

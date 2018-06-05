@@ -85,6 +85,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean WARN_MISSING_REF_RESULT = false;
   public static final String RECORDED1 = "Recorded";
   public static final String RECORDED = RECORDED1;
+  public static final String ANY = "Any";
 
   /**
    * @param request
@@ -108,17 +109,39 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       User userFromSession = getUserFromSession();
 
-      logger.info("getTypeToValues got " + userFromSession);
-      logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-      if (request.isRecordRequest() && userFromSession != null) { //how no user???
-        response.getTypesToInclude().add(RECORDED);
-        Set<MatchInfo> value = new HashSet<>();
-        boolean isMale = userFromSession.isMale();
-        String s = isMale ? "Males" : "Females";
-        value.add(new MatchInfo("Recorded by " + s, 0, -1, false, ""));
-        value.add(new MatchInfo("Unrecorded by " + s, 0, -1, false, ""));
-        response.getTypeToValues().put(RECORDED, value);
-        response.getTypesToInclude().add(RECORDED);
+      if (userFromSession != null) {
+        logger.info("getTypeToValues got " + userFromSession);
+        logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+        int userFromSessionID = userFromSession.getID();
+        int projectID = getProjectIDFromUser(userFromSessionID);
+
+        Map<String, Collection<String>> typeToSelection = new HashMap<>();
+        request.getTypeToSelection().forEach(pair -> {
+          String value1 = pair.getValue();
+          if (!value1.equalsIgnoreCase(ANY)) {
+            typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
+          }
+        });
+
+        if (request.isRecordRequest()) { //how no user???
+          List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
+
+          ExerciseListRequest request1 = new ExerciseListRequest()
+              .setOnlyUnrecordedByMe(true)
+              .setOnlyExamples(request.isExampleRequest())
+              .setUserID(userFromSessionID);
+          List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+          List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
+
+          response.getTypesToInclude().add(RECORDED);
+          Set<MatchInfo> value = new HashSet<>();
+          boolean isMale = userFromSession.isMale();
+          String s = isMale ? "Males" : "Females";
+          value.add(new MatchInfo("Unrecorded by " + s, unRec.size(), -1, false, ""));
+          value.add(new MatchInfo("Recorded by " + s, rec.size(), -1, false, ""));
+          response.getTypeToValues().put(RECORDED, value);
+          response.getTypesToInclude().add(RECORDED);
+        }
       }
 
       return response;
@@ -138,27 +161,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       typeToValues.getTypeToValues().put(LISTS, value);
     }
   }
-
- /* public FilterResponse getQuizTypeToValues(FilterRequest request) throws DominoSessionException {
-    List<Pair> typeToSelection = request.getTypeToSelection();
-
-    logger.info("getQuizTypeToValues " +
-        "\n\trequest         " + request +
-        "\n\ttype->selection " + typeToSelection);
-
-    int projectIDFromUser = getProjectIDFromUser();
-    Project project = db.getProject(projectIDFromUser);
-
-
-    ISection<CommonExercise> sectionHelper = db.getQuizSectionHelper(projectIDFromUser);
-    if (sectionHelper == null) {
-      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
-      return new FilterResponse();
-    } else {
-      return sectionHelper.getTypeToValues(request);
-    }
-  }
-*/
 
   /**
    * Complicated.
@@ -180,7 +182,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param request
    * @return
-   * @seex mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
   public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException {
@@ -200,25 +201,36 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
-      UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectIDFromUser()) : null;
+      UserList<CommonExercise> userListByID =
+          isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectIDFromUser()) : null;
 
       // logger.info("found user list " + isUserListReq + " " + userListByID);
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
-        logger.info("getExerciseIds : 1 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+
+        logger.info("getExerciseIds : 1 req  " + request + " took " + (System.currentTimeMillis() - then) +
+            " millis to get " + exerciseWhenNoUnitChapter.getSize());
+
         return exerciseWhenNoUnitChapter;
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
-          ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request, filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
-          logger.info("getExerciseIds : 2 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+          ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request,
+              filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
+
+          logger.info("getExerciseIds : 2 req  " + request + " took " + (System.currentTimeMillis() - then) +
+              " millis to get " + exerciseListWrapperForPrefix.getSize());
+
           return exerciseListWrapperForPrefix;
         } else {
           ExerciseListWrapper<T> exercisesForSelectionState = getExercisesForSelectionState(request, projectID);
-          logger.info("getExerciseIds : 3 req  " + request + " took " + (System.currentTimeMillis() - then) + " millis");
+
+          logger.info("getExerciseIds : 3 req  " + request + " took " + (System.currentTimeMillis() - then) +
+              " millis to get " + exercisesForSelectionState.getSize());
+
           return exercisesForSelectionState;
         }
       }
@@ -241,11 +253,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises;
     boolean predefExercises = userListByID == null;
-//    if (request.isQuiz()) {
-//      exercises = Collections.emptyList();
-//    } else {
     exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
-//    }
     // now if there's a prefix, filter by prefix match
 
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
@@ -495,50 +503,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-    typeToSelection.remove(RECORDED1);
-
-    Collection<CommonExercise> exercisesForState =
-        typeToSelection.isEmpty() ? getExercises(projid) :
-            sectionHelper.getExercisesForSelectionState(typeToSelection);
+    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
 
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-/*    if (request.isQuiz()) {
-      Collator collator = getAudioFileHelper(projid).getCollator();
-      copy.sort((o1, o2) -> compareExercisesByLength(o1, o2, collator));
-//      copy.forEach(commonExercise -> logger.info("1 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
-    }*/
-
     exercisesForState = filterExercises(request, copy, projid);
-//    exercisesForState.forEach(commonExercise -> logger.info("2 ex " + commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getNumPhones()));
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
   }
 
-  /**
-   * TODO : unfortunately num phones is not correct right now.
-   *
-   * @param o1
-   * @param o2
-   * @param collator
-   * @return
-   */
-/*
-  private int compareExercisesByLength(CommonExercise o1, CommonExercise o2, Collator collator) {
-    int i = 0;//Integer.compare(o1.getNumPhones(), o2.getNumPhones());
-    if (i == 0) {
-      String f1 = o1.getForeignLanguage();
-      String f2 = o2.getForeignLanguage();
-      i = Integer.compare(f1.length(), f2.length());
-    }
-    if (i == 0) {
-      i = collator.compare(o1.getForeignLanguage(), o2.getForeignLanguage());
-    }
-    if (i == 0) i = Integer.compare(o1.getID(), o2.getID());
-    return i;
-  }
-*/
+  private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
+    typeToSelection.remove(RECORDED1);
 
+    return typeToSelection.isEmpty() ? getExercises(projid) :
+        sectionHelper.getExercisesForSelectionState(typeToSelection);
+  }
 
   /**
    * Always sort the result

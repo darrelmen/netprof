@@ -174,7 +174,7 @@ public class ExerciseListRequest implements IsSerializable {
   /**
    * @param activityType
    * @return
-   * @see PagingExerciseList#getRequest
+   * @see PagingExerciseList#getExerciseListRequest
    */
   public ExerciseListRequest setActivityType(ActivityType activityType) {
     this.activityType = activityType;
@@ -193,6 +193,7 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyUnrecordedByMe = onlyUnrecordedByMe;
     return this;
   }
+
   public boolean isOnlyRecordedByMatchingGender() {
     return onlyRecordedByMatchingGender;
   }
@@ -211,7 +212,7 @@ public class ExerciseListRequest implements IsSerializable {
   /**
    * @param onlyExamples
    * @return
-   * @see PagingExerciseList#getRequest
+   * @see PagingExerciseList#getExerciseListRequest
    */
   public ExerciseListRequest setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
@@ -365,5 +366,8 @@ public class ExerciseListRequest implements IsSerializable {
     return plainVocab;
   }
 
-
+  public ExerciseListRequest setUserID(int userID) {
+    this.userID = userID;
+    return this;
+  }
 }

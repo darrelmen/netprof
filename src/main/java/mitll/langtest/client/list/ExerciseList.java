@@ -42,7 +42,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -73,6 +72,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
+  private static final String SERVER_ERROR = "Server error";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -99,7 +99,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected Panel createdPanel;
   private int lastReqID = 0;
-  protected final boolean allowPlusInURL;
+  final boolean allowPlusInURL;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   boolean doShuffle;
 
@@ -175,13 +175,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   public boolean getExercises() {
     if (DEBUG) logger.info("\n\n\nExerciseList.getExercises instance " + getInstance());
-    ExerciseListRequest request = getRequest("");
+    ExerciseListRequest request = getExerciseListRequest("");
 //    logger.info("request is " +request);
     service.getExerciseIds(request, new SetExercisesCallback("", "", -1, request));
     return true;
   }
 
-  protected abstract ExerciseListRequest getRequest(String prefix);
+  protected abstract ExerciseListRequest getExerciseListRequest(String prefix);
 
   int incrRequest() {
     return ++lastReqID;
@@ -207,7 +207,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (DEBUG) {
       logger.info("ExerciseList.reloadWith id = " + id + " for user " + getUser() + " instance " + getInstance());
     }
-    ExerciseListRequest request = getRequest("");
+    ExerciseListRequest request = getExerciseListRequest("");
     service.getExerciseIds(request, new SetExercisesCallbackWithID(id, request));
   }
 
@@ -457,7 +457,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     String message = caught.getMessage();
     if (message != null && message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (message != null && !message.trim().equals("0")) {
-      feedback.showErrorMessage("Server error", "Please clear your cache and reload the page. (" +
+      feedback.showErrorMessage(SERVER_ERROR, "Please clear your cache and reload the page. (" +
           message +
           ")");
     }
@@ -679,7 +679,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     goGetNextAndCacheIt(itemID);
   }
 
-  private void goGetNextAndCacheIt(int itemID) {
+  protected void goGetNextAndCacheIt(int itemID) {
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
@@ -862,7 +862,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param id
    * @return
-   * @see StatsFlashcardFactory.StatsPracticePanel#loadAfterCurrent
+   * @see #loadNext
    */
   public boolean loadNextExercise(int id) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id);// + " instance ");// + getInstance());
@@ -928,11 +928,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return this;
   }
 
-  //@Override
-//  public boolean onFirst() {
-//    return onFirst(getCurrentExercise());
-//  }
-
   /**
    * @param current
    * @return
@@ -950,14 +945,22 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public boolean onLast(HasID current) {
-    return current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+    boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
+   // if (b) logger.info("onLast YES - "+ current + " size " + getSize());
+    return b;
   }
 
+  /**
+   * @see #isOnLast(HasID)
+   * @param i
+   * @return
+   */
   private boolean isOnLastItem(int i) {
-    return i == getSize() - 1;
+    int size = getSize();
+  //  logger.info("isOnLastItem " +i + " vs " +size);
+    return i == size - 1;
   }
 
-  //@Override
   private void reloadExercises() {
     loadFirstExercise("");
   }
@@ -987,7 +990,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param doShuffle
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory#StatsFlashcardFactory
    */
   public void simpleSetShuffle(boolean doShuffle) {
     this.doShuffle = doShuffle;

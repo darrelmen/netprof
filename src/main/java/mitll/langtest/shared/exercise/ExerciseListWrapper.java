@@ -86,6 +86,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
     return exercises;
   }
 
+  public int getSize() { return exercises.size(); }
   public CommonExercise getFirstExercise() {
     return firstExercise;
   }

@@ -556,7 +556,8 @@ public abstract class BaseAudioDAO extends DAO {
     Map<String, Float> recordedReport = getRecordedReport(projectid, total, exToContextTranscript.size(), uniqueIDs,
         exToTranscript, exToContextTranscript);
     long now = System.currentTimeMillis();
-    if (now - then > 100) logger.info("getRecordedReport for" +
+
+    if (now - then > 200) logger.info("getRecordedReport for" +
         "\n\t project " + projectid +
         "\n\twith     " + exercises.size() + " exercises " +
         "\n\ttook     " + (now - then));

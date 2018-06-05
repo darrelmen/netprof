@@ -458,7 +458,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   void simpleLoadExercises(String selectionState, String prefix, int exerciseID) {
-    loadExercises(selectionState, prefix, false, false, false, false, exerciseID);
+    loadExercises(selectionState, prefix, false, false, false, exerciseID);
   }
 
   /**
@@ -469,9 +469,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private void loadExercises(String selectionState,
                              String prefix,
 
-
                              boolean onlyWithAudioAnno,
-                             boolean onlyUnrecorded,
                              boolean onlyDefaultUser,
                              boolean onlyUninspected,
                              int exerciseID) {
@@ -544,7 +542,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                                        boolean onlyWithAudioAnno,
                                                        boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
-    return getRequest(prefix)
+    return getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyWithAudioAnno(onlyWithAudioAnno)
        // .setOnlyUnrecordedByMe(onlyUnrecorded)

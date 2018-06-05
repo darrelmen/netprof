@@ -57,8 +57,8 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("NavigationHelper");
 
 
-  public static final String PREVIOUS = "Previous";
-  public static final String NEXT = "Next";
+  private static final String PREVIOUS = "Previous";
+  private static final String NEXT = "Next";
 
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
 
@@ -136,15 +136,16 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   }
 
   private void makeNextButton(final HasID exercise, final ExerciseController controller, boolean addButtons) {
-    this.next = new Button(getNextButtonText());
-    next.getElement().setId("NavigationHelper_" + getNextButtonText());
+    String nextButtonText = getNextButtonText();
+    this.next = new Button(nextButtonText);
+    next.getElement().setId("NavigationHelper_" + nextButtonText);
 
     next.setType(ButtonType.SUCCESS);
     enableNext(exercise);
 
     if (addButtons) add(next);
 
-    next.getElement().setId("nextButton");
+   // next.getElement().setId("nextButton");
 
     // send answers to server
     next.addClickHandler(event -> clickNext(controller, exercise));
@@ -160,7 +161,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
       next.setEnabled(false);
     } else {
       boolean b = listContainer.onLast(exercise);
-      //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
+   //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
       next.setEnabled(!b);
     }
   }
@@ -186,7 +187,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
         // logger.info("clickNext  post answers " + exercise.getID());
         provider.postAnswers(controller, exercise);
       } else {
-        logger.info("clickNext NO PROVIDER " + exercise.getID());
+       // logger.info("clickNext NO PROVIDER " + exercise.getID());
       }
     }
   }
@@ -200,6 +201,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @see ExercisePanel#enableNext
    */
   public void enableNextButton(boolean val) {
+//    logger.info("enable next "+val);
     next.setEnabled(val);
   }
 

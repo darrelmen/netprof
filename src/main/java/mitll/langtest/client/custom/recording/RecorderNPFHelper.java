@@ -72,7 +72,7 @@ import java.util.Map;
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
-  private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
+  // private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   /**
    *
    */
@@ -86,7 +86,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    * @param doNormalRecording
    * @param viewContaner
    * @param myView
-   * @see INavigation#showView
+   * @see mitll.langtest.client.banner.NewContentChooser#showView
    */
   public RecorderNPFHelper(ExerciseController controller,
                            boolean doNormalRecording,
@@ -118,7 +118,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
         return new RecordingFacetExerciseList(controller,
-            topRow, currentExercisePanel, instanceName, listHeader);
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT);
 
         /*        return new NPExerciseList(currentExercisePanel,
             outerLayout.getController(),
@@ -202,7 +202,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
-    getProgressInfo();
+   // getProgressInfo();
     return flex;
   }
 
@@ -366,7 +366,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   }
 
   private class RecordFactory extends ExercisePanelFactory<CommonShell, CommonExercise> {
-     RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+    RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
       super(RecorderNPFHelper.this.controller, exerciseList);
     }
 

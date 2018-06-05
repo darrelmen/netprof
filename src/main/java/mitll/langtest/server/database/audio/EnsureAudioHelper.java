@@ -240,10 +240,6 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
     return filePath;
   }
-/*  private String getUserID(int user) {
-    User userBy = getUserBy(user);
-    return getUserIDForgiving(user, userBy);
-  }*/
 
   private String getUserIDForgiving(int user, User userBy) {
     return userBy == null ? "" + user : userBy.getUserID();
@@ -267,7 +263,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
-      if (DEBUG || true) logger.debug("ensureMP3 : trying " + wavFile);
+      if (DEBUG || true) {
+        logger.debug("ensureMP3 : trying to ensure compressed" +
+            "\n\tfor " + wavFile +
+            "\n\tunder " + parent);
+      }
       // File test = new File(parent + File.separator + language, wavFile);
       parent = audioConversion.getParentForFilePathUnderBaseAudio(wavFile, language, parent, serverProps.getAudioBaseDir());
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {

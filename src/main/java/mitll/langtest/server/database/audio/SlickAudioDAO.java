@@ -71,6 +71,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private int defaultResult;
 
+  private static final boolean DEBUG_AUDIO_REPORT = false;
+
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
@@ -422,17 +424,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return regExids;
   }*/
 
-  private static final boolean DEBUG_AUDIO_REPORT = true;
 
   @Override
   Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
                                                     boolean isMale,
-                                                    //Set<Integer> exerciseIDs,
                                                     Map<Integer, String> exToTranscript) {
     Set<Integer> maleReg = new HashSet<>();
     Set<Integer> femaleReg = new HashSet<>();
     Set<Integer> uniqueIDs = exToTranscript.keySet();
-    logger.info("check " + uniqueIDs.size() + " exercises");
+    if (DEBUG_AUDIO_REPORT)   logger.info("getAudioExercisesForGenderBothSpeeds : check " + uniqueIDs.size() + " exercises");
     getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, maleReg, femaleReg);
 
     float maleFast = (float) maleReg.size();

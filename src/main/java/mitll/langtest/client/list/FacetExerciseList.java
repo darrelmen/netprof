@@ -50,6 +50,7 @@ import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -77,6 +78,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
+  public static final String RECORDED = "Recorded";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String PRACTICED = " practiced.";
@@ -443,9 +445,18 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     restoreUIState(selectionState);
   }
 
+  /**
+   * TODO : don't do two requests for recording views
+   *
+   * @param prefix
+   * @return
+   */
   @Override
-  protected ExerciseListRequest getRequest(String prefix) {
-    ExerciseListRequest request = super.getRequest(prefix);
+  protected ExerciseListRequest getExerciseListRequest(String prefix) {
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("logException stack " + exceptionAsString);
+
+    ExerciseListRequest request = super.getExerciseListRequest(prefix);
     request.setAddFirst(false);
     return request;
   }
@@ -584,10 +595,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
                                                        boolean onlyWithAudioAnno,
                                                        boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
-    ExerciseListRequest exerciseListRequest = getRequest(prefix)
+    ExerciseListRequest exerciseListRequest = getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        //  .setOnlyUnrecordedByMe(onlyUnrecorded)
         .setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected)
         .setAddFirst(false);
@@ -604,7 +614,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
           exerciseListRequest.setUserListID(userListID);
           //   logger.info("getExerciseListRequest userlist = " + userListID);
         } catch (NumberFormatException e) {
-          logger.warning("couldn't parse " + next);
+          logger.warning("getExerciseListRequest couldn't parse " + next);
         }
       }
     }
@@ -728,6 +738,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
         if (DEBUG) logger.info("addChoices for " + type + "=" + keys.size());
+        if (type.equalsIgnoreCase(RECORDED)) {
+          keys = new TreeSet<MatchInfo>(keys);
+        }
         addChoicesForType(typeToValues, type, choices, keys);
       }
     } else {
@@ -747,10 +760,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         liForDimension.add(addChoices(typeToValues, childType));
       } else {
         if (isListType(type)) {
-          logger.info("addChoices addListChoice " + type + "=" + selectionForType);
+          if (DEBUG) logger.info("addChoices addListChoice " + type + "=" + selectionForType);
           addListChoice(type, choices, selectionForType);
         } else {
-          logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
+          if (DEBUG) logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
           choices.add(getSelectedAnchor(type, selectionForType));
         }
       }
@@ -1391,7 +1404,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return newTypeToSelection;
   }
 
-  void pushFirstSelection(int exerciseID, String searchIfAny) {
+  protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     if (isDrillView()) {
       super.pushFirstSelection(exerciseID, searchIfAny);
     } else {
@@ -1583,7 +1596,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   @NotNull
-  private Set<Integer> getRequested(Collection<Integer> visibleIDs, List<CommonExercise> alreadyFetched) {
+  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<CommonExercise> alreadyFetched) {
     Set<Integer> requested = new HashSet<>();
     for (Integer id : visibleIDs) {
       CommonExercise cachedExercise = getCachedExercise(id);

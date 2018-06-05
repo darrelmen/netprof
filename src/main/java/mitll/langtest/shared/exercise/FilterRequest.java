@@ -50,6 +50,7 @@ public class FilterRequest implements IsSerializable {
   private int limit = -1;
   private int userListID = -1;
   private boolean recordRequest = false;
+  private boolean exampleRequest = false;
 
   public FilterRequest() {
   }
@@ -58,7 +59,7 @@ public class FilterRequest implements IsSerializable {
    * @param reqID
    * @param pairs
    * @param userListID
-   * @see mitll.langtest.client.list.FacetExerciseList#getRequest
+   * @see mitll.langtest.client.list.FacetExerciseList#getExerciseListRequest
    */
   public FilterRequest(int reqID, List<Pair> pairs, int userListID) {
     this.reqID = reqID;
@@ -128,8 +129,27 @@ public class FilterRequest implements IsSerializable {
     return recordRequest;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
+   * @param recordRequest
+   * @return
+   */
   public FilterRequest setRecordRequest(boolean recordRequest) {
     this.recordRequest = recordRequest;
+    return this;
+  }
+
+  public boolean isExampleRequest() {
+    return exampleRequest;
+  }
+
+  /**
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
+   * @param exampleRequest
+   * @return
+   */
+  public FilterRequest setExampleRequest(boolean exampleRequest) {
+    this.exampleRequest = exampleRequest;
     return this;
   }
 

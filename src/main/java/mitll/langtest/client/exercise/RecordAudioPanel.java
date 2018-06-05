@@ -67,13 +67,12 @@ import static com.google.gwt.dom.client.Style.Unit.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<CommonAudioExercise> {
-  private final Logger logger = Logger.getLogger("RecordAudioPanel");
+ private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
    * @see #getAfterPlayWidget
    */
   private static final String DYNAMIC_RANGE = "Dynamic Range";
-  //private static final int HEIGHT_OF_RECORD_ROW = 48;
 
   private static final int MIN_VALID_DYNAMIC_RANGE = 32;
   private static final int MIN_GOOD_DYNAMIC_RANGE = 40;

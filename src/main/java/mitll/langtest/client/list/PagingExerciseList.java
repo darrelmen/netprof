@@ -136,7 +136,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitCursorHelper.scheduleWaitTimer();
   }
 
-  protected ExerciseListRequest getRequest(String prefix) {
+  protected ExerciseListRequest getExerciseListRequest(String prefix) {
     // logger.info("isOnlyExamples " + isOnlyExamples());
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
