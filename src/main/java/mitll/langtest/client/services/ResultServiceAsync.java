@@ -35,14 +35,15 @@ package mitll.langtest.client.services;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.ResultAndTotal;
-import mitll.langtest.shared.common.DominoSessionException;
 
 import java.util.Collection;
 import java.util.Map;
 
 public interface ResultServiceAsync {
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, String flText,
-                  int req, AsyncCallback<ResultAndTotal> async);
+  void getResults(int start, int end,
+                  String sortInfo, Map<String, String> unitToValue,
+                  String flText,
+                  int req, int userID, AsyncCallback<ResultAndTotal> async);
 
   void getNumResults(AsyncCallback<Integer> async);
 

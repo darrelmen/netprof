@@ -290,23 +290,28 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        //logger.info("createProvider asking for " + start +"->" + end);
+        logger.info("createProvider asking for " + start + "->" + end);
 
         StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
         int currentReq = req++;
-        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " currentReq " + currentReq);
+        String text = resultTypeAhead.getText();
+        logger.info("createProvider req " + unitToValue
+            +
+            //" user " + userID +
+            " text '" + text + "' currentReq " + currentReq);
         //   logger.info("got " + builder.toString());
 
+        String sortInfo = builder.toString();
         resultServiceAsync.getResults(
             start,
             end,
-            builder.toString(),
+            sortInfo,
             unitToValue,
-            resultTypeAhead.getText(),
+            text,
             currentReq,
-            new AsyncCallback<ResultAndTotal>() {
+            resultTypeAhead.getUserID(), new AsyncCallback<ResultAndTotal>() {
               @Override
               public void onFailure(Throwable caught) {
                 // Window.alert("Can't contact server.");
@@ -349,6 +354,7 @@ public class ResultManager extends PagerTable {
 
   /**
    * TODO :  Too late... table already requesting audio...
+   *
    * @param results
    */
   private void ensureAudio(List<MonitorResult> results) {

@@ -354,7 +354,7 @@ public class JsonExport {
    * @return
    */
   private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise) {
-    JSONObject ex = getJsonForCommonExercise(exercise, false);
+    JSONObject ex = getJsonForCommonExercise(exercise);
 
     addContextAudioRefs(exercise, ex, exercise.getDirectlyRelated());
     addLatestRefs(preferredVoices, exercise, ex);
@@ -411,16 +411,17 @@ public class JsonExport {
    * TODO : add json array of context sentences - be careful to maintain backward compatibility
    *
    * @param exercise
-   * @param addMeaning
    * @return
    */
-  private JSONObject getJsonForCommonExercise(CommonExercise exercise, boolean addMeaning) {
+  private JSONObject getJsonForCommonExercise(CommonExercise exercise) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
-    if (addMeaning) ex.put(MN, exercise.getMeaning());
+
+    exercise.getUnitToValue().forEach((k,v)->ex.put(k,v));
+  //  if (addMeaning) ex.put(MN, exercise.getMeaning());
 
     boolean hasContext = !exercise.getDirectlyRelated().isEmpty();
     if (hasContext) {

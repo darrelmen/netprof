@@ -50,7 +50,7 @@ public class ResultTypeAhead {
 
   Panel getSearchBoxes() {
     Panel hp = new HorizontalPanel();
-    hp.getElement().setId("search_container");
+    //hp.getElement().setId("search_container");
 
     for (final String type : typeOrder) {
       Typeahead typeahead = getTypeahead(type);
@@ -64,8 +64,19 @@ public class ResultTypeAhead {
     return hp;
   }
 
+
+  private TextBox userIDBox = new TextBox();
+
+  public int getUserID() {
+    try {
+      return userIDBox.getText().isEmpty() ? -1 : Integer.parseInt(userIDBox.getText());
+    } catch (NumberFormatException e) {
+      return -1;
+    }
+  }
+
   private ControlGroup getUserIDSuggestWidget() {
-    return TypeAhead.getControlGroup(USER_ID, getTypeahead(MonitorResult.USERID).asWidget());
+    return TypeAhead.getControlGroup(USER_ID, getTypeaheadUsing(MonitorResult.USERID, userIDBox).asWidget());
   }
 
   private ControlGroup getTextSuggestWidget() {
@@ -154,7 +165,9 @@ public class ResultTypeAhead {
    * @return
    * @paramx w
    */
-  private KeyUpHandler getKeyUpHandler() { return event -> redraw();  }
+  private KeyUpHandler getKeyUpHandler() {
+    return event -> redraw();
+  }
 
   private void redraw() {
     RangeChangeEvent.fire(cellTable, cellTable.getVisibleRange());

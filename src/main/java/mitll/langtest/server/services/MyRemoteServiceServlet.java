@@ -130,8 +130,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    */
   protected Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
-    logger.info("getPermissions for" + "\nuser " + userIDFromSessionOrDB);
-
+//    logger.info("getPermissions for" + "\nuser " + userIDFromSessionOrDB);
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {
       logger.error("getPermissions : no user in session?");

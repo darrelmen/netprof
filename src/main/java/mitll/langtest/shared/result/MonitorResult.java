@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.npdata.dao.SlickResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,6 +104,7 @@ public class MonitorResult implements IsSerializable, UserAndTime {
    * @param withFlash
    * @param exid
    * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   * @see mitll.langtest.server.database.result.SlickResultDAO#fromSlickToMonitorResult(SlickResult)
    */
   public MonitorResult(int uniqueID, int userid, String answer,
                        boolean valid, long timestamp,
@@ -114,7 +116,6 @@ public class MonitorResult implements IsSerializable, UserAndTime {
                        String transcript, int exid) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-//    this.oldExID = oldExID;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;

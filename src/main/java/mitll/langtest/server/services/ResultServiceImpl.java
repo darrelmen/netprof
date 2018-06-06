@@ -35,7 +35,6 @@ package mitll.langtest.server.services;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.services.ResultService;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
@@ -70,6 +69,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    *
    * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
    * @param req      - to echo back -- so that if we get an old request we can discard it
+   * @param userID
    * @return
    * @see mitll.langtest.client.result.ResultManager#createProvider
    */
@@ -79,12 +79,12 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
                                    String sortInfo,
                                    Map<String, String> unitToValue,
                                    String flText,
-                                   int req) throws DominoSessionException, RestrictedOperationException {
+                                   int req, int userID) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSession = getUserIDFromSessionOrDB();
 
     if (hasAdminPerm(userIDFromSession)) {
       int projectID = getProjectIDFromUser(userIDFromSession);
-      List<MonitorResult> results = getResults(projectID, unitToValue, -1, flText);
+      List<MonitorResult> results = getResults(projectID, unitToValue, userID, flText);
       if (!results.isEmpty()) {
         Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
         try {
@@ -105,7 +105,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       List<MonitorResult> resultList = results.subList(start, min);
 
       // have to do it on hydra!
-    //  ensureAudioForAnswers(projectID, resultList);
+      //  ensureAudioForAnswers(projectID, resultList);
 
       //logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
       return new ResultAndTotal(new ArrayList<>(resultList), n, req);
@@ -176,7 +176,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       return monitorResultsByID;
     }
 
- //   Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
+    //   Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
 
     Collection<MonitorResult> results = null;
     try {
@@ -278,14 +278,26 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
+  /**
+   * get cached results... fall back to getting them again...
+   *
+   * @param userid
+   * @return
+   */
   private Collection<MonitorResult> getMonitorResults(int userid) {
     int projectID = getProjectIDFromUser(userid);
+
     Collection<MonitorResult> results = null;
     try {
       results = projectToResults2.get(projectID);
     } catch (ExecutionException e) {
       results = db.getMonitorResults(projectID);
     }
+
+    logger.info("getMonitorResults : before " + results.size() + " for project " + projectID + " and user " + userid);
+//    results = results.stream().filter(monitorResult -> monitorResult.getUserid() == userid).collect(Collectors.toList());
+//    logger.info("getMonitorResults : after  " + results.size() + " for project " +projectID + " and user "+ userid);
+
     return results;
   }
 
@@ -302,26 +314,33 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
                                                   String flText,
                                                   String which) throws DominoSessionException, RestrictedOperationException {
-    int userid = getUserIDFromSessionOrDB();
+    int sessionUser = getUserIDFromSessionOrDB();
+    int requestedUser = -1;
 
-    if (hasAdminPerm(userid)) {
-      if (which.equalsIgnoreCase("userid")) {
+    if (hasAdminPerm(sessionUser)) {
+      boolean fieldIsUserID = which.equalsIgnoreCase(MonitorResult.USERID);
+      if (fieldIsUserID) {
         try {
-          userid=Integer.parseInt(flText);
+          requestedUser = Integer.parseInt(flText);
         } catch (NumberFormatException e) {
           logger.info("couldn't parse " + flText);
         }
       }
-      Collection<MonitorResult> results = getMonitorResults(userid);
 
-      logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
+      Collection<MonitorResult> results = getMonitorResults(sessionUser);
+
+      logger.info("getResultAlternatives" +
+          "\n\trequest     " + unitToValue +
+          "\n\tsessionUser " + sessionUser +
+          "\n\trequestedUser " + requestedUser +
+          "\n\tfl '" + flText + "' :'" + which + "'");
 
       Collection<String> matches = new TreeSet<>();
       Trie<MonitorResult> trie;
 
       for (String type : db.getTypeOrder(getProjectIDFromUser())) {
         if (unitToValue.containsKey(type)) {
-          logger.debug("getResultAlternatives making trie for " + type);
+          logger.info("getResultAlternatives making trie for " + type);
           // make trie from results
           trie = new Trie<>();
 
@@ -339,7 +358,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
           // stop!
           if (which.equals(type)) {
-            //        logger.debug("\tmatch for " + type);
+            //        logger.info("\tmatch for " + type);
 
             boolean allInt = true;
             for (MonitorResult result : matchesLC) {
@@ -361,9 +380,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
         }
       }
 
-      if (userid > -1) { // asking for userid
+      if (fieldIsUserID && requestedUser > -1) { // asking for user
         // make trie from results
-        logger.debug("getResultAlternatives making trie for userid " + userid);
+        logger.info("getResultAlternatives making trie for sessionUser " + requestedUser);
 
         // TODO : dude this doesn't scale - what if have to walk through 100K items?
 
@@ -375,28 +394,28 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
         trie.endMakingNodes();
 
         Set<Integer> imatches = new TreeSet<>();
-        Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(requestedUser));
 
         // stop!
-        if (which.equals(MonitorResult.USERID)) {
-          for (MonitorResult result : matchesLC) {
-            imatches.add(result.getUserid());
-          }
-          //logger.debug("returning " + imatches);
-
-          for (Integer m : imatches) matches.add(Long.toString(m));
-          matches = getLimitedSizeList(matches);
-          return matches;
-        } else {
-          results = matchesLC;
+        //if (fieldIsUserID) {
+        for (MonitorResult result : matchesLC) {
+          imatches.add(result.getUserid());
         }
+        //logger.info("returning " + imatches);
+
+        for (Integer m : imatches) matches.add(Long.toString(m));
+        matches = getLimitedSizeList(matches);
+        return matches;
+        //} else {
+        //  / results = matchesLC;
+        // }
       }
 
       // must be asking for text
       if (!flText.isEmpty()) {
         trie = new Trie<>();
         trie.startMakingNodes();
-        logger.debug("text searching over " + results.size());
+        logger.info("text searching over " + results.size());
         for (MonitorResult result : results) {
           trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
           trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
@@ -404,7 +423,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
         trie.endMakingNodes();
 
         results = trie.getMatchesLC(flText);
-        logger.debug("matchesLC for '" + flText + "' " + results);
+        logger.info("matchesLC for '" + flText + "' " + results);
       }
 
       boolean isNumber = isNumber(flText);
@@ -418,7 +437,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
           matches.add(result.getForeignText().trim());
         }
       }
-      logger.debug("returning text " + matches);
+      logger.info("returning text " + matches);
 
       return getLimitedSizeList(matches);
     } else {
@@ -426,25 +445,10 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
-//  private boolean isNumber(String flText) {
-//    boolean isNumber = false;
-//    try {
-//      Integer.parseInt(flText);
-//      isNumber = true;
-//    } catch (NumberFormatException e) {
-//    }
-//    return isNumber;
-//  }
-
   @NotNull
   private Collection<String> getIntSorted(Collection<String> matches) {
     List<String> sorted = new ArrayList<>(matches);
-    Collections.sort(sorted, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        return compareTwoMaybeInts(o1, o2);
-      }
-    });
+    Collections.sort(sorted, (o1, o2) -> compareTwoMaybeInts(o1, o2));
     return sorted;
   }
 

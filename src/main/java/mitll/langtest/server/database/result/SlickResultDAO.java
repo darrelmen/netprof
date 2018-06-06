@@ -237,12 +237,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return Collections.emptyList();
   }
 
-/*  private List<Result> getResults(Collection<SlickResult> all) {
-    List<Result> copy = new ArrayList<>();
-    for (SlickResult result : all) copy.add(fromSlick(result));
-    return copy;
-  }*/
-
   @Override
   public Collection<MonitorResult> getResultsDevices(int projid) {
     return getMonitorResults(dao.allDevices(projid));
@@ -404,8 +398,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         .stream()
         .map(HasID::getID)
         .collect(Collectors.toSet());
-
-    //   Map<Integer, SlickExerciseScore> correctAndScoresForReal;
 
     if (idsToFind.size() < 2000) {
       long then = System.currentTimeMillis();

@@ -71,9 +71,10 @@ public interface ResultService extends RemoteService {
    * @param unitToValue
    * @param flText
    * @param req
+   * @param userID
    * @return
    * @see ResultManager#createProvider
    */
   ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue,
-                            String flText, int req) throws DominoSessionException, RestrictedOperationException;
+                            String flText, int req, int userID) throws DominoSessionException, RestrictedOperationException;
 }
