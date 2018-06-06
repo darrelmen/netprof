@@ -1261,12 +1261,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private int warns = 0;
 
   /**
-   * TODOx : Fix this to get the right project first!
-   * <p>
-   * allow custom items to mask out non-custom items
-   * Special code to mask out unit/chapter from database in userexercise table.
-   * <p>
-   * Must check update times to make sure we don't mask out a newer entry.
    *
    * @param projid
    * @param id

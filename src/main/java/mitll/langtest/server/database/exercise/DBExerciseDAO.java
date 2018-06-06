@@ -39,6 +39,7 @@ import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -353,8 +354,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
-    userExerciseDAO.getDao().updateCheckedBulk(safe, true);
-    userExerciseDAO.getDao().updateCheckedBulk(unsafe, false);
+    getDao().updateCheckedBulk(safe, true);
+    getDao().updateCheckedBulk(unsafe, false);
   }
 
   /**
@@ -364,17 +365,16 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @deprecated
    */
   public void updatePhones(int id, int count) {
-    userExerciseDAO.getDao().updatePhones(id, count);
+    getDao().updatePhones(id, count);
   }
 
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
-    userExerciseDAO.getDao().updatePhonesBulk(pairs);
+    getDao().updatePhonesBulk(pairs);
   }
 
-  @Override
-  public void deleteForProject() {
-
+  private ExerciseDAOWrapper getDao() {
+    return userExerciseDAO.getDao();
   }
 
   public String toString() {

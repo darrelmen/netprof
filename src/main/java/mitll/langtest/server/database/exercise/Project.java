@@ -419,9 +419,6 @@ public class Project implements IPronunciationLookup {
       if (exercise == null) {
         logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
       }
-//    else {
-//      logger.info("getExerciseByID " + id + " = " + exercise);
-//    }
       return exercise;
     }
   }

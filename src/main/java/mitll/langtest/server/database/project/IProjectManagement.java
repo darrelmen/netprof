@@ -134,4 +134,6 @@ public interface IProjectManagement {
   ImportInfo getImportFromDomino(int projID);
 
   List<ImportProjectInfo> getVocabProjects();
+
+  String getDominoProjectName(int dominoProjectID);
 }

@@ -996,9 +996,4 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
 
   }
-
-  @Override
-  public void deleteForProject() {
-
-  }
 }

@@ -224,6 +224,11 @@ public class DominoImport implements IDominoImport {
     );
   }
 
+  @Override
+  public String getDominoProjectName(int id) {
+    return projectDelegate.getProjectName(id);
+  }
+
   private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));

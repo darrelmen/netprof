@@ -88,7 +88,7 @@ public class ProjectManagement implements IProjectManagement {
    * JUST FOR TESTING
    */
   private static final String LANG_TO_LOAD = "";
-  public static final String SYNCED = "SYNCED";
+  public static final String DOMINO_NAME = "Domino Name";
   /**
    * JUST FOR TESTING
    */
@@ -96,6 +96,8 @@ public class ProjectManagement implements IProjectManagement {
 
   private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
+
+  private static final String SYNCED = "Last Sync";
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
   /**
@@ -104,6 +106,10 @@ public class ProjectManagement implements IProjectManagement {
    * @see mitll.langtest.server.domino.ProjectSync#getProps
    */
   public static final String NUM_ITEMS = "Num Items";
+
+  /**
+   * @see #addOtherProps
+   */
   private static final String DOMINO_ID = "Domino ID";
 
   private static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -600,13 +606,20 @@ public class ProjectManagement implements IProjectManagement {
     return getProjectOrFirst(projectid).getExerciseByID(id);
   }
 
+  /**
+   * @param id
+   * @return
+   * @see DatabaseImpl#getCustomOrPredefExercise
+   */
   @Override
   public CommonExercise getExercise(int id) {
-    for (Project project : idToProject.values()) {
-      CommonExercise exerciseByID = project.getExerciseByID(id);
-      if (exerciseByID != null) return exerciseByID;
+    int projectForExercise = db.getUserExerciseDAO().getProjectForExercise(id);
+    if (projectForExercise == -1) {
+      logger.error("getExercise : can't find project for exercise " + id);
+      return null;
+    } else {
+      return getProject(projectForExercise).getExerciseByID(id);
     }
-    return null;
   }
 
   /**
@@ -912,7 +925,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #getNestedProjectInfo
    */
   private SlimProject getProjectInfo(Project pproject) {
-    TreeMap<String, String> info = new TreeMap<>();
+    Map<String, String> info = new LinkedHashMap<>();
 
     SlickProject project = pproject.getProject();
     addDateProps(project, info);
@@ -951,6 +964,7 @@ public class ProjectManagement implements IProjectManagement {
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
     if (project.dominoid() > 0) {
       info.put(DOMINO_ID, "" + project.dominoid());
+      info.put(DOMINO_NAME, getDominoProjectName(project.dominoid()));
     }
 
     return addExerciseDerivedProperties(project, info);
@@ -1047,5 +1061,10 @@ public class ProjectManagement implements IProjectManagement {
    */
   public List<ImportProjectInfo> getVocabProjects() {
     return dominoImport == null ? Collections.emptyList() : dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());
+  }
+
+  @Override
+  public String getDominoProjectName(int dominoProjectID) {
+    return dominoImport == null ? "" : dominoImport.getDominoProjectName(dominoProjectID);
   }
 }

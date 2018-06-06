@@ -32,17 +32,14 @@
 
 package mitll.langtest.shared.project;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.ToIntFunction;
 
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
-  private TreeMap<String, String> props;
+  private Map<String, String> props;
 
   public SlimProject() {
   }
@@ -86,7 +83,7 @@ public class SlimProject extends ProjectInfo {
                      String secondType,
                      boolean showOniOS,
                      int dominoID,
-                     TreeMap<String, String> props,
+                     Map<String, String> props,
                      int userID) {
     super(projectid, name, language, course, countryCode, status, type, displayOrder, created, lastImport, lastNetprof, host, port, modelsDir,
         firstType, secondType, showOniOS, dominoID, userID);
@@ -125,7 +122,6 @@ public class SlimProject extends ProjectInfo {
   public boolean isHasModel() {
     return hasModel;
   }
-
   public boolean isRTL() {
     return isRTL;
   }
@@ -134,7 +130,7 @@ public class SlimProject extends ProjectInfo {
    * @return
    * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
    */
-  public TreeMap<String, String> getProps() {
+  public Map<String, String> getProps() {
     return props;
   }
 

@@ -436,6 +436,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
+  public int getProjectForExercise(int exid) {
+    return 0;
+  }
+
+  @Override
   public CommonExercise getTemplateExercise(int projID) {
     return null;
   }

@@ -2,6 +2,7 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.domino.IProjectSync;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -48,5 +49,5 @@ public interface ProjectServices {
 
   String getLanguage(int projectid);
 
-  ProjectSync getProjectSync();
+  IProjectSync getProjectSync();
 }

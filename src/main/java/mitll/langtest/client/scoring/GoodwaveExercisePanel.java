@@ -461,23 +461,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return new TooltipHelper().addTooltip(w, tip);
   }
 
-  /**
-   * Has a answerPanel mark to indicate when the saved audio has been successfully posted to the server.
-   *
-   * @paramx controller
-   * @paramx screenPortion
-   * @return
-   * @see #addUserRecorder
-   */
-/*  private ScoringAudioPanel getAnswerWidget(final ExerciseController controller, float screenPortion) {
-    ScoringAudioPanel widgets =
-        new ASRRecordAudioPanel<>(this, controller, getLocalExercise(), options.getInstance());
-    answerAudio = widgets;
-    answerAudio.setScreenPortion(screenPortion);
-
-    return widgets;
-  }*/
-
   protected String removePunct(String t) {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }

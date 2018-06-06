@@ -86,6 +86,8 @@ public interface IUserExerciseDAO extends IDAO {
    */
   CommonExercise getByExOldID(String oldid, int projID);
 
+  int getProjectForExercise(int exid);
+
   CommonExercise getTemplateExercise(int projID);
 
   int ensureTemplateExercise(int projID);

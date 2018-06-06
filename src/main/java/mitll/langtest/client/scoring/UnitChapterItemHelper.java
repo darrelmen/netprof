@@ -142,22 +142,33 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     }
 
     int dominoID = exercise.getDominoID();
-    if (dominoID > 0 &&
-        !("" + dominoID).equals(exercise.getOldID())
-        ) {
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, DOMINO_ID, "" + exercise.getDominoID());
-      child.addStyleName("rightFiveMargin");
-      child.getWidget(1);
-      flow.add(child);
+    String oldID = exercise.getOldID();
+    if (showDominoID(dominoID, oldID)) {
+      addProminentLabel(flow, DOMINO_ID, "" + exercise.getDominoID());
     }
 
-    if (!exercise.getOldID().isEmpty()) {
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, NP_ID, exercise.getOldID());
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
+    if (!oldID.isEmpty()) {
+      addProminentLabel(flow, NP_ID, oldID);
     }
 
     return flow;
+  }
+
+  private boolean showDominoID(int dominoID, String oldID) {
+    return dominoID > 0 &&
+        !("" + dominoID).equals(oldID);
+  }
+
+  private void addProminentLabel(Panel flow, String npId, String oldID) {
+    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
+    child.addStyleName("rightFiveMargin");
+
+    flow.add(child);
+
+    Heading npid = new Heading(HEADING_FOR_UNIT_LESSON, oldID);
+    npid.addStyleName("rightFiveMargin");
+    npid.getElement().getStyle().setColor("blue");
+    flow.add(npid);
   }
 
   public InlineLabel showPopup(T exercise) {
@@ -175,7 +186,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    */
   private InlineLabel getLabel(T e) {
     String unitChapterLabel = getUnitChapterLabel(e.getUnitToValue());
-    // String val = "<span style='white-space:nowrap;'>" + unitChapterLabel + "</span>";
     if (unitChapterLabel.length() > MAXLEN) unitChapterLabel = unitChapterLabel.substring(0, MAXLEN) + "...";
     InlineLabel inlineLabel = new InlineLabel(unitChapterLabel);
     inlineLabel.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
@@ -200,15 +210,16 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   private String getUnitLessonForExercise2(T exercise) {
     long update = exercise.getUpdateTime();
     String updateTime = this.format.format(new Date(update));
-    return getTypeToValue(this.typeOrder, exercise.getUnitToValue(), exercise.getID(), updateTime);
+    return getTypeToValue(this.typeOrder, exercise.getUnitToValue(), exercise.getID(), exercise.getDominoID(), exercise.getOldID(), updateTime);
   }
 
   public String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue) {
-    return getTypeToValue(typeOrder, unitToValue, -1, "");
+    return getTypeToValue(typeOrder, unitToValue, -1, -1, "", "");
   }
 
   @NotNull
-  private String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id, String updateTime) {
+  private String getTypeToValue(Collection<String> typeOrder, Map<String, String> unitToValue, int id,
+                                int dominoID, String oldID, String updateTime) {
     StringBuilder builder = new StringBuilder();
     for (String type : typeOrder) {
       String subtext = unitToValue.get(type);
@@ -218,6 +229,12 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     }
     if (id > 0) {
       builder.append(getTypeAndValue(ID, "" + id));
+    }
+    if (showDominoID(dominoID, oldID)) {
+      builder.append(getTypeAndValue(DOMINO_ID, "" + dominoID));
+    }
+    if (!oldID.isEmpty()) {
+      builder.append(getTypeAndValue(NP_ID, oldID));
     }
 
     if (!updateTime.isEmpty()) {

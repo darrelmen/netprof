@@ -61,7 +61,6 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
-
  */
 class EditableExerciseDialog extends NewUserExercise {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
@@ -94,18 +93,18 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   /**
-   * @see
    * @param foreignLang
    * @param rap
    * @param normalSpeedRecording
    * @param pagingContainer
    * @param toAddTo
+   * @see
    */
   @Override
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         ListInterface<CommonShell,CommonExercise> pagingContainer,
+                         ListInterface<CommonShell, CommonExercise> pagingContainer,
                          Panel toAddTo) {
     validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, false, foreignChanged());
   }
@@ -116,30 +115,8 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected void addItemsAtTop(Panel container) {
-    //Map<String, String> unitToValue = newUserExercise.getUnitToValue();
-//    if (!unitToValue.isEmpty()) {
-//      Panel flow = new HorizontalPanel();
-//      flow.getElement().setId("addItemsAtTop_unitLesson");
-//      flow.addStyleName("leftFiveMargin");
-//
-//      for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
-//        String subtext = unitToValue.get(type);
-//        if (subtext != null && !subtext.isEmpty()) {
-//          Heading child = new Heading(4, type, subtext);
-//          child.addStyleName("rightFiveMargin");
-//          flow.add(child);
-//        }
-//      }
-//
-//      Heading child = new Heading(4, ITEM, "" + newUserExercise.getID());
-//      child.addStyleName("rightFiveMargin");
-//      flow.add(child);
-
-      UnitChapterItemHelper<CommonExercise> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
-     unit.addUnitChapterItem(newUserExercise,container);
-
-     // container.add(tUnitChapterItemHelper;
-//    }
+    UnitChapterItemHelper<CommonExercise> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
+    unit.addUnitChapterItem(newUserExercise, container);
   }
 
   boolean shouldDisableNext() {
@@ -161,26 +138,8 @@ class EditableExerciseDialog extends NewUserExercise {
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
-//    PrevNextList prevNext = getPrevNext(pagingContainer);
-//    prevNext.getElement().setId("PrevNextList");
-//    prevNext.addStyleName("floatLeftAndClear");
-//    prevNext.addStyleName("rightFiveMargin");
-//    row.add(prevNext);
-
-    //configureButtonRow(row);
-
     return row;
   }
-
-  /**
-   * @param pagingContainer
-   * @return
-   * @see NewUserExercise#getCreateButton(ListInterface, Panel, ControlGroup)
-   */
-//  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell, CommonExercise> pagingContainer) {
-//    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
-//    return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
-//  }
 
   /**
    * @param row
@@ -344,7 +303,8 @@ class EditableExerciseDialog extends NewUserExercise {
       }
 
       @Override
-      protected int getScaledImageHeight(String type) {      return 40;
+      protected int getScaledImageHeight(String type) {
+        return 40;
       }
     };
   }

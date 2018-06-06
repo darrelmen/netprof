@@ -96,10 +96,12 @@ public class ProjectSync implements IProjectSync {
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    */
+  @Override
   public DominoUpdateResponse addPending(int projectid, int importUser, boolean doChange) {
     return getDominoUpdateResponse(projectid, importUser, doChange, projectManagement.getImportFromDomino(projectid));
   }
 
+  @Override
   @NotNull
   public DominoUpdateResponse getDominoUpdateResponse(int projectid, int importUser, boolean doChange, ImportInfo importFromDomino) {
     long requestTime = System.currentTimeMillis();
@@ -330,9 +332,7 @@ public class ProjectSync implements IProjectSync {
         }
       }
     });
-
-//    return importToKnownID;
-  }
+    }
 
   private void addNewExercises(Map<Integer, SlickExercise> dominoToNonContextEx, List<CommonExercise> newEx, Map<String, SlickExercise> oldIDToExer, Map<Integer, CommonExercise> dominoIDToAddedExercise) {
     dominoIDToAddedExercise.forEach((dominoID, importEx) -> {
@@ -610,6 +610,8 @@ public class ProjectSync implements IProjectSync {
         .forEach(importProjectInfo -> dominoProjects.add(getDominoProject(importProjectInfo)));
     return dominoProjects;
   }
+
+
 
   @NotNull
   private DominoProject getDominoProject(ImportProjectInfo importProjectInfo) {

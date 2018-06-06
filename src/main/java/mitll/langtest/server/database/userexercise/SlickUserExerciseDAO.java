@@ -52,6 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.Int;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -930,6 +931,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
+  @Override
+  public int getProjectForExercise(int exid) {
+    Collection<Integer> byExid = dao.projForEx(exid);
+    return byExid.isEmpty() ? -1 : byExid.iterator().next();
+  }
+
   /**
    * @param projID
    * @see DatabaseImpl#initializeDAOs
@@ -1378,7 +1385,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 /*  public Map<Integer, SlickExercise> getLegacyContextToEx(int projectid) {
     return dao.getAllContextPredefByProject(projectid);
   }
-
 
   List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);*/
 

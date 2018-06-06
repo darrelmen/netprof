@@ -10,4 +10,6 @@ public interface IDominoImport {
 
   @NotNull
   List<ImportProjectInfo> getImportProjectInfos(DBUser dominoAdminUser);
+
+  String getDominoProjectName(int id);
 }

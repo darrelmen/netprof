@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -115,6 +116,7 @@ public class ProjectChoices {
    */
   private DivWidget contentRow;
   private int sessionUser = -1;
+
   /**
    * @param langTest
    * @param uiLifecycle
@@ -625,7 +627,7 @@ public class ProjectChoices {
         Placement.RIGHT);
   }
 
-  private TreeMap<String, String> getProps(SlimProject projectForLang) {
+  private Map<String, String> getProps(SlimProject projectForLang) {
     return projectForLang.getProps();
   }
 
@@ -706,6 +708,7 @@ public class ProjectChoices {
 
   /**
    * You can only delete a project if it's not in production, or it's yours or you're an admin.
+   *
    * @param projectForLang
    * @return
    */
@@ -741,6 +744,8 @@ public class ProjectChoices {
   private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang, Heading label) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.PENCIL);
+    addTooltip(w, "Edit project.");
+
     w.addClickHandler(event -> showEditDialog(projectForLang, label));
     return w;
   }
@@ -757,6 +762,7 @@ public class ProjectChoices {
 
     w.setIcon(IconType.EXCHANGE);
     w.setEnabled(ALLOW_SYNC_WITH_DOMINO);
+    addTooltip(w, "Synchronize content with domino.");
 
     w.addClickHandler(event -> {
       w.setEnabled(false);
@@ -770,8 +776,14 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.ERASER);
     w.setType(ButtonType.DANGER);
+    addTooltip(w, "Start to delete this project.");
     w.addClickHandler(event -> showDeleteDialog(projectForLang, label));
+
     return w;
+  }
+
+  private void addTooltip(Widget w, String tip) {
+    new TooltipHelper().createAddTooltip(w, tip, Placement.TOP);
   }
 
   private void showEditDialog(SlimProject projectForLang, Heading label) {
@@ -801,11 +813,11 @@ public class ProjectChoices {
   }
 
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
-  //  logger.info("showImport " + doChange);
+    //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
     logger.info("showImportDialog # items = " + s);
     String msg = PLEASE_WAIT;
-  //  if (s.equals("0")) msg += " this could take awhile the first time.";
+    //  if (s.equals("0")) msg += " this could take awhile the first time.";
     final Object waitToken = messageHelper.startWaiting(msg);
 
     int id = projectForLang.getID();
@@ -824,13 +836,13 @@ public class ProjectChoices {
         button.setEnabled(true);
 
         DominoUpdateResponse.UPLOAD_STATUS status = result.getStatus();
-   //     logger.info("showImport got " + status);
+        //     logger.info("showImport got " + status);
         if (status == DominoUpdateResponse.UPLOAD_STATUS.SUCCESS && !doChange) {
-     //     logger.info("showImport show " + status);
+          //     logger.info("showImport show " + status);
           getProps(projectForLang).putAll(result.getProps());
           showResponseReport(projectForLang, button, result);
         } else {
-       //   logger.info("showImport 2 show " + status);
+          //   logger.info("showImport 2 show " + status);
           showStatus(result, status);
 
           /**

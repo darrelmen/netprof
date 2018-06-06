@@ -188,22 +188,6 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return propertyValue;
   }
 
-/*  public void addProp(String key, String value) {
-    propertyValue.put(key, value);
-  }*/
-
-/*
-  public String getProp(String key) {
-    return propertyValue.get(key);
-  }
-*/
-
-/*
-  public String removeProp(String key) {
-    return propertyValue.remove(key);
-  }
-*/
-
   public void setCourse(String course) {
     this.course = course;
   }
@@ -228,7 +212,6 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   public String getHost() {
     return host;
   }
-
 
   /**
    * @param host
