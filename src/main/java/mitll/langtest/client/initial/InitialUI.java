@@ -213,15 +213,12 @@ public class InitialUI implements UILifecycle {
       if (props.isShowAdvertiseIOS() && !controller.getStorage().hasValue(SHOW_ADVERTISED_IOS)) {
         showIOSAd();
       }
-      else logger.warning("nope - no show");
     }
 //    logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {
-    List<String> messages = Arrays.asList(
-        IPAD_LINE_1,
-        IPAD_LINE_2);
+    List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_2);
     Modal modal = new ModalInfoDialog().getModal(
         INSTALL_APP,
         messages,
@@ -231,7 +228,7 @@ public class InitialUI implements UILifecycle {
         true,
         true);
     modal.setMaxHeigth(600 + "px");
-    controller.getStorage().storeValue(SHOW_ADVERTISED_IOS,"true");
+    controller.getStorage().storeValue(SHOW_ADVERTISED_IOS, "true");
     modal.show();
   }
 
@@ -931,9 +928,9 @@ public class InitialUI implements UILifecycle {
    * @see #clickOnParentCrumb
    */
   private void removeLastCrumb() {
-   // logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
+    // logger.info("removeLastCrumb has " + breadcrumbs.getWidgetCount());
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
-   // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
+    // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
   /**

@@ -150,6 +150,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     return userByID != null && userByID.hasValidEmail();
   }
 
+  public boolean accountExistsWithEmail(String email) {
+    return !db.getUserDAO().getUsersWithThisEmail(email).isEmpty();
+  }
+
   @Nullable
   private User getUserDealWithSpaces(String id) {
     User userByID = db.getUserDAO().getUserByID(id);
@@ -182,7 +186,16 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   public LoginResult addUser(SignUpUser user, String url) {
     User userByID = getUserByID(user.getUserID());
 
-    if (userByID != null) {
+    if (userByID == null) {
+      User newUser = db.getUserManagement().addUser(getThreadLocalRequest(), user);
+
+      if (newUser == null) {
+        logger.error("addUser somehow couldn't add " + user.getUserID());
+        return new LoginResult(null, Failed);
+      } else {
+        return new LoginResult(newUser, Added);
+      }
+    } else {
       ResultType resultType = Exists;
       if (!userByID.isValid()) {
         userByID.setEmail(user.getEmail());
@@ -196,15 +209,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         resultType = Updated;
       }
       return new LoginResult(userByID, resultType);
-    } else {
-      User newUser = db.getUserManagement().addUser(getThreadLocalRequest(), user);
-
-      if (newUser == null) {
-        logger.error("addUser somehow couldn't add " + user.getUserID());
-        return new LoginResult(null, Failed);
-      } else {
-        return new LoginResult(newUser, Added);
-      }
     }
   }
 

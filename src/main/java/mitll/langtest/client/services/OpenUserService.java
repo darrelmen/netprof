@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
 import mitll.langtest.shared.user.*;
@@ -85,8 +86,15 @@ public interface OpenUserService extends RemoteService {
   LoginResult addUser(SignUpUser user, String url);
 
   LoginResult isKnownUser(String id,boolean emailOK);
+
+  /**
+   * @see SignInForm#sendEmailIfExists
+   * @param id
+   * @return
+   */
   boolean isKnownUserWithEmail(String id);
   boolean isValidUser(String id);
+  boolean accountExistsWithEmail(String email);
 
   /**
    * @param projectid

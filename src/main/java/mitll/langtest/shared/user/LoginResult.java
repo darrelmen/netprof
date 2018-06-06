@@ -69,6 +69,9 @@ public class LoginResult implements IsSerializable {
     MissingInfo,
     Updated,
     Added,
+    /**
+     * @see mitll.langtest.client.user.SignUpForm#handleAddUserResponse
+     */
     Exists,
     Multiple,
     Email,

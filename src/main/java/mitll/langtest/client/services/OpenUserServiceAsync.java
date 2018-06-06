@@ -72,4 +72,6 @@ public interface OpenUserServiceAsync {
 
   void setCurrentUserToProject(int projid, String implVersion, AsyncCallback<HeartbeatStatus> async);
   void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
+
+  void accountExistsWithEmail(String email, AsyncCallback<Boolean> async);
 }

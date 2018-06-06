@@ -60,7 +60,6 @@ public class SignUpUser implements IsSerializable {
    * @param kind
    * @param isMale
    * @param age
-   * @param dialect
    * @param device
    * @param ip
    * @param first
@@ -76,7 +75,6 @@ public class SignUpUser implements IsSerializable {
                     MiniUser.Gender realGender,
                     int age,
 
-                    String dialect,
                     String device,
                     String ip,
                     String first,
@@ -90,7 +88,7 @@ public class SignUpUser implements IsSerializable {
     this.isMale = isMale;
     this.realGender = realGender;
     this.age = age;
-    this.dialect = dialect;
+    this.dialect = "";
     this.device = device;
     this.ip = ip;
     this.first = first;

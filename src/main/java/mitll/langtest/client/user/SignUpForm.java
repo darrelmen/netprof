@@ -57,6 +57,7 @@ import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
+
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final int MIN_EMAIL_LENGTH = 7;
@@ -70,8 +71,13 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String USER_ID_BAD = "User IDs must contain only alphanumeric characters";
   private static final String LAST_NAME = "Last Name";
   private static final String EMAIL = "Email";
+  private static final String EMAIL1 = "email";
+  private static final String BROWSER = "browser";
   private static final String ADD_INFO1 = "Add Info";
   private static final String ADD_INFO = "Add info";
+  private static final String FORGOT_PASSWORD = "Forgot password or check email?";
+  private static final String EXISTING_ACCOUNT = "Existing account with this email - click forgot password?";
+
   /**
    *
    */
@@ -250,7 +256,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     newUserPrompt.addStyleName("signUp");
 
     Fieldset fields = getFields();
-    fields.add(signUp = getSignUpButton(userBox, emailBox));
+    fields.add(signUp = getSignUpButton(userBox));
     fields.add(pleaseCheck = getPleaseCheck());
 
     return getTwoPartForm(newUserPrompt, fields);
@@ -303,7 +309,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private ListBox getAffBox() {
     ListBox affBox = new ListBox();
-    affBox.getElement().setId("Affiliation_Box");
+    // affBox.getElement().setId("Affiliation_Box");
     affBox.setWidth(SIGN_UP_WIDTH + 30);
     affBox.addStyleName("leftTenMargin");
 
@@ -322,7 +328,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
-    signUpUser = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
+    signUpUser = getFormField(fieldset, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "username");
@@ -395,20 +401,20 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void makeSignUpFirstName(Fieldset fieldset) {
-    firstName = getFormField(fieldset, false, 3, USERNAME_WIDTH, "First Name");
+    firstName = getFormField(fieldset, 3, USERNAME_WIDTH, "First Name");
     final TextBoxBase userBox = firstName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "firstName");
   }
 
-  private FormField getFormField(Fieldset fieldset, boolean isPassword, int minLength, int usernameWidth, String hint) {
+  private FormField getFormField(Fieldset fieldset, int minLength, int usernameWidth, String hint) {
     return markFieldsWithLabels ?
-        addControlFormField(fieldset, hint, isPassword, minLength, usernameWidth, "") :
-        addControlFormFieldWithPlaceholder(fieldset, isPassword, minLength, usernameWidth, hint);
+        addControlFormField(fieldset, hint, false, minLength, usernameWidth, "") :
+        addControlFormFieldWithPlaceholder(fieldset, false, minLength, usernameWidth, hint);
   }
 
   private void makeSignUpLastName(Fieldset fieldset) {
-    lastName = getFormField(fieldset, false, 3, USERNAME_WIDTH, LAST_NAME);
+    lastName = getFormField(fieldset, 3, USERNAME_WIDTH, LAST_NAME);
     final TextBoxBase userBox = lastName.box;
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "lastName");
@@ -422,15 +428,50 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getFields
    */
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
-    signUpEmail = getFormField(fieldset, false, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
+    signUpEmail = getFormField(fieldset, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
     final TextBoxBase emailBox = signUpEmail.box;
     styleBox(emailBox);
-    addFocusHandler(emailBox, "email");
+    addFocusHandler(emailBox, EMAIL1);
+
+    emailBox.addBlurHandler(event -> gotEmailBlur());
     return emailBox;
+  }
+
+  /**
+   * Check if the email already corresponds to an existing account.
+   */
+  private void gotEmailBlur() {
+    final TextBoxBase box = signUpEmail.box;
+    String value = box.getValue();
+    if (isValidEmail(value)) {
+      warnIfAlreadyHasAccount(box, value);
+    } else {
+      markInvalidEmail();
+    }
+  }
+
+  private void warnIfAlreadyHasAccount(TextBoxBase box, String value) {
+    openUserService.accountExistsWithEmail(value, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        logger.warning("\tgot FAILURE on isKnownUserWithEmail ");
+      }
+
+      @Override
+      public void onSuccess(Boolean isValid) {
+        if (isValid) {
+          eventRegistration.logEvent(box, "TextBox", "N/A", "account with email exists " + value);
+          markError(signUpEmail.group, signUpEmail.box, FORGOT_PASSWORD,
+              EXISTING_ACCOUNT, Placement.TOP, false, true, false);
+        }
+      }
+    });
   }
 
   private void addFocusHandler(final TextBoxBase userBox, final String username) {
     userBox.addFocusHandler(event -> {
+
+      // logger.info("addFocusHandler got focus on "+ username);
       userPassLogin.clearSignInHasFocus();
       pleaseCheck.setVisible(false);
       signUp.setEnabled(true);
@@ -462,11 +503,10 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   /**
    * @param userBox
-   * @param emailBox
    * @return
    * @see #getSignUpForm
    */
-  private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
+  private Button getSignUpButton(final TextBoxBase userBox) {
     Button signUp = getFormButton("SignUp", SIGN_UP, eventRegistration);
     signUp.addClickHandler(getSignUpClickHandler(userBox));
     return signUp;
@@ -647,7 +687,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    *
    * @param user
    * @param email
-   * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
+   * @see #getSignUpButton(TextBoxBase)
    */
   private void gotSignUp(final String user,
                          String email) {
@@ -661,9 +701,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         isMale(),  // don't really know the gender, so guess male...?
         getRealGender(),
         getAge(),
-        "", // TODO : not getting dialect for now
-
-        "browser",
+        BROWSER,
         "",
         firstName.getSafeText(),
         lastName.getSafeText(),

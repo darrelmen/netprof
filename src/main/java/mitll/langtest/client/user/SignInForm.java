@@ -247,8 +247,6 @@ public class SignInForm extends UserDialog implements SignIn {
         if (!passwordText.isEmpty() && passwordText.length() < MIN_PASSWORD) {
           markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
         } else if (passwordText.isEmpty()) {
-          // final String text = userField.getSafeText();
-
           if (!userID.isEmpty()) {
             checkUserExists(userID);
           }
@@ -297,7 +295,6 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onSuccess(LoginResult result) {
         LoginResult.ResultType resultType = result.getResultType();
-
 //        logger.warning("checkUserExists onSuccess  " + text + " = " + result + " " + resultType);
 
         if (resultType == LoginResult.ResultType.Success) {

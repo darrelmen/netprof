@@ -524,7 +524,6 @@ public class RestUserManagement {
                 male,
                 male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
                 age1,
-                dialect,
                 deviceType,
                 device,
                 "",
@@ -597,7 +596,7 @@ public class RestUserManagement {
         email,
         Kind.STUDENT,
         isMale,
-        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, "", deviceType, device, first, last, affiliation);
+        isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, deviceType, device, first, last, affiliation);
     user1 = getUserManagement().addUser(user2);
     return user1;
   }

@@ -118,15 +118,15 @@ public class UserDialog extends BasicDialog {
    * @param message
    */
   protected void markError(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true);
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, true, false, true);
   }
 
   protected void markErrorNoGrab(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false);
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP, false, false, true);
   }
 
   protected void markErrorNoGrabRight(FormField dialectGroup, String message) {
-    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.RIGHT, false);
+    markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.RIGHT, false, false, true);
   }
 
   /**
@@ -161,11 +161,7 @@ public class UserDialog extends BasicDialog {
    * @return
    */
   String trimURL(String url) {
-//    if (url.contains("127.0.0.1")) {
-//      return url.split("\\?")[0].split("#")[0];
-//    } else {
     return url.split("\\?")[0].split("#")[0];
-//    }
   }
 
   //    String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
@@ -201,11 +197,7 @@ public class UserDialog extends BasicDialog {
   }
 
   void setFocusOn(final FocusWidget widget) {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        widget.setFocus(true);
-      }
-    });
+    Scheduler.get().scheduleDeferred(() -> widget.setFocus(true));
   }
 
   /**

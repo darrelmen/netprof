@@ -137,11 +137,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       public void userHitEnterKey(Button button) {
         if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
-        }
-        //else if (signInForm.clickSendEmail()) {
-          //    sendEmail.fireEvent(new ButtonClickEvent());
-        //}
-        else if (signInHasFocus) {
+        } else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
           signUpForm.clickSignUp();
@@ -159,7 +155,6 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   public void setSignInHasFocus() {
     signInHasFocus = true;
   }
-
   public void setSignInPasswordFocus() {
     signInForm.setFocusPassword();
   }
@@ -204,10 +199,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    */
   public Panel getContent() {
     Panel container = new DivWidget();
-    container.getElement().setId("UserPassLogin");
-
-//    container.setHeight("100%");
-  //  container.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+//    container.getElement().setId("UserPassLogin");
 
     DivWidget child = new DivWidget();
     container.add(child);
@@ -330,7 +322,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
                         sendUsernamePopup.hide(); // TODO : ugly
                       }
                     }
-                  }, false);
+                  }, false, true);
                 }
               }
             });

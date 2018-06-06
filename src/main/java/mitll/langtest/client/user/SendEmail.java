@@ -101,7 +101,7 @@ class SendEmail extends UserDialog {
                   resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
                 }
               }
-            }, false);
+            }, false, true);
           }
         });
   }

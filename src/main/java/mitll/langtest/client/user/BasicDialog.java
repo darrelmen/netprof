@@ -66,6 +66,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
+  private static final int DELAY_MILLIS = 3000;
   private final Logger logger = Logger.getLogger("BasicDialog");
 
   private static final boolean DEBUG = false;
@@ -113,7 +114,7 @@ public class BasicDialog {
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
 
     FormField formField = new FormField(textBox, userGroup, minLength);
-    textBox.getElement().getStyle().setProperty("fontFamily","sans-serif");
+    textBox.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     // formField.setRightSide(rightSide);
     return formField;
   }
@@ -268,7 +269,7 @@ public class BasicDialog {
    * @param message
    * @seex EditableExerciseDialog#checkForForeignChange
    */
-  public void markError(ControlGroup dialectGroup, String header, String message) {
+  protected void markError(ControlGroup dialectGroup, String header, String message) {
     markError(dialectGroup, header, message, Placement.RIGHT);
   }
 
@@ -279,7 +280,7 @@ public class BasicDialog {
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
     markErrorOnGroup(dialectGroup);
     focusable.setFocus(true);
-    setupPopoverThatHidesItself(dialect, header, message, right);
+    setupPopoverThatHidesItself(dialect, header, message, right, true);
   }
 
   /**
@@ -346,75 +347,78 @@ public class BasicDialog {
    */
   private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     markErrorOnGroup(dialectGroup);
-    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
+    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement, true);
+  }
+
+  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus, boolean isWarning, boolean requestFocus) {
+    if (DEBUG)
+      logger.info("markError on '" + "" + "' with " + header + "/" + message + " grab " + grabFocus + " warng " + isWarning);
+
+    if (isWarning) {
+      dialectGroup.setType(ControlGroupType.WARNING);
+    } else {
+      markErrorOnGroup(dialectGroup);
+    }
+
+    if (grabFocus) {
+      dialect.setFocus(grabFocus);
+    }
+
+    Widget widget = dialect;
+
+    try {
+      widget = dialectGroup.getWidget(1);
+    } catch (Exception e) {
+    }
+
+    setupPopoverThatHidesItself(widget, header, message, placement, requestFocus);
   }
 
   private void markErrorOnGroup(ControlGroup dialectGroup) {
     dialectGroup.setType(ControlGroupType.ERROR);
   }
 
-  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
-    markErrorOnGroup(dialectGroup);
-    dialect.setFocus(grabFocus);
-//    setupPopover(dialect, header, message, placement);
-    Widget widget = dialect;
-
-    try {
-      widget = dialectGroup.getWidget(1);
-    } catch (Exception e) {
-      //if (DEBUG) logger.info("no nested object...");
-    }
-    setupPopoverThatHidesItself(widget, header, message, placement);
-  }
-
   void markErrorBlur(FocusWidget focusWidget, String message, Placement placement) {
-    markErrorBlurFocus(focusWidget, focusWidget, TRY_AGAIN, message, placement, false);
+    markErrorBlurFocus(focusWidget, focusWidget, TRY_AGAIN, message, placement);
   }
 
   void markErrorBlur(Button button, String message) {
-    markErrorBlurFocus(button, button, TRY_AGAIN, message, Placement.RIGHT, false);
+    markErrorBlurFocus(button, button, TRY_AGAIN, message, Placement.RIGHT);
   }
 
   void markErrorBlur(Button button, String message, Placement placement) {
-    markErrorBlurFocus(button, button, TRY_AGAIN, message, placement, false);
+    markErrorBlurFocus(button, button, TRY_AGAIN, message, placement);
   }
 
   void markErrorBlur(Button button, String heading, String message, Placement placement) {
-    markErrorBlurFocus(button, button, heading, message, placement, false);
+    markErrorBlurFocus(button, button, heading, message, placement);
   }
 
   Popover markErrorBlur(FocusWidget button, String heading, String message, Placement placement) {
-    return markErrorBlurFocus(button, button, heading, message, placement, false);
+    return markErrorBlurFocus(button, button, heading, message, placement);
   }
 
   private Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
-                                     Placement placement, boolean showOnlyOnce) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
-    // dialect.setFocus(true);
-//    setupPopover(dialect, header, message, placement);
+                                     Placement placement) {
     return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(), true);
   }
 
-  private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
+  private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement, boolean requestFocus) {
     if (DEBUG)
       logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
-    setupPopover(w, heading, message, placement);
+    setupPopover(w, heading, message, placement, requestFocus);
   }
 
-  private void setupPopover(Widget w, String heading, String message, Placement placement) {
-    int delayMillis = 3000;
-    setupPopover(w, heading, message, placement, delayMillis, false);
+  private void setupPopover(Widget w, String heading, String message, Placement placement, boolean requestFocus) {
+    setupPopover(w, heading, message, placement, DELAY_MILLIS, false, requestFocus);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML) {
-    final MyPopover popover = new MyPopover();
-
-    return setupPopover(w, heading, message, placement, delayMillis, popover, isHTML);
+  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML, boolean requestFocus) {
+    return setupPopover(w, heading, message, placement, delayMillis, new MyPopover(), isHTML, requestFocus);
   }
 
-  Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML) {
-    configurePopup(popover, w, heading, message, placement, isHTML, true);
+  Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML, boolean requestFocus) {
+    configurePopup(popover, w, heading, message, placement, isHTML, requestFocus);
 
     Timer t = new Timer() {
       @Override
@@ -428,16 +432,16 @@ public class BasicDialog {
 
   private void setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup, boolean requestFocus) {
     configurePopup(popover, w, heading, message, placement, true, requestFocus);
-    new FireOnce().addBlurHandler(w,popover,this,dialectGroup);
+    new FireOnce().addBlurHandler(w, popover, this, dialectGroup);
   }
 
   private static class FireOnce {
     private HandlerRegistration handlerRegistration;
 
-     void addBlurHandler(FocusWidget w, final MyPopover popover, BasicDialog outer, final ControlGroup dialectGroup) {
+    void addBlurHandler(FocusWidget w, final MyPopover popover, BasicDialog outer, final ControlGroup dialectGroup) {
       handlerRegistration = w.addBlurHandler(event -> {
         clear();
-      //  outer.logger.info("got blur, dismissing popover...");
+        //  outer.logger.info("got blur, dismissing popover...");
         popover.dontFireAgain();
         outer.clearError(dialectGroup);
       });
