@@ -420,7 +420,7 @@ public class JsonExport {
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
 
-    exercise.getUnitToValue().forEach((k,v)->ex.put(k,v));
+    exercise.getUnitToValue().forEach(ex::put);
   //  if (addMeaning) ex.put(MN, exercise.getMeaning());
 
     boolean hasContext = !exercise.getDirectlyRelated().isEmpty();

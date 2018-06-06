@@ -275,14 +275,13 @@ public class RecordButton extends Button {
 
     //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
 
-    int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
     afterStopTimer = new Timer() {
       @Override
       public void run() {
         stop(duration);
       }
     };
-    afterStopTimer.schedule(afterStopDelayMillis);
+    afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
   }
 
   private void cancelAfterStopTimer() {

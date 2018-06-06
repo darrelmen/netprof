@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,6 +54,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
+  private static final String SHOW_SPECTROGRAM1 = "showSpectrogram";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
@@ -151,6 +155,7 @@ public class PropertyHandler {
   public boolean isAMAS() {
     return isAMAS;
   }
+
   public boolean isBeta() {
     return true;
   }
@@ -189,6 +194,7 @@ public class PropertyHandler {
   private String sendResetPassToken = "";
   private final Map<String, String> props;
   private boolean bkgColorForRef = false;
+  private boolean showAdvertiseIOS = false;
 
   private boolean demoMode;
 
@@ -234,7 +240,6 @@ public class PropertyHandler {
       else if (key.equals(BKG_COLOR_FOR_REF)) bkgColorForRef = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-        //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
@@ -242,15 +247,15 @@ public class PropertyHandler {
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals("showSpectrogram")) spectrogram = getBoolean(value);
+      else if (key.equals(SHOW_SPECTROGRAM1)) spectrogram = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(FONT_FAMILY)) fontFamily = value;
       else if (key.equals(DOMINO_SERVER)) dominoURL = value;
       else if (key.equals(HELP)) helpMessage = value;
-      else if (key.equals("afterStopDelayMillis")) {
-        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
+      else if (key.equals(AFTER_STOP_DELAY_MILLIS)) {
+        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
       } else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
@@ -371,6 +376,9 @@ public class PropertyHandler {
     if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
       responseType = Window.Location.getParameter(RESPONSE_TYPE);
     }
+    if (Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null) {
+      showAdvertiseIOS = Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null;
+    }
 
     setResponseType();
   }
@@ -384,16 +392,6 @@ public class PropertyHandler {
     return bkgColorForRef;
   }
 
-  /**
-   * For headstart integration.
-   *
-   * @return
-   */
-/*
-  public String getExercise_title() {
-    return exercise_title;
-  }
-*/
   public String getAppTitle() {
     return appTitle;
   }
@@ -503,6 +501,10 @@ public class PropertyHandler {
 
   public Map<String, String> getProps() {
     return props;
+  }
+
+  public boolean isShowAdvertiseIOS() {
+    return showAdvertiseIOS;
   }
 
 /*  public String getAMASHelpMessage() {

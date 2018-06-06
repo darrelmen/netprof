@@ -32,10 +32,7 @@
 
 package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.Breadcrumbs;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -56,6 +53,7 @@ import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -68,9 +66,14 @@ import mitll.langtest.shared.user.HeartbeatStatus;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.LangTest.RECORDING_DISABLED;
+import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
+import static mitll.langtest.client.user.UserPassLogin.*;
 
 
 /**
@@ -206,8 +209,30 @@ public class InitialUI implements UILifecycle {
     choices.setContentRow(makeFirstTwoRows(verticalContainer));
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
+
+      if (props.isShowAdvertiseIOS() && !controller.getStorage().hasValue(SHOW_ADVERTISED_IOS)) {
+        showIOSAd();
+      }
+      else logger.warning("nope - no show");
     }
 //    logger.info("----> populateRootPanel END   ------>");
+  }
+
+  private void showIOSAd() {
+    List<String> messages = Arrays.asList(
+        IPAD_LINE_1,
+        IPAD_LINE_2);
+    Modal modal = new ModalInfoDialog().getModal(
+        INSTALL_APP,
+        messages,
+        Collections.emptySet(),
+        null,
+        hiddenEvent -> {},
+        true,
+        true);
+    modal.setMaxHeigth(600 + "px");
+    controller.getStorage().storeValue(SHOW_ADVERTISED_IOS,"true");
+    modal.show();
   }
 
   /**
@@ -690,6 +715,7 @@ public class InitialUI implements UILifecycle {
   protected boolean showLogin() {
     final EventRegistration eventRegistration = lifecycleSupport;
 
+
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty()) {
@@ -743,7 +769,7 @@ public class InitialUI implements UILifecycle {
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    firstRow.add(new ResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
+    firstRow.add(new ResetPassword(props, eventRegistration, userManager, controller.getStorage()).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();

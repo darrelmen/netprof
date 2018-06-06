@@ -71,8 +71,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   /**
    * @see #showSuggestApp
    */
-  private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
-  private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://netprof.ll.mit.edu/ios/'>netprof for your iPad/iPhone" + "</a>.";
+  public static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
+  public static final String IPAD_LINE_2 = "Or click this link to install <a href='https://netprof.ll.mit.edu/ios/'>netprof for your iPad/iPhone" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final int LEFT_SIDE_WIDTH = 453;
@@ -91,7 +91,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   /**
    *
    */
-  private static final String INSTALL_APP = "Install App?";
+  public static final String INSTALL_APP = "Install App?";
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -100,7 +100,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   private final SignUp signUpForm;
   private final SignIn signInForm;
-  private FlagsDisplay flagsDisplay;
+  private final FlagsDisplay flagsDisplay;
 
   /**
    * @param props

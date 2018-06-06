@@ -39,12 +39,20 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.ChoosePasswordResult;
 import mitll.langtest.shared.user.User;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static mitll.langtest.client.user.UserPassLogin.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -74,23 +82,27 @@ public class ResetPassword extends UserDialog {
    *
    */
   private static final String PASSWORD_HAS_ALREADY_BEEN_CHANGED = "Couldn't set password - please try again.";
-  private static final int DELAY_MILLIS = 2000;
+  private static final int DELAY_MILLIS = 1000;
   private static final int OLD_NETPROF_LEN = 4;
+  public static final String SHOW_ADVERTISED_IOS = "showAd";
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
   private final UserManager userManager;
+  private final KeyStorage storage;
 
   /**
    * @param props
    * @param eventRegistration
+   * @param storage
    * @see InitialUI#handleResetPass
    */
-  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
+  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager, KeyStorage storage) {
     super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
     this.userManager = userManager;
+    this.storage = storage;
   }
 
   /**
@@ -194,7 +206,7 @@ public class ResetPassword extends UserDialog {
                                 String token) {
     String newPassword = firstPassword.box.getText();
     String second = secondPassword.box.getText();
-    if (userIDForm.getSafeText().length()< OLD_NETPROF_LEN) {
+    if (userIDForm.getSafeText().length() < OLD_NETPROF_LEN) {
       markErrorBlur(userIDForm, "Please enter a longer id.");
     } else if (newPassword.isEmpty()) {
       markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
@@ -211,7 +223,8 @@ public class ResetPassword extends UserDialog {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
       String safeText = userIDForm.getSafeText();
-      if (safeText.length() == OLD_NETPROF_LEN) safeText += "_"; // legacy user ids can be 4 but domino requires length 5
+      if (safeText.length() == OLD_NETPROF_LEN)
+        safeText += "_"; // legacy user ids can be 4 but domino requires length 5
       openUserService.changePasswordWithToken(safeText, token, newPassword,
           new AsyncCallback<ChoosePasswordResult>() {
             @Override
@@ -231,14 +244,14 @@ public class ResetPassword extends UserDialog {
                 changePassword.setEnabled(true);
               } else if (resultType == ChoosePasswordResult.PasswordResultType.Success) {
                 markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.TOP);
-                reloadPageInThreeSeconds(result.getUser());
+                reloadPageLater(result.getUser());
               }
             }
           });
     }
   }
 
-  private void reloadPageInThreeSeconds(final User user) {
+  private void reloadPageLater(final User user) {
     Timer t = new Timer() {
       @Override
       public void run() {
@@ -248,9 +261,15 @@ public class ResetPassword extends UserDialog {
     t.schedule(DELAY_MILLIS);
   }
 
+  /**
+   * Add the advertise param to url
+   * @param user
+   */
   private void reloadPage(User user) {
     String newURL = trimURL(Window.Location.getHref());
     userManager.rememberUser(user);
+    boolean showAdvertisedIOS = !storage.hasValue(SHOW_ADVERTISED_IOS);
+    if (showAdvertisedIOS) newURL += "?" + SHOW_ADVERTISED_IOS;
     Window.Location.replace(newURL);
   }
 }
