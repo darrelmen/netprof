@@ -155,11 +155,12 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   }
 
   /**
-   * TODO : for now, no hint
+   *
    *
    * @return
    */
   @Override
+  @NotNull
   String getTooltipHint() {
     return "<br/><b>Click to re-record.</b>";
   }

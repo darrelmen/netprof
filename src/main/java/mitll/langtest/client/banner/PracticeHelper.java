@@ -114,6 +114,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }
+
+
     };
   }
 

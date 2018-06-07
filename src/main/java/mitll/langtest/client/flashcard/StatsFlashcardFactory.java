@@ -34,6 +34,7 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -103,6 +104,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           StatsFlashcardFactory.this.listChanged(items, selectionID);
         }
       });
+      if (exerciseList instanceof PracticeFacetExerciseList) {
+        PracticeFacetExerciseList exerciseList1 = (PracticeFacetExerciseList) exerciseList;
+        exerciseList1.setControlState(controlState);
+      }
     }
 
     storage = new KeyStorage(controller) {
@@ -127,7 +132,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+  //  logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
     reset();
   }
 

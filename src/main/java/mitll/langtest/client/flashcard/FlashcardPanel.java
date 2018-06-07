@@ -224,10 +224,10 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     super.onDetach();
     stopPlayback();
 
-    if (controlState.isAutoPlay()) {
-      // logger.info("maybePlayRef : audio on, so playing ref");
-      controlState.setAutoPlay(false);
-    }
+//    if (controlState.isAutoPlay()) {
+//      // logger.info("maybePlayRef : audio on, so playing ref");
+//      controlState.setAutoPlay(false);
+//    }
   }
 
   private void wasHidden() {

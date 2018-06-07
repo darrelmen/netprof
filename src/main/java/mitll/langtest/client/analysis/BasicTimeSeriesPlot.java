@@ -1,7 +1,6 @@
 package mitll.langtest.client.analysis;
 
 import mitll.langtest.client.exercise.ExceptionSupport;
-import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +14,10 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
-  public static final int HIDE_DELAY = 5000;
+  private static final int HIDE_DELAY = 5000;
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
-  public static final String SCORE = "Score";
+  private static final String SCORE = "Score";
 
   static final String I_PAD_I_PHONE = "iPad/iPhone";
   static final String VOCAB_PRACTICE = "Vocab Practice";
@@ -34,7 +33,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private static final int X_OFFSET_LEGEND = 65;
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
-  private Map<Long, Integer> timeToId = new TreeMap<>();
+  private final Map<Long, Integer> timeToId = new TreeMap<>();
   private Map<Integer, CommonShell> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
@@ -194,7 +193,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
       english = commonShell.getMeaning();
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
-    String dateToShow = getDateToShow(toolTipData);
+   // String dateToShow = getDateToShow(toolTipData);
 
     return
         (showEx ?
@@ -229,9 +228,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return toShowExercise.contains(seriesName);
   }
 
+/*
   boolean showDate() {
     return true;
   }
+*/
 
   /**
    * @return

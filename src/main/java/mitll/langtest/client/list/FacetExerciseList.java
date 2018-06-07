@@ -1085,8 +1085,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       String value = getChoiceHandlerValue(type, key, newUserListID);
       candidate.put(type, value);
-
-      logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+  //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
   }

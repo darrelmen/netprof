@@ -190,11 +190,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     webAudio.stopRecording(wavCallback);
   }
 
-  /*
-  public native boolean isMicAvailable() *//*-{
-      return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
-  }-*//*;*/
-
   /**
    * @return
    * @see #installFlash()
@@ -349,13 +344,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   private void stopWebRTCRecordingLater(final WavCallback wavCallback) {
     final long then = System.currentTimeMillis();
-    logger.info("stopWebRTCRecordingLater - initial ");
+    //logger.info("stopWebRTCRecordingLater - initial ");
 
     Timer t = new Timer() {
       @Override
       public void run() {
         long now = System.currentTimeMillis();
-        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
+      //  logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
         stopWebRTCRecording(wavCallback);
       }
     };

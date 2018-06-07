@@ -120,7 +120,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
    * @see #sessionComplete
    */
   private void stopTimedRun() {
-    logger.info("stopTimedRun");
+  //  logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     //inLightningRound = false;
@@ -156,14 +156,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         logger.warning("startRoundTimer : no current flashcard?");
       }
     } else {
-      logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
+   //   logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
     }
   }
 
   private void doSessionStart(boolean isDry) {
     int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
-    logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
+    //logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
    // sessionStartMillis = System.currentTimeMillis();
   }
@@ -278,7 +278,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   @Override
   void reset() {
     super.reset();
-    logger.info("reset");
+    //logger.info("reset");
     cancelRoundTimer();
   }
 

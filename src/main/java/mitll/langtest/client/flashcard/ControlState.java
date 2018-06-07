@@ -56,14 +56,14 @@ public class ControlState {
 
   public static final String ENGLISH = "english";
   public static final String FOREIGN = "foreign";
-   static final String BOTH = "both";
+  static final String BOTH = "both";
   private static final String AUTO_PLAY = "autoPlay";
   private String showState = BOTH; // english/foreign/both - default
 
   private KeyStorage storage = null;
   private final int id;
 
-   ControlState() {
+  public ControlState() {
     id = count++;
   }
 
@@ -133,7 +133,7 @@ public class ControlState {
    * @param autoPlay
    * @see FlashcardPanel#getAutoPlayButton
    */
-  void setAutoPlay(boolean autoPlay) {
+  public void setAutoPlay(boolean autoPlay) {
     this.autoPlay = autoPlay;
     storeValue(AUTO_PLAY, autoPlay);
   }
@@ -165,7 +165,7 @@ public class ControlState {
    * @see BootstrapExercisePanel#checkThenLoadNextOnTimer
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#
    */
-  boolean isAutoPlay() {
+  public boolean isAutoPlay() {
     return autoPlay;
   }
 

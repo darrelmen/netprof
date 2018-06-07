@@ -142,7 +142,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void recordingStarted() {
-    logger.info("recordingStarted  ");
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       polyglotFlashcardContainer.startTimedRun();
     }

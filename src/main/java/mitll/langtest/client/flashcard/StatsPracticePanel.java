@@ -69,6 +69,16 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   final StickyState sticky;
   private Label remain, incorrectBox, correctBox, pronScore;
 
+  /**
+   * @see StatsFlashcardFactory#getFlashcard
+   * @param statsFlashcardFactory
+   * @param controlState
+   * @param controller
+   * @param soundFeedback
+   * @param e
+   * @param stickyState
+   * @param exerciseListToUse
+   */
   public StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
                             ControlState controlState,
                             ExerciseController controller,

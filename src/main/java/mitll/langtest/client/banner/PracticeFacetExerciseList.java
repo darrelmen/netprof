@@ -3,6 +3,7 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
@@ -12,10 +13,12 @@ import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
-class PracticeFacetExerciseList extends FacetExerciseList {
-  //private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+public class PracticeFacetExerciseList extends FacetExerciseList {
+  private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper practiceHelper;
+  private ControlState controlState;
 
   PracticeFacetExerciseList(ExerciseController controller,
                             PracticeHelper practiceHelper,
@@ -28,6 +31,25 @@ class PracticeFacetExerciseList extends FacetExerciseList {
             .setShowPager(false).
             setShowTypeAhead(false), listHeader, true);
     this.practiceHelper = practiceHelper;
+  }
+
+  public void setControlState(ControlState state) {
+    this.controlState = state;
+  }
+
+  /**
+   * Turn off auto advance if not visible any more.
+   * Thanks Reina!
+   */
+  @Override
+  protected void onDetach() {
+    super.onDetach();
+    // logger.info("\n\ngot detach ---> \n\n\n");
+
+    if (controlState.isAutoPlay()) {
+      // logger.info("onDetach : audio on, so turn auto advance OFF");
+      controlState.setAutoPlay(false);
+    }
   }
 
   protected void goToFirst(String searchIfAny, int exerciseID) {
@@ -46,7 +68,8 @@ class PracticeFacetExerciseList extends FacetExerciseList {
   /**
    * The issue is there should only be only keyboard focus - either the space bar and prev/next or
    * the search box. - so we should hide the search box.
-   *  @param typeToSection
+   *
+   * @param typeToSection
    * @param prefix
    * @param exerciseID
    * @param onlyWithAudioAnno

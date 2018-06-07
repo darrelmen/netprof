@@ -142,7 +142,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-     logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+   //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -383,7 +383,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-    logger.info("getCurrentStoredView instance = " + instance);
+   // logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -402,24 +402,15 @@ public class NewContentChooser implements INavigation {
     } else {
       return views.toString().toUpperCase();
     }
-
   }
 
 
   /**
-   * if (views == null) {
-   * String value = controller.getStorage().getValue(CURRENT_VIEW);
-   * if (value == null || value.isEmpty()) return "";
-   * else return value.toUpperCase();
-   * } else {
-   * return views.toString().toUpperCase();
-   * }
    *
    * @return
    */
   private String getCurrentInstance() {
-    SelectionState selectionState = new SelectionState(History.getToken(), false);
-    return selectionState.getInstance();
+    return new SelectionState(History.getToken(), false).getInstance();
   }
 
   private void storeValue(VIEWS view) {
