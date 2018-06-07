@@ -190,8 +190,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     this.contentPanel = contentPanel;
   }
 
-//  private int counter = 0;
-
   public void setNavigation(INavigation navigation) {
     this.navigation = navigation;
   }

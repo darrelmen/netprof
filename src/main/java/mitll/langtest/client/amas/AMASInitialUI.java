@@ -84,7 +84,7 @@ public class AMASInitialUI extends InitialUI {
      */
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
-    LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  //  LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
     learnHelper = new AutoCRTChapterNPFHelper(controller);
     learnHelper.showContent(contentRow, "", true);
   }

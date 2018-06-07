@@ -933,8 +933,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   @Override
   public int getProjectForExercise(int exid) {
-    Collection<Integer> byExid = dao.projForEx(exid);
-    return byExid.isEmpty() ? -1 : byExid.iterator().next();
+    if (exid == unknownExerciseID) return -1;
+    else {
+      Collection<Integer> byExid = dao.projForEx(exid);
+      return byExid.isEmpty() ? -1 : byExid.iterator().next();
+    }
   }
 
   /**

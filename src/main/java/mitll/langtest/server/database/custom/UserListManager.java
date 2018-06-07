@@ -88,16 +88,12 @@ public class UserListManager implements IUserListManager {
 
 
   private static final boolean DEBUG = false;
-  private static final int DRY_RUN_ITEMS = 10;
-  private static final int MIN_PHONE = 4;
-  private static final int MAX_PHONE = 7;
-  public static final String DRY_RUN = "Dry Run (Just Practice!)";
-  //private static final String DESCRIP = "Dry run to prep for quizzes.";
-  public static final int MINUTE = 60 * 1000;
-  public static final int HOUR = 60 * MINUTE;
-  public static final int DAY = 24 * HOUR;
-  public static final int YEAR = 365 * DAY;
-  public static final int FIFTY_YEAR = 50 * YEAR;
+
+  private static final int MINUTE = 60 * 1000;
+  private static final int HOUR = 60 * MINUTE;
+  private static final int DAY = 24 * HOUR;
+  private static final int YEAR = 365 * DAY;
+  private static final int FIFTY_YEAR = 50 * YEAR;
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -161,23 +157,6 @@ public class UserListManager implements IUserListManager {
     } else {
       return userList;
     }
-  }
-
-/*  @Override
-  public void ensureDryRun(int projid) {
-    List<IUserListLight> collect = getDryRunList(projid);
-    if (collect.isEmpty()) {
-      int defaultUser = userDAO.getDefaultUser();
-      long now = System.currentTimeMillis();
-      createQuiz(defaultUser, DRY_RUN, DESCRIP, "", false, projid, 10, true,
-          new TimeRange(), 1, minScore, showAudio);
-      boolean addedit = getDryRunList(projid).size() == 1;
-      if (!addedit) logger.error("ensureDryRun couldn't add dry run ?");
-    }
-  }*/
-
-  private List<IUserListLight> getDryRunList(int projid) {
-    return userListDAO.getAllQuizLight(projid).stream().filter(iUserListLight -> iUserListLight.getName().equalsIgnoreCase(DRY_RUN)).collect(Collectors.toList());
   }
 
   /**
@@ -326,10 +305,10 @@ public class UserListManager implements IUserListManager {
   }
 
   private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> toChooseFrom) {
-  //  int misses = 0;
+    //  int misses = 0;
     Random random = new Random();
 
-  //  int size = toChooseFrom.size();
+    //  int size = toChooseFrom.size();
 
     Set<Integer> exids = new TreeSet<>();
 
@@ -866,8 +845,8 @@ public class UserListManager implements IUserListManager {
 
     addItemToList(userList.getID(), userExercise.getOldID(), newExerciseID);
 
-    // TODO : necessary?
-    fixAudioPaths(userExercise, true, mediaDir);
+    // TODOx : necessary?
+//    fixAudioPaths(userExercise, true, mediaDir);
   }
 
   private Collection<String> getTypeOrder(int projectID) {
@@ -906,11 +885,13 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
+
   @Override
   public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
     fixAudioPaths(userExercise, true, mediaDir);
     userExerciseDAO.update(userExercise, false, typeOrder);
   }
+
 
   /**
    * TODOx : why all this foolishness with the id?
@@ -971,7 +952,7 @@ public class UserListManager implements IUserListManager {
       return;
     }
     long now = System.currentTimeMillis();
-    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
+    logger.info("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
 
     // String foreignLanguage = userExercise.getForeignLanguage();
     int id = userExercise.getID();
@@ -979,7 +960,7 @@ public class UserListManager implements IUserListManager {
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
       fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, id, projectID, FAST);
-      logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
+      logger.info("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
@@ -1088,31 +1069,6 @@ public class UserListManager implements IUserListManager {
       return userListDAO.getWithExercises(id);
     }
   }
-
-  /**
-   * the review, comment, and attention LL (if needed) lists need to be in context of project?
-   *
-   * @param id
-   * @param projid    IGNORED HERE
-   * @param typeOrder
-   * @param ids
-   * @return
-   * @see UserListServices#getUserListByIDExercises
-   */
-/*  @Override
-  public UserList<CommonExercise> getUserListByIDExercises(int id,
-                                                           int projid,
-                                                           Collection<String> typeOrder,
-                                                           Set<Integer> ids) {
-    if (id == -1) {
-      logger.error("getUserListByID : huh? asking for id " + id);
-      return null;
-    }
-    return
-        id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder, projid) :
-            userListDAO.getWithExercisesEx(id);
-
-  }*/
 
   /**
    * @param userListID

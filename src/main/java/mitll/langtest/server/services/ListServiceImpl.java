@@ -432,13 +432,4 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return db.duplicateExercise(exercise);
   }*/
 
-  /**
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
-   */
-  @Override
-  public void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException {
-    getUserIDFromSessionOrDB();
-    db.editItem(userExercise, keepAudio);
-  }
 }

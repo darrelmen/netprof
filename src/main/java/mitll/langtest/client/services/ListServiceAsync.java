@@ -79,13 +79,6 @@ public interface ListServiceAsync {
 
   void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
-  /**
-   * @param userExercise
-   * @param keepAudio
-   * @param async
-   * @seex mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
-   */
-  void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
   void deleteList(int id, AsyncCallback<Boolean> async);
 

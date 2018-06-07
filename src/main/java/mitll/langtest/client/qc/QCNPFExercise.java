@@ -81,9 +81,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
-  public static final String CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED = "Click to indicate item has been reviewed.";
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
+  public static final String CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED = "Click to indicate item has been reviewed.";
   private static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private static final String VOCABULARY = "Vocabulary:";
 
@@ -114,11 +114,8 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
-  // private static final String ATTENTION_LL = "Attention LL";
-//  private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
 
   private static final String REVIEW = "review";
-  //public static final String COMMENT = "comment";
 
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;

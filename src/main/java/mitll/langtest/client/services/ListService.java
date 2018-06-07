@@ -133,30 +133,5 @@ public interface ListService extends RemoteService {
    */
   CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
 
-  /**
-   * @param userListID
-   * @param userExerciseText
-   * @return
-   * @seex ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
-   */
-/*
-  Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText);
-*/
 
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
-   */
-  // CommonExercise duplicateExercise(CommonExercise id);
-
-  /**
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
-   */
-  void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
-
-//  void updateContext(long userListID, String context);
-//  void updateRichText(long userListID, String richText);
-//  void updateName(long userListID, String name);
 }

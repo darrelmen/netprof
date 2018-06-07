@@ -431,7 +431,7 @@ abstract class NewUserExercise extends BasicDialog {
    * @see #reallyChange
    */
   private void editItem(final ListInterface<CommonShell,CommonExercise> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
-    controller.getListService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
+    controller.getAudioService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("changin an exercise", caught);

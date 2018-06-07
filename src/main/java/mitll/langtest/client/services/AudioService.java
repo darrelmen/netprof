@@ -39,12 +39,15 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
+
+import java.util.Collection;
 
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.
@@ -92,6 +95,16 @@ public interface AudioService extends RemoteService {
 
   void logMessage(String subject,String message, boolean sendEmail);
 
-
+  /**
+   *
+   * @return
+   */
   StartupInfo getStartupInfo();
+
+  /**
+   * @param userExercise
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
+   */
+  void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
+
 }

@@ -129,7 +129,7 @@ public class InitialUI implements UILifecycle {
 
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
-  protected final UserFeedback userFeedback;
+  private final UserFeedback userFeedback;
   protected final PropertyHandler props;
 
   private final IBanner banner;
@@ -144,7 +144,6 @@ public class InitialUI implements UILifecycle {
   private INavigation navigation;
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
-  // private String implVersion;
 
   private static final boolean DEBUG = false;
 
@@ -187,7 +186,7 @@ public class InitialUI implements UILifecycle {
       if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
-        // logger.info("populateRootPanelIfLogin found login...");
+        logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       } else {
         if (DEBUG) logger.info("populateRootPanelIfLogin no login...");
@@ -210,21 +209,27 @@ public class InitialUI implements UILifecycle {
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
 
-      if (props.isShowAdvertiseIOS() && !controller.getStorage().hasValue(SHOW_ADVERTISED_IOS)) {
-        showIOSAd();
+      try {
+        if (props.isShowAdvertiseIOS() && !controller.getStorage().hasValue(SHOW_ADVERTISED_IOS)) {
+          showIOSAd();
+        }
+      } catch (Exception e) {
+        logger.warning("got " + e);
       }
     }
 //    logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {
+    logger.warning("showIOSAd ");
     List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_2);
     Modal modal = new ModalInfoDialog().getModal(
         INSTALL_APP,
         messages,
         Collections.emptySet(),
         null,
-        hiddenEvent -> {},
+        hiddenEvent -> {
+        },
         true,
         true);
     modal.setMaxHeigth(600 + "px");
@@ -498,13 +503,14 @@ public class InitialUI implements UILifecycle {
    * @see UILifecycle#gotUser(HasID)
    */
   private void showNavigation() {
-    if (contentRow.getElement().getChildCount() <= 2) {
-      // logger.info("showNavigation : - add to content root");
+    int childCount = contentRow.getElement().getChildCount();
+    if (childCount <= 2) {
+      logger.info("showNavigation : - add to content root = " + childCount);
       contentRow.remove(child);
       if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());
     } else {
-      logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
+      logger.warning("showNavigation : first row has " + childCount + " child(ren) - not adding tab panel???");
     }
   }
 
@@ -725,13 +731,13 @@ public class InitialUI implements UILifecycle {
       return true;
     }
     // are we here to show the login screen?
-    boolean show = /*userManager.isUserExpired() ||*/ userManager.getUserID() == null;
+    boolean show = userManager.getUserID() == null;
     if (show) {
-      //    logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
+      logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
-    //   logger.info("user is valid...");
+    logger.info("user is valid...");
 
     showCogMenu();
     return false;

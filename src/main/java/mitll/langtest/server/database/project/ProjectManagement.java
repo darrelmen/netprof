@@ -618,7 +618,8 @@ public class ProjectManagement implements IProjectManagement {
       logger.error("getExercise : can't find project for exercise " + id);
       return null;
     } else {
-      return getProject(projectForExercise).getExerciseByID(id);
+      Project project = getProject(projectForExercise);
+      return project == null ? null : project.getExerciseByID(id);
     }
   }
 

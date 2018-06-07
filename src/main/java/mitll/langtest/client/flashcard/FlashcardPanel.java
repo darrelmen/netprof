@@ -44,8 +44,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
@@ -225,6 +223,11 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   protected void onDetach() {
     super.onDetach();
     stopPlayback();
+
+    if (controlState.isAutoPlay()) {
+      // logger.info("maybePlayRef : audio on, so playing ref");
+      controlState.setAutoPlay(false);
+    }
   }
 
   private void wasHidden() {
@@ -517,7 +520,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     if (!b) {
       //   logger.info("setAutoPlay false");
       if (autoPlay != null) autoPlay.setActive(false);
-      controlState.setAutoPlayOn(false);
+      controlState.setAutoPlay(false);
       cancelAdvanceTimer();
     }
   }
@@ -699,7 +702,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     autoPlay.addClickHandler(event -> {
       boolean autoOn = !autoPlay.isToggled();
       //   logger.info("\tgetAutoPlayButton auto play state " + autoOn);
-      controlState.setAutoPlayOn(autoOn);
+      controlState.setAutoPlay(autoOn);
       gotAutoPlay(autoOn);
     });
     autoPlay.setActive(controlState.isAutoPlay());

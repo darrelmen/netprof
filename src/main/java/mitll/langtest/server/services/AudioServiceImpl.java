@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.AudioService;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
@@ -40,9 +41,11 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
@@ -62,10 +65,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -76,6 +76,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
+  private static final String FAST = "regular";
+  private static final String SLOW = "slow";
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
@@ -537,4 +539,132 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
+
+ /**
+   * @param userExercise
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
+   */
+  @Override
+  public void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.editItem(userExercise, keepAudio);
+  }
+  /*
+
+  *//**
+   * @param userExercise
+   * @param mediaDir
+   * @param typeOrder
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
+   *//*
+  @Override
+  public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
+    fixAudioPaths(userExercise, true, mediaDir);
+    db.getUserExerciseDAO().update(userExercise, false, typeOrder);
+  }
+
+
+  *//**
+   * TODO : Why is this needed?
+   * <p>
+   * Remember to copy the audio from the posted location to a more permanent location.
+   * <p>
+   * If it's already under a media directory -- don't change it.
+   *
+   * @param userExercise
+   * @param overwrite
+   * @param mediaDir
+   * @seex IUserListManager#newExercise
+   * @see UserListManager#editItem
+   *//*
+  private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
+    AudioAttribute regularSpeed = userExercise.getRegularSpeed();
+    if (regularSpeed == null) {
+      logger.info("fixAudioPaths no audio yet for " + userExercise);
+      return;
+    }
+    long now = System.currentTimeMillis();
+    logger.info("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
+
+    // String foreignLanguage = userExercise.getForeignLanguage();
+    int id = userExercise.getID();
+    int projectID = userExercise.getProjectID();
+
+    if (!regularSpeed.getAudioRef().contains(mediaDir)) {
+      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, id, projectID, FAST);
+      logger.info("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
+    }
+
+    AudioAttribute slowSpeed = userExercise.getSlowSpeed();
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
+        !slowSpeed.getAudioRef().contains(mediaDir)) {
+      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, id, projectID, SLOW);
+    }
+  }
+
+  *//**
+   * @param userExercise
+   * @param overwrite
+   * @param regularSpeed
+   * @param now
+   * @param id
+   * @param projectID
+   * @param prefix
+   *//*
+  private void fixAudioPathOfAttribute(CommonExercise userExercise,
+                                       boolean overwrite,
+                                       AudioAttribute regularSpeed,
+                                       long now,
+                                       int id,
+                                       int projectID,
+                                       String prefix) {
+    File fileRef = pathHelper.getAbsoluteAudioFile(regularSpeed.getAudioRef());
+
+    String fast = prefix + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
+    String artist = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(
+        projectID,
+        id,
+        fileRef,
+        fast,
+        overwrite,
+        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(), ""));
+    regularSpeed.setAudioRef(refAudio);
+  }
+
+  *//**
+   * Copying audio from initial recording location to new location.
+   * <p>
+   * Also normalizes the audio level.
+   *
+   * @param projid
+   * @param id
+   * @param fileRef
+   * @param destFileName
+   * @param overwrite
+   * @param trackInfo
+   * @return new, permanent audio path
+   * @see #fixAudioPaths
+   *//*
+  private String getRefAudioPath(int projid,
+                                 int id,
+                                 File fileRef,
+                                 String destFileName,
+                                 boolean overwrite,
+                                 TrackInfo trackInfo) {
+    //Database database = db.getUserDAO().getDatabase();
+    ServerProperties serverProps = db.getServerProps();
+
+
+    Project project = getProject(projid);
+    return new PathWriter(serverProps).getPermanentAudioPath(
+        fileRef,
+        destFileName,
+        overwrite,
+        project.getLanguage(),
+        id,
+        serverProps,
+        trackInfo);
+  }*/
 }

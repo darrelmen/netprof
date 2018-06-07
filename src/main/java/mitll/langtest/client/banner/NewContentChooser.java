@@ -94,7 +94,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    //   logger.info("getCurrentView currentView " + currentView);
+   //    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -142,7 +142,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    // logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+     logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -383,7 +383,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-    //  logger.info("getCurrentStoredView instance = " + instance);
+    logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -393,9 +393,30 @@ public class NewContentChooser implements INavigation {
     }
     //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
 
-    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
+//    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
+
+    if (views == null) {
+      String value = controller.getStorage().getValue(CURRENT_VIEW);
+      if (value == null || value.isEmpty()) return "";
+      else return value.toUpperCase();
+    } else {
+      return views.toString().toUpperCase();
+    }
+
   }
 
+
+  /**
+   * if (views == null) {
+   * String value = controller.getStorage().getValue(CURRENT_VIEW);
+   * if (value == null || value.isEmpty()) return "";
+   * else return value.toUpperCase();
+   * } else {
+   * return views.toString().toUpperCase();
+   * }
+   *
+   * @return
+   */
   private String getCurrentInstance() {
     SelectionState selectionState = new SelectionState(History.getToken(), false);
     return selectionState.getInstance();

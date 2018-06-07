@@ -199,7 +199,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    */
   public Panel getContent() {
     Panel container = new DivWidget();
-//    container.getElement().setId("UserPassLogin");
+
+    // THIS ID IS USED IN INITIAL UI. LEAVE IT!
+    container.getElement().setId("UserPassLogin");
 
     DivWidget child = new DivWidget();
     container.add(child);

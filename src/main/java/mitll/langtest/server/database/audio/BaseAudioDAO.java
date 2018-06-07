@@ -782,17 +782,19 @@ public abstract class BaseAudioDAO extends DAO {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
-      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
-        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
+      ExerciseAnnotation value = fieldAnno.getValue();
+      if (!value.isCorrect()) {  // i.e. defect
+        String key = fieldAnno.getKey();
+        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(key);
         if (audioAttribute != null) {
           logger.debug("getAndMarkDefects : found defect " + audioAttribute +
-              " anno : " + fieldAnno.getValue() +
-              " field  " + fieldAnno.getKey());
+              " anno : " + value +
+              " field  " + key);
           // logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           markDefect(audioAttribute);
-        } else if (!fieldAnno.getKey().equals(TRANSLITERATION)) {
-          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() +
+        } else if (!key.equals(TRANSLITERATION)) {
+          logger.warn("\tgetAndMarkDefects can't mark defect on audio : looking for field '" + key +
               "' in " + userExercise.getAudioRefToAttr().keySet());
         }
       }
