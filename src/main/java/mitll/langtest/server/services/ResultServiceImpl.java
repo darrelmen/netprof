@@ -36,6 +36,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import mitll.langtest.client.services.ResultService;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.ResultAndTotal;
@@ -49,6 +50,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultService {
@@ -83,8 +86,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     int userIDFromSession = getUserIDFromSessionOrDB();
 
     if (hasAdminPerm(userIDFromSession)) {
-      int projectID = getProjectIDFromUser(userIDFromSession);
-      List<MonitorResult> results = getResults(projectID, unitToValue, userID, flText);
+      List<MonitorResult> results = getResults(getProjectIDFromUser(userIDFromSession), unitToValue, userID, flText);
       if (!results.isEmpty()) {
         Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
         try {
@@ -136,7 +138,9 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             @Override
             public Collection<MonitorResult> load(Integer key) throws Exception {
               // logger.info("Load " + key);
-              return db.getResultDAO().getMonitorResultsKnownExercises(key);
+              List<MonitorResult> monitorResultsKnownExercises = db.getResultDAO().getMonitorResultsKnownExercises(key);
+              db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
+              return db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
             }
           });
 
@@ -166,17 +170,16 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @see mitll.langtest.client.result.ResultManager#createProvider
    */
   private List<MonitorResult> getResults(int projectID, Map<String, String> unitToValue, int userid, String flText) {
-    logger.debug("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
+    logger.info("getResults : request unit to value " + unitToValue + " user " + userid + " text '" + flText + "'");
 
     if (isNumber(flText)) {
       int i = Integer.parseInt(flText);
+      List<MonitorResult> monitorResultsByExerciseID = db.getResultDAO().getMonitorResultsByExerciseID(i);
       List<MonitorResult> monitorResultsByID =
-          db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByExerciseID(i), projectID);
-      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
+          db.getMonitorResultsWithText(monitorResultsByExerciseID, projectID);
+      logger.info("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
       return monitorResultsByID;
     }
-
-    //   Collection<MonitorResult> results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
 
     Collection<MonitorResult> results = null;
     try {
@@ -204,7 +207,34 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     if (!flText.isEmpty()) { // asking for text
       results = getTrieFromFL(flText, results).getMatchesLC(flText);
     }
-    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
+
+    Database database = db.getDatabase();
+    String relPrefix = database.getRelPrefix(getLanguage(getProject(projectID)));
+
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    results.forEach(monitorResult ->
+    {
+      String rawFilePath = monitorResult.getAnswer();
+
+      if (!rawFilePath.startsWith(relPrefix)) {
+        String webPageAudioRefWithPrefix = database.getWebPageAudioRefWithPrefix(relPrefix, rawFilePath);
+/*
+        logger.info("convert audio path" +
+            "\n\trelPrefix " + relPrefix +
+            "\n\tfrom      " + rawFilePath +
+            "\n\tto        " + webPageAudioRefWithPrefix);
+*/
+        atomicInteger.incrementAndGet();
+        monitorResult.setAnswer(webPageAudioRefWithPrefix);
+      }
+    });
+    logger.info("getResults :" +
+        "\n\trequest " + unitToValue +
+        "\n\tuser    " + userid +
+        "\n\ttext    '" + flText + "'" +
+        "\n\tconverted " + atomicInteger.get() +
+        "\n\treturning " + results.size() + " results...");
     return new ArrayList<>(results);
   }
 
@@ -248,7 +278,8 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
    * @return
    */
   private Collection<MonitorResult> filterByUser(int userid, Collection<MonitorResult> results) {
-    Trie<MonitorResult> trie;
+    return results.stream().filter(monitorResult -> monitorResult.getUserid() == userid).collect(Collectors.toList());
+/*    Trie<MonitorResult> trie;
     logger.debug("filterByUser making trie for userid " + userid);
 
     long then = System.currentTimeMillis();
@@ -261,7 +292,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     logger.info("filterByUser took " + (System.currentTimeMillis() - then) + " to get trie");
 
     results = trie.getMatchesLC(Long.toString(userid));
-    return results;
+    return results;*/
   }
 
   private boolean isNumber(String flText) {

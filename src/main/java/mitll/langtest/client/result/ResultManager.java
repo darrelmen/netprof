@@ -75,12 +75,12 @@ import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
-  public static final String DYNAMIC_RANGE = "Dynamic Range";
-  public static final String VALIDITY = "Validity";
+  private static final String DYNAMIC_RANGE = "Dynamic Range";
+  private static final String VALIDITY = "Validity";
   private final Logger logger = Logger.getLogger("ResultManager");
 
 
-  public static final int TOP = 56;
+  private static final int TOP = 56;
   private static final String DOWNLOAD_EXCEL = "Download Excel";
 
   private static final String YES = "Yes";
@@ -106,6 +106,8 @@ public class ResultManager extends PagerTable {
   private static final String CLOSE = "Close";
   private static final int MAX_TO_SHOW = PAGE_SIZE;
 
+  private static final boolean DEBUG = false;
+
   private final EventRegistration eventRegistration;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
 
@@ -117,7 +119,7 @@ public class ResultManager extends PagerTable {
 
   private CellTable<MonitorResult> cellTable;
   private Panel reviewContainer;
-  private TableSortHelper tableSortHelper = new TableSortHelper();
+  private final TableSortHelper tableSortHelper = new TableSortHelper();
 
   /**
    * @param nameForAnswer

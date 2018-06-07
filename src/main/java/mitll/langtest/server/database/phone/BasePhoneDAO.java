@@ -122,7 +122,7 @@ public class BasePhoneDAO extends DAO {
         rid,
         wseq,
         seq,
-        getFilePath(audioAnswer, language),
+        database.getWebPageAudioRef(audioAnswer, language),
         refAudioForExercise,
         scoreJson,
         resultTime);
@@ -155,12 +155,12 @@ public class BasePhoneDAO extends DAO {
     return parsedTime;
   }
 
-  private String getFilePath(String audioAnswer, String language) {
+/*  private String getFilePath(String audioAnswer, String language) {
     boolean isLegacy = audioAnswer.startsWith("answers");
     return isLegacy ?
         getRelPrefix(language) + audioAnswer :
         trimPathForWebPage(audioAnswer);
-  }
+  }*/
 
   /**
    * @param phoneToScores
@@ -191,10 +191,12 @@ public class BasePhoneDAO extends DAO {
     wordAndScore.clearJSON();
   }
 
+/*
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
   }
+*/
 
 
   /**
@@ -210,7 +212,7 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.result.SlickResultDAO#getRelPrefix
    */
-  private String getRelPrefix(String language) {
+/*  private String getRelPrefix(String language) {
     String installPath = database.getServerProps().getAnswerDir();
 
     String s = language.toLowerCase();
@@ -218,5 +220,5 @@ public class BasePhoneDAO extends DAO {
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
     return prefix.substring(netProfDurLength) + File.separator;
-  }
+  }*/
 }

@@ -80,8 +80,6 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
-import mitll.langtest.server.domino.ImportInfo;
-import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
@@ -91,7 +89,6 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -109,6 +106,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -119,9 +117,9 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 
 /**
  * Note with H2 that :  <br></br>
@@ -160,6 +158,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
+  public static final int WARN_THRESH = 10;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -1130,18 +1129,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public Collection<MonitorResult> getMonitorResults(int projid) {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid);
 
-    logger.debug("getMonitorResults got back " + monitorResults.size() + " for project " + projid);
-/*    for (MonitorResult result : monitorResults) {
-      int exID = result.getExID();
-      CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
-      if (exercise != null) {
-        int dominoID = isAmas() ? -1 : ((CommonExercise) exercise).getDominoID();
-        result.setDisplayID("" + dominoID);
-      }
-    }*/
+    logger.info("getMonitorResults got back " + monitorResults.size() + " for project " + projid);
     List<MonitorResult> monitorResultsWithText = getMonitorResultsWithText(monitorResults, projid);
-
-    logger.debug("getMonitorResults got back after join " + monitorResultsWithText.size() + " for project " + projid);
+    logger.info("getMonitorResults got back after join " + monitorResultsWithText.size() + " for project " + projid);
 
     return monitorResultsWithText;
   }
@@ -1156,7 +1146,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {
     Map<Integer, CommonExercise> idToExerciseMap = getIdToExerciseMap(projid);
-    logger.debug("getMonitorResultsWithText Got size = " + idToExerciseMap.size() + " id->ex map");
+    logger.info("getMonitorResultsWithText Got size = " + idToExerciseMap.size() + " id->ex map");
     addUnitAndChapterToResults(monitorResults, idToExerciseMap);
     return monitorResults;
   }
@@ -1177,11 +1167,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Set<Integer> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
       int id = result.getExID();
-      // if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
+
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
-        if (n < 5) {
-          logger.error("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
+        if (n < WARN_THRESH) {
+          logger.warn("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
         }
         unknownIDs.add(id);
         n++;
@@ -1197,7 +1187,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() +
           " # bad join ids = " + unknownIDs.size());
     }
-    logger.debug("addUnitAndChapterToResults joined with " + m + " results");
+    logger.info("addUnitAndChapterToResults joined with " + m + " results");
   }
 
   /**
@@ -1261,7 +1251,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private int warns = 0;
 
   /**
-   *
    * @param projid
    * @param id
    * @return null if it's a bogus exercise - the unknown exercise
@@ -1808,6 +1797,41 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (now - then > 50) {
       logger.info("recordWordAndPhoneInfo took " + (now - then) + " millis");
     }
+  }
+
+  @Override
+  public String getWebPageAudioRef(String language, String path) {
+    return getWebPageAudioRefWithPrefix(getRelPrefix(language), path);
+  }
+
+  @Override
+  public String getWebPageAudioRefWithPrefix(String relPrefix, String path) {
+    boolean isLegacy = path.startsWith(ANSWERS);
+
+    return isLegacy ?
+        relPrefix + path :
+        trimPathForWebPage(path);
+  }
+
+  /**
+   * @see SlickResultDAO#getCorrectAndScores(Collection, String)
+   * @param language
+   * @return
+   */
+  @Override
+  public String getRelPrefix(String language) {
+    String installPath = getServerProps().getAnswerDir();
+
+    String s = language.toLowerCase();
+    String prefix = installPath + File.separator + s;
+    int netProfDurLength = getServerProps().getAudioBaseDir().length();
+
+    return prefix.substring(netProfDurLength) + File.separator;
+  }
+
+  private String trimPathForWebPage(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+    return (answer == -1) ? path : path.substring(answer);
   }
 
   /**

@@ -57,7 +57,7 @@ public interface AmasService extends RemoteService {
 
   /**
    * AMAS ONLY
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getChoice
+   * @seex mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getChoice
    * @param resultID
    * @param correct
    */
@@ -65,7 +65,7 @@ public interface AmasService extends RemoteService {
 
   /**
    * AMAS
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getScores(boolean)
+   * @seex mitll.langtest.client.amas.FeedbackRecordPanel#getScores(boolean)
    * @param typeToSection
    * @param exids
    * @return

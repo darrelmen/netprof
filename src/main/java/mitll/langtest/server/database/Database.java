@@ -72,6 +72,12 @@ public interface Database extends AutoCloseable {
 
   void dropProject(int projID);
 
+  String getWebPageAudioRef(String language, String path);
+
+  String getRelPrefix(String language);
+
+  String getWebPageAudioRefWithPrefix(String relPrefix, String path);
+
   LogAndNotify getLogAndNotify();
 
   Collection<String> getTypeOrder(int projectid);

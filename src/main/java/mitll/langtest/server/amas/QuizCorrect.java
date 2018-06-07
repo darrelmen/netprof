@@ -61,7 +61,6 @@ public class QuizCorrect {
    * @param exids
    * @param projectid
    * @return
-   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#getScores
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
                                               int userID,

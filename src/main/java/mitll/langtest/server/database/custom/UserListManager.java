@@ -888,7 +888,7 @@ public class UserListManager implements IUserListManager {
 
   @Override
   public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
-    fixAudioPaths(userExercise, true, mediaDir);
+    //fixAudioPaths(userExercise, true, mediaDir);
     userExerciseDAO.update(userExercise, false, typeOrder);
   }
 

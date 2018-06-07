@@ -365,7 +365,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       return new ArrayList<>();
     } else {
 
-      if (DEBUG || DEBUG_PHONE) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+      if (DEBUG || DEBUG_PHONE)
+        logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
 
       SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
       // examples.addAll(wordAndScores);
@@ -531,10 +532,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         }
       }
 
-      boolean isLegacy = path.startsWith(ANSWERS);
-      String filePath = isLegacy ?
-          getRelPrefix(language) + path :
-          trimPathForWebPage(path);
+//      boolean isLegacy = path.startsWith(ANSWERS);
+//      String filePath = isLegacy ?
+//          database.getRelPrefix(language) + path :
+//          trimPathForWebPage(path);
+
+      String filePath = database.getWebPageAudioRef(language, path);
 
       //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
 
@@ -644,8 +647,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    *
    * @param language
    * @return
+   * @see
    */
-  private String getRelPrefix(String language) {
+/*  private String getRelPrefix(String language) {
     String installPath = database.getServerProps().getAnswerDir();
 
     String s = language.toLowerCase();
@@ -653,5 +657,5 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
     return prefix.substring(netProfDurLength) + File.separator;
-  }
+  }*/
 }

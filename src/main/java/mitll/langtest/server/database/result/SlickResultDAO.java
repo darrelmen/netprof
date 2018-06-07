@@ -55,7 +55,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -264,7 +263,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
-    List<MonitorResult> copy = new ArrayList<>();
+    List<MonitorResult> copy = new ArrayList<>(all.size());
     for (SlickResult result : all) copy.add(fromSlickToMonitorResult(result));
     return copy;
   }
@@ -513,8 +512,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
     List<CorrectAndScore> cs = new ArrayList<>(slickCorrectAndScores.size());
-    String relPrefix = getRelPrefix(language);
-    slickCorrectAndScores.forEach(slickCorrectAndScore -> cs.add(fromSlickCorrectAndScoreWithRelPath(slickCorrectAndScore, relPrefix, language)));
+    String relPrefix = database.getRelPrefix(language);
+    slickCorrectAndScores
+        .forEach(slickCorrectAndScore -> cs.add(fromSlickCorrectAndScoreWithRelPath(slickCorrectAndScore, relPrefix, language)));
     return cs;
   }
 
@@ -524,10 +524,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
                                                               String relPrefix,
                                                               String language) {
     String path = cs.path();
-    boolean isLegacy = path.startsWith("answers");
-    String filePath = isLegacy ?
-        relPrefix + path :
-        trimPathForWebPage2(path);
+
+//    boolean isLegacy = path.startsWith("answers");
+//    String filePath = isLegacy ?
+//        relPrefix + path :
+//        trimPathForWebPage2(path);
+
+    String filePath = database.getWebPageAudioRefWithPrefix(relPrefix, path);
+
 
     String json = cs.json();
     CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
@@ -577,10 +581,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * <p>
    * answers/english/answers/plan/1039/1/subject-130
    *
-   * @param language
    * @return
+   * @paramx language
    */
-  private String getRelPrefix(String language) {
+/*  private String getRelPrefix(String language) {
     String installPath = database.getServerProps().getAnswerDir();
 
     String s = language.toLowerCase();
@@ -588,8 +592,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
 
     return prefix.substring(netProfDurLength) + File.separator;
-  }
-
+  }*/
   public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
     return dao.perf(projid, minScore);
   }

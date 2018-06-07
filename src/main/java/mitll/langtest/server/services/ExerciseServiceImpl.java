@@ -1507,7 +1507,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID);
     long now = System.currentTimeMillis();
     if (now - then > 50)
-      logger.info("getFullExercises took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
 
     return scoreHistories;
   }

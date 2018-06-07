@@ -193,7 +193,7 @@ public class PathHelper {
     return getAbsoluteWavPathUnder(planAndTestPath);
   }
 
-  public String getAbsoluteWavPathUnder(String planAndTestPath) {
+  private String getAbsoluteWavPathUnder(String planAndTestPath) {
     return getWavPath(getAnswerDir(), planAndTestPath);
   }
 

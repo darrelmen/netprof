@@ -155,8 +155,16 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     return foreignText;
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.client.result.ResultManager#respondToClick
+   */
   public String getAnswer() {
     return answer;
+  }
+
+  public void setAnswer(String orig) {
+    this.answer = orig;
   }
 
   public boolean isValid() {
@@ -197,8 +205,8 @@ public class MonitorResult implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#addUnitAndChapterToResults
    * @param unitToValue
+   * @see mitll.langtest.server.database.DatabaseImpl#addUnitAndChapterToResults
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
@@ -320,12 +328,11 @@ public class MonitorResult implements IsSerializable, UserAndTime {
 
           if (unitToValue1 != null && unitToValue2 != null) {
             if (unitToValue1.containsKey(field) || unitToValue2.containsKey(field)) {
-              String first  = unitToValue1.get(field);
+              String first = unitToValue1.get(field);
               String second = unitToValue2.get(field);
               if (first == null && second == null) {
                 comp = 0;
-              }
-              else {
+              } else {
                 comp = first == null ? +1 : second == null ? -1 : 0;
                 if (comp == 0) {
                   comp = compareTwoMaybeInts(first, second);
