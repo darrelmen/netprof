@@ -216,10 +216,6 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     return new EmailHelper(serverProps, getMailSupport());
   }
 
-  private MailSupport getMailSupport() {
-    return new MailSupport(serverProps);
-  }
-
   /**
    * @param user
    * @return true if there's a user with this email
