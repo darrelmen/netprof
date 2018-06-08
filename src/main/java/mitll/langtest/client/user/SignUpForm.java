@@ -40,6 +40,7 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,6 +50,7 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -57,8 +59,27 @@ import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
-
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  private static final String DLIFLC_EDU = "dliflc.edu";
+
+  // out of 1630 instances on 6/8/18
+  private static final List<String> DOMAINS =
+      Arrays.asList(DLIFLC_EDU,
+          "pom.dliflc.edu", // 5
+          "ll.mit.edu", //137
+          "gmail.com", // 219
+          "hotmail.com",
+          "mail.mil", //146
+          "us.af.mil",
+          "aol.com", // 3
+          "yahoo.com", //32
+          "cableone.net",
+          "comcast.net",
+          "icloud.com",
+          "outlook.com" // 5
+      );
+
 
   private static final int MIN_EMAIL_LENGTH = 7;
   private static final String BAD_PASS = "Your password is incorrect. Please try again.";
@@ -444,16 +465,92 @@ public class SignUpForm extends UserDialog implements SignUp {
     final TextBoxBase box = signUpEmail.box;
     String value = box.getValue();
     if (isValidEmail(value)) {
+      String[] split = value.split("@");
       if (value.endsWith("dliflc.com")) {
-        markErrorBlur(signUpEmail, "Did you mean dliflc.edu?");
+        didYouMean(split, DLIFLC_EDU);
+      } else {
+        if (split.length == 2) {
+          String server = split[1];
 
-      }
-      else {
-        warnIfAlreadyHasAccount(box, value);
+          // check for popular domain typos
+          boolean anyNear = false;
+
+          for (String domain : DOMAINS) {
+            int ed = ed(server, domain);
+            boolean isNear = ed > 0 && ed < 3;
+            if (isNear) {
+              didYouMean(split, domain);
+              anyNear = true;
+              break;
+            }
+          }
+
+
+          if (!anyNear) {
+            warnIfAlreadyHasAccount(box, value);
+          }
+        } else {
+          warnIfAlreadyHasAccount(box, value);
+        }
       }
     } else {
       markInvalidEmail();
     }
+  }
+
+  private void didYouMean(String[] split, String server) {
+    String suffix = "@" + server;
+    if (split.length == 2) {
+      suffix = split[0] + suffix;
+    }
+    String message = "Did you mean " + suffix + "?";
+
+    // markErrorBlur(signUpEmail, message);
+    markWarn(signUpEmail, "Did you mean?", message);
+  }
+
+  private int min(int x, int y, int z) {
+    if (x <= y && x <= z) return x;
+    if (y <= x && y <= z) return y;
+    else return z;
+  }
+
+  private int ed(String s1, String s2) {
+    return editDistDP(s1, s2, s1.length(), s2.length());
+  }
+
+  private int editDistDP(String str1, String str2, int m, int n) {
+    // Create a table to store results of subproblems
+    int dp[][] = new int[m + 1][n + 1];
+
+    // Fill d[][] in bottom up manner
+    for (int i = 0; i <= m; i++) {
+      for (int j = 0; j <= n; j++) {
+        // If first string is empty, only option is to
+        // isnert all characters of second string
+        if (i == 0)
+          dp[i][j] = j;  // Min. operations = j
+
+          // If second string is empty, only option is to
+          // remove all characters of second string
+        else if (j == 0)
+          dp[i][j] = i; // Min. operations = i
+
+          // If last characters are same, ignore last char
+          // and recur for remaining string
+        else if (str1.charAt(i - 1) == str2.charAt(j - 1))
+          dp[i][j] = dp[i - 1][j - 1];
+
+          // If the last character is different, consider all
+          // possibilities and find the minimum
+        else
+          dp[i][j] = 1 + min(dp[i][j - 1],  // Insert
+              dp[i - 1][j],  // Remove
+              dp[i - 1][j - 1]); // Replace
+      }
+    }
+
+    return dp[m][n];
   }
 
   private void warnIfAlreadyHasAccount(TextBoxBase box, String value) {
@@ -467,8 +564,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       public void onSuccess(Boolean isValid) {
         if (isValid) {
           eventRegistration.logEvent(box, "TextBox", "N/A", "account with email exists " + value);
-          markError(signUpEmail.group, signUpEmail.box, FORGOT_PASSWORD,
-              EXISTING_ACCOUNT, Placement.TOP, false, true, false);
+          markWarn(signUpEmail, FORGOT_PASSWORD, EXISTING_ACCOUNT);
         }
       }
     });

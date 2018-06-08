@@ -37,8 +37,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -139,7 +137,7 @@ public class ProjectEditForm extends UserDialog {
    * @see #addLanguage
    */
   private ListBox language;
-  private ListBox dominoProjects;
+  private ListBox dominoProjectsListBox;
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
@@ -207,13 +205,13 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(language.getSelectedValue());
-    DominoProject id = dominoToProject.get(dominoProjects.getSelectedValue());
+    DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
     if (id != null) {
       info.setDominoID(id.getDominoID());
       //logger.info(" project domino id now " + id.getDominoID());
     } else {
-      logger.info("no project for " + dominoProjects.getSelectedValue());
+      logger.info("no project for " + dominoProjectsListBox.getSelectedValue());
     }
 
     setCommonFields();
@@ -295,7 +293,7 @@ public class ProjectEditForm extends UserDialog {
       return false;
       // } else if (dominoProjects.getSelectedIndex() == -1 && dominoProjects.getItemCount() > 0) {
     } else if (unit.getSafeText().isEmpty()) {
-      logger.info("isValid : selected " + dominoProjects.getSelectedIndex() + " vs " + dominoProjects.getItemCount() +
+      logger.info("isValid : selected " + dominoProjectsListBox.getSelectedIndex() + " vs " + dominoProjectsListBox.getItemCount() +
           " unit = '" + unit.getSafeText() + "'");
       Window.alert(PLEASE_SELECT_A_DOMINO_PROJECT);
       return false;
@@ -321,7 +319,7 @@ public class ProjectEditForm extends UserDialog {
     info.setLanguage(getLanguageChoice());
 
     {
-      DominoProject id = dominoToProject.get(dominoProjects.getValue());
+      DominoProject id = dominoToProject.get(dominoProjectsListBox.getValue());
 
       if (id != null) {
         info.setDominoID(id.getDominoID());
@@ -489,20 +487,19 @@ public class ProjectEditForm extends UserDialog {
     name.getElement().getStyle().setMarginTop(0, PX);
 
     this.language = new ListBox();
-    final ListBox outer = this.language;
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(outer.getSelectedValue(), new AsyncCallback<List<DominoProject>>() {
+    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(), new AsyncCallback<List<DominoProject>>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        logger.warning("got failure asking for " + language.getSelectedValue());
       }
 
       @Override
       public void onSuccess(List<DominoProject> result) {
-        dominoProjects.clear();
+        dominoProjectsListBox.clear();
 
         result.forEach(dominoProject -> {
           String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-          dominoProjects.addItem(item);
+          dominoProjectsListBox.addItem(item);
           dominoToProject.put(item, dominoProject);
 
         });
@@ -545,20 +542,20 @@ public class ProjectEditForm extends UserDialog {
     DivWidget name = getHDivLabel(fieldset, DOMINO_PROJECT, false);
     name.getElement().getStyle().setMarginTop(0, PX);
 
-    this.dominoProjects = new ListBox();
-    this.dominoProjects.addStyleName("leftTenMargin");
+    this.dominoProjectsListBox = new ListBox();
+    this.dominoProjectsListBox.addStyleName("leftTenMargin");
 
-    name.add(this.dominoProjects);
+    name.add(this.dominoProjectsListBox);
 
-    dominoProjects.addChangeHandler(event -> {
-      String selectedValue = dominoProjects.getSelectedValue();
+    dominoProjectsListBox.addChangeHandler(event -> {
+      String selectedValue = dominoProjectsListBox.getSelectedValue();
       setUnitAndChapter(selectedValue, dominoToProject.get(selectedValue));
     });
 
     if (isNew) {
-      this.dominoProjects.addItem(PLEASE_SELECT_A_DOMINO_PROJECT);
+      this.dominoProjectsListBox.addItem(PLEASE_SELECT_A_DOMINO_PROJECT);
     } else {
-      ListBox outer = dominoProjects;
+      ListBox outer = dominoProjectsListBox;
       projectServiceAsync.getDominoForLanguage(info.getLanguage(), new AsyncCallback<List<DominoProject>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -567,14 +564,14 @@ public class ProjectEditForm extends UserDialog {
 
         @Override
         public void onSuccess(List<DominoProject> result) {
-          dominoProjects.clear();
+          dominoProjectsListBox.clear();
 
           result.forEach(dominoProject -> {
             String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-            dominoProjects.addItem(item);
+            dominoProjectsListBox.addItem(item);
             dominoToProject.put(item, dominoProject);
             if (info.getDominoID() == dominoProject.getDominoID()) {
-              outer.setItemSelected(dominoProjects.getItemCount() - 1, true);
+              outer.setItemSelected(dominoProjectsListBox.getItemCount() - 1, true);
             }
           });
 
@@ -791,6 +788,7 @@ public class ProjectEditForm extends UserDialog {
   /**
    * Production status controls whether show on iOS is enabled.
    * Only production projects are visible on iOS.
+   *
    * @return
    */
   private ListBox getStatusChoices() {

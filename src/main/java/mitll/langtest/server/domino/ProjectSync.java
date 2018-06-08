@@ -41,10 +41,7 @@ public class ProjectSync implements IProjectSync {
   public static final String NAME = "name";
   public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
-  /**
-   * @seex #getNewAndChangedContextExercises(int, ImportInfo, List, List, Set, Map)
-   */
-//  private static final String CONTEXT_SENTENCE = "Context sentence.";
+
   public static final String UNKNOWN = "unknown";
   private final SimpleDateFormat format = new SimpleDateFormat("MMM d, yy h:mm a");
 

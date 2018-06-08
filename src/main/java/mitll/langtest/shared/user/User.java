@@ -61,7 +61,7 @@ public class User extends MiniUser implements ReportUser {
   @Deprecated
   private String dialect;
 
-  private String resetKey ="";
+  private String resetKey = "";
 
   private String ipaddr;
 
@@ -174,7 +174,6 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
-   * @see DominoUserDAOImpl#toUser
    * @param id
    * @param userID
    * @param gender
@@ -187,6 +186,7 @@ public class User extends MiniUser implements ReportUser {
    * @param timestamp
    * @param affiliation
    * @param hasAppPermission
+   * @see DominoUserDAOImpl#toUser
    */
   public User(int id,
               String userID,
@@ -266,7 +266,7 @@ public class User extends MiniUser implements ReportUser {
     this.email = email;
     //  this.emailHash = emailHash;
     this.userKind = userKind;
-    this.setEnabled(enabled);
+    this.enabled = enabled;
     this.admin = isAdmin;
     this.permissions = permissions;
     this.nativeLang = nativeLang;
@@ -378,9 +378,11 @@ public class User extends MiniUser implements ReportUser {
     return enabled;
   }
 
+/*
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
+*/
 
   public boolean hasResetKey() {
     return resetKey != null && !resetKey.isEmpty();
@@ -390,14 +392,14 @@ public class User extends MiniUser implements ReportUser {
     return resetKey;
   }
 
-  @Deprecated
+/*  @Deprecated
   public String getNativeLang() {
     return nativeLang;
-  }
-
+  }*/
+/*
   public String getDialect() {
     return dialect;
-  }
+  }*/
 
   @Override
   public String getDevice() {
@@ -416,18 +418,22 @@ public class User extends MiniUser implements ReportUser {
     this.email = email;
   }
 
+/*
   public void setDialect(String dialect) {
     this.dialect = dialect;
   }
+*/
 
 
   public String getFullName() {
     return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
   }
 
+/*
   public void setAdmin(boolean admin) {
     this.admin = admin;
   }
+*/
 
   /**
    * Two cases-

@@ -472,32 +472,32 @@ public class ProjectChoices {
    */
   private void showNewProjectDialog() {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
-    DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
-      @Override
-      public boolean gotYes() {
-        if (projectEditForm.isValid()) {
-          projectEditForm.newProject();
-          return true;
-        } else {
-          return false;
-        }
-      }
 
-      @Override
-      public void gotNo() {
-      }
+    new DialogHelper(true)
+        .show(
+            CREATE_NEW_PROJECT,
+            projectEditForm.getForm(new ProjectInfo(), true),
+            new DialogHelper.CloseListener() {
+              @Override
+              public boolean gotYes() {
+                if (projectEditForm.isValid()) {
+                  projectEditForm.newProject();
+                  return true;
+                } else {
+                  return false;
+                }
+              }
 
-      @Override
-      public void gotHidden() {
+              @Override
+              public void gotNo() {
+              }
 
-      }
-    };
+              @Override
+              public void gotHidden() {
 
-    new DialogHelper(true).show(
-        CREATE_NEW_PROJECT,
-        projectEditForm.getForm(new ProjectInfo(), true),
-        listener,
-        DIALOG_HEIGHT, -1);
+              }
+            },
+            DIALOG_HEIGHT, -1);
   }
 
   /**

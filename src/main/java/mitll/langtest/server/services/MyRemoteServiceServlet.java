@@ -111,7 +111,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   protected boolean hasAdminPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    return getPermissions(userIDFromSessionOrDB).contains(User.Permission.PROJECT_ADMIN);
+    return getPermissions(userIDFromSessionOrDB)
+        .contains(User.Permission.PROJECT_ADMIN);
+  }
+
+  protected boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    return permissions
+        .contains(User.Permission.PROJECT_ADMIN);
   }
 
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {

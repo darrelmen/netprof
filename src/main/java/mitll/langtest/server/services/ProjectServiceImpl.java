@@ -211,14 +211,16 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   @Override
-  public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+  public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    //if (hasAdminPerm(userIDFromSessionOrDB)) {
       return db.getProjectSync().getDominoForLanguage(lang);
-    } else {
-      throw getRestricted("getting domino projects");
-    }
+   // } else {
+    //  throw getRestricted("getting domino projects");
+   // }
   }
 
+/*
   @Override
   public String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
@@ -227,6 +229,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       throw getRestricted("getProperty");
     }
   }
+*/
 
 /*
   @Override
@@ -261,6 +264,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+/*
   @Override
   public boolean setProperty(int projid, ProjectProperty key, String newValue) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
@@ -269,6 +273,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       throw getRestricted("setProperty");
     }
   }
+*/
 
   @Override
   public boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException {

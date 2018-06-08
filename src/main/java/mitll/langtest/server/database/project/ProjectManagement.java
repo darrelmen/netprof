@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.project;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
@@ -88,7 +87,10 @@ public class ProjectManagement implements IProjectManagement {
    * JUST FOR TESTING
    */
   private static final String LANG_TO_LOAD = "";
-  public static final String DOMINO_NAME = "Domino Name";
+  /**
+   * @see #addOtherProps
+   */
+  private static final String DOMINO_NAME = "Domino Name";
   /**
    * JUST FOR TESTING
    */
@@ -98,6 +100,9 @@ public class ProjectManagement implements IProjectManagement {
   private static final boolean ADD_DEFECTS = false;
 
   private static final String SYNCED = "Last Sync";
+  /**
+   * @see #addDateProps(SlickProject, Map)
+   */
   private static final String CREATED = "Created";
   public static final String MODIFIED = "Modified";
   /**
@@ -929,6 +934,10 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, String> info = new LinkedHashMap<>();
 
     SlickProject project = pproject.getProject();
+    User creator = db.getUserDAO().getByID(project.userid());
+    String userInfo = creator == null ? "" : " : " + creator.getUserID();
+    info.put(CREATED + " by", project.userid() + userInfo);
+
     addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);

@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static com.github.gwtbootstrap.client.ui.constants.Placement.TOP;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -348,6 +350,14 @@ public class BasicDialog {
   private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     markErrorOnGroup(dialectGroup);
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement, true);
+  }
+
+  void markWarn(FormField signUpEmail, String header, String message) {
+    markWarn(signUpEmail.group, signUpEmail.box, header, message);
+  }
+
+  void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+    markError(dialectGroup, dialect, header, message, TOP, false, true, false);
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus, boolean isWarning, boolean requestFocus) {
