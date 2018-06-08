@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
 
-  private static final String UPDATING_PROJECT_INFO = "updating project info";
+  public static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
 

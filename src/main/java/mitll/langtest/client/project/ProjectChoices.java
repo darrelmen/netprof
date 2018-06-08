@@ -145,7 +145,7 @@ public class ProjectChoices {
       // logger.info("show initial " + level);
       showInitialChoices(level);
     } else {
-      logger.info("show choice for parent " + parent.getName() + " " + level);
+     // logger.info("show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }

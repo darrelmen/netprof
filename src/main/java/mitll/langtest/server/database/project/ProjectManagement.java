@@ -99,6 +99,9 @@ public class ProjectManagement implements IProjectManagement {
   private static final int IMPORT_PROJECT_ID = DatabaseImpl.IMPORT_PROJECT_ID;
   private static final boolean ADD_DEFECTS = false;
 
+  /**
+   *
+   */
   private static final String SYNCED = "Last Sync";
   /**
    * @see #addDateProps(SlickProject, Map)
@@ -998,7 +1001,7 @@ public class ProjectManagement implements IProjectManagement {
   private void addDateProps(SlickProject project, Map<String, String> info) {
     info.put(CREATED, format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
-    info.put(SYNCED, format.format(project.lastnetprof()));
+    info.put(SYNCED, format.format(project.lastimport()));
   }
 
   @NotNull

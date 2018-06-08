@@ -100,7 +100,8 @@ public class ProjectSync implements IProjectSync {
 
   @Override
   @NotNull
-  public DominoUpdateResponse getDominoUpdateResponse(int projectid, int importUser, boolean doChange, ImportInfo importFromDomino) {
+  public DominoUpdateResponse getDominoUpdateResponse(int projectid, int importUser, boolean doChange,
+                                                      ImportInfo importFromDomino) {
     long requestTime = System.currentTimeMillis();
     Project project = projectServices.getProject(projectid);
 

@@ -66,8 +66,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  public static final String IN_PROGRESS = "In progress...";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
+
+  public static final String IN_PROGRESS = "In progress...";
 
   public static final String PROJECT_TYPE = "Project Type";
   public static final boolean SHOW_PROJECT_TYPE = false;
@@ -282,7 +283,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   boolean isValid() {
-    logger.info("isValid unit '" + unit.getSafeText() + "'");
+  //  logger.info("isValid unit '" + unit.getSafeText() + "'");
 
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
@@ -575,7 +576,7 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
-          logger.info("got " + result.size() + " matching projects.");
+     //     logger.info("got " + result.size() + " matching projects.");
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
@@ -595,12 +596,12 @@ public class ProjectEditForm extends UserDialog {
    */
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-      logger.info("setUnitAndChapter got " + dominoProject);
+    //  logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
-      logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
+    //  logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
-      logger.info("setUnitAndChapter no domino project for " + selectedValue);
+     // logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }
   }
 

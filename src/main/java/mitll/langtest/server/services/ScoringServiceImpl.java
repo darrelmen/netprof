@@ -773,7 +773,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     else {
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
-      String actualPath = ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+      /*String actualPath =*/ ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
 //    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
   }
