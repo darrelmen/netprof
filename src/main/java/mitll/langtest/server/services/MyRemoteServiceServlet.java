@@ -117,8 +117,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    return permissions
+    boolean hasPerm = permissions
         .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
+    logger.info("hasAdminOrCDPerm for " +userIDFromSessionOrDB + " are " + permissions + " has perm "+ hasPerm);
+    return hasPerm;
   }
 
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
@@ -145,9 +147,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     if (!enabled) logger.info("getPermissions user " + userIDFromSessionOrDB + " not enabled");
     if (!isApprovedForNetprof) logger.info("getPermissions user " + userIDFromSessionOrDB + " not approved to use net");
 
-/*    logger.info("getPermissions for" +
-        "\nuser " + userFromSession +
-        "\nperms " + userFromSession.getPermissions());*/
+   logger.info("getPermissions for" +
+        "\nuser  " + userFromSession +
+        "\nperms " + userFromSession.getPermissions());
 
     return enabled && isApprovedForNetprof ? userFromSession.getPermissions() : Collections.emptyList();
   }

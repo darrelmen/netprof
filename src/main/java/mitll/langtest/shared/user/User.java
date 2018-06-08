@@ -94,9 +94,13 @@ public class User extends MiniUser implements ReportUser {
       case AUDIO_RECORDER:
         return Collections.singleton(RECORD_AUDIO);
       case QAQC:
+        return Arrays.asList(
+            RECORD_AUDIO,
+            QUALITY_CONTROL);
       case CONTENT_DEVELOPER:
         return Arrays.asList(
             RECORD_AUDIO,
+            DEVELOP_CONTENT,
             QUALITY_CONTROL);
       case PROJECT_ADMIN:
       case ADMIN:
