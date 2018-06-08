@@ -61,10 +61,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return end;
   }
 
-  public enum LIST_TYPE {
-    NORMAL,
-    QUIZ
-  }
+  public enum LIST_TYPE {NORMAL, QUIZ}
 
   private int projid;
 
@@ -142,8 +139,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.start = start;
     this.end = end;
     this.duration = duration;
-    this.minScore=minScore;
-    this.showAudio=showAudio;
+    this.minScore = minScore;
+    this.showAudio = showAudio;
   }
 
   @Override

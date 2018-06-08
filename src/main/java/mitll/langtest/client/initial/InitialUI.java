@@ -160,8 +160,12 @@ public class InitialUI implements UILifecycle {
     this.userManager = userManager;
     this.controller = langTest;
     this.choices = new ProjectChoices(langTest, this);
-    banner = new NewBanner(userManager, this, new UserMenu(langTest, userManager, this),
-        breadcrumbs = getBreadcrumbs(), controller);
+    banner =
+        new NewBanner(userManager,
+            this,
+            new UserMenu(langTest, userManager, this),
+            breadcrumbs = getBreadcrumbs(),
+            controller);
   }
 
   public INavigation getNavigation() {
@@ -506,7 +510,7 @@ public class InitialUI implements UILifecycle {
   private void showNavigation() {
     int childCount = contentRow.getElement().getChildCount();
     if (childCount <= 2) {
-   //   logger.info("showNavigation : - add to content root = " + childCount);
+      //   logger.info("showNavigation : - add to content root = " + childCount);
       contentRow.remove(child);
       if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());

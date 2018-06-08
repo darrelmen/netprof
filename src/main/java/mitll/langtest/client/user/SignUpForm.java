@@ -444,7 +444,13 @@ public class SignUpForm extends UserDialog implements SignUp {
     final TextBoxBase box = signUpEmail.box;
     String value = box.getValue();
     if (isValidEmail(value)) {
-      warnIfAlreadyHasAccount(box, value);
+      if (value.endsWith("dliflc.com")) {
+        markErrorBlur(signUpEmail, "Did you mean dliflc.edu?");
+
+      }
+      else {
+        warnIfAlreadyHasAccount(box, value);
+      }
     } else {
       markInvalidEmail();
     }

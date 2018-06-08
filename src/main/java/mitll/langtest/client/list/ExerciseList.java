@@ -985,7 +985,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void setShuffle(boolean doShuffle) {
     simpleSetShuffle(doShuffle);
-    rememberAndLoadFirst(getInOrder());
+    Scheduler.get().scheduleDeferred(()->rememberAndLoadFirst(getInOrder()));
+
+   // rememberAndLoadFirst(getInOrder());
   }
 
   /**
@@ -994,6 +996,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   public void simpleSetShuffle(boolean doShuffle) {
     this.doShuffle = doShuffle;
+  }
+
+  public boolean isShuffle() {
+    return doShuffle;
   }
 
   /**

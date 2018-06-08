@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -37,6 +38,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
 
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
+  private static final String SHUFFLE = "Shuffle";
   private String language;
   private static final boolean DEBUG = false;
 
@@ -72,6 +74,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       w1.addItem(LENGTH_LONG_TO_SHORT);
       w1.addItem(SCORE_LOW_TO_HIGH);
       w1.addItem(SCORE_DSC);
+      w1.addItem(SHUFFLE);
 
       w1.addChangeHandler(event -> ListSorting.this.onChange(w1, langASC, langDSC));
 
@@ -143,11 +146,10 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       toStore = LANG_DSC;
     }
     exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
-    logger.info("START onChange Sort by " + selectedValue + " to sort is null ");
+    if (DEBUG) logger.info("START onChange Sort by " + selectedValue + " to sort is null ");
 
     sortByValue(null, selectedValue, langASC, langDSC);
-    //exerciseList.flushWith();
-    logger.info("END   onChange Sort by " + selectedValue + " to sort is null ");
+    if (DEBUG) logger.info("END   onChange Sort by " + selectedValue + " to sort is null ");
   }
 
   /**
@@ -177,24 +179,27 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     } else if (selectedValue.equals(langDSC)) {
       sortBy(toSort, (o1, o2) -> -1 * compForeign(o1, o2));
     } else if (selectedValue.equals(SCORE_LOW_TO_HIGH)) {
-      sortBy(toSort, (o1, o2) -> {
-        int i = compareScores(o1, o2);
-        return compareShells(o1, o2, i);
-      });
+      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compareScores(o1, o2)));
     } else if (selectedValue.equals(SCORE_DSC)) {
-      sortBy(toSort, (o1, o2) -> {
-        int i = -1 * compareScores(o1, o2);
-        return compareShells(o1, o2, i);
-      });
+      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, -1 * compareScores(o1, o2)));
+    } else if (selectedValue.equals(SHUFFLE)) {
+      sortBy(toSort, this::compRand);
     } else {
       logger.warning("sortByValue huh? no match " + selectedValue);
     }
 
     if (toSort == null) {
-      if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort is null " + (toSort == null));
+      if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort is null ");
     } else {
       if (DEBUG) logger.info("FINISH Sort by " + selectedValue + " to sort has " + (toSort.size()));
     }
+  }
+
+  private Random random = new Random();
+
+  private int compRand(T o1, T o2) {
+    int i = random.nextInt(2);
+    return (i == 0) ? -1 : 1;
   }
 
   /**

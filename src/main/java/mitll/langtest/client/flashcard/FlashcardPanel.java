@@ -115,6 +115,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    *
    */
   private static final String CLICK_TO_FLIP = "Click to flip";
+  /**
+   * @see #getShuffleButton
+   */
   private static final String SHUFFLE = "Shuffle";
 
   final T exercise;

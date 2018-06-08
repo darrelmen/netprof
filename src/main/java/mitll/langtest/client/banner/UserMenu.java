@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -30,6 +31,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.Kind;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -39,6 +41,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
+  public static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
@@ -201,13 +204,21 @@ public class UserMenu {
 
     choices.add(getChangePassword());
 
-    if (userManager.getCurrent().getUserKind() == Kind.STUDENT) {
+    maybeAddReqInstructor(choices);
+
+    return choices;
+  }
+
+  private void maybeAddReqInstructor(List<LinkAndTitle> choices) {
+    User current = userManager.getCurrent();
+
+    if (current != null && !current.isTeacher() && !current.getPermissions().contains(User.Permission.TEACHER_PERM)) {
       choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS, new SuccessClickHandler(() -> {
-        new DialogHelper(true).show("Are you an instructor?",
+        new DialogHelper(true).show(ARE_YOU_AN_INSTRUCTOR,
             REQ_MESSAGE, new DialogHelper.CloseListener() {
               @Override
               public boolean gotYes() {
-                logger.info("Sending request.");
+                //logger.info("Sending request.");
                 controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
@@ -234,9 +245,9 @@ public class UserMenu {
             }, "OK", "Cancel");
       })));
     }
+
     choices.add(getLogOut());
 
-    return choices;
   }
 
   @NotNull

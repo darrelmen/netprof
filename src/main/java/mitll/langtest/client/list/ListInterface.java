@@ -127,6 +127,8 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   void simpleSetShuffle(boolean doShuffle);
 
+  boolean isShuffle();
+
   void reload(Map<String, Collection<String>> typeToSection);
 
   /**
