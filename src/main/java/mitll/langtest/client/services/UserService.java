@@ -62,4 +62,6 @@ public interface UserService extends RemoteService {
    * @see ChangePasswordView#changePassword
    */
   boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
+
+  void sendTeacherRequest() throws DominoSessionException;
 }

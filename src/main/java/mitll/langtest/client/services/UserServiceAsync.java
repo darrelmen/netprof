@@ -66,4 +66,6 @@ public interface UserServiceAsync {
   void logout(AsyncCallback<Void> async);
 
   void getUsersSince(long when, AsyncCallback<List<ActiveUser>> async);
+
+  void sendTeacherRequest(AsyncCallback<Void> async);
 }

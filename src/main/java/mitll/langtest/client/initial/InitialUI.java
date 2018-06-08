@@ -113,6 +113,9 @@ public class InitialUI implements UILifecycle {
    */
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
+  /**
+   * Critical - don't mess with this.
+   */
   protected static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
 
@@ -129,7 +132,6 @@ public class InitialUI implements UILifecycle {
 
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
-  private final UserFeedback userFeedback;
   protected final PropertyHandler props;
 
   private final IBanner banner;
@@ -157,7 +159,6 @@ public class InitialUI implements UILifecycle {
     this.props = langTest.getProps();
     this.userManager = userManager;
     this.controller = langTest;
-    userFeedback = langTest;
     this.choices = new ProjectChoices(langTest, this);
     banner = new NewBanner(userManager, this, new UserMenu(langTest, userManager, this),
         breadcrumbs = getBreadcrumbs(), controller);
@@ -972,8 +973,4 @@ public class InitialUI implements UILifecycle {
   public void setSplash(String message) {
     banner.setSubtitle(message);
   }
-
-//  public void setVisible(boolean visible) {
-//    banner.setVisible(visible);
-//  }
 }

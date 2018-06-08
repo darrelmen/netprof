@@ -76,6 +76,9 @@ public class ResetPassword extends UserDialog {
   private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
   private static final String PASSWORD_HAS_BEEN_CHANGED = "Password has been changed";
   private static final String SUCCESS = "Success";
+  /**
+   * @see ResetPassword#getChangePasswordButton(String, FormField, FormField, FormField)
+   */
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
   /**

@@ -35,6 +35,7 @@ package mitll.langtest.client.initial;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.recorder.RecordButton;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -47,6 +48,8 @@ import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * Client side properties.
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/30/13
@@ -100,14 +103,12 @@ public class PropertyHandler {
   private static final String DOMINO_SERVER = "domino.url";
 
   private static final String HELP = "help";
+  private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
-  private static final String HELP_DEFAULT = "Please consult the user manual or send email to " +
-      "<a href=\"mailto:" +
-      NETPROF_HELP_DLIFLC_EDU +
-      "\">" +
-      NETPROF_HELP_DLIFLC_EDU +
-      "</a>" +
-      ".";
+  //private String HELP_DEFAULT = getHelpDefault();
+
+
+
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
@@ -124,7 +125,7 @@ public class PropertyHandler {
    *
    */
   private static final String DOMINO_SERVER_DEFAULT = "http://ltea-data2-dev:8080/domino-ltea/";
-  private String dominoURL = DOMINO_SERVER_DEFAULT, helpMessage = HELP_DEFAULT;
+  private String dominoURL = DOMINO_SERVER_DEFAULT;
 
   /**
    * @return
@@ -216,6 +217,8 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
+  private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
+  private String helpMessage = "";
 
   /**
    * @param props
@@ -254,6 +257,7 @@ public class PropertyHandler {
       else if (key.equals(FONT_FAMILY)) fontFamily = value;
       else if (key.equals(DOMINO_SERVER)) dominoURL = value;
       else if (key.equals(HELP)) helpMessage = value;
+      else if (key.equals(HELP_EMAIL)) helpEmail = value;
       else if (key.equals(AFTER_STOP_DELAY_MILLIS)) {
         afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
       } else if (key.equals(USE_PHONE_TO_DISPLAY)) {
@@ -492,7 +496,18 @@ public class PropertyHandler {
   }
 
   public String getHelpMessage() {
-    return helpMessage;
+    return helpMessage.isEmpty() ? getHelpDefault() : helpMessage;
+  }
+
+  @NotNull
+  private String getHelpDefault() {
+    return "Please consult the user manual or send email to " +
+        "<a href=\"mailto:" +
+        helpEmail +
+        "\">" +
+        helpEmail +
+        "</a>" +
+        ".";
   }
 
   String getSendResetPassToken() {
@@ -505,6 +520,10 @@ public class PropertyHandler {
 
   public boolean isShowAdvertiseIOS() {
     return showAdvertiseIOS;
+  }
+
+  public String getHelpEmail() {
+    return helpEmail;
   }
 
 /*  public String getAMASHelpMessage() {

@@ -92,6 +92,33 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   }
 
+  /**
+   * Try to make it easier to mark users as teachers via netprof-help.
+   *
+   * @throws DominoSessionException
+   */
+  @Override
+  public void sendTeacherRequest() throws DominoSessionException {
+    User userFromSession = getUserFromSession();
+    getMailSupport().sendHTMLEmail(serverProps.getHelpEmail(), serverProps.getMailReplyTo(),
+        "Instructor Status Request",
+        "Hi,<br/>" +
+            " A Netprof user<br/>" +
+            "<br/> * named <b>" + userFromSession.getName() + "</b>" +
+            "<br/> * user id <b>" + userFromSession.getID() + "</b>" +
+            "<br/> * email <b>" + userFromSession.getEmail() + "</b>" +
+            " has requested instructor permissions in Netprof." +
+            "<br/><br/>If this person is an instructor, please go to " +
+
+            "<a href='https://" + serverProps.getDominoServer() + "'>" + serverProps.getDominoServer() + "</a>" +
+
+            " and " +
+            "<br/> find their user profile, choose Roles, and click on Teacher." +
+            "<br/>Finally, perhaps consider sending them a confirmation email." +
+            "<br/>Thanks,<br/> Netprof Administrator"
+    );
+  }
+
   private String getBaseURL() {
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
   }

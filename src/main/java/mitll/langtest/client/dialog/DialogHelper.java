@@ -51,6 +51,8 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
+  public static final String OK = "OK";
+  public static final String CANCEL = "Cancel";
   //private final Logger logger = Logger.getLogger("DialogHelper");
   private final boolean doYesAndNo;
   private Modal dialogBox;
@@ -76,16 +78,17 @@ public class DialogHelper {
   private void showErrorMessage(String title, Collection<String> msgs) {
     show(title, msgs, null, "Close", "No", null, -1);
   }
+
 /*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
     show(title, Collections.singletonList(msg), buttonName, listener);
   }*/
 
-  public void show(String title, Collection<String> msgs, final CloseListener listener) {
-    show(title, msgs, null, "Yes", "No", listener, -1);
+  public void show(String title, Collection<String> msgs, final CloseListener listener, String okTitle, String cancelTitle) {
+    show(title, msgs, null, okTitle, cancelTitle, listener, -1);
   }
 
   public Button show(String title, Widget contents, CloseListener listener, int max, int width) {
-    return show(title, Collections.emptyList(), contents, "OK", "Cancel", listener, max, width, false);
+    return show(title, Collections.emptyList(), contents, OK, CANCEL, listener, max, width, false);
   }
 
   public Button show(String title,
@@ -119,7 +122,8 @@ public class DialogHelper {
   }
 
   @NotNull
-  private Button showDialog(String title, Collection<String> msgs, Widget other, String cancelButtonName,
+  private Button showDialog(String title, Collection<String> msgs, Widget other,
+                            String cancelButtonName,
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();

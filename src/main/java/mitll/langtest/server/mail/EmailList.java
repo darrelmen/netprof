@@ -82,6 +82,7 @@ public class EmailList {
    * Set this property for non-DLI deployments.
    */
   private static final String REPORT_EMAILS = "reportEmails";
+  private static final String LOG_MAILTO = "log.mailto";
 
   /**
    * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500
@@ -129,8 +130,21 @@ public class EmailList {
     return reportEmails;
   }
 
+  /**
+   * Use the system property
+   *
+   *  log.mailto
+   *
+   * defined in
+   *
+   *  /opt/tomcat-latest/bin/setenv.sh
+   *
+   *  if it's defined... which it should be.
+   *
+   * @return
+   */
   public String getEmailAddress() {
-    String property = System.getProperty("log.mailto");
+    String property = System.getProperty(LOG_MAILTO);
     return property == null ? props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL) : property;
   }
 

@@ -46,9 +46,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
 
-  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
+//  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
-  private static final String MAIL_TO = "mailto:" + NETPROF_HELP_LL_MIT_EDU + "?" + "Subject=" + MAILTO_SUBJECT;
+ // private String MAIL_TO = getMailTo();
+
+  @NotNull
+  private String getMailTo() {
+    return "mailto:" + controller.getProps().getHelpEmail() + "?" + "Subject=" + MAILTO_SUBJECT;
+  }
 
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Contact us";
   private static final String DOCUMENTATION = "User Manual";
@@ -458,7 +463,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private NavLink getContactUs() {
-    return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, MAIL_TO);
+    return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, getMailTo());
   }
 
   /**

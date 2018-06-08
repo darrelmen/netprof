@@ -208,6 +208,18 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       results = getTrieFromFL(flText, results).getMatchesLC(flText);
     }
 
+    AtomicInteger atomicInteger = fixAudioPaths(projectID, results);
+    logger.info("getResults :" +
+        "\n\trequest " + unitToValue +
+        "\n\tuser    " + userid +
+        "\n\ttext    '" + flText + "'" +
+        "\n\tconverted " + atomicInteger.get() +
+        "\n\treturning " + results.size() + " results...");
+    return new ArrayList<>(results);
+  }
+
+  @NotNull
+  private AtomicInteger fixAudioPaths(int projectID, Collection<MonitorResult> results) {
     Database database = db.getDatabase();
     String relPrefix = database.getRelPrefix(getLanguage(getProject(projectID)));
 
@@ -229,13 +241,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
         monitorResult.setAnswer(webPageAudioRefWithPrefix);
       }
     });
-    logger.info("getResults :" +
-        "\n\trequest " + unitToValue +
-        "\n\tuser    " + userid +
-        "\n\ttext    '" + flText + "'" +
-        "\n\tconverted " + atomicInteger.get() +
-        "\n\treturning " + results.size() + " results...");
-    return new ArrayList<>(results);
+    return atomicInteger;
   }
 
   @NotNull

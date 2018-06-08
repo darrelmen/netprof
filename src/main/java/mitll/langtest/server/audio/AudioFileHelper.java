@@ -1334,6 +1334,26 @@ public class AudioFileHelper implements AlignDecode {
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
     File originalFile = new File(testAudioFile);
+
+// try to fix the path for old audio files.
+    if (!originalFile.exists()) {
+      String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
+      File file = new File(absolutePath);
+      if (!file.exists()) {
+        String relPrefix = db.getDatabase().getRelPrefix(language);
+
+        if (!testAudioFile.startsWith(relPrefix)) {
+          String webPageAudioRefWithPrefix = db.getDatabase().getWebPageAudioRefWithPrefix(relPrefix, testAudioFile);
+          logger.info("getASRScoreForAudio  no testAudioFile for " +
+              "\n\tsentence " + sentence +
+              "\n\tat       " + originalFile.getAbsolutePath() +
+              "\n\ttrying   " + webPageAudioRefWithPrefix);
+          testAudioFile = webPageAudioRefWithPrefix;
+          originalFile = new File(testAudioFile);
+        }
+      }
+    }
+
     if (!originalFile.exists()) {
       String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
       File file = new File(absolutePath);

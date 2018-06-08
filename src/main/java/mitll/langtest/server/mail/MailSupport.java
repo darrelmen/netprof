@@ -162,18 +162,30 @@ public class MailSupport {
 
   }
 
+ public boolean sendHTMLEmail(String to,
+                        String replyTo,
+                        String subject,
+                        String message) {
+    return sendEmail(null, to, replyTo, subject, message, null, Collections.emptyList());
+  }
+
   /**
-   * @param baseURL
+   * @param baseURL  null OK
    * @param to
    * @param replyTo
    * @param subject
    * @param message
-   * @param linkText
+   * @param linkText null OK
    * @param ccEmails
    * @see EmailHelper#sendEmail
    */
-  boolean sendEmail(String baseURL, String to, String replyTo, String subject, String message,
-                    String linkText, Collection<String> ccEmails) {
+  boolean sendEmail(String baseURL,
+                    String to,
+                    String replyTo,
+                    String subject,
+                    String message,
+                    String linkText,
+                    Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
@@ -378,8 +390,8 @@ public class MailSupport {
 
     {// creates body part for the message
       MimeBodyPart messageBodyPart = new MimeBodyPart();
-      String htmlEmail = getHTMLEmail(null, messageBody, null);
-      messageBodyPart.setContent(htmlEmail, "text/html");
+      // String htmlEmail = getHTMLEmail(null, messageBody, null);
+      messageBodyPart.setContent(getHTMLEmail(null, messageBody, null), "text/html");
       // messageBodyPart.setText(htmlEmail, "utf-8", "text/html");
 
       // adds parts to the multipart
@@ -535,7 +547,7 @@ public class MailSupport {
     props.put(MAIL_SMTP_HOST, email_server);
     props.put(MAIL_DEBUG, "" + debugEmail);
 
-   // logger.info("getMailProps : smtp host = " + email_server);
+    // logger.info("getMailProps : smtp host = " + email_server);
     logger.info("getMailProps : props     = " + props);
 
     if (useTestEmail) {

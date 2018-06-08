@@ -133,6 +133,10 @@ public class ServerProperties {
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
   public static final int DEFAULT_PERIOD = 5 * 60 * 1000;
+  public static final String DOMINO_LL_MIT_EDU = "domino.ll.mit.edu";
+  public static final String LOG_MAILHOST = "log.mailhost";
+  public static final String LOG_MAILFROM = "log.mailfrom";
+  public static final String MAIL_FROM = "mail.from";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -154,7 +158,7 @@ public class ServerProperties {
   private static final String CONFIG_FILE1 = "config.file";
   private static final String RELEASE_DATE = "releaseDate";
   // use postfix relay to llmx2
-  private static final String LLMAIL_LL_MIT_EDU = "localhost";//llmx2.ll.mit.edu";//"llmail.ll.mit.edu";
+  private static final String LLMAIL_LL_MIT_EDU = "localhost";
 
   private static final String NP_SERVER = "netprof.ll.mit.edu";
 
@@ -213,6 +217,9 @@ public class ServerProperties {
 
   public static final String BEST_AUDIO = "bestAudio";
   private static final String ANSWERS = "answers";
+
+  private static final String HELP_EMAIL = "helpEmail";
+  private static final String HELP_EMAIL_DEF = "netprof-help@dliflc.edu";
 
   private Properties props = new Properties();
   private Properties uiprops = new Properties();
@@ -681,55 +688,6 @@ public class ServerProperties {
     }
   }
 
-  /**
-   * @return
-   * @seex DatabaseImpl#preloadContextPractice
-   * @deprecated - new project will do something different
-   */
-/*
-  public String getDialogFile() {
-    return props.getProperty("dialog");
-  }
-*/
-
- /* private void readPhonemeMap(String configDir) {
-    String phonemeMapping = props.getProperty("phonemeMapping");
-
-    if (phonemeMapping == null) {
-      //   logger.debug("no phoneme mapping file property");
-      return;
-    }
-
-    File file1 = new File(configDir + File.separator + phonemeMapping);
-
-    if (!file1.exists()) {
-      logger.error("couldn't find phoneme mapping file " + file1);
-      return;
-    }
-
-    FileReader file;
-    String line;
-    try {
-      file = new FileReader(file1);
-      BufferedReader reader = new BufferedReader(file);
-
-      *//*line =*//*
-      reader.readLine(); // skip header
-
-      while ((line = reader.readLine()) != null) {
-        String[] split = line.split("\\s++");
-        if (split.length == 2) {
-          String key = split[0].trim();
-          String value = split[1].trim();
-          phoneToDisplay.put(key, value);
-        }
-      }
-      reader.close();
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }
-*/
   public boolean usePhoneToDisplay() {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
@@ -892,14 +850,13 @@ public class ServerProperties {
   }
 
   public String getMailServer() {
-//    return LLMAIL_LL_MIT_EDU;
-    String property = System.getProperty("log.mailhost");
+    String property = System.getProperty(LOG_MAILHOST);
     return property == null ? props.getProperty(MAIL_SERVER, LLMAIL_LL_MIT_EDU) : property;
   }
 
   public String getMailFrom() {
-    String property = System.getProperty("log.mailfrom");
-    return property == null ? props.getProperty("mail.from", DEFAULT_MAIL_FROM) : property;
+    String property = System.getProperty(LOG_MAILFROM);
+    return property == null ? props.getProperty(MAIL_FROM, DEFAULT_MAIL_FROM) : property;
   }
 
   public String getMailReplyTo() {
@@ -915,6 +872,10 @@ public class ServerProperties {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
   }
 
+  public String getProp(String prop, String def) {
+    return props.getProperty(prop, def);
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfigCommand
@@ -927,6 +888,13 @@ public class ServerProperties {
   public String getCurrentModel() {
     String models_dir = getProperty(MODELS_DIR);
     return models_dir != null ? models_dir.replaceAll("models.", "") : "";
+  }
+
+  public String getHelpEmail() {
+    return getProp(HELP_EMAIL, HELP_EMAIL_DEF);
+  }
+  public String getDominoServer() {
+    return getProp("domino.server", DOMINO_LL_MIT_EDU);
   }
 
   public List<Affiliation> getAffiliations() {
@@ -959,7 +927,6 @@ public class ServerProperties {
   }
 
   /**
-   *
    * @return
    */
   public boolean sendHeartbeat() {

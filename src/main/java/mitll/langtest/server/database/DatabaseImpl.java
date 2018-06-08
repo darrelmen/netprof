@@ -1147,7 +1147,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {
     Map<Integer, CommonExercise> idToExerciseMap = getIdToExerciseMap(projid);
     logger.info("getMonitorResultsWithText Got size = " + idToExerciseMap.size() + " id->ex map");
-    addUnitAndChapterToResults(monitorResults, idToExerciseMap);
+    addUnitAndChapterToResults(monitorResults, idToExerciseMap, projid);
     return monitorResults;
   }
 
@@ -1161,7 +1161,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DatabaseImpl#getMonitorResultsWithText
    */
   private void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults,
-                                          Map<Integer, CommonExercise> join) {
+                                          Map<Integer, CommonExercise> join, int projid) {
     int n = 0;
     int m = 0;
     Set<Integer> unknownIDs = new HashSet<>();
@@ -1169,6 +1169,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
       int id = result.getExID();
 
       CommonExercise exercise = join.get(id);
+      if (exercise == null) {
+        exercise = getExercise(projid, id);
+      }
+
       if (exercise == null) {
         if (n < WARN_THRESH) {
           logger.warn("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
@@ -1814,16 +1818,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see SlickResultDAO#getCorrectAndScores(Collection, String)
    * @param language
    * @return
+   * @see SlickResultDAO#getCorrectAndScores(Collection, String)
    */
   @Override
   public String getRelPrefix(String language) {
     String installPath = getServerProps().getAnswerDir();
 
-    String s = language.toLowerCase();
-    String prefix = installPath + File.separator + s;
+    String prefix = installPath + File.separator + language.toLowerCase();
     int netProfDurLength = getServerProps().getAudioBaseDir().length();
 
     return prefix.substring(netProfDurLength) + File.separator;

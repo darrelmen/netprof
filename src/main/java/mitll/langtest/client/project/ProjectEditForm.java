@@ -37,6 +37,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -66,9 +68,11 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String IN_PROGRESS = "In progress...";
+  private final Logger logger = Logger.getLogger("ProjectEditForm");
+
   public static final String PROJECT_TYPE = "Project Type";
   public static final boolean SHOW_PROJECT_TYPE = false;
-  private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   public static final String LANGUAGE = "Language";
   public static final String LIFECYCLE = "Lifecycle";
@@ -76,6 +80,9 @@ public class ProjectEditForm extends UserDialog {
   private static final int LEFT_MARGIN_FOR_DOMINO = 320;
 
   private static final String PLEASE_ENTER_A_PROJECT_NAME = "Please enter a project name.";
+  /**
+   * @see #addLifecycle
+   */
   private static final String SHOW_ON_I_OS = "Show On iOS";
   private static final String STATUS_BOX = "Status_Box";
 
@@ -277,7 +284,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   boolean isValid() {
-    logger.info("isValid unit '" + unit.getSafeText() +"'");
+    logger.info("isValid unit '" + unit.getSafeText() + "'");
 
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
@@ -447,12 +454,13 @@ public class ProjectEditForm extends UserDialog {
   private DivWidget addLifecycle(ProjectInfo info, Fieldset fieldset) {
     DivWidget lifecycle = getHDivLabel(fieldset, LIFECYCLE, false);
 
-    lifecycle.add(statusBox = getBox());
+    lifecycle.add(statusBox = getStatusChoices());
     {
       showOniOSBox = new CheckBox(SHOW_ON_I_OS);
       showOniOSBox.setValue(info.isShowOniOS());
       lifecycle.add(showOniOSBox);
       showOniOSBox.addStyleName("leftTenMargin");
+      showOniOSBox.setEnabled(info.getStatus() == ProjectStatus.PRODUCTION);
     }
 
     checkPortOnBlur(statusBox);
@@ -504,8 +512,8 @@ public class ProjectEditForm extends UserDialog {
             setUnitAndChapter("", result.iterator().next());
           }
 //          else {
-  //          logger.info("---> addLanguage : results size = " + result.size());
-    //      }
+          //          logger.info("---> addLanguage : results size = " + result.size());
+          //      }
         });
       }
     }));
@@ -570,7 +578,7 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
-          logger.info("got " +result.size() + " matching projects.");
+          logger.info("got " + result.size() + " matching projects.");
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
@@ -583,10 +591,10 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
-   * @see #addLanguage(ProjectInfo, Fieldset, boolean)
-   * @see #addDominoProject(ProjectInfo, Fieldset, boolean)
    * @param selectedValue
    * @param dominoProject
+   * @see #addLanguage(ProjectInfo, Fieldset, boolean)
+   * @see #addDominoProject(ProjectInfo, Fieldset, boolean)
    */
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
@@ -774,12 +782,18 @@ public class ProjectEditForm extends UserDialog {
       @Override
       public void onSuccess(Void result) {
         w.setEnabled(true);
-        feedback.setText("In progress...");
+        feedback.setText(IN_PROGRESS);
       }
     });
   }
 
-  private ListBox getBox() {
+
+  /**
+   * Production status controls whether show on iOS is enabled.
+   * Only production projects are visible on iOS.
+   * @return
+   */
+  private ListBox getStatusChoices() {
     ListBox affBox = new ListBox();
     affBox.getElement().setId(STATUS_BOX);
     affBox.addStyleName("leftTenMargin");
@@ -789,6 +803,10 @@ public class ProjectEditForm extends UserDialog {
         affBox.addItem(status.name());
       }
     }
+
+    affBox.addChangeHandler(event ->
+        showOniOSBox.setEnabled(affBox.getValue().equalsIgnoreCase(ProjectStatus.PRODUCTION.toString()))
+    );
 
     return affBox;
   }

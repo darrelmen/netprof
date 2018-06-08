@@ -76,6 +76,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  public static final String USER_AGENT = "User-Agent";
+  public static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
+
   /**
    *
    */
@@ -346,18 +349,18 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
-  private MailSupport getMailSupport() {
+  protected MailSupport getMailSupport() {
     return new MailSupport(serverProps);
   }
 
   protected String getInfo(String message) {
     HttpServletRequest request = getThreadLocalRequest();
     if (request != null) {
-      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+      String remoteAddr = request.getHeader(X_FORWARDED_FOR);
       if (remoteAddr == null || remoteAddr.isEmpty()) {
         remoteAddr = request.getRemoteAddr();
       }
-      String userAgent = request.getHeader("User-Agent");
+      String userAgent = request.getHeader(USER_AGENT);
 
       String strongName = getPermutationStrongName();
       String serverName = getThreadLocalRequest().getServerName();

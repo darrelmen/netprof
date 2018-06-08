@@ -1,5 +1,6 @@
 package mitll.langtest.client.banner;
 
+import cern.jet.random.StudentT;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.core.client.GWT;
@@ -10,22 +11,25 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.initial.*;
-import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.LifecycleSupport;
+import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.result.ActiveUsersManager;
 import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.AudioServiceAsync;
-import mitll.langtest.client.services.LangTestDatabase;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.Kind;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,13 +39,25 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
+  private final Logger logger = Logger.getLogger("UserMenu");
+
+  private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
+  private static final List<String> REQ_MESSAGE = Arrays.asList(
+      "Click OK to request instructor status.",
+      "Instructors get to make quizzes and view additional analysis information.",
+      "(It may take some time for your request to be confirmed.)");
+
   private static final String ACTIVE_USERS = "Active Users";
+  private static final String ACTIVE_USERS_WEEK = ACTIVE_USERS + " Week";
   private static final String TEST_EXCEPTION = "Test Exception";
   private static final String TEST_EXCEPTION_MSG = "Test Exception - this tests to see that email error reporting is configured properly. Thanks!";
   private static final String STATUS_REPORT_BEING_GENERATED = "Status report being generated.";
   private static final String MESSAGE__504 = "504";
+  private static final String CHANGE_PASSWORD = "Change Password";
+  private static final String SEND_TEST_EXCEPTION = "Send Test Exception";
+  private static final String CHECK_YOUR_EMAIL = "Check your email.";
+  private static final String IT_CAN_TAKE_AWHILE = "It can take awhile to generate the report.<br>Please check your email after a few minutes.";
 
-  private final Logger logger = Logger.getLogger("UserMenu");
   //private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
 
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
@@ -52,7 +68,6 @@ public class UserMenu {
   private static final String REPORT_LIST = "Weekly Report List";
 
   private static final String ABOUT_NETPROF = "About Netprof";
-  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String LOG_OUT = "Sign Out";
 
   private final UserManager userManager;
@@ -61,8 +76,6 @@ public class UserMenu {
   private final ExerciseController controller;
   private final UserState userState;
   private final PropertyHandler props;
-
-  private LangTestDatabaseAsync service = null;
 
   /**
    * @see #getLogOut
@@ -92,56 +105,66 @@ public class UserMenu {
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
-    choices.add(new LinkAndTitle(ACTIVE_USERS, new ActiveUsersHandler()));
-    choices.add(new LinkAndTitle(ACTIVE_USERS + " Week", new ActiveUsersHandlerWeek()));
+    choices.add(new LinkAndTitle(ACTIVE_USERS, new SuccessClickHandler(() -> showActiveUsers(24))));
+    choices.add(new LinkAndTitle(ACTIVE_USERS_WEEK, new SuccessClickHandler(() -> showActiveUsers(7 * 24))));
+
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
-    choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
-
-
-    choices.add(new LinkAndTitle("Send Test Exception", event -> {
-      List<String> strings = new ArrayList<>();
-      Collection<AudioServiceAsync> allAudioServices = controller.getAllAudioServices();
-      allAudioServices.forEach(audioServiceAsync ->
-          audioServiceAsync.logMessage(TEST_EXCEPTION,
-              TEST_EXCEPTION_MSG, true, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  new ModalInfoDialog("Error", "Somehow couldn't send test emails.");
-
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                  strings.add("got");
-                  if (strings.size() == allAudioServices.size()) {
-                    new ModalInfoDialog("Check your email.", "Email should arrive sent from all servers.");
-                  }
-                }
-              })
-      );
-
-      controller.logMessageOnServer(TEST_EXCEPTION, TEST_EXCEPTION_MSG, true);
-    }));
+    // choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
+    choices.add(new LinkAndTitle(REPORT_LIST, new SuccessClickHandler(() -> new ReportListManager(controller).showReportList())));
+    choices.add(new LinkAndTitle(SEND_TEST_EXCEPTION, event -> sendTestExceptionToAllServers()));
 
     return choices;
+  }
+
+  private void sendTestExceptionToAllServers() {
+    List<String> strings = new ArrayList<>();
+    Collection<AudioServiceAsync> allAudioServices = controller.getAllAudioServices();
+    allAudioServices.forEach(audioServiceAsync ->
+        audioServiceAsync.logMessage(TEST_EXCEPTION,
+            TEST_EXCEPTION_MSG, true, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                new ModalInfoDialog("Error", "Somehow couldn't send test emails.");
+
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                strings.add("got");
+                if (strings.size() == allAudioServices.size()) {
+                  new ModalInfoDialog(CHECK_YOUR_EMAIL, "Email should arrive sent from all servers.");
+                }
+              }
+            })
+    );
+
+    controller.logMessageOnServer(TEST_EXCEPTION, TEST_EXCEPTION_MSG, true);
   }
 
 
   List<LinkAndTitle> getProjectSpecificChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
     String nameForAnswer = props.getNameForAnswer() + "s";
-    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
+    // choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
+    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer),
+//        new ResultsClickHandler()
+        new SuccessClickHandler(() -> new ResultManager(
+            props.getNameForAnswer(),
+            lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
+            lifecycleSupport,
+            controller).showResults()
+        )
+    ));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new LinkAndTitle(EVENTS, new EventsClickHandler()));
+    choices.add(new LinkAndTitle(EVENTS,
+        new SuccessClickHandler(() -> new EventTable().show(lazyGetService(), controller.getMessageHelper()))));
     return choices;
   }
 
   private void addSendReport(List<LinkAndTitle> choices) {
     choices.add(new LinkAndTitle(SEND_REPORT, event -> {
-      new ModalInfoDialog(
-          STATUS_REPORT_BEING_GENERATED,
-          "It can take awhile to generate the report.<br>Please check your email after a few minutes.");
+      new ModalInfoDialog(STATUS_REPORT_BEING_GENERATED, IT_CAN_TAKE_AWHILE);
       sendReport();
     }));
   }
@@ -177,6 +200,40 @@ public class UserMenu {
     List<LinkAndTitle> choices = new ArrayList<>();
 
     choices.add(getChangePassword());
+
+    if (userManager.getCurrent().getUserKind() == Kind.STUDENT) {
+      choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS, new SuccessClickHandler(() -> {
+        new DialogHelper(true).show("Are you an instructor?",
+            REQ_MESSAGE, new DialogHelper.CloseListener() {
+              @Override
+              public boolean gotYes() {
+                logger.info("Sending request.");
+                controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+
+                  }
+
+                  @Override
+                  public void onSuccess(Void result) {
+
+                  }
+                });
+                return true;
+              }
+
+              @Override
+              public void gotNo() {
+
+              }
+
+              @Override
+              public void gotHidden() {
+
+              }
+            }, "OK", "Cancel");
+      })));
+    }
     choices.add(getLogOut());
 
     return choices;
@@ -184,7 +241,9 @@ public class UserMenu {
 
   @NotNull
   private LinkAndTitle getChangePassword() {
-    return new LinkAndTitle("Change Password", new ChangePasswordClickHandler());
+    return new LinkAndTitle(CHANGE_PASSWORD, new SuccessClickHandler(() ->
+        new ChangePasswordView(userManager.getCurrent(), false, userState,
+            controller.getUserService()).showModal()));
   }
 
   @NotNull
@@ -192,7 +251,13 @@ public class UserMenu {
     return new LinkAndTitle(LOG_OUT, event -> uiLifecycle.logout());
   }
 
-/*  private class UsersClickHandler implements ClickHandler {
+  private class SuccessClickHandler implements ClickHandler {
+    final OnSuccess onSuccess;
+
+    SuccessClickHandler(OnSuccess onSuccess) {
+      this.onSuccess = onSuccess;
+    }
+
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -200,108 +265,18 @@ public class UserMenu {
         }
 
         public void onSuccess() {
-          new UserTable(props, userManager.isAdmin()).showUsers(controller.getUserService());
+          onSuccess.onSuccess();
         }
       });
     }
-  }*/
+  }
 
-  private class EventsClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new EventTable().show(lazyGetService(), controller.getMessageHelper());
-        }
-      });
-    }
+  interface OnSuccess {
+    void onSuccess();
   }
 
   private LangTestDatabaseAsync lazyGetService() {
-    if (service == null) {
-      service = GWT.create(LangTestDatabase.class);
-    }
-    return service;
-  }
-
-  private class ChangePasswordClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new ChangePasswordView(userManager.getCurrent(), false, userState, controller.getUserService()).showModal();
-        }
-      });
-    }
-  }
-
-  private class ResultsClickHandler implements ClickHandler {
-    final EventRegistration outer = lifecycleSupport;
-
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          ResultManager resultManager = new ResultManager(
-              props.getNameForAnswer(),
-              lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
-              outer,
-              controller);
-          resultManager.showResults();
-        }
-      });
-    }
-  }
-
-  private class ReportListHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new ReportListManager(controller).showReportList();
-        }
-      });
-    }
-  }
-
-  private class ActiveUsersHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          showActiveUsers(24);
-        }
-      });
-    }
-  }
-
-  private class ActiveUsersHandlerWeek implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          showActiveUsers(7 * 24);
-        }
-      });
-    }
+    return controller.getService();
   }
 
   private void showActiveUsers(int hours) {
@@ -317,7 +292,6 @@ public class UserMenu {
     about.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-
         Map<String, String> props = UserMenu.this.props.getProps();
 
         List<Map<String, String>> allProps = new ArrayList<>();
@@ -336,9 +310,8 @@ public class UserMenu {
                 allProps.add(properties);
                 List<String> keys = new ArrayList<>();
                 List<String> values = new ArrayList<>();
-                if (allProps.size() == allAudioServices.size()+1) {
+                if (allProps.size() == allAudioServices.size() + 1) {
                   showAllProps(keys, values);
-
                 }
               }
 
@@ -362,24 +335,6 @@ public class UserMenu {
                 };
               }
             }));
-
-/*
-        Map<String, String> props = UserMenu.this.props.getProps();
-
-        controller.getAllAudioServices();
-        List<String> strings = getPropKeys(props);
-
-        new ModalInfoDialog(ABOUT_NETPROF, strings, props.values(), null, null, false, true, 600, 400) {
-          @Override
-          protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
-            FlexTable flexTable = super.addContent(messages, values, modal, bigger);
-
-            int rowCount = flexTable.getRowCount();
-            flexTable.setHTML(rowCount + 1, 0, "Need Help?");
-            flexTable.setHTML(rowCount + 1, 1, " <a href='" + getMailTo() + "'>Help Email</a>");
-            return flexTable;
-          }
-        };*/
       }
     });
     return about;
@@ -399,7 +354,7 @@ public class UserMenu {
       Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
       if (max.isPresent()) {
         int maxl = max.get().length();
-        props.keySet().forEach(key -> strings.add("Server #"+server + " : " + key + getLen(maxl - key.length()))
+        props.keySet().forEach(key -> strings.add("Server #" + server + " : " + key + getLen(maxl - key.length()))
         );
       }
     } catch (Exception e) {
@@ -416,9 +371,8 @@ public class UserMenu {
 
   @NotNull
   private String getMailTo() {
-    return "mailto:" +
-        NETPROF_HELP_LL_MIT_EDU + "?" +
-        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
-        "Subject=Question%20about%20NetProF";
+    return "mailto:" + controller.getProps().getHelpEmail() +
+        "?Subject=" +
+        "Question%20about%20NetProF";
   }
 }
