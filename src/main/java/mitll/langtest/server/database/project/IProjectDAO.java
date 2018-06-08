@@ -149,7 +149,7 @@ public interface IProjectDAO extends IDAO {
   void addProperty(int projid, ProjectProperty projectProperty, String value, String propertyType, String parent);
 
   /**
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo)
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo, int)
    * @param projid
    * @param key
    * @param value

@@ -37,7 +37,6 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
@@ -48,7 +47,6 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,7 +55,7 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
 
-  public static final String UPDATING_PROJECT_INFO = "updating project info";
+  private static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
 
@@ -73,7 +71,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public boolean existsByName(String languageChoice, String name) throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    if (hasAdminOrCDPerm(getUserIDFromSessionOrDB())) {
       return getProjectDAO().getByLanguageAndName(languageChoice, name) != -1;
     } else {
       throw getRestricted("exists by name");
@@ -88,7 +86,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean update(ProjectInfo info) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    if (hasAdminPerm(userIDFromSessionOrDB)) {
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
       logger.info("update for " +
           "\n\tuser    " + userIDFromSessionOrDB + " update" +
           "\n\tproject " + info);
@@ -133,12 +131,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public int create(ProjectInfo newProject) throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
       if (newProject.getModelsDir().isEmpty()) {
         setDefaultsIfMissing(newProject);
       }
-      CreateProject createProject = new CreateProject(db.getServerProps().getHydra2Languages());
-      return createProject.createProject(db, db, newProject);
+      return new CreateProject(db.getServerProps().getHydra2Languages()).createProject(db, db, newProject, userIDFromSessionOrDB);
     } else {
       throw getRestricted(CREATING_PROJECT);
     }
@@ -173,12 +171,8 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
     if (hasAdminPerm(getUserIDFromSessionOrDB())) {
-      // boolean delete = getProjectDAO().delete(id);
       markDeleted(id);
-      //if (delete) {
       db.getProjectManagement().forgetProject(id);
-      // }
-      // return delete;
       return true;
     } else {
       throw getRestricted(DELETING_A_PROJECT);
@@ -214,10 +208,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     //if (hasAdminPerm(userIDFromSessionOrDB)) {
-      return db.getProjectSync().getDominoForLanguage(lang);
-   // } else {
+    return db.getProjectSync().getDominoForLanguage(lang);
+    // } else {
     //  throw getRestricted("getting domino projects");
-   // }
+    // }
   }
 
 /*

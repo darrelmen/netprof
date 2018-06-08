@@ -202,9 +202,11 @@ public class ProjectSync implements IProjectSync {
 
       logger.info("addPending got num updates = " + importUpdateEx.size());
       // todo : should we configure project if it didn't change?
-      int numExercises = projectManagement.configureProject(project, false, doChange);
+      projectManagement.configureProject(project, false, doChange);
+      int numExercises = project.getRawExercises().size();
       Map<String, String> props = getProps(project.getProject(), numExercises);
-      DominoUpdateResponse dominoUpdateResponse = new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, props, updates, timestamp);
+      DominoUpdateResponse dominoUpdateResponse =
+          new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, props, updates, timestamp);
       logger.info("addPending returning" +
           "\n\tresp " + dominoUpdateResponse +
           "\n\tprops " + props);

@@ -148,25 +148,30 @@ public class CreateProject {
   }
 
   /**
-   * Let's by default put all new projects on
+   * All new projects start in development
    *
    * @param daoContainer
    * @param projectServices
    * @param info
+   * @param creator
    * @return false if name already exists
    * @see mitll.langtest.server.services.ProjectServiceImpl#create
    */
   public int createProject(DAOContainer daoContainer,
                            ProjectServices projectServices,
-                           ProjectInfo info) {
+                           ProjectInfo info,
+                           int creator) {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
     int byName = projectDAO.getByLanguageAndName(info.getLanguage(), info.getName());
 
 
     if (byName == -1) {
       logger.info("createProject : Create new " + info);
+      if (creator == -1) {
+        creator = daoContainer.getUserDAO().getBeforeLoginUser();
+      }
       int projectID = addProject(projectDAO,
-          daoContainer.getUserDAO().getBeforeLoginUser(),
+          creator,
           info.getName(),
           info.getLanguage(),
           info.getCourse(),

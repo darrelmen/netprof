@@ -115,22 +115,16 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         .contains(User.Permission.PROJECT_ADMIN);
   }
 
-  protected boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+  protected boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     return permissions
-        .contains(User.Permission.PROJECT_ADMIN);
+        .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
   }
 
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
   }
-
-/*
-  protected boolean hasRecordPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    return permissions.contains(User.Permission.RECORD_AUDIO) || permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
-  }*/
 
   /**
    * Also checks whether user is enabled and approved for netprof.

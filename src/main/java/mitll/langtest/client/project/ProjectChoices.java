@@ -816,9 +816,9 @@ public class ProjectChoices {
     //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
     logger.info("showImportDialog # items = " + s);
-    String msg = PLEASE_WAIT;
+    //String msg = PLEASE_WAIT;
     //  if (s.equals("0")) msg += " this could take awhile the first time.";
-    final Object waitToken = messageHelper.startWaiting(msg);
+    final Object waitToken = messageHelper.startWaiting(PLEASE_WAIT);
 
     int id = projectForLang.getID();
     projectServiceAsync.addPending(id, doChange, new AsyncCallback<DominoUpdateResponse>() {

@@ -3,7 +3,6 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.IProjectSync;
-import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.ProjectInfo;
 
@@ -14,7 +13,7 @@ import java.util.Collection;
  */
 public interface ProjectServices {
   /**
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo)
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject(DAOContainer, ProjectServices, ProjectInfo, int)
    * @param projectid
    */
   void rememberProject(int projectid);
