@@ -549,6 +549,7 @@ public class ProjectSync implements IProjectSync {
 
     List<DominoUpdateItem> deletes = new ArrayList<>();
     Set<Integer> missing = new TreeSet<>();
+
     deletedDominoIDs.forEach(id -> {
       SlickExercise slickExercise = dominoToEx.get(id);
       if (slickExercise == null) {
@@ -557,7 +558,7 @@ public class ProjectSync implements IProjectSync {
       } else {
         int exid = slickExercise.id();
 
-        CommonExercise byExID = userExerciseDAO.getByExID(exid);
+        CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
         if (byExID == null) {
           logger.warn("doDelete : no ex by " + exid + " from domino #" + id);
         } else {

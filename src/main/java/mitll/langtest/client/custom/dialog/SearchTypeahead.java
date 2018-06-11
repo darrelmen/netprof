@@ -115,7 +115,6 @@ public class SearchTypeahead {
                                       SuggestOracle.Callback callback,
                                       SuggestOracle.Request request) {
     List<? extends CommonShell> exercises = result.getExercises();
-    //  exercises.sort((Comparator<CommonShell>) (o1, o2) -> o1.getForeignLanguage().compareTo(o2.getForeignLanguage()));
     int size = exercises.size();
     if (size == 0) {
       clearCurrentExercise();
@@ -170,7 +169,7 @@ public class SearchTypeahead {
   private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
     //String lcQ = query.toLowerCase();
 
-    String foreignLanguage = resp.getForeignLanguage();
+    String foreignLanguage = resp.getFLToShow();
     //boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
 
     String formattedSuggestion =// found ?

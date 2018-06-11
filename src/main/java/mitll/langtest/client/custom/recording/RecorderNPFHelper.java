@@ -290,7 +290,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
       Widget contentWidget = (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
 
-      boolean rtlContent = isRTLContent(e.getForeignLanguage());
+      boolean rtlContent = isRTLContent(e.getFLToShow());
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
 
       //   logger.info("rtl " + rtlContent + " for " + content);

@@ -37,12 +37,14 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
@@ -52,7 +54,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.Int;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -90,7 +91,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-
+  IProjectDAO projectDAO;
   private CommonExercise templateExercise;
   private int unknownExerciseID;
 
@@ -109,6 +110,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
+    projectDAO = database.getProjectDAO();
 
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
@@ -269,10 +271,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * @param slick
+   * @param shouldSwap
    * @return
    * @see #getUserExercises
    */
-  private Exercise fromSlick(SlickExercise slick) {
+  private Exercise fromSlick(SlickExercise slick, boolean shouldSwap) {
     Map<String, String> unitToValue = getUnitToValue(slick);
 
 //    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
@@ -281,14 +284,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       english = english.substring(0, MAX_LENGTH) + "...";
       logger.warn("toSlick " + slick.id() + " truncate english " + english);
     }
+
+    String altfl = slick.altfl();
+    String foreignlanguage = slick.foreignlanguage();
+
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
         english,
-        slick.foreignlanguage(),
-        StringUtils.stripAccents(slick.foreignlanguage()),
-        slick.altfl(),
+        foreignlanguage,
+        StringUtils.stripAccents(foreignlanguage),
+        altfl,
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,
@@ -298,8 +305,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecodechecked().getTime(),
         slick.iscontext(),
         slick.numphones(),
-        factory.getTokens(slick.foreignlanguage()),
-        slick.legacyid());
+        slick.legacyid(),
+        shouldSwap);
 
 /*    logger.info("fromSlick " +
         "\n\tfrom    " + slick+
@@ -387,11 +394,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * @param slick
+   * @param shouldSwap
    * @return
    * @see #getExercises(Collection, List, ISection, Map, Project, Map, Map, boolean)
    */
   @NotNull
-  private Exercise makeExercise(SlickExercise slick) {
+  private Exercise makeExercise(SlickExercise slick, boolean shouldSwap) {
     int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
@@ -412,7 +420,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecodechecked().getTime(),
         slick.iscontext(),
         slick.numphones(),
-        slick.legacyid());  // i.e. dominoID
+        slick.legacyid(), // i.e. dominoID
+        shouldSwap);
 
     {
       List<String> translations = new ArrayList<String>();
@@ -721,14 +730,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * TODO : All overkill...?  why not just look them back up from exercise dao?
    *
    * @param all
+   * @param shouldSwap
    * @return
    * @see
-   * @see IUserExerciseDAO#getOnList(int)
+   * @see IUserExerciseDAO#getOnList
    */
-  private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
+  private List<CommonExercise> getUserExercises(Collection<SlickExercise> all, boolean shouldSwap) {
 //    logger.info("getUserExercises for " + all.size()+ " exercises");
     List<CommonExercise> copy = new ArrayList<>(all.size());
-    all.forEach(slickExercise -> copy.add(fromSlick(slickExercise)));
+    all.forEach(slickExercise -> copy.add(fromSlick(slickExercise, shouldSwap)));
     //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
     return copy;
   }
@@ -769,8 +779,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     //  logger.info("examining  " + all.size() + " exercises...");
 
     int n = 0;
+    boolean shouldSwap = getShouldSwap(lookup.getID());
     for (SlickExercise slickExercise : all) {
-      Exercise exercise = makeExercise(slickExercise);
+      Exercise exercise = makeExercise(slickExercise, shouldSwap);
 
       if (WARN_ABOUT_MISSING_PHONES) {
         if (exercise.getNumPhones() == 0 && n++ < 10) {
@@ -871,43 +882,46 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * @param listID
+   * @param shouldSwap
    * @return
    * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateList(UserList)
    */
   @Override
-  public List<CommonShell> getOnList(int listID) {
-    return new ArrayList<>(getCommonExercises(listID));
+  public List<CommonShell> getOnList(int listID, boolean shouldSwap) {
+    return new ArrayList<>(getCommonExercises(listID, shouldSwap));
   }
 
   /**
    * @param listID
+   * @param shouldSwap
    * @return
    * @see #getOnList
    * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    */
-  public List<CommonExercise> getCommonExercises(int listID) {
+  public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
     long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
     long now = System.currentTimeMillis();
 //    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
-    return getUserExercises(onList);
+    return getUserExercises(onList, shouldSwap);
   }
 
   /**
    * Pull out of the database.
    *
    * @param exid
+   * @param shouldSwap
    * @return
    */
   @Override
-  public CommonExercise getByExID(int exid) {
+  public CommonExercise getByExID(int exid, boolean shouldSwap) {
     Collection<SlickExercise> byExid = dao.byID(exid);
-    CommonExercise exercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+    CommonExercise exercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next(), shouldSwap);
 
     if (exercise != null) {
       //   for (SlickExercise ex:relatedExerciseDAOWrapper.contextExercises(exid)) exercise.getDirectlyRelated().add(fromSlick(ex));
       relatedExerciseDAOWrapper.contextExercises(exid)
-          .forEach(ex -> exercise.getDirectlyRelated().add(fromSlick(ex)));
+          .forEach(ex -> exercise.getDirectlyRelated().add(fromSlick(ex, shouldSwap)));
     }
     return exercise;
   }
@@ -928,7 +942,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   @Override
   public CommonExercise getByExOldID(String oldid, int projID) {
     Collection<SlickExercise> byExid = dao.getByExid(oldid, projID);
-    return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+    boolean shouldSwap = getShouldSwap(projID);
+    return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next(), shouldSwap);
   }
 
   @Override
@@ -965,7 +980,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   public List<CommonExercise> getAllUserExercises(int projid) {
-    return getUserExercises(dao.getAllUserEx(projid));
+    boolean shouldSwap = getShouldSwap(projid);
+    return getUserExercises(dao.getAllUserEx(projid), shouldSwap);
+  }
+
+  private boolean getShouldSwap(int projid) {
+    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
+    return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**
@@ -1042,13 +1063,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   @Override
-  public Collection<CommonExercise> getOverrides() {
-    return getUserExercises(dao.getOverrides());
+  public Collection<CommonExercise> getOverrides(boolean shouldSwap) {
+    return getUserExercises(dao.getOverrides(), shouldSwap);
   }
 
   @Override
-  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
-    return getUserExercises(dao.byIDs(exids));
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
+    return getUserExercises(dao.byIDs(exids), shouldSwap);
   }
 
   /**

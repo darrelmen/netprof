@@ -238,7 +238,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @deprecated only for old h2 world with immutable exercises from spreadsheet
    */
   protected void addOverlays(Collection<Integer> removes) {
-    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
+    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides(false);
 
     if (overrides.size() > 0) {
       logger.debug("addOverlays found " + overrides.size() + " overrides : ");

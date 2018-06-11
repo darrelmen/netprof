@@ -37,30 +37,24 @@ public class DominoExerciseDAO {
   private static final String PREFIX = "v-";
   public static final String EDIT = "edit";
   public static final String UNKNOWN = "unknown";
-
-  //private final JSONSerializer ser;
+  private boolean shouldSwap;
 
   public DominoExerciseDAO() {
-  }
-
-  /**
-   * @param serializer
-   */
-  public DominoExerciseDAO(JSONSerializer serializer) {
-
   }
 
   /**
    * @param projid
    * @param projectInfo
    * @param importDocs
+   * @param shouldSwap
    * @return
    * @see IProjectManagement#getImportFromDomino
    */
   public ImportInfo readExercises(int projid,
                                   ImportProjectInfo projectInfo,
-                                  DominoImport.ChangedAndDeleted importDocs
-  ) {
+                                  DominoImport.ChangedAndDeleted importDocs,
+                                  boolean shouldSwap) {
+    this.shouldSwap = shouldSwap;
     List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
         projid,
         projectInfo.getCreatorID(),
@@ -88,22 +82,6 @@ public class DominoExerciseDAO {
         importDocs.getDeletedNPIDs());
   }
 
-
-  /**
-   * Get the language from the content descriptor.
-   *
-   * @param pd
-   * @return
-   */
- /* private String getLanguage(ProjectDescriptor pd) {
-    ProjectContentDescriptor content = pd.getContent();
-    if (content.getSkill() != Vocabulary) {
-      logger.error("readExercises huh? skill type is " + content.getSkill());
-    }
-
-    return content.getLanguageName();
-  }
-*/
   @NotNull
   private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
                                                        DominoImport.ChangedAndDeleted changedAndDeleted) {
@@ -162,7 +140,7 @@ public class DominoExerciseDAO {
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
-    addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex);
+    addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex, shouldSwap);
 
     return ex;
   }
@@ -230,6 +208,7 @@ public class DominoExerciseDAO {
    * @param docID
    * @param samples
    * @param parentExercise
+   * @param shouldSwap
    * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem)
    */
   private void addContextSentences(int projid,
@@ -237,7 +216,7 @@ public class DominoExerciseDAO {
                                    int docID,
                                    String npID,
                                    IDocumentComposite samples,
-                                   Exercise parentExercise) {
+                                   Exercise parentExercise, boolean shouldSwap) {
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
       String contextNPID = (npID + "_" + sample.getNum());
@@ -288,7 +267,7 @@ public class DominoExerciseDAO {
         removeMarkup(sample.getTransliterationVal()),
         removeMarkup(sample.getTranslationVal()),
 
-        true);
+        true, shouldSwap);
 
     context.setDominoContextIndex(sample.getNum());
 
@@ -328,7 +307,7 @@ public class DominoExerciseDAO {
         removeMarkup(termVal),
         removeMarkup(alternateFormVal),
         removeMarkup(transliterationVal),
-        removeMarkup(meaning), false);
+        removeMarkup(meaning), false, shouldSwap);
     exerciseFromVocabularyItem.setUpdateTime(createTime);
 
     return exerciseFromVocabularyItem;
@@ -348,6 +327,7 @@ public class DominoExerciseDAO {
    * @param transliterationVal
    * @param meaning
    * @param isContext
+   * @param shouldSwap
    * @return
    * @see #addContextSentences
    */
@@ -360,7 +340,7 @@ public class DominoExerciseDAO {
                                                  String alternateFormVal,
                                                  String transliterationVal,
                                                  String meaning,
-                                                 boolean isContext) {
+                                                 boolean isContext, boolean shouldSwap) {
     String trim = termVal.trim();
     Exercise exercise = new Exercise(-1,
         npID,
@@ -376,7 +356,7 @@ public class DominoExerciseDAO {
         0,
         isContext,
         0,
-        dominoID);
+        dominoID, shouldSwap);
 
     logger.info("getExerciseFromVocabularyItem : made ex" +
         "\n\tdominoID " + exercise.getDominoID() +

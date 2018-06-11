@@ -87,6 +87,7 @@ public class Project implements IPronunciationLookup {
    * @see #getWebserviceHost
    */
   public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
+  public static final String TRUE = Boolean.TRUE.toString();
 
   /**
    * @see #getWebservicePort
@@ -174,7 +175,9 @@ public class Project implements IPronunciationLookup {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
   }
 
-  public boolean hasModel() {    return !isNoModel();  }
+  public boolean hasModel() {
+    return !isNoModel();
+  }
 
   private boolean isNoModel() {
     return getModelsDir() == null || getModelsDir().isEmpty();
@@ -355,7 +358,7 @@ public class Project implements IPronunciationLookup {
 
   public boolean isOnIOS() {
     String prop = getProp(SHOW_ON_IOS);
-    return prop != null && prop.equalsIgnoreCase(Boolean.TRUE.toString());
+    return prop != null && prop.equalsIgnoreCase(TRUE);
   }
 
   public String getModelsDir() {
@@ -363,7 +366,11 @@ public class Project implements IPronunciationLookup {
   }
 
   public boolean hasProjectSpecificAudio() {
-    return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(Boolean.TRUE.toString());
+    return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(TRUE);
+  }
+
+  public boolean shouldSwapPrimaryAndAlt() {
+    return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
   private Map<String, String> propCache = new HashMap<>();

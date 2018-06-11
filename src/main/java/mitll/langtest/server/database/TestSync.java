@@ -102,7 +102,7 @@ this.db=db;
     {
       List<CommonExercise> changedExercises = new ArrayList<>();
       CommonExercise first = new Exercise(-1, "unkn", importUser, "new add ", "new add trans", "new add trans", "alt fl", "transliter", false,
-          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, new ArrayList<>(), bogusDominoID);
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, bogusDominoID, false);
       logger.info("\n\n\nFirst " + first);
       changedExercises.add(first);
       ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
@@ -200,7 +200,7 @@ this.db=db;
       logger.info("--- test deleting context exercise with np id \n\n\n\n");
 
       CommonExercise withNoContext = new Exercise(-1, "" + 612, importUser, "new add ", "new add trans", "new add trans", "alt fl", "transliter", false,
-          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, new ArrayList<>(), bogusDominoID);
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, bogusDominoID, false);
 
       CommonExercise parent = project.getExerciseByID(154838);
       CommonExercise context = parent.getDirectlyRelated().iterator().next();
@@ -246,7 +246,7 @@ this.db=db;
       Date date = new Date();
       withAnotherContext.getDirectlyRelated().add(
           new Exercise(-1, "", importUser, "second context " + date, "second context trans", "second context trans", "alt fl", "transliter", false,
-              new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, 0, new ArrayList<>(), bogusDominoID));
+              new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, 0, bogusDominoID, false));
 
       List<CommonExercise> changedExercises = new ArrayList<>();
       changedExercises.add(withAnotherContext);

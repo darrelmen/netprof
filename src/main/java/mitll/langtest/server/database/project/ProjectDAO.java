@@ -201,7 +201,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
     return countryCode;
   }
-//
+
 //  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
 //    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
 //  }
@@ -257,6 +257,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       logger.warn("getListProp " + projectProperty + " is not a list property ");
     }
     return Arrays.asList(getPropValue(projid, projectProperty.getName()).split(","));
+  }
+
+  public String getDefPropValue(int projid, ProjectProperty projectProperty) {
+    return getPropValue(projid, projectProperty.getName());
+  }
+
+  public boolean getShouldSwap(int projid) {
+    return getPropValue(projid, SWAP_PRIMARY_AND_ALT.getName()).equalsIgnoreCase("TRUE");
   }
 
   @Override

@@ -24,7 +24,7 @@ public class ImportInfo {
    * @param importProjectInfo
    * @param changedExercises
    * @param deletedNPIDs
-   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted)
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted, boolean)
    */
   public ImportInfo(ImportProjectInfo importProjectInfo,
                     List<CommonExercise> addedExercises, List<CommonExercise> changedExercises,

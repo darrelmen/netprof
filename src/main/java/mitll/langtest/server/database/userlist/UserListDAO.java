@@ -414,7 +414,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @return
    * @throws SQLException
    * @seex #getAllPredef(long)
-   * @see IUserListDAO#getAllPublic
+   * @seex IUserListDAO#getAllPublic
    * @see IUserListDAO#getWhere(int, boolean)
    */
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
@@ -462,7 +462,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see IUserListDAO#getAllByUser(int, int)
    */
   private void populateList(UserList<CommonShell> where) {
-    where.setExercises(userExerciseDAO.getOnList(where.getID()));
+    where.setExercises(userExerciseDAO.getOnList(where.getID(), false));
   }
 
   @Override

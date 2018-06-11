@@ -75,11 +75,12 @@ public class DominoImport implements IDominoImport {
    * @param dominoID
    * @param sinceInUTC
    * @param dominoAdminUser
+   * @param shouldSwap
    * @return
    * @see ProjectManagement#getImportFromDomino
    */
   @Override
-  public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser) {
+  public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser, boolean shouldSwap) {
     logger.info("getImportFromDomino " + projID + " domino " + dominoID + " since " + sinceInUTC);
 
     List<ImportProjectInfo> matches = getImportProjectInfosByID(dominoID, dominoAdminUser);
@@ -93,8 +94,8 @@ public class DominoImport implements IDominoImport {
               getChangedDocs(
                   sinceInUTC,
                   dominoAdminUser,
-                  getClientPMProject(dominoID, dominoAdminUser))
-          );
+                  getClientPMProject(dominoID, dominoAdminUser)),
+              shouldSwap);
     }
   }
 
@@ -114,7 +115,7 @@ public class DominoImport implements IDominoImport {
    * @param id
    * @param dominoAdminUser
    * @return
-   * @see #getImportFromDomino(int, int, String, DBUser)
+   * @see IDominoImport#getImportFromDomino(int, int, String, DBUser, boolean)
    */
   @NotNull
   private List<ImportProjectInfo> getImportProjectInfosByID(int id, DBUser dominoAdminUser) {
@@ -253,11 +254,7 @@ public class DominoImport implements IDominoImport {
 
     Set<String> deletedNPIDs = new TreeSet<>();
 
-    //Map<String, Integer> npToDomino = new HashMap<>();
-
     Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs);
-
-    // Set<String> deletedNPIDs = getDeletedIDs(dominoAdminUser, dominoProject, deletedDocsSince);
 
     logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
     return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports);
@@ -462,7 +459,7 @@ public class DominoImport implements IDominoImport {
               String npID = matchingMeta.getString(VALUE);
               if (npID != null) {
                 npIDs.add(npID);
-             //   npToDomino.put(npID,id);
+                //   npToDomino.put(npID,id);
               }
             } else {
               logger.warn("no metadata on " + metadata);

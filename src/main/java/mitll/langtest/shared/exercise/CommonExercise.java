@@ -45,11 +45,16 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
 
   int getDominoID();
 
+  boolean shouldSwap();
+
   /**
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
    * @return
    */
   String getAltFL();
+
+  String getAltFLToShow();
+  //String getFLToShow();
 
   /**
    * @deprecated - can't guarantee we'll have this on the znetprof instance

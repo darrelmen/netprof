@@ -365,12 +365,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 
     refresultDAO = new SlickRefResultDAO(this, dbConnection);
+    projectDAO = new ProjectDAO(this, dbConnection);
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
-    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, projectDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
     IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
@@ -386,7 +387,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         this,
         pathHelper);
 
-    projectDAO = new ProjectDAO(this, dbConnection);
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
@@ -407,7 +407,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
-    dominoExerciseDAO = new DominoExerciseDAO(dominoUserDAO.getSerializer());
+    dominoExerciseDAO = new DominoExerciseDAO();
 
     logger.debug("initializeDAOs : tables = " + getTables());
   }
@@ -1314,7 +1314,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
         logger.info("getCustomOrPredefExercise couldn't find exercise " + exid + " in project #" + projid + " looking in user exercise table");
       }
 
-      exercise = getUserExerciseByExID(exid);
+      boolean swap = projectDAO.getDefPropValue(project.getID(), ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("TRUE");
+      exercise = getUserExerciseByExID(exid, swap);
     }
 
     return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage(), idToMini);
@@ -1324,12 +1325,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Ask the database for the user exercise.
    *
    * @param id
+   * @param shouldSwap
    * @return
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id) {
-    return userExerciseDAO.getByExID(id);
+  private CommonExercise getUserExerciseByExID(int id, boolean shouldSwap) {
+    return userExerciseDAO.getByExID(id, shouldSwap);
   }
 
   @Override

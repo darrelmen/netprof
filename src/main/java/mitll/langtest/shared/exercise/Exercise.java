@@ -98,8 +98,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private String noAccentFL;
 
-  private List<VocabToken> tokens;
-
+  /*private List<VocabToken> tokens;
+*/
   private int parentExerciseID;
   private int parentDominoID;
 
@@ -113,7 +113,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param projectid
    * @param updateTime
    * @param noAccentFL
-   * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id,
@@ -124,13 +123,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   long updateTime,
                   String noAccentFL) {
-    super(-1, projectid);
+    super(-1, projectid, false);
     this.oldid = id;
-/*    try {
-      this.dominoID = Integer.parseInt(id);
-    } catch (NumberFormatException e) {
-      //
-    }*/
     this.meaning = meaning;
     this.updateTime = updateTime;
     this.isPredef = true;
@@ -165,7 +159,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, String noAccentFL, int projectid) {
-    super(-1, projectid);
+    super(-1, projectid, false);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
@@ -189,6 +183,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param lastChecked
    * @param isContext
    * @param dominoID
+   * @param shouldSwap
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#makeExercise
    */
   public Exercise(int exid,
@@ -205,8 +200,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   long lastChecked,
                   boolean isContext,
                   int numPhones,
-                  int dominoID) {
-    super(exid, projectid);
+                  int dominoID,
+                  boolean shouldSwap) {
+    super(exid, projectid, shouldSwap);
     this.oldid = oldid;
     this.creator = creator;
     setEnglishSentence(englishSentence);
@@ -238,6 +234,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param lastChecked
    * @param isContext
    * @param dominoID
+   * @param shouldSwap
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlick(SlickExercise)
    */
   public Exercise(int uniqueID,
@@ -256,16 +253,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   long lastChecked,
                   boolean isContext,
                   int numPhones,
-                  List<VocabToken> tokens,
-                  int dominoID) {
+                  int dominoID,
+                  boolean shouldSwap) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
-        projectid, candecode, lastChecked, isContext, numPhones, dominoID);
+        projectid, candecode, lastChecked, isContext, numPhones, dominoID, shouldSwap);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
     this.numPhones = numPhones;
-    this.tokens = tokens;
+  //  this.tokens = tokens;
   }
 
   /**
@@ -275,7 +272,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
-    super(exercise.getID(), exercise.getProjectID());
+    super(exercise.getID(), exercise.getProjectID(), exercise.shouldSwap());
     this.isPredef = exercise.isPredefined();
     this.isContext = exercise.isContext();
     this.english = exercise.getEnglish();
@@ -627,9 +624,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return isContext;
   }
 
-  public List<VocabToken> getTokens() {
+  /**
+   *
+   * @return
+   */
+/*  public List<VocabToken> getTokens() {
     return tokens;
-  }
+  }*/
 
   @Override
   public int getParentExerciseID() {

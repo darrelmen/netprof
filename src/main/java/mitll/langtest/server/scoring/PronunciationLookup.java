@@ -21,6 +21,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
   private static final String UNK = "+UNK+";
+
   /**
    *
    */
@@ -323,7 +324,8 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
-    logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript);
+    String s = emptyLTS ? " with empty LTS" : "";
+    logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript + s);
     dict.append(getUnkPron(word));
     candidates.add(new WordAndProns(word, UNK));
   }

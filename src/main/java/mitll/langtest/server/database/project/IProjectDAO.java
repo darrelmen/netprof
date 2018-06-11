@@ -176,6 +176,8 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   String getPropValue(int projid, String key);
+  String getDefPropValue(int projid, ProjectProperty projectProperty);
+  boolean getShouldSwap(int projid);
 
   /**
    * @see Project#putAllProps

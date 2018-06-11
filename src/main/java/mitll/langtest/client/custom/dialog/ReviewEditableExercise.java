@@ -436,7 +436,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), exercise.getTransliteration(), controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(), exercise.getTransliteration(), controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
         exercise, instance
     ) {

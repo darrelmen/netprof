@@ -185,7 +185,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     boolean showEx = shouldShowExercise(seriesName);
 
     // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
-    String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
+    String foreignLanguage = commonShell == null ? "" : commonShell.getFLToShow();
     String english = commonShell == null ? "" : commonShell.getEnglish();
     if (english.equalsIgnoreCase(foreignLanguage) &&
         commonShell != null &&

@@ -596,7 +596,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
 
-
       logger.info("runHydra now for asian language (" + language + "): " +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
@@ -856,12 +855,19 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     eventAndFileInfo.typeToEvent.forEach((imageType, eventMap) -> {
       NetPronImageType netPronImageType = NetPronImageType.valueOf(imageType.toString());
+      boolean isPhone = netPronImageType == NetPronImageType.PHONE_TRANSCRIPT;
+
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(netPronImageType, k2 -> new ArrayList<>());
+      StringBuilder builder = new StringBuilder();
       eventMap.values()
           .forEach(value -> {
             String event = value.getEvent();
-            String displayName = netPronImageType == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(event) : event;
-            endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
+            String displayName = isPhone ? getDisplayName(event) : event;
+            endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event, value.getScore(), displayName, builder.length()));
+
+            if (!isPhone) {
+              builder.append(event);
+            }
           });
     });
 

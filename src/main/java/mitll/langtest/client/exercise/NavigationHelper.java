@@ -139,13 +139,11 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     String nextButtonText = getNextButtonText();
     this.next = new Button(nextButtonText);
     next.getElement().setId("NavigationHelper_" + nextButtonText);
-
+    next.addStyleName("leftFiveMargin");
     next.setType(ButtonType.SUCCESS);
     enableNext(exercise);
 
     if (addButtons) add(next);
-
-   // next.getElement().setId("nextButton");
 
     // send answers to server
     next.addClickHandler(event -> clickNext(controller, exercise));

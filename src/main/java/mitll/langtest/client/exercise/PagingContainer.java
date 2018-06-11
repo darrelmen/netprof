@@ -166,7 +166,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
           // Compare the name columns.
           if (o1 != null) {
-            return (o2 == null) ? 1 : o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
+            return (o2 == null) ? 1 : o1.getFLToShow().toLowerCase().compareTo(o2.getFLToShow().toLowerCase());
           }
           return -1;
         });
@@ -308,8 +308,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    * @return
    */
   private String getEnglishText(CommonShell shell) {
-//    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
-    String s = english ? shell.getForeignLanguage() : shell.getEnglish();
+    String s = english ? shell.getFLToShow() : shell.getEnglish();
     // if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
@@ -323,7 +322,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    */
   private String getFLText(CommonShell shell) {
 //    logger.info("getFLText on " +shell);
-    String toShow = shell.getForeignLanguage();
+    String toShow = shell.getFLToShow();
     if (english) {
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;

@@ -344,7 +344,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   @NotNull
   DivWidget getCommentDiv() {
     DivWidget left = new DivWidget();
-    boolean rtlContent = isRTLContent(exercise.getForeignLanguage());
+    boolean rtlContent = isRTLContent(exercise.getFLToShow());
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE), true, rtlContent));
     left.addStyleName("floatLeftAndClear");
     left.getElement().setId("leftCommentBoxContainer");
@@ -1039,7 +1039,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getCardPrompt
    */
   private DivWidget getQuestionContent(T e) {
-    String foreignSentence = e.getForeignLanguage();
+    String foreignSentence = e.getFLToShow();
 
     String englishTranslations = e.getEnglish();
     if (isSiteEnglish() && !e.getMeaning().isEmpty()) {

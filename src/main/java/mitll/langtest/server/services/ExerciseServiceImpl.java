@@ -1678,14 +1678,23 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
+
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {
         typeToEndTimes.put(key, endTimes = new ArrayList<>());
       }
+
+      StringBuilder builder = new StringBuilder();
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.getEvent(), phoneToDisplay) : value.getEvent();
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
+        String event1 = value.getEvent();
+        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
+
+        if (!isPhone) {
+          builder.append(event1);
+        }
       }
     }
 

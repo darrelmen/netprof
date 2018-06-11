@@ -147,12 +147,12 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     }
 //    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
 
-    String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? getForeignLanguage() : NO_AUDIO_TO_RECORD;
+    String context = isNormalRecord() ? e.getFLToShow() : hasContext(exercise) ? getFLToShow() : NO_AUDIO_TO_RECORD;
     return ExerciseFormatter.getArabic(context);
   }
 
-  private String getForeignLanguage() {
-    return exercise.isContext() ? exercise.getForeignLanguage() : exercise.getDirectlyRelated().iterator().next().getForeignLanguage();
+  private String getFLToShow() {
+    return exercise.isContext() ? exercise.getFLToShow() : exercise.getDirectlyRelated().iterator().next().getFLToShow();
   }
 
   /**

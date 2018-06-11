@@ -1070,7 +1070,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see mitll.langtest.server.domino.ProjectSync#addPending
    */
   private ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
-    return dominoImport == null ? null : dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser());
+    boolean shouldSwap = db.getProjectDAO().getDefPropValue(projID, ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("TRUE");
+    return dominoImport == null ? null : dominoImport.getImportFromDomino(projID, dominoID, sinceInUTC, db.getUserDAO().getDominoAdminUser(), shouldSwap);
   }
 
   /**

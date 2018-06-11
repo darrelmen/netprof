@@ -1040,7 +1040,9 @@ public class AudioFileHelper implements AlignDecode {
    */
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
-    return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(),
+    return getASRScoreForAudio(0, testAudioPath,
+        exercise.getForeignLanguage(),
+        exercise.getTransliteration(),
         NO_IMAGE_PLEASE, "" + exercise.getID(), null,
         options);
   }
@@ -1179,7 +1181,7 @@ public class AudioFileHelper implements AlignDecode {
     httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
 
     if (session != null) {
-      logger.info("getProxyScore adding session " + session);
+//      logger.info("getProxyScore adding session " + session);
       httpClient.addRequestProperty("Cookie", session);
     }
 
@@ -1211,7 +1213,8 @@ public class AudioFileHelper implements AlignDecode {
 
   private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
     String s = getSmallVocabDecoder().cleanToken(foreignLanguage, removeAccents);
-    return asrScoring.getHydraDict(s.trim(), "", possibleProns);
+    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
+    return asrScoring.getHydraDict(cleaned.trim(), "", possibleProns);
   }
 
   @NotNull

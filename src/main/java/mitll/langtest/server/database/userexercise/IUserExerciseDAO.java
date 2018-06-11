@@ -47,7 +47,6 @@ import mitll.npdata.dao.SlickExercise;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @see
@@ -67,15 +66,16 @@ public interface IUserExerciseDAO extends IDAO {
 
   void addContextToExercise(int exid, int contextid, int projid);
 
-  List<CommonShell> getOnList(int listID);
+  List<CommonShell> getOnList(int listID, boolean shouldSwap);
 
-  List<CommonExercise> getCommonExercises(int listID);
+  List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap);
   /**
    * @param exid
+   * @param shouldSwap
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
-  CommonExercise getByExID(int exid);
+  CommonExercise getByExID(int exid, boolean shouldSwap);
   SlickExercise getByID(int exid);
 
   /**
@@ -96,9 +96,9 @@ public interface IUserExerciseDAO extends IDAO {
 
   List<SlickExercise> getDeletedFor(int projid);
 
-  Collection<CommonExercise> getOverrides();
+  Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
-  Collection<CommonExercise> getByExID(Collection<Integer> exids);
+  Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
 
   void deleteByExID(Collection<Integer> exids);
 

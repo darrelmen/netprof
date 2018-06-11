@@ -181,10 +181,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }*/
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
    * @param projid
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
    */
   @Override
   public void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException {
@@ -287,7 +287,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
 
     logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
-    return recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+    Map<Integer, AlignmentOutput> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+    return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
   }
 
@@ -446,14 +447,25 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
+
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {
         typeToEndTimes.put(key, endTimes = new ArrayList<>());
       }
+
+      StringBuilder builder = new StringBuilder();
+
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
-        String displayName = key == NetPronImageType.PHONE_TRANSCRIPT ? getDisplayName(value.getEvent(), phoneToDisplay) : value.getEvent();
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), value.getEvent(), value.getScore(), displayName));
+        String event1 = value.getEvent();
+
+        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
+
+        if (!isPhone) {
+          builder.append(event1);
+        }
       }
     }
 
@@ -775,7 +787,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     else {
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
-      /*String actualPath =*/ ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+      /*String actualPath =*/
+      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
 //    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
   }

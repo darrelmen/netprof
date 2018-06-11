@@ -284,11 +284,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * Handles both userexercise items and predefined exercises.
    *
    * @param listID
+   * @param shouldSwap
    * @return
    * @see UserListDAO#populateList
    */
   @Override
-  public List<CommonShell> getOnList(int listID) {
+  public List<CommonShell> getOnList(int listID, boolean shouldSwap) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
 
@@ -373,14 +374,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public List<CommonExercise> getCommonExercises(int listID) {
+  public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
     return null;
   }
 
   /**
    * @param listID
    * @return
-   * @see IUserExerciseDAO#getOnList(int)
+   * @see IUserExerciseDAO#getOnList(int, boolean)
    */
   private String getJoin(long listID) {
     return "SELECT " +
@@ -413,11 +414,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * Remove single ticks which break the sql.
    *
    * @param exid
+   * @param shouldSwap
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   @Override
-  public CommonExercise getByExID(int exid) {
+  public CommonExercise getByExID(int exid, boolean shouldSwap) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
@@ -465,9 +467,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @return
    * @seex #setAudioDAO(AudioDAO)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
+   * @param shouldSwap
    */
   @Override
-  public Collection<CommonExercise> getOverrides() {
+  public Collection<CommonExercise> getOverrides(boolean shouldSwap) {
     return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
   }
 
@@ -502,11 +505,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   /**
    * @param exids
+   * @param shouldSwap
    * @return
    * @seex UserListManager#getDefectList
    */
   @Override
-  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -529,9 +533,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @param sql
    * @return user exercises without annotations
    * @throws SQLException
-   * @see IUserExerciseDAO#getOnList(int)
-   * @see #getOverrides()
-   * @see IUserExerciseDAO#getByExID(int)
+   * @see IUserExerciseDAO#getOnList(int, boolean)
+   * @see IUserExerciseDAO#getOverrides(boolean)
+   * @see IUserExerciseDAO#getByExID(int, boolean)
    */
   private Collection<CommonExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -587,7 +591,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         System.currentTimeMillis(),
         false,
         -1,
-        factory.getTokens(foreignLanguage), -1);
+        -1, false);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

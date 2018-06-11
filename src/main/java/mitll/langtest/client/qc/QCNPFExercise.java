@@ -340,7 +340,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 //      row.add(widgets);
 //    }
 
-    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getForeignLanguage()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getFLToShow()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
 
@@ -677,7 +677,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<>(audioRef, e.getForeignLanguage(), e.getTransliteration(), controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<>(audioRef, e.getFLToShow(), e.getTransliteration(), controller,
         controller.getProps().showSpectrogram(), 70, speed, e, getInstance());
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");

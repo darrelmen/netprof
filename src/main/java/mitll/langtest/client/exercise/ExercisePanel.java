@@ -197,7 +197,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   }
 
   protected boolean isRTL(T exercise) {
-    return isRTLContent(exercise.getForeignLanguage());
+    return isRTLContent(exercise.getFLToShow());
   }
 
   private boolean isRTLContent(String content) {

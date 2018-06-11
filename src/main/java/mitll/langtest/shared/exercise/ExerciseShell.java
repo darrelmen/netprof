@@ -47,23 +47,27 @@ import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
  * To change this template use File | Settings | File Templates.
  * <p>
  */
-class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
+public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
-//  private String cforeignLanguage = "";
-//  private String cenglish = "";
+  protected boolean shouldSwap;
   int numPhones;
+  /**
+   *
+   */
+  String altfl = "";
   private int score = -1;//.0f;
 
   public ExerciseShell() {
   }
 
   /**
-   * @see AudioExercise#AudioExercise(int, int)
+   * @see AudioExercise#AudioExercise(int, int, boolean)
    */
-  ExerciseShell(int realID) {
+  ExerciseShell(int realID, boolean shouldSwap) {
     this("", "", "", realID, 0);
+    this.shouldSwap = shouldSwap;
   }
 
   /**
@@ -84,8 +88,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
     this.numPhones = numPhones;
-//    this.cforeignLanguage = cfl;
-//    this.cenglish = cenglish;
   }
 
   /**
@@ -114,6 +116,10 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return foreignLanguage;
   }
 
+  public void setForeignLanguage(String foreignLanguage) {
+    this.foreignLanguage = foreignLanguage;
+  }
+
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell &&
@@ -134,9 +140,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return Collections.singleton(getForeignLanguage());
   }
 
-  public void setForeignLanguage(String foreignLanguage) {
-    this.foreignLanguage = foreignLanguage;
-  }
 
 
   @Override
@@ -182,17 +185,33 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return score > 0;
   }
 
-/*  @Override
-  public String getCforeignLanguage() {
-    return cforeignLanguage;
-  }*/
-/*
-
-  @Override
-  public String getCenglish() {
-    return cenglish;
+  /**
+   * @return
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#toSlick(CommonExercise, boolean, int, int, boolean, Collection)
+   */
+  public String getAltFL() {
+    return altfl;
   }
-*/
+
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getAltFL
+   * @return
+   */
+  public String getAltFLToShow() {
+    return shouldSwap ? foreignLanguage : altfl;
+  }
+
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFL
+   * @return
+   */
+  public String getFLToShow() {
+    return shouldSwap ? altfl : foreignLanguage;
+  }
+
+  public boolean shouldSwap() {
+    return shouldSwap;
+  }
 
   public String toString() {
     return "ExerciseShell " +

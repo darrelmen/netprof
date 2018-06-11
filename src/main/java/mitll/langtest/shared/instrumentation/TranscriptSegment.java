@@ -33,7 +33,6 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -47,6 +46,7 @@ import java.util.Map;
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private int start;                  /// Start time in seconds
   private int end;                    /// End time in seconds
+  private int index;                    // character index from start of string
 
   private String displayEvent;
 
@@ -65,13 +65,15 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
    * @param name        event name (i.e. phone, word, etc.)
    * @param score
    * @param displayName
+   * @param index
    * @see mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes(Map)
    */
-  public TranscriptSegment(float s, float e, String name, float score, String displayName) {
+  public TranscriptSegment(float s, float e, String name, float score, String displayName, int index) {
     super(name, score);
     start = toInt(s);
     end = toInt(e);
     this.displayEvent = displayName;
+    this.index=index;
   }
 
   public float getStart() {
@@ -111,8 +113,12 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     this.displayEvent = displayEvent;
   }
 
+  public int getIndex() {
+    return index;
+  }
+
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
-        getEvent() + " (" + roundToHundredth(getScore()) + ")";
+        getEvent() + " (" + roundToHundredth(getScore()) + ") @ "+index;
   }
 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface IDominoImport {
-  ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser);
+  ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser, boolean shouldSwap);
 
   @NotNull
   List<ImportProjectInfo> getImportProjectInfos(DBUser dominoAdminUser);

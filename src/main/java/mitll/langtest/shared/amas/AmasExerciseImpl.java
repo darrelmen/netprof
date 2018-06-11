@@ -274,6 +274,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return "";
   }
 
+  @Override
+  public String getFLToShow() {
+    return null;
+  }
+
   public String getAltFL() {
     return null;
   }

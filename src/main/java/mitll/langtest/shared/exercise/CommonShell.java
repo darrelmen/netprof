@@ -60,6 +60,7 @@ public interface CommonShell extends Shell {
    * @see mitll.langtest.client.list.ListSorting#compForeign
    */
   String getForeignLanguage();
+  String getFLToShow();
 
   MutableShell getMutableShell();
 

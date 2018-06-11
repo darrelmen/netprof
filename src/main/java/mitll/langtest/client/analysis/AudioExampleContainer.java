@@ -109,7 +109,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   @NotNull
   private String getTitle(CommonShell exercise) {
-    return exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+    return exercise == null ? "play" : exercise.getFLToShow() + "/" + exercise.getEnglish();
   }
 
   /**

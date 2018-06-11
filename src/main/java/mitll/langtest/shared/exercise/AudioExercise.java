@@ -60,10 +60,6 @@ public class AudioExercise extends ExerciseShell {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
-  /**
-   *
-   */
-   String altfl = "";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
@@ -73,12 +69,12 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   *
    * @param id
    * @param projectid
+   * @param shouldSwap
    */
-  public AudioExercise(int id, int projectid) {
-    super(id);
+  AudioExercise(int id, int projectid, boolean shouldSwap) {
+    super(id, shouldSwap);
     this.projectid = projectid;
   }
 
@@ -425,7 +421,7 @@ public class AudioExercise extends ExerciseShell {
    * @return
    * @see import mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    */
-  public synchronized  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext) {
+  public synchronized List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext) {
     Map<Integer, List<AudioAttribute>> userToAudio = simpleByGenderByContext(isMale, includeContext);
     //logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices + "\n\tinclude "+includeContext);
 
@@ -529,8 +525,8 @@ public class AudioExercise extends ExerciseShell {
    * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
   public synchronized Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale,
-                                                                Collection<Integer> preferredVoices,
-                                                                boolean includeContext) {
+                                                                             Collection<Integer> preferredVoices,
+                                                                             boolean includeContext) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale, includeContext);
 
     //logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices + "\n\tinclude "+includeContext);
@@ -658,14 +654,6 @@ public class AudioExercise extends ExerciseShell {
 
   public void setProjectID(int projectid) {
     this.projectid = projectid;
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
-   */
-  public String getAltFL() {
-    return altfl;
   }
 
   /**

@@ -28,6 +28,8 @@ public class CreateProject {
 
   public static final String MODEL_PROPERTY_TYPE = "model";
   private static final String PROPERTY = "property";
+  public static final String TRUE = Boolean.TRUE.toString();
+  private static final String MANDARIN_TRAD = "mandarinTrad";
   private final Set<String> h2Languages;
 
   public CreateProject(Set<String> h2Languages) {
@@ -52,7 +54,8 @@ public class CreateProject {
                                       String course,
                                       int displayOrder,
                                       Collection<String> typeOrder,
-                                      ProjectType projectType, ProjectStatus status) {
+                                      ProjectType projectType,
+                                      ProjectStatus status) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
@@ -63,10 +66,19 @@ public class CreateProject {
       logger.info("createProjectIfNotExists checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, typeOrder, projectType, status);
+      boolean swapPrimaryAndAlt = false;
+      swapPrimaryAndAlt = optName != null && (optName.equalsIgnoreCase(MANDARIN_TRAD));
+
+      if (swapPrimaryAndAlt) {
+        logger.info("createProjectIfNotExists : swap primary...");
+      }
+      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, typeOrder, projectType, status,
+          swapPrimaryAndAlt);
       db.rememberProject(byName);
     } else {
-      logger.info("createProjectIfNotExists found project " + byName + " for language '" + oldLanguage + "'");
+      logger.info("createProjectIfNotExists found existing " +
+          "\n\tproject  " + byName + " for" +
+          "\n\tlanguage '" + oldLanguage + "'");
     }
     return byName;
   }
@@ -89,7 +101,8 @@ public class CreateProject {
    * @param displayOrder
    * @param typeOrder
    * @param projectType
-   * @param status       - eval = audio per project
+   * @param status            - eval = audio per project
+   * @param swapPrimaryAndAlt
    * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db,
@@ -99,7 +112,9 @@ public class CreateProject {
                             String course,
                             int displayOrder,
                             Collection<String> typeOrder,
-                            ProjectType projectType, ProjectStatus status) {
+                            ProjectType projectType,
+                            ProjectStatus status,
+                            boolean swapPrimaryAndAlt) {
     Iterator<String> iterator = typeOrder.iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -121,7 +136,10 @@ public class CreateProject {
 
     addProjectProperties(db, projectDAO, projectID);
     if (status == ProjectStatus.EVALUATION) {
-      addModelProp(projectDAO, projectID, AUDIO_PER_PROJECT, Boolean.TRUE.toString());
+      addModelProp(projectDAO, projectID, AUDIO_PER_PROJECT, TRUE);
+    }
+    if (swapPrimaryAndAlt) {
+      addDefinedProperty(projectDAO, projectID, SWAP_PRIMARY_AND_ALT, TRUE);
     }
     addDefaultHostProperty(language, projectDAO, projectID);
     logger.info("createProject : created project " + projectID);
@@ -194,7 +212,7 @@ public class CreateProject {
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 
-      info.getPropertyValue().forEach((k, v) -> projectDAO.addProperty(projectID, k, v, PROPERTY, ""));
+      info.getPropertyValue().forEach((k, v) -> addProperty(projectDAO, projectID, k, v));
 
       projectServices.rememberProject(projectID);
       return projectID;
@@ -202,6 +220,14 @@ public class CreateProject {
       logger.info("createProject : PROJECT EXISTS with name " + info.getName() + " : create new " + info);
       return -1;
     }
+  }
+
+  private void addProperty(IProjectDAO projectDAO, int projectID, String k, String v) {
+    projectDAO.addProperty(projectID, k, v, PROPERTY, "");
+  }
+
+  private void addDefinedProperty(IProjectDAO projectDAO, int projectID, ProjectProperty defProp, String v) {
+    projectDAO.addProperty(projectID, defProp, v, PROPERTY, "");
   }
 
   private void addDefaultHostProperty(String language, IProjectDAO projectDAO, int projectID) {

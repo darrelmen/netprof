@@ -100,12 +100,15 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String NETPROF_PROPERTIES = "netprof.properties";
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
+  private static final boolean ALLOW_DELETE = false;
 
   enum ACTION {
     COPY("c"),
+
     DROP("d"),
     DROPALL("a"),
     DROPALLBUT("b"),
+
     UPDATEUSER("u"),
     UPDATE("p"),
     IMPORT("i"),
@@ -877,9 +880,11 @@ public class CopyToPostgres<T extends CommonShell> {
         String exerciseID = join.getExerciseID();
         Integer id = exToInt.get(exerciseID);
 //        CommonExercise customOrPredefExercise = null;
-        if (id == null)
-          logger.warn("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
-        else {
+        if (id == null) {
+          if (!exerciseID.startsWith("Custom")) {
+            logger.warn("copyUserExerciseListJoin Can't find exercise " + exerciseID + " in " + exToInt.size() + " ex->int map");
+          }
+        } else {
           //customOrPredefExercise = db.getCustomOrPredefExercise(projectid, id);
           slickUserListExerciseJoinDAO.addPair(userListID, id);
         }
@@ -1216,8 +1221,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
     ACTION action = UNKNOWN;
     String config = null;
+
     int projID = -1;
     String dropConfirm = null;
+
     String updateUsersFile = null;
     String optName = null;
     String optConfigValue = null;
@@ -1228,27 +1235,29 @@ public class CopyToPostgres<T extends CommonShell> {
     if (cmd.hasOption(COPY.toLower())) {
       action = COPY;
       config = cmd.getOptionValue(COPY.toLower());
-    } else if (cmd.hasOption(DROP.toLower())) {
-      action = DROP;
-      String optionValue = cmd.getOptionValue(DROP.toLower());
-      try {
-        projID = Integer.parseInt(optionValue);
-      } catch (NumberFormatException e) {
-        warnParse(options, formatter, optionValue, DROP);
-        return;
+    } else if (ALLOW_DELETE) {
+      if (cmd.hasOption(DROP.toLower())) {
+        action = DROP;
+        String optionValue = cmd.getOptionValue(DROP.toLower());
+        try {
+          projID = Integer.parseInt(optionValue);
+        } catch (NumberFormatException e) {
+          warnParse(options, formatter, optionValue, DROP);
+          return;
+        }
+      } else if (cmd.hasOption(DROPALLBUT.toLower())) {
+        action = DROPALLBUT;
+        String optionValue = cmd.getOptionValue(DROPALLBUT.toLower());
+        try {
+          projID = Integer.parseInt(optionValue);
+        } catch (NumberFormatException e) {
+          warnParse(options, formatter, optionValue, DROPALLBUT);
+          return;
+        }
+      } else if (cmd.hasOption(DROPALL.toLower())) {
+        action = DROPALL;
+        dropConfirm = cmd.getOptionValue(DROPALL.toLower());
       }
-    } else if (cmd.hasOption(DROPALLBUT.toLower())) {
-      action = DROPALLBUT;
-      String optionValue = cmd.getOptionValue(DROPALLBUT.toLower());
-      try {
-        projID = Integer.parseInt(optionValue);
-      } catch (NumberFormatException e) {
-        warnParse(options, formatter, optionValue, DROPALLBUT);
-        return;
-      }
-    } else if (cmd.hasOption(DROPALL.toLower())) {
-      action = DROPALL;
-      dropConfirm = cmd.getOptionValue(DROPALL.toLower());
     } else if (cmd.hasOption(UPDATEUSER.toLower())) {
       action = UPDATEUSER;
       updateUsersFile = cmd.getOptionValue(UPDATEUSER.toLower());
@@ -1291,7 +1300,7 @@ public class CopyToPostgres<T extends CommonShell> {
       case UNKNOWN:
         formatter.printHelp("copy", options);
         break;
-      case DROP:
+/*      case DROP:
         logger.info("drop project #" + config);
         try {
           copyToPostgres.dropOneConfig(projID);
@@ -1307,6 +1316,14 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.error("couldn't drop config " + config, e);
         }
         break;
+      case DROPALL:
+        logger.warn("really be sure that this is only during development and not during production!");
+        if (dropConfirm.equals("destroy")) {
+          doDropAll();
+        } else {
+          logger.info("please check with Gordon or Ray or somebody like that before doing this.");
+        }
+        break;*/
       case COPY:
         logger.info("copying " +
             "\nconfig    '" + config + "' " +
@@ -1317,9 +1334,9 @@ public class CopyToPostgres<T extends CommonShell> {
         );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false);
-        //  if (!b) {
-            System.exit(1);  // ?
-         // }
+          //  if (!b) {
+          doExit(b);  // ?
+          // }
         } catch (Exception e) {
           logger.error("couldn't copy config " + config, e);
         }
@@ -1334,14 +1351,7 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.error("couldn't copy config " + config, e);
         }
         break;*/
-      case DROPALL:
-        logger.warn("really be sure that this is only during development and not during production!");
-        if (dropConfirm.equals("destroy")) {
-          doDropAll();
-        } else {
-          logger.info("please check with Gordon or Ray or somebody like that before doing this.");
-        }
-        break;
+
       case UPDATEUSER:
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
@@ -1349,9 +1359,9 @@ public class CopyToPostgres<T extends CommonShell> {
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
         boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true);
-       // if (!b) {
-          System.exit(1);  // ?
-       // }
+        // if (!b) {
+        doExit(b);  // ?
+        // }
         break;
       case IMPORT:
         logger.info("get import date from old config");
@@ -1361,6 +1371,10 @@ public class CopyToPostgres<T extends CommonShell> {
       default:
         formatter.printHelp("copy", options);
     }
+  }
+
+  private static void doExit(boolean b) {
+    System.exit(b ? 0 : 1);
   }
 
   private static void warnParse(Options options, HelpFormatter formatter, String optionValue, ACTION drop) {
@@ -1383,22 +1397,24 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(copy);
     }
 
-    {
-      Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this project from netprof database");
-      drop.setRequired(false);
-      options.addOption(drop);
-    }
+    if (ALLOW_DELETE) {
+      {
+        Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this project from netprof database");
+        drop.setRequired(false);
+        options.addOption(drop);
+      }
 
-    {
-      Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
-      drop.setRequired(false);
-      options.addOption(drop);
-    }
+      {
+        Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
+        drop.setRequired(false);
+        options.addOption(drop);
+      }
 
-    {
-      Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
-      dropAll.setRequired(false);
-      options.addOption(dropAll);
+      {
+        Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
+        dropAll.setRequired(false);
+        options.addOption(dropAll);
+      }
     }
 
     {

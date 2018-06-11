@@ -16,6 +16,7 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -105,6 +106,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private boolean addPlayer;
 
   /**
+   * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
+   */
+  private boolean isMandarin;
+
+  /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side --
    *
@@ -128,7 +134,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
-
+    isMandarin = getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     annotationHelper = controller.getCommentAnnotator();
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -319,7 +325,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
-      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all"),
+      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all", 0),
           new AllHighlight(flclickables));
     } else {
       if (DEBUG_MATCH)
@@ -387,7 +393,10 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
             while (!fragment1.isEmpty()) {
               // boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
-              if (fragment1.startsWith(lcSegment)) {
+              boolean isFragmentInSegment = fragment1.startsWith(lcSegment) || (
+                  isMandarin && fragment1.length() <= lcSegment.length()
+              );
+              if (isFragmentInSegment) {
                 // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + fragment1);
 
                 fragment1 = fragment1.substring(lcSegment.length());
@@ -547,23 +556,22 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     String segment = wordSegment.getEvent();
     if (DEBUG_DETAIL)
       logger.info("matchSegmentToWidgetForAudio compare :" +
-          "\n\tsegment       " + segment + //" length " + segmentLength +
-          "\n\tvs clickable '" + clickable + "'");
+          "\n\tsegment      " + segment + //" length " + segmentLength +
+          "\n\tvs clickable " + clickable);
 
     String lcSegment = removePunct(segment.toLowerCase());
     String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
     if (DEBUG_DETAIL)
       logger.info("matchSegmentToWidgetForAudio compare :" +
-          "\n\tsegment       " + lcSegment + //" length " + segmentLength +
-          "\n\tvs clickable '" + fragment1 + "'");
+          "\n\tlc segment   " + lcSegment + //" length " + segmentLength +
+          "\n\tvs fragment1 '" + fragment1 + "'");
 
     boolean showPhones = shouldShowPhones();
 
     if (lcSegment.equalsIgnoreCase(fragment1)) {  // easy match -
       if (showPhones) {
         DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-
         addSouthClickable(clickablePhones, clickable, phoneDivBelowWord);
       }
 
@@ -628,20 +636,20 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         "\n\tvs      " + clickable);
 
     while (!lcSegment.isEmpty()) {
-      String t = clickable.getContent().toLowerCase();
-      String fragment = removePunct(t);
+      String lcClickable = clickable.getContent().toLowerCase();
+      String fragment = removePunct(lcClickable);
 /*
       if (fragment.isEmpty()) {
-        logger.info("BEFORE '" + t +
+        logger.info("BEFORE '" + lcClickable +
             "' after '" + fragment +
             "'");
       }
       */
-      if (DEBUG_MATCH) logger.info("\tgetMatchingSegments compare :" +
-          "\n\tsegment     " + lcSegment +
-          "\n\tvs fragment '" + fragment + "'");
+      if (DEBUG_MATCH) logger.info("\tgetMatchingSegments (2) compare :" +
+          "\n\tsegment     " + lcSegment + " " + lcSegment.length()+
+          "\n\tvs fragment '" + fragment + "' " + fragment.length());
 
-      boolean segmentHasFragment = lcSegment.startsWith(fragment);
+      boolean segmentHasFragment = lcSegment.startsWith(fragment) || (isMandarin && fragment.length() <= lcSegment.length());
       if (segmentHasFragment) {
         bulk.add(clickable);
         lcSegment = lcSegment.substring(fragment.length());
@@ -656,7 +664,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
         // logger.info("after skip clickable " + clickable);
       } else {
         if (DEBUG_MATCH) {
-          logger.info("\tgetMatchingSegments compare :" +
+          logger.info("\tgetMatchingSegments (2) NOPE compare :" +
               "\n\tsegment     '" + lcSegment + "'" +
               "\n\tvs fragment '" + fragment + "'");
         }
@@ -694,9 +702,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
       StringBuilder builder2 = new StringBuilder();
       for (TranscriptSegment segment : segments) {
-
         builder2.append(segment.getEvent()).append(" ");
-
       }
       if (DEBUG) logger.info("align    : " + builder2);
 
@@ -874,12 +880,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     fieldContainer.setWidth("100%");
     fieldContainer.getElement().setId("leftSideFieldContainer");
 
-    String trim = e.getAltFL().trim();
+    String trim = getAltFL(e).trim();
 
     now = System.currentTimeMillis();
     // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
 
-    if (showFL || e.getForeignLanguage().trim().equals(trim) || trim.isEmpty()) {
+    if (showFL || getFL(e).trim().equals(trim) || trim.isEmpty()) {
       fieldContainer.add(getFLEntry(e));
       fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
       flClickableRowPhones.getElement().setId("flClickableRowPhones");
@@ -896,11 +902,11 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     }
 
-    now = System.currentTimeMillis();
+//    now = System.currentTimeMillis();
     // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
 
     if (showALTFL) {
-      addField(fieldContainer, addAltFL(e, showFL && showALTFL));
+      addField(fieldContainer, addAltFL(e, showFL));
       altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
       altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
       stylePhoneRow(altFLClickableRowPhones);
@@ -945,7 +951,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
 
-    DivWidget contentWidget = clickableWords.getClickableWords(e.getForeignLanguage(),
+    DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
         FieldType.FL,
         flclickables, false, true, isRTL);
 
@@ -966,6 +972,14 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return flEntry;
   }
 
+  private String getFL(CommonExercise e) {
+    return e.getFLToShow();
+  }
+
+  private String getAltFL(CommonExercise exercise) {
+    return exercise.getAltFLToShow();
+  }
+
   /**
    * @param e
    * @return
@@ -983,8 +997,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   private void addContext(T e, Panel card) {
     //  int c = 0;
-    String foreignLanguage = e.getForeignLanguage();
-    String altFL = e.getAltFL();
+    String foreignLanguage = getFL(e);
+    String altFL = getAltFL(e);
     Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
     for (CommonExercise contextEx : directlyRelated) {
       DivWidget rowWidget = getRowWidget();
@@ -1017,7 +1031,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     String contextTranslation = contextEx.getEnglish();
 
-    boolean same = contextEx.getForeignLanguage().equals(contextTranslation);
+    boolean same = getFL((T) contextEx).equals(contextTranslation);
     if (!same) {
       if (context != null && !contextTranslation.isEmpty()) {
         context.setWidth(LEFT_WIDTH);
@@ -1120,8 +1134,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    * @see #makeFirstRow
    */
   private Widget addAltFL(T e, boolean addTopMargin) {
-    String altFL = e.getAltFL().trim();
-    if (!altFL.isEmpty() && !altFL.equals(N_A) && !e.getForeignLanguage().trim().equals(altFL)) {
+    String altFL = getAltFL(e).trim();
+    if (!altFL.isEmpty() && !altFL.equals(N_A) && !getFL(e).trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
 
       DivWidget contentWidget = clickableWords.getClickableWords(altFL,
@@ -1172,8 +1186,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return meaning != null && !meaning.trim().isEmpty() && !meaning.equals(N_A);
   }
 
-  // private final List<CommentBox> comments = new ArrayList<>();
-
   /**
    * @param contextExercise
    * @return
@@ -1183,7 +1195,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                            String itemText,
                            String altFL,
                            AnnotationHelper annotationHelper) {
-    String context = contextExercise.getForeignLanguage();
+    String context = getFL(contextExercise);
 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
@@ -1217,7 +1229,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       //   col.setWidth(CONTEXT_WIDTH + "%");
       hp.add(col);
 
-      String altFL1 = contextExercise.getAltFL();
+      String altFL1 = getAltFL(contextExercise);
       if (showFL || altFL1.isEmpty()) {
         col.add(commentRow);
         col.add(contextClickableRowPhones);
@@ -1243,6 +1255,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       return null;
     }
   }
+
 
   @NotNull
   private DivWidget getSpacer() {

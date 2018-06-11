@@ -151,7 +151,7 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   }
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    return getFLTooltip(commonShell.getForeignLanguage()) + getTooltipHint();
+    return getFLTooltip(commonShell.getFLToShow()) + getTooltipHint();
   }
 
   /**

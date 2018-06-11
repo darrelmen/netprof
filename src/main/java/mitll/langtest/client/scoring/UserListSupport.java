@@ -194,7 +194,7 @@ public class UserListSupport {
         SHARE_NETPROF + controller.getLanguage() + " item " + exercise.getEnglish() +
 
         "&body=" +
-        getPrefix() + exercise.getEnglish() + "/" + exercise.getForeignLanguage() + " : " +
+        getPrefix() + exercise.getEnglish() + "/" + exercise.getFLToShow() + " : " +
         encode +
         getSuffix();
   }

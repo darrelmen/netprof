@@ -73,6 +73,14 @@ public class ExerciseCopy {
     return ((SlickUserExerciseDAO) db.getUserExerciseDAO()).getOldToNew(projectid).getOldToNew();
   }
 
+  /**
+   *
+   * @param projectid
+   * @param typeOrder
+   * @param slickUEDAO
+   * @param exToInt
+   * @param exercises
+   */
   private void reallyAddingUserExercises(int projectid,
                                          Collection<String> typeOrder,
                                          SlickUserExerciseDAO slickUEDAO,
@@ -85,7 +93,7 @@ public class ExerciseCopy {
       Integer existingPredefID = exToInt.get(oldID);
 
       if (existingPredefID != null) {
-        CommonExercise byExID = slickUEDAO.getByExID(existingPredefID);
+        CommonExercise byExID = slickUEDAO.getByExID(existingPredefID, false);
         if (byExID.getEnglish().equals(userCandidate.getEnglish()) &&
             byExID.getForeignLanguage().equals(userCandidate.getForeignLanguage())) {
           logger.debug("reallyAddingUserExercises - user exercise with same old id " + oldID + " as predef " + byExID);

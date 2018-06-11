@@ -92,16 +92,20 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
     boolean isKorean = language.equalsIgnoreCase(KOREAN);
     boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
-    boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
+    boolean isAsianLanguage = isMandarin || isKorean || isJapanese;
+    boolean hasClickableCharacters = isAsianLanguage;
     removeAllPunct = !language.equalsIgnoreCase("french");
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
-    for (T exercise : exercisesForState) {
+
+    exercisesForState.forEach(exercise -> {
+      //  for (T exercise : exercisesForState) {
       if (doExercise) {
-        addEntriesForExercise(isMandarin, hasClickableCharacters, exercise);
+        addEntriesForExercise(isAsianLanguage, hasClickableCharacters, exercise);
       } else {
-        addContextSentences(isMandarin, hasClickableCharacters, exercise);
+        addContextSentences(isAsianLanguage, hasClickableCharacters, exercise);
       }
-    }
+    });
+
     endMakingNodes();
     long now = System.currentTimeMillis();
 
@@ -111,7 +115,12 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
-
+  /**
+   * @param isMandarin
+   * @param hasClickableCharacters
+   * @param exercise
+   * @see #ExerciseTrie(Collection, String, SmallVocabDecoder, boolean)
+   */
   private void addEntriesForExercise(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
     addEnglish(exercise);
     addForeign(isMandarin, hasClickableCharacters, exercise);
@@ -181,6 +190,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     }
   }
 
+  /**
+   * @param isMandarin
+   * @param hasClickableCharacters
+   * @param exToReturnOnMatch
+   * @param fl
+   * @see #addForeign(boolean, boolean, CommonExercise, String, String)
+   */
   private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exToReturnOnMatch, String fl) {
     fl = getTrimmed(fl);
     addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
