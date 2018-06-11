@@ -60,6 +60,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String SCORE_JSON = "scoreJson";
   public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
+  public static final String LEARN = "learn";
 
   @Override
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
@@ -101,7 +102,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public ResultDAO(Database database) {
     super(database);
-  //  logger.warn("\n\n\n\nmade h2 result dao " + this);
+    //  logger.warn("\n\n\n\nmade h2 result dao " + this);
   }
 
   @Override
@@ -146,7 +147,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + DEVICETYPE + " like 'i%'";
       return Collections.emptyList();
-    //  return getResultsSQL(sql);
+      //  return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       logException(ee);
@@ -403,8 +404,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param sql
    * @return
    * @throws SQLException
-   * @see #getResults()
    * @seex #getResultsDevices()
+   * @see #getResults()
    */
   private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -437,7 +438,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      finish(connection, statement, rs,sql);
+      finish(connection, statement, rs, sql);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -516,6 +517,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       try {
         if (type != null) {
           type = type.replaceAll("=", "_");
+
         }
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
@@ -573,6 +575,10 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       type = practice;
     } else if (type.startsWith("avp")) {
       type = practice;
+    } else if (type.startsWith("learn_")) {
+      type = LEARN;    }
+      else if (type.startsWith("classroom")) {
+      type = LEARN;
     } else {
       type = type.replaceAll("=", "_");
     }
@@ -592,7 +598,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
       results.add(userAndTime);
     }
-    finish(connection, statement, rs,"");
+    finish(connection, statement, rs, "");
 
     return results;
   }
@@ -680,7 +686,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           trimPathForWebPage2(path), json);
       results.add(result);
     }
-    finish(connection, statement, rs,"");
+    finish(connection, statement, rs, "");
 
     return results;
   }

@@ -1,14 +1,10 @@
 package mitll.langtest.client.project;
 
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.DominoUpdateItem;
 
 import java.util.Collection;
@@ -16,14 +12,20 @@ import java.util.Comparator;
 import java.util.List;
 
 class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<DominoUpdateItem> {
+  private static final String DOMINO_ID = "Domino ID";
+  private static final String NETPROF_ID = "Netprof ID";
+  private static final String ENGLISH = "English";
+  private static final String VOCABULARY = "Vocabulary";
+  private static final String MESSAGE = "Message";
+
   /**
    * @param controller
    * @param selectedUserKey
    * @see ResponseModal#getReportTab(String, Collection)
    */
-  public DominoUpdateResponseSimplePagingContainer(ExerciseController controller,
+   DominoUpdateResponseSimplePagingContainer(ExerciseController controller,
                                                    String selectedUserKey) {
-    super(controller, selectedUserKey, "Domino ID", 10, 7);
+    super(controller, selectedUserKey, DOMINO_ID, 10, 7);
   }
 
   @Override
@@ -46,7 +48,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getNetprofID);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 60 + "px");
-    addColumn(userCol, "Netprof ID");
+    addColumn(userCol, NETPROF_ID);
     table.addColumnSortHandler(getNPSorter(userCol, list));
   }
 
@@ -54,7 +56,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getEnglish);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, "English");
+    addColumn(userCol, ENGLISH);
     table.addColumnSortHandler(getEnglishSorter(userCol, list));
   }
 
@@ -62,7 +64,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     Column<DominoUpdateItem, SafeHtml> userCol = getTruncatedCol(maxLength, DominoUpdateItem::getForeignLanguage);
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 200 + "px");
-    addColumn(userCol, "Vocabulary");
+    addColumn(userCol, VOCABULARY);
     table.addColumnSortHandler(getFLorter(userCol, list));
   }
 
@@ -74,7 +76,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     });
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 200 + "px");
-    addColumn(userCol, "Message");
+    addColumn(userCol, MESSAGE);
     table.addColumnSortHandler(getMessageSorter(userCol, list));
   }
 
@@ -123,7 +125,6 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
     addColumn(userCol, "Context?");
     table.addColumnSortHandler(getExSorter(userCol, list));
   }
-
 
   private ColumnSortEvent.ListHandler<DominoUpdateItem> getExSorter(Column<DominoUpdateItem, SafeHtml> englishCol,
                                                                     List<DominoUpdateItem> dataList) {

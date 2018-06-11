@@ -90,7 +90,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @see #addOtherProps
    */
-  private static final String DOMINO_NAME = "Domino Name";
+  private static final String DOMINO_NAME = "Domino Project";
   /**
    * JUST FOR TESTING
    */
@@ -330,6 +330,11 @@ public class ProjectManagement implements IProjectManagement {
     if (forceReload) {
       project.getExerciseDAO().reload();
     }
+
+    if (project.getExerciseDAO() == null) {
+      setExerciseDAO(project);
+    }
+
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
@@ -573,11 +578,11 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * JUST FOR IMPORT
    *
-   * @param jsonExerciseDAO
+   * @param excelImport
    */
   @Override
-  public void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
-    idToProject.put(IMPORT_PROJECT_ID, new Project(jsonExerciseDAO));
+  public void addSingleProject(ExerciseDAO<CommonExercise> excelImport) {
+    idToProject.put(IMPORT_PROJECT_ID, new Project(excelImport));
   }
 
   /**
@@ -976,8 +981,8 @@ public class ProjectManagement implements IProjectManagement {
 
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
     if (project.dominoid() > 0) {
-      info.put(DOMINO_ID, "" + project.dominoid());
-      info.put(DOMINO_NAME, getDominoProjectName(project.dominoid()));
+//      info.put(DOMINO_ID, "" + project.dominoid());
+      info.put(DOMINO_NAME, project.dominoid() + " : " + getDominoProjectName(project.dominoid()));
     }
 
     return addExerciseDerivedProperties(project, info);

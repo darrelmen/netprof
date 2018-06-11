@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
@@ -40,10 +41,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.DominoProject;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.*;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -168,9 +166,34 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#showDeleteDialog
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    boolean isAllowed = hasAdminPerm(userIDFromSessionOrDB);
+    if (!isAllowed) {
+      boolean isCD = hasCDPerm(userIDFromSessionOrDB);
+      if (isCD) {
+        Project project = getProject(id);
+        if (project != null) {
+          boolean isMine = project.getProject().userid() == userIDFromSessionOrDB;
+
+          if (isMine) {
+            isAllowed = true;
+          } else {
+            return false;
+          }
+        }
+      }
+    }
+
+    if (isAllowed) {
       markDeleted(id);
       db.getProjectManagement().forgetProject(id);
       return true;

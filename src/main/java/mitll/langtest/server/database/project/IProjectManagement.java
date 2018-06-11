@@ -58,6 +58,8 @@ public interface IProjectManagement {
 
   ExerciseDAO<CommonExercise> setDependencies();
 
+
+
   /**
    * @see ProjectServiceImpl#delete
    * @param projid
@@ -70,7 +72,7 @@ public interface IProjectManagement {
 
   void stopDecode();
 
-  void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO);
+  void addSingleProject(ExerciseDAO<CommonExercise> excelImport);
 
   CommonExercise getExercise(int projectid, int id);
 

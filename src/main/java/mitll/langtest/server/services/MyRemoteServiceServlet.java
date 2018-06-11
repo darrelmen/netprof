@@ -123,6 +123,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return hasPerm;
   }
 
+  protected boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    boolean hasPerm = permissions.contains(User.Permission.DEVELOP_CONTENT);
+    logger.info("hasCDPerm for " +userIDFromSessionOrDB + " are " + permissions + " has perm "+ hasPerm);
+    return hasPerm;
+  }
+
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);

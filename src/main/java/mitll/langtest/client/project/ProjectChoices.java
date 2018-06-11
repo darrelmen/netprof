@@ -36,6 +36,7 @@ import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.user.User.Permission;
+import org.apache.xpath.operations.Mod;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -49,6 +50,9 @@ import static mitll.langtest.shared.user.User.Permission.*;
  */
 public class ProjectChoices {
   public static final String PLEASE_WAIT = "Please wait...";
+  public static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
+  public static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
+  public static final String DELETE_PROJECT = "delete project";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
@@ -116,6 +120,7 @@ public class ProjectChoices {
    */
   private DivWidget contentRow;
   private int sessionUser = -1;
+  private boolean isSuperUser = false;
 
   /**
    * @param langTest
@@ -125,6 +130,8 @@ public class ProjectChoices {
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
     this.sessionUser = langTest.getUser();
+    String userID = langTest.getUserManager().getUserID();
+    if (userID != null) isSuperUser = userID.equalsIgnoreCase("gvidaver");
     this.props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
@@ -145,7 +152,7 @@ public class ProjectChoices {
       // logger.info("show initial " + level);
       showInitialChoices(level);
     } else {
-     // logger.info("show choice for parent " + parent.getName() + " " + level);
+      // logger.info("show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }
@@ -359,13 +366,21 @@ public class ProjectChoices {
     return header;
   }
 
+  /**
+   * For right now recalc all alignments only should be done by really prepared admin.
+   *
+   * @param topBottom
+   * @param right
+   */
   private void addAdminControls(DivWidget topBottom, DivWidget right) {
     HTML status = new HTML();
     status.setHeight("15px");
     status.addStyleName("leftFiveMargin");
     getEnsureAllAudioButton(right, status);
     right.addStyleName("topFiveMargin");
-    getRecalcRefAudioButton(right, status);
+    if (isSuperUser) {
+      getRecalcRefAudioButton(right, status);
+    }
     topBottom.add(status);
   }
 
@@ -443,6 +458,11 @@ public class ProjectChoices {
     w.addClickHandler(event -> recalcProject(controller.getAllProjects(), status));
   }
 
+  /**
+   * @param projects
+   * @param status
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcAlignments
+   */
   private void recalcProject(List<SlimProject> projects, HTML status) {
     if (projects.isEmpty()) {
       status.setText(ALL_PROJECTS_COMPLETE);
@@ -713,8 +733,9 @@ public class ProjectChoices {
    * @return
    */
   private boolean isAllowedToDelete(SlimProject projectForLang) {
+    ProjectStatus status = projectForLang.getStatus();
     return
-        projectForLang.getStatus() != ProjectStatus.PRODUCTION &&
+        status != ProjectStatus.PRODUCTION &&
             (projectForLang.isMine(sessionUser) ||
                 controller.getUserManager().isAdmin());
   }
@@ -762,7 +783,7 @@ public class ProjectChoices {
 
     w.setIcon(IconType.EXCHANGE);
     w.setEnabled(ALLOW_SYNC_WITH_DOMINO);
-    addTooltip(w, "Synchronize content with domino.");
+    addTooltip(w, SYNCHRONIZE_CONTENT_WITH_DOMINO);
 
     w.addClickHandler(event -> {
       w.setEnabled(false);
@@ -776,7 +797,7 @@ public class ProjectChoices {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.ERASER);
     w.setType(ButtonType.DANGER);
-    addTooltip(w, "Start to delete this project.");
+    addTooltip(w, START_TO_DELETE_THIS_PROJECT);
     w.addClickHandler(event -> showDeleteDialog(projectForLang, label));
 
     return w;
@@ -921,12 +942,16 @@ public class ProjectChoices {
         projectServiceAsync.delete(projectForLang.getID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("delete project", caught);
+            controller.handleNonFatalError(DELETE_PROJECT, caught);
           }
 
           @Override
           public void onSuccess(Boolean result) {
-            uiLifecycle.startOver();
+            if (result) {
+              uiLifecycle.startOver();
+            } else {
+              new ModalInfoDialog("Not allowed to delete", "You are not the creator of this project.");
+            }
           }
         });
         return true;

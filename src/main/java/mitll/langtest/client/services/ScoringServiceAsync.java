@@ -65,7 +65,9 @@ public interface ScoringServiceAsync {
                      AsyncCallback<Map<Integer, AlignmentOutput>> async);
 
   void recalcAlignments(int projid, AsyncCallback<Void> async);
+/*
   void recalcAllAlignments(AsyncCallback<Void> async);
+*/
 
   void configureAndRefresh(int projID, AsyncCallback<Void> async);
 

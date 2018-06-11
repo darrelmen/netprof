@@ -102,7 +102,9 @@ public interface ScoringService extends RemoteService {
    */
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
+/*
   void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException;
+*/
 
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 

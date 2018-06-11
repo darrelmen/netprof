@@ -795,7 +795,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   protected void showEmptySelection() {
-    Scheduler.get().scheduleDeferred((Command) () -> showEmptyExercise(getEmptySearchMessage()));
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      String emptySearchMessage = isEmpty() ? "No exercises in this project yet." : getEmptySearchMessage();
+      showEmptyExercise(emptySearchMessage);
+    });
   }
 
   /**
@@ -946,18 +949,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public boolean onLast(HasID current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
-   // if (b) logger.info("onLast YES - "+ current + " size " + getSize());
+    // if (b) logger.info("onLast YES - "+ current + " size " + getSize());
     return b;
   }
 
   /**
-   * @see #isOnLast(HasID)
    * @param i
    * @return
+   * @see #isOnLast(HasID)
    */
   private boolean isOnLastItem(int i) {
     int size = getSize();
-  //  logger.info("isOnLastItem " +i + " vs " +size);
+    //  logger.info("isOnLastItem " +i + " vs " +size);
     return i == size - 1;
   }
 
@@ -985,9 +988,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void setShuffle(boolean doShuffle) {
     simpleSetShuffle(doShuffle);
-    Scheduler.get().scheduleDeferred(()->rememberAndLoadFirst(getInOrder()));
+    Scheduler.get().scheduleDeferred(() -> rememberAndLoadFirst(getInOrder()));
 
-   // rememberAndLoadFirst(getInOrder());
+    // rememberAndLoadFirst(getInOrder());
   }
 
   /**
@@ -1007,11 +1010,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @return
    */
-  public Collection<Integer> getIDs() {
+/*  public Collection<Integer> getIDs() {
     Set<Integer> ids = new HashSet<>();
     for (T cs : getInOrder()) ids.add(cs.getID());
     return ids;
-  }
+  }*/
 
   protected abstract List<T> getInOrder();
 

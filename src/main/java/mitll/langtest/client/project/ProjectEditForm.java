@@ -66,6 +66,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final String GVIDAVER = "gvidaver";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   public static final String IN_PROGRESS = "In progress...";
@@ -87,6 +88,9 @@ public class ProjectEditForm extends UserDialog {
 
   private static final String DOMINO_PROJECT = "Domino";
   private static final String PLEASE_WAIT = "Please wait...";
+  /**
+   *
+   */
   private static final String ALIGN_REF_AUDIO = "Align ref audio";
   private static final String CHECK_AUDIO = "Check Audio";
 
@@ -142,6 +146,7 @@ public class ProjectEditForm extends UserDialog {
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
+  private boolean isSuperUser = false;
 
   /**
    * @param lifecycleSupport
@@ -152,6 +157,8 @@ public class ProjectEditForm extends UserDialog {
     this.lifecycleSupport = lifecycleSupport;
     services = controller;
     messageHelper = controller.getMessageHelper();
+    String userID = controller.getUserManager().getUserID();
+    if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
   }
 
   /**
@@ -426,7 +433,10 @@ public class ProjectEditForm extends UserDialog {
 
     if (!isNew) {
       fieldset.add(getCheckAudio(info));
-      fieldset.add(getRecalcRefAudio(info));
+
+      if (isSuperUser) {
+        fieldset.add(getRecalcRefAudio(info));
+      }
     }
 
     {

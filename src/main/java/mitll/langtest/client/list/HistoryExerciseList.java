@@ -72,7 +72,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private HandlerRegistration handlerRegistration;
   private final FacetContainer sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  private static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 

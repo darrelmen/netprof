@@ -249,9 +249,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.audioPerProject = audioPerProject;
   }
 
-  public boolean isMine(int sessionUser) {
-    return userID == sessionUser;
-  }
+  public boolean isMine(int sessionUser) {    return userID == sessionUser;  }
 
   public String toString() {
     return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +

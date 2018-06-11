@@ -328,7 +328,7 @@ public class NewContentChooser implements INavigation {
       if (!typeOrder.isEmpty()) {
         String s = typeOrder.get(0);
         Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
-        if (!matchInfos.isEmpty()) {
+        if (matchInfos != null && !matchInfos.isEmpty()) {
           pushUnitOrChapter(s, matchInfos.iterator().next());
         }
       }

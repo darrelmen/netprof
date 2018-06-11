@@ -32,18 +32,15 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.scoring.RefAudioListener;
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.audio.IEnsureAudioHelper;
-import mitll.langtest.shared.result.MonitorResult;
-import mitll.langtest.shared.scoring.DecoderOptions;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
@@ -55,11 +52,8 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.scoring.*;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,19 +63,21 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.services.ProjectServiceImpl.UPDATING_PROJECT_INFO;
-
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
   private static final Logger logger = LogManager.getLogger(ScoringServiceImpl.class);
 
-  // private static final boolean DEBUG = true;
+  private static final String UPDATING_PROJECT_INFO = "updating project info";
+
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final int SLOW_ROUND_TRIP = 3000;
+  private static final String RECALC_ALIGNMENTS = "recalc alignments";
 
   private IEnsureAudioHelper ensureAudioHelper;
+
+  // private static final boolean DEBUG = true;
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -172,7 +168,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  @Override
+/*  @Override
   public void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
@@ -182,15 +178,21 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     } else {
       throw getRestricted("recalc alignments");
     }
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#recalcProject
+   * @param projid
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   @Override
   public void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       recalcAlignments(userIDFromSessionOrDB, db.getProject(projid));
     } else {
-      throw getRestricted("recalc alignments");
+      throw getRestricted(RECALC_ALIGNMENTS);
     }
   }
 
@@ -743,7 +745,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    if (hasAdminPerm(userIDFromSessionOrDB)) {
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
       if (projID == -1) {
         logger.error("huh? why sending bad project id?");
       } else {

@@ -297,7 +297,7 @@ public class CopyToPostgres<T extends CommonShell> {
     long now = System.currentTimeMillis();
 
     Collection<SlickProject> all = projectDAO.getAll();
-    logger.info("Took " + (now - then) + " millis to " + drop + " #" + config + ", now there are " + all.size() + " projects:");
+    logger.info("reportAfterDelete Took " + (now - then) + " millis to " + drop + " #" + config + ", now there are " + all.size() + " projects:");
 
     all.forEach(project -> logger.info("\t" + project));
   }
@@ -1317,9 +1317,9 @@ public class CopyToPostgres<T extends CommonShell> {
         );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false);
-          if (!b) {
+        //  if (!b) {
             System.exit(1);  // ?
-          }
+         // }
         } catch (Exception e) {
           logger.error("couldn't copy config " + config, e);
         }
@@ -1349,9 +1349,9 @@ public class CopyToPostgres<T extends CommonShell> {
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
         boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true);
-        if (!b) {
+       // if (!b) {
           System.exit(1);  // ?
-        }
+       // }
         break;
       case IMPORT:
         logger.info("get import date from old config");
