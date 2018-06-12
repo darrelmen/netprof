@@ -75,11 +75,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.dao().name();
   }
 
-/*
-  public void insert(SlickRefResult word) {
-    dao.insert(word);
+  public boolean updateProject(int old, int newprojid) {
+    return dao.updateProject(old, newprojid) > 0;
   }
-*/
 
   /**
    * @param bulk
@@ -93,10 +91,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getNumRows() == 0;
   }
 
-/*  @Override
-  public boolean removeForExercise(int exid) {
-    return dao.deleteByExID(exid) > 0;
-  }*/
 
   /**
    * @param userID

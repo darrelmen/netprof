@@ -64,6 +64,11 @@ public class DLIClassJoinDAO implements IDLIClassJoinDAO {
   }
 
   @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
+  @Override
   public Set<Integer> getStudents(int teacherid) {
     return dao.getStudents(teacherid);
   }

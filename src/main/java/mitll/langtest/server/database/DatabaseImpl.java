@@ -428,6 +428,22 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return defaultProject;
   }
 
+  /**
+   * This is how we merge pashto projects...
+   * @param oldID
+   * @param newprojid
+   */
+  public void updateProject(int oldID, int newprojid) {
+    audioDAO.updateProject(oldID, newprojid);
+    resultDAO.updateProject(oldID, newprojid);
+    wordDAO.updateProject(oldID, newprojid);
+    phoneDAO.updateProject(oldID, newprojid);
+    getUserExerciseDAO().updateProject(oldID, newprojid);
+    getUserExerciseDAO().updateProject(oldID, newprojid);
+    refresultDAO.updateProject(oldID, newprojid);
+    userProjectDAO.updateProject(oldID, newprojid);
+  }
+
   private void setPostgresDBConnection() {
     dbConnection = getDbConnection();
   }

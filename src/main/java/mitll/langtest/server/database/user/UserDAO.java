@@ -56,6 +56,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public static final String OTHER = "OTHER";
   public static final boolean DEBUG = false;
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   /**
    * @param database
    */

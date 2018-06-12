@@ -60,6 +60,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String UNIT = "unit";
   private static final String LESSON = "lesson";
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   private static final String USEREXERCISE = "userexercise";
   private static final String GET_ALL_SQL = "SELECT * FROM " + USEREXERCISE;
   private static final String MODIFIED = "modified";

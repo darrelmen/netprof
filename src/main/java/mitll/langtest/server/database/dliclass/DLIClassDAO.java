@@ -58,6 +58,11 @@ public class DLIClassDAO implements IDLIClassDAO {
     dao = new DLIClassWrapper(dbConnection);
   }
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   public List<DLIClass> getAll() {
     Collection<SlickDLIClass> all = dao.all();
     List<DLIClass> ret = new ArrayList<>();

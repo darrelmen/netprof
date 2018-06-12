@@ -64,6 +64,11 @@ public class SlickAnnotationDAO
     return dao.dao().name();
   }
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   public SlickAnnotation toSlick(UserAnnotation shared) {
     return new SlickAnnotation(-1,
         (int) shared.getCreatorID(),

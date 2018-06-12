@@ -131,6 +131,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao.dao().name();
   }
 
+  public boolean updateProject(int old, int newprojid) {
+    boolean b = dao.updateProject(old, newprojid) > 0;
+    boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
+    return b && b1 && relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+  }
+
   /**
    * @param shared
    * @param projectID
@@ -1147,6 +1153,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       public String getName() {
         return relatedExerciseDAOWrapper.getName();
       }
+
+      @Override
+      public boolean updateProject(int oldID, int newprojid) {
+        return relatedExerciseDAOWrapper.updateProject(oldID, newprojid) > 0;
+      }
     };
   }
 
@@ -1159,6 +1170,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       public String getName() {
         return attributeDAOWrapper.getName();
       }
+
+      @Override
+      public boolean updateProject(int oldID, int newprojid) {
+        return attributeDAOWrapper.updateProject(oldID, newprojid) > 0;
+      }
     };
   }
 
@@ -1170,6 +1186,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
       public String getName() {
         return attributeJoinDAOWrapper.getName();
+      }
+
+      @Override
+      public boolean updateProject(int oldID, int newprojid) {
+        return true;//attributeJoinDAOWrapper.updateProject(oldID, newprojid) > 0;
       }
     };
   }

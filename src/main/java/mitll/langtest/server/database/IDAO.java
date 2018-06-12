@@ -34,5 +34,8 @@ package mitll.langtest.server.database;
 
 public interface IDAO {
   void createTable();
+
   String getName();
+
+  boolean updateProject(int oldID, int newprojid);
 }

@@ -113,6 +113,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   /**
    * Should be consistent with DOMINO.
    * Actually it's all lower case.

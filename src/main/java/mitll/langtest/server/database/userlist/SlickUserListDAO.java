@@ -88,6 +88,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.createTable();
   }
 
+  public boolean updateProject(int old, int newprojid) {
+    return dao.updateProject(old, newprojid) > 0;
+  }
+
   @Override
   public String getName() {
     return dao.getName();

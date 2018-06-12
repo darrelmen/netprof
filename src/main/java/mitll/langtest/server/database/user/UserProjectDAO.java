@@ -64,6 +64,11 @@ public class UserProjectDAO implements IUserProjectDAO {
   }
 
   @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return dao.updateProject(oldID,newprojid)>0;
+  }
+
+  @Override
   public String getName() {
     return dao.dao().name();
   }

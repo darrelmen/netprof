@@ -42,6 +42,11 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
     eventDAOWrapper.deleteForProject(projID);
   }
 
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   /**
    * @param other
    * @param projid

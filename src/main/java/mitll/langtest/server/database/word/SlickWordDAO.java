@@ -62,6 +62,12 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
     return dao.dao().name();
   }
 
+
+  public boolean updateProject(int old, int newprojid) {
+    return dao.updateProject(old, newprojid) > 0;
+  }
+
+
   /**
    * @param shared
    * @return

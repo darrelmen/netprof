@@ -70,6 +70,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String RESULTS = "results";
 
   static final String FLQ = "flq";
+
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   static final String SPOKEN = "spoken";
   public static final String AUDIO_TYPE = "audioType";
   public static final String DURATION = "duration";

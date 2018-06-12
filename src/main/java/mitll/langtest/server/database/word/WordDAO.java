@@ -64,6 +64,11 @@ public class WordDAO extends DAO implements IWordDAO {
   private static final String ID = "ID";
 
   @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
+  @Override
   public void deleteForProject(int projID) {
 
   }

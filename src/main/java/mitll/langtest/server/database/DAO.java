@@ -73,6 +73,11 @@ public class DAO {
     this.logAndNotify = database.getLogAndNotify();
   }
 
+
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
+
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
     ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 1");

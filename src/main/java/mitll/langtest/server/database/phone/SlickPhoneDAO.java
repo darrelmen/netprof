@@ -70,6 +70,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     dao.createTable();
   }
 
+  public boolean updateProject(int old, int newprojid) {
+    return dao.updateProject(old, newprojid) > 0;
+  }
+
   @Override
   public String getName() {
     return this.dao.dao().name();
