@@ -1,5 +1,6 @@
 package mitll.langtest.client.project;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -9,11 +10,7 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -22,7 +19,6 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.LifecycleSupport;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.OpenUserServiceAsync;
@@ -36,7 +32,6 @@ import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.user.User.Permission;
-import org.apache.xpath.operations.Mod;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -49,11 +44,12 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String PLEASE_WAIT = "Please wait...";
-  public static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
-  public static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
-  public static final String DELETE_PROJECT = "delete project";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  public static final String PLEASE_WAIT = "Please wait...";
+  private static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
+  private static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
+  private static final String DELETE_PROJECT = "delete project";
 
   //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
   /**
@@ -104,17 +100,16 @@ public class ProjectChoices {
    */
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet.";
 
-  protected static final String LOGIN = "Login";
+  //protected static final String LOGIN = "Login";
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
-  protected final ExerciseController controller;
+  private final ExerciseController controller;
   private final UserNotification userNotification;
-  protected final PropertyHandler props;
 
   private final OpenUserServiceAsync userService;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
-  private MessageHelper messageHelper;
+  private final MessageHelper messageHelper;
   /**
    * @see InitialUI#populateRootPanel
    */
@@ -132,7 +127,7 @@ public class ProjectChoices {
     this.sessionUser = langTest.getUser();
     String userID = langTest.getUserManager().getUserID();
     if (userID != null) isSuperUser = userID.equalsIgnoreCase("gvidaver");
-    this.props = langTest.getProps();
+    //PropertyHandler props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
     this.userNotification = langTest;
@@ -614,7 +609,7 @@ public class ProjectChoices {
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
   }
 
-  private BasicDialog basicDialog = new BasicDialog();
+  private final BasicDialog basicDialog = new BasicDialog();
 
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
@@ -652,7 +647,7 @@ public class ProjectChoices {
   }
 
   @NotNull
-  protected String truncate(String columnText, int maxLengthId) {
+  private String truncate(String columnText, int maxLengthId) {
     if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
   }
@@ -837,8 +832,6 @@ public class ProjectChoices {
     //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
     logger.info("showImportDialog # items = " + s);
-    //String msg = PLEASE_WAIT;
-    //  if (s.equals("0")) msg += " this could take awhile the first time.";
     final Object waitToken = messageHelper.startWaiting(PLEASE_WAIT);
 
     int id = projectForLang.getID();
@@ -923,15 +916,6 @@ public class ProjectChoices {
       }
     }, controller
     ).prepareContentWidget();
-  }
-
-
-  @NotNull
-  protected com.google.gwt.user.client.ui.Label getLabel(String messageStr) {
-    com.google.gwt.user.client.ui.Label msgLabel = new com.google.gwt.user.client.ui.Label(messageStr);
-    msgLabel.addStyleName("bulk-update-modal-msg-label");
-    //msgLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-    return msgLabel;
   }
 
   private void showDeleteDialog(SlimProject projectForLang, Heading label) {

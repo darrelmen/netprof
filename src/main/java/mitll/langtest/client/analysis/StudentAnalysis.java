@@ -34,8 +34,10 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -49,6 +51,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
+import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,23 +60,39 @@ import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
  * @since 10/27/15.
  */
 public class StudentAnalysis extends DivWidget {
+  private static final int DELAY_MILLIS = 2000;
   private final Logger logger = Logger.getLogger("StudentAnalysis");
   private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
+
+  private Object waitToken = null;
 
   /**
    * @param controller
    * @see NewContentChooser#showProgress
    */
   public StudentAnalysis(final ExerciseController controller) {
+    MessageHelper messageHelper = controller.getMessageHelper();
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        waitToken = messageHelper.startWaiting(PLEASE_WAIT);
+      }
+    };
+    t.schedule(DELAY_MILLIS);
+
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
+        finishPleaseWait(t, messageHelper);
+
         logger.warning("Got " + throwable);
         controller.handleNonFatalError("Error retrieving user performance!", throwable);
       }
 
       @Override
       public void onSuccess(Collection<UserInfo> users) {
+        finishPleaseWait(t, messageHelper);
+
         DivWidget bottom = new DivWidget();
         bottom.addStyleName("floatLeft");
         bottom.getElement().setId("StudentAnalysis_bottom");
@@ -89,6 +108,14 @@ public class StudentAnalysis extends DivWidget {
 
       }
     });
+  }
+
+  private void finishPleaseWait(Timer t, MessageHelper messageHelper) {
+    t.cancel();
+    if (waitToken != null) {
+      messageHelper.stopWaiting(waitToken);
+      waitToken = null;
+    }
   }
 
   /**

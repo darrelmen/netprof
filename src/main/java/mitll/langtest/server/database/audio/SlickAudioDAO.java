@@ -261,8 +261,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
 //    }
     if (copy.size() != exids.size()) {
+      String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
       logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
-          copy.size());
+          copy.size() + suffix);
     }
     return copy;
   }
@@ -359,11 +360,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
-/*  public Collection<Integer> getRecordedBySameGender(int userid) {
-    Collection<Integer> userIDs = getUserIDs(userid);
-    return dao.getAudioForGenderBothSpeeds(userIDs);
-  }*/
-
   /**
    * TODO TODO :
    * <p>
@@ -379,50 +375,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   Set<Integer> getAudioExercisesForGender(boolean isMale,
                                           String audioSpeed,
                                           int projid) {
-//    if (database.getServerProps().shouldCheckAudioTranscript()) {
-//      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
-//    }
     Map<Integer, Collection<Tuple2<Integer, Integer>>> audioForGender1 = dao.getAudioForGender(audioSpeed, projid, isMale ? 0 : 1);
     Set<Pair> genderMatch = getGenderMatch(audioForGender1);
     return getExercises(genderMatch);
   }
-
-  /**
-   * @param projid
-   * @param isMale
-   * @param regSpeed
-   * @param slowSpeed
-   * @return
-   * @see #getRecordedBySameGender
-   */
-/*  @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
-                                                    boolean isMale,
-                                                    String regSpeed,
-                                                    String slowSpeed) {
-//    if (database.getServerProps().shouldCheckAudioTranscript()) {
-//      logger.warn("getAudioExercisesForGender should do check audio transcript - ?");
-//    }
-    Tuple2<Map<Integer, Collection<Tuple2<Integer, Integer>>>,
-        Map<Integer, Collection<Tuple2<Integer, Integer>>>> audioForGenderBothRecorded =
-        dao.getAudioForGenderBothRecorded(regSpeed, slowSpeed, projid, isMale ? 0 : 1);
-
-    Map<Integer, Collection<Tuple2<Integer, Integer>>> regSpeedPairs = audioForGenderBothRecorded._1();
-    Map<Integer, Collection<Tuple2<Integer, Integer>>> slowSpeedPairs = audioForGenderBothRecorded._2();
-
-    Set<Pair> regSpeedGenderMatch = getGenderMatch(regSpeedPairs);
-    Set<Pair> slowSpeedGenderMatch = getGenderMatch(slowSpeedPairs);
-
-    // now find overlap
-
-    Set<Integer> regExids = getExercises(regSpeedGenderMatch);
-    Set<Integer> slowExids = getExercises(slowSpeedGenderMatch);
-
-    regExids.retainAll(slowExids);
-
-    logger.info("getAudioExercisesForGenderBothSpeeds found " + regExids.size() + " for " + isMale + " " + regSpeed + " " + slowSpeed + " for " + projid);
-    return regExids;
-  }*/
 
 
   @Override
@@ -432,7 +388,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Set<Integer> maleReg = new HashSet<>();
     Set<Integer> femaleReg = new HashSet<>();
     Set<Integer> uniqueIDs = exToTranscript.keySet();
-    if (DEBUG_AUDIO_REPORT)   logger.info("getAudioExercisesForGenderBothSpeeds : check " + uniqueIDs.size() + " exercises");
+    if (DEBUG_AUDIO_REPORT)
+      logger.info("getAudioExercisesForGenderBothSpeeds : check " + uniqueIDs.size() + " exercises");
     getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, maleReg, femaleReg);
 
     float maleFast = (float) maleReg.size();
@@ -467,6 +424,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Never going to record slow speec context audio, at least per DLI's request.
+   *
    * @param projid
    * @param isMale
    * @param exToContextTranscript
@@ -741,11 +699,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.warn("toAudioAttribute table has " + dao.getNumRows() + " rows but no audio?");
     }
 //    logger.info("toAudioAttribute " + all.size());
-    // Map<Integer, MiniUser> idToMini = new HashMap<>();
     all.forEach(slickAudio -> copy.add(getAudioAttribute(slickAudio, idToMini, hasProjectSpecificAudio)));
-//    for (SlickAudio s : all) {
-//      copy.add(getAudioAttribute(s, idToMini, hasProjectSpecificAudio));
-//    }
     return copy;
   }
 

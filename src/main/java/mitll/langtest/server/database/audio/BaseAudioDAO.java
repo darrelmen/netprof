@@ -172,14 +172,6 @@ public abstract class BaseAudioDAO extends DAO {
     exercises.forEach(exercise -> exercise.getDirectlyRelated()
         .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));
 
-    //    for (CommonExercise exercise : exercises) {
-//      for (CommonExercise de : exercise.getDirectlyRelated()) {
-//        exerciseIDs.add(de.getID());
-//        if (DEBUG_ATTACH)
-//          logger.info("attachAudioToExercises For exercise #" + exercise.getID() + " adding context ex " + de.getID());
-//      }
-//    }
-
     if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
 
     //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
@@ -924,7 +916,7 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param t
    * @return
-   * @see AudioAttribute#removePunct
+   * @see #matchTranscript
    */
   private String removePunct(String t) {
     return t

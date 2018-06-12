@@ -61,8 +61,6 @@ public class UserMenu {
   private static final String CHECK_YOUR_EMAIL = "Check your email.";
   private static final String IT_CAN_TAKE_AWHILE = "It can take awhile to generate the report.<br>Please check your email after a few minutes.";
 
-  //private static final String PLEASE_WAIT = "Please wait... this can take awhile.";
-
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   private static final String STATUS_REPORT_SENT = "Status report sent";
   private static final String MANAGE_USERS = "Manage Users";
