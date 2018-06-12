@@ -430,18 +430,51 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * This is how we merge pashto projects...
+   *
    * @param oldID
    * @param newprojid
    */
   public void updateProject(int oldID, int newprojid) {
-    audioDAO.updateProject(oldID, newprojid);
-    resultDAO.updateProject(oldID, newprojid);
-    wordDAO.updateProject(oldID, newprojid);
-    phoneDAO.updateProject(oldID, newprojid);
-    getUserExerciseDAO().updateProject(oldID, newprojid);
-    getUserExerciseDAO().updateProject(oldID, newprojid);
-    refresultDAO.updateProject(oldID, newprojid);
-    userProjectDAO.updateProject(oldID, newprojid);
+    if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
+      logger.error("couldn't update exercise dao to " + newprojid);
+    } else {
+      logger.info("updated exercises");
+    }
+    if (!resultDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update result dao to " + newprojid);
+    } else {
+      logger.info("updated results");
+    }
+    if (!audioDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update audio dao to " + newprojid);
+    } else {
+      logger.info("updated audio");
+    }
+    if (!wordDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update word dao to " + newprojid);
+    } else {
+      logger.info("updated word");
+    }
+    if (!phoneDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update phone dao to " + newprojid);
+    } else {
+      logger.info("updated phones");
+    }
+    if (!getUserListManager().updateProject(oldID, newprojid)) {
+      logger.error("couldn't update user list dao to " + newprojid);
+    } else {
+      logger.info("updated user lists.");
+    }
+    if (!refresultDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update ref result dao to " + newprojid);
+    } else {
+      logger.info("updated ref results");
+    }
+    if (!userProjectDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update user->project dao to " + newprojid);
+    } else {
+      logger.info("updated user->project");
+    }
   }
 
   private void setPostgresDBConnection() {

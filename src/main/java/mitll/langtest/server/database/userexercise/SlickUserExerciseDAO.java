@@ -133,8 +133,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   public boolean updateProject(int old, int newprojid) {
     boolean b = dao.updateProject(old, newprojid) > 0;
+    if (b) logger.info("updated exercises to            " + newprojid);
     boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
-    return b && b1 && relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b1) logger.info("updated exercise attributes to " + newprojid);
+    boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b2) logger.info("updated related exercises  to  " + newprojid);
+    return b && b1 && b2;
   }
 
   /**

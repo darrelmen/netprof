@@ -1308,4 +1308,9 @@ public class UserListManager implements IUserListManager {
   public void update(UserList userList) {
     userListDAO.update(userList);
   }
+
+  @Override
+  public boolean updateProject(int oldid, int newid) {
+    return userListDAO.updateProject(oldid, newid);
+  }
 }

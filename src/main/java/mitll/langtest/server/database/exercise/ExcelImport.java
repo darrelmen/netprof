@@ -166,6 +166,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    */
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
+    logger.info("readExercises from " + file.getAbsolutePath());
+
     lastModified = file.lastModified();
     long excelLastModified = getExcelLastModified(file);
     lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
