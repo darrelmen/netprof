@@ -43,6 +43,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.util.*;
 
+import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
+import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SUB_TOPIC;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,19 +60,49 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   /**
    * These are fixed!
+   *
+   * @see DBExerciseDAO#setRootTypes
+   * @see #reorderTypes
    */
-  static final String TOPIC = "Topic";
-  static final String SUB_TOPIC = "Sub-topic";
+  enum Facet implements Comparator<Facet> {
+    SEMESTER("Semester", 0),
+    TOPIC("Topic", 1),
+    SUB_TOPIC("Sub-topic", 2),
+    GRAMMAR("Grammar", 3),
+    DIALECT("Dialect", 4),
+    DIFFICULTY("Difficulty", 5);
 
-  private static final String GRAMMAR = "Grammar";
-  private static final String DIALECT = "Dialect";
-  private static final String DIFFICULTY = "Difficulty";
+    private String name;
+    private int order;
+
+    Facet(String name, int order) {
+      this.name = name;
+      this.order = order;
+    }
+
+    public String toString() {
+      return name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getOrder() {
+      return order;
+    }
+
+    @Override
+    public int compare(Facet o1, Facet o2) {
+      return Integer.compare(o1.order, o2.order);
+    }
+  }
 
   static final String SUBTOPIC_LC = "subtopic";
   /**
    * @see DBExerciseDAO#removeSubtopic
    */
-  static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC, SUBTOPIC_LC));
+  static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC.toString(), SUBTOPIC_LC));
 
   /**
    * @see #getTypeToMatchPairs(List, SectionNode)
@@ -151,7 +184,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      if (DEBUG_TYPE_ORDER) logger.info("getTypeOrder validTypes " + validTypes);
+      if (DEBUG_TYPE_ORDER) {
+        logger.info("getTypeOrder validTypes          " + validTypes);
+        logger.info("getTypeOrder predefinedTypeOrder " + predefinedTypeOrder);
+      }
 
       List<String> valid = new ArrayList<>(predefinedTypeOrder);
       valid.retainAll(validTypes);
@@ -183,15 +219,22 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * TODO : maybe let user configure this somehow.
    *
    * @param types
+   * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
     //logger.info("reorderTypes " + types);
-    putAtEnd(types, TOPIC);
-    putAtEnd(types, SUB_TOPIC);
-    //putAtEnd(types, SUBTOPIC_LC);
-    putAtEnd(types, GRAMMAR);
-    putAtEnd(types, DIALECT);
-    putAtEnd(types, DIFFICULTY);
+    for (Facet f : Facet.values()) {
+      logger.info("reorderTypes " + f);
+
+      putAtEnd(types, f.getName());
+    }
+//    putAtEnd(types, SEMESTER);
+//    putAtEnd(types, TOPIC);
+//    putAtEnd(types, SUB_TOPIC);
+//    //putAtEnd(types, SUBTOPIC_LC);
+//    putAtEnd(types, GRAMMAR);
+//    putAtEnd(types, DIALECT);
+//    putAtEnd(types, DIFFICULTY);
     //logger.info("reorderTypes " + types);
   }
 
@@ -756,6 +799,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   @Override
   public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
     this.predefinedTypeOrder = predefinedTypeOrder;
+    if (predefinedTypeOrder.contains(SEMESTER.toString())) {
+      predefinedTypeOrder.remove(SEMESTER.toString());
+      predefinedTypeOrder.add(0, SEMESTER.toString());
+    }
   }
 
   @Override
@@ -807,7 +854,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   /**
-   * TESTING
+   * JUST FOR TESTING
    *
    * @param predefinedTypeOrder
    */

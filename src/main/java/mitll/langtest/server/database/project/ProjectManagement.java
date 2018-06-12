@@ -845,7 +845,11 @@ public class ProjectManagement implements IProjectManagement {
     SlickProject project1 = project.getProject();
     List<String> typeOrder = project.getTypeOrder();
 
+    logger.info("project   " + project1);
+    logger.info("typeOrder " + typeOrder);
+
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+    logger.info("sectionHelper typeOrder " + typeOrder);
 
     String language = project1.language();
 

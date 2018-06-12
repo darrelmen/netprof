@@ -178,7 +178,7 @@ public class DominoExerciseDAO {
 
   private String getNormName(String name) {
     if (name.equalsIgnoreCase(SectionHelper.SUBTOPIC_LC)) {
-      return SectionHelper.SUB_TOPIC;
+      return SectionHelper.Facet.SUB_TOPIC.getName();
     } else {
       return name.substring(0, 1).toUpperCase() + name.substring(1);
     }

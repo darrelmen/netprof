@@ -33,8 +33,10 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -75,7 +77,7 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param rootNodes
    * @param parentToChild
    * @param projectType
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    */
   public ProjectStartupInfo(Map<String, String> properties,
                             List<String> typeOrder,

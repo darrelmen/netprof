@@ -367,7 +367,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     }
   }
 
-  protected List<String> getTypeOrderSimple() {
+  List<String> getTypeOrderSimple() {
     return getStartupInfo().getTypeOrder();
   }
 

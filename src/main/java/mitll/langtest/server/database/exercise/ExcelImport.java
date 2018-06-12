@@ -106,7 +106,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private final List<String> errors = new ArrayList<>();
   private final String file;
 
-  private boolean shouldHaveRefAudio = false;
+  private boolean shouldHaveRefAudio;
   private final boolean usePredefinedTypeOrder;
   private final boolean skipSemicolons;
   private final int maxExercises;
@@ -349,7 +349,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unitName = null, chapterName = null, weekName = null;
 
     List<String> typeOrder = getTypeOrder();
-    String first  = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String first = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     String second = typeOrder.size() > 1 ? typeOrder.get(1) : "";
 
     logger.info("readFromSheet initial type order First '" + first + "' second '" + second + "'");
@@ -435,7 +435,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             getSectionHelper().setPredefinedTypeOrder(predefinedTypeOrder);
           }
 
-          if (DEBUG || true) logger.debug("readFromSheet columns" +
+          if (DEBUG || true) logger.info("readFromSheet columns" +
               " word index " + colIndexOffset +
               " altfl " + altIndex +
               " week " + weekIndex +
@@ -632,7 +632,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     List<ExerciseAttribute> exerciseAttributes = attrToItself.get(attributeSet);
     if (exerciseAttributes == null) {
       attrToItself.put(attributeSet, exerciseAttributes = toAdd);
-      // logger.info("Remember attr list " + exerciseAttributes);
+      if (DEBUG) logger.info("getExerciseAttributes Remember attr list " + exerciseAttributes);
     }
     return exerciseAttributes;
   }

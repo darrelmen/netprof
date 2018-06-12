@@ -38,7 +38,10 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.npdata.dao.*;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
+import mitll.npdata.dao.SlickExercisePhone;
+import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,8 +50,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC_LC;
-import static mitll.langtest.server.database.exercise.SectionHelper.SUB_TOPIC;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
@@ -267,7 +270,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
-    typeOrder.addAll(getAttributeTypes());
+    Collection<String> attributeTypes = getAttributeTypes();
+
+    if (attributeTypes.contains(SEMESTER.toString())) {
+      logger.info("found semester ");
+      List<String> copy = new ArrayList<>();
+      copy.add(SEMESTER.toString());
+      copy.addAll(typeOrder);
+      typeOrder = copy;
+      attributeTypes.remove(SEMESTER.toString());
+    }
+
+    typeOrder.addAll(attributeTypes);
     getSectionHelper().reorderTypes(typeOrder);
     return typeOrder;
   }
@@ -303,33 +317,38 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       parentToChild.put(firstProjectType, second);
     }
 
-    if (rootTypes.contains(SectionHelper.TOPIC)) {
-      setParentChild(attributeTypes, parentToChild, SectionHelper.TOPIC);
+    String topic = SectionHelper.Facet.TOPIC.toString();
+    if (rootTypes.contains(topic)) {
+      setParentChild(attributeTypes, parentToChild, topic);
     } else {
-      String lowerTopic = SectionHelper.TOPIC.toLowerCase();
+      String lowerTopic = topic.toLowerCase();
       if (rootTypes.contains(lowerTopic)) {
         setParentChild(attributeTypes, parentToChild, lowerTopic);
       }
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-    if (DEBUG) logger.info("setRootTypes roots " + rootTypes);
+    if (DEBUG){
+      logger.info("setRootTypes roots " + rootTypes);
+
+    }
     sectionHelper.setPredefinedTypeOrder(typeOrder);
     if (DEBUG) logger.info("parentToChild " + parentToChild);
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
+    String subtopic = SectionHelper.Facet.SUB_TOPIC.toString();
     if (rootTypes.contains(SUBTOPIC_LC)) {
       parentToChild.put(lowerTopic, SUBTOPIC_LC);
-    } else if (rootTypes.contains(SUB_TOPIC)) {
-      parentToChild.put(lowerTopic, SUB_TOPIC);
+    } else if (rootTypes.contains(subtopic)) {
+      parentToChild.put(lowerTopic, subtopic);
     }
   }
 
   /**
-   * @see #setRootTypes
    * @param attributeTypes
    * @return
+   * @see #setRootTypes
    */
   private Set<String> removeSubtopic(Collection<String> attributeTypes) {
     return attributeTypes

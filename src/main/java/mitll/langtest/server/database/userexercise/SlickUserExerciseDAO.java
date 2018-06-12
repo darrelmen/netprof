@@ -34,9 +34,11 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
+import mitll.langtest.server.database.exercise.IPronunciationLookup;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
@@ -72,7 +74,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
   private static final String DEFAULT_FOR_EMPTY = ANY;
-  public static final boolean ADD_SOUNDS = false;
+  //public static final boolean ADD_SOUNDS = false;
   private static final String HYDRA = "hydra";
   private static final int DEFAULT_PROJECT = 1;
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
@@ -87,11 +89,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
-  public static final boolean ADD_PHONE_LENGTH = false;
+  //public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-  IProjectDAO projectDAO;
+  private final IProjectDAO projectDAO;
   private CommonExercise templateExercise;
   private int unknownExerciseID;
 
@@ -267,7 +269,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private final Timestamp never = new Timestamp(0);
 
-  private final VocabFactory factory = new VocabFactory();
+//  private final VocabFactory factory = new VocabFactory();
 
   /**
    * @param slick
@@ -424,7 +426,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shouldSwap);
 
     {
-      List<String> translations = new ArrayList<String>();
+      List<String> translations = new ArrayList<>();
       if (!foreignlanguage.isEmpty()) {
         translations.add(foreignlanguage);
       }
