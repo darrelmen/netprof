@@ -83,7 +83,7 @@ public class CreateProject {
     return byName;
   }
 
-  public int getExisting(DatabaseImpl db, String optName) {
+   int getExisting(DatabaseImpl db, String optName) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
     return db.getProjectDAO().getByName(name);
@@ -267,7 +267,7 @@ public class CreateProject {
         dominoID);
   }
 
-  public String getOldLanguage(DatabaseImpl db) {
+  String getOldLanguage(DatabaseImpl db) {
     return db.getLanguage();
   }
 
@@ -330,6 +330,7 @@ public class CreateProject {
     Project project = db.getProject(projectID);
     // long createdTime = project.getProject().created().getTime();
     long netprofUpdate = project.getProject().lastnetprof().getTime();
+    db.close();
 
     return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;
   }
@@ -339,6 +340,7 @@ public class CreateProject {
     if (!db.getProjectDAO().easyUpdateNetprof(project.getProject(), sinceWhen)) {
       logger.warn("couldn't update project " + projectID);
     }
+    db.close();
   }
 
   private static class Pair {

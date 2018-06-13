@@ -251,6 +251,7 @@ public class CopyToPostgres<T extends CommonShell> {
       }
 
     }
+    databaseLight.close();
     logger.info("UPDATE : Since when " + new Date(sinceWhen));
     return sinceWhen;
   }
@@ -319,6 +320,7 @@ public class CopyToPostgres<T extends CommonShell> {
       return;
     }
     database.updateProject(from, to);
+    database.close();
   }
 
   private void mergeRecordings(int from, int to) {
@@ -341,6 +343,7 @@ public class CopyToPostgres<T extends CommonShell> {
       return;
     }
     database.updateRecordings(from, to);
+    database.close();
   }
 
   private void reportAfterDelete(int config, IProjectDAO projectDAO, long then, String drop) {
@@ -512,6 +515,7 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.info("UPDATE : latest result or audio is " + new Date(maxTime));
           createProject.updateNetprof(db, projectID, maxTime);
         }
+        db.close();
       }
     } else {
       // first add the user table
@@ -523,6 +527,7 @@ public class CopyToPostgres<T extends CommonShell> {
       } else {
         logger.warn("\n\n\nProject #" + projectID + " (" + optName + ") already has exercises in it.  Not loading again...\n\n\n");
       }
+      db.close();
     }
     long now = System.currentTimeMillis();
 
@@ -1416,6 +1421,7 @@ public class CopyToPostgres<T extends CommonShell> {
       case UPDATEUSER:
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
+        doExit(true);  // ?
         break;
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
@@ -1428,6 +1434,7 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("get import date from old config");
         long importDate = copyToPostgres.getImportDate(config, optConfigValue);
         logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
+        doExit(true);  // ?
         break;
       case MERGE:
         logger.info("merge project from into project to");
@@ -1576,9 +1583,6 @@ public class CopyToPostgres<T extends CommonShell> {
     try {
       logger.warn("Mapping old user ids to new user ids.");
       database = getDatabase();
-      //  database.setInstallPath("");
-      //database = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF);
-
       long then = System.currentTimeMillis();
 
       Map<Integer, Integer> oldToNew = getUserMapFromFile(filename);
@@ -1592,7 +1596,7 @@ public class CopyToPostgres<T extends CommonShell> {
       long now = System.currentTimeMillis();
 
       logger.warn("Updated  " + oldToNew.size() + " user ids in " + (now - then) + " millis.");
-
+      database.close();
     } catch (Exception e) {
       logger.error("couldn't update all tables, got " + e, e);
       String concat = database == null ? "" : database.getTables().concat(",\n");
