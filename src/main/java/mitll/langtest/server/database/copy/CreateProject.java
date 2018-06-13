@@ -332,9 +332,16 @@ public class CreateProject {
     Project project = db.getProject(projectID);
     // long createdTime = project.getProject().created().getTime();
     long netprofUpdate = project.getProject().lastnetprof().getTime();
-  //  db.close();
+    //  db.close();
 
     return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;
+  }
+
+  long getSinceCreated(DatabaseImpl db, int projectID) {
+    Project project = db.getProject(projectID);
+    long netprofUpdate = project.getProject().created().getTime();
+    logger.info("\n\n\n getSinceCreated is at " + new Date(netprofUpdate));
+    return netprofUpdate;
   }
 
   long getSinceWhenResults(DatabaseImpl db, int projectID) {
@@ -354,7 +361,7 @@ public class CreateProject {
     long netprofUpdate = latest.isEmpty() ? 0 : latest.iterator().next();
 
     logger.info("\n\n\n latest result is at " + new Date(netprofUpdate));
-   // db.close();
+    // db.close();
 
     return netprofUpdate;
   }
