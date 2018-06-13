@@ -47,6 +47,7 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -144,4 +145,6 @@ public interface IResultDAO extends IDAO {
   <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
 
   boolean updateProjectAndEx(int rid, int newprojid, int newEXID);
+
+ // boolean updateProjectOnDay(int oldid, int newid, Date day);
 }

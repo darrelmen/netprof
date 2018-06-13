@@ -86,6 +86,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.updateProjectAndEx(rid, newprojid, newEXID) > 0;
   }
 
+/*  @Override
+  public List<MonitorResult>  updateProjectOnDay(int oldid, int newid, Date day) {
+
+
+    long time = day.getTime();
+    long start = day.getTime() - 24 * 60 * 60 * 1000;
+    long end = day.getTime() + 24 * 60 * 60 * 1000;
+    List<MonitorResult> collect = getMonitorResults(oldid).stream().filter(monitorResult -> monitorResult.getTimestamp() > start && monitorResult.getTimestamp() < end).collect(Collectors.toList());
+    logger.info("updateProjectOnDay found " +collect.size() + " on day " +day + " in " + oldid);
+
+    return collect;
+
+  }*/
+
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
     List<SlickResult> defResult = dao.getAllByProject(projid);
 

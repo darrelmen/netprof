@@ -182,7 +182,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
 
   private ProjectStartupInfo getProjectStartupInfo() {
-    return controller.getProjectStartupInfo();
+    return controller == null ? null : controller.getProjectStartupInfo();
   }
 
   public Set<Integer> getReqAudio() {
@@ -646,7 +646,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
       */
       if (DEBUG_MATCH) logger.info("\tgetMatchingSegments (2) compare :" +
-          "\n\tsegment     " + lcSegment + " " + lcSegment.length()+
+          "\n\tsegment     " + lcSegment + " " + lcSegment.length() +
           "\n\tvs fragment '" + fragment + "' " + fragment.length());
 
       boolean segmentHasFragment = lcSegment.startsWith(fragment) || (isMandarin && fragment.length() <= lcSegment.length());

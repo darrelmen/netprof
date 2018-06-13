@@ -796,8 +796,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected void showEmptySelection() {
     Scheduler.get().scheduleDeferred((Command) () -> {
-      String emptySearchMessage = isEmpty() ? "No exercises in this project yet." : getEmptySearchMessage();
-      showEmptyExercise(emptySearchMessage);
+  //    String emptySearchMessage = isEmpty() ? "No exercises in this project yet." : getEmptySearchMessage();
+      showEmptyExercise(getEmptySearchMessage());
     });
   }
 

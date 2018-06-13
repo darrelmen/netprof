@@ -76,6 +76,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,6 +117,7 @@ public class CopyToPostgres<T extends CommonShell> {
     CREATED("z"),
     IMPORT("i"),
     MERGE("m"),
+    //MERGEDAY("y"),
     RECORDINGS("r"),
     UNKNOWN("k");
 
@@ -135,7 +137,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   enum OPTIONS {
-    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s"), TO("t");
+    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s"), TO("t"), ONDAY("w");
     private String value;
 
     OPTIONS(String value) {
@@ -329,7 +331,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  private void mergeRecordings(int from, int to) {
+  private void mergeRecordings(int from, int to, Date onDay) {
     DatabaseImpl database = getDatabase();
     Project fProject = database.getProject(from);
     Project tProject = database.getProject(to);
@@ -348,7 +350,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    database.updateRecordings(from, to);
+    database.updateRecordings(from, to, onDay);
     database.close();
   }
 
@@ -465,11 +467,11 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @param db            to read from
-   * @param cc            country code
-   * @param optName       non-default name (not language) - null OK
+   * @param db             to read from
+   * @param cc             country code
+   * @param optName        non-default name (not language) - null OK
    * @param projectType
-   * @param status        i.e. not production
+   * @param status         i.e. not production
    * @param skipRefResult
    * @param doUpdate
    * @param oldSinceWhen
@@ -516,7 +518,7 @@ public class CopyToPostgres<T extends CommonShell> {
           oldSinceWhen = createProject.getSinceWhenResults(db, projectID);
         }
         if (doSinceCreated) {
-          oldSinceWhen = createProject.getSinceCreated(db,projectID);
+          oldSinceWhen = createProject.getSinceCreated(db, projectID);
         }
         sinceWhen = Math.max(createProject.getSinceWhen(db, projectID), oldSinceWhen);
         logger.info("UPDATE : sinceWhen is " + new Date(sinceWhen));
@@ -1288,6 +1290,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     int projID = -1;
     int from = -1, to = -1;
+    Date onDay = null;
     String dropConfirm = null;
 
     String updateUsersFile = null;
@@ -1348,11 +1351,39 @@ public class CopyToPostgres<T extends CommonShell> {
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
       to = Integer.parseInt(cmd.getOptionValue(TO.toLower()));
       logger.info("\n\naction " + action + " from " + from + " to " + to);
+/*    } else if (cmd.hasOption(MERGEDAY.toLower())) {
+      action = MERGEDAY;
+      from = Integer.parseInt(cmd.getOptionValue(MERGEDAY.toLower()));
+      to = Integer.parseInt(cmd.getOptionValue(TO.toLower()));
+
+      String opt = cmd.getOptionValue(ONDAY.toLower());
+      if (opt!= null) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM_dd_yyyy");
+        try {
+          Date parse = sdf.parse(opt);
+          onDay = parse;
+          logger.info("\n\naction " + action + " from " + from + " to " + to + " on day " + onDay);
+        } catch (java.text.ParseException e) {
+          logger.error("couldn't parse " + opt);
+        }
+      }*/
     } else if (cmd.hasOption(RECORDINGS.toLower())) {
       action = RECORDINGS;
       from = Integer.parseInt(cmd.getOptionValue(RECORDINGS.toLower()));
       to = Integer.parseInt(cmd.getOptionValue(TO.toLower()));
-      logger.info("\n\naction " + action + " from " + from + " to " + to);
+
+      String opt = cmd.getOptionValue(ONDAY.toLower());
+      if (opt != null) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM_dd_yyyy");
+        try {
+          Date parse = sdf.parse(opt);
+          onDay = parse;
+          logger.info("\n\naction " + action + " from " + from + " to " + to + " on day " + onDay);
+        } catch (java.text.ParseException e) {
+          logger.error("couldn't parse " + opt);
+        }
+      }
+      logger.info("\n\naction " + action + " from " + from + " to " + to + " on " + onDay);
     }
 
     logger.info("action " + action + " config " + config);
@@ -1478,9 +1509,15 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("merge project '" + from + "' into '" + to);
         doExit(true);  // ?
         break;
+ /*       case MERGEDAY:
+        logger.info("merge project from into project to");
+        copyToPostgres.merge(from, to, onDay);
+        logger.info("merge project '" + from + "' into '" + to);
+        doExit(true);  // ?
+        break;*/
       case RECORDINGS:
-        logger.info("merge recordings for project from into project to");
-        copyToPostgres.mergeRecordings(from, to);
+        logger.info("merge recordings for project from into project to " + onDay);
+        copyToPostgres.mergeRecordings(from, to, onDay);
         logger.info("merge recordings for project '" + from + "' into '" + to);
         doExit(true);  // ?
         break;
@@ -1581,6 +1618,10 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(CREATED.getValue(), CREATED.toLower(), true, "update existing config since creation date of target project");
       options.addOption(mapFile);
     }
+//    {
+//      Option mapFile = new Option(MERGEDAY.getValue(), MERGEDAY.toLower(), true, "from project id to project id on day");
+//      options.addOption(mapFile);
+//    }
 
     {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
@@ -1590,6 +1631,8 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(mapFile);
 
       mapFile = new Option(TO.getValue(), TO.toLower(), true, "to project id");
+      options.addOption(mapFile);
+      mapFile = new Option(ONDAY.getValue(), ONDAY.toLower(), true, "on day");
       options.addOption(mapFile);
     }
 

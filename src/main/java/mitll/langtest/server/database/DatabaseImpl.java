@@ -433,8 +433,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param oldID
    * @param newprojid
+   * @param onDay     optionally filter on a day
    */
-  public void updateRecordings(int oldID, int newprojid) {
+  public void updateRecordings(int oldID, int newprojid, Date onDay) {
     Project fromProject = getProject(oldID);
     Project toProject = getProject(newprojid);
 
@@ -443,16 +444,26 @@ public class DatabaseImpl implements Database, DatabaseServices {
     fromProject.getRawExercises().forEach(commonExercise -> idToOldIDFrom.put(commonExercise.getID(), commonExercise.getOldID()));
     toProject.getRawExercises().forEach(commonExercise -> oldToIDTo.put(commonExercise.getOldID(), commonExercise.getID()));
 
+    boolean noDay = onDay == null;
+
+    long start = noDay ? 0 : onDay.getTime() - 24 * 60 * 60 * 1000;
+    long end = noDay ? 0 : onDay.getTime() + 24 * 60 * 60 * 1000;
+    logger.info("updateRecordings : check for day " + onDay);
+
     Map<Integer, List<Integer>> oldExToResults = new HashMap<>();
     resultDAO
         .getMonitorResults(oldID)
         .forEach(monitorResult -> {
-          List<Integer> resultsForEx = oldExToResults.get(monitorResult.getExID());
-          if (resultsForEx == null) {
-            oldExToResults.put(monitorResult.getExID(), resultsForEx = new ArrayList<>());
+          List<Integer> resultsForEx = oldExToResults.computeIfAbsent(monitorResult.getExID(), k -> new ArrayList<>());
+
+          if (noDay) {
+            resultsForEx.add(monitorResult.getUniqueID());
+          } else {
+            if (monitorResult.getTimestamp() > start && monitorResult.getTimestamp() < end) {
+              resultsForEx.add(monitorResult.getUniqueID());
+              logger.info("updateRecordings : recording on day " + onDay + " : " + monitorResult);
+            }
           }
-          resultsForEx.add(monitorResult.getUniqueID());
-          //  oldExToResult.put(monitorResult.getExID(), monitorResult.getUniqueID())
         });
 
     List<Integer> ridsUpdated = new ArrayList<>();
@@ -530,6 +541,26 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("updated user->project");
     }
   }
+
+  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
+    if (!resultDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update result dao to " + newprojid);
+    } else {
+      logger.info("updated results");
+    }
+    if (!wordDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update word dao to " + newprojid);
+    } else {
+      logger.info("updated word");
+    }
+    if (!phoneDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update phone dao to " + newprojid);
+    } else {
+      logger.info("updated phones");
+    }
+
+  }
+
 
   private void setPostgresDBConnection() {
     dbConnection = getDbConnection();
