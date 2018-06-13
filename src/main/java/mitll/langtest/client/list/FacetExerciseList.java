@@ -50,7 +50,6 @@ import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -65,6 +64,7 @@ import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -247,7 +247,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 //    pagerAndSort.add(expander);
 //    expander.addStyleName("floatRight");
     {
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this).getRealViewMenu();
+      // better name for primary and alternate choices
+      boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
+      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
       widgets.add(realViewMenu);

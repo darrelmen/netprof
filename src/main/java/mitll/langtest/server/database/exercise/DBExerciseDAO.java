@@ -265,6 +265,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * First basic types, then attribute types...
    * Might want to allow this to be configurable.
    *
+   * Added special code for putting semester at the top.
    * @return
    */
   @NotNull
@@ -273,7 +274,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     Collection<String> attributeTypes = getAttributeTypes();
 
     if (attributeTypes.contains(SEMESTER.toString())) {
-      logger.info("found semester ");
+    //  logger.info("found semester ");
       List<String> copy = new ArrayList<>();
       copy.add(SEMESTER.toString());
       copy.addAll(typeOrder);

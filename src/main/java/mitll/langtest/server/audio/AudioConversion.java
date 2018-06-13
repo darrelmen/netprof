@@ -649,7 +649,7 @@ public class AudioConversion extends AudioBase {
 
       if (!fileUnderParent2.exists()) {
         if (spew4++ < 100) {
-          logger.warn("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath(), new Exception());
+          logger.warn("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath());
         }
       } else {
         // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());

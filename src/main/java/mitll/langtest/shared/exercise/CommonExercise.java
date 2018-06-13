@@ -54,7 +54,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   String getAltFL();
 
   String getAltFLToShow();
-  //String getFLToShow();
 
   /**
    * @deprecated - can't guarantee we'll have this on the znetprof instance

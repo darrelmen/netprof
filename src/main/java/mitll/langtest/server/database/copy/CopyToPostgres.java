@@ -40,6 +40,7 @@ import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
@@ -112,6 +113,8 @@ public class CopyToPostgres<T extends CommonShell> {
     UPDATEUSER("u"),
     UPDATE("x"),
     IMPORT("i"),
+    MERGE("m"),
+    RECORDINGS("r"),
     UNKNOWN("k");
 
     private String value;
@@ -130,7 +133,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   enum OPTIONS {
-    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s");
+    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s"), TO("t");
     private String value;
 
     OPTIONS(String value) {
@@ -294,6 +297,50 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     database.close();
+  }
+
+  private void merge(int from, int to) {
+    DatabaseImpl database = getDatabase();
+    Project fProject = database.getProject(from);
+    Project tProject = database.getProject(to);
+    logger.info("merging " +
+        "\n\tproject " + fProject +
+        "\n\tinto    " + tProject);
+    if (fProject == null) {
+      logger.warn("no from project by " + from);
+      return;
+    }
+    if (tProject == null) {
+      logger.warn("no to project by " + to);
+      return;
+    }
+    if (!fProject.getLanguage().equalsIgnoreCase(tProject.getLanguage())) {
+      logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
+      return;
+    }
+    database.updateProject(from, to);
+  }
+
+  private void mergeRecordings(int from, int to) {
+    DatabaseImpl database = getDatabase();
+    Project fProject = database.getProject(from);
+    Project tProject = database.getProject(to);
+    logger.info("merging " +
+        "\n\tproject " + fProject +
+        "\n\tinto    " + tProject);
+    if (fProject == null) {
+      logger.warn("no from project by " + from);
+      return;
+    }
+    if (tProject == null) {
+      logger.warn("no to project by " + to);
+      return;
+    }
+    if (!fProject.getLanguage().equalsIgnoreCase(tProject.getLanguage())) {
+      logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
+      return;
+    }
+    database.updateRecordings(from, to);
   }
 
   private void reportAfterDelete(int config, IProjectDAO projectDAO, long then, String drop) {
@@ -1223,6 +1270,7 @@ public class CopyToPostgres<T extends CommonShell> {
     String config = null;
 
     int projID = -1;
+    int from = -1, to = -1;
     String dropConfirm = null;
 
     String updateUsersFile = null;
@@ -1270,6 +1318,16 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(IMPORT.toLower())) {
       action = IMPORT;
       config = cmd.getOptionValue(IMPORT.toLower());
+    } else if (cmd.hasOption(MERGE.toLower())) {
+      action = MERGE;
+      from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
+      to = Integer.parseInt(cmd.getOptionValue(TO.toLower()));
+      logger.info("\n\naction " + action + " from " + from + " to " + to);
+    } else if (cmd.hasOption(RECORDINGS.toLower())) {
+      action = RECORDINGS;
+      from = Integer.parseInt(cmd.getOptionValue(RECORDINGS.toLower()));
+      to = Integer.parseInt(cmd.getOptionValue(TO.toLower()));
+      logger.info("\n\naction " + action + " from " + from + " to " + to);
     }
 
     logger.info("action " + action + " config " + config);
@@ -1371,6 +1429,18 @@ public class CopyToPostgres<T extends CommonShell> {
         long importDate = copyToPostgres.getImportDate(config, optConfigValue);
         logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
         break;
+      case MERGE:
+        logger.info("merge project from into project to");
+        copyToPostgres.merge(from, to);
+        logger.info("merge project '" + from + "' into '" + to);
+        doExit(true);  // ?
+        break;
+      case RECORDINGS:
+        logger.info("merge recordings for project from into project to");
+        copyToPostgres.mergeRecordings(from, to);
+        logger.info("merge recordings for project '" + from + "' into '" + to);
+        doExit(true);  // ?
+        break;
       default:
         formatter.printHelp("copy", options);
     }
@@ -1451,6 +1521,16 @@ public class CopyToPostgres<T extends CommonShell> {
 
     {
       Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file (two column csv)");
+      options.addOption(mapFile);
+    }
+    {
+      Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
+      options.addOption(mapFile);
+
+      mapFile = new Option(RECORDINGS.getValue(), RECORDINGS.toLower(), true, "from project id");
+      options.addOption(mapFile);
+
+      mapFile = new Option(TO.getValue(), TO.toLower(), true, "to project id");
       options.addOption(mapFile);
     }
 

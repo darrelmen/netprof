@@ -137,4 +137,6 @@ public interface IUserListManager {
   IUserExerciseListVisitorDAO getVisitorDAO();
 
   void update(UserList userList);
+
+  boolean updateProject(int oldID, int newprojid);
 }

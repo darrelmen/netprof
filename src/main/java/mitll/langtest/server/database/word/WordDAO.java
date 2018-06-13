@@ -57,6 +57,7 @@ public class WordDAO extends DAO implements IWordDAO {
   private static final Logger logger = LogManager.getLogger(WordDAO.class);
 
   public static final String WORD = "word";
+  public static final String SQL = "SELECT * from " + WORD;
   private static final String RID = "rid";
   private static final String SEQ = "seq";
   private static final String SCORE = "score";
@@ -70,7 +71,11 @@ public class WordDAO extends DAO implements IWordDAO {
 
   @Override
   public void deleteForProject(int projID) {
+  }
 
+  @Override
+  public boolean updateProjectForRID(int rid, int newprojid) {
+    return false;
   }
 
   /**
@@ -207,7 +212,7 @@ public class WordDAO extends DAO implements IWordDAO {
 
   public List<Word> getAll(int projID) {
     try {
-      return getWords("SELECT * from " + WORD, projID);
+      return getWords(SQL, projID);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       logAndNotify.logAndNotifyServerException(ee);

@@ -429,19 +429,106 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * For each old recording, find the old exercise id, then use that to figure out the matching exercise in the target project.
+   *
+   * @param oldID
+   * @param newprojid
+   */
+  public void updateRecordings(int oldID, int newprojid) {
+    Project fromProject = getProject(oldID);
+    Project toProject = getProject(newprojid);
+
+    Map<Integer, String> idToOldIDFrom = new HashMap<>();
+    Map<String, Integer> oldToIDTo = new HashMap<>();
+    fromProject.getRawExercises().forEach(commonExercise -> idToOldIDFrom.put(commonExercise.getID(), commonExercise.getOldID()));
+    toProject.getRawExercises().forEach(commonExercise -> oldToIDTo.put(commonExercise.getOldID(), commonExercise.getID()));
+
+    Map<Integer, List<Integer>> oldExToResults = new HashMap<>();
+    resultDAO
+        .getMonitorResults(oldID)
+        .forEach(monitorResult -> {
+          List<Integer> resultsForEx = oldExToResults.get(monitorResult.getExID());
+          if (resultsForEx == null) {
+            oldExToResults.put(monitorResult.getExID(), resultsForEx = new ArrayList<>());
+          }
+          resultsForEx.add(monitorResult.getUniqueID());
+          //  oldExToResult.put(monitorResult.getExID(), monitorResult.getUniqueID())
+        });
+
+    List<Integer> ridsUpdated = new ArrayList<>();
+    oldExToResults.forEach((exid, results) -> {
+      String oldNPID = idToOldIDFrom.get(exid);
+      if (oldNPID != null) {
+        Integer idInTarget = oldToIDTo.get(oldNPID);
+
+        if (idInTarget != null) {
+          results.forEach(rid -> {
+            if (resultDAO.updateProjectAndEx(rid, newprojid, idInTarget)) {
+              ridsUpdated.add(rid);
+              boolean b = wordDAO.updateProjectForRID(rid, newprojid);
+              boolean b1 = phoneDAO.updateProjectForRID(rid, newprojid);
+
+              if (!b) logger.warn("updateRecordings word :   didn't update rid " + rid + " and ex " + idInTarget);
+              if (!b1) logger.warn("updateRecordings phone : didn't update rid " + rid + " and ex " + idInTarget);
+
+            } else {
+              logger.warn("updateRecordings didn't update rid " + rid + " and ex " + idInTarget);
+            }
+          });
+        }
+      }
+    });
+
+    logger.info("updated " + ridsUpdated.size() + " results.");
+  }
+
+  /**
    * This is how we merge pashto projects...
+   *
    * @param oldID
    * @param newprojid
    */
   public void updateProject(int oldID, int newprojid) {
-    audioDAO.updateProject(oldID, newprojid);
-    resultDAO.updateProject(oldID, newprojid);
-    wordDAO.updateProject(oldID, newprojid);
-    phoneDAO.updateProject(oldID, newprojid);
-    getUserExerciseDAO().updateProject(oldID, newprojid);
-    getUserExerciseDAO().updateProject(oldID, newprojid);
-    refresultDAO.updateProject(oldID, newprojid);
-    userProjectDAO.updateProject(oldID, newprojid);
+    if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
+      logger.error("couldn't update exercise dao to " + newprojid);
+    } else {
+      logger.info("updated exercises");
+    }
+    if (!resultDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update result dao to " + newprojid);
+    } else {
+      logger.info("updated results");
+    }
+    if (!audioDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update audio dao to " + newprojid);
+    } else {
+      logger.info("updated audio");
+    }
+    if (!wordDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update word dao to " + newprojid);
+    } else {
+      logger.info("updated word");
+    }
+    if (!phoneDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update phone dao to " + newprojid);
+    } else {
+      logger.info("updated phones");
+    }
+    if (!getUserListManager().updateProject(oldID, newprojid)) {
+      logger.error("couldn't update user list dao to " + newprojid);
+    } else {
+      logger.info("updated user lists.");
+    }
+    if (!refresultDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update ref result dao to " + newprojid);
+    } else {
+      logger.info("updated ref results");
+    }
+    if (!userProjectDAO.updateProject(oldID, newprojid)) {
+      logger.error("couldn't update user->project dao to " + newprojid);
+    } else {
+      logger.info("updated user->project");
+    }
   }
 
   private void setPostgresDBConnection() {

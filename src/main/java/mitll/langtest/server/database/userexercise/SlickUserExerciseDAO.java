@@ -131,10 +131,26 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao.dao().name();
   }
 
+  /**
+   * Update the netprof 1 exercise ids too, since that's how we'll sync up with domino.
+   *
+   * @param old
+   * @param newprojid
+   * @return
+   */
   public boolean updateProject(int old, int newprojid) {
+    List<SlickExercise> allUserEx = dao.getAllByProject(old);
+    logger.info("updateProject altering " + allUserEx.size() + " exercises...");
+    allUserEx.forEach(slickExercise -> dao.updateOldEx(slickExercise.id(), old + "-" + slickExercise.exid()));
+    logger.info("updateProject DONE altering " + allUserEx.size() + " exercises...");
+
     boolean b = dao.updateProject(old, newprojid) > 0;
+    if (b) logger.info("updated exercises to            " + newprojid);
     boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
-    return b && b1 && relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b1) logger.info("updated exercise attributes to " + newprojid);
+    boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b2) logger.info("updated related exercises  to  " + newprojid);
+    return b && b1 && b2;
   }
 
   /**
