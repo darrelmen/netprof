@@ -1523,6 +1523,11 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file (two column csv)");
       options.addOption(mapFile);
     }
+
+    {
+      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "update existing config");
+      options.addOption(mapFile);
+    }
     {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
       options.addOption(mapFile);
