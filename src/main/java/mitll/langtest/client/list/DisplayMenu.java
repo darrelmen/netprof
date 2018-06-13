@@ -34,19 +34,21 @@ public class DisplayMenu {
   /**
    * @see DisplayMenu#storePhoneChoices
    */
-  public static final String SHOW_PHONES = "showPhones";
+  private static final String SHOW_PHONES = "showPhones";
 
   private static final IconType CHECK = IconType.CHECK;
 
-  public static final String SHOWFL = "showStorageFL";
-  public static final String SHOWALT = "showStorageALTFL";
+  private static final String SHOWFL = "showStorageFL";
+  private static final String SHOWALT = "showStorageALTFL";
+  private final boolean isMandarin;
 
   private final KeyStorage storage;
-  private ShowEventListener showEventListener;
+  private final ShowEventListener showEventListener;
 
-  DisplayMenu(KeyStorage storage, ShowEventListener showEventListener) {
+  DisplayMenu(KeyStorage storage, ShowEventListener showEventListener, boolean isMandarin) {
     this.storage = storage;
-    this.showEventListener=showEventListener;
+    this.showEventListener = showEventListener;
+    this.isMandarin = isMandarin;
   }
 
   /**
@@ -63,7 +65,8 @@ public class DisplayMenu {
     view.setWidth(85 + "px");
 
     view.add(getShowSounds());
-    NavLink primary = new NavLink(SHOW_PRIMARY_TEXT);
+    String toUse = isMandarin ? "Show CM Simplified" : SHOW_PRIMARY_TEXT;
+    NavLink primary = new NavLink(toUse);
     view.add(primary);
 
     view.add(flTextChoices(primary));
@@ -100,7 +103,9 @@ public class DisplayMenu {
   }
 
   private NavLink flTextChoices(NavLink primary) {
-    NavLink altflChoice = new NavLink(SHOW_ALTERNATE_TEXT);
+    String toUse = isMandarin ? "Show CM Traditional" : SHOW_ALTERNATE_TEXT;
+
+    NavLink altflChoice = new NavLink(toUse);
     boolean choicesFL1 = getChoicesFL();
     primary.setIcon(choicesFL1 ? IconType.CHECK : null);
     boolean choicesALT1 = getChoicesALT();
@@ -149,9 +154,8 @@ public class DisplayMenu {
 
   @NotNull
   private boolean getChoicesFL() {
-    boolean stored = getStored(storage.getValue(SHOWFL), true);
     //logger.info("Stored fl value " + stored);
-    return stored;
+    return getStored(storage.getValue(SHOWFL), true);
   }
 
   private void storeShowChoicesFL(boolean toStore) {

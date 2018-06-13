@@ -222,19 +222,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
-    //logger.info("reorderTypes " + types);
     for (Facet f : Facet.values()) {
-      logger.info("reorderTypes " + f);
-
       putAtEnd(types, f.getName());
     }
-//    putAtEnd(types, SEMESTER);
-//    putAtEnd(types, TOPIC);
-//    putAtEnd(types, SUB_TOPIC);
-//    //putAtEnd(types, SUBTOPIC_LC);
-//    putAtEnd(types, GRAMMAR);
-//    putAtEnd(types, DIALECT);
-//    putAtEnd(types, DIFFICULTY);
     //logger.info("reorderTypes " + types);
   }
 

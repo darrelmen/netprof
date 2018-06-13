@@ -32,7 +32,6 @@
 
 package mitll.langtest.server;
 
-import com.google.gwt.http.client.URL;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -58,7 +57,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
@@ -80,7 +84,6 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
-  // private static final String USERS = "users";
   private static final String RESULTS = "results";
   /**
    * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String)
@@ -102,9 +105,9 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
   private static final String RESULTS_XLSX = "results.xlsx";
   private static final String EVENTS_XLSX = "events.xlsx";
-  public static final String WAV = ".wav";
+  private static final String WAV = ".wav";
   public static final String MP3 = ".mp3";
-  public static final String UNIT = "unit";
+  private static final String UNIT = "unit";
 
   /**
    * This is getting complicated.

@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
@@ -54,8 +55,8 @@ public class ExcelExport {
   private static final String WORD_EXPRESSION = "Word/Expression";
   private static final String TRANSLITERATION = "Transliteration";
   private static final String MEANING = "Meaning";
-  private static final String MALE = "Male";
-  private static final String FEMALE = "Female";
+  //  private static final String MALE = "Male";
+//  private static final String FEMALE = "Female";
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String CONTEXT_TRANSLATION = "Context Translation";
   private final ServerProperties props;
@@ -70,8 +71,7 @@ public class ExcelExport {
    * @param typeOrder
    * @param language
    * @param isDefectList
-   * @seex #writeToStream
-   * @seex #addSpreadsheetToZip
+   * @see AudioExport#addSpreadsheetToZip
    */
   public void writeExcelToStream(Collection<CommonExercise> exercises,
                                  OutputStream out,
@@ -128,6 +128,7 @@ public class ExcelExport {
       int j = 0;
 
       row.createCell(j++).setCellValue(exercise.getID());
+      row.createCell(j++).setCellValue(exercise.getOldID());
 
       // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
 
@@ -265,6 +266,7 @@ public class ExcelExport {
   private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList) {
     List<String> columns = new ArrayList<>();
     columns.add(ID);
+    columns.add("NP_ID");
     columns.add(WORD_EXPRESSION);
     boolean english = isEnglish(language);
     if (!english) {
